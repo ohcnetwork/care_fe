@@ -3,7 +3,6 @@ import { useMutation } from "@tanstack/react-query";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
-import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -29,10 +28,10 @@ import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { AltchaWidget } from "@/components/Auth/AltchaWidget";
 import { ForgotPasswordPanel } from "@/components/Auth/ForgotPasswordPanel";
 import CircularProgress from "@/components/Common/CircularProgress";
 import LanguageSelectorLogin from "@/components/Common/LanguageSelectorLogin";
-
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
@@ -77,10 +76,15 @@ interface LoginProps {
   forgot?: boolean;
 }
 
+interface LoginForm extends Record<string, string | undefined> {
+  username: string;
+  password: string;
+  altcha?: string;
+}
+
 const Login = (props: LoginProps) => {
   const { signIn, patientLogin, isAuthenticating } = useAuthContext();
   const {
-    reCaptchaSiteKey,
     urls,
     stateLogo,
     customLogo,
@@ -88,7 +92,7 @@ const Login = (props: LoginProps) => {
     resendOtpTimeout,
     disablePatientLogin,
   } = careConfig;
-  const initForm: any = {
+  const initForm: LoginForm = {
     username: "",
     password: "",
   };
@@ -99,6 +103,7 @@ const Login = (props: LoginProps) => {
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
+  const [captchaKey, setCaptchaKey] = useState(0);
   const { t } = useTranslation();
   const [forgotPassword, setForgotPassword] = useState(forgot);
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -216,6 +221,10 @@ const Login = (props: LoginProps) => {
     let hasError = false;
     const err = Object.assign({}, errors);
     Object.keys(form).forEach((key) => {
+      // altcha isn't user-entered; its presence is enforced via the submit
+      // button's disabled state (see `isCaptchaEnabled && !form.altcha`
+      // below), not via this required-field validation.
+      if (key === "altcha") return;
       if (
         typeof form[key] === "string" &&
         key !== "password" &&
@@ -252,7 +261,16 @@ const Login = (props: LoginProps) => {
       await signIn(validated);
     } catch (error) {
       if (error instanceof HTTPError) {
-        setCaptcha(error.status == 429);
+        const captchaRequired =
+          error.status === 429 && error.cause?.code === "captchaRequired";
+        if (captchaRequired || isCaptchaEnabled) {
+          setCaptcha(true);
+          setCaptchaKey((current) => current + 1);
+          setForm((current) => ({
+            ...current,
+            altcha: undefined,
+          }));
+        }
       }
     }
   };
@@ -286,12 +304,8 @@ const Login = (props: LoginProps) => {
     submitForgetPassword(valid);
   };
 
-  const onCaptchaChange = (value: any) => {
-    if (value && isCaptchaEnabled) {
-      const formCaptcha = { ...form };
-      formCaptcha["g-recaptcha-response"] = value;
-      setForm(formCaptcha);
-    }
+  const onCaptchaStateChange = (payload?: string) => {
+    setForm((current) => ({ ...current, altcha: payload }));
   };
 
   // Handle OTP flow
@@ -316,6 +330,9 @@ const Login = (props: LoginProps) => {
 
   // Loading state derived from mutations
   const isLoading = isAuthenticating || sendOtpPending || verifyOtpPending;
+  // Blocks submission until ALTCHA has supplied a fresh payload, so the
+  // "verifying"/reset window never results in a silently no-op submit.
+  const captchaPending = isCaptchaEnabled && !form.altcha;
 
   const logos = [stateLogo, customLogo].filter(
     (logo) => logo?.light || logo?.dark,
@@ -414,11 +431,11 @@ const Login = (props: LoginProps) => {
                           )}
                         </div>
 
-                        {isCaptchaEnabled && reCaptchaSiteKey && (
+                        {isCaptchaEnabled && (
                           <div className="py-4">
-                            <ReCaptcha
-                              sitekey={reCaptchaSiteKey}
-                              onChange={onCaptchaChange}
+                            <AltchaWidget
+                              key={captchaKey}
+                              onStateChange={onCaptchaStateChange}
                             />
                           </div>
                         )}
@@ -436,7 +453,7 @@ const Login = (props: LoginProps) => {
                           type="submit"
                           className="w-full"
                           variant="primary"
-                          disabled={isLoading}
+                          disabled={isLoading || captchaPending}
                         >
                           {isLoading ? (
                             <CircularProgress className="text-white" />
@@ -523,11 +540,11 @@ const Login = (props: LoginProps) => {
                             )}
                           </div>
 
-                          {isCaptchaEnabled && reCaptchaSiteKey && (
+                          {isCaptchaEnabled && (
                             <div className="py-4">
-                              <ReCaptcha
-                                sitekey={reCaptchaSiteKey}
-                                onChange={onCaptchaChange}
+                              <AltchaWidget
+                                key={captchaKey}
+                                onStateChange={onCaptchaStateChange}
                               />
                             </div>
                           )}
@@ -545,7 +562,7 @@ const Login = (props: LoginProps) => {
                             type="submit"
                             className="w-full"
                             variant="primary"
-                            disabled={isLoading}
+                            disabled={isLoading || captchaPending}
                           >
                             {isLoading ? (
                               <CircularProgress className="text-white" />
