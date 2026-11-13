@@ -1,7 +1,9 @@
 import dayjs from "dayjs";
 import { SearchIcon } from "lucide-react";
+import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -28,28 +30,26 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
 import { FilterBadges, FilterButton } from "@/components/Files/FileFilters";
+import { GenerateReportDropdown } from "@/components/Files/GenerateReportDropdown";
+import { getReportBasePath } from "@/components/Files/reportTemplateOptions";
 import { EmptyState } from "@/components/ui/empty-state";
 
 import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
 
 import queryClient from "@/Utils/request/queryClient";
-import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateReportSheet";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ReportRead,
   ReportReadList,
   ReportType,
 } from "@/types/emr/report/report";
-import { navigate } from "raviger";
-import { toast } from "sonner";
 
 interface ReportTabProps {
   associatingId: string;
   reportType?: ReportType;
   facilityId?: string;
   patientId?: string;
-  encounterId?: string;
 }
 
 export function ReportSubTab({
@@ -57,10 +57,10 @@ export function ReportSubTab({
   reportType,
   facilityId,
   patientId,
-  encounterId,
 }: ReportTabProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
+
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
     disableCache: true,
@@ -72,7 +72,6 @@ export function ReportSubTab({
     viewFile,
     downloadFile,
     archiveReport,
-    refetch,
     Dialogs,
   } = useReportManager({
     associatingId,
@@ -98,13 +97,15 @@ export function ReportSubTab({
     return iconMap[reportType] || "l-file-alt";
   };
 
-  const canNavigateToPreview = !!(facilityId && patientId && encounterId);
-
   const handleView = (report: ReportReadList) => {
-    if (canNavigateToPreview) {
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/report/${report.id}`,
-      );
+    const basePath = getReportBasePath(
+      reportType,
+      associatingId,
+      facilityId ?? facility?.id,
+      patientId,
+    );
+    if (basePath) {
+      navigate(`${basePath}/report/${report.id}`);
     } else {
       viewFile(report);
     }
@@ -374,20 +375,11 @@ export function ReportSubTab({
           </Button>
         </div>
         {facility && (
-          <TemplateReportSheet
-            facilityId={facility.id}
+          <GenerateReportDropdown
+            facilityId={facilityId ?? facility.id}
+            patientId={patientId}
             associatingId={associatingId}
-            permissions={facility.permissions ?? []}
             reportType={reportType}
-            trigger={
-              <Button variant="outline_primary">
-                <CareIcon icon="l-plus" className="mr-1" />
-                <span>{t("generate_report")}</span>
-              </Button>
-            }
-            onSuccess={() => {
-              refetch();
-            }}
           />
         )}
       </div>
