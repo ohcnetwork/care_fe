@@ -70,6 +70,7 @@ export function useDeliveryRowItem({
     is_tax_inclusive: isTaxInclusive,
     is_total_purchase_price_edited: isTotalPurchasePriceEdited,
     is_charge_item_edited: isChargeItemEdited,
+    is_manually_edited: isManuallyEdited,
     _created_charge_item_definition: createdChargeItemDefinition,
     _created_product: createdProduct,
     replaces_delivery: replacesDelivery,
@@ -427,7 +428,8 @@ export function useDeliveryRowItem({
 
     // Computed values
     needsCategorySelection,
-    isCreatingNew,
+    // Plugins set the form flag directly, bypassing markAsEdited
+    isCreatingNew: isCreatingNew || Boolean(isManuallyEdited),
     isLoadingProducts,
     isLoadingInventory,
     products,
