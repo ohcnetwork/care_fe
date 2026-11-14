@@ -42,7 +42,7 @@ interface AutocompleteProps {
   onOpenChange?: (open: boolean) => void;
   placeholder?: string;
   inputPlaceholder?: string;
-  noOptionsMessage?: string;
+  noOptionsMessage?: React.ReactNode;
   disabled?: boolean;
   align?: "start" | "center" | "end";
   className?: string;

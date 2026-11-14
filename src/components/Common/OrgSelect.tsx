@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Autocomplete from "@/components/ui/autocomplete";
@@ -17,7 +17,8 @@ interface OrgSelectProps {
   className?: string;
   placeholder?: string;
   inputPlaceholder?: string;
-  noOptionsMessage?: string;
+  noOptionsMessage?: ReactNode;
+  excludeIds?: string[];
   showClearButton?: boolean;
 }
 
@@ -31,6 +32,7 @@ export function OrgSelect({
   placeholder,
   inputPlaceholder,
   noOptionsMessage,
+  excludeIds,
   showClearButton,
 }: OrgSelectProps) {
   const { t } = useTranslation();
@@ -66,6 +68,11 @@ export function OrgSelect({
       ? [...searchOptions, selectedData]
       : searchOptions;
 
+  const excludeSet = new Set(excludeIds ?? []);
+  const visibleOptions = allOptions.filter(
+    (org) => org.id === value || !excludeSet.has(org.id),
+  );
+
   return (
     <Autocomplete
       id={id}
@@ -81,7 +88,7 @@ export function OrgSelect({
         }
       }}
       onSearch={setSearchQuery}
-      options={allOptions.map((org) => ({
+      options={visibleOptions.map((org) => ({
         label: org.name,
         value: org.id,
       }))}
