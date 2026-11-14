@@ -640,7 +640,7 @@ const NewAvailabilityCard = ({
         .array(z.number() as unknown as z.ZodType<DayOfWeek, DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
       is_auto_fill: z.boolean().optional(),
-      num_of_slots: z.number().min(1, t("number_min_error", { min: 0 })),
+      num_of_slots: z.number().nullable(),
     })
     .refine(
       (data) => {
@@ -654,7 +654,24 @@ const NewAvailabilityCard = ({
         message: t("start_time_must_be_before_end_time"),
         path: ["start_time"], // This will show the error on the start_time field
       },
-    );
+    )
+    .superRefine((data, ctx) => {
+      // The slot count only drives auto-fill, so skip it when auto-fill is off
+      if (!data.is_auto_fill) return;
+      if (data.num_of_slots === null) {
+        ctx.addIssue({
+          code: "custom",
+          message: t("field_required"),
+          path: ["num_of_slots"],
+        });
+      } else if (data.num_of_slots < 1) {
+        ctx.addIssue({
+          code: "custom",
+          message: t("number_min_error", { min: 1 }),
+          path: ["num_of_slots"],
+        });
+      }
+    });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -770,7 +787,7 @@ const NewAvailabilityCard = ({
       const start = form.watch("start_time");
       const end = form.watch("end_time");
       const numOfSlots = form.watch("num_of_slots");
-      if (!start || !end) return;
+      if (!start || !end || !numOfSlots) return;
       const duration = calculateSlotDuration(start, end, numOfSlots);
       form.setValue("slot_size_in_minutes", duration);
     }
@@ -919,11 +936,12 @@ const NewAvailabilityCard = ({
                                 inputMode="numeric"
                                 pattern="[0-9]*"
                                 min={1}
-                                defaultValue={1}
                                 {...field}
+                                value={field.value ?? ""}
                                 className="shadow-none"
                                 onChange={(e) => {
-                                  field.onChange(e.target.valueAsNumber);
+                                  const value = e.target.valueAsNumber;
+                                  field.onChange(isNaN(value) ? null : value);
                                   updateSlotDuration();
                                 }}
                               />
