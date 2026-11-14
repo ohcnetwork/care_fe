@@ -1,6 +1,10 @@
 import type { TFunction } from "i18next";
 
-import type { EnableWhen, Question } from "@/types/questionnaire/question";
+import {
+  type EnableWhen,
+  type Question,
+  isCodedEnableWhenAnswer,
+} from "@/types/questionnaire/question";
 
 /** link_id → question. Hosts build this ONCE per render pass (the canvas
  *  annotation renders per block, so an internal per-call build would still
@@ -40,8 +44,20 @@ function ruleText(
   return t("condition_rule", {
     question: questionText,
     operator: t(condition.operator).toLowerCase(),
-    answer: String(condition.answer ?? ""),
+    answer: answerLabel(condition.answer, target),
   });
+}
+
+/** The answer as authors picked it: a code's display, or an option's label. */
+function answerLabel(
+  answer: EnableWhen["answer"],
+  target: Question | undefined,
+): string {
+  if (isCodedEnableWhenAnswer(answer)) return answer.display || answer.code;
+  const option = target?.answer_option?.find(
+    (candidate) => String(candidate.value) === String(answer),
+  );
+  return option?.display || String(answer ?? "");
 }
 
 /**
