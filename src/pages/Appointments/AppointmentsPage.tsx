@@ -1,8 +1,7 @@
-import { CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { addDays, differenceInDays } from "date-fns";
 import { TFunction } from "i18next";
-import { FilterIcon, InfoIcon } from "lucide-react";
+import { Check as CheckIcon, FilterIcon, InfoIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -14,6 +13,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -356,9 +356,9 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
       }
     >
       <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
-        <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start md:w-xs">
+        <div className="flex w-full min-w-0 flex-wrap items-start gap-4 lg:w-auto">
           {practitionerFilterEnabled && (
-            <div className="mt-1 w-full">
+            <div className="mt-1 w-full sm:w-auto sm:min-w-60">
               <Label className="mb-2 text-black">
                 {t("practitioner", { count: 2 })}
               </Label>
@@ -376,7 +376,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           )}
 
           {/* Tags Filter */}
-          <div>
+          <div className="w-full min-w-0 sm:w-auto">
             <Label className="mt-1 text-black">{t("filter_by_tags")}</Label>
             <MultiFilter
               selectedFilters={selectedFilters}
@@ -384,10 +384,9 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
               onOperationChange={handleOperationChange}
               onClearAll={handleClearAll}
               onClearFilter={handleClearFilter}
-              className="flex sm:flex-row mt-2 sm:items-center"
+              className="mt-2 w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
               triggerButtonClassName="self-start sm:self-center h-9"
               clearAllButtonClassName="self-center"
-              selectedBarClassName="h-9"
               facilityId={facilityId}
             />
           </div>
@@ -596,7 +595,7 @@ function AppointmentColumn(props: {
   }, [inView, hasNextPage, fetchNextPage]);
 
   return (
-    <div className="bg-gray-100 py-4 rounded-lg w-[20rem] overflow-y-hidden">
+    <div className="bg-gray-100 py-4 rounded-lg w-80 overflow-y-hidden">
       <div className="flex flex-row justify-between px-3 gap-2 mb-3">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold capitalize text-base px-1">
@@ -763,9 +762,12 @@ function AppointmentCard({
       </div>
       <div className="flex flex-wrap gap-1">
         {appointment.tags.map((tag) => (
-          <Badge variant="primary" className="text-xs" key={tag.id}>
-            {tag.display}
-          </Badge>
+          <TagBadge
+            key={tag.id}
+            tag={tag}
+            variant="primary"
+            className="text-xs"
+          />
         ))}
         {showStatus && (
           <Badge

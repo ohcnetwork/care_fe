@@ -59,6 +59,7 @@ import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import BackButton from "@/components/Common/BackButton";
+import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 
 interface DetailRowProps {
   label: string;
@@ -487,20 +488,16 @@ export const PrintChargeItems = (props: {
                             value={formatDateTime(new Date(), "DD-MM-YYYY")}
                             width="w-24"
                           />
-                          {account?.patient?.instance_identifiers
-                            ?.filter(
-                              ({ config }) =>
-                                config.config.use ===
-                                PatientIdentifierUse.official,
-                            )
-                            .map((identifier) => (
-                              <DetailRow
-                                key={identifier.config.id}
-                                label={identifier.config.config.display}
-                                value={identifier.value}
-                                width="w-24"
-                              />
-                            ))}
+                          {getPatientIdentifiers(account?.patient, {
+                            use: PatientIdentifierUse.official,
+                          }).map((identifier) => (
+                            <DetailRow
+                              key={identifier.config.id}
+                              label={identifier.config.config.display}
+                              value={identifier.value}
+                              width="w-24"
+                            />
+                          ))}
 
                           {account?.primary_encounter && (
                             <>
@@ -1617,7 +1614,7 @@ export const PrintChargeItems = (props: {
                       {/* Account Summary Section */}
                       {account && (
                         <div className="overflow-hidden mt-4">
-                          <Table className="w-full border [&_th]:text-xs [&_td]:text-xs">
+                          <Table className="w-full [&_th]:text-xs [&_td]:text-xs">
                             <TableHeader className="[&_tr]:border [&_th]:p-0.5 [&_th]:h-auto">
                               <TableRow className="bg-transparent hover:bg-transparent">
                                 <TableHead className="text-center font-bold">

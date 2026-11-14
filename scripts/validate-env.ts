@@ -1,3 +1,4 @@
+import { PaymentReconciliationPaymentMethod } from "../src/types/billing/paymentReconciliation/paymentReconciliation";
 import {
   ENCOUNTER_CLASS,
   ENCOUNTER_DISCHARGE_DISPOSITION,
@@ -73,6 +74,15 @@ const VALID_ROUNDING_METHODS = [
   "ROUND_HALF_FLOOR",
 ];
 
+const VALID_TOAST_POSITIONS = [
+  "top-left",
+  "top-center",
+  "top-right",
+  "bottom-left",
+  "bottom-center",
+  "bottom-right",
+] as const;
+
 /**
  * Schema for API URL map - validates that all keys are valid origins
  * and all values are valid URLs
@@ -106,13 +116,16 @@ const envSchema = z
     REACT_APP_META_DESCRIPTION: z.string(),
     REACT_PUBLIC_URL: z.url(),
     REACT_APP_COVER_IMAGE: z.url(),
-    REACT_APP_COVER_IMAGE_ALT: z.url(),
     REACT_SBOM_BASE_URL: z.url().optional(),
-    REACT_GITHUB_URL: z.url().optional(),
+    REACT_APP_STORE_API_URL: z.url().or(z.literal("")).optional(),
     REACT_OHCN_URL: z.url().optional(),
     REACT_SENTRY_DSN: z.url().optional(),
     REACT_SENTRY_ENVIRONMENT: z.string().optional(),
     REACT_DEFAULT_PAYMENT_TERMS: z.string().optional(),
+    REACT_DEFAULT_PAYMENT_METHOD: z
+      .enum(PaymentReconciliationPaymentMethod)
+      .optional(),
+    REACT_TOAST_POSITION: z.enum(VALID_TOAST_POSITIONS).optional(),
     REACT_MAIN_LOGO: logoSchemaString.optional(),
     REACT_STATE_LOGO: logoSchemaString.optional(),
     REACT_CUSTOM_LOGO: logoSchemaString.optional(),
@@ -120,7 +133,16 @@ const envSchema = z
     REACT_CUSTOM_LOGO_ALT: logoSchemaString.optional(),
     REACT_MAPS_FALLBACK_URL_TEMPLATE: z.url().optional(),
     REACT_ENABLED_APPS: z.string().optional(),
+    REACT_MFE_REGISTERED_COMPONENTS: z
+      .string()
+      .optional()
+      .describe(
+        "Optional: '*' or a comma-separated list of component names to register for plugin overrides",
+      ),
+    REACT_INJECTED_HEAD: z.string().optional(),
+    REACT_INJECTED_HTML: z.string().optional(),
     REACT_RECAPTCHA_SITE_KEY: z.string(),
+    REACT_APP_RESEND_OTP_TIMEOUT: positiveNumberAsString.optional(),
     REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: positiveNumberAsString.optional(),
     REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT: positiveNumberAsString.optional(),
     REACT_JWT_TOKEN_REFRESH_INTERVAL: positiveNumberAsString.optional(),
@@ -128,6 +150,8 @@ const envSchema = z
     REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: booleanAsStringSchema.optional(),
     REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED: booleanAsStringSchema.optional(),
     REACT_APPOINTMENTS_DEFAULT_DATE_FILTER: numberAsString.optional(),
+    REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API:
+      booleanAsStringSchema.optional(),
     REACT_PAYMENT_LOCATION_REQUIRED: booleanAsStringSchema.optional(),
     REACT_ENCOUNTER_DEFAULT_DATE_FILTER: numberAsString.optional(),
     REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE: booleanAsStringSchema.optional(),
@@ -135,7 +159,7 @@ const envSchema = z
       booleanAsStringSchema.optional(),
     REACT_ENABLE_QUESTIONNAIRE_DRAFT: booleanAsStringSchema.optional(),
     REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE: booleanAsStringSchema.optional(),
-    REACT_INVENTORY_EXPIRY_MONTH_OFFSET: numberAsString.optional(),
+    REACT_INVENTORY_EXPIRY_MONTH_OFFSET: positiveNumberAsString.optional(),
     REACT_OPEN_SCHEDULE_AFTER_PATIENT_REGISTRATION:
       booleanAsStringSchema.optional(),
     REACT_OBSERVATION_PLOTS_CONFIG_URL: z.url().optional(),
@@ -178,7 +202,11 @@ const envSchema = z
         message: `Must be one of: ${VALID_ROUNDING_METHODS.join(", ")}`,
       })
       .optional(),
+    REACT_MAX_DATAPOINTS_PER_UPSERT: positiveNumberAsString.optional(),
     REACT_MAX_FORM_DIALOG_FAVORITES: positiveNumberAsString.optional(),
+    REACT_MEDICATION_VALUE_SET_SELECT_DEFAULT_TAB: z
+      .enum(["product", "valueset"])
+      .optional(),
   })
   .superRefine(async (data, ctx) => {
     if (data.REACT_CARE_API_URL === undefined && !data.REACT_CARE_URL_MAP) {

@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Bed, Eye, Loader2, Lock } from "lucide-react";
+import { ArrowRight, Bed, Eye, Lock } from "lucide-react";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +18,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -25,6 +27,8 @@ import {
 import PaginationComponent from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
+
+import { TagBadges } from "@/components/Tags/TagBadges";
 
 import query from "@/Utils/request/query";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
@@ -72,14 +76,14 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
           {t("view_encounter")}
         </Button>
       </div>
-      <SheetContent className="sm:max-w-lg overflow-y-auto">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("bed_encounter_details")}</SheetTitle>
         </SheetHeader>
-        <div className="mt-4">
+        <SheetBody>
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="size-8 animate-spin text-gray-400" />
+              <Spinner className="size-8 animate-spin text-gray-400" />
               <p className="text-sm text-gray-500 mt-2">{t("loading")}</p>
             </div>
           ) : firstAssociation?.encounter ? (
@@ -95,7 +99,7 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
               </p>
             </div>
           )}
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );
@@ -122,31 +126,34 @@ function BedCard({ location, facilityId }: BedCardProps) {
     >
       <div
         className={cn(
-          "px-4 py-3 flex justify-between items-center",
+          "px-4 py-3",
           isOccupied
             ? "bg-blue-50 border-b border-blue-100"
             : "bg-green-100 border-b border-green-200",
         )}
       >
-        <div className="flex items-center">
-          <Bed
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2 min-w-0">
+            <Bed
+              className={cn(
+                "size-4 shrink-0",
+                isOccupied ? "text-blue-600" : "text-green-600",
+              )}
+            />
+            <span className="font-medium">{location.name}</span>
+          </div>
+          <div
             className={cn(
-              "size-4 mr-2",
-              isOccupied ? "text-blue-600" : "text-green-600",
+              "text-xs px-2 py-1 rounded-full shrink-0",
+              isOccupied
+                ? "bg-blue-100 text-blue-800"
+                : "bg-green-200 text-green-800",
             )}
-          />
-          <span className="font-medium">{location.name}</span>
+          >
+            {isOccupied ? t("occupied") : t("available")}
+          </div>
         </div>
-        <div
-          className={cn(
-            "text-xs px-2 py-1 rounded-full",
-            isOccupied
-              ? "bg-blue-100 text-blue-800"
-              : "bg-green-200 text-green-800",
-          )}
-        >
-          {isOccupied ? t("occupied") : t("available")}
-        </div>
+        <TagBadges className="pt-1" tags={location.tags} size="xs" />
       </div>
 
       <div className="h-full">
@@ -181,32 +188,43 @@ function LocationCard({ location, onClick }: LocationCardProps) {
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons];
 
   return (
-    <div
+    <Card
       className="border border-gray-200 rounded-lg overflow-hidden shadow-xs hover:shadow-md transition-shadow cursor-pointer"
-      onClick={onClick}
+      onClick={(event) => {
+        if (
+          event.target instanceof Element &&
+          event.target.closest("button, a, input")
+        )
+          return;
+        onClick();
+      }}
     >
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-        <div className="flex items-center">
+      <Button
+        type="button"
+        variant="ghost"
+        className="h-auto w-full rounded-none px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center whitespace-normal text-left"
+        onClick={onClick}
+      >
+        <span className="flex items-center">
           <Icon className="size-4 mr-2 text-gray-600" />
           <span className="font-medium">{location.name}</span>
-        </div>
+        </span>
         <ArrowRight className="size-4 text-gray-400" />
-      </div>
+      </Button>
 
-      <div className="p-4">
+      <CardContent className="p-4">
         <p className="text-sm text-gray-600 mb-3 line-clamp-2">
           {location.description}
         </p>
 
-        <div className="flex justify-between text-sm">
-          <div className="flex items-center">
-            <span className="capitalize text-gray-600">
-              {t(`location_form__${location.form}`)}
-            </span>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+          <span className="capitalize text-gray-600">
+            {t(`location_form__${location.form}`)}
+          </span>
+          <TagBadges tags={location.tags} size="xs" />
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -327,9 +345,14 @@ export default function LocationContent({
         )}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
-            <h2 className="text-lg font-semibold whitespace-nowrap">
-              {selectedLocation ? selectedLocation.name : t("locations")}
-            </h2>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-lg font-semibold whitespace-nowrap">
+                {selectedLocation ? selectedLocation.name : t("locations")}
+              </h2>
+              {selectedLocation && (
+                <TagBadges tags={selectedLocation.tags} size="xs" />
+              )}
+            </div>
           </div>
           <div className="w-full sm:w-72 shrink-0">
             <Input

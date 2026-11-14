@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { differenceInMinutes, format } from "date-fns";
+import { differenceInMinutes, format, isValid, parseISO } from "date-fns";
 import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
@@ -14,6 +14,15 @@ import { navigate } from "raviger";
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
 const DATE_TIME_FORMAT = `${TIME_FORMAT}; ${DATE_FORMAT}`;
+
+/**
+ * Guards against invalid dates from unvalidated query params (e.g. ?..._after=lol)
+ */
+export function parseValidISO(value: string | undefined) {
+  if (!value) return undefined;
+  const date = parseISO(value);
+  return isValid(date) ? date : undefined;
+}
 
 type DateLike = Parameters<typeof dayjs>[0];
 
@@ -81,6 +90,11 @@ export const relativeTime = (time?: DateLike) => {
 export const dateQueryString = (date: DateLike) => {
   if (!date || !dayjs(date).isValid()) return "";
   return dayjs(date).format("YYYY-MM-DD");
+};
+
+/** Local midnight from a "YYYY-MM-DD" string (avoids UTC parsing of date-only values) for the calendar. */
+export const parseLocalDate = (dateYmd?: string): Date | undefined => {
+  return dateYmd ? new Date(`${dateYmd}T00:00:00`) : undefined;
 };
 
 export const dateTimeQueryString = (date: DateLike, isEndDate = false) => {
@@ -361,71 +375,6 @@ export const readFileAsDataURL = async (file: File) => {
 
   return result_base64 as string;
 };
-
-/**
- * Generates a URL-safe slug from a given string.
- *
- * @param title - The string to convert to a slug
- * @param maxLength - Maximum length of the slug (default: 50)
- * @returns A URL-safe slug string
- *
- * @example
- * generateSlug("Hello World!") // "hello-world"
- * generateSlug("Café & Résumé") // "cafe-resume"
- * generateSlug("Special @#$% Characters") // "special-characters"
- */
-export function generateSlug(title: string, maxLength: number = 50): string {
-  if (!title || typeof title !== "string") {
-    return "";
-  }
-
-  return (
-    title
-      // Convert to lowercase
-      .toLowerCase()
-      // Normalize unicode characters (handles accented characters)
-      .normalize("NFD")
-      // Remove diacritics (accents, umlauts, etc.)
-      .replace(/[\u0300-\u036f]/g, "")
-      // Replace special characters and spaces with hyphens
-      .replace(/[^\w\s-]/g, "")
-      // Replace multiple spaces or hyphens with single hyphen
-      .replace(/[\s-]+/g, "-")
-      // Remove leading and trailing hyphens
-      .replace(/^-+|-+$/g, "")
-      // Limit length
-      .slice(0, maxLength)
-      // Remove trailing hyphens after truncation
-      .replace(/-+$/, "")
-  );
-}
-
-/**
- * Returns a formatted string of items, truncated if longer than maxItems
- * Eg.Formatted string like "item1, item2 ... +{count} more"
- * @param items Array of items to format
- * @param maxItems Maximum number of items to show before truncating
- * @param getDisplayValue Function to get display value from each item
- * @param moreText Text to show for additional items (e.g. "more" default is more)
- * @returns Formatted string like "item1, item2 ... +{count} more"
- */
-export function formatTruncatedList<T>(
-  items: T[],
-  maxItems: number,
-  getDisplayValue: (item: T) => string,
-  moreText?: string,
-): string {
-  if (!items?.length) return "";
-
-  if (items.length <= maxItems) {
-    return items.map(getDisplayValue).join(", ");
-  }
-
-  const displayedItems = items.slice(0, maxItems);
-  const remainingCount = items.length - maxItems;
-
-  return `${displayedItems.map(getDisplayValue).join(", ")} ... +${remainingCount} ${t("more") || moreText}`;
-}
 
 export function deepFreeze<T>(obj: T): T {
   if (!obj || typeof obj !== "object") return obj;

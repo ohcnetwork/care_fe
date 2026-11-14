@@ -9,6 +9,10 @@ import {
 } from "./association";
 import { LocationDetail, LocationRead, LocationWrite } from "./location";
 
+interface LocationTagRequest {
+  tags: { tag: string }[];
+}
+
 export default {
   list: {
     path: "/api/v1/facility/{facility_id}/location/",
@@ -56,6 +60,18 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<LocationDetail>(),
     TBody: Type<{ organization: string }>(),
+  },
+  setTags: {
+    path: "/api/v1/facility/{facilityId}/location/{external_id}/set_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<LocationRead>(),
+    TBody: Type<LocationTagRequest>(),
+  },
+  removeTags: {
+    path: "/api/v1/facility/{facilityId}/location/{external_id}/remove_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<LocationRead>(),
+    TBody: Type<LocationTagRequest>(),
   },
   listAssociations: {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/",

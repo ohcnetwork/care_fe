@@ -245,7 +245,12 @@ test.describe("Admin organization lists", () => {
     const treePanel = firstResizablePanel(page);
     await expect(treePanel).toBeVisible();
 
-    const expandButtons = treePanel.getByRole("button");
+    // Only nodes with children get an expander, an icon button showing a
+    // right chevron while collapsed; the named buttons select a node.
+    await expect(treePanel.getByRole("button").first()).toBeVisible();
+    const expandButtons = treePanel
+      .getByRole("button")
+      .filter({ has: page.locator("svg.lucide-chevron-right") });
     const expandCount = await expandButtons.count();
     if (expandCount === 0) {
       test.skip(true, "No expandable orgs in tree (all nodes are leaf nodes)");
@@ -263,7 +268,11 @@ test.describe("Admin organization lists", () => {
       })
       .toBeGreaterThan(beforeText);
 
-    await expandBtn.click();
+    await treePanel
+      .getByRole("button")
+      .filter({ has: page.locator("svg.lucide-chevron-down") })
+      .first()
+      .click();
     await expect
       .poll(async () => (await treePanel.innerText()).length, {
         message: "tree content should shrink on collapse",

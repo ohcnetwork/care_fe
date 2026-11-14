@@ -1,3 +1,4 @@
+import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
@@ -35,8 +36,10 @@ import {
 } from "@/components/ui/select";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -308,8 +311,8 @@ export default function ConsentFormSheet({
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto sm:max-w-lg">
-        <SheetHeader className="mb-6">
+      <SheetContent size="md">
+        <SheetHeader>
           <SheetTitle>
             {isEdit ? t("edit_consent") : t("add_consent")}
           </SheetTitle>
@@ -321,96 +324,157 @@ export default function ConsentFormSheet({
         </SheetHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {!isEdit && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel aria-required>
-                        {t("consent_given_on")}
-                      </FormLabel>
-                      <FormControl>
-                        <DateTimeInput
-                          {...field}
-                          value={field.value}
-                          onDateChange={(val) => field.onChange(val ?? null)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <SheetBody>
+              <div className="space-y-6">
+                {!isEdit && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel aria-required>
+                            {t("consent_given_on")}
+                          </FormLabel>
+                          <FormControl>
+                            <DateTimeInput
+                              {...field}
+                              value={field.value}
+                              onDateChange={(val) =>
+                                field.onChange(val ?? null)
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="period.start"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>{t("consent_valid_from")}</FormLabel>
-                        <FormControl>
-                          <DateTimeInput
-                            {...field}
-                            value={field.value ?? ""}
-                            onDateChange={(val) => {
-                              field.onChange(val ?? null);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="period.end"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>{t("consent_valid_until")}</FormLabel>
-                        <FormControl>
-                          <DateTimeInput
-                            {...field}
-                            value={field.value ?? ""}
-                            onDateChange={(val) => {
-                              field.onChange(val ?? null);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="decision"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("consent_decision")}</FormLabel>
-                      <RadioInput
-                        {...field}
-                        options={CONSENT_DECISIONS.map((decision) => ({
-                          label: t(`consent_decision__${decision}`),
-                          value: decision,
-                        }))}
-                        onValueChange={field.onChange}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="period.start"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>{t("consent_valid_from")}</FormLabel>
+                            <FormControl>
+                              <DateTimeInput
+                                {...field}
+                                value={field.value ?? ""}
+                                onDateChange={(val) => {
+                                  field.onChange(val ?? null);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
+                      <FormField
+                        control={form.control}
+                        name="period.end"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>{t("consent_valid_until")}</FormLabel>
+                            <FormControl>
+                              <DateTimeInput
+                                {...field}
+                                value={field.value ?? ""}
+                                onDateChange={(val) => {
+                                  field.onChange(val ?? null);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="decision"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("consent_decision")}</FormLabel>
+                          <RadioInput
+                            {...field}
+                            options={CONSENT_DECISIONS.map((decision) => ({
+                              label: t(`consent_decision__${decision}`),
+                              value: decision,
+                            }))}
+                            onValueChange={field.onChange}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("category")}</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger ref={field.ref}>
+                                <SelectValue
+                                  placeholder={t("select_category")}
+                                  className="flex justify-start items-center w-full"
+                                >
+                                  {field.value
+                                    ? t(`consent_category__${field.value}`)
+                                    : t("select_category")}
+                                </SelectValue>
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="max-w-[var(--anchor-width)] w-full">
+                              {CONSENT_CATEGORIES.map((category) => (
+                                <SelectItem key={category} value={category}>
+                                  <div className="flex flex-col gap-1">
+                                    <p className="font-medium">
+                                      {t(`consent_category__${category}`)}
+                                    </p>
+                                    <p className="text-xs text-gray-500 whitespace-normal">
+                                      {t(
+                                        `consent_category__${category}_description`,
+                                      )}
+                                    </p>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>
+                            <div className="text-xs text-blue-600 bg-blue-100 rounded-md p-2">
+                              {t(
+                                `consent_category__${form.watch("category")}_description`,
+                              )}
+                            </div>
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
 
                 <FormField
                   control={form.control}
-                  name="category"
+                  name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("category")}</FormLabel>
+                      <FormLabel>{t("status")}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -418,154 +482,101 @@ export default function ConsentFormSheet({
                       >
                         <FormControl>
                           <SelectTrigger ref={field.ref}>
-                            <SelectValue
-                              placeholder={t("select_category")}
-                              className="flex justify-start items-center w-full"
-                            >
-                              {field.value
-                                ? t(`consent_category__${field.value}`)
-                                : t("select_category")}
-                            </SelectValue>
+                            <SelectValue placeholder={t("select_status")} />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="max-w-[var(--radix-select-trigger-width)] w-full">
-                          {CONSENT_CATEGORIES.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              <div className="flex flex-col gap-1">
-                                <p className="font-medium">
-                                  {t(`consent_category__${category}`)}
-                                </p>
-                                <p className="text-xs text-gray-500 whitespace-normal">
-                                  {t(
-                                    `consent_category__${category}_description`,
-                                  )}
-                                </p>
-                              </div>
+                        <SelectContent>
+                          {CONSENT_STATUSES.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {t(`consent_status__${status}`)}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormDescription>
-                        <div className="text-xs text-blue-600 bg-blue-100 rounded-md p-2">
-                          {t(
-                            `consent_category__${form.watch("category")}_description`,
-                          )}
-                        </div>
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </>
-            )}
 
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("status")}</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger ref={field.ref}>
-                        <SelectValue placeholder={t("select_status")} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {CONSENT_STATUSES.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {t(`consent_status__${status}`)}
-                        </SelectItem>
+                <FormField
+                  control={form.control}
+                  name="note"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("note")}</FormLabel>
+                      <FormControl>
+                        <Textarea rows={3} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {!isEdit && (
+                  <div>
+                    <FormLabel>{t("supporting_documents")}</FormLabel>
+                    <div className="flex flex-col gap-2 mt-2">
+                      {fileUpload.files.map((file, index) => (
+                        <FormField
+                          key={index}
+                          control={form.control}
+                          name={`fileEntries.${index}.name`}
+                          render={({ field }) => (
+                            <FormItem className="space-y-0">
+                              <div className="flex items-stretch gap-2">
+                                <FormControl>
+                                  <Input
+                                    placeholder={t("file_name")}
+                                    className="flex-1"
+                                    {...field}
+                                    value={field.value || ""}
+                                    onChange={(e) => {
+                                      field.onChange(e.target.value);
+                                      fileUpload.setFileName(
+                                        e.target.value,
+                                        index,
+                                      );
+                                    }}
+                                  />
+                                </FormControl>
+                                <div className="bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 flex items-center gap-2 max-w-[150px]">
+                                  <span className="text-sm truncate">
+                                    {file.name}
+                                  </span>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  className="border border-secondary-300"
+                                  onClick={() => {
+                                    fileUpload.removeFile(index);
+                                    if (fileInputRef.current) {
+                                      fileInputRef.current.value = "";
+                                    }
+                                  }}
+                                >
+                                  <CareIcon icon="l-trash" className="size-4" />
+                                </Button>
+                              </div>
+                              <FormMessage className="mt-1" />
+                            </FormItem>
+                          )}
+                        />
                       ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="note"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("note")}</FormLabel>
-                  <FormControl>
-                    <textarea
-                      className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-md"
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {!isEdit && (
-              <div>
-                <FormLabel>{t("supporting_documents")}</FormLabel>
-                <div className="flex flex-col gap-2 mt-2">
-                  {fileUpload.files.map((file, index) => (
-                    <FormField
-                      key={index}
-                      control={form.control}
-                      name={`fileEntries.${index}.name`}
-                      render={({ field }) => (
-                        <FormItem className="space-y-0">
-                          <div className="flex items-stretch gap-2">
-                            <FormControl>
-                              <Input
-                                placeholder={t("file_name")}
-                                className="flex-1"
-                                {...field}
-                                value={field.value || ""}
-                                onChange={(e) => {
-                                  field.onChange(e.target.value);
-                                  fileUpload.setFileName(e.target.value, index);
-                                }}
-                              />
-                            </FormControl>
-                            <div className="bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 flex items-center gap-2 max-w-[150px]">
-                              <span className="text-sm truncate">
-                                {file.name}
-                              </span>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="border border-secondary-300"
-                              onClick={() => {
-                                fileUpload.removeFile(index);
-                                if (fileInputRef.current) {
-                                  fileInputRef.current.value = "";
-                                }
-                              }}
-                            >
-                              <CareIcon icon="l-trash" className="size-4" />
-                            </Button>
-                          </div>
-                          <FormMessage className="mt-1" />
-                        </FormItem>
-                      )}
-                    />
-                  ))}
-                  <FileUploadDropdown
-                    fileUpload={fileUpload}
-                    showAudioCapture={false}
-                    inputRef={fileInputRef}
-                    buttonText={`${t("select")} ${t("files")}`}
-                    buttonClassName="w-full flex flex-row items-center justify-center"
-                  />
-                </div>
+                      <FileUploadDropdown
+                        fileUpload={fileUpload}
+                        showAudioCapture={false}
+                        inputRef={fileInputRef}
+                        buttonText={`${t("select")} ${t("files")}`}
+                        buttonClassName="w-full flex flex-row items-center justify-center"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </SheetBody>
 
-            <div className="flex justify-end mt-6 space-x-2">
+            <SheetFooter>
               <Button
                 type="button"
                 variant="outline"
@@ -577,14 +588,10 @@ export default function ConsentFormSheet({
               >
                 {t("cancel")}
               </Button>
-              <Button
-                type="submit"
-                className="bg-primary-600 hover:bg-primary-700"
-                disabled={isPending}
-              >
+              <Button type="submit" disabled={isPending}>
                 {isPending ? t("saving") : t("save")}
               </Button>
-            </div>
+            </SheetFooter>
           </form>
         </Form>
       </SheetContent>

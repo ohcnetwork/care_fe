@@ -14,3 +14,8 @@ export interface CareTeamResponse {
 export interface CareTeamRequest {
   members: CareTeamMember[];
 }
+
+export const toCareTeamMembers = (
+  members: CareTeamResponse[],
+): CareTeamMember[] =>
+  members.map(({ member, role }) => ({ user_id: member.id, role }));

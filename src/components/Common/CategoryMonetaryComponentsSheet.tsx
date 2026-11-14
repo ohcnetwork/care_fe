@@ -6,8 +6,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -167,7 +169,7 @@ export function CategoryMonetaryComponentsSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="sm:max-w-3xl overflow-y-auto">
+      <SheetContent size="lg">
         <SheetHeader>
           <SheetTitle>{t("set_monetary_components")}</SheetTitle>
           <SheetDescription>
@@ -177,56 +179,52 @@ export function CategoryMonetaryComponentsSheet({
           </SheetDescription>
         </SheetHeader>
 
-        {isLoading || !facilityData ? (
-          <div className="mt-6">
+        <SheetBody>
+          {isLoading || !facilityData ? (
             <CardListSkeleton count={3} />
-          </div>
-        ) : (
-          <div className="space-y-6 mt-6">
-            <MonetaryComponentSelector
-              title={t("taxes")}
-              components={availableTaxes}
-              selectedComponents={selectedTaxes}
-              onSelectionChange={setSelectedTaxes}
-              type={MonetaryComponentType.tax}
-            />
+          ) : (
+            <div className="space-y-6">
+              <MonetaryComponentSelector
+                title={t("taxes")}
+                components={availableTaxes}
+                selectedComponents={selectedTaxes}
+                onSelectionChange={setSelectedTaxes}
+                type={MonetaryComponentType.tax}
+              />
 
-            <MonetaryComponentSelector
-              title={t("discounts")}
-              components={availableDiscounts}
-              selectedComponents={selectedDiscounts}
-              onSelectionChange={setSelectedDiscounts}
-              onConditionsChange={handleComponentConditionsChange}
-              type={MonetaryComponentType.discount}
-              showConditionsEditor
-              availableMetrics={availableMetrics}
-              facilityId={facilityId}
-            />
-
-            <div className="flex gap-2 pt-4">
-              <Button
-                variant="outline"
-                className="flex-1"
-                aria-label={t("cancel")}
-                onClick={onClose}
-              >
-                {t("cancel")}
-                <ShortcutBadge actionId="cancel-action" />
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={handleSubmit}
-                disabled={setMonetaryComponentsMutation.isPending}
-                aria-label={t("save")}
-              >
-                {setMonetaryComponentsMutation.isPending
-                  ? t("saving")
-                  : t("save")}
-                <ShortcutBadge actionId="submit-action" />
-              </Button>
+              <MonetaryComponentSelector
+                title={t("discounts")}
+                components={availableDiscounts}
+                selectedComponents={selectedDiscounts}
+                onSelectionChange={setSelectedDiscounts}
+                onConditionsChange={handleComponentConditionsChange}
+                type={MonetaryComponentType.discount}
+                showConditionsEditor
+                availableMetrics={availableMetrics}
+                facilityId={facilityId}
+              />
             </div>
-          </div>
-        )}
+          )}
+        </SheetBody>
+
+        <SheetFooter>
+          <Button variant="outline" aria-label={t("cancel")} onClick={onClose}>
+            {t("cancel")}
+            <ShortcutBadge actionId="cancel-action" />
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={
+              isLoading ||
+              !facilityData ||
+              setMonetaryComponentsMutation.isPending
+            }
+            aria-label={t("save")}
+          >
+            {setMonetaryComponentsMutation.isPending ? t("saving") : t("save")}
+            <ShortcutBadge actionId="submit-action" />
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

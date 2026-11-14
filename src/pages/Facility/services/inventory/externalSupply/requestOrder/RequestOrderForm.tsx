@@ -201,6 +201,14 @@ export default function RequestOrderForm({
     }
   }, [isEditMode, existingData, form]);
 
+  useEffect(() => {
+    if (isEditMode) return;
+    if (internal && form.getValues("origin") === locationId) {
+      form.setValue("origin", undefined);
+    }
+    form.setValue("destination", locationId);
+  }, [locationId, internal, isEditMode, form]);
+
   const tagIds = form.watch("tags") || [];
   const selectedTags = useTagConfigs({ ids: tagIds, facilityId })
     .map(({ data }) => data)
@@ -247,6 +255,7 @@ export default function RequestOrderForm({
     } else {
       createRequestOrder({
         ...data,
+        tags: data.tags.map((tag) => ({ tag })),
         status: RequestOrderStatus.draft,
       });
     }

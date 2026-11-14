@@ -1,8 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ButtonVariant, buttonVariants } from "@/components/ui/button";
+import { ButtonVariant } from "@/components/ui/button";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface ConfirmActionDialogProps {
   open: boolean;
@@ -54,10 +53,18 @@ export default function ConfirmActionDialog({
           )}
           <AlertDialogAction
             onClick={onConfirm}
-            className={cn(buttonVariants({ variant }))}
+            variant={variant}
             disabled={disabled}
           >
             {confirmText}
+            <ShortcutBadge
+              actionId="submit-action"
+              variant={
+                variant === "destructive" || variant === "destructive-solid"
+                  ? "destructive"
+                  : "default"
+              }
+            />
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

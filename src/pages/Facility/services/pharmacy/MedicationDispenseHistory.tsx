@@ -229,21 +229,24 @@ export default function MedicationDispenseHistory({
           onValueChange={(value) => updateQuery({ exclude_status: value })}
           className="w-full"
         >
-          <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-            {Object.entries(DISPENSE_STATUS_OPTIONS).map(([key, { label }]) => (
-              <TabsTrigger
-                key={key}
-                value={key}
-                className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t(label)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="w-full overflow-x-auto pb-1">
+            <TabsList
+              variant="line"
+              className="w-full justify-evenly border-b border-border sm:justify-start"
+            >
+              {Object.entries(DISPENSE_STATUS_OPTIONS).map(
+                ([key, { label }]) => (
+                  <TabsTrigger key={key} value={key}>
+                    {t(label)}
+                  </TabsTrigger>
+                ),
+              )}
+            </TabsList>
+          </div>
         </Tabs>
       </div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
           <PatientIdentifierFilter
             onSelect={(patientId, patientName) =>
               updateQuery({
@@ -256,15 +259,19 @@ export default function MedicationDispenseHistory({
             patientId={qParams.patientId}
             patientName={qParams.patient_name}
           />
-          <MultiFilter
-            selectedFilters={selectedFilters}
-            onFilterChange={handleFilterChange}
-            onOperationChange={handleOperationChange}
-            onClearAll={handleClearAll}
-            onClearFilter={handleClearFilter}
-            className="flex flex-row flex-wrap sm:items-center"
-            facilityId={facilityId}
-          />
+          <div className="w-full min-w-0 sm:w-auto">
+            <MultiFilter
+              selectedFilters={selectedFilters}
+              onFilterChange={handleFilterChange}
+              onOperationChange={handleOperationChange}
+              onClearAll={handleClearAll}
+              onClearFilter={handleClearFilter}
+              className="w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
+              triggerButtonClassName="self-start sm:self-center"
+              clearAllButtonClassName="self-center"
+              facilityId={facilityId}
+            />
+          </div>
         </div>
       </div>
       <div className="mt-4">

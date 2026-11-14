@@ -10,8 +10,13 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import {
+  TagConfig,
+  TagExpiryOffset,
+  TagResource,
+} from "@/types/emr/tagConfig/tagConfig";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
+import locationApi from "@/types/location/locationApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
@@ -30,7 +35,8 @@ export type TagEntityType =
   | "delivery_order"
   | "request_order"
   | "account"
-  | "charge_item_definition";
+  | "charge_item_definition"
+  | "location";
 
 // Mapping from entity types to tag resources
 const ENTITY_TO_RESOURCE_MAP = {
@@ -43,6 +49,7 @@ const ENTITY_TO_RESOURCE_MAP = {
   request_order: TagResource.REQUEST_ORDER,
   account: TagResource.ACCOUNT,
   charge_item_definition: TagResource.CHARGE_ITEM_DEFINITION,
+  location: TagResource.LOCATION,
 } as const;
 
 // Configuration for different entity types using their respective API files
@@ -94,6 +101,11 @@ const ENTITY_CONFIG = {
     setTagsApi: chargeItemDefinitionApi.setTags,
     removeTagsApi: chargeItemDefinitionApi.removeTags,
     displayName: "charge_item_definition",
+  },
+  location: {
+    setTagsApi: locationApi.setTags,
+    removeTagsApi: locationApi.removeTags,
+    displayName: "location",
   },
   // TODO: Add more entity configurations here
 
@@ -156,15 +168,29 @@ export default function TagAssignmentSheet({
         ? entityConfig.setTagsApi
         : entityConfig.removeTagsApi;
 
-    const createBodyPayload = (tags: string[]) =>
-      isFacilityPatientTag ? { tags, facility: facilityId || null } : { tags };
+    const createBodyPayload = (
+      tags: string[],
+      expiryOffset?: TagExpiryOffset,
+    ) => {
+      const tagRequests = tags.map((tag) => ({
+        tag,
+        ...(expiryOffset && { expiry_offset: expiryOffset }),
+      }));
+      return isFacilityPatientTag
+        ? { tags: tagRequests, facility: facilityId || null }
+        : { tags: tagRequests };
+    };
 
     return { apiEndpoint, createBodyPayload };
   };
 
   // Set tags mutation
   const { mutateAsync: setTags, isPending: isSettingTags } = useMutation({
-    mutationFn: async (payload: { tags: string[]; tag: TagConfig }) => {
+    mutationFn: async (payload: {
+      tags: string[];
+      tag: TagConfig;
+      expiryOffset?: TagExpiryOffset;
+    }) => {
       const { apiEndpoint, createBodyPayload } = getTagMutationConfig(
         payload.tag,
         "set",
@@ -176,7 +202,7 @@ export default function TagAssignmentSheet({
           ...(facilityId && { facilityId }),
           ...(patientId && { patientId }),
         },
-      })(createBodyPayload(payload.tags));
+      })(createBodyPayload(payload.tags, payload.expiryOffset));
     },
     onError: (error: unknown) => {
       const errorMessage =
@@ -219,7 +245,10 @@ export default function TagAssignmentSheet({
   }
 
   // Handle tag changes with sequential API calls
-  const handleTagChange = async (newTags: TagConfig[]) => {
+  const handleTagChange = async (
+    newTags: TagConfig[],
+    expiryOffset?: TagExpiryOffset,
+  ) => {
     const prevTagIds = new Set(selectedTags.map((tag: TagConfig) => tag.id));
     const newTagIds = new Set(newTags.map((tag: TagConfig) => tag.id));
 
@@ -240,7 +269,7 @@ export default function TagAssignmentSheet({
       }
 
       for (const tag of tagsToAdd) {
-        await setTags({ tags: [tag.id!], tag });
+        await setTags({ tags: [tag.id!], tag, expiryOffset });
       }
 
       onUpdate();
@@ -264,6 +293,7 @@ export default function TagAssignmentSheet({
           resource={ENTITY_TO_RESOURCE_MAP[entityType]}
           isTagMutationInProgress={isTagMutationInProgress}
           trigger={trigger}
+          allowCustomExpiry
         />
       )}
     </>

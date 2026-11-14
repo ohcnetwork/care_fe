@@ -1,12 +1,11 @@
 import { BillMedicationLineItemSchemaType } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
-import batchApi from "@/types/base/batch/batchApi";
+import { createAndIssueInvoice } from "@/pages/Facility/services/pharmacy/utils/createAndIssueInvoice";
 import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDefaultBillingAccount";
 import {
   ChargeItemBatchResponse,
   extractChargeItemsFromBatchResponse,
 } from "@/types/billing/chargeItem/chargeItem";
-import { InvoiceStatus } from "@/types/billing/invoice/invoice";
-import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import { InvoiceCreate } from "@/types/billing/invoice/invoice";
 import {
   DispenseOrderBatchResponse,
   DispenseOrderRead,
@@ -15,10 +14,11 @@ import {
   MedicationDispenseCreate,
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
+import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
-import mutate from "@/Utils/request/mutate";
-import { HttpMethod } from "@/Utils/request/types";
+import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -46,8 +46,7 @@ export default function useBillMedications({
       facilityId,
     });
 
-  const dispenseMutation = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
+  const dispenseMutation = useBatchRequest({
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["prescription", patientId],
@@ -64,9 +63,8 @@ export default function useBillMedications({
   });
 
   const createInvoiceMutation = useMutation({
-    mutationFn: mutate(invoiceApi.createInvoice, {
-      pathParams: { facilityId },
-    }),
+    mutationFn: (data: Pick<InvoiceCreate, "account" | "charge_items">) =>
+      createAndIssueInvoice(facilityId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
     },
@@ -93,7 +91,7 @@ export default function useBillMedications({
           : []),
       ];
 
-      const response = await dispenseMutation.mutateAsync({ requests });
+      const response = await dispenseMutation.mutateAsync(requests);
 
       const dispenseOrder = (response as DispenseOrderBatchResponse).results
         .map((item) => item.data?.order)
@@ -106,24 +104,36 @@ export default function useBillMedications({
       // Get the account ID from the account or refetch it if it's not available.
       const accountId = account?.id ?? (await refetchAccount()).data?.id;
 
+      let invoiceFailed = false;
+      let issuedInvoiceId: string | undefined;
       if (chargeItems.length > 0 && accountId) {
-        await createInvoiceMutation.mutateAsync({
-          status: InvoiceStatus.draft,
-          account: accountId,
-          charge_items: chargeItems.map((item) => item.id),
-        });
+        try {
+          const invoice = await createInvoiceMutation.mutateAsync({
+            account: accountId,
+            charge_items: chargeItems.map((item) => item.id),
+          });
+          issuedInvoiceId = invoice.id;
+        } catch {
+          // The dispenses are already saved and the mutation reports the error.
+          // Continue to their order to retry billing without dispensing again.
+          invoiceFailed = true;
+        }
       }
 
-      return dispenseOrder;
+      return { dispenseOrder, invoiceFailed, issuedInvoiceId };
     },
-    onSuccess: (response: DispenseOrderRead) => {
+    onSuccess: ({ dispenseOrder, invoiceFailed, issuedInvoiceId }) => {
       queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
       queryClient.invalidateQueries({ queryKey: ["accounts", patientId] });
       queryClient.invalidateQueries({ queryKey: ["invoice"] });
 
-      toast.success(t("medications_billed_successfully"));
+      if (window.location.pathname.startsWith("/session-expired")) return;
+
+      if (!invoiceFailed) {
+        toast.success(t("medications_billed_successfully"));
+      }
       navigate(
-        `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${response.id}?autoAdvanceStatus=true`,
+        `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}?autoAdvanceStatus=true${issuedInvoiceId ? `&collectPayment=${issuedInvoiceId}` : ""}`,
         { replace: true },
       );
     },
@@ -149,7 +159,7 @@ const getDispenseCreateRequests = ({
 }) => {
   const whenPrepared = new Date();
 
-  const requests = [];
+  const requests: BatchRequestObject<MedicationDispenseCreate>[] = [];
 
   for (const item of items) {
     if (!item.isSelected) {
@@ -181,33 +191,35 @@ const getDispenseCreateRequests = ({
       };
 
       requests.push({
-        url: "/api/v1/medication/dispense/",
-        method: HttpMethod.POST,
-        reference_id: `dispense_${item.reference_id}_lot_${lot.item.id}`,
+        api: medicationDispenseApi.create,
+        referenceId: `dispense_${item.reference_id}_lot_${lot.item.id}`,
         body,
-      } as const);
+      });
     }
   }
 
   return requests;
 };
 
-const getPrescriptionCompletionRequest = (ids: string[], patientId: string) => {
+const getPrescriptionCompletionRequest = (
+  ids: string[],
+  patientId: string,
+): BatchRequestObject[] => {
   if (ids.length === 0) {
     return [];
   }
 
   return [
     {
-      url: `/api/v1/patient/${patientId}/medication/prescription/upsert/`,
-      method: HttpMethod.POST,
-      reference_id: `prescription_completion_upsert`,
+      api: prescriptionApi.upsert,
+      pathParams: { patientId },
+      referenceId: `prescription_completion_upsert`,
       body: {
         datapoints: ids.map((id) => ({
           id,
           status: PrescriptionStatus.completed,
         })),
       },
-    } as const,
+    },
   ];
 };

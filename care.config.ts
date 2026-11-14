@@ -54,7 +54,6 @@ const careConfig = {
   apiUrl: resolveApiUrl(),
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
   urls: {
-    github: env.REACT_GITHUB_URL || "https://github.com/ohcnetwork",
     ohcn: env.REACT_OHCN_URL || "https://ohc.network?ref=care",
   },
 
@@ -65,7 +64,6 @@ const careConfig = {
   stateLogo: logo(env.REACT_STATE_LOGO),
   customLogo: logo(env.REACT_CUSTOM_LOGO),
   customLogoAlt: logo(env.REACT_CUSTOM_LOGO_ALT),
-  customDescription: env.REACT_CUSTOM_DESCRIPTION,
   availableLocales: (env.REACT_ALLOWED_LOCALES || "")
     .split(",")
     .map((l) => l.trim()),
@@ -168,6 +166,11 @@ const careConfig = {
   })(),
 
   /**
+   * Default payment terms to prefill when creating a new invoice
+   */
+  defaultPaymentTerms: env.REACT_DEFAULT_PAYMENT_TERMS || "",
+
+  /**
    * Screen position for toast notifications (Sonner)
    * Valid values: top-left, top-center, top-right, bottom-left, bottom-center, bottom-right
    * Defaults to top-center if unset or invalid.
@@ -225,7 +228,7 @@ const careConfig = {
     : [],
 
   appStore: {
-    indexUrl: env.REACT_APP_STORE_INDEX_URL,
+    apiUrl: env.REACT_APP_STORE_API_URL,
   },
 
   plotsConfigUrl:
@@ -359,10 +362,13 @@ const careConfig = {
       false,
     ),
     /**
-     * Number of months offset for expiry restriction.
-     * 0 = current month, 1 = next month, etc.
-     * Products expiring before the end of (current month + offset) will be restricted.
-     * Set to null (default) to disable expiry restriction entirely.
+     * Number of months after the current month during which products are
+     * considered "expiring soon" (a positive integer). Products expiring on or
+     * before the end of (current month + offset) are restricted from
+     * dispensing, and the "expiring soon" status and filter become available.
+     * Products expiring by the end of the current month are always treated as
+     * expired and restricted, regardless of this setting.
+     * Set to null (default) to disable the "expiring soon" restriction.
      */
     expiryMonthOffset: env.REACT_INVENTORY_EXPIRY_MONTH_OFFSET
       ? parseInt(env.REACT_INVENTORY_EXPIRY_MONTH_OFFSET, 10)
@@ -421,6 +427,14 @@ const careConfig = {
   maxFormDialogFavorites: env.REACT_MAX_FORM_DIALOG_FAVORITES
     ? parseInt(env.REACT_MAX_FORM_DIALOG_FAVORITES, 10)
     : 5,
+
+  /**
+   * Maximum number of datapoints allowed in a single upsert request.
+   * This should be set with whatever backend sets.
+   */
+  maxDatapointsPerUpsert: env.REACT_MAX_DATAPOINTS_PER_UPSERT
+    ? parseInt(env.REACT_MAX_DATAPOINTS_PER_UPSERT, 10)
+    : 100,
 } as const;
 
 export default careConfig;

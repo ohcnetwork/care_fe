@@ -1,32 +1,30 @@
+import { Kbd } from "@/components/ui/kbd";
+
 import { useShortcutDisplay } from "@/context/ShortcutContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
-const keyboardShortcutBadgeVariants = cva(
-  "h-5 min-w-5 flex justify-center px-1 rounded border font-medium text-xs",
-  {
-    variants: {
-      variant: {
-        default:
-          "bg-linear-to-b from-white to-gray-200 border-gray-200 text-gray-700",
-        primary: "border-gray-200/20 font-normal",
-        classic_primary:
-          "border-primary-900 font-normal bg-linear-to-b from-primary-600 to-primary-900",
-        secondary: "bg-gray-50 text-gray-700",
-      },
-      position: {
-        "top-right": "absolute top-1 right-1",
-        "bottom-right": "absolute bottom-1 right-1",
-        "top-left": "absolute top-1 left-1",
-        "bottom-left": "absolute bottom-1 left-1",
-      },
+const keyboardShortcutBadgeVariants = cva("", {
+  variants: {
+    variant: {
+      default: "",
+      primary: "",
+      classic_primary: "",
+      secondary: "",
+      destructive: "",
     },
-    defaultVariants: {
-      variant: "default",
+    position: {
+      "top-right": "absolute top-1 right-1",
+      "bottom-right": "absolute bottom-1 right-1",
+      "top-left": "absolute top-1 left-1",
+      "bottom-left": "absolute bottom-1 left-1",
     },
   },
-);
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
 type KeyboardShortcutBadgeVariant = VariantProps<
   typeof keyboardShortcutBadgeVariants
@@ -54,12 +52,19 @@ export function KeyboardShortcutBadge({
   variant = "default",
 }: KeyboardShortcutBadgeProps &
   VariantProps<typeof keyboardShortcutBadgeVariants>) {
-  const { isOptionPressed } = useKeyboardShortcuts([], {}, {});
+  const { isOptionPressed } = useKeyboardShortcuts([], {});
 
   const shouldShowVisually = shortcut && (alwaysShow || isOptionPressed);
 
   return (
-    <div
+    <Kbd
+      variant={
+        variant === "primary" || variant === "classic_primary"
+          ? "primary"
+          : variant === "destructive"
+            ? "destructive"
+            : "default"
+      }
       data-shortcut-id={actionId}
       className={cn(
         keyboardShortcutBadgeVariants({ variant, position }),
@@ -68,7 +73,7 @@ export function KeyboardShortcutBadge({
       )}
     >
       {shortcut}
-    </div>
+    </Kbd>
   );
 }
 
@@ -93,7 +98,7 @@ export function ShortcutBadge({
   variant?: KeyboardShortcutBadgeVariant;
 }) {
   const getShortcutDisplay = useShortcutDisplay();
-  const { isOptionPressed } = useKeyboardShortcuts([], {}, {});
+  const { isOptionPressed } = useKeyboardShortcuts([], {});
 
   return (
     <KeyboardShortcutBadge

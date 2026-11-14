@@ -36,7 +36,10 @@ import {
   PAYMENT_RECONCILIATION_METHOD_MAP,
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
-import { getPartialId } from "@/types/emr/patient/patient";
+import {
+  getPartialId,
+  getPatientIdentifiers,
+} from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
@@ -98,6 +101,7 @@ function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
           phone_number: patient.phone_number ?? "",
           year_of_birth: patient.year_of_birth?.toString() ?? "",
           partial_id: getPartialId(patient),
+          facility: facilityId,
         },
       }),
       enabled: true,
@@ -195,25 +199,19 @@ function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
                       {formatPatientAge(firstInvoice.account.patient, true)})
                     </span>
                   </p>
-                  {verifiedPatient &&
-                    "instance_identifiers" in verifiedPatient &&
-                    verifiedPatient.instance_identifiers
-                      .filter(
-                        ({ config }) =>
-                          config.config.use === PatientIdentifierUse.official &&
-                          !config.config.auto_maintained,
-                      )
-                      .map((identifier) => (
-                        <div
-                          key={identifier.config.id}
-                          className="text-base text-gray-700"
-                        >
-                          <span>{identifier.config.config.display}: </span>
-                          <span className="ml-2 font-semibold">
-                            {identifier.value}
-                          </span>
-                        </div>
-                      ))}
+                  {getPatientIdentifiers(verifiedPatient, {
+                    use: PatientIdentifierUse.official,
+                  }).map((identifier) => (
+                    <div
+                      key={identifier.config.id}
+                      className="text-base text-gray-700"
+                    >
+                      <span>{identifier.config.config.display}: </span>
+                      <span className="ml-2 font-semibold">
+                        {identifier.value}
+                      </span>
+                    </div>
+                  ))}
                   <div className="flex gap-1 font-medium text-gray-700 text-sm mt-1">
                     <span>{t("address")}:</span>
                     <span className="whitespace-pre-wrap">
@@ -269,7 +267,7 @@ function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
 
                 <div className="space-y-4">
                   {/* Items Table */}
-                  <div className="rounded-t-sm border border-gray-300">
+                  <div className="rounded-t-sm border border-gray-300 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
                     <Table>
                       <TableHeader>
                         <TableRow className="border-b border-gray-200">
@@ -556,7 +554,7 @@ function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
                     (p) => p.status === PaymentReconciliationStatus.active,
                   ).length > 0 && (
                     <>
-                      <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2">
+                      <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
                         <Table>
                           <TableHeader>
                             <TableRow className="border-b border-gray-200">
@@ -669,7 +667,7 @@ function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
                     (p) => p.status === PaymentReconciliationStatus.active,
                   ).length > 0 && (
                     <>
-                      <div className="border border-gray-300 rounded-md space-y-2">
+                      <div className="border border-gray-300 rounded-md space-y-2 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
                         <div className="mt-2 px-3 font-medium">
                           {t("credit_notes_issued_against_this_invoice")}
                         </div>

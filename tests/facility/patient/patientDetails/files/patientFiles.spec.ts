@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import { format, subDays } from "date-fns";
 import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -89,28 +89,8 @@ test.describe("Patient Files", () => {
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
-
-    // Navigate to encounters page and open first in-progress encounter
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
-    );
-
-    // Open first encounter details - wait for the link to be visible
-    const viewEncounterLink = page
-      .getByRole("link", { name: "View Encounter" })
-      .first();
-    await expect(viewEncounterLink).toBeVisible({ timeout: 10000 });
-    await viewEncounterLink.click();
-
-    // Wait for encounter page to load and get URL
-    await expect(page).toHaveURL(/\/encounter\//, { timeout: 10000 });
-    const currentUrl = page.url();
-    const patientUrl = currentUrl.split("/encounter/")[0];
-
-    // Navigate to patient details page
-    await page.goto(patientUrl);
+    // Open the saved patient fixture; list navigation is covered separately.
+    await page.goto(`/facility/${facilityId}/patient/${getPatientId()}`);
 
     // Wait for Files tab to be visible and click it
     const filesTab = page.getByRole("tab", { name: "Files" });

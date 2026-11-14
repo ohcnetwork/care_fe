@@ -80,7 +80,10 @@ import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
-import { getPartialId } from "@/types/emr/patient/patient";
+import {
+  getPartialId,
+  getPatientIdentifiers,
+} from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
@@ -754,24 +757,17 @@ function InvoiceShow({
                         invoice.account.patient.phone_number,
                       )}
                     </p>
-                    {verifiedPatient &&
-                      "instance_identifiers" in verifiedPatient &&
-                      verifiedPatient.instance_identifiers
-                        .filter(
-                          ({ config }) =>
-                            config.config.use ===
-                              PatientIdentifierUse.official &&
-                            !config.config.auto_maintained,
-                        )
-                        .map((identifier) => (
-                          <p
-                            key={identifier.config.id}
-                            className="font-medium text-gray-700 text-sm ml-2"
-                          >
-                            <span>{identifier.config.config.display}: </span>
-                            <span>{identifier.value}</span>
-                          </p>
-                        ))}
+                    {getPatientIdentifiers(verifiedPatient, {
+                      use: PatientIdentifierUse.official,
+                    }).map((identifier) => (
+                      <p
+                        key={identifier.config.id}
+                        className="font-medium text-gray-700 text-sm ml-2"
+                      >
+                        <span>{identifier.config.config.display}: </span>
+                        <span>{identifier.value}</span>
+                      </p>
+                    ))}
                   </div>
                   <div className="mt-2">
                     {invoice.note && <p>{invoice.note}</p>}
@@ -792,7 +788,7 @@ function InvoiceShow({
                 </div>
               </div>
 
-              <div className="rounded-t-sm border border-gray-300">
+              <div className="rounded-t-sm border border-gray-300 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-b border-gray-200">
@@ -1162,7 +1158,7 @@ function InvoiceShow({
                 (p) => p.status === PaymentReconciliationStatus.active,
               ).length > 0 && (
                 <>
-                  <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2">
+                  <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
                     <div className="-mt-7 px-3 font-medium ">
                       {invoice.is_refund
                         ? t("refunds_given_against_this_invoice")
@@ -1319,7 +1315,7 @@ function InvoiceShow({
                 (p) => p.status === PaymentReconciliationStatus.active,
               ).length > 0 && (
                 <>
-                  <div className="border border-gray-300 rounded-md space-y-2">
+                  <div className="border border-gray-300 rounded-md space-y-2 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
                     <div className="mt-2 px-3 font-medium">
                       {t("credit_notes_issued_against_this_invoice")}
                     </div>

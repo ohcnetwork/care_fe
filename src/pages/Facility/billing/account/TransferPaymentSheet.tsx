@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
@@ -23,7 +24,6 @@ import {
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { cn } from "@/lib/utils";
-import batchApi from "@/types/base/batch/batchApi";
 import {
   ACCOUNT_BILLING_STATUS_COLORS,
   ACCOUNT_STATUS_COLORS,
@@ -40,7 +40,8 @@ import {
   PaymentReconciliationStatus,
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
-import mutate from "@/Utils/request/mutate";
+import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { useBatchRequest } from "@/Utils/request/batch";
 import query from "@/Utils/request/query";
 
 interface TransferPaymentSheetProps {
@@ -80,8 +81,7 @@ export default function TransferPaymentSheet({
     (a) => a.id !== account.id,
   );
 
-  const { mutate: submitTransfer, isPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
+  const { mutate: submitTransfer, isPending } = useBatchRequest({
     onSuccess: () => {
       toast.success(t("payment_transferred_successfully"));
       queryClient.invalidateQueries({ queryKey: ["account", account.id] });
@@ -95,57 +95,6 @@ export default function TransferPaymentSheet({
       onOpenChange(false);
       setSelectedAccountId(null);
       setAmount("");
-    },
-    onError: (error) => {
-      const errorData = error.cause as {
-        results?: Array<{
-          reference_id: string;
-          status_code: number;
-          data: {
-            detail?: string;
-            errors?: Array<{
-              msg?: string;
-              error?: string;
-              type?: string;
-              loc?: string[];
-            }>;
-            non_field_errors?: string[];
-          };
-        }>;
-      };
-
-      if (errorData?.results) {
-        const failedResults = errorData.results.filter(
-          (result) => result.status_code >= 400,
-        );
-
-        if (failedResults.length > 0) {
-          for (const result of failedResults) {
-            if (result.data?.detail) {
-              toast.error(result.data.detail);
-              return;
-            }
-
-            const errors = result.data?.errors || [];
-            if (errors.length > 0) {
-              const message =
-                errors[0].msg ||
-                errors[0].error ||
-                t("payment_transfer_failed");
-              toast.error(message);
-              return;
-            }
-
-            const nonFieldErrors = result.data?.non_field_errors || [];
-            if (nonFieldErrors.length > 0) {
-              toast.error(nonFieldErrors[0]);
-              return;
-            }
-          }
-        }
-      }
-
-      toast.error(t("payment_transfer_failed"));
     },
   });
 
@@ -171,32 +120,30 @@ export default function TransferPaymentSheet({
       returned_amount: "0",
     };
 
-    submitTransfer({
-      requests: [
-        {
-          url: `/api/v1/facility/${facilityId}/payment_reconciliation/`,
-          method: "POST",
-          reference_id: "debit_current",
-          body: {
-            ...basePayment,
-            account: account.id,
-            is_credit_note: true,
-            note: t("outgoing_transfer_note", { account: selectedAccountId }),
-          },
+    submitTransfer([
+      {
+        api: paymentReconciliationApi.createPaymentReconciliation,
+        pathParams: { facilityId },
+        referenceId: "debit_current",
+        body: {
+          ...basePayment,
+          account: account.id,
+          is_credit_note: true,
+          note: t("outgoing_transfer_note", { account: selectedAccountId }),
         },
-        {
-          url: `/api/v1/facility/${facilityId}/payment_reconciliation/`,
-          method: "POST",
-          reference_id: "credit_target",
-          body: {
-            ...basePayment,
-            account: selectedAccountId,
-            is_credit_note: false,
-            note: t("incoming_transfer_note", { account: account.id }),
-          },
+      },
+      {
+        api: paymentReconciliationApi.createPaymentReconciliation,
+        pathParams: { facilityId },
+        referenceId: "credit_target",
+        body: {
+          ...basePayment,
+          account: selectedAccountId,
+          is_credit_note: false,
+          note: t("incoming_transfer_note", { account: account.id }),
         },
-      ],
-    });
+      },
+    ]);
   };
 
   return (
@@ -210,7 +157,7 @@ export default function TransferPaymentSheet({
         }
       }}
     >
-      <SheetContent className="sm:max-w-md">
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>{t("transfer_payment")}</SheetTitle>
           <SheetDescription>
@@ -218,69 +165,75 @@ export default function TransferPaymentSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="py-4 space-y-4">
-          <div className="space-y-2">
-            <Label>{t("amount")}</Label>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder={t("enter_amount")}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700">
-              {t("select_target_account")}
-            </p>
-            {isLoading ? (
-              <TableSkeleton count={3} />
-            ) : !accounts?.length ? (
-              <EmptyState
-                icon={
-                  <CareIcon icon="l-user" className="text-primary size-6" />
-                }
-                title={t("no_other_accounts_available")}
+        <SheetBody>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t("amount")}</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder={t("enter_amount")}
               />
-            ) : (
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {accounts.map((acc) => (
-                  <button
-                    key={acc.id}
-                    type="button"
-                    className={cn(
-                      "w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50",
-                      selectedAccountId === acc.id
-                        ? "border-primary bg-primary/5 ring-1 ring-primary"
-                        : "border-gray-200",
-                    )}
-                    onClick={() => setSelectedAccountId(acc.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm">{acc.name}</span>
-                      <div className="flex items-center gap-1">
-                        <Badge variant={ACCOUNT_STATUS_COLORS[acc.status]}>
-                          {t(acc.status)}
-                        </Badge>
-                        <Badge
-                          variant={
-                            ACCOUNT_BILLING_STATUS_COLORS[acc.billing_status]
-                          }
-                        >
-                          {t(acc.billing_status)}
-                        </Badge>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        <SheetFooter className="pt-2">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700">
+                {t("select_target_account")}
+              </p>
+              {isLoading ? (
+                <TableSkeleton count={3} />
+              ) : !accounts?.length ? (
+                <EmptyState
+                  icon={
+                    <CareIcon icon="l-user" className="text-primary size-6" />
+                  }
+                  title={t("no_other_accounts_available")}
+                />
+              ) : (
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {accounts.map((acc) => (
+                    <Button
+                      variant="outline"
+                      key={acc.id}
+                      type="button"
+                      className={cn(
+                        "h-auto block whitespace-normal",
+                        cn(
+                          "w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50",
+                          selectedAccountId === acc.id
+                            ? "border-primary bg-primary/5 ring-1 ring-primary"
+                            : "border-gray-200",
+                        ),
+                      )}
+                      onClick={() => setSelectedAccountId(acc.id)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-sm">{acc.name}</span>
+                        <div className="flex items-center gap-1">
+                          <Badge variant={ACCOUNT_STATUS_COLORS[acc.status]}>
+                            {t(acc.status)}
+                          </Badge>
+                          <Badge
+                            variant={
+                              ACCOUNT_BILLING_STATUS_COLORS[acc.billing_status]
+                            }
+                          >
+                            {t(acc.billing_status)}
+                          </Badge>
+                        </div>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </SheetBody>
+
+        <SheetFooter>
           <SheetClose asChild>
             <Button variant="outline" type="button">
               {t("cancel")}

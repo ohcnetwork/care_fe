@@ -1,14 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import shortcutsConfig from "@/config/keyboardShortcuts.json";
-
-export interface ShortcutConditions {
-  readOnly?: boolean;
-  canEdit?: boolean;
-  canCreate?: boolean;
-  questionnairesEnabled?: boolean;
-  [key: string]: unknown; // Allow custom conditions
-}
+import { isAppleDevice } from "@/Utils/utils";
 
 export interface ShortcutHandlers {
   [action: string]: () => void;
@@ -18,13 +11,11 @@ export interface KeyboardShortcut {
   key: string;
   action: string;
   description: string;
-  when: string;
   subContext?: string;
 }
 
 export function useKeyboardShortcuts(
   contexts: string[],
-  conditions: ShortcutConditions,
   handlers: ShortcutHandlers,
   activeSubContext?: string,
   ignoreInputFields?: boolean,
@@ -43,48 +34,12 @@ export function useKeyboardShortcuts(
     return allShortcuts;
   }, [contexts]);
 
-  const evaluateWhenCondition = useCallback(
-    (whenClause: string): boolean => {
-      if (whenClause === "always") return true;
-
-      const evalContext = {
-        canEdit: conditions.canEdit || false,
-        canCreate: conditions.canCreate || false,
-        readOnly: conditions.readOnly || false,
-        questionnairesEnabled: conditions.questionnairesEnabled || false,
-        ...conditions, // Allow custom conditions
-      };
-
-      try {
-        let expression = whenClause;
-        Object.entries(evalContext).forEach(([key, value]) => {
-          const regex = new RegExp(`\\b${key}\\b`, "g");
-          expression = expression.replace(regex, String(value));
-        });
-
-        return new Function(`return ${expression}`)();
-      } catch (error) {
-        console.warn(
-          `Failed to evaluate shortcut condition: ${whenClause}`,
-          error,
-        );
-        return false;
-      }
-    },
-    [conditions],
-  );
-
   const categorizedShortcuts = useMemo(() => {
     const direct: Record<string, KeyboardShortcut> = {};
     const prefixGroups: Record<string, Record<string, KeyboardShortcut>> = {};
     const modified: Record<string, KeyboardShortcut> = {};
 
     shortcuts.forEach((shortcut) => {
-      //should be active or not check
-      if (!evaluateWhenCondition(shortcut.when)) {
-        return;
-      }
-
       if (
         (activeSubContext &&
           shortcut.subContext &&
@@ -118,7 +73,7 @@ export function useKeyboardShortcuts(
     });
 
     return { direct, prefixGroups, modified };
-  }, [shortcuts, evaluateWhenCondition]);
+  }, [shortcuts, activeSubContext]);
 
   const matchesKeyCombo = useCallback(
     (keyCombo: string, event: KeyboardEvent): boolean => {
@@ -163,6 +118,12 @@ export function useKeyboardShortcuts(
             requiredModifiers.ctrl = true;
             break;
           case "cmd":
+            if (isAppleDevice) {
+              requiredModifiers.meta = true;
+            } else {
+              requiredModifiers.ctrl = true;
+            }
+            break;
           case "meta":
             requiredModifiers.meta = true;
             break;
@@ -204,18 +165,38 @@ export function useKeyboardShortcuts(
         setIsOptionPressed(event.altKey);
       }
 
-      // Skip if typing in input fields (unless explicitly allowed)
+      // Component handlers and focused actions own their activation keys.
+      if (event.defaultPrevented) return;
       const target = event.target as HTMLElement;
+      if (
+        (event.key === "Enter" || event.key === " ") &&
+        !event.shiftKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey &&
+        target instanceof Element &&
+        target.closest("button, a[href], [role='button'], [role='link']")
+      ) {
+        return;
+      }
+
+      // Skip if typing in input fields (unless explicitly allowed)
       const isInputField =
         target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA" ||
         target.contentEditable === "true";
 
-      if (
-        isInputField &&
+      // Printable keys always belong to the field, even when shortcuts such as
+      // Shift+Enter are allowed to run from inside inputs.
+      const isTyping =
+        event.key?.length === 1 &&
         !event.ctrlKey &&
         !event.metaKey &&
-        !ignoreInputFields
+        !event.altKey;
+
+      if (
+        isInputField &&
+        (isTyping || (!event.ctrlKey && !event.metaKey && !ignoreInputFields))
       ) {
         return;
       }
@@ -327,9 +308,7 @@ export function useKeyboardShortcuts(
   }, [handleKeyDown, handleKeyUp, handleWindowBlur]);
 
   return {
-    shortcuts: shortcuts.filter((shortcut) =>
-      evaluateWhenCondition(shortcut.when),
-    ),
+    shortcuts,
     activePrefix,
     isOptionPressed,
   };

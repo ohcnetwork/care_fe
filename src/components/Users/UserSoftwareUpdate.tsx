@@ -47,19 +47,16 @@ export default function UserSoftwareUpdate() {
     : null;
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:p-6">
+    <div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h3 className="text-lg font-medium text-gray-900">
-            {t("software_update")}
-          </h3>
           {lastUpdatedText && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               {t("last_updated")}: {lastUpdatedText}
             </p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {isChecking ? (
             <Button
               variant="primary"

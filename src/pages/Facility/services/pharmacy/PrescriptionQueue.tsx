@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRightIcon, CheckCircle, MoreVertical } from "lucide-react";
+import {
+  ArrowRightIcon,
+  CheckCircle,
+  MoreVertical,
+  PrinterIcon,
+} from "lucide-react";
 import { Link } from "raviger";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -256,34 +261,29 @@ export default function PrescriptionQueue({
         />
       }
     >
-      {/* Priority tabs with original styling */}
+      {/* Prescription status tabs */}
       <div className="mb-4 pt-6">
         <Tabs
           value={currentTab}
           onValueChange={(value) => updateQuery({ status: value })}
           className="w-full"
         >
-          <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-            {[
-              PrescriptionStatus.active,
-              PrescriptionStatus.completed,
-              PrescriptionStatus.cancelled,
-            ].map((key) => (
-              <TabsTrigger
-                key={key}
-                value={key}
-                className="relative px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none font-semibold transition-colors whitespace-nowrap ease-in-out"
-              >
-                {t(`prescription_status__${key}`)}
-                <div
-                  className={cn(
-                    "absolute inset-x-0 bg-primary-700 h-0.75 rounded-t-md -bottom-px transition-opacity duration-200 ease-in-out",
-                    currentTab === key ? "opacity-100" : "opacity-0",
-                  )}
-                />
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="w-full overflow-x-auto pb-1">
+            <TabsList
+              variant="line"
+              className="w-full justify-evenly border-b border-border sm:justify-start"
+            >
+              {[
+                PrescriptionStatus.active,
+                PrescriptionStatus.completed,
+                PrescriptionStatus.cancelled,
+              ].map((key) => (
+                <TabsTrigger key={key} value={key}>
+                  {t(`prescription_status__${key}`)}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
         </Tabs>
       </div>
       {/* Search and filter */}
@@ -352,31 +352,31 @@ export default function PrescriptionQueue({
                 </label>
               </div>
             </div>
-            <div className="ml-auto flex items-center gap-2">
-              <Button
-                variant="link"
-                className={cn(
-                  "underline",
-                  selectedPrescriptionIds.length === 0
-                    ? "pointer-events-none opacity-50"
-                    : "",
-                )}
-                asChild
-              >
+            <div
+              className={cn(
+                "mx-auto md:mr-0 flex flex-col md:flex-row items-center gap-2",
+                selectedPrescriptionIds.length === 0 && "hidden",
+              )}
+            >
+              <Button variant="link" className="underline" asChild>
                 <Link
                   href={`/medication_requests/patient/${qParams.patient_external_id}/prescriptions/${selectedPrescriptionIds.join(",")}`}
                 >
                   {t("preview_selected_rx")}
                 </Link>
               </Button>
+              <Button variant="link" asChild>
+                <Link
+                  href={`/medication_requests/patient/${qParams.patient_external_id}/prescriptions/${selectedPrescriptionIds.join(",")}/print`}
+                  className="underline"
+                >
+                  <PrinterIcon />
+                  {t("print_selected_rx")}
+                </Link>
+              </Button>
               <Button variant="outline_primary" asChild>
                 <Link
                   href={`/medication_requests/patient/${qParams.patient_external_id}/bill/prescriptions/${selectedPrescriptionIds.join(",")}`}
-                  className={
-                    selectedPrescriptionIds.length === 0
-                      ? "pointer-events-none opacity-50"
-                      : ""
-                  }
                 >
                   {t("bill_selected_prescriptions")}
                   <ArrowRightIcon />

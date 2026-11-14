@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -88,7 +89,7 @@ function GovtOrganizationLevel({
         {required && <span className="text-red-500">*</span>}
       </Label>
       <div className="flex items-center gap-2">
-        {isFetching && <Loader2 className="size-6 animate-spin" />}
+        {isFetching && <Spinner className="size-6 animate-spin" />}
         <Autocomplete
           showClearButton={false}
           aria-invalid={isError}

@@ -38,6 +38,7 @@ import {
   TimingBounds,
   validateTimingBounds,
 } from "@/types/emr/medicationRequest/medicationRequest";
+import { parseLocalDate } from "@/Utils/utils";
 
 interface DurationInputProps {
   value?: TimingBounds;
@@ -59,11 +60,6 @@ const BOUND_ICONS = {
   range: ArrowLeftRight,
   period: CalendarIcon,
 } as const;
-
-/** Local Date (midnight) from a "YYYY-MM-DD" string, for the calendar. */
-function parseLocalDate(ymd: string): Date | undefined {
-  return ymd ? new Date(`${ymd}T00:00:00`) : undefined;
-}
 
 /**
  * Duration field with scheduling bounds — Duration · Range · Period.
@@ -239,9 +235,12 @@ export function DurationInput({
       drawerOnMobile
       title={t("duration")}
       onFocus={() => inputRef.current?.select()}
-      contentClassName="w-72"
+      contentClassName={cn(
+        "max-w-[calc(100vw-2rem)]",
+        view === "period" ? "w-auto" : "w-72",
+      )}
       className={cn(
-        "h-9 text-sm",
+        "text-sm",
         BoundIcon && "pl-9",
         hasError && "border-red-500",
         className,
@@ -254,33 +253,38 @@ export function DurationInput({
     >
       {view === "list" && (
         <>
-          <div className="max-h-56 overflow-y-auto py-1">
+          <div className="sm:max-h-56 overflow-y-auto py-1">
             {customDuration && (
-              <button
+              <Button
+                variant="ghost"
                 type="button"
                 onClick={() => commitDuration(customDuration)}
-                className="flex w-full items-center gap-2 px-3.5 py-2 text-left text-sm hover:bg-accent"
+                className="justify-start whitespace-normal flex w-full items-center gap-2 px-3.5 py-2 text-left text-sm hover:bg-accent"
               >
                 {t("use_duration", {
                   duration: formatDurationLabel(customDuration),
                 })}
-              </button>
+              </Button>
             )}
             {suggestions.map((s) => (
-              <button
+              <Button
+                variant="ghost"
                 type="button"
                 key={`${s.decoded.value}-${s.decoded.unit}`}
                 onClick={() => commitDuration(s.decoded)}
                 className={cn(
-                  "flex w-full items-center justify-between px-3.5 py-2 text-left text-sm hover:bg-accent",
-                  isSelected(s.decoded) && "bg-accent",
+                  "justify-start whitespace-normal",
+                  cn(
+                    "flex w-full items-center justify-between px-3.5 py-2 text-left text-sm hover:bg-accent",
+                    isSelected(s.decoded) && "bg-accent",
+                  ),
                 )}
               >
                 {s.label}
                 {isSelected(s.decoded) && (
                   <Check className="size-3.5 shrink-0 text-primary" />
                 )}
-              </button>
+              </Button>
             ))}
             {!customDuration && suggestions.length === 0 && (
               <div className="px-3.5 py-2 text-sm text-muted-foreground">
@@ -290,44 +294,47 @@ export function DurationInput({
           </div>
           {/* Dedicated, visually distinct range & period actions. */}
           <div className="border-t py-1">
-            <button
+            <Button
+              variant="ghost"
               type="button"
               onClick={() => {
                 seedRange();
                 setView("range");
               }}
-              className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
+              className="justify-start whitespace-normal flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
             >
               <ArrowLeftRight className="size-4 shrink-0" />
               <span className="flex-1">{t("duration_set_range")}</span>
               <ChevronRight className="size-3.5 shrink-0" />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
               type="button"
               onClick={() => {
                 seedPeriod();
                 setView("period");
               }}
-              className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
+              className="justify-start whitespace-normal flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
             >
               <CalendarIcon className="size-4 shrink-0" />
               <span className="flex-1">{t("duration_set_period")}</span>
               <ChevronRight className="size-3.5 shrink-0" />
-            </button>
+            </Button>
           </div>
         </>
       )}
 
       {view === "range" && (
         <>
-          <button
+          <Button
+            variant="ghost"
             type="button"
             onClick={() => setView("list")}
-            className="flex w-full items-center gap-2 border-b px-3 py-2.5 text-left text-sm font-medium"
+            className="justify-start whitespace-normal flex w-full items-center gap-2 border-b px-3 py-2.5 text-left text-sm font-medium"
           >
             <ChevronLeft className="size-4 text-muted-foreground" />
             {t("duration_range_title")}
-          </button>
+          </Button>
           <div className="flex flex-col gap-3 p-3.5">
             <div className="flex items-center gap-2">
               <Input
@@ -336,7 +343,7 @@ export function DurationInput({
                 aria-label={t("start")}
                 value={rLow}
                 onChange={(e) => setRLow(e.target.value.replace(/\D/g, ""))}
-                className="h-9 w-12 text-center text-sm"
+                className="w-12 text-center text-sm"
               />
               <span className="text-muted-foreground">–</span>
               <Input
@@ -345,13 +352,13 @@ export function DurationInput({
                 aria-label={t("end")}
                 value={rHigh}
                 onChange={(e) => setRHigh(e.target.value.replace(/\D/g, ""))}
-                className="h-9 w-12 text-center text-sm"
+                className="w-12 text-center text-sm"
               />
               <Select
                 value={rUnit}
                 onValueChange={(u: RangeUnit) => setRUnit(u)}
               >
-                <SelectTrigger className="h-9 flex-1 text-sm">
+                <SelectTrigger className="flex-1 text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -381,16 +388,18 @@ export function DurationInput({
 
       {view === "period" && (
         <>
-          <button
+          <Button
+            variant="ghost"
             type="button"
             onClick={() => setView("list")}
-            className="flex w-full items-center gap-2 border-b px-3 py-2.5 text-left text-sm font-medium"
+            className="justify-start whitespace-normal flex w-full items-center gap-2 border-b px-3 py-2.5 text-left text-sm font-medium"
           >
             <ChevronLeft className="size-4 text-muted-foreground" />
             {t("duration_set_period")}
-          </button>
+          </Button>
           <div className="flex justify-center p-2">
             <Calendar
+              className="[--cell-size:min(--spacing(10),calc((100vw-4rem)/7))]"
               mode="range"
               selected={draftRange}
               onSelect={setDraftRange}

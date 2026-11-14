@@ -93,6 +93,20 @@ test.describe("Admin Responsibilities Page", () => {
     await expect(listRow(page, name)).toBeVisible();
   });
 
+  test("keeps the desktop page from scrolling as a whole", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await gotoResponsibilities(page);
+
+    const pageContent = page.locator("[data-cui-page]");
+    await expect
+      .poll(() =>
+        pageContent.evaluate(
+          (element) => element.scrollHeight - element.clientHeight,
+        ),
+      )
+      .toBeLessThanOrEqual(1);
+  });
+
   test("should create a new responsibility and view its details", async ({
     page,
   }) => {

@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "pages": [
+    {
+      "key": "rounds",
+      "kind": "custom",
+      "title": "Ward rounds",
+      "icon": "stethoscope",
+      "columns": [
+        {
+          "span": 2,
+          "widgets": [
+            {
+              "type": "vitals"
+            },
+            {
+              "type": "diagnosis"
+            },
+            {
+              "type": "questionnaire_responses",
+              "title": "Latest progress note",
+              "config": {
+                "questionnaire_slug": "daily-progress-note",
+                "limit": 1
+              }
+            },
+            {
+              "type": "service_requests",
+              "title": "Pending requests",
+              "config": {
+                "status": "active",
+                "limit": 5
+              }
+            }
+          ]
+        },
+        {
+          "span": 1,
+          "widgets": [
+            {
+              "type": "allergies"
+            },
+            {
+              "type": "symptoms"
+            },
+            {
+              "type": "quick_actions"
+            },
+            {
+              "type": "favorite_forms"
+            },
+            {
+              "type": "draft_forms"
+            },
+            {
+              "type": "care_team"
+            },
+            {
+              "type": "encounter_actions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "form-review",
+      "kind": "custom",
+      "title": "Form filters",
+      "icon": "clipboard-list",
+      "columns": [
+        {
+          "span": 1,
+          "widgets": [
+            {
+              "type": "questionnaire_responses",
+              "title": "Latest note \u2014 this form",
+              "config": {
+                "questionnaire_slug": "daily-progress-note",
+                "only_unstructured": true,
+                "limit": 1
+              }
+            }
+          ]
+        },
+        {
+          "span": 1,
+          "widgets": [
+            {
+              "type": "questionnaire_responses",
+              "title": "Last five notes \u2014 this form",
+              "config": {
+                "questionnaire_slug": "daily-progress-note",
+                "only_unstructured": true,
+                "limit": 5
+              }
+            }
+          ]
+        },
+        {
+          "span": 1,
+          "widgets": [
+            {
+              "type": "questionnaire_responses",
+              "title": "Last five responses \u2014 all forms",
+              "config": {
+                "limit": 5
+              }
+            },
+            {
+              "type": "favorite_forms"
+            },
+            {
+              "type": "draft_forms"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "request-queues",
+      "kind": "custom",
+      "title": "Request queues",
+      "icon": "list-checks",
+      "columns": [
+        {
+          "span": 2,
+          "widgets": [
+            {
+              "type": "service_requests",
+              "title": "Active requests \u2014 paginated",
+              "config": {
+                "status": "active"
+              }
+            }
+          ]
+        },
+        {
+          "span": 1,
+          "widgets": [
+            {
+              "type": "service_requests",
+              "title": "On hold \u2014 latest five",
+              "config": {
+                "status": "on_hold",
+                "limit": 5
+              }
+            },
+            {
+              "type": "service_requests",
+              "title": "Drafts \u2014 latest five",
+              "config": {
+                "status": "draft",
+                "limit": 5
+              }
+            }
+          ]
+        },
+        {
+          "span": 1,
+          "widgets": [
+            {
+              "type": "service_requests",
+              "title": "Completed \u2014 latest five",
+              "config": {
+                "status": "completed",
+                "limit": 5
+              }
+            },
+            {
+              "type": "quick_actions",
+              "title": "Create an order"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "encounter-details",
+      "kind": "custom",
+      "title": "Encounter details",
+      "icon": "info",
+      "columns": [
+        {
+          "span": 1,
+          "widgets": [
+            {
+              "type": "encounter_tags"
+            },
+            {
+              "type": "locations"
+            }
+          ]
+        },
+        {
+          "span": 1,
+          "widgets": [
+            {
+              "type": "care_team"
+            },
+            {
+              "type": "departments"
+            }
+          ]
+        },
+        {
+          "span": 1,
+          "widgets": [
+            {
+              "type": "hospitalization"
+            },
+            {
+              "type": "discharge"
+            }
+          ]
+        },
+        {
+          "span": 1,
+          "widgets": [
+            {
+              "type": "audit_logs",
+              "title": "Audit details"
+            },
+            {
+              "type": "reports"
+            },
+            {
+              "type": "encounter_actions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "updates",
+      "kind": "system"
+    },
+    {
+      "key": "medicines",
+      "kind": "system"
+    },
+    {
+      "key": "devices",
+      "kind": "system",
+      "hidden": true
+    }
+  ]
+}

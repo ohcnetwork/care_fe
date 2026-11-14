@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -18,6 +19,7 @@ import {
   LocationAssociationStatus,
 } from "@/types/location/association";
 import { LocationRead } from "@/types/location/location";
+import { BatchRequestObject } from "@/Utils/request/batch";
 
 import { useLocationAssignment } from "@/components/Location/hooks/useLocationAssignment";
 import { useLocationDialogs } from "@/components/Location/hooks/useLocationDialogs";
@@ -43,6 +45,7 @@ interface LocationSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultTab?: "assign" | "history";
+  readOnly?: boolean;
 }
 
 export function LocationSheet({
@@ -52,15 +55,30 @@ export function LocationSheet({
   open,
   onOpenChange,
   defaultTab = "assign",
+  readOnly = false,
 }: LocationSheetProps) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<"assign" | "history">(defaultTab);
+  const activeTab = readOnly ? "history" : tab;
+
+  useEffect(() => {
+    if (open) setTab(readOnly ? "history" : defaultTab);
+  }, [open, readOnly, defaultTab, encounter.id]);
 
   // Custom hooks
-  const navigation = useLocationNavigation({ facilityId, open, tab });
+  const navigation = useLocationNavigation({
+    facilityId,
+    open,
+    tab: activeTab,
+  });
   const assignment = useLocationAssignment();
   const dialogs = useLocationDialogs();
   const mutations = useLocationMutations(encounter.id);
+  const canMutate = () => {
+    if (!readOnly) return true;
+    toast.error(t("permission_denied"));
+    return false;
+  };
 
   // Derived state
   const { currentLocation, reservedLocations, plannedLocations } = useMemo(
@@ -161,9 +179,10 @@ export function LocationSheet({
   };
 
   const handleConfirmDelete = async () => {
+    if (!canMutate()) return;
     if (!dialogs.locationToDelete) return;
 
-    const requests = [];
+    const requests: BatchRequestObject[] = [];
 
     // Find the location being deleted from history
     const locationBeingDeleted = history.find(
@@ -191,7 +210,7 @@ export function LocationSheet({
     );
 
     // Execute all requests in batch
-    await mutations.executeBatch.mutateAsync({ requests });
+    await mutations.executeBatch.mutateAsync(requests);
 
     dialogs.closeDeleteDialog();
   };
@@ -200,7 +219,8 @@ export function LocationSheet({
   const handleConfirmTime = async (
     existingLocation?: LocationAssociationRead,
   ) => {
-    const requests = [];
+    if (!canMutate()) return;
+    const requests: BatchRequestObject[] = [];
     const selectedBed = navigation.selectedBed;
     const action = assignment.sheetState.action;
 
@@ -284,14 +304,15 @@ export function LocationSheet({
     }
 
     if (requests.length > 0) {
-      await mutations.executeBatch.mutateAsync({ requests });
+      await mutations.executeBatch.mutateAsync(requests);
       resetAll();
     }
   };
 
   // Confirm edit for existing location
   const handleConfirmEdit = async (location: LocationAssociationRead) => {
-    const requests = [];
+    if (!canMutate()) return;
+    const requests: BatchRequestObject[] = [];
 
     const isUpdatingActiveLocation =
       currentLocation && currentLocation.id === location.id;
@@ -382,7 +403,7 @@ export function LocationSheet({
     }
 
     if (requests.length > 0) {
-      await mutations.executeBatch.mutateAsync({ requests });
+      await mutations.executeBatch.mutateAsync(requests);
       resetAll();
     }
   };
@@ -495,51 +516,46 @@ export function LocationSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetContent className="w-full sm:max-w-3xl pr-2 pl-3">
-          <SheetHeader className="space-y-1 px-1">
-            <SheetTitle className="text-sm font-semibold">
-              {t("update_location")}
-            </SheetTitle>
+        <SheetContent size="xl" className="overflow-hidden">
+          <SheetHeader>
+            <SheetTitle>{t("update_location")}</SheetTitle>
           </SheetHeader>
 
-          <Tabs
-            value={tab}
-            onValueChange={(value) => setTab(value as "assign" | "history")}
-            className="mt-2"
-          >
-            <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
-              <TabsTrigger
-                value="assign"
-                className="border-0 data-[state=active]:border-b-2 px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t("assign_location")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="history"
-                className="border-0 data-[state=active]:border-b px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t("location_history")}
-              </TabsTrigger>
-            </TabsList>
+          <SheetBody>
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => setTab(value as "assign" | "history")}
+            >
+              <div className="max-w-full overflow-x-auto pb-1">
+                <TabsList variant="line">
+                  {!readOnly && (
+                    <TabsTrigger value="assign">
+                      {t("assign_location")}
+                    </TabsTrigger>
+                  )}
+                  <TabsTrigger value="history">
+                    {t("location_history")}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-            <TabsContent value="assign" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)] p-3 md:p-4">
-                {renderScreen()}
-              </ScrollArea>
-            </TabsContent>
+              {!readOnly && (
+                <TabsContent value="assign" className="mt-2">
+                  {renderScreen()}
+                </TabsContent>
+              )}
 
-            <TabsContent value="history" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)]">
+              <TabsContent value="history" className="mt-2">
                 <LocationHistoryComponent history={history} />
-              </ScrollArea>
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+            </Tabs>
+          </SheetBody>
         </SheetContent>
       </Sheet>
 
       {/* Discharge Dialog */}
       <ConfirmActionDialog
-        open={dialogs.showDischargeDialog}
+        open={dialogs.showDischargeDialog && !readOnly}
         onOpenChange={(open) => {
           if (!open) {
             dialogs.closeDischargeDialog();
@@ -553,7 +569,7 @@ export function LocationSheet({
 
       {/* Delete Dialog */}
       <ConfirmActionDialog
-        open={dialogs.showDeleteDialog}
+        open={dialogs.showDeleteDialog && !readOnly}
         onOpenChange={(open) => {
           if (!open) {
             dialogs.closeDeleteDialog();
@@ -568,7 +584,7 @@ export function LocationSheet({
 
       {/* Occupied Dialog */}
       <ConfirmActionDialog
-        open={dialogs.showOccupiedDialog}
+        open={dialogs.showOccupiedDialog && !readOnly}
         onOpenChange={(open) => {
           if (!open) {
             dialogs.closeOccupiedDialog();

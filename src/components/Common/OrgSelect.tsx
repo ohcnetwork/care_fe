@@ -9,6 +9,7 @@ import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 interface OrgSelectProps {
+  id?: string;
   value?: string; // Organization ID
   onChange: (value?: Organization) => void;
   orgType: string;
@@ -18,9 +19,11 @@ interface OrgSelectProps {
   inputPlaceholder?: string;
   noOptionsMessage?: ReactNode;
   excludeIds?: string[];
+  showClearButton?: boolean;
 }
 
 export function OrgSelect({
+  id,
   value,
   onChange,
   orgType,
@@ -30,6 +33,7 @@ export function OrgSelect({
   inputPlaceholder,
   noOptionsMessage,
   excludeIds,
+  showClearButton,
 }: OrgSelectProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,20 +52,21 @@ export function OrgSelect({
   // Query for selected organization if not in search results
   const { data: selectedData } = useQuery({
     queryKey: ["organizations", orgType, value, "selected"],
-    queryFn: query(organizationApi.list, {
-      queryParams: {
-        org_type: orgType,
-        id: value,
-      },
+    queryFn: query(organizationApi.get, {
+      pathParams: { id: value! },
+      // A stale id (e.g. from a shared URL) should leave the field empty, not toast "Not found".
+      silent: true,
     }),
     enabled:
       !!value && !searchResults?.results?.some((org) => org.id === value),
   });
 
   const searchOptions = searchResults?.results || [];
-  const allOptions = value
-    ? [...searchOptions, ...(selectedData?.results || [])]
-    : searchOptions;
+  const allOptions =
+    selectedData?.org_type === orgType &&
+    !searchOptions.some((org) => org.id === selectedData.id)
+      ? [...searchOptions, selectedData]
+      : searchOptions;
 
   const excludeSet = new Set(excludeIds ?? []);
   const visibleOptions = allOptions.filter(
@@ -70,6 +75,7 @@ export function OrgSelect({
 
   return (
     <Autocomplete
+      id={id}
       value={value || ""}
       onChange={(selectedId) => {
         if (!selectedId) {
@@ -92,6 +98,7 @@ export function OrgSelect({
       noOptionsMessage={noOptionsMessage || t("no_organization_found")}
       disabled={disabled}
       className={className}
+      showClearButton={showClearButton}
       closeOnSelect
     />
   );

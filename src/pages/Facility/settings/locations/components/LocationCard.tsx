@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  Bed,
   ChevronRight,
   Folder,
   FolderOpen,
@@ -26,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import mutate from "@/Utils/request/mutate";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
@@ -129,15 +131,35 @@ export function SettingsLocationCard({
                     ? t("unavailable")
                     : t("available")}
                 </Badge>
-                {location.has_children && (
+                {location.has_sub_locations && (
                   <Badge
                     variant="outline"
                     className="flex items-center gap-1 whitespace-nowrap"
                   >
                     <FolderOpen className="size-3" />
-                    {t("has_child_locations")}
+                    {t("has_sub_locations")}
                   </Badge>
                 )}
+                {location.has_beds && (
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1 whitespace-nowrap"
+                  >
+                    <Bed className="size-3" />
+                    {t("has_beds")}
+                  </Badge>
+                )}
+                <TagAssignmentSheet
+                  entityType="location"
+                  entityId={location.id}
+                  facilityId={facilityId}
+                  currentTags={location.tags ?? []}
+                  onUpdate={() => {
+                    queryClient.invalidateQueries({
+                      queryKey: ["locations", facilityId],
+                    });
+                  }}
+                />
               </div>
             </div>
 

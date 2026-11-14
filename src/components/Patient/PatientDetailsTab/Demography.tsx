@@ -21,6 +21,7 @@ import { formatPatientAge } from "@/Utils/utils";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import usePatientExtensionData from "@/hooks/usePatientExtensionData";
+import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 import {
   getOrgLabel,
   Organization,
@@ -215,6 +216,12 @@ export const Demography = (props: PatientProps) => {
           label: t("sex"),
           value: patientGender,
         },
+        {
+          label: t("blood_group"),
+          value: patientData.blood_group
+            ? t(`BLOOD_GROUP_LONG__${patientData.blood_group}`)
+            : t("BLOOD_GROUP_LONG__unknown"),
+        },
         <EmergencyContact
           key="emergency-contact"
           number={patientData.emergency_phone_number}
@@ -259,12 +266,10 @@ export const Demography = (props: PatientProps) => {
     {
       id: "identifiers",
       allowEdit: false,
-      details: patientData.instance_identifiers
-        ?.filter(({ config }) => !config.config.auto_maintained)
-        .map((i) => ({
-          label: i.config.config.display,
-          value: i.value,
-        })),
+      details: getPatientIdentifiers(patientData).map((i) => ({
+        label: i.config.config.display,
+        value: i.value,
+      })),
     },
     {
       id: "tags",
@@ -308,9 +313,14 @@ export const Demography = (props: PatientProps) => {
           {data
             .filter((s) => !s.hidden)
             .map((subtab, i) => (
-              <button
+              <Button
+                type="button"
+                variant="ghost"
                 key={i}
-                className={`cursor-pointer rounded-lg p-3 transition-colors duration-300 text-left ${
+                aria-current={
+                  activeSection === subtab.id ? "location" : undefined
+                }
+                className={`h-auto justify-start whitespace-normal cursor-pointer rounded-lg p-3 transition-colors duration-300 text-left ${
                   activeSection === subtab.id
                     ? "bg-white text-green-800"
                     : "hover:bg-white hover:text-green-800"
@@ -318,7 +328,7 @@ export const Demography = (props: PatientProps) => {
                 onClick={() => scrollToSection(subtab.id)}
               >
                 {t(`patient__${subtab.id}`)}
-              </button>
+              </Button>
             ))}
         </div>
 

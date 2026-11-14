@@ -255,7 +255,7 @@ export default function FacilityOrganizationView({
         <div className="md:pb-4">
           {children?.results?.length ? (
             <>
-              <div className="hidden sm:block rounded-lg border">
+              <div className="hidden sm:block">
                 <Table>
                   <TableHeader>
                     <TableRow>

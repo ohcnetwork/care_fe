@@ -82,7 +82,11 @@ export default function ResponsibilitiesIndex({ organizationId }: Props) {
   // On mobile, a selected responsibility takes over the screen (master-detail).
   if (isMobile && organizationId) {
     return (
-      <Page title={t("responsibilities")} hideTitleOnPage className="p-0">
+      <Page
+        title={t("responsibilities")}
+        hideTitleOnPage
+        className="p-0 pt-2"
+      >
         <div className="container mx-auto pb-6">
           <DetailPanel
             organizationId={organizationId}
@@ -95,13 +99,20 @@ export default function ResponsibilitiesIndex({ organizationId }: Props) {
   }
 
   return (
-    <Page title={t("responsibilities")} hideTitleOnPage className="p-0">
+    <Page
+      title={t("responsibilities")}
+      hideTitleOnPage
+      className={cn(
+        "p-0 pt-2",
+        !isMobile && "flex min-h-0 flex-1 flex-col",
+      )}
+    >
       <div
         className={cn(
           "container mx-auto pb-24 md:pb-0",
           isMobile
             ? "space-y-4"
-            : "flex h-[calc(100dvh-4rem)] flex-col gap-4 overflow-hidden",
+            : "flex min-h-0 flex-1 flex-col gap-4 overflow-hidden",
         )}
       >
         {/* Header */}
