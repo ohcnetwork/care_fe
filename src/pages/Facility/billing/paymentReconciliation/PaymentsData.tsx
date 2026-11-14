@@ -20,6 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import {
@@ -57,6 +62,7 @@ import {
   PAYMENT_RECONCILIATION_METHOD_MAP,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
   PaymentReconciliationRead,
+  PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { LocationRead } from "@/types/location/location";
@@ -71,16 +77,42 @@ const SORT_OPTIONS = {
   created_date: "sort_by_oldest_created",
 };
 
+const MOVABLE_PAYMENT_STATUSES = [
+  PaymentReconciliationStatus.active,
+  PaymentReconciliationStatus.draft,
+];
+
+/**
+ * Why a payment can't be moved to another account, mirroring the backend
+ * validations on `payment_reconciliation/change_account`. Returns `null` when
+ * the payment can be moved.
+ */
+const getChangeAccountBlocker = (payment: PaymentReconciliationRead) => {
+  if (payment.target_invoice) {
+    return "payment_against_invoice_cannot_change_account";
+  }
+  if (!MOVABLE_PAYMENT_STATUSES.includes(payment.status)) {
+    return "only_active_or_draft_payments_can_change_account";
+  }
+  return null;
+};
+
 export default function PaymentsData({
   facilityId,
   accountId,
   patientId,
   hideAccountColumn = false,
+  canChangeAccount = false,
 }: {
   facilityId: string;
   accountId?: string;
   patientId?: string;
   hideAccountColumn?: boolean;
+  /**
+   * Whether the user may move payments to another account. Mirrors the
+   * backend's `can_write_payment_reconciliation_in_facility` check.
+   */
+  canChangeAccount?: boolean;
 }) {
   const { t } = useTranslation();
   const [createdBy, setCreatedBy] = useState<UserReadMinimal | undefined>(
@@ -148,6 +180,15 @@ export default function PaymentsData({
     [response?.results],
   );
 
+  const showSelection = canChangeAccount && !!patientId && !!accountId;
+
+  const movablePayments = payments.filter(
+    (payment) => !getChangeAccountBlocker(payment),
+  );
+  const allMovableSelected =
+    movablePayments.length > 0 &&
+    movablePayments.every((payment) => selectedItems.has(payment.id));
+
   const selectedPayments = payments.filter((p) => selectedItems.has(p.id));
 
   useEffect(() => {
@@ -158,7 +199,11 @@ export default function PaymentsData({
       return;
     }
 
-    const validIds = new Set(payments.map((payment) => payment.id));
+    const validIds = new Set(
+      payments
+        .filter((payment) => !getChangeAccountBlocker(payment))
+        .map((payment) => payment.id),
+    );
     setSelectedItems((prev) => {
       const next = new Set([...prev].filter((id) => validIds.has(id)));
       return next.size === prev.size ? prev : next;
@@ -179,7 +224,7 @@ export default function PaymentsData({
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedItems(new Set(payments.map((p) => p.id)));
+      setSelectedItems(new Set(movablePayments.map((p) => p.id)));
     } else {
       setSelectedItems(new Set());
     }
@@ -314,7 +359,7 @@ export default function PaymentsData({
           </Select>
         </div>
       </div>
-      {selectedItems.size > 0 && payments?.length && patientId && accountId && (
+      {showSelection && selectedItems.size > 0 && !!payments.length && (
         <div className="mb-4 flex items-center gap-3 rounded-md border bg-primary/5 border-primary/20 p-3">
           <span className="text-sm font-medium">
             {selectedItems.size} {t("items_selected")}
@@ -351,13 +396,17 @@ export default function PaymentsData({
           <Table>
             <TableHeader>
               <TableRow>
-                {patientId && accountId && (
+                {showSelection && (
                   <TableHead className="w-10">
                     <Checkbox
                       checked={
-                        !!payments?.length &&
-                        payments.every((p) => selectedItems.has(p.id))
+                        allMovableSelected
+                          ? true
+                          : selectedItems.size > 0
+                            ? "indeterminate"
+                            : false
                       }
+                      disabled={!movablePayments.length}
                       onCheckedChange={(checked: CheckedState) =>
                         handleSelectAll(checked === true)
                       }
@@ -377,125 +426,149 @@ export default function PaymentsData({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {payments.map((payment) => (
-                <TableRow
-                  key={payment.id}
-                  className={
-                    selectedItems.has(payment.id) ? "bg-primary/5" : ""
-                  }
-                >
-                  {patientId && accountId && (
+              {payments.map((payment) => {
+                const changeAccountBlocker = getChangeAccountBlocker(payment);
+                return (
+                  <TableRow
+                    key={payment.id}
+                    className={
+                      selectedItems.has(payment.id) ? "bg-primary/5" : ""
+                    }
+                  >
+                    {showSelection && (
+                      <TableCell>
+                        {changeAccountBlocker ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="inline-flex">
+                                <Checkbox
+                                  checked={false}
+                                  disabled
+                                  aria-label={t(changeAccountBlocker)}
+                                />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {t(changeAccountBlocker)}
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <Checkbox
+                            checked={selectedItems.has(payment.id)}
+                            onCheckedChange={(checked: CheckedState) =>
+                              handleSelectItem(payment.id, checked === true)
+                            }
+                            aria-label={t("select_item")}
+                          />
+                        )}
+                      </TableCell>
+                    )}
+                    {!hideAccountColumn && (
+                      <TableCell>
+                        <Button variant="link" asChild>
+                          <Link
+                            href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}
+                            className="hover:text-primary "
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <div className="text-base flex items-center gap-1 underline underline-offset-2">
+                              {payment.account?.name}
+                              <CareIcon
+                                icon="l-external-link-alt"
+                                className="size-3"
+                              />
+                            </div>
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    )}
                     <TableCell>
-                      <Checkbox
-                        checked={selectedItems.has(payment.id)}
-                        onCheckedChange={(checked: CheckedState) =>
-                          handleSelectItem(payment.id, checked === true)
-                        }
-                        aria-label={t("select_item")}
-                      />
+                      <div className="flex flex-col">
+                        <span>
+                          {payment.payment_datetime
+                            ? format(
+                                new Date(payment.payment_datetime),
+                                "MMM d, yyyy hh:mm a",
+                              )
+                            : "-"}
+                        </span>
+                        <span className="font-mono text-xs text-gray-500">
+                          {payment.id}
+                        </span>
+                      </div>
                     </TableCell>
-                  )}
-                  {!hideAccountColumn && (
                     <TableCell>
-                      <Button variant="link" asChild>
-                        <Link
-                          href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}
-                          className="hover:text-primary "
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <div className="text-base flex items-center gap-1 underline underline-offset-2">
-                            {payment.account?.name}
+                      {payment.target_invoice && (
+                        <Button variant="link" asChild>
+                          <Link
+                            href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice?.id}`}
+                            className="hover:text-primary underline underline-offset-2"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {payment.target_invoice.number || t("view_invoice")}
                             <CareIcon
                               icon="l-external-link-alt"
                               className="size-3"
                             />
-                          </div>
+                          </Link>
+                        </Button>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {t(
+                        getPaymentTypeLabelKey(
+                          payment.reconciliation_type,
+                          payment.is_credit_note,
+                        ),
+                      )}
+                    </TableCell>
+                    <TableCell>{t(payment.issuer_type)}</TableCell>
+                    <TableCell>
+                      {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
+                    </TableCell>
+                    <TableCell>
+                      <MonetaryDisplay
+                        amount={multiply(
+                          payment.amount,
+                          payment.is_credit_note ? -1 : 1,
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          PAYMENT_RECONCILIATION_STATUS_COLORS[payment.status]
+                        }
+                      >
+                        {t(payment.status)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        className="font-semibold"
+                        asChild
+                      >
+                        <Link
+                          href={`/facility/${facilityId}/billing/payments/${payment.id}`}
+                        >
+                          <EyeIcon />
+                          {t("view")}
                         </Link>
                       </Button>
                     </TableCell>
-                  )}
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span>
-                        {payment.payment_datetime
-                          ? format(
-                              new Date(payment.payment_datetime),
-                              "MMM d, yyyy hh:mm a",
-                            )
-                          : "-"}
-                      </span>
-                      <span className="font-mono text-xs text-gray-500">
-                        {payment.id}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {payment.target_invoice && (
-                      <Button variant="link" asChild>
-                        <Link
-                          href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice?.id}`}
-                          className="hover:text-primary underline underline-offset-2"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {payment.target_invoice.number || t("view_invoice")}
-                          <CareIcon
-                            icon="l-external-link-alt"
-                            className="size-3"
-                          />
-                        </Link>
-                      </Button>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {t(
-                      getPaymentTypeLabelKey(
-                        payment.reconciliation_type,
-                        payment.is_credit_note,
-                      ),
-                    )}
-                  </TableCell>
-                  <TableCell>{t(payment.issuer_type)}</TableCell>
-                  <TableCell>
-                    {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
-                  </TableCell>
-                  <TableCell>
-                    <MonetaryDisplay
-                      amount={multiply(
-                        payment.amount,
-                        payment.is_credit_note ? -1 : 1,
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        PAYMENT_RECONCILIATION_STATUS_COLORS[payment.status]
-                      }
-                    >
-                      {t(payment.status)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="outline" className="font-semibold" asChild>
-                      <Link
-                        href={`/facility/${facilityId}/billing/payments/${payment.id}`}
-                      >
-                        <EyeIcon />
-                        {t("view")}
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
       )}
       {response && <Pagination totalCount={response.count} />}
 
-      {patientId && accountId && (
+      {showSelection && patientId && accountId && (
         <ChangePaymentAccountSheet
           open={isChangeAccountOpen}
           onOpenChange={setIsChangeAccountOpen}
