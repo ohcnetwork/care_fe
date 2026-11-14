@@ -10,6 +10,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { Separator } from "@/components/ui/separator";
 
+import PatientPrintPageHeader from "@/components/Common/PatientPrintPageHeader";
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
@@ -84,12 +85,17 @@ export function PrintAllQuestionnaireResponses({
     return questionnaireResponses?.results?.[0]?.questionnaire;
   }, [questionnaireResponses]);
 
+  const headerPatient = encounter?.patient ?? patient;
+
   return (
     <PrintPreview
       title={t("questionnaire_response_logs")}
       disabled={!questionnaireResponses?.results?.length}
       facility={facility}
       templateSlug={PrintTemplateType.questionnaire_response_logs}
+      pageHeader={
+        headerPatient && <PatientPrintPageHeader patient={headerPatient} />
+      }
     >
       <div className="md:p-2 max-w-4xl mx-auto">
         <div>
@@ -101,7 +107,7 @@ export function PrintAllQuestionnaireResponses({
 
           <PrintableEncounterDetails
             encounter={encounter}
-            patient={encounter?.patient ?? patient}
+            patient={headerPatient}
           />
 
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">

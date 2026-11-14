@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import PatientPrintPageHeader from "@/components/Common/PatientPrintPageHeader";
 
 import { add } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
@@ -178,6 +179,7 @@ export default function AppointmentPrint(props: Props) {
       templateSlug={PrintTemplateType.appointment}
       disabled={isFetching}
       className="w-[720px] mx-auto"
+      pageHeader={patient && <PatientPrintPageHeader patient={patient} />}
     >
       <DisablingCover disabled={isFetching} message={t("loading")}>
         <div className="max-w-4xl mx-auto text-xs">

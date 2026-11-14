@@ -40,6 +40,8 @@ type Props = {
   templateSlug: string;
   hideFacilityHeader?: boolean;
   footer?: ReactNode;
+  /** Print-only `@page` header, shown in the top margin of every page after the first. */
+  pageHeader?: ReactNode;
 };
 
 export default function PrintPreview(props: Props) {
@@ -100,6 +102,7 @@ export default function PrintPreview(props: Props) {
       {templateWatermark?.enabled && templateWatermark.text && (
         <TiledWatermark watermark={templateWatermark} />
       )}
+      {props.pageHeader}
       <FacilityPrintLayout
         facility={props.facility}
         templateSlug={props.templateSlug}
