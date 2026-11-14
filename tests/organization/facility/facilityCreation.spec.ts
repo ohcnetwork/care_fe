@@ -116,7 +116,7 @@ test.describe("Facility Creation", () => {
       .getByRole("link", { name: /Government$/ })
       .first()
       .click();
-    await page.getByRole("menuitem", { name: "Facilities" }).click();
+    await page.getByRole("tab", { name: "Facilities" }).click();
   });
 
   test("Create a new facility with all fields", async ({ page }) => {

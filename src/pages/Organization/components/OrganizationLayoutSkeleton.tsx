@@ -8,8 +8,10 @@ import {
 export default function OrganizationLayoutSkeleton() {
   return (
     <div className="p-4">
-      <Skeleton className="h-8 w-48 mb-4" />
-      <Skeleton className="h-4 w-24 mb-4" />
+      <Skeleton className="mb-4 h-9 w-64" />
+      <div className="mb-4 flex min-h-11 items-center">
+        <Skeleton className="h-5 w-80 max-w-full" />
+      </div>
       <div className="flex space-x-4 mb-4">
         <CardListSkeleton count={3} />
       </div>

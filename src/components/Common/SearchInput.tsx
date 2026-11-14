@@ -1,3 +1,4 @@
+import { Search } from "lucide-react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -49,6 +50,8 @@ interface SearchInputProps extends Omit<
   buttonClassName?: string;
   enableOptionButtons?: boolean;
   hideSearchButton?: boolean;
+  /** Shows a leading search icon when there is no search-type trigger. */
+  showSearchIcon?: boolean;
   onFieldChange?: (options: SearchOption) => void;
   autoFocus?: boolean;
 }
@@ -63,6 +66,7 @@ const SearchInputFieldRenderer = ({
   isSingleOption,
   onSearch,
   searchTrigger,
+  showSearchIcon,
   ...prop
 }: {
   selectedOption: SearchOption;
@@ -74,6 +78,7 @@ const SearchInputFieldRenderer = ({
   isSingleOption: boolean;
   onSearch: (key: string, value: string) => void;
   searchTrigger?: React.ReactNode;
+  showSearchIcon?: boolean;
   disabled?: boolean;
   readOnly?: boolean;
 }) => {
@@ -127,7 +132,7 @@ const SearchInputFieldRenderer = ({
             value={searchValue}
             onChange={handlePhoneChange}
             className={cn(
-              "min-w-0",
+              "min-w-0 bg-background",
               (!isSingleOption || hasValue) && "[&_input]:pr-20",
               inputClassName,
             )}
@@ -161,7 +166,7 @@ const SearchInputFieldRenderer = ({
     );
   }
   return (
-    <InputGroup>
+    <InputGroup className="bg-background">
       <InputGroupInput
         type="text"
         placeholder={selectedOption.placeholder}
@@ -172,8 +177,14 @@ const SearchInputFieldRenderer = ({
         autoFocus={autoFocus}
         {...prop}
       />
-      {searchTrigger && (
+      {searchTrigger ? (
         <InputGroupAddon align="inline-start">{searchTrigger}</InputGroupAddon>
+      ) : (
+        showSearchIcon && (
+          <InputGroupAddon align="inline-start">
+            <Search aria-hidden="true" />
+          </InputGroupAddon>
+        )
       )}
       {showClear ? (
         <InputGroupAddon align="inline-end">
@@ -205,6 +216,7 @@ export default function SearchInput({
   onFieldChange,
   enableOptionButtons = true,
   hideSearchButton = false,
+  showSearchIcon = false,
   autoFocus = false,
   ...props
 }: SearchInputProps) {
@@ -332,6 +344,7 @@ export default function SearchInput({
         isSingleOption={isSingleOption}
         onSearch={onSearch}
         searchTrigger={searchTrigger}
+        showSearchIcon={showSearchIcon}
         {...props}
       />
       {enableOptionButtons && !isSingleOption && (
