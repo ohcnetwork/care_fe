@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -124,16 +124,19 @@ function IncomingOrdersTab({
 }) {
   const { t } = useTranslation();
 
-  const [qParams] = useQueryParams();
-  const { updateQuery, Pagination, resultsPerPage } = useFilters({
-    limit: 14,
-    disableCache: true,
-  });
-
   const EFFECTIVE_STATUSES = [
     { value: "pending", label: "pending" },
     { value: "completed", label: "completed" },
   ];
+  const defaultStatus = EFFECTIVE_STATUSES[0].value;
+
+  const [qParams] = useQueryParams();
+  const { updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 14,
+    disableCache: true,
+    defaultQueryParams: { status: defaultStatus },
+  });
+  const currentStatus = qParams.status || defaultStatus;
 
   const filterConfigs = useMemo(
     () => [
@@ -183,12 +186,6 @@ function IncomingOrdersTab({
         : undefined,
   });
 
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: EFFECTIVE_STATUSES[0].value });
-    }
-  }, [qParams.status]);
-
   const { data: response, isLoading } = useQuery({
     queryKey: ["requestOrders", locationId, internal, qParams],
     queryFn: query.debounced(requestOrderApi.listRequestOrder, {
@@ -197,7 +194,7 @@ function IncomingOrdersTab({
         origin: locationId,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
-        status: qParams.status,
+        status: currentStatus,
         origin_isnull: !internal,
         priority: qParams.priority,
         date_after: qParams.date_after
@@ -215,7 +212,7 @@ function IncomingOrdersTab({
   return (
     <div className="space-y-4">
       <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
-        <Tabs value={qParams.status}>
+        <Tabs value={currentStatus}>
           <TabsList>
             {EFFECTIVE_STATUSES.map((status) => (
               <TabsTrigger
@@ -267,16 +264,19 @@ function OutgoingDeliveriesTab({
 }) {
   const { t } = useTranslation();
 
-  const [qParams] = useQueryParams();
-  const { updateQuery, Pagination, resultsPerPage } = useFilters({
-    limit: 14,
-    disableCache: true,
-  });
-
   const EFFECTIVE_STATUSES = [
     { value: "draft,pending", label: "created" },
     { value: "completed,abandoned,entered_in_error", label: "completed" },
   ];
+  const defaultStatus = EFFECTIVE_STATUSES[0].value;
+
+  const [qParams] = useQueryParams();
+  const { updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 14,
+    disableCache: true,
+    defaultQueryParams: { status: defaultStatus },
+  });
+  const currentStatus = qParams.status || defaultStatus;
 
   const filterConfigs = useMemo(
     () => [dateFilter("date", t("date"), longDateRangeOptions)],
@@ -327,12 +327,6 @@ function OutgoingDeliveriesTab({
         : undefined,
   });
 
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: EFFECTIVE_STATUSES[0].value });
-    }
-  }, [qParams.status]);
-
   const { data: response, isLoading } = useQuery({
     queryKey: ["deliveryOrders", locationId, internal, qParams],
     queryFn: query.debounced(deliveryOrderApi.listDeliveryOrder, {
@@ -341,7 +335,7 @@ function OutgoingDeliveriesTab({
         origin: locationId,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
-        status: qParams.status,
+        status: currentStatus,
         origin_isnull: !internal,
         priority: qParams.priority,
         created_date_after: qParams.created_date_after
@@ -360,7 +354,7 @@ function OutgoingDeliveriesTab({
     <div className="space-y-4">
       <div className="flex flex-col items-start gap-4 justify-between sm:flex-row">
         <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
-          <Tabs value={qParams.status}>
+          <Tabs value={currentStatus}>
             <TabsList>
               {EFFECTIVE_STATUSES.map((status) => (
                 <TabsTrigger
