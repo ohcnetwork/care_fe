@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { SkullIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
@@ -44,10 +45,14 @@ const UserDeleteDialog = (props: ConfirmDialogProps) => {
     <CriticalActionConfirmationDialog
       trigger={
         props.trigger ?? (
-          <button className={buttonVariants({ variant: "destructive" })}>
+          <Button
+            variant="destructive"
+            type="button"
+            className={buttonVariants({ variant: "destructive" })}
+          >
             <Trash2Icon />
             {t("delete_account")}
-          </button>
+          </Button>
         )
       }
       title={t("verify_account_deletion_request")}

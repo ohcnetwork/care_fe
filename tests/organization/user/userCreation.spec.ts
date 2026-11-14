@@ -24,7 +24,7 @@ test.describe("User Creation", () => {
       .getByRole("link", { name: /Government$/ })
       .first()
       .click();
-    await page.getByRole("menuitem", { name: "Users" }).click();
+    await page.getByRole("tab", { name: "Users" }).click();
   });
 
   test("Verify validation errors in user creation form", async ({ page }) => {

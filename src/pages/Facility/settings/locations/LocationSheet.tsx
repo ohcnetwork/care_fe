@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -31,7 +32,7 @@ export default function SettingsLocationSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>
             {location?.id ? t("edit_location") : t("add_location")}
@@ -42,14 +43,14 @@ export default function SettingsLocationSheet({
               : t("add_location_description")}
           </SheetDescription>
         </SheetHeader>
-        <div className="mt-6">
+        <SheetBody>
           <LocationForm
             facilityId={facilityId}
             locationId={location?.id}
             parentId={parentId}
             onSuccess={() => onOpenChange(false)}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

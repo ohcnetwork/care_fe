@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -68,13 +69,13 @@ export function ServiceRequestCompletion({
 
   return (
     <>
-      <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-white border-gray-300 p-2">
-        <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-3 gap-2 bg-white">
+      <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-background border-border p-2">
+        <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-3 gap-2 bg-background">
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-sm font-semibold text-foreground">
               {t("complete_service_request")}
             </p>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-muted-foreground">
               {hasPendingReports
                 ? t("reports_pending_final_review", {
                     count: pendingReports,
@@ -105,26 +106,30 @@ export function ServiceRequestCompletion({
             if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
           }}
         >
-          <SheetContent side="bottom">
+          <SheetContent side="bottom" className="overflow-hidden">
             <SheetHeader>
               <SheetTitle>{t("add_completion_note")}</SheetTitle>
               <SheetDescription>
                 {t("service_request_completion_note_description")}
               </SheetDescription>
             </SheetHeader>
-            <CompletionNoteContent
-              note={completionNote}
-              isUpdating={isCompletingServiceRequest}
-              onNoteChange={setCompletionNote}
-              onComplete={() =>
-                completeServiceRequest({
-                  status: Status.completed,
-                  note: completionNote.trim() || null,
-                  locations: request.locations.map((loc) => loc.id),
-                })
-              }
-              onCancel={() => setIsCompleteDialogOpen(false)}
-            />
+            <SheetBody>
+              <div className="space-y-4">
+                <CompletionNoteContent
+                  note={completionNote}
+                  isUpdating={isCompletingServiceRequest}
+                  onNoteChange={setCompletionNote}
+                  onComplete={() =>
+                    completeServiceRequest({
+                      status: Status.completed,
+                      note: completionNote.trim() || null,
+                      locations: request.locations.map((loc) => loc.id),
+                    })
+                  }
+                  onCancel={() => setIsCompleteDialogOpen(false)}
+                />
+              </div>
+            </SheetBody>
           </SheetContent>
         </Sheet>
       ) : (
@@ -181,7 +186,7 @@ const CompletionNoteContent = ({
   return (
     <>
       <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-900">
+        <p className="text-sm font-medium text-foreground">
           {t("completion_note")}
         </p>
         <Textarea

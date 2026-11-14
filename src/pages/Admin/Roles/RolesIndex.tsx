@@ -255,7 +255,7 @@ export default function RolesIndex() {
                 {t("add_role")}
               </Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent size="lg" className="overflow-hidden">
               <SheetHeader>
                 <SheetTitle>
                   {isEditMode ? t("edit_role") : t("add_role")}
@@ -266,9 +266,7 @@ export default function RolesIndex() {
                     : t("add_role_description")}
                 </SheetDescription>
               </SheetHeader>
-              <div className="mt-4 overflow-auto pr-2">
-                <RoleForm role={selectedRole} onSuccess={handleSheetClose} />
-              </div>
+              <RoleForm role={selectedRole} onSuccess={handleSheetClose} />
             </SheetContent>
           </Sheet>
         </div>
@@ -292,7 +290,8 @@ export default function RolesIndex() {
 
           <div className="flex flex-wrap gap-1.5">
             {CONTEXT_FILTERS.map((filter) => (
-              <button
+              <Button
+                variant="outline"
                 key={filter}
                 type="button"
                 onClick={() => {
@@ -300,14 +299,17 @@ export default function RolesIndex() {
                   updateQuery({ page: undefined });
                 }}
                 className={cn(
-                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                  contextFilter === filter
-                    ? "border-primary-200 bg-primary-50 text-primary-700"
-                    : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50",
+                  "h-auto",
+                  cn(
+                    "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                    contextFilter === filter
+                      ? "border-primary-200 bg-primary-50 text-primary-700"
+                      : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50",
+                  ),
                 )}
               >
                 {getContextFilterLabel(filter)}
-              </button>
+              </Button>
             ))}
           </div>
         </div>

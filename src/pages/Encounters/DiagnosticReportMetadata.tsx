@@ -18,7 +18,7 @@ export function DiagnosticReportMetadata({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
       {report.code?.display && (
         <div>
-          <div className="text-gray-500">{t("report")}</div>
+          <div className="text-muted-foreground">{t("report")}</div>
           <div className="font-medium">
             <span>{report.code.display}</span>
           </div>
@@ -26,11 +26,11 @@ export function DiagnosticReportMetadata({
       )}
       {report.service_request?.code?.display && (
         <div>
-          <div className="text-gray-500">{t("procedure")}</div>
+          <div className="text-muted-foreground">{t("procedure")}</div>
           <div className="font-medium">
             {report.service_request.code.display}
             {report.service_request.code.code && (
-              <span className="text-xs text-gray-500 ml-2">
+              <span className="text-xs text-muted-foreground ml-2">
                 ({report.service_request.code.code})
               </span>
             )}
@@ -38,32 +38,32 @@ export function DiagnosticReportMetadata({
         </div>
       )}
       <div>
-        <div className="text-gray-500">{t("category")}</div>
+        <div className="text-muted-foreground">{t("category")}</div>
         <div className="font-medium">{report.category?.display || "-"}</div>
       </div>
       <div>
-        <div className="text-gray-500">{t("report_date")}</div>
+        <div className="text-muted-foreground">{t("report_date")}</div>
         <div className="font-medium">
           {format(new Date(report.created_date), "dd-MM-yyyy HH:mm")}
         </div>
       </div>
       <div>
-        <div className="text-gray-500">{t("requested_by")}</div>
+        <div className="text-muted-foreground">{t("requested_by")}</div>
         <div className="font-medium">{formatName(report.requester)}</div>
       </div>
       <div>
-        <div className="text-gray-500">{t("filed_by")}</div>
+        <div className="text-muted-foreground">{t("filed_by")}</div>
         <div className="font-medium">{formatName(report.created_by)}</div>
       </div>
       {report.note && (
         <div className="col-span-full">
-          <div className="text-gray-500">{t("notes")}</div>
+          <div className="text-muted-foreground">{t("notes")}</div>
           <div className="font-medium whitespace-pre-wrap">{report.note}</div>
         </div>
       )}
       {report.conclusion && (
         <div className="col-span-full min-w-0">
-          <div className="text-gray-500">{t("conclusion")}</div>
+          <div className="text-muted-foreground">{t("conclusion")}</div>
           <Markdown
             richText
             content={report.conclusion}

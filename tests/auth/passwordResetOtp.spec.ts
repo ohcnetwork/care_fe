@@ -68,8 +68,10 @@ test.describe("OTP password reset", () => {
       await expect(
         page.getByRole("textbox", { name: /username/i }),
       ).toBeVisible();
-      await expect(page.getByLabel(/password/i)).toBeVisible();
-      await expect(page.getByRole("button", { name: /login/i })).toBeVisible();
+      await expect(page.getByLabel(/^password$/i)).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /^sign in$/i }),
+      ).toBeVisible();
     });
 
     await page.close();

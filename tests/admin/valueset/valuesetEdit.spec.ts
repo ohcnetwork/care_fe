@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
-import { expectedSlug } from "tests/helper/utils";
 import {
   LOINC_CODE_NAME,
   SNOMED_CODE_NAME,
@@ -35,7 +34,9 @@ test.describe("ValueSet Edit", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/admin/valuesets");
     name = faker.company.name();
-    slug = expectedSlug(name);
+    // This test exercises identifier preservation, independently of the
+    // punctuation a generated company name may contain.
+    slug = `edit-${faker.string.alphanumeric(12).toLowerCase()}`;
     description = faker.lorem.sentence();
     status = faker.helpers.arrayElement(STATUS_OPTIONS);
     system = faker.helpers.arrayElement(SYSTEM_OPTIONS);
@@ -56,7 +57,7 @@ test.describe("ValueSet Edit", () => {
     await createBasicValueSet(page);
   });
 
-  test("should edit all fields in valueset and verify changes", async ({
+  test("should edit valueset fields while preserving its slug", async ({
     page,
   }) => {
     await page.getByRole("textbox", { name: "Search ValueSets" }).fill(name);
@@ -64,9 +65,16 @@ test.describe("ValueSet Edit", () => {
     await expect(
       page.getByRole("heading", { name: /edit valueset/i }),
     ).toBeVisible();
+    const slugInput = page.getByRole("textbox", { name: "Slug *" });
+    await expect(slugInput).toBeDisabled();
+    await expect(slugInput).toHaveValue(slug);
+    await expect(
+      page.getByText(
+        "The slug cannot be changed after this value set is created.",
+      ),
+    ).toBeVisible();
     await page.getByRole("textbox", { name: "Name *" }).fill(`${name}-edited`);
-    const editedSlug = expectedSlug(`${name}-edited`);
-    await page.getByRole("textbox", { name: "Slug *" }).fill(editedSlug);
+    await expect(slugInput).toHaveValue(slug);
     await page.getByRole("textbox", { name: "Description" }).fill(description);
     await page.getByRole("combobox", { name: "Status *" }).click();
     await page.getByRole("option", { name: status }).click();
@@ -85,11 +93,19 @@ test.describe("ValueSet Edit", () => {
 
     // Verify the code name is present in the display value
     const displayValue = await page
-      .getByRole("textbox", { name: "Unverified" })
+      .getByRole("textbox", { name: "Display name" })
       .inputValue();
     expect(displayValue).toContain(codeName);
 
-    await page.getByRole("button", { name: "Save ValueSet" }).click();
+    const [updateRequest] = await Promise.all([
+      page.waitForRequest(
+        (request) =>
+          request.method() === "PUT" &&
+          request.url().includes("/api/v1/valueset/"),
+      ),
+      page.getByRole("button", { name: "Save ValueSet" }).click(),
+    ]);
+    expect(updateRequest.postDataJSON()).toMatchObject({ slug });
 
     await expect(page.getByText("ValueSet updated successfully")).toBeVisible();
 

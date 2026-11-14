@@ -10,7 +10,6 @@ import RenderActivityDefinitionFilter, {
 import RenderCareTeamFilter from "./careTeamFilter";
 import RenderDateFilter from "./dateFilter";
 import RenderDepartmentFilter from "./departmentFilter";
-import GenericFilter from "./genericFilter";
 import RenderLocationFilter from "./locationFilter";
 import RenderTagFilter from "./tagFilter";
 import NavigationHelper from "./utils/navigation-helper";
@@ -114,15 +113,6 @@ export default function FilterRenderer({
         </>
       );
     default:
-      return (
-        <>
-          <GenericFilter
-            {...commonProps}
-            selectedValues={selected as string[]}
-            showColorIndicators={filter.showColorIndicators ?? true}
-          />
-          <NavigationHelper isActiveFilter={true} />
-        </>
-      );
+      return null;
   }
 }

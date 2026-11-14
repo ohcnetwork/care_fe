@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
@@ -156,7 +157,7 @@ export default function TransferPaymentSheet({
         }
       }}
     >
-      <SheetContent className="sm:max-w-md">
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>{t("transfer_payment")}</SheetTitle>
           <SheetDescription>
@@ -164,69 +165,75 @@ export default function TransferPaymentSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="py-4 space-y-4">
-          <div className="space-y-2">
-            <Label>{t("amount")}</Label>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder={t("enter_amount")}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700">
-              {t("select_target_account")}
-            </p>
-            {isLoading ? (
-              <TableSkeleton count={3} />
-            ) : !accounts?.length ? (
-              <EmptyState
-                icon={
-                  <CareIcon icon="l-user" className="text-primary size-6" />
-                }
-                title={t("no_other_accounts_available")}
+        <SheetBody>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t("amount")}</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder={t("enter_amount")}
               />
-            ) : (
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {accounts.map((acc) => (
-                  <button
-                    key={acc.id}
-                    type="button"
-                    className={cn(
-                      "w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50",
-                      selectedAccountId === acc.id
-                        ? "border-primary bg-primary/5 ring-1 ring-primary"
-                        : "border-gray-200",
-                    )}
-                    onClick={() => setSelectedAccountId(acc.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm">{acc.name}</span>
-                      <div className="flex items-center gap-1">
-                        <Badge variant={ACCOUNT_STATUS_COLORS[acc.status]}>
-                          {t(acc.status)}
-                        </Badge>
-                        <Badge
-                          variant={
-                            ACCOUNT_BILLING_STATUS_COLORS[acc.billing_status]
-                          }
-                        >
-                          {t(acc.billing_status)}
-                        </Badge>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        <SheetFooter className="pt-2">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700">
+                {t("select_target_account")}
+              </p>
+              {isLoading ? (
+                <TableSkeleton count={3} />
+              ) : !accounts?.length ? (
+                <EmptyState
+                  icon={
+                    <CareIcon icon="l-user" className="text-primary size-6" />
+                  }
+                  title={t("no_other_accounts_available")}
+                />
+              ) : (
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {accounts.map((acc) => (
+                    <Button
+                      variant="outline"
+                      key={acc.id}
+                      type="button"
+                      className={cn(
+                        "h-auto block whitespace-normal",
+                        cn(
+                          "w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50",
+                          selectedAccountId === acc.id
+                            ? "border-primary bg-primary/5 ring-1 ring-primary"
+                            : "border-gray-200",
+                        ),
+                      )}
+                      onClick={() => setSelectedAccountId(acc.id)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-sm">{acc.name}</span>
+                        <div className="flex items-center gap-1">
+                          <Badge variant={ACCOUNT_STATUS_COLORS[acc.status]}>
+                            {t(acc.status)}
+                          </Badge>
+                          <Badge
+                            variant={
+                              ACCOUNT_BILLING_STATUS_COLORS[acc.billing_status]
+                            }
+                          >
+                            {t(acc.billing_status)}
+                          </Badge>
+                        </div>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </SheetBody>
+
+        <SheetFooter>
           <SheetClose asChild>
             <Button variant="outline" type="button">
               {t("cancel")}

@@ -80,7 +80,7 @@ export default function TemplateCard({
             {t(template.template_type)}
           </span>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        <div className="flex flex-col gap-2 w-full sm:w-auto">
           {canWriteTemplate && (
             <Button variant="outline" size="sm" className="w-full" asChild>
               <Link

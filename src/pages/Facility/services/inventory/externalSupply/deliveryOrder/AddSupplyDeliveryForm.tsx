@@ -775,7 +775,7 @@ export function AddSupplyDeliveryForm({
           price_components: priceComponents,
           discount_configuration:
             sourceChargeItem?.discount_configuration ?? null,
-          tags: sourceChargeItem?.tags?.map((tag) => tag.id),
+          tags: sourceChargeItem?.tags?.map(({ id }) => ({ tag: id })),
         };
 
         const newChargeItem =
@@ -1034,7 +1034,7 @@ export function AddSupplyDeliveryForm({
                     </div>
                   )}
 
-                  <div className="rounded-md border border-gray-200 bg-white shadow overflow-hidden">
+                  <div className="rounded-md bg-white shadow overflow-hidden">
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader className="bg-gray-100">

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -42,11 +43,11 @@ export function CreateDiscountMonetaryComponentSheet() {
           {t("create_discount_component")}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("create_discount_component")}</SheetTitle>
         </SheetHeader>
-        <div className="mt-6">
+        <SheetBody>
           <DiscountMonetaryComponentForm
             onSubmit={(data) => {
               if (!facility) {
@@ -64,7 +65,7 @@ export function CreateDiscountMonetaryComponentSheet() {
               });
             }}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

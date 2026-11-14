@@ -623,12 +623,13 @@ const DrugChartTable = ({
                             {/* Screen version - with popover for details */}
                             <Popover>
                               <PopoverTrigger asChild>
-                                <button
+                                <Button
+                                  variant="ghost"
                                   type="button"
-                                  className="w-full h-full min-h-[28px] cursor-pointer hover:bg-green-200 transition-colors flex items-center justify-center print:hidden"
+                                  className="p-0 w-full h-full min-h-[28px] cursor-pointer hover:bg-green-200 transition-colors flex items-center justify-center print:hidden"
                                 >
                                   {cellContent}
-                                </button>
+                                </Button>
                               </PopoverTrigger>
                               <PopoverContent
                                 className="w-64 p-0 print:hidden"

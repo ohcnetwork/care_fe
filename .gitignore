@@ -32,7 +32,6 @@ stats.json
 public/build-meta.json
 .vscode/*
 !.vscode/launch.json
-src/supportedBrowsers.ts
 
 # Reason React
 /lib/bs/**
@@ -64,6 +63,9 @@ bun.lockb
 /playwright/.cache/
 /tests/.auth/
 test-results.json
+
+# Local browser automation logs
+/.gstack/*.log
 
 # Federation Temp files
 /.__mf__temp

@@ -1,8 +1,14 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { expectedSlug } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+/** A tax-rate radio is named by its formatted percentage (e.g. "9.00%"). */
+function taxRateOption(rate: string) {
+  return new RegExp(`^${rate}(?:\\.0+)?%$`);
+}
 
 test.describe("Charge Item Definition Creation", () => {
   let facilityId: string;
@@ -20,7 +26,7 @@ test.describe("Charge Item Definition Creation", () => {
     facilityId = getFacilityId();
     const chargeItemName = faker.string.alphanumeric(10);
     title = chargeItemName;
-    slug = chargeItemName.replace(/\s+/g, "-").slice(0, 25);
+    slug = expectedSlug(chargeItemName);
     basePrice = faker.commerce.price({ dec: 0 });
     mrp = faker.commerce.price({ dec: 0 });
     purchasePrice = faker.commerce.price({ dec: 0 });
@@ -43,7 +49,7 @@ test.describe("Charge Item Definition Creation", () => {
     // Title required
     await expect(page.getByText(/title.*required/i)).toBeVisible();
     // Slug required/length
-    await expect(page.getByText(/slug.*atleast 5.*atmost 25/i)).toBeVisible();
+    await expect(page.getByText(/slug.*atleast 5.*atmost 50/i)).toBeVisible();
     // Base Price required/invalid
     await expect(page.getByText(/base price.*required/i)).toBeVisible();
   });
@@ -130,7 +136,7 @@ test.describe("Charge Item Definition Creation", () => {
     await page
       .getByText("cgst", { exact: true })
       .locator("../..")
-      .locator(`button[role="radio"][value="${cgstRate}"]`)
+      .getByRole("radio", { name: taxRateOption(cgstRate) })
       .click();
 
     await page
@@ -141,7 +147,7 @@ test.describe("Charge Item Definition Creation", () => {
     await page
       .getByText("sgst", { exact: true })
       .locator("../..")
-      .locator(`button[role="radio"][value="${sgstRate}"]`)
+      .getByRole("radio", { name: taxRateOption(sgstRate) })
       .click();
     const doneButton = page.getByRole("button", { name: "Done" });
     await doneButton.scrollIntoViewIfNeeded();
@@ -152,7 +158,9 @@ test.describe("Charge Item Definition Creation", () => {
       .filter({ hasText: /^Add Discount$/ })
       .first()
       .click();
-    await page.getByRole("checkbox").first().click();
+    // Pick the first discount in the opened picker (not a form checkbox
+    // behind its modal backdrop).
+    await page.getByRole("dialog").getByRole("checkbox").first().click();
     await page.getByRole("button", { name: "Done" }).click();
     const switchElement = page.getByRole("switch", {
       name: "Use facility global value",

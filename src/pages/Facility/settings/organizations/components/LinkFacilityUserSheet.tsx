@@ -9,8 +9,10 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -115,7 +117,7 @@ export default function LinkFacilityUserSheet({
           {isServiceAccount ? t("link_service_account") : t("link_user")}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto p-8">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>
             {isServiceAccount
@@ -128,94 +130,97 @@ export default function LinkFacilityUserSheet({
               : t("link_user_to_facility_description")}
           </SheetDescription>
         </SheetHeader>
-        <div className="space-y-6 py-4 min-h-full">
-          <UserSelector
-            selected={selectedUser}
-            onChange={handleUserChange}
-            placeholder={
-              isServiceAccount
-                ? t("search_for_a_service_account")
-                : t("search_for_a_user")
-            }
-            noOptionsMessage={
-              isServiceAccount
-                ? t("no_service_accounts_found")
-                : t("no_users_found")
-            }
-            popoverClassName="w-full"
-            isServiceAccount={isServiceAccount}
-          />
-          {selectedUser && (
-            <div className="space-y-4">
-              <div className="rounded-lg border border-gray-200 p-4 space-y-4">
-                <div className="flex gap-4 flex-row">
-                  <Avatar
-                    imageUrl={selectedUser.profile_picture_url}
-                    name={formatName(selectedUser, true)}
-                    className="size-12"
-                  />
-                  <div className="w-3/4">
-                    <p className="font-medium text-lg truncate">
-                      {formatName(selectedUser)}
-                    </p>
+        <SheetBody>
+          <div className="space-y-6">
+            <UserSelector
+              selected={selectedUser}
+              onChange={handleUserChange}
+              placeholder={
+                isServiceAccount
+                  ? t("search_for_a_service_account")
+                  : t("search_for_a_user")
+              }
+              noOptionsMessage={
+                isServiceAccount
+                  ? t("no_service_accounts_found")
+                  : t("no_users_found")
+              }
+              popoverClassName="w-full"
+              isServiceAccount={isServiceAccount}
+            />
+            {selectedUser && (
+              <div className="space-y-4">
+                <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+                  <div className="flex gap-4 flex-row">
+                    <Avatar
+                      imageUrl={selectedUser.profile_picture_url}
+                      name={formatName(selectedUser, true)}
+                      className="size-12"
+                    />
+                    <div className="w-3/4">
+                      <p className="font-medium text-lg truncate">
+                        {formatName(selectedUser)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+                    <div className="truncate">
+                      <span className="text-sm text-gray-500">
+                        {t("username")}
+                      </span>
+                      <p className="text-sm font-medium">
+                        {selectedUser.username}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">
+                        {isServiceAccount
+                          ? t("service_account_type")
+                          : t("user_type")}
+                      </span>
+                      <p className="text-sm font-medium">
+                        {selectedUser.user_type}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">
+                        {t("phone_number")}
+                      </span>
+                      <p className="text-sm font-medium truncate">
+                        {selectedUser.phone_number
+                          ? formatPhoneNumberIntl(selectedUser.phone_number)
+                          : "-"}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
-                  <div className="truncate">
-                    <span className="text-sm text-gray-500">
-                      {t("username")}
-                    </span>
-                    <p className="text-sm font-medium">
-                      {selectedUser.username}
-                    </p>
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    {t("select_role")}
+                  </label>
                   <div>
-                    <span className="text-sm text-gray-500">
-                      {isServiceAccount
-                        ? t("service_account_type")
-                        : t("user_type")}
-                    </span>
-                    <p className="text-sm font-medium">
-                      {selectedUser.user_type}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-500">
-                      {t("phone_number")}
-                    </span>
-                    <p className="text-sm font-medium truncate">
-                      {selectedUser.phone_number
-                        ? formatPhoneNumberIntl(selectedUser.phone_number)
-                        : "-"}
-                    </p>
+                    <RoleSelect
+                      value={selectedRole}
+                      onChange={setSelectedRole}
+                      context={RoleContext.FACILITY}
+                    />
                   </div>
                 </div>
               </div>
+            )}
+          </div>
+        </SheetBody>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  {t("select_role")}
-                </label>
-                <div>
-                  <RoleSelect
-                    value={selectedRole}
-                    onChange={setSelectedRole}
-                    context={RoleContext.FACILITY}
-                  />
-                </div>
-              </div>
-
-              <Button
-                className="w-full"
-                onClick={handleAddUser}
-                disabled={!selectedRole}
-              >
-                {t("add_to_organization")}
-              </Button>
-            </div>
-          )}
-        </div>
+        <SheetFooter>
+          <Button
+            onClick={handleAddUser}
+            disabled={!selectedUser || !selectedRole}
+          >
+            {t("add_to_organization")}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

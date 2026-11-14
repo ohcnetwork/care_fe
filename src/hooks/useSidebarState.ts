@@ -11,6 +11,6 @@ export default function useSidebarState() {
       return value === "true";
     }
 
-    return false;
+    return true;
   }, []);
 }
