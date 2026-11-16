@@ -1,15 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-
-import { Avatar } from "@/components/Common/Avatar";
 import SearchInput from "@/components/Common/SearchInput";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -17,13 +11,13 @@ import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { FacilityListRead } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 
 import useAuthUser from "@/hooks/useAuthUser";
-import { Settings } from "lucide-react";
 import AddFacilitySheet from "./components/AddFacilitySheet";
 import EntityBadge from "./components/EntityBadge";
+import { OrganizationFacilityCard } from "./components/OrganizationFacilityCard";
+import { OrganizationFacilityCardSkeleton } from "./components/OrganizationFacilityCardSkeleton";
 import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
@@ -45,7 +39,7 @@ export default function OrganizationFacilities({
   );
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 15, disableCache: true });
+    useFilters({ limit: 12, disableCache: true });
 
   const { data: facilities, isFetching } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
@@ -74,122 +68,59 @@ export default function OrganizationFacilities({
           orgPermissions,
         );
         return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center flex-wrap">
-              <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
-                <EntityBadge
-                  title={t("facilities")}
-                  count={facilities?.count}
-                  isFetching={isFetching}
-                  customTranslation="facility_count"
+          <div className="space-y-4">
+            <EntityBadge
+              title={t("facilities")}
+              description={t("organization_facilities_description")}
+              count={facilities?.count}
+              isFetching={isFetching}
+              actions={
+                canCreateFacility && <AddFacilitySheet organizationId={id} />
+              }
+            />
+            <Frame>
+              <FrameHeader>
+                <SearchInput
+                  options={[
+                    {
+                      key: "name",
+                      type: "text",
+                      placeholder: t("search_by_facility_name"),
+                      value: qParams.name || "",
+                      display: t("name"),
+                    },
+                  ]}
+                  onSearch={(key, value) =>
+                    updateQuery({
+                      [key]: value || undefined,
+                    })
+                  }
+                  showSearchIcon
+                  className="w-full sm:max-w-sm"
                 />
-              </div>
-              {canCreateFacility && <AddFacilitySheet organizationId={id} />}
-            </div>
-
-            <div className="flex gap-2">
-              <SearchInput
-                options={[
-                  {
-                    key: "name",
-                    type: "text",
-                    placeholder: t("search_by_facility_name"),
-                    value: qParams.name || "",
-                    display: t("name"),
-                  },
-                ]}
-                onSearch={(key, value) =>
-                  updateQuery({
-                    [key]: value || undefined,
-                  })
-                }
-                className="w-full max-w-sm"
-              />
-            </div>
-
-            <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              {isFetching ? (
-                <CardGridSkeleton count={6} />
-              ) : facilities?.results?.length === 0 ? (
-                <Card className="col-span-full">
-                  <CardContent className="p-6 text-center text-gray-500">
+              </FrameHeader>
+              <FramePanel>
+                {!isFetching && facilities?.results?.length === 0 ? (
+                  <div className="p-2 text-center text-sm text-muted-foreground">
                     {t("no_facilities_found")}
-                  </CardContent>
-                </Card>
-              ) : (
-                facilities?.results?.map((facility: FacilityListRead) => (
-                  <Card
-                    key={facility.id}
-                    className="h-full hover:border-primary/50 transition-colors overflow-hidden"
-                  >
-                    <div className="relative h-48 bg-gray-100">
-                      {facility.read_cover_image_url ? (
-                        <img
-                          src={facility.read_cover_image_url}
-                          alt={facility.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center overflow-hidden">
-                          <Avatar name={facility.name} />
-                        </div>
-                      )}
-                    </div>
-                    <CardContent className="p-6">
-                      <div className="flex flex-col h-full">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="text-md font-medium text-gray-900">
-                              {facility.name}
-                            </h3>
-                            <div className="font-medium">
-                              {facility.facility_type}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-end">
-                      <div className="flex">
-                        <Button
-                          variant="link"
-                          size="icon"
-                          className="text-primary"
-                          asChild
-                        >
-                          <Link
-                            href={`/facility/${facility.id}/settings/general`}
-                            className="text-sm w-full hover:underline"
-                          >
-                            {t("view_facility")}
-                            <CareIcon
-                              icon="l-arrow-up-right"
-                              className="size-4"
-                            />
-                          </Link>
-                        </Button>
-                        {/* GeoAdmin Button to Manage Departments */}
-                        {isGeoAdmin && (
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="text-primary ml-4 p-2"
-                            asChild
-                          >
-                            <Link
-                              href={`/facility/${facility.id}/settings/departments`}
-                              className="text-sm w-full hover:underline"
-                            >
-                              <Settings className="size-4" />
-                            </Link>
-                          </Button>
-                        )}
-                      </div>
-                    </CardFooter>
-                  </Card>
-                ))
-              )}
-            </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {isFetching
+                      ? Array.from({ length: 8 }, (_, index) => (
+                          <OrganizationFacilityCardSkeleton key={index} />
+                        ))
+                      : facilities?.results?.map((facility) => (
+                          <OrganizationFacilityCard
+                            key={facility.id}
+                            facility={facility}
+                            showSettings={isGeoAdmin}
+                          />
+                        ))}
+                  </div>
+                )}
+              </FramePanel>
+            </Frame>
             <Pagination totalCount={facilities?.count ?? 0} />
           </div>
         );

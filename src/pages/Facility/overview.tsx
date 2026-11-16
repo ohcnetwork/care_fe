@@ -134,7 +134,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
         {/* Welcome Header */}
         <div
           data-cy="facility-overview-greeting"
-          className="relative overflow-hidden rounded-xl border border-inverse-border shadow-inner bg-linear-to-r from-sky-50 to-emerald-100 text-foreground"
+          className="relative overflow-hidden rounded-xl border border-inverse-border inset-shadow-sm bg-linear-to-r from-sky-50 to-emerald-100 text-foreground"
         >
           <img
             src="/images/home-banner.svg"
