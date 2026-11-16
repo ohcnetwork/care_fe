@@ -82,7 +82,7 @@ export default function ChangeAccountSheet({
     onSuccess: () => {
       toast.success(t("charge_items_account_changed"));
       queryClient.invalidateQueries({
-        queryKey: ["infinite-chargeItems", currentAccountId],
+        queryKey: ["infinite-chargeItems", facilityId, currentAccountId],
       });
       queryClient.invalidateQueries({
         queryKey: ["account"],
