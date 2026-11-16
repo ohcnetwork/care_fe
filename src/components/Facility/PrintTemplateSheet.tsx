@@ -93,7 +93,9 @@ function PrintTemplateSheetBody({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [templates, setTemplates] = useState<PrintTemplate[]>(() =>
-    structuredClone(facility.print_templates ?? []),
+    Array.isArray(facility.print_templates)
+      ? structuredClone(facility.print_templates)
+      : [],
   );
 
   const { mutate: updateFacility, isPending } = useMutation({
