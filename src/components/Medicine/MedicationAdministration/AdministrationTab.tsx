@@ -215,11 +215,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   const { data: administrations } = useQuery({
     queryKey: ["medication_administrations", patientId, encounterId],
-    queryFn: query(medicationAdministrationApi.list, {
+    queryFn: query.paginated(medicationAdministrationApi.list, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
-        limit: 1000, // Increased to fetch more historical administrations
       },
     }),
     enabled: !!patientId && canAccess,
