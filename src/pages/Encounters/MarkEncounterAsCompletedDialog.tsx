@@ -13,7 +13,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
 
-import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
+import {
+  encounterRequiresDischarge,
+  useEncounterProgressController,
+} from "@/pages/Encounters/utils/useEncounterProgressController";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -28,16 +31,25 @@ export function MarkEncounterAsCompletedDialog({
   completeEverythingToMark?: boolean;
 } & React.ComponentProps<typeof AlertDialog>) {
   const { t } = useTranslation();
-  const { completeEncounter, completeEverything } =
-    useEncounterProgressController({
-      encounter: encounter,
-    });
-
-  if (!encounter) return null;
+  const {
+    completeEncounter,
+    completeEverything,
+    willCloseAppointment,
+    willCloseToken,
+  } = useEncounterProgressController({
+    encounter: encounter,
+  });
 
   const shouldShowCompletionWarning =
     completeEverythingToMark &&
-    Boolean(encounter.appointment?.id || encounter.appointment?.token?.id);
+    !encounterRequiresDischarge(encounter) &&
+    (willCloseAppointment || willCloseToken);
+
+  const completionWarningKey = willCloseAppointment
+    ? willCloseToken
+      ? "appointment_and_token_will_be_closed_warning"
+      : "appointment_will_be_closed_warning"
+    : "token_will_be_closed_warning";
 
   return (
     <AlertDialog {...props}>
@@ -50,7 +62,7 @@ export function MarkEncounterAsCompletedDialog({
               <div className="bg-yellow-50 flex gap-2 items-center justify-start rounded-md p-1">
                 <AlertTriangleIcon className="text-yellow-500 size-4" />
                 <span className="block text-sm text-yellow-900">
-                  {t("mark_everything_as_complete_description")}
+                  {t(completionWarningKey)}
                 </span>
               </div>
             )}
