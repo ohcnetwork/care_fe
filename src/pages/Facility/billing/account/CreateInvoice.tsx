@@ -248,6 +248,7 @@ export function CreateInvoicePage({
       return currentOffset < lastPage.count ? currentOffset : null;
     },
     enabled: !!facilityId && !!accountId && !preSelectedChargeItems,
+    gcTime: 0,
   });
 
   const createMutation = useMutation({
