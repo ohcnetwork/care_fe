@@ -173,11 +173,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       selectedProductType,
       facilityId,
     ],
-    queryFn: query(medicationRequestApi.list, {
+    queryFn: query.paginated(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
-        limit: 1000,
         status: ACTIVE_MEDICATION_STATUSES.join(","),
         facility: facilityId,
         ...(selectedProductType === ProductKnowledgeType.medication
@@ -186,6 +185,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       },
     }),
     enabled: !!patientId && canAccess,
+    staleTime: 10e3,
+    gcTime: 10e3,
   });
 
   const { data: stoppedMedications } = useQuery({
@@ -196,11 +197,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       selectedProductType,
       facilityId,
     ],
-    queryFn: query(medicationRequestApi.list, {
+    queryFn: query.paginated(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
-        limit: 1000,
         status: INACTIVE_MEDICATION_STATUSES.join(","),
         facility: facilityId,
         ...(selectedProductType === ProductKnowledgeType.medication
@@ -209,6 +209,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       },
     }),
     enabled: !!patientId && canAccess,
+    staleTime: 10e3,
+    gcTime: 10e3,
   });
 
   const { data: administrations } = useQuery({
