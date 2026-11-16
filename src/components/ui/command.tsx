@@ -124,12 +124,10 @@ function CommandInput({
   className,
   wrapperClassName,
   autoFocus,
-  hideSearchIcon = false,
   ref,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Input> & {
   wrapperClassName?: string;
-  hideSearchIcon?: boolean;
 }) {
   const innerRef = React.useRef<HTMLInputElement>(null);
   const isDesktopCommandDialog = React.useContext(CommandDialogContext);
@@ -164,9 +162,7 @@ function CommandInput({
           />
         </CommandPrimitive.Input>
         <InputGroupAddon>
-          {!hideSearchIcon && (
-            <SearchIcon className="opacity-50 size-4 shrink-0" />
-          )}
+          <SearchIcon className="opacity-50 size-4 shrink-0" />
         </InputGroupAddon>
         {isDesktopCommandDialog && (
           <InputGroupAddon align="inline-end">

@@ -160,9 +160,7 @@ export function EncounterList({
   const user = useAuthUser();
   const filterScope = `${user.id}:${facilityId}`;
   const storageKey = encounterFilterStorageKey("list", filterScope);
-  const [savedFilters, setSavedFilters] = useAtom(
-    encounterListFiltersAtom(filterScope),
-  );
+  const [, setSavedFilters] = useAtom(encounterListFiltersAtom(filterScope));
   const hasRestoredFilters = useRef<string | null>(null);
   const hasAppliedDefaultStatus = useRef(false);
 
@@ -260,14 +258,6 @@ export function EncounterList({
       } catch {
         // Ignore parsing errors
       }
-      if (savedFilters.dateFrom)
-        restoredParams.created_date_after = dateQueryString(
-          new Date(savedFilters.dateFrom),
-        );
-      if (savedFilters.dateTo)
-        restoredParams.created_date_before = dateQueryString(
-          new Date(savedFilters.dateTo),
-        );
     }
 
     const hasAnyDates =
