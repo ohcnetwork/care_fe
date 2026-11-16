@@ -43,7 +43,7 @@ function ConsentCard({
 
   const renderDateTime = (date: Date | undefined | null) => {
     if (!date) return <span>{t("na")}</span>;
-    return <>{formatDateTime(date, "DD MMM YYYY h:mm A")}</>;
+    return <>{formatDateTime(date, "dd MMM yyyy h:mm a")}</>;
   };
 
   return (

@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import { isAfter, parseISO, subMinutes } from "date-fns";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -31,7 +31,7 @@ export const LoginHeader = () => {
   const isLoggedIn =
     tokenData.token &&
     Object.keys(tokenData).length > 0 &&
-    dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"));
+    isAfter(parseISO(tokenData.createdAt ?? ""), subMinutes(new Date(), 14));
 
   if (isLoggedIn) {
     return (

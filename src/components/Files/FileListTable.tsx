@@ -30,9 +30,8 @@ import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 
 import useFileManager, { FileManagerResult } from "@/hooks/useFileManager";
 
-import { formatName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { FILE_EXTENSIONS, FileReadMinimal } from "@/types/files/file";
-import { formatDate } from "date-fns";
 
 const icons: Record<keyof typeof FILE_EXTENSIONS | "UNKNOWN", LucideIcon> = {
   AUDIO: AudioLines,
@@ -198,7 +197,7 @@ export function FileListTable({
                     </span>
 
                     <span className="flex flex-wrap items-center text-xs text-muted-foreground">
-                      {formatDate(new Date(file.created_date), "dd MMM yyyy")}
+                      {formatDateTime(file.created_date, "dd MMM yyyy")}
                       <Dot size={9} className="mx-1 shrink-0" />
                       {formatName(file.uploaded_by)}
                     </span>

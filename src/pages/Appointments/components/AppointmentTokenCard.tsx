@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
+import { formatDateTimeInZone } from "@/Utils/date";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { PatientAge } from "@/components/Patient/PatientAge";
 import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
@@ -13,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import usePatientExtensionData from "@/hooks/usePatientExtensionData";
+import { getAppointmentsSchedulingTimeZone } from "@/pages/Appointments/schedulingTimeZone";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
 import {
   getPatientIdentifiers,
@@ -25,7 +27,6 @@ import {
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import { renderTokenNumber, TokenRead } from "@/types/tokens/token/token";
-import { formatDate } from "date-fns";
 import { PrinterIcon } from "lucide-react";
 import { Link } from "raviger";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -159,8 +160,9 @@ const TokenCard = ({
                         </p>
                         <p className="text-sm font-semibold text-gray-600 flex gap-2">
                           <span className="text-sm font-semibold text-gray-600">
-                            {formatDate(
+                            {formatDateTimeInZone(
                               appointment.token_slot.start_datetime,
+                              getAppointmentsSchedulingTimeZone(),
                               "EEE, dd MMM",
                             )}
                           </span>

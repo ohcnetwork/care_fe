@@ -18,6 +18,7 @@ import scheduleApi from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
 
 import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
+import { getClinicTodayDate } from "@/pages/Appointments/schedulingTimeZone";
 import { Appointment } from "@/types/scheduling/schedule";
 import { AppointmentDateSelection } from "./AppointmentDateSelection";
 import { AppointmentFormSection } from "./AppointmentFormSection";
@@ -45,7 +46,7 @@ export const BookAppointmentDetails = ({
   const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
   const [editedReason, setReason] = useState<string>();
   const reason = editedReason ?? referralContext.referral?.title ?? "";
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(() => getClinicTodayDate());
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [selectedResource, setSelectedResource] =

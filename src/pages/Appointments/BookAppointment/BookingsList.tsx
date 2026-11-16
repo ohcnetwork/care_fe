@@ -1,4 +1,4 @@
-import { differenceInMinutes, format } from "date-fns";
+import { differenceInMinutes } from "date-fns";
 import { CalendarDays, CalendarOff } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -27,11 +27,18 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { dateQueryString } from "@/Utils/utils";
+import {
+  facilityLocalDateQueryString,
+  formatDateTimeInZone,
+} from "@/Utils/utils";
 import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { EmptyState } from "@/components/ui/empty-state";
+import {
+  formatSchedulingTimeRange,
+  getAppointmentsSchedulingTimeZone,
+} from "@/pages/Appointments/schedulingTimeZone";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
@@ -48,7 +55,11 @@ export const BookingsList = ({
   appointmentQueryParams,
 }: BookingsListProps) => {
   const { t } = useTranslation();
-  const today = new Date();
+  const schedulingTimeZone = getAppointmentsSchedulingTimeZone();
+  const clinicToday = facilityLocalDateQueryString(
+    new Date(),
+    schedulingTimeZone,
+  );
   const appointmentQuery = appointmentQueryParams?.referralId
     ? `?${new URLSearchParams(Object.entries(appointmentQueryParams).filter((entry): entry is [string, string] => typeof entry[1] === "string"))}`
     : "";
@@ -67,7 +78,8 @@ export const BookingsList = ({
               facilityId={facilityId}
               appointmentQuery={appointmentQuery}
               statuses={UpcomingAppointmentStatuses}
-              date_after={today}
+              schedulingTimeZone={schedulingTimeZone}
+              date_after={clinicToday}
             />
           </TabsContent>
           <TabsContent value="past" className="space-y-4 ">
@@ -76,7 +88,8 @@ export const BookingsList = ({
               facilityId={facilityId}
               appointmentQuery={appointmentQuery}
               statuses={PastAppointmentStatuses}
-              date_before={today}
+              schedulingTimeZone={schedulingTimeZone}
+              date_before={clinicToday}
             />
           </TabsContent>
           <TabsContent value="cancelled" className="space-y-4 overflow-x-auto">
@@ -85,6 +98,7 @@ export const BookingsList = ({
               facilityId={facilityId}
               appointmentQuery={appointmentQuery}
               statuses={CancelledAppointmentStatuses}
+              schedulingTimeZone={schedulingTimeZone}
             />
           </TabsContent>
         </div>
@@ -98,11 +112,13 @@ const AppointmentCard = ({
   patientId,
   showFacilityInfo,
   appointmentQuery,
+  schedulingTimeZone,
 }: {
   appointment: Appointment;
   patientId: string;
   showFacilityInfo: boolean;
   appointmentQuery: string;
+  schedulingTimeZone: string;
 }) => {
   const { t } = useTranslation();
 
@@ -112,7 +128,11 @@ const AppointmentCard = ({
         <div className="flex flex-row gap-6">
           <div className="flex flex-col">
             <span className="font-medium text-gray-950">
-              {format(appointment.token_slot.start_datetime, "EEE, dd MMM")}
+              {formatDateTimeInZone(
+                appointment.token_slot.start_datetime,
+                schedulingTimeZone,
+                "EEE, dd MMM",
+              )}
             </span>
             <span className="text-sm text-gray-600 font-medium">
               {appointment.token_slot.availability.name}
@@ -120,8 +140,12 @@ const AppointmentCard = ({
           </div>
           <div className="flex flex-col">
             <span className="font-medium text-gray-950">
-              {format(appointment.token_slot.start_datetime, "hh:mm a")} -{" "}
-              {format(appointment.token_slot.end_datetime, "hh:mm a")}
+              {formatSchedulingTimeRange(
+                appointment.token_slot.start_datetime,
+                appointment.token_slot.end_datetime,
+                "hh:mm a",
+                schedulingTimeZone,
+              )}
             </span>
             <span className="text-sm text-gray-600 font-medium">
               {t("duration")}:{" "}
@@ -174,11 +198,13 @@ const AppointmentTable = ({
   patientId,
   showFacilityInfo,
   appointmentQuery,
+  schedulingTimeZone,
 }: {
   appointments: Appointment[];
   patientId: string;
   showFacilityInfo: boolean;
   appointmentQuery: string;
+  schedulingTimeZone: string;
 }) => {
   const { t } = useTranslation();
 
@@ -213,8 +239,9 @@ const AppointmentTable = ({
                   <CalendarDays size={16} className="mt-1" />
                   <div className="flex flex-col">
                     <span className="font-medium text-gray-950">
-                      {format(
+                      {formatDateTimeInZone(
                         appointment.token_slot.start_datetime,
+                        schedulingTimeZone,
                         "EEE, dd MMM",
                       )}
                     </span>
@@ -228,8 +255,12 @@ const AppointmentTable = ({
               <TableCell>
                 <div className="flex flex-col">
                   <span className="font-medium text-gray-950">
-                    {format(appointment.token_slot.start_datetime, "hh:mm a")} -{" "}
-                    {format(appointment.token_slot.end_datetime, "hh:mm a")}
+                    {formatSchedulingTimeRange(
+                      appointment.token_slot.start_datetime,
+                      appointment.token_slot.end_datetime,
+                      "hh:mm a",
+                      schedulingTimeZone,
+                    )}
                   </span>
                   <span className="text-sm text-gray-600 font-medium">
                     {t("duration")}:{" "}
@@ -293,6 +324,7 @@ export const BookingListContent = ({
   patientId,
   facilityId,
   statuses,
+  schedulingTimeZone,
   date_after,
   date_before,
   appointmentQuery = "",
@@ -300,8 +332,9 @@ export const BookingListContent = ({
   patientId: string;
   facilityId?: string;
   statuses?: readonly AppointmentStatus[];
-  date_after?: Date;
-  date_before?: Date;
+  schedulingTimeZone: string;
+  date_after?: string;
+  date_before?: string;
   appointmentQuery?: string;
 }) => {
   const { t } = useTranslation();
@@ -323,8 +356,8 @@ export const BookingListContent = ({
           offset: pageParam,
           limit: 15,
           facility: facilityId,
-          ...(date_after && { date_after: dateQueryString(date_after) }),
-          ...(date_before && { date_before: dateQueryString(date_before) }),
+          ...(date_after && { date_after }),
+          ...(date_before && { date_before }),
           status: statuses?.join(","),
         },
       })({ signal });
@@ -367,6 +400,7 @@ export const BookingListContent = ({
           patientId={patientId}
           showFacilityInfo={!facilityId}
           appointmentQuery={appointmentQuery}
+          schedulingTimeZone={schedulingTimeZone}
         />
       </div>
       <div className="sm:hidden space-y-4">
@@ -377,6 +411,7 @@ export const BookingListContent = ({
             patientId={patientId}
             showFacilityInfo={!facilityId}
             appointmentQuery={appointmentQuery}
+            schedulingTimeZone={schedulingTimeZone}
           />
         ))}
       </div>

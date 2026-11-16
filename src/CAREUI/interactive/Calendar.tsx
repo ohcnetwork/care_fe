@@ -1,3 +1,4 @@
+import { isSameDay } from "date-fns";
 import { LocateFixed } from "lucide-react";
 import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +18,8 @@ interface Props {
   renderDay?: (date: Date) => React.ReactNode;
   highlightToday?: boolean;
   setSelectedDate?: (date: Date) => void;
+  /** When set, "Today" and today highlight use this day instead of browser now. */
+  referenceToday?: Date;
 }
 
 export default function Calendar(props: Props) {
@@ -61,10 +64,12 @@ export default function Calendar(props: Props) {
   };
 
   const handleToday = () => {
-    const today = new Date();
+    const today = props.referenceToday ?? new Date();
     props.onMonthChange?.(today);
     props.setSelectedDate?.(today);
   };
+
+  const referenceToday = props.referenceToday ?? new Date();
 
   const weekDays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -121,7 +126,7 @@ export default function Calendar(props: Props) {
             );
           }
 
-          const isToday = date.toDateString() === new Date().toDateString();
+          const isToday = isSameDay(date, referenceToday);
 
           return (
             <div
