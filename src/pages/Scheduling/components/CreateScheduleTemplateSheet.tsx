@@ -51,7 +51,11 @@ import {
   getSlotsPerSession,
   getTokenDuration,
 } from "@/pages/Scheduling/utils";
-import { CareTeamResponse, toCareTeamMembers } from "@/types/careTeam/careTeam";
+import {
+  CareTeamDraftMember,
+  isCareTeamComplete,
+  toCareTeamMembers,
+} from "@/types/careTeam/careTeam";
 import {
   SchedulableResourceType,
   ScheduleAvailabilityCreateRequest,
@@ -99,7 +103,9 @@ export default function CreateScheduleTemplateSheet({
       valid_to: z.date({ error: t("field_required") }),
       is_public: z.boolean(),
       organizations: z.array(z.string()),
-      care_team: z.array(z.custom<CareTeamResponse>()),
+      care_team: z
+        .array(z.custom<CareTeamDraftMember>())
+        .refine((rows) => isCareTeamComplete(rows)),
 
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek, DayOfWeek>)
@@ -236,6 +242,8 @@ export default function CreateScheduleTemplateSheet({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    // The schema already rejects incomplete rows; this narrows the type.
+    if (!isCareTeamComplete(values.care_team)) return;
     createTemplate({
       valid_from: dateQueryString(values.valid_from),
       valid_to: dateQueryString(values.valid_to),
@@ -463,6 +471,7 @@ export default function CreateScheduleTemplateSheet({
                   onCareTeamChange={(value) =>
                     form.setValue("care_team", value, { shouldDirty: true })
                   }
+                  showCareTeamErrors={form.formState.isSubmitted}
                   disabled={isPending}
                 />
                 <div className="space-y-4">

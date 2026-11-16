@@ -57,6 +57,10 @@ test("coordinates a referral with persisted status, team, response, and conversa
       .getByRole("option", { name: "All accessible users", exact: true })
       .click();
     await dialog
+      .getByRole("button", { name: "Add Member", exact: true })
+      .click();
+    const newRow = dialog.getByRole("listitem").last();
+    await newRow
       .getByRole("combobox", { name: "Select Member", exact: true })
       .click();
     await page
@@ -66,7 +70,7 @@ test("coordinates a referral with persisted status, team, response, and conversa
       .getByRole("option")
       .filter({ has: page.getByText("admin", { exact: true }) })
       .click();
-    await dialog
+    await newRow
       .getByRole("combobox", { name: "Select Role", exact: true })
       .click();
     await page.getByPlaceholder("Select Role", { exact: true }).fill("Doctor");
@@ -74,7 +78,7 @@ test("coordinates a referral with persisted status, team, response, and conversa
       .getByRole("option")
       .filter({ has: page.getByText("Doctor", { exact: true }) })
       .click();
-    await dialog.getByRole("button", { name: "Add", exact: true }).click();
+    await expect(newRow).toContainText("Doctor");
     await dialog
       .getByRole("button", { name: "Save Changes", exact: true })
       .click();

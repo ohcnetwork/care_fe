@@ -500,10 +500,6 @@ export default function ReferralAvailabilitySettings({
                 availability={detailQuery.data}
                 onSaved={() => setEditingId(null)}
                 onCancel={() => setEditingId(null)}
-                onDelete={() => {
-                  if (detailQuery.data)
-                    setDeletingAvailability(detailQuery.data);
-                }}
               />
             )
           )}

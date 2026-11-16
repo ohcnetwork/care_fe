@@ -25,7 +25,11 @@ import {
 } from "@/components/ui/select";
 
 import { ReferralDefaultCareTeam } from "@/pages/Facility/settings/referrals/ReferralDefaultCareTeam";
-import { CareTeamResponse } from "@/types/careTeam/careTeam";
+import {
+  CareTeamDraftMember,
+  CareTeamResponse,
+  isCareTeamComplete,
+} from "@/types/careTeam/careTeam";
 import { ReferralRetrieve } from "@/types/emr/referral/referral";
 import referralApi from "@/types/emr/referral/referralApi";
 import { callApi } from "@/Utils/request/query";
@@ -69,6 +73,11 @@ function serialize(members: CareTeamResponse[]) {
   return members.map(({ member, role }) => ({ user_id: member.id, role }));
 }
 
+// Compares rows that may still be incomplete while editing.
+function draftKey(rows: CareTeamDraftMember[]) {
+  return JSON.stringify(rows.map(({ member, role }) => [member?.id, role]));
+}
+
 function AssignmentContent({
   referral,
   onClose,
@@ -82,20 +91,19 @@ function AssignmentContent({
   const id = useId();
   const client = useQueryClient();
   const [baseline] = useState(referral.assignees);
-  const [assignees, setAssignees] = useState(baseline);
+  const [assignees, setAssignees] = useState<CareTeamDraftMember[]>(baseline);
+  const [showErrors, setShowErrors] = useState(false);
   const facilities = useReferralFacilities();
   const [facilityId, setFacilityId] = useState(facilities[0]?.id ?? "all");
-  const changed =
-    JSON.stringify(serialize(assignees)) !==
-    JSON.stringify(serialize(baseline));
+  const changed = draftKey(assignees) !== draftKey(baseline);
   const update = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (desiredMembers: CareTeamResponse[]) => {
       const latest = await callApi(referralApi.get, {
         pathParams: { referralId: referral.id },
         silent: true,
       });
       const desired = new Map(
-        assignees.map((entry) => [entry.member.id, entry]),
+        desiredMembers.map((entry) => [entry.member.id, entry]),
       );
       const original = new Map(
         baseline.map((entry) => [entry.member.id, entry]),
@@ -144,7 +152,12 @@ function AssignmentContent({
         className="space-y-5"
         onSubmit={(event) => {
           event.preventDefault();
-          if (changed && !update.isPending) update.mutate();
+          if (!changed || update.isPending) return;
+          if (!isCareTeamComplete(assignees)) {
+            setShowErrors(true);
+            return;
+          }
+          update.mutate(assignees);
         }}
       >
         {facilities.length > 0 && (
@@ -178,6 +191,7 @@ function AssignmentContent({
           facilityId={facilityId === "all" ? undefined : facilityId}
           value={assignees}
           onChange={setAssignees}
+          showErrors={showErrors}
           disabled={update.isPending}
           title={t("assigned_to")}
           description={t("referral_assignees_help")}

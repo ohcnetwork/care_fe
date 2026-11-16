@@ -441,6 +441,9 @@ test.describe("Referrals", () => {
 
       await setAvailabilityStatus(page, "Draft");
       await dialog
+        .getByRole("button", { name: "Add Form", exact: true })
+        .click();
+      await dialog
         .getByRole("combobox", { name: "Search active forms", exact: true })
         .click();
       await page
