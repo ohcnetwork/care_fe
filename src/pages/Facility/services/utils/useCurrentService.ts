@@ -30,7 +30,6 @@ export default function useCurrentService() {
     queryFn: query(healthcareServiceApi.retrieveHealthcareService, {
       pathParams: { facilityId: facilityId, healthcareServiceId: serviceId },
     }),
-    staleTime: 1000 * 60 * 30, // cache for 30 minutes
   });
 
   return { facilityId, serviceId, service };

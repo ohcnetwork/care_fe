@@ -30,7 +30,6 @@ export default function useCurrentLocation() {
     queryFn: query(locationApi.get, {
       pathParams: { facility_id: facilityId, id: locationId },
     }),
-    staleTime: 1000 * 60 * 30, // cache for 30 minutes
   });
 
   return { facilityId, locationId, location };

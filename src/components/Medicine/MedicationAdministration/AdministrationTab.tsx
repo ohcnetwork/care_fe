@@ -186,7 +186,6 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       },
     }),
     enabled: !!patientId && canAccess,
-    staleTime: 10 * 1000,
   });
 
   const { data: stoppedMedications } = useQuery({
@@ -210,7 +209,6 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       },
     }),
     enabled: !!patientId && canAccess,
-    staleTime: 10 * 1000,
   });
 
   const { data: administrations } = useQuery({

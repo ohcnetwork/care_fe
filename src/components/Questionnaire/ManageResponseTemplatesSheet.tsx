@@ -98,7 +98,6 @@ function MedicationName({
       pathParams: { slug: medication.requested_product! },
     }),
     enabled: !!medication.requested_product,
-    meta: { persist: true },
   });
 
   if (isLoading) {

@@ -36,7 +36,6 @@ export function useCurrentFacilitySilently() {
     queryFn: query(facilityApi.get, {
       pathParams: { facilityId: facilityId ?? "" },
     }),
-    staleTime: 1000 * 60 * 5, // cache for 5 minutes
     enabled: !!facilityId,
   });
 

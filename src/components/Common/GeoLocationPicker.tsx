@@ -51,6 +51,7 @@ export default function GeoLocationPicker({
     }),
     enabled: selectedLocation !== searchQuery && searchQuery.trim().length >= 3,
     staleTime: 1000 * 60 * 5, // Cache results for 5 minutes
+    gcTime: 1000 * 60 * 5,
     retry: 1,
   });
 

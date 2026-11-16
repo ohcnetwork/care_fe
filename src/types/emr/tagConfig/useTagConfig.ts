@@ -1,6 +1,7 @@
 import { useQueries } from "@tanstack/react-query";
 
 import query from "@/Utils/request/query";
+import { PERSISTED_QUERY_MAX_AGE } from "@/Utils/request/queryClient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
@@ -23,6 +24,7 @@ function getQueryOptions(
     }),
     enabled: !disabled,
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    gcTime: PERSISTED_QUERY_MAX_AGE,
     meta: {
       persist: true,
     },

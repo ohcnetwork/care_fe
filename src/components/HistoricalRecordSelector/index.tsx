@@ -192,7 +192,6 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
       };
     },
     enabled: isOpen && !disableAPI,
-    staleTime: 0,
   });
 
   // Update state when data changes

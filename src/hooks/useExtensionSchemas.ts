@@ -7,6 +7,7 @@ import {
 } from "@/types/extensions/extensions";
 import extensionsAPI from "@/types/extensions/extensionsAPI";
 import query from "@/Utils/request/query";
+import { PERSISTED_QUERY_MAX_AGE } from "@/Utils/request/queryClient";
 import { JSONSchema2020 } from "@/Utils/schema/types";
 
 export type ExtensionSchemaType = "write" | "read" | "retrieve";
@@ -95,6 +96,7 @@ export function useExtensionSchemas(): UseExtensionSchemasReturn {
     queryKey: ["extensions"],
     queryFn: query(extensionsAPI.list),
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    gcTime: PERSISTED_QUERY_MAX_AGE,
     meta: {
       // Extensions are not expected to change frequently, so we can cache them in production.
       persist: process.env.NODE_ENV === "production",
