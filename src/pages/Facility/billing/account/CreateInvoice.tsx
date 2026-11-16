@@ -214,7 +214,7 @@ export function CreateInvoicePage({
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
-      queryKey: ["chargeItems", facilityId, accountId],
+      queryKey: ["infinite-chargeItems", facilityId, accountId],
     });
   };
 
@@ -225,7 +225,7 @@ export function CreateInvoicePage({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["chargeItems", facilityId, accountId],
+    queryKey: ["infinite-chargeItems", facilityId, accountId],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(chargeItemApi.listChargeItem, {
         pathParams: { facilityId },
@@ -259,7 +259,7 @@ export function CreateInvoicePage({
       // Invoiced items are no longer billable; drop them from the cache so
       // the next invoice doesn't start with them pre-selected.
       queryClient.invalidateQueries({
-        queryKey: ["chargeItems", facilityId, accountId],
+        queryKey: ["infinite-chargeItems", facilityId, accountId],
       });
       toast.success(t("invoice_created_successfully"));
 
