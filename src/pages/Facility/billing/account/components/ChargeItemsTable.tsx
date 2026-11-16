@@ -213,7 +213,7 @@ function ChargeItemsTable({
     isFetchingNextPage,
     isLoading,
   } = useInfiniteQuery({
-    queryKey: ["infinite-chargeItems", accountId, qParams],
+    queryKey: ["infinite-chargeItems", facilityId, accountId, qParams],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(chargeItemApi.listChargeItem, {
         pathParams: { facilityId },
