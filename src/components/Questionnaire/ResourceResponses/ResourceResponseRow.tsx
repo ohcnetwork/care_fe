@@ -72,7 +72,7 @@ export function ResourceResponseRow({
             <div className="flex flex-wrap items-center gap-2 md:hidden">
               <span className="text-xs text-neutral-500">
                 {response.created_date
-                  ? formatDateTime(response.created_date, "DD MMM YYYY, h:mm A")
+                  ? formatDateTime(response.created_date, "dd MMM yyyy, h:mm a")
                   : t("unknown")}
               </span>
               {statusBadge}
@@ -91,12 +91,12 @@ export function ResourceResponseRow({
       <TableCell className="hidden md:table-cell">
         <p className="text-neutral-700">
           {response.created_date
-            ? formatDateTime(response.created_date, "DD MMM YYYY")
+            ? formatDateTime(response.created_date, "dd MMM yyyy")
             : t("unknown")}
         </p>
         {response.created_date && (
           <p className="mt-1 text-xs text-neutral-500">
-            {formatDateTime(response.created_date, "h:mm A")}
+            {formatDateTime(response.created_date, "h:mm a")}
           </p>
         )}
       </TableCell>

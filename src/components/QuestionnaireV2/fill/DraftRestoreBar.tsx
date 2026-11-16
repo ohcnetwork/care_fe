@@ -36,7 +36,7 @@ export function DraftRestoreBar({
         <div className="min-w-0 flex-1 space-y-1">
           <p className="font-medium">
             {t("fill_draft_resume_prompt", {
-              time: formatDateTime(draft.savedAt, "DD MMM YYYY, hh:mm A"),
+              time: formatDateTime(draft.savedAt, "dd MMM yyyy, hh:mm a"),
             })}
           </p>
           {draft.forms.length > 1 && (

@@ -222,7 +222,7 @@ export function CurrentMedicationsWidget({
                           title={formatDateTime(row.since)}
                         >
                           {t("workspace_medications_since", {
-                            date: formatDateTime(row.since, "DD MMM YYYY"),
+                            date: formatDateTime(row.since, "dd MMM yyyy"),
                           })}
                         </time>
                         <span className="block text-xs text-soft-foreground">

@@ -227,7 +227,7 @@ function SharedRecordRow({
             </ItemTitle>
             <ItemDescription className="text-xs">
               <time dateTime={fileDate}>
-                {formatDateTime(fileDate, "DD MMM YYYY")}
+                {formatDateTime(fileDate, "dd MMM yyyy")}
               </time>
             </ItemDescription>
           </ItemContent>
