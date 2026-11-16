@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { isSameDay, isToday, isYesterday } from "date-fns";
 import type { TFunction } from "i18next";
 import {
   ArrowDownRight,
@@ -21,6 +21,7 @@ import { ObservationDetailSheet } from "@/components/Common/Charts/ObservationDe
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
+import { parseDate } from "@/Utils/date";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { plotsConfigQueryOptions } from "@/pages/Encounters/utils/plotsConfigQuery";
@@ -504,14 +505,14 @@ function VitalsMatrix({
 }
 
 function columnLabel(time: string, previous: string | undefined, t: TFunction) {
-  const date = dayjs(time);
-  const clock = date.format("hh:mm A");
-  if (previous && date.isSame(previous, "day")) return clock;
-  const day = date.isSame(dayjs(), "day")
+  const date = parseDate(time);
+  const clock = formatDateTime(date, "hh:mm a");
+  if (previous && isSameDay(date, parseDate(previous))) return clock;
+  const day = isToday(date)
     ? t("workspace_vitals_today")
-    : date.isSame(dayjs().subtract(1, "day"), "day")
+    : isYesterday(date)
       ? t("workspace_vitals_yesterday")
-      : date.format("DD MMM");
+      : formatDateTime(date, "dd MMM");
   return `${day} · ${clock}`;
 }
 

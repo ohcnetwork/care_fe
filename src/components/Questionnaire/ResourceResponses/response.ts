@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
 
-import dayjs from "@/Utils/dayjs";
+import { formatDateTime } from "@/Utils/date";
 import { Question } from "@/types/questionnaire/question";
 import {
   ResourceQuestionnaireAnswer,
@@ -18,12 +18,10 @@ export function formatResponseValue(
     if (question.type === "boolean") {
       value = ["true", "1"].includes(value.toLowerCase()) ? t("yes") : t("no");
     } else if (question.type === "date") {
-      value = dayjs(value).format("DD/MM/YYYY");
+      value = formatDateTime(value, "dd/MM/yyyy");
     } else if (question.type === "dateTime") {
-      const date = dayjs(value);
-      value = date.format(
-        date.isSame(date.startOf("day")) ? "DD/MM/YYYY" : "hh:mm A; DD/MM/YYYY",
-      );
+      // Date only at local midnight, otherwise "hh:mm a; dd/MM/yyyy".
+      value = formatDateTime(value);
     } else if (question.type === "choice") {
       value =
         question.answer_option?.find((option) => option.value === value)

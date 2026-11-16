@@ -1,7 +1,6 @@
-import type { Dayjs } from "dayjs";
+import { differenceInSeconds, isBefore, isValid, parseISO } from "date-fns";
 import type { TFunction } from "i18next";
 
-import dayjs from "@/Utils/dayjs";
 import { TagConfig, TagExpiryOffset } from "@/types/emr/tagConfig/tagConfig";
 
 export const TAG_EXPIRY_OFFSET_UNITS = [
@@ -25,14 +24,15 @@ export const TAG_EXPIRY_OFFSET_INPUT_UNITS = [
  */
 export function getTagExpiry(tag: TagConfig) {
   if (!tag.expiry) return undefined;
-  const expiry = dayjs(
+  const expiry = parseISO(
     tag.expiry.replace(" ", "T").replace(/(\.\d{3})\d+/, "$1"),
   );
-  return expiry.isValid() ? expiry : undefined;
+  return isValid(expiry) ? expiry : undefined;
 }
 
 export function isTagExpired(tag: TagConfig) {
-  return !!tag.expired || !!getTagExpiry(tag)?.isBefore(dayjs());
+  const expiry = getTagExpiry(tag);
+  return !!tag.expired || (!!expiry && isBefore(expiry, new Date()));
 }
 
 export function hasExpiryOffset(offset?: TagExpiryOffset) {
@@ -73,15 +73,15 @@ const RELATIVE_TIME_UNITS = [
 ] as const;
 
 /**
- * "in 3 days" in the active language. Day.js's `fromNow` is not localised in
- * this app, so this uses `Intl.RelativeTimeFormat` instead.
+ * "in 3 days" in the active language. date-fns relative wording is not
+ * localised in this app, so this uses `Intl.RelativeTimeFormat` instead.
  */
 export function formatTimeUntil(
-  date: Dayjs,
+  date: Date,
   locale: string,
   style: Intl.RelativeTimeFormatStyle = "long",
 ) {
-  const seconds = date.diff(dayjs(), "second");
+  const seconds = differenceInSeconds(date, new Date());
   const format = new Intl.RelativeTimeFormat(locale, {
     numeric: "auto",
     style,
