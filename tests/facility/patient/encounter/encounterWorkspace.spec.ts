@@ -4476,7 +4476,8 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
       has: page.getByRole("button", { name, exact: true }),
     });
   const pulse = vitalRow("Pulse");
-  await expect(pulse.getByRole("cell").first()).toHaveText("82 /min");
+  await expect(pulse.getByRole("cell").first()).toHaveText("82");
+  await expect(pulse.getByRole("cell").first()).toHaveAccessibleName("82 /min");
   await expect(
     pulse.getByRole("cell", { name: "76 /min", exact: true }),
   ).toBeVisible();
