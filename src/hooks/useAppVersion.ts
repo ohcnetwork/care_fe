@@ -52,6 +52,7 @@ export function useAppVersion(): UseAppVersionReturn {
     refetchIntervalInBackground: false,
     retry: false,
     staleTime: careConfig.appUpdateCheckInterval,
+    gcTime: careConfig.appUpdateCheckInterval,
   });
 
   useEffect(() => {
