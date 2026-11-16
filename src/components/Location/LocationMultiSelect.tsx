@@ -59,6 +59,8 @@ function BaseLocationTreeNode({
       },
     }),
     enabled: isExpanded,
+    staleTime: 60e3,
+    gcTime: 60e3,
   });
 
   // Add children to the global map when they are fetched
