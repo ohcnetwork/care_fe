@@ -27,6 +27,16 @@ export function useEncounterProgressController({
 }) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const appointment = encounter.appointment;
+
+  const willCloseAppointment = Boolean(
+    appointment?.id && !AppointmentFinalStatuses.includes(appointment.status),
+  );
+
+  const willCloseToken = Boolean(
+    appointment?.token?.id &&
+    TokenActiveStatuses.includes(appointment.token.status),
+  );
 
   const { mutate: executeBatch, isPending } = useBatchRequest({
     onSuccess: ({ results }) => {
@@ -65,12 +75,7 @@ export function useEncounterProgressController({
   };
 
   const addAppointmentCloseRequestsToBatch = () => {
-    const appointment = encounter.appointment;
-
-    if (
-      appointment?.id &&
-      !AppointmentFinalStatuses.includes(appointment.status)
-    ) {
+    if (willCloseAppointment && appointment) {
       return {
         api: scheduleApi.appointments.update,
         referenceId: "appointment-closed",
@@ -87,11 +92,7 @@ export function useEncounterProgressController({
   };
 
   const addTokenCloseRequestToBatch = () => {
-    const appointment = encounter.appointment;
-    if (
-      appointment?.token?.id &&
-      TokenActiveStatuses.includes(appointment.token.status)
-    ) {
+    if (willCloseToken && appointment?.token) {
       return {
         api: tokenApi.update,
         referenceId: "token-closed",
@@ -124,16 +125,20 @@ export function useEncounterProgressController({
       });
       return;
     }
-    let requests: BatchRequestObject[] = [];
+
+    const requests: BatchRequestObject[] = [];
     requests.push(addEncounterCloseRequestToBatch());
+
     const appointmentRequest = addAppointmentCloseRequestsToBatch();
     if (appointmentRequest) {
       requests.push(appointmentRequest);
     }
+
     const tokenRequest = addTokenCloseRequestToBatch();
     if (tokenRequest) {
       requests.push(tokenRequest);
     }
+
     executeBatch(requests);
   };
 
@@ -151,19 +156,23 @@ export function useEncounterProgressController({
       });
       return;
     }
+
     executeBatch([addEncounterCloseRequestToBatch()]);
   };
 
   const completeAppointment = () => {
-    let requests: BatchRequestObject[] = [];
+    const requests: BatchRequestObject[] = [];
+
     const appointmentRequest = addAppointmentCloseRequestsToBatch();
     if (appointmentRequest) {
       requests.push(appointmentRequest);
     }
+
     const tokenRequest = addTokenCloseRequestToBatch();
     if (tokenRequest) {
       requests.push(tokenRequest);
     }
+
     executeBatch(requests);
   };
 
@@ -172,5 +181,7 @@ export function useEncounterProgressController({
     completeAppointment,
     completeEncounter,
     isPending,
+    willCloseAppointment,
+    willCloseToken,
   };
 }
