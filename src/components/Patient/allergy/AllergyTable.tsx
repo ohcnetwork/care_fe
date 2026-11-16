@@ -210,26 +210,28 @@ export const AllergyTable = ({
     <>
       {compactGrid}
       {/* Mobile: Card layout */}
-      <div className={cn("block space-y-3 sm:hidden", compact && "hidden")}>
-        {allergies.map((allergy) => {
-          return (
-            <AllergyCard
-              key={allergy.id}
-              allergy={allergy}
-              onViewEncounter={
-                showViewEncounter
-                  ? () =>
-                      navigate(
-                        facilityId
-                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
-                          : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
-                      )
-                  : undefined
-              }
-            />
-          );
-        })}
-      </div>
+      {!compact && (
+        <div className="block space-y-3 sm:hidden">
+          {allergies.map((allergy) => {
+            return (
+              <AllergyCard
+                key={allergy.id}
+                allergy={allergy}
+                onViewEncounter={
+                  showViewEncounter
+                    ? () =>
+                        navigate(
+                          facilityId
+                            ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
+                            : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
+                        )
+                    : undefined
+                }
+              />
+            );
+          })}
+        </div>
+      )}
       {/* Desktop: Table layout */}
       <div
         className={cn(

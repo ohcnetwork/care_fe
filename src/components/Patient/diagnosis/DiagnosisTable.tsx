@@ -269,24 +269,26 @@ export const DiagnosisTable = ({
     <>
       {compactGrid}
       {/* Mobile: Card layout */}
-      <div className={cn("block space-y-3 sm:hidden", compact && "hidden")}>
-        {diagnoses.map((diagnosis) => (
-          <DiagnosisCard
-            key={diagnosis.id}
-            diagnosis={diagnosis}
-            onViewEncounter={
-              showViewEncounter
-                ? () =>
-                    navigate(
-                      facilityId
-                        ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
-                        : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-                    )
-                : undefined
-            }
-          />
-        ))}
-      </div>
+      {!compact && (
+        <div className="block space-y-3 sm:hidden">
+          {diagnoses.map((diagnosis) => (
+            <DiagnosisCard
+              key={diagnosis.id}
+              diagnosis={diagnosis}
+              onViewEncounter={
+                showViewEncounter
+                  ? () =>
+                      navigate(
+                        facilityId
+                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                          : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+                      )
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+      )}
       {/* Desktop: Table layout */}
       <div
         className={cn(

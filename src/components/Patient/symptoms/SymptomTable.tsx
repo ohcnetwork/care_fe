@@ -218,24 +218,26 @@ export const SymptomTable = ({
     <>
       {compactGrid}
       {/* Mobile: Card layout */}
-      <div className={cn("block space-y-3 sm:hidden", compact && "hidden")}>
-        {symptoms.map((symptom) => (
-          <SymptomCard
-            key={symptom.id}
-            symptom={symptom}
-            onViewEncounter={
-              showViewEncounter
-                ? () =>
-                    navigate(
-                      facilityId
-                        ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
-                        : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
-                    )
-                : undefined
-            }
-          />
-        ))}
-      </div>
+      {!compact && (
+        <div className="block space-y-3 sm:hidden">
+          {symptoms.map((symptom) => (
+            <SymptomCard
+              key={symptom.id}
+              symptom={symptom}
+              onViewEncounter={
+                showViewEncounter
+                  ? () =>
+                      navigate(
+                        facilityId
+                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                          : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+                      )
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+      )}
       {/* Desktop: Table layout */}
       <div
         className={cn(
