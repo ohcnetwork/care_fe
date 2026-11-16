@@ -256,6 +256,11 @@ export function CreateInvoicePage({
     }),
     onSuccess: (invoice: InvoiceRead) => {
       queryClient.invalidateQueries({ queryKey: ["invoices", accountId] });
+      // Invoiced items are no longer billable; drop them from the cache so
+      // the next invoice doesn't start with them pre-selected.
+      queryClient.invalidateQueries({
+        queryKey: ["chargeItems", facilityId, accountId],
+      });
       toast.success(t("invoice_created_successfully"));
 
       // If skipNavigation is true, just call onSuccess without navigating
