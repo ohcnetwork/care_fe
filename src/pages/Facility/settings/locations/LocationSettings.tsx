@@ -140,7 +140,7 @@ export default function LocationSettings({
   return (
     <Page title={t("locations")} hideTitleOnPage className="p-0">
       <div className="container mx-auto">
-        <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4">
+        <div className="flex flex-col sm:flex-row items-start justify-between pb-2 pt-4">
           <h3>{t("locations")}</h3>
           <Tabs
             value={activeTab}
@@ -151,7 +151,7 @@ export default function LocationSettings({
               <TabsTrigger
                 value="list"
                 id="location-list-view"
-                className="data-[state=active]:text-primary"
+                className="data-active:text-primary"
               >
                 <CareIcon icon="l-list-ul" className="text-lg" />
                 <span>{t("list")}</span>
@@ -159,7 +159,7 @@ export default function LocationSettings({
               <TabsTrigger
                 value="map"
                 id="location-map-view"
-                className="data-[state=active]:text-primary"
+                className="data-active:text-primary"
               >
                 <CareIcon icon="l-map" className="text-lg" />
                 <span>{t("map")}</span>

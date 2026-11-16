@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
-import { HeartPulse, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronsUpDown, HeartPulse, X } from "lucide-react";
 import { navigate, usePath } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,8 +23,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 
 import PaginationComponent from "@/components/Common/Pagination";
 
@@ -39,11 +40,17 @@ import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi
 export function ServiceSwitcher() {
   const { t } = useTranslation();
   const { facilityId, service } = useCurrentService();
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
+  const isCollapsed = state === "collapsed" && !isMobile;
   const [selectedService, setSelectedService] = useState<
     HealthcareServiceReadSpec | undefined
   >(undefined);
   const [openDialog, setOpenDialog] = useState(false);
+  const { handleMenuOpenChange } = useAppSidebar();
+  const handleDialogOpenChange = (open: boolean) => {
+    setOpenDialog(open);
+    handleMenuOpenChange(open);
+  };
 
   const fallbackUrl = `/facility/${facilityId}/overview`;
 
@@ -58,65 +65,79 @@ export function ServiceSwitcher() {
         service={selectedService}
         setService={setSelectedService}
         open={openDialog}
-        setOpen={setOpenDialog}
+        setOpen={handleDialogOpenChange}
       />
-      <div className="flex flex-col items-start gap-4">
-        {state === "collapsed" ? (
+      <div
+        className={cn("flex min-w-0 flex-col gap-2", !isCollapsed && "px-2")}
+      >
+        <div className="flex min-h-8 items-center justify-between">
           <Button
             variant="ghost"
-            size="icon"
-            onClick={() => navigate(fallbackUrl)}
-            className="w-8 h-8"
+            size={isCollapsed ? "icon-sm" : "sm"}
+            onClick={() => {
+              if (isMobile) setOpenMobile(false);
+              navigate(fallbackUrl);
+            }}
+            className={cn(
+              "gap-1.5 text-muted-foreground",
+              !isCollapsed && "-ml-2 px-2",
+            )}
             aria-label={t("home")}
-            title={t("home")}
+            title={isCollapsed ? t("home") : undefined}
           >
-            <CareIcon icon="l-home-alt" />
+            <ChevronLeft className="size-4" />
+            {!isCollapsed && <span>{t("home")}</span>}
           </Button>
-        ) : (
-          <Button variant="ghost" onClick={() => navigate(fallbackUrl)}>
-            <CareIcon icon="l-arrow-left" />
-            <span className="underline underline-offset-2">{t("home")}</span>
-          </Button>
-        )}
+          {isMobile && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setOpenMobile(false)}
+              aria-label={t("close_sidebar")}
+            >
+              <X className="size-4" />
+            </Button>
+          )}
+        </div>
 
-        <div className={cn("w-full", state === "expanded" ? "px-2" : "px-0")}>
+        <div className="w-full">
           <TooltipComponent
             content={selectedService?.name ?? t("select_healthcare_service")}
           >
             <Button
-              variant="ghost"
+              variant="outline"
+              size={isCollapsed ? "icon-sm" : "sm"}
               className={cn(
-                "w-full flex items-center justify-between gap-3 overflow-hidden rounded-md border border-gray-200 bg-white px-2",
-                state === "expanded" && "py-6",
+                "w-full min-w-0 gap-2 font-normal shadow-sm",
+                !isCollapsed && "h-auto justify-between py-2",
               )}
               aria-label={
                 selectedService?.name ?? t("select_healthcare_service")
               }
-              onClick={() => setOpenDialog(true)}
+              aria-haspopup="dialog"
+              aria-expanded={openDialog}
+              onClick={() => handleDialogOpenChange(true)}
             >
               <div className="flex min-w-0 flex-1 items-center gap-2">
-                <HeartPulse className="size-5 text-green-600" />
-                <div
-                  className={cn(
-                    state === "collapsed" ? "hidden" : "min-w-0 flex-1",
-                  )}
-                >
+                {isCollapsed && (
+                  <HeartPulse className="mx-auto size-4 text-muted-foreground" />
+                )}
+                <div className={cn("min-w-0 flex-1", isCollapsed && "hidden")}>
                   <div className="flex min-w-0 w-full flex-col items-start overflow-hidden">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       {t("current_service")}
                     </span>
-                    <span className="max-w-full truncate text-sm font-medium text-gray-900">
-                      {selectedService?.name}
+                    <span className="max-w-full truncate text-left text-sm font-medium">
+                      {selectedService?.name ?? t("select_healthcare_service")}
                     </span>
                   </div>
                 </div>
               </div>
-              {state === "expanded" && (
-                <CareIcon icon="l-sort" className="shrink-0" />
+              {!isCollapsed && (
+                <ChevronsUpDown className="size-3.5 shrink-0 opacity-60" />
               )}
             </Button>
           </TooltipComponent>
-          <Separator className="mt-4" />
         </div>
       </div>
     </Fragment>
@@ -222,7 +243,7 @@ export function ServiceSelectorDialog({
               <CommandEmpty>
                 {isLoading ? (
                   <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                    <Spinner className="h-4 w-4 animate-spin text-gray-500" />
                     <span className="ml-2 text-sm text-gray-500">
                       {t("loading")}
                     </span>

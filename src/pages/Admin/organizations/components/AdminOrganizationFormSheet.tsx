@@ -21,8 +21,10 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -154,7 +156,7 @@ export default function AdminOrganizationFormSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto sm:max-w-xl">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>
             {isRoleOrganizationPage
@@ -178,81 +180,86 @@ export default function AdminOrganizationFormSheet({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 py-4"
+            className="flex min-h-0 flex-1 flex-col"
           >
-            {isRoleOrganizationPage && (
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <ShieldCheck className="size-4" />
-                  <span className="text-xs font-semibold uppercase tracking-wider">
-                    {t("role_organization_record")}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-gray-500">
-                  {t("role_organization_record_description")}
-                </p>
+            <SheetBody>
+              <div className="space-y-6">
+                {isRoleOrganizationPage && (
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <ShieldCheck className="size-4" />
+                      <span className="text-xs font-semibold uppercase tracking-wider">
+                        {t("role_organization_record")}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-gray-500">
+                      {t("role_organization_record_description")}
+                    </p>
+                  </div>
+                )}
+
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel aria-required>{t("name")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder={
+                            isRoleOrganizationPage
+                              ? t("enter_role_organization_name")
+                              : t("enter_department_team_name")
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>{t("description")}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder={
+                            isRoleOrganizationPage
+                              ? t("enter_role_organization_description")
+                              : t("enter_department_team_description")
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            )}
+            </SheetBody>
 
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem className="space-y-2">
-                  <FormLabel aria-required>{t("name")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder={
-                        isRoleOrganizationPage
-                          ? t("enter_role_organization_name")
-                          : t("enter_department_team_name")
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem className="space-y-2">
-                  <FormLabel>{t("description")}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder={
-                        isRoleOrganizationPage
-                          ? t("enter_role_organization_description")
-                          : t("enter_department_team_description")
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isPending || !form.formState.isDirty}
-            >
-              {isPending
-                ? isEditMode
-                  ? t("updating")
-                  : t("creating")
-                : isRoleOrganizationPage
+            <SheetFooter>
+              <Button
+                type="submit"
+                disabled={isPending || !form.formState.isDirty}
+              >
+                {isPending
                   ? isEditMode
-                    ? t("update_role_organization")
-                    : t("create_role_organization")
-                  : isEditMode
-                    ? t("update_organization")
-                    : t("create_organization")}
-            </Button>
+                    ? t("updating")
+                    : t("creating")
+                  : isRoleOrganizationPage
+                    ? isEditMode
+                      ? t("update_role_organization")
+                      : t("create_role_organization")
+                    : isEditMode
+                      ? t("update_organization")
+                      : t("create_organization")}
+              </Button>
+            </SheetFooter>
           </form>
         </Form>
       </SheetContent>

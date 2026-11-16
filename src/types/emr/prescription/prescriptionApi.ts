@@ -4,6 +4,7 @@ import {
   PrescriptionRead,
   PrescriptionSummary,
 } from "@/types/emr/prescription/prescription";
+import { TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 
 export default {
   list: {
@@ -30,13 +31,13 @@ export default {
     path: "/api/v1/patient/{patientId}/medication/prescription/{external_id}/set_tags/",
     method: HttpMethod.POST,
     TRes: Type<unknown>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<{ tags: TagSetRequest[] }>(),
   },
   removeTags: {
     path: "/api/v1/patient/{patientId}/medication/prescription/{external_id}/remove_tags/",
     method: HttpMethod.POST,
     TRes: Type<unknown>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<{ tags: TagSetRequest[] }>(),
   },
   summary: {
     path: "/api/v1/facility/{facilityId}/medication_prescription/summary/",

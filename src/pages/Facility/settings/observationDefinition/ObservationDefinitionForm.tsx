@@ -53,6 +53,7 @@ import {
   QualifiedRange,
   qualifiedRangeSchema,
 } from "@/types/base/qualifiedRange/qualifiedRange";
+import { slugValueSchema } from "@/types/base/slug/schema";
 import {
   ObservationDefinitionCategory,
   ObservationDefinitionCreate,
@@ -64,7 +65,9 @@ import {
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug, valuesOf } from "@/Utils/utils";
+
+import { generateSlugValue } from "@/Utils/slug";
+import { valuesOf } from "@/Utils/utils";
 import { ObservationInterpretation } from "./components/ObservationInterpretation";
 
 export default function ObservationDefinitionForm({
@@ -141,10 +144,7 @@ function ObservationDefinitionFormContent({
   const formSchema = z
     .object({
       title: z.string().min(1, t("field_required")),
-      slug_value: z
-        .string()
-        .min(5, t("character_count_validation", { min: 5, max: 25 }))
-        .max(25, t("character_count_validation", { min: 5, max: 25 })),
+      slug_value: slugValueSchema(),
       description: z.string().min(1, t("field_required")),
       status: z.enum(ObservationDefinitionStatus),
       category: z.enum(ObservationDefinitionCategory),
@@ -283,7 +283,7 @@ function ObservationDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || "", 25), {
+        form.setValue("slug_value", generateSlugValue(value.title), {
           shouldValidate: true,
         });
       }

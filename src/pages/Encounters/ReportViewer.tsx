@@ -454,13 +454,14 @@ export default function ReportViewer({
                   isLatest={selectedReportIndex === 0 && reports.length > 0}
                 />
               </DrawerTrigger>
-              <DrawerContent className="max-h-[85vh]">
-                <DrawerHeader className="border-b py-2">
-                  <DrawerTitle className="text-lg font-semibold">
-                    {t("report_history")}
-                  </DrawerTitle>
+              <DrawerContent aria-describedby={undefined} height="fixed">
+                <DrawerHeader
+                  className="pl-3 border-b shadow-2xs"
+                  showCloseButton
+                >
+                  <DrawerTitle>{t("report_history")}</DrawerTitle>
                 </DrawerHeader>
-                <div className="overflow-y-auto py-2 mx-2">
+                <div className="min-h-0 flex-1 py-2 mx-2 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
                   <ReportList
                     reports={reports}
                     isGenerating={isGenerating}

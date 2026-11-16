@@ -45,11 +45,42 @@ on:
 # copilot-pull-request-reviewer post under their own App tokens and DO fire issue_comment. Without
 # this filter, every one of their comments starts a billed run that reads the whole agent file and
 # then noops. The prompt-level bot rule stays as a second line of defence.
+#
+# Fork inline replies are skipped HERE. `pull_request_review_comment` withholds COPILOT_GITHUB_TOKEN
+# when the PR head is a fork, so this workflow would fail the secret check and turn the run red.
+# `pull_request_target` still reviews those PRs (that event keeps the secret), and the fork-reply
+# bridge answers the inline reply. Same-repo review comments keep the secret and stay here.
 if: >
   ${{ github.repository == 'ohcnetwork/care_fe' &&
       (github.event.pull_request == null || github.event.pull_request.draft == false) &&
       (github.event.comment == null || github.event.comment.user.type != 'Bot') &&
-      (github.event.issue == null || github.event.issue.pull_request != null) }}
+      (github.event.issue == null || github.event.issue.pull_request != null) &&
+      (github.event_name != 'pull_request_review_comment' || github.event.pull_request.head.repo.full_name == github.repository) }}
+# Concurrency, overriding gh-aw's default of one per-PR group shared by ALL triggers.
+#
+# The default keys the group on `issue.number || pr.number || run_id` with cancel-in-progress, so
+# every trigger for a PR — a push AND every comment — shares one slot. Concurrency is evaluated
+# BEFORE the `if:` above, so even a bot comment that `if:` will skip still enters the group and
+# cancels the in-flight review. On a PR carrying CodeRabbit / Copilot / React Doctor / Cloudflare, a
+# real review is superseded by the next status comment before it can post — observed on #16818/24/25.
+#
+# The override is the DEFAULT group with one thing appended: `-${{ github.event.comment.id || 'review' }}`.
+# That trailing segment is a coalescing fallback, not an event-name branch — comment-bearing events
+# (issue_comment, pull_request_review_comment) carry `comment.id`; push/PR/dispatch do not, so they
+# fall to the literal `review`. The leading id is `issue.number || pr.number || run_id`:
+#   - push / PR (no comment)            -> `…-<pr>-review`       one slot per PR; a newer push cancels
+#     the stale review (latest commit wins), and no comment can land in this slot.
+#   - dispatch (no issue/PR/comment)    -> `…-<run_id>-review`   one slot per run. Manual dispatch is
+#     deliberately unserialised: it does not share the PR's review slot, so it can run alongside a
+#     push-triggered review of the same PR. (gh-aw may pass aw_context on dispatch; this group does
+#     not read it.)
+#   - comment events (comment.id set)   -> `…-<pr>-<comment_id>` one slot PER comment, so a comment
+#     never cancels the review, nor another reply. Deliberately NOT keyed on head SHA: that would give
+#     each commit its own slot and defeat newer-push-cancels-stale-review, billing every superseded commit.
+concurrency:
+  group: >-
+    gh-aw-${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number || github.run_id }}-${{ github.event.comment.id || 'review' }}
+  cancel-in-progress: true
 # Least privilege for the agent job. It only reads: the base repo (contents), the PR's files and
 # review threads (pull-requests), and PR conversation comments, which are issue comments (issues).
 # All writes happen in separate, permission-scoped safe-output jobs — the agent job never writes.

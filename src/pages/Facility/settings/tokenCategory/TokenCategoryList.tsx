@@ -203,7 +203,7 @@ export default function TokenCategoryList({
             </div>
             {/* Desktop Table View */}
             <div className="hidden md:block">
-              <div className="rounded-lg border">
+              <div>
                 <Table>
                   <TableHeader className="bg-gray-100">
                     <TableRow>

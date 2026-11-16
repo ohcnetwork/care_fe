@@ -7,36 +7,37 @@ import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { Spinner } from "@/components/ui/spinner";
 
+import { AuthCard } from "@/components/Auth/AuthCard";
 import {
   PasswordErrors,
   PasswordFields,
   validatePasswordFields,
 } from "@/components/Auth/PasswordFields";
-import CircularProgress from "@/components/Common/CircularProgress";
+import { otpErrorMessages } from "@/components/Auth/otpErrorMessages";
 
 import { LocalStorageKeys } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
+import { OTP_LENGTH } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
-
-const OTP_LENGTH = 5;
-
-type PhoneResetStep = "phone" | "confirm";
 
 interface ForgotPasswordPhoneProps {
   onBackToEmail: () => void;
@@ -49,54 +50,13 @@ interface ConfirmFieldErrors extends PasswordErrors {
   error?: string | null;
 }
 
-function extractFieldErrors(cause: unknown): ConfirmFieldErrors {
-  const result: ConfirmFieldErrors = {};
-  if (!cause || typeof cause !== "object") return result;
-
-  const data = cause as Record<string, unknown>;
-  const errors = data.errors;
-
-  if (Array.isArray(errors)) {
-    for (const entry of errors) {
-      if (!entry || typeof entry !== "object") continue;
-      const msg = (entry as { msg?: unknown }).msg;
-      if (typeof msg === "string") {
-        result.error = msg;
-      } else if (msg && typeof msg === "object") {
-        for (const [key, value] of Object.entries(
-          msg as Record<string, unknown>,
-        )) {
-          if (typeof value === "string") {
-            result[key as keyof ConfirmFieldErrors] = value;
-          } else if (Array.isArray(value) && typeof value[0] === "string") {
-            result[key as keyof ConfirmFieldErrors] = value[0];
-          }
-        }
-      }
-    }
-  }
-
-  if (typeof data.error === "string") {
-    result.error = data.error;
-  }
-  if (typeof data.otp === "string") {
-    result.otp = data.otp;
-  }
-  if (typeof data.password === "string") {
-    result.password = data.password;
-  }
-
-  return result;
-}
-
 export function ForgotPasswordPhone({
   onBackToEmail,
   onSuccess,
 }: ForgotPasswordPhoneProps) {
   const { t } = useTranslation();
-  const { resendOtpTimeout } = careConfig;
 
-  const [step, setStep] = useState<PhoneResetStep>("phone");
+  const [step, setStep] = useState<"phone" | "confirm">("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [username, setUsername] = useState("");
@@ -108,29 +68,27 @@ export function ForgotPasswordPhone({
   const [errors, setErrors] = useState<ConfirmFieldErrors>({});
   const [phoneError, setPhoneError] = useState("");
   const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
-  const [resendOtpCountdown, setResendOtpCountdown] = useState(0);
+  const [resendCountdown, setResendCountdown] = useState(0);
 
   useEffect(() => {
-    if (resendOtpCountdown <= 0) return;
+    if (resendCountdown <= 0) return;
     const timer = setInterval(() => {
-      setResendOtpCountdown((prev) => prev - 1);
+      setResendCountdown((seconds) => seconds - 1);
     }, 1000);
     return () => clearInterval(timer);
-  }, [resendOtpCountdown]);
+  }, [resendCountdown]);
 
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
     mutationFn: mutate(otpApi.sendPasswordResetOtp),
     onSuccess: () => {
       setStep("confirm");
       setPhoneError("");
-      setResendOtpCountdown(resendOtpTimeout);
+      setResendCountdown(careConfig.resendOtpTimeout);
       toast.success(t("otp_password_reset_sent"));
     },
     onError: (error) => {
-      const fieldErrors = extractFieldErrors(error.cause);
-      setPhoneError(
-        fieldErrors.error || fieldErrors.otp || t("send_otp_error"),
-      );
+      const messages = otpErrorMessages(error);
+      setPhoneError(messages.error ?? messages.otp ?? t("send_otp_error"));
     },
   });
 
@@ -151,78 +109,56 @@ export function ForgotPasswordPhone({
 
       if (error.status === 409) {
         setRequiresUsername(true);
-        const message =
-          typeof error.cause?.error === "string"
-            ? error.cause.error
-            : t("multiple_users_linked_to_phone");
-        setErrors({ error: message });
+        setErrors({
+          error:
+            typeof error.cause?.error === "string"
+              ? error.cause.error
+              : t("multiple_users_linked_to_phone"),
+        });
         return;
       }
 
-      const fieldErrors = extractFieldErrors(error.cause);
-      setErrors(fieldErrors);
-      if (fieldErrors.otp) {
-        toast.error(fieldErrors.otp);
-      } else if (fieldErrors.error) {
-        toast.error(fieldErrors.error);
-      } else if (fieldErrors.password) {
-        toast.error(
-          typeof fieldErrors.password === "string"
-            ? fieldErrors.password
-            : t("invalid_password"),
-        );
-      } else {
-        toast.error(t("something_went_wrong"));
-      }
+      const messages = otpErrorMessages(error);
+      setErrors(messages);
+      toast.error(
+        messages.otp ??
+          messages.error ??
+          messages.password ??
+          t("something_went_wrong"),
+      );
     },
   });
 
-  const handleSendOtp = (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSendOtp = (event: React.SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (!isValidPhoneNumber(phone)) {
       setPhoneError(t("phone_number_validation_error"));
       return;
     }
-    setPhoneError("");
     sendOtp({ phone_number: phone });
   };
 
-  const handleResendOtp = () => {
-    if (resendOtpCountdown > 0 || !isValidPhoneNumber(phone)) return;
-    sendOtp({ phone_number: phone });
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setPasswordForm((current) => ({ ...current, [name]: value }));
+    setErrors((current) => ({ ...current, [name]: null }));
   };
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPasswordForm((prev) => ({ ...prev, [name]: value }));
-    if (errors[name as keyof ConfirmFieldErrors]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
-    }
-  };
+  const handleConfirm = (event: React.SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-  const handleConfirm = (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const nextErrors: ConfirmFieldErrors = {};
+    const nextErrors: ConfirmFieldErrors = {
+      ...validatePasswordFields(passwordForm, t),
+    };
     if (otp.length !== OTP_LENGTH) {
       nextErrors.otp = t("invalid_otp");
     }
-
-    const passwordErrors = validatePasswordFields(passwordForm, t);
-    if (passwordErrors) {
-      Object.assign(nextErrors, passwordErrors);
-    }
-
     if (requiresUsername && !username.trim()) {
       nextErrors.username = t("field_required");
     }
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
 
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors);
-      return;
-    }
-
-    setErrors({});
     confirmReset({
       phone_number: phone,
       otp,
@@ -243,111 +179,89 @@ export function ForgotPasswordPhone({
 
   if (step === "phone") {
     return (
-      <form onSubmit={handleSendOtp} className="space-y-4">
-        <Button
-          variant="link"
-          type="button"
-          onClick={onBackToEmail}
-          className="px-0 mb-4 flex items-center gap-2"
-        >
-          <CareIcon icon="l-arrow-left" className="text-lg" />
-          <span>{t("back_to_email_reset")}</span>
-        </Button>
-
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              {t("reset_using_phone_number")}
-            </h2>
-            <p className="text-sm text-gray-500 mt-2">
-              {t("forget_password_phone_instruction")}
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="reset_phone">{t("phone_number")}</Label>
+      <AuthCard
+        back={{ label: t("back_to_email_reset"), onClick: onBackToEmail }}
+        title={t("reset_using_phone_number")}
+        description={t("forget_password_phone_instruction")}
+      >
+        <form noValidate className="grid gap-6" onSubmit={handleSendOtp}>
+          <Field data-invalid={!!phoneError}>
+            <FieldLabel htmlFor="reset_phone">{t("phone_number")}</FieldLabel>
             <PhoneInput
               id="reset_phone"
               name="phone"
+              autoFocus
+              required
+              placeholder={t("enter_phone_number")}
               value={phone}
               onChange={(value) => {
                 setPhone(value ?? "");
                 setPhoneError("");
               }}
-              placeholder={t("enter_phone_number")}
+              aria-invalid={!!phoneError}
+              aria-describedby={phoneError ? "reset_phone-error" : undefined}
             />
-            {phoneError && <p className="text-sm text-red-500">{phoneError}</p>}
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full"
-            variant="primary"
-            disabled={sendOtpPending || !isValidPhoneNumber(phone)}
-          >
-            {sendOtpPending ? (
-              <CircularProgress className="text-white" />
-            ) : (
-              t("send_otp")
+            {phoneError && (
+              <FieldError id="reset_phone-error">{phoneError}</FieldError>
             )}
+          </Field>
+          <Button type="submit" disabled={sendOtpPending}>
+            {sendOtpPending && (
+              <Spinner data-icon="inline-start" aria-hidden="true" />
+            )}
+            {t("send_otp")}
           </Button>
-        </div>
-      </form>
+        </form>
+      </AuthCard>
     );
   }
 
+  const usernameError = errors.username || errors.error;
+
   return (
-    <form onSubmit={handleConfirm} className="space-y-4">
-      <Button
-        variant="link"
-        type="button"
-        onClick={handleChangePhone}
-        className="px-0 mb-4 flex items-center gap-2"
-      >
-        <CareIcon icon="l-arrow-left" className="text-lg" />
-        <span>{t("change_phone_number")}</span>
-      </Button>
-
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            {t("reset_password")}
-          </h2>
-          <p className="text-sm text-gray-500 mt-2">
-            {t("forget_password_phone_otp_instruction")}
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="reset_otp">{t("enter_otp")}</Label>
-          <div className="flex justify-center">
-            <InputOTP
-              id="reset_otp"
-              maxLength={OTP_LENGTH}
-              value={otp}
-              onChange={(value) => {
-                setOtp(value);
-                if (errors.otp) {
-                  setErrors((prev) => ({ ...prev, otp: null }));
-                }
-              }}
-              pattern={REGEXP_ONLY_DIGITS}
-            >
-              <InputOTPGroup>
-                {Array.from({ length: OTP_LENGTH }).map((_, index) => (
-                  <InputOTPSlot
-                    key={index}
-                    index={index}
-                    className={cn(errors.otp && "border-red-500")}
-                  />
-                ))}
-              </InputOTPGroup>
-            </InputOTP>
-          </div>
+    <AuthCard
+      back={{ label: t("change_phone_number"), onClick: handleChangePhone }}
+      title={t("reset_password")}
+      description={t("forget_password_phone_otp_instruction")}
+    >
+      <form noValidate className="grid gap-6" onSubmit={handleConfirm}>
+        <Field data-invalid={!!errors.otp}>
+          <FieldLabel htmlFor="reset_otp">
+            {t("otp_code_label", { length: OTP_LENGTH })}
+          </FieldLabel>
+          <InputOTP
+            id="reset_otp"
+            name="otp"
+            maxLength={OTP_LENGTH}
+            pattern={REGEXP_ONLY_DIGITS}
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            pushPasswordManagerStrategy="none"
+            autoFocus
+            value={otp}
+            onChange={(value) => {
+              setOtp(value);
+              setErrors((current) => ({ ...current, otp: null }));
+            }}
+            aria-invalid={!!errors.otp}
+            aria-describedby={errors.otp ? "reset_otp-error" : undefined}
+            containerClassName="w-full"
+            className="w-full"
+          >
+            <InputOTPGroup className="w-full justify-between">
+              {Array.from({ length: OTP_LENGTH }, (_, index) => (
+                <InputOTPSlot
+                  key={index}
+                  index={index}
+                  className="h-12 min-w-0 flex-1 font-mono text-lg"
+                />
+              ))}
+            </InputOTPGroup>
+          </InputOTP>
           {errors.otp && (
-            <p className="text-sm text-red-500 text-center">{errors.otp}</p>
+            <FieldError id="reset_otp-error">{errors.otp}</FieldError>
           )}
-        </div>
+        </Field>
 
         <PasswordFields
           password={passwordForm.password}
@@ -359,82 +273,71 @@ export function ForgotPasswordPhone({
         />
 
         {requiresUsername && (
-          <div className="space-y-2">
-            <Label htmlFor="reset_username">{t("username")}</Label>
+          <Field data-invalid={!!usernameError}>
+            <FieldLabel htmlFor="reset_username">{t("username")}</FieldLabel>
             <Input
               id="reset_username"
               name="username"
               type="text"
-              value={username}
-              onChange={(e) => {
-                setUsername(e.target.value.toLowerCase());
-                if (errors.username || errors.error) {
-                  setErrors((prev) => ({
-                    ...prev,
-                    username: null,
-                    error: null,
-                  }));
-                }
-              }}
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
               placeholder={t("enter_your_username")}
-              className={cn(
-                (errors.username || errors.error) &&
-                  "border-red-500 focus-visible:ring-red-500",
-              )}
+              value={username}
+              onChange={(event) => {
+                setUsername(event.target.value.toLowerCase());
+                setErrors((current) => ({
+                  ...current,
+                  username: null,
+                  error: null,
+                }));
+              }}
+              aria-invalid={!!usernameError}
+              aria-describedby="reset_username-hint"
             />
-            {(errors.username || errors.error) && (
-              <p className="text-sm text-red-500">
-                {errors.username || errors.error}
-              </p>
-            )}
-            <p className="text-xs text-gray-500">
+            <FieldDescription id="reset_username-hint">
               {t("multiple_users_linked_to_phone_hint")}
-            </p>
-          </div>
+            </FieldDescription>
+            {usernameError && <FieldError>{usernameError}</FieldError>}
+          </Field>
         )}
 
         {!requiresUsername && errors.error && (
-          <p className="text-sm text-red-500">{errors.error}</p>
+          <FieldError>{errors.error}</FieldError>
         )}
 
         <Button
           type="submit"
-          className="w-full"
-          variant="primary"
           disabled={
             confirmPending ||
+            sendOtpPending ||
             otp.length !== OTP_LENGTH ||
             !passwordForm.password ||
             !passwordForm.confirm
           }
         >
-          {confirmPending ? (
-            <CircularProgress className="text-white" />
-          ) : (
-            t("reset_password")
+          {confirmPending && (
+            <Spinner data-icon="inline-start" aria-hidden="true" />
           )}
+          {t("reset_password")}
         </Button>
+      </form>
 
-        <p className="text-sm text-red-500 font-base">{t("dont_share_code")}</p>
+      <Alert variant="warning" role="note">
+        <AlertDescription>{t("dont_share_code")}</AlertDescription>
+      </Alert>
 
-        <div className="text-center">
-          {resendOtpCountdown <= 0 ? (
-            <Button
-              variant="link"
-              type="button"
-              onClick={handleResendOtp}
-              disabled={sendOtpPending}
-              className="px-0"
-            >
-              {t("resend_otp")}
-            </Button>
-          ) : (
-            <p className="text-sm text-gray-500">
-              {t("resend_otp_timer", { time: resendOtpCountdown })}
-            </p>
-          )}
-        </div>
-      </div>
-    </form>
+      <Button
+        type="button"
+        variant="ghost"
+        className="underline underline-offset-4"
+        disabled={resendCountdown > 0 || sendOtpPending}
+        onClick={() => sendOtp({ phone_number: phone })}
+      >
+        {resendCountdown > 0
+          ? t("resend_otp_timer", { time: resendCountdown })
+          : t("resend_otp")}
+      </Button>
+    </AuthCard>
   );
 }

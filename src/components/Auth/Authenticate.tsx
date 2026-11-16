@@ -6,10 +6,9 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FieldError } from "@/components/ui/field";
 import {
   Form,
   FormControl,
@@ -22,12 +21,15 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { Spinner } from "@/components/ui/spinner";
+
+import { AuthCard } from "@/components/Auth/AuthCard";
+import { AuthLayout } from "@/components/Auth/AuthLayout";
+import { otpErrorMessages } from "@/components/Auth/otpErrorMessages";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import { MfaMethod, MfaOption } from "@/types/auth/auth";
-
-import { AuthHero } from "./AuthHero";
 
 export const Authenticate = () => {
   const { t } = useTranslation();
@@ -87,11 +89,9 @@ export const Authenticate = () => {
         code: values.code,
         temp_token,
       });
-    } catch (_err: any) {
-      // Handle specific API error messages
-      if (_err?.response?.data?.detail) {
-        setError(_err.response.data.detail);
-      }
+    } catch (err) {
+      const { error } = otpErrorMessages(err);
+      if (error) setError(error);
     }
   });
 
@@ -107,103 +107,89 @@ export const Authenticate = () => {
     setError("");
   };
 
+  const codeLength = currentMethod === "backup" ? 8 : 6;
+
   return (
-    <div className="relative flex min-h-screen flex-col md:h-screen md:flex-row">
-      <AuthHero />
-      {/* Login Forms Section */}
-      <div className="login-hero-form py-16 w-full md:mt-0 md:h-full md:w-1/2">
-        <div className="relative h-full items-center flex justify-center md:flex">
-          <div className="w-full max-w-[400px] space-y-6">
-            <Card className="mx-4">
-              <CardHeader className="space-y-1 px-4">
-                <CardTitle className="text-3xl font-bold text-black text-center">
-                  {t("authenticate_your_account")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="code"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex justify-center">
-                              <InputOTP
-                                key={`otp-input-${currentMethod}`}
-                                maxLength={currentMethod === "backup" ? 8 : 6}
-                                pattern={REGEXP_ONLY_DIGITS}
-                                value={field.value}
-                                onChange={field.onChange}
-                                autoComplete="one-time-code"
-                                autoFocus
-                              >
-                                <InputOTPGroup>
-                                  {[
-                                    ...Array(
-                                      currentMethod === "backup" ? 8 : 6,
-                                    ),
-                                  ].map((_, index) => (
-                                    <InputOTPSlot key={index} index={index} />
-                                  ))}
-                                </InputOTPGroup>
-                              </InputOTP>
-                            </div>
-                          </FormControl>
-                          <FormLabel className="mt-3 text-center">
-                            {currentMethod === "backup"
-                              ? t("enter_recovery_code")
-                              : t("enter_2fa_code")}
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    <Button
-                      type="submit"
-                      className="w-full mt-4"
-                      variant="primary"
-                      disabled={
-                        isVerifyingMFA ||
-                        codeValue.length < (currentMethod === "backup" ? 8 : 6)
-                      }
+    <AuthLayout>
+      <AuthCard
+        title={t("authenticate_your_account")}
+        description={
+          currentMethod === "backup"
+            ? t("enter_recovery_code")
+            : t("enter_2fa_code")
+        }
+      >
+        <Form {...form}>
+          <form onSubmit={handleSubmit} className="grid gap-6">
+            <FormField
+              control={form.control}
+              name="code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("code")}</FormLabel>
+                  <FormControl>
+                    <InputOTP
+                      key={`otp-input-${currentMethod}`}
+                      maxLength={codeLength}
+                      pattern={REGEXP_ONLY_DIGITS}
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      pushPasswordManagerStrategy="none"
+                      autoFocus
+                      value={field.value}
+                      onChange={field.onChange}
+                      containerClassName="w-full"
+                      className="w-full"
                     >
-                      {isVerifyingMFA ? t("verifying") : t("verify")}{" "}
-                      <CareIcon icon="l-angle-right" className="ml-2 text-sm" />
-                    </Button>
-
-                    <p className="text-sm text-red-500 font-base mt-3">
-                      {t("dont_share_code")}
-                    </p>
-                    {error && (
-                      <p className="text-destructive text-sm">{error}</p>
-                    )}
-
-                    <div className="mt-5 text-center">
-                      <p className="text-sm text-gray-500 font-base">
-                        {currentMethod === "backup"
-                          ? ""
-                          : t("cant_access_code")}
-                      </p>
-                      <ul className="list-disc inline-flex justify-center w-full">
-                        {alternativeMethods.map((method) => (
-                          <li
-                            key={method.id}
-                            onClick={() => handleMethodChange(method.id)}
-                            className="text-sm font-medium text-primary-500 hover:underline cursor-pointer"
-                          >
-                            {method.label}
-                          </li>
+                      <InputOTPGroup className="w-full justify-between">
+                        {Array.from({ length: codeLength }, (_, index) => (
+                          <InputOTPSlot
+                            key={index}
+                            index={index}
+                            className="h-12 min-w-0 flex-1 font-mono text-lg"
+                          />
                         ))}
-                      </ul>
-                    </div>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </div>
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            {error && <FieldError>{error}</FieldError>}
+            <Button
+              type="submit"
+              disabled={isVerifyingMFA || codeValue.length < codeLength}
+            >
+              {isVerifyingMFA && (
+                <Spinner data-icon="inline-start" aria-hidden="true" />
+              )}
+              {t("verify")}
+            </Button>
+          </form>
+        </Form>
+
+        <Alert variant="warning" role="note">
+          <AlertDescription>{t("dont_share_code")}</AlertDescription>
+        </Alert>
+
+        <div className="flex flex-col items-center gap-1 pb-2">
+          {currentMethod !== "backup" && (
+            <p className="text-sm text-muted-foreground">
+              {t("cant_access_code")}
+            </p>
+          )}
+          {alternativeMethods.map((method) => (
+            <Button
+              key={method.id}
+              type="button"
+              variant="link"
+              onClick={() => handleMethodChange(method.id)}
+            >
+              {method.label}
+            </Button>
+          ))}
         </div>
-      </div>
-    </div>
+      </AuthCard>
+    </AuthLayout>
   );
 };

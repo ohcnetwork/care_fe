@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -71,11 +72,11 @@ export function DispensedItemsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-3xl">
+      <SheetContent size="xl" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("dispensed_items")}</SheetTitle>
         </SheetHeader>
-        <div className="mt-4">
+        <SheetBody>
           {isLoading ? (
             <TableSkeleton count={3} />
           ) : dispensedItems?.results.length ? (
@@ -159,7 +160,7 @@ export function DispensedItemsSheet({
               {t("no_items_dispensed_yet")}
             </p>
           )}
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

@@ -11,6 +11,7 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -296,7 +297,9 @@ export function ObservationInterpretation<
       setQualifiedRanges(newRanges);
 
       form.setValue(name as any, newRanges as any);
-      const isValid = await form.trigger();
+      const isValid = await form.trigger(
+        `${name}.${editingIndex}` as Parameters<typeof form.trigger>[0],
+      );
 
       if (!isValid) {
         return;
@@ -490,24 +493,26 @@ export function ObservationInterpretation<
       )}
 
       <Sheet open={isSheetOpen} onOpenChange={handleSheetState}>
-        <SheetContent className="sm:max-w-3xl flex flex-col">
+        <SheetContent size="lg" className="overflow-hidden">
           <SheetHeader>
             <SheetTitle>{t("add_edit_interpretation")}</SheetTitle>
             <SheetDescription>{t("configure_interpretation")}</SheetDescription>
           </SheetHeader>
 
-          {editedRange && (
-            <QualifiedRangeEditor
-              form={form}
-              editedRange={editedRange}
-              setEditedRange={handleEditRange}
-              onSave={handleSaveInterpretation}
-              onCancel={handleCancelEdit}
-              interpretationType={selectedInterpretationType}
-              fieldName={`${name}.${editedRange.id || 0}`}
-              facilityId={facilityId}
-            />
-          )}
+          <SheetBody>
+            {editedRange && (
+              <QualifiedRangeEditor
+                form={form}
+                editedRange={editedRange}
+                setEditedRange={handleEditRange}
+                onSave={handleSaveInterpretation}
+                onCancel={handleCancelEdit}
+                interpretationType={selectedInterpretationType}
+                fieldName={`${name}.${editedRange.id || 0}`}
+                facilityId={facilityId}
+              />
+            )}
+          </SheetBody>
         </SheetContent>
       </Sheet>
 

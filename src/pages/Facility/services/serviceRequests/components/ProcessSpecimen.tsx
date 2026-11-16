@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { CircleCheckBig, Edit, Settings2 } from "lucide-react";
+import { Edit, Settings2 } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +24,7 @@ import {
   ProcessingSpec,
 } from "@/types/emr/specimen/specimen";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { formatName } from "@/Utils/utils";
+import { SpecimenProcessingSteps } from "./SpecimenProcessingSteps";
 
 interface ProcessSpecimenProps {
   onAddProcessing: (processing: ProcessingSpec) => void;
@@ -122,45 +122,11 @@ export function ProcessSpecimen({
           </div>
         </div>
         <div className="space-y-4">
-          {existingProcessing.map((process, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-2 rounded-md bg-primary-100 border border-primary-300 px-3 py-2"
-            >
-              <CircleCheckBig className="h-4 w-4 text-green-600" />
-              <div className="flex-1">
-                <div className="font-medium text-sm text-primary-950">
-                  {process.method?.display || process.description}
-                </div>
-                {process.method &&
-                  process.description !== process.method.display && (
-                    <div className="text-sm text-gray-600 mt-0.5">
-                      {process.description}
-                    </div>
-                  )}
-              </div>
-              <div>
-                {process.performer_object && (
-                  <div className="text-sm text-gray-600 mt-0.5">
-                    {t("performed_by")}: {formatName(process.performer_object)}
-                  </div>
-                )}
-                <div className="text-sm text-gray-600 mt-0.5">
-                  {t("performed_on")}:{" "}
-                  {process.time_date_time
-                    ? new Date(process.time_date_time).toLocaleString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })
-                    : "N/A"}
-                </div>
-              </div>
+          <SpecimenProcessingSteps
+            steps={existingProcessing}
+            renderAction={(process, index) => (
               <Button
-                type="button" // Explicitly set type to button
+                type="button"
                 variant="ghost"
                 size="sm"
                 className="ml-auto h-auto p-1.5"
@@ -171,8 +137,8 @@ export function ProcessSpecimen({
               >
                 <Edit className="h-4 w-4" />
               </Button>
-            </div>
-          ))}
+            )}
+          />
 
           {!hasReport && (
             <div className="space-y-2">

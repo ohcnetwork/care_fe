@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Info, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -41,15 +42,18 @@ import { Textarea } from "@/components/ui/textarea";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ScheduleEncounterDefaultsFields } from "@/pages/Scheduling/components/ScheduleEncounterDefaultsFields";
 import {
   calculateSlotDuration,
   formatAvailabilityTime,
   getSlotsPerSession,
   getTokenDuration,
 } from "@/pages/Scheduling/utils";
+import { CareTeamResponse, toCareTeamMembers } from "@/types/careTeam/careTeam";
 import {
   AvailabilityDateTime,
   SchedulableResourceType,
@@ -83,14 +87,14 @@ export default function EditScheduleTemplateSheet({
       <SheetTrigger asChild>
         {trigger || <Button variant="outline" size="sm"></Button>}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-128">
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
             {t("edit_schedule_template")}
           </SheetDescription>
         </SheetHeader>
-        <div className="overflow-auto -mx-6 px-6 pb-16">
+        <SheetBody className="bg-muted-background">
           <ScheduleTemplateEditor
             template={template}
             facilityId={facilityId}
@@ -127,7 +131,7 @@ export default function EditScheduleTemplateSheet({
             resourceType={resourceType}
             resourceId={resourceId}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );
@@ -148,6 +152,21 @@ const ScheduleTemplateEditor = ({
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+  // The list response omits the encounter defaults; only the detail has them.
+  // The key nests under the list's so saving refreshes both.
+  const { data: templateDetail } = useQuery({
+    queryKey: [
+      "schedule",
+      facilityId,
+      { resourceType, resourceId, id: template.id },
+    ],
+    queryFn: query(scheduleApis.templates.retrieve, {
+      pathParams: { facilityId, id: template.id },
+    }),
+  });
+  const savedOrganizations = templateDetail?.organizations ?? [];
+  const savedCareTeam = templateDetail?.care_team ?? [];
+
   const templateFormSchema = z
     .object({
       name: z.string().min(1, t("field_required")),
@@ -158,6 +177,8 @@ const ScheduleTemplateEditor = ({
         error: t("field_required"),
       }),
       is_public: z.boolean(),
+      organizations: z.array(z.string()),
+      care_team: z.array(z.custom<CareTeamResponse>()),
     })
     .refine(
       (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
@@ -174,7 +195,22 @@ const ScheduleTemplateEditor = ({
       valid_from: new Date(template.valid_from),
       valid_to: new Date(template.valid_to),
       is_public: template.is_public,
+      organizations: [],
+      care_team: [],
     },
+    values: templateDetail && {
+      name: templateDetail.name,
+      valid_from: new Date(templateDetail.valid_from),
+      valid_to: new Date(templateDetail.valid_to),
+      is_public: templateDetail.is_public,
+      organizations: savedOrganizations.map(({ id }) => id),
+      care_team: savedCareTeam,
+    },
+    resetOptions: { keepDirtyValues: true },
+  });
+  const [organizations, careTeam] = useWatch({
+    control: form.control,
+    name: ["organizations", "care_team"],
   });
 
   const { mutate: updateTemplate, isPending: isUpdating } = useMutation({
@@ -204,11 +240,22 @@ const ScheduleTemplateEditor = ({
   const isProcessing = isUpdating || isDeleting;
 
   function onSubmit(values: z.infer<typeof templateFormSchema>) {
+    const careTeamMembers = toCareTeamMembers(values.care_team);
+    // Saved defaults may name departments or staff no longer at the facility,
+    // which the API rejects. Send them only when edited so other changes save.
+    const organizationsChanged =
+      JSON.stringify(values.organizations) !==
+      JSON.stringify(savedOrganizations.map(({ id }) => id));
+    const careTeamChanged =
+      JSON.stringify(careTeamMembers) !==
+      JSON.stringify(toCareTeamMembers(savedCareTeam));
     updateTemplate({
       name: values.name,
       valid_from: dateQueryString(values.valid_from),
       valid_to: dateQueryString(values.valid_to),
       is_public: values.is_public,
+      ...(organizationsChanged && { organizations: values.organizations }),
+      ...(careTeamChanged && { care_team: careTeamMembers }),
     });
   }
 
@@ -301,6 +348,21 @@ const ScheduleTemplateEditor = ({
                 <FormMessage />
               </FormItem>
             )}
+          />
+
+          <ScheduleEncounterDefaultsFields
+            facilityId={facilityId}
+            organizations={organizations}
+            onOrganizationsChange={(value) =>
+              form.setValue("organizations", value, { shouldDirty: true })
+            }
+            currentOrganizations={savedOrganizations}
+            careTeam={careTeam}
+            onCareTeamChange={(value) =>
+              form.setValue("care_team", value, { shouldDirty: true })
+            }
+            // Until the saved defaults load, an edit here would replace them.
+            disabled={isProcessing || !templateDetail}
           />
 
           <div className="flex justify-end gap-2">

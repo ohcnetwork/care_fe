@@ -6,6 +6,7 @@
     "src/PluginRegistry.ts",
     "src/Locale/update_locale.js",
     "src/lib/override/index.ts",
+    "public/loading-screen.js",
     "tests/globalSetup.ts",
     "tests/setup/*.setup.ts"
   ],
@@ -18,6 +19,6 @@
     "src/Utils/decimal.ts": ["exports"]
   },
   "ignore": [".opencode/**"],
-  "ignoreUnresolved": ["__federation__", "@/supportedBrowsers"],
+  "ignoreUnresolved": ["__federation__"],
   "ignoreDependencies": ["workbox-core", "workbox-precaching", "pdfjs-dist"]
 }

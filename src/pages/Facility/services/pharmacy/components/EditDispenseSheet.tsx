@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -272,102 +273,108 @@ export function EditDispenseSheet({
         </TooltipTrigger>
         <TooltipContent>{t("edit_dispense")}</TooltipContent>
       </Tooltip>
-      <SheetContent className="sm:max-w-lg overflow-y-auto">
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>{t("edit_dispense")}</SheetTitle>
           <SheetDescription>{t("edit_dispense_description")}</SheetDescription>
         </SheetHeader>
 
-        <ExistingDispenseDetails dispense={dispense} />
+        <SheetBody>
+          <ExistingDispenseDetails dispense={dispense} />
 
-        {medication && (
-          <div className="flex flex-col gap-2">
-            <SubstitutionSheet
-              original={{
-                productKnowledge: medication.requested_product ?? null,
-                medicationName: displayMedicationName(medication),
-              }}
-              initialValue={substitution}
-              onSave={applySubstitution}
-              onClear={() => applySubstitution(null)}
-              trigger={
-                <Button variant="outline" disabled={isSaving} className="w-fit">
-                  <ReplaceIcon />
-                  {t("substitute")}
-                </Button>
-              }
-            />
+          {medication && (
+            <div className="flex flex-col gap-2">
+              <SubstitutionSheet
+                original={{
+                  productKnowledge: medication.requested_product ?? null,
+                  medicationName: displayMedicationName(medication),
+                }}
+                initialValue={substitution}
+                onSave={applySubstitution}
+                onClear={() => applySubstitution(null)}
+                trigger={
+                  <Button
+                    variant="outline"
+                    disabled={isSaving}
+                    className="w-fit"
+                  >
+                    <ReplaceIcon />
+                    {t("substitute")}
+                  </Button>
+                }
+              />
 
-            {substitution && (
-              <div className="flex flex-col gap-1 rounded-md border border-orange-200 bg-orange-50 p-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <Badge variant="orange">{t("substituted")}</Badge>
-                  <span className="font-semibold text-gray-900 wrap-anywhere">
-                    {substitution.substitutedProductKnowledge.name}
+              {substitution && (
+                <div className="flex flex-col gap-1 rounded-md border border-orange-200 bg-orange-50 p-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="orange">{t("substituted")}</Badge>
+                    <span className="font-semibold text-gray-900 wrap-anywhere">
+                      {substitution.substitutedProductKnowledge.name}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-600">
+                    {getSubstitutionTypeDisplay(t, substitution.type)}
+                    <span className="mx-1.5 text-gray-400">·</span>
+                    {getSubstitutionReasonDisplay(t, substitution.reason)}
                   </span>
                 </div>
-                <span className="text-xs text-gray-600">
-                  {getSubstitutionTypeDisplay(t, substitution.type)}
-                  <span className="mx-1.5 text-gray-400">·</span>
-                  {getSubstitutionReasonDisplay(t, substitution.reason)}
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-4">
+            <div className="flex flex-col gap-2 w-full">
+              <Label>{t("select_lot")}</Label>
+              <DispenseLotSelector
+                facilityId={facilityId}
+                locationId={locationId}
+                productKnowledgeId={effectivePk.id}
+                value={lot ?? undefined}
+                selected={lot ? [lot] : []}
+                onChange={(items) => {
+                  // Single-lot behaviour: keep the newly toggled lot (if any),
+                  // carrying over the entered quantity.
+                  const next =
+                    items.find((i) => i.item.id !== lot?.item.id) ?? items[0];
+                  setLot(
+                    next
+                      ? { ...next, quantity: lot?.quantity ?? next.quantity }
+                      : null,
+                  );
+                }}
+                disabled={isSaving}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="edit-dispense-quantity">{t("quantity")}</Label>
+              <Input
+                id="edit-dispense-quantity"
+                type="number"
+                min={0}
+                max={maxQuantity}
+                value={lot?.quantity ?? ""}
+                onChange={(e) =>
+                  lot &&
+                  setLot({
+                    ...lot,
+                    quantity: e.target.value ? roundWhole(e.target.value) : "",
+                  })
+                }
+                className="w-28"
+                placeholder="0"
+                disabled={isSaving || !lot}
+              />
+              {lot && !isQuantityValid && (
+                <span className="text-sm text-red-600">
+                  {isPositive(lot.quantity || "0")
+                    ? t("insufficient_stock")
+                    : t("quantity_must_be_greater_than_zero")}
                 </span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        )}
-
-        <div className="flex gap-3 py-4">
-          <div className="flex flex-col gap-2 w-full">
-            <Label>{t("select_lot")}</Label>
-            <DispenseLotSelector
-              facilityId={facilityId}
-              locationId={locationId}
-              productKnowledgeId={effectivePk.id}
-              value={lot ?? undefined}
-              selected={lot ? [lot] : []}
-              onChange={(items) => {
-                // Single-lot behaviour: keep the newly toggled lot (if any),
-                // carrying over the entered quantity.
-                const next =
-                  items.find((i) => i.item.id !== lot?.item.id) ?? items[0];
-                setLot(
-                  next
-                    ? { ...next, quantity: lot?.quantity ?? next.quantity }
-                    : null,
-                );
-              }}
-              disabled={isSaving}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-dispense-quantity">{t("quantity")}</Label>
-            <Input
-              id="edit-dispense-quantity"
-              type="number"
-              min={0}
-              max={maxQuantity}
-              value={lot?.quantity ?? ""}
-              onChange={(e) =>
-                lot &&
-                setLot({
-                  ...lot,
-                  quantity: e.target.value ? roundWhole(e.target.value) : "",
-                })
-              }
-              className="w-28"
-              placeholder="0"
-              disabled={isSaving || !lot}
-            />
-            {lot && !isQuantityValid && (
-              <span className="text-sm text-red-600">
-                {isPositive(lot.quantity || "0")
-                  ? t("insufficient_stock")
-                  : t("quantity_must_be_greater_than_zero")}
-              </span>
-            )}
-          </div>
-        </div>
+        </SheetBody>
 
         <SheetFooter>
           <Button
@@ -427,7 +434,7 @@ function ExistingDispenseDetails({
     !!prescribedName && prescribedName !== dispensedName;
 
   return (
-    <div className="my-4 flex flex-col gap-3 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
+    <div className="mb-4 flex flex-col gap-3 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
       {/* Dispensed medicine (with substitution context) + lot & quantity */}
       <div className="flex flex-col gap-0.5">
         {isDifferentFromPrescribed && (

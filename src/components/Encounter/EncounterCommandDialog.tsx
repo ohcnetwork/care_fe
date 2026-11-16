@@ -1,4 +1,5 @@
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import {
   CommandDialog,
   CommandEmpty,
@@ -9,6 +10,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import { Kbd } from "@/components/ui/kbd";
 import { useShortcutDisplay } from "@/context/ShortcutContext";
 import {
   ArrowBigRight,
@@ -22,17 +24,21 @@ import {
   Pill,
   Plus,
   RotateCcw,
+  Scissors,
   Users,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
-import { useCareApps } from "@/hooks/useCareApps";
+import { useCareAppTabs, useCareApps } from "@/hooks/useCareApps";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
+import { parseEncounterWorkspace } from "@/pages/Encounters/workspace/parseEncounterWorkspace";
+import { useEncounterWorkspaces } from "@/pages/Encounters/workspace/useEncounterWorkspaces";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { SYSTEM_PAGE_KEYS } from "@/types/workspace/encounterWorkspace";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -57,6 +63,8 @@ interface EncounterCommandDialogProps {
   trigger?: React.ReactNode;
 }
 
+const WORKSPACE_PAGE_PREFIX = "workspace-page-";
+
 export function EncounterCommandDialog({
   encounter,
   open,
@@ -66,6 +74,7 @@ export function EncounterCommandDialog({
   const {
     canWriteSelectedEncounter,
     canRestartSelectedEncounter,
+    selectedEncounterPermissions,
     actions,
     selectedEncounterId,
     primaryEncounterId,
@@ -73,6 +82,36 @@ export function EncounterCommandDialog({
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const { defaults, list, workspace } = useEncounterWorkspaces(
+    encounter.encounter_class,
+  );
+  // Serialized so the memos below compare plugin tab keys by value.
+  const pluginTabKeys = JSON.stringify(
+    Object.keys(useCareAppTabs<object>("encounterTabs")),
+  );
+  // Without a workspace the standard tabs apply, so every page is offered.
+  const visiblePages = useMemo(() => {
+    if (!workspace) return undefined;
+    const pages = parseEncounterWorkspace(workspace.template, [
+      ...SYSTEM_PAGE_KEYS,
+      ...(JSON.parse(pluginTabKeys) as string[]),
+    ]).pages.filter((page) => !page.hidden);
+    return {
+      systemKeys: new Set(
+        pages.flatMap((page) => (page.kind === "system" ? [page.key] : [])),
+      ),
+      customPages: pages.flatMap((page) =>
+        page.kind === "custom" ? [{ key: page.key, title: page.title }] : [],
+      ),
+    };
+  }, [workspace, pluginTabKeys]);
+  const isPageVisible = useCallback(
+    (pageKey: string) => !visiblePages || visiblePages.systemKeys.has(pageKey),
+    [visiblePages],
+  );
+  // Referrals depends on the workspace, so wait for it instead of offering a dead end.
+  const canNavigateToReferrals =
+    !defaults.isLoading && !list.isLoading && isPageVisible("referrals");
 
   const { data: questionnaires, isLoading } = useQuery({
     queryKey: ["questionnaires", search, "encounter"],
@@ -85,11 +124,15 @@ export function EncounterCommandDialog({
     }),
   });
 
-  useEffect(() => {
-    if (!open) {
-      setSearch("");
-    }
-  }, [open]);
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (!nextOpen) {
+        setSearch("");
+      }
+      onOpenChange(nextOpen);
+    },
+    [onOpenChange],
+  );
 
   const getShortcutDisplay = useShortcutDisplay();
 
@@ -121,10 +164,13 @@ export function EncounterCommandDialog({
         selectedEncounterId !== primaryEncounterId
       ) {
         const separator = path.includes("?") ? "&" : "?";
-        return `${baseUrl}${separator}selectedEncounter=${selectedEncounterId}`;
+        return appendReferralNativeContext(
+          `${baseUrl}${separator}selectedEncounter=${selectedEncounterId}`,
+          window.location.search,
+        );
       }
 
-      return baseUrl;
+      return appendReferralNativeContext(baseUrl, window.location.search);
     },
     [encounter, selectedEncounterId, primaryEncounterId],
   );
@@ -143,6 +189,8 @@ export function EncounterCommandDialog({
           navigate(buildEncounterUrl("/questionnaire/symptom")),
         "add-diagnosis": () =>
           navigate(buildEncounterUrl("/questionnaire/diagnosis")),
+        "add-procedure": () =>
+          navigate(buildEncounterUrl("/questionnaire/procedure")),
         "update-encounter": () =>
           navigate(buildEncounterUrl("/questionnaire/encounter")),
         "service-requests": () =>
@@ -159,8 +207,10 @@ export function EncounterCommandDialog({
         plots: () => navigate(buildEncounterUrl("/plots")),
         observations: () => navigate(buildEncounterUrl("/observations")),
         medicines: () => navigate(buildEncounterUrl("/medicines")),
+        immunizations: () => navigate(buildEncounterUrl("/immunizations")),
         responses: () => navigate(buildEncounterUrl("/responses")),
         files: () => navigate(buildEncounterUrl("/files")),
+        referrals: () => navigate(buildEncounterUrl("/referrals")),
         notes: () => navigate(buildEncounterUrl("/notes")),
         devices: () => navigate(buildEncounterUrl("/devices")),
         consents: () => navigate(buildEncounterUrl("/consents")),
@@ -180,10 +230,17 @@ export function EncounterCommandDialog({
         return;
       }
 
+      if (actionId.startsWith(WORKSPACE_PAGE_PREFIX)) {
+        navigate(
+          buildEncounterUrl(`/${actionId.slice(WORKSPACE_PAGE_PREFIX.length)}`),
+        );
+        return;
+      }
+
       // Handle dynamic questionnaire actions
       if (actionId.startsWith("questionnaire-")) {
-        const slug = actionId.replace("questionnaire-", "");
-        navigate(buildEncounterUrl(`/questionnaire/${slug}`));
+        const questionnaireId = actionId.replace("questionnaire-", "");
+        navigate(buildEncounterUrl(`/questionnaire/${questionnaireId}`));
       }
     },
     [navigate, buildEncounterUrl, actions, encounter],
@@ -233,6 +290,12 @@ export function EncounterCommandDialog({
             icon: <Plus />,
           },
           {
+            id: "add-procedure",
+            label: t("add_procedure"),
+            shortcut: getShortcutDisplay("add-procedure"),
+            icon: <Scissors />,
+          },
+          {
             id: "add-service-request",
             label: t("service_request"),
             shortcut: getShortcutDisplay("add-service-request"),
@@ -273,12 +336,6 @@ export function EncounterCommandDialog({
     // Add write actions only when user has write permission
     if (canWriteSelectedEncounter) {
       actionItems.push(
-        {
-          id: "consents",
-          label: t("manage_consents"),
-          shortcut: getShortcutDisplay("consents"),
-          icon: <NotebookPen />,
-        },
         {
           id: "mark-as-completed",
           label: encounterRequiresDischarge(encounter)
@@ -328,77 +385,79 @@ export function EncounterCommandDialog({
       items: actionItems,
     });
 
-    // Go to navigation - always available
+    if (
+      canNavigateToReferrals &&
+      (selectedEncounterPermissions.canReadReferral ||
+        selectedEncounterPermissions.canCreateReferral)
+    ) {
+      actionItems.push({
+        id: "referrals",
+        label: t("referrals"),
+        icon: <ArrowBigRight />,
+      });
+    }
+
+    // Go to navigation - limited to pages visible in the active workspace
+    const goToItems: (ActionItem & { pageKey: string })[] = [
+      {
+        id: "encounter-overview",
+        pageKey: "updates",
+        label: t("ENCOUNTER_TAB__updates"),
+      },
+      { id: "plots", pageKey: "plots", label: t("ENCOUNTER_TAB__plots") },
+      {
+        id: "observations",
+        pageKey: "observations",
+        label: t("observations"),
+      },
+      { id: "medicines", pageKey: "medicines", label: t("medicines") },
+      {
+        id: "immunizations",
+        pageKey: "immunizations",
+        label: t("immunizations"),
+      },
+      { id: "responses", pageKey: "responses", label: t("responses") },
+      { id: "files", pageKey: "files", label: t("files") },
+      { id: "notes", pageKey: "notes", label: t("notes") },
+      { id: "devices", pageKey: "devices", label: t("devices") },
+      { id: "consents", pageKey: "consents", label: t("consents") },
+      {
+        id: "service-requests",
+        pageKey: "service_requests",
+        label: t("service_requests"),
+      },
+      {
+        id: "diagnostic-reports",
+        pageKey: "diagnostic_reports",
+        label: t("ENCOUNTER_TAB__diagnostic_reports"),
+      },
+    ];
+
     groups.push({
       group: t("go_to"),
-      items: [
-        {
-          id: "encounter-overview",
-          label: t("ENCOUNTER_TAB__updates"),
-          shortcut: getShortcutDisplay("encounter-overview"),
+      items: goToItems
+        .filter(({ pageKey }) => isPageVisible(pageKey))
+        .map(({ pageKey: _pageKey, ...item }) => ({
+          ...item,
+          shortcut: getShortcutDisplay(item.id),
           icon: <ArrowBigRight />,
-        },
-        {
-          id: "plots",
-          label: t("ENCOUNTER_TAB__plots"),
-          shortcut: getShortcutDisplay("plots"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "observations",
-          label: t("observations"),
-          shortcut: getShortcutDisplay("observations"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "medicines",
-          label: t("medicines"),
-          shortcut: getShortcutDisplay("medicines"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "responses",
-          label: t("responses"),
-          shortcut: getShortcutDisplay("responses"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "files",
-          label: t("files"),
-          shortcut: getShortcutDisplay("files"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "notes",
-          label: t("notes"),
-          shortcut: getShortcutDisplay("notes"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "devices",
-          label: t("devices"),
-          shortcut: getShortcutDisplay("devices"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "consents",
-          label: t("consents"),
-          shortcut: getShortcutDisplay("consents"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "service-requests",
-          label: t("service_requests"),
-          shortcut: getShortcutDisplay("service-requests"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "diagnostic-reports",
-          label: t("ENCOUNTER_TAB__diagnostic_reports"),
-          shortcut: getShortcutDisplay("diagnostic-reports"),
-          icon: <ArrowBigRight />,
-        },
-      ],
+        }))
+        .concat(
+          (JSON.parse(pluginTabKeys) as string[])
+            .filter(isPageVisible)
+            .map((key) => ({
+              id: `${WORKSPACE_PAGE_PREFIX}${key}`,
+              label: t(`ENCOUNTER_TAB__${key}`),
+              shortcut: undefined,
+              icon: <ArrowBigRight />,
+            })),
+          (visiblePages?.customPages ?? []).map((page) => ({
+            id: `${WORKSPACE_PAGE_PREFIX}${page.key}`,
+            label: page.title,
+            shortcut: undefined,
+            icon: <ArrowBigRight />,
+          })),
+        ),
     });
 
     // Questionnaires - only show when user has write permission
@@ -407,10 +466,10 @@ export function EncounterCommandDialog({
         group: t("questionnaire"),
         items: [
           ...(questionnaires?.results || []).map((option) => ({
-            id: `questionnaire-${option.slug}`,
+            id: `questionnaire-${option.id}`,
             label: option.title,
             icon: <NotebookPen />,
-            shortcut: getShortcutDisplay(`questionnaire-${option.slug}`),
+            shortcut: getShortcutDisplay(`questionnaire-${option.id}`),
           })),
         ],
       });
@@ -420,12 +479,16 @@ export function EncounterCommandDialog({
   }, [
     t,
     questionnaires,
-    search,
     getShortcutDisplay,
     canWriteSelectedEncounter,
     canRestartSelectedEncounter,
-    encounter.encounter_class,
-    encounter.status,
+    canNavigateToReferrals,
+    isPageVisible,
+    visiblePages,
+    pluginTabKeys,
+    encounter,
+    selectedEncounterPermissions.canReadReferral,
+    selectedEncounterPermissions.canCreateReferral,
   ]);
 
   const findRecentActions = useCallback(
@@ -459,9 +522,9 @@ export function EncounterCommandDialog({
     (actionId: string) => {
       addRecentAction(actionId);
       handleAction(actionId);
-      onOpenChange(false);
+      handleOpenChange(false);
     },
-    [handleAction, onOpenChange, addRecentAction],
+    [handleAction, handleOpenChange, addRecentAction],
   );
 
   const careApps = useCareApps();
@@ -471,17 +534,17 @@ export function EncounterCommandDialog({
       {trigger}
       <CommandDialog
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={handleOpenChange}
         className="md:max-w-2xl"
       >
-        <div className="border-b border-gray-100 shadow-xs">
+        <div>
           <CommandInput
             placeholder={t("search_encounter_command")}
-            className="border-none focus:ring-0 text-base sm:text-sm"
+            className="text-base border-none focus:ring-0 sm:text-sm"
             onValueChange={setSearch}
           />
         </div>
-        <CommandList className="h-[80vh] max-h-[80vh] w-full">
+        <CommandList className="w-full md:max-h-[min(24rem,calc(75dvh-8rem))]">
           <CommandEmpty>
             {isLoading && search.length > 0 ? (
               <div className="space-y-2">
@@ -499,15 +562,17 @@ export function EncounterCommandDialog({
                     key={`${group.group}-${action.id}`}
                     value={`${group.group} ${action.id} ${action.label}`}
                     onSelect={() => handleSelect(action.id)}
-                    className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
+                    className="flex justify-between rounded-sm cursor-pointer hover:bg-soft-background aria-selected:bg-muted"
                     autoFocus={false}
                     disabled={action.disabled}
                   >
                     {action.icon}
-                    <span className="flex-1">{action.label}</span>
+                    <span className="min-w-0 flex-1 truncate">
+                      {action.label}
+                    </span>
                     {action.shortcut && (
-                      <CommandShortcut className="ml-2 text-xs text-gray-500 bg-white border border-gray-200 shadow-xs px-1.5 py-0.5 rounded">
-                        {action.shortcut}
+                      <CommandShortcut className="ml-2 tracking-normal">
+                        <Kbd>{action.shortcut}</Kbd>
                       </CommandShortcut>
                     )}
                   </CommandItem>
@@ -524,7 +589,7 @@ export function EncounterCommandDialog({
               <PLUGIN_Component
                 __name="EncounterActions"
                 encounter={encounter}
-                className="rounded-md cursor-pointer text-gray-600 hover:bg-gray-100 flex justify-baseline aria-selected:bg-gray-100 w-full p-2"
+                className="flex w-full p-2 text-muted-foreground rounded-md cursor-pointer hover:bg-soft-background justify-baseline aria-selected:bg-muted"
               />
             </CommandGroup>
           )}

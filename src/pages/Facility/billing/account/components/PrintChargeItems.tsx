@@ -1614,7 +1614,7 @@ export const PrintChargeItems = (props: {
                       {/* Account Summary Section */}
                       {account && (
                         <div className="overflow-hidden mt-4">
-                          <Table className="w-full border [&_th]:text-xs [&_td]:text-xs">
+                          <Table className="w-full [&_th]:text-xs [&_td]:text-xs">
                             <TableHeader className="[&_tr]:border [&_th]:p-0.5 [&_th]:h-auto">
                               <TableRow className="bg-transparent hover:bg-transparent">
                                 <TableHead className="text-center font-bold">

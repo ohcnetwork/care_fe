@@ -7,7 +7,7 @@ import {
 } from "tests/facility/settings/activityDefinition/activityDefinition";
 import { getFieldErrorMessage } from "tests/helper/error";
 import { expectToast } from "tests/helper/ui";
-import { expectedSlug } from "tests/helper/utils";
+import { expectedSlug, getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -49,13 +49,13 @@ test.describe("Activity Definition Resource Category List", () => {
 
     const slugInput = page.getByPlaceholder(/enter category slug/i);
     await expect(getFieldErrorMessage(slugInput)).toContainText(
-      /atleast 5.*atmost 25/i,
+      /atleast 5.*atmost 50/i,
     );
 
     await slugInput.click();
     await slugInput.fill("abc");
     await expect(getFieldErrorMessage(slugInput)).toContainText(
-      /atleast 5.*atmost 25/i,
+      /atleast 5.*atmost 50/i,
     );
   });
 
@@ -239,4 +239,61 @@ test.describe("Activity Definition Resource Category List", () => {
 
     await expect(page.getByText(/no results/i)).toBeVisible();
   });
+});
+
+test("an obsolete category type must be explicitly replaced before saving", async ({
+  page,
+  request,
+}) => {
+  const title = `Legacy category ${faker.string.alphanumeric(8)}`;
+  const created = await request.post(
+    `${getApiUrl()}/api/v1/facility/${facilityId}/resource_category/`,
+    {
+      headers: getApiHeaders(),
+      data: {
+        title,
+        slug_value: faker.string.uuid(),
+        resource_type: "activity_definition",
+        resource_sub_type: "other",
+      },
+    },
+  );
+  expect(created.ok(), await created.text()).toBe(true);
+  const category = (await created.json()) as { slug: string };
+  await page.reload();
+  const card = page
+    .locator('[data-slot="card"]')
+    .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
+  await card.getByRole("button").click();
+  const sheet = page.getByRole("dialog");
+  const save = sheet.getByRole("button", {
+    name: "Update Category",
+    exact: true,
+  });
+  await expect(save).toBeDisabled();
+  await expect(
+    sheet.getByText(/saved category type is no longer available/),
+  ).toBeVisible();
+  await sheet.getByRole("combobox").click();
+  await page.getByRole("option", { name: "Other", exact: true }).click();
+  await sheet
+    .getByRole("textbox", { name: "Name", exact: true })
+    .fill(`${title} renamed`);
+  const saved = page.waitForResponse(
+    (response) =>
+      response.request().method() === "PUT" &&
+      response.url().endsWith(`/resource_category/${category.slug}/`),
+  );
+  await expect(save).toBeEnabled();
+  await save.click();
+  const response = await saved;
+  expect(response.ok(), await response.text()).toBe(true);
+  expect(response.request().postDataJSON().resource_sub_type).toBe("all:other");
+  await expect(
+    page.getByText(`${title} renamed`, { exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByText(`${title} renamed`, { exact: true }),
+  ).toBeVisible();
 });

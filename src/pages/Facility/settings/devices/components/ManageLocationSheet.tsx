@@ -10,8 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -89,7 +91,7 @@ export default function ManageLocationSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md overflow-auto">
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>{t("associate_location")}</SheetTitle>
           <SheetDescription>
@@ -97,84 +99,92 @@ export default function ManageLocationSheet({
           </SheetDescription>
         </SheetHeader>
 
-        {device?.current_location ? (
-          <div className="mt-6 space-y-4">
-            <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
-              <div className="space-y-1">
-                <div className="text-sm font-medium">
-                  {t("current_location")}
+        <SheetBody>
+          {device?.current_location ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
+                <div className="space-y-1">
+                  <div className="text-sm font-medium">
+                    {t("current_location")}
+                  </div>
+                  <Link
+                    href={`/locations/${device.current_location.id}`}
+                    className="text-sm text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
+                  >
+                    {device.current_location.name}
+                    <CareIcon
+                      icon="l-external-link-alt"
+                      className="size-3 opacity-50"
+                    />
+                  </Link>
                 </div>
-                <Link
-                  href={`/locations/${device.current_location.id}`}
-                  className="text-sm text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDisassociate}
+                  disabled={isPending}
                 >
-                  {device.current_location.name}
-                  <CareIcon
-                    icon="l-external-link-alt"
-                    className="size-3 opacity-50"
-                  />
-                </Link>
+                  {isPending ? t("disassociating") : t("disassociate")}
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDisassociate}
-                disabled={isPending}
-              >
-                {isPending ? t("disassociating") : t("disassociate")}
-              </Button>
             </div>
+          ) : (
+            <div className="space-y-4">
+              <LocationSearch
+                facilityId={facilityId}
+                onSelect={setSelectedLocation}
+                value={selectedLocation}
+              />
+            </div>
+          )}
+
+          <Separator className="my-6" />
+
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium">{t("location_history")}</h4>
+
+            {isLoading ? (
+              <div className="grid gap-4">
+                <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
+              </div>
+            ) : (
+              <div>
+                {locationsData?.results?.length === 0 ? (
+                  <div className="p-2">
+                    <div className="h-full space-y-2 rounded-lg bg-white px-4 py-8 border border-secondary-300">
+                      <div className="flex w-full items-center justify-center">
+                        <span className="text-sm text-gray-500">
+                          {t("no_locations_found")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <ul className="space-y-4">
+                    {locationsData?.results?.map((locationData) => (
+                      <li key={locationData.id} className="group">
+                        <DeviceLocationTimelineCard
+                          locationData={locationData}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="mt-6 space-y-4">
-            <LocationSearch
-              facilityId={facilityId}
-              onSelect={setSelectedLocation}
-              value={selectedLocation}
-            />
+        </SheetBody>
+
+        {!device?.current_location && (
+          <SheetFooter>
             <Button
               onClick={handleSubmit}
               disabled={!selectedLocation || isPending}
-              className="w-full mt-4"
             >
               {isPending ? t("associating") : t("associate")}
             </Button>
-          </div>
+          </SheetFooter>
         )}
-
-        <Separator className="my-6" />
-
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium">{t("location_history")}</h4>
-
-          {isLoading ? (
-            <div className="grid gap-4">
-              <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
-            </div>
-          ) : (
-            <div>
-              {locationsData?.results?.length === 0 ? (
-                <div className="p-2">
-                  <div className="h-full space-y-2 rounded-lg bg-white px-4 py-8 border border-secondary-300">
-                    <div className="flex w-full items-center justify-center">
-                      <span className="text-sm text-gray-500">
-                        {t("no_locations_found")}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <ul className="space-y-4">
-                  {locationsData?.results?.map((locationData) => (
-                    <li key={locationData.id} className="group">
-                      <DeviceLocationTimelineCard locationData={locationData} />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-        </div>
       </SheetContent>
     </Sheet>
   );

@@ -4,6 +4,13 @@ import { expectToast } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+/** The facility overview shows its type on the line under the name heading. */
+function facilityTypeLine(page: Page, facilityName: string) {
+  return page
+    .getByRole("heading", { name: facilityName, exact: true })
+    .locator("xpath=following-sibling::p[1]");
+}
+
 test.describe("Facility Creation", () => {
   const FACILITY_TYPES = [
     "Primary Health Centres",
@@ -127,9 +134,7 @@ test.describe("Facility Creation", () => {
     await page.getByRole("combobox", { name: "Features" }).click();
 
     for (const feature of facilityFeatures) {
-      await page
-        .getByRole("option", { name: new RegExp(`Select ${feature}`) })
-        .click();
+      await page.getByRole("option", { name: feature, exact: true }).click();
     }
     // Click the Done button to confirm selection
     await page.getByRole("button", { name: "Done" }).click();
@@ -175,9 +180,7 @@ test.describe("Facility Creation", () => {
     await expect(
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: facilityType }),
-    ).toBeVisible();
+    await expect(facilityTypeLine(page, facilityName)).toHaveText(facilityType);
     await expect(page.getByText(address)).toBeVisible();
     await expect(page.getByText(description)).toBeVisible();
     await expect(
@@ -246,9 +249,7 @@ test.describe("Facility Creation", () => {
     await expect(
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: facilityType }),
-    ).toBeVisible();
+    await expect(facilityTypeLine(page, facilityName)).toHaveText(facilityType);
     await expect(page.getByText(address)).toBeVisible();
     await expect(
       page.getByRole("link", { name: `Call +91 ${phoneNumber}` }),

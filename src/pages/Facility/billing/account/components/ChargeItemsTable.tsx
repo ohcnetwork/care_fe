@@ -1,4 +1,4 @@
-import { CheckedState } from "@radix-ui/react-checkbox";
+import { CheckedState } from "@/components/ui/checkbox";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRightLeft,
@@ -434,7 +434,7 @@ function ChargeItemsTable({
         />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
-          <Table className="rounded-lg border shadow-sm w-full bg-white">
+          <Table className="shadow-sm w-full bg-white">
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10">

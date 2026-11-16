@@ -35,6 +35,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { Code, CodeSchema } from "@/types/base/code/code";
+import { slugValueSchema } from "@/types/base/slug/schema";
 import {
   ContainerSpec,
   Preference,
@@ -48,7 +49,7 @@ import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefini
 import { zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+import { generateSlugValue } from "@/Utils/slug";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
 
@@ -156,15 +157,7 @@ function SpecimenDefinitionFormContent({
   facilityId,
   specimenSlug,
   initialData,
-  onSuccess = () => {
-    if (specimenSlug) {
-      navigate(
-        `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`,
-      );
-    } else {
-      navigate(`/facility/${facilityId}/settings/specimen_definitions`);
-    }
-  },
+  onSuccess,
   onCancel = () => {
     if (specimenSlug) {
       navigate(
@@ -180,10 +173,7 @@ function SpecimenDefinitionFormContent({
 
   const formSchema = z.object({
     title: z.string().min(1, t("field_required")),
-    slug_value: z
-      .string()
-      .min(5, t("character_count_validation", { min: 5, max: 25 }))
-      .max(25, t("character_count_validation", { min: 5, max: 25 })),
+    slug_value: slugValueSchema(),
     status: z.enum(SpecimenDefinitionStatus),
     description: z.string().min(1, t("field_required")),
     derived_from_uri: z.url({ message: t("field_required") }).optional(),
@@ -233,7 +223,7 @@ function SpecimenDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || "", 25), {
+        form.setValue("slug_value", generateSlugValue(value.title), {
           shouldValidate: true,
         });
       }
@@ -288,7 +278,11 @@ function SpecimenDefinitionFormContent({
         queryClient.invalidateQueries({
           queryKey: ["specimenDefinitions", facilityId],
         });
-        onSuccess?.();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate(`/facility/${facilityId}/settings/specimen_definitions`);
+        }
       },
     });
 
@@ -297,12 +291,18 @@ function SpecimenDefinitionFormContent({
       mutationFn: mutate(specimenDefinitionApi.updateSpecimenDefinition, {
         pathParams: { facilityId, specimenSlug },
       }),
-      onSuccess: () => {
+      onSuccess: (updated: SpecimenDefinitionRead) => {
         toast.success(t("specimen_definition_updated"));
         queryClient.invalidateQueries({
           queryKey: ["specimenDefinitions", facilityId],
         });
-        onSuccess?.();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate(
+            `/facility/${facilityId}/settings/specimen_definitions/${updated.slug}`,
+          );
+        }
       },
     });
 

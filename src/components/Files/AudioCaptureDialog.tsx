@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -139,13 +140,15 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
           <h2 className="font-bold text-white">{t("audio__record")}</h2>
           <div className="text-secondary-200">{t("audio__record_helper")}</div>
           <div className="mt-4" id="start-recording">
-            <button
+            <Button
+              variant="ghost"
+              type="button"
               onClick={handleStartRecording}
-              className="inline-flex aspect-square w-32 items-center justify-center rounded-full bg-white/10 text-6xl text-white hover:bg-white/20"
-              aria-label="Start Recording"
+              className="h-auto p-0 inline-flex aspect-square w-32 items-center justify-center rounded-full bg-white/10 text-6xl text-white hover:bg-white/20"
+              aria-label={t("audio__record")}
             >
               <CareIcon icon="l-microphone" />
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -161,14 +164,16 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
             {t("audio__recording_helper_2")}
           </div>
           <div className="mt-4">
-            <button
+            <Button
+              variant="ghost"
+              type="button"
               onClick={handleStopRecording}
               id="stop-recording"
-              className="inline-flex aspect-square w-32 animate-pulse items-center justify-center rounded-full bg-red-500/20 text-2xl text-red-500 hover:bg-red-500/30"
-              aria-label="Stop Recording"
+              className="h-auto p-0 inline-flex aspect-square w-32 animate-pulse items-center justify-center rounded-full bg-red-500/20 text-2xl text-red-500 hover:bg-red-500/30"
+              aria-label={t("stop_recording")}
             >
               {timer.time}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -188,35 +193,41 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
             )}
           </div>
           <div className="mt-4 inline-flex items-center gap-2">
-            <button
+            <Button
+              variant="default"
+              type="button"
               onClick={handleSubmit}
-              className="rounded-md bg-primary-500 px-4 py-2 text-white transition-all hover:bg-primary-600"
+              className="h-auto rounded-md bg-primary-500 px-4 py-2 text-white transition-all hover:bg-primary-600"
               id="save-recording"
             >
               <CareIcon icon="l-check" className="mr-2 text-lg" />
               {t("done")}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              type="button"
               onClick={handleRestartRecording}
-              className="rounded-md bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20"
+              className="h-auto rounded-md bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20"
             >
               <CareIcon icon="l-history" className="mr-2 text-lg" />
               {t("audio__start_again")}
-            </button>
+            </Button>
           </div>
         </div>
       )}
-      <button
+      <Button
+        variant="ghost"
+        type="button"
         onClick={() => {
           handleStopRecording();
           onHide();
           resetRecording();
         }}
-        className="rounded-md bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20"
+        className="h-auto rounded-md bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20"
       >
         <CareIcon icon="l-times" className="mr-2 text-lg" />
         {t("cancel")}
-      </button>
+      </Button>
     </div>
   );
 }

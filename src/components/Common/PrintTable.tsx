@@ -93,12 +93,7 @@ export default function PrintTable({
   };
 
   return (
-    <div
-      className={cn(
-        "overflow-hidden rounded border border-gray-200",
-        tableClassName,
-      )}
-    >
+    <div className={cn("overflow-hidden rounded-md", tableClassName)}>
       <Table className="w-full">
         <TableHeader>
           <TableRow className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200">

@@ -216,7 +216,7 @@ export function PrintInvoiceBase({ facilityId, invoiceId }: PrintInvoiceProps) {
             </div>
 
             {/* Items Table */}
-            <div className="rounded-t-sm border border-gray-300">
+            <div className="rounded-t-sm border border-gray-300 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
               <Table>
                 <TableHeader>
                   <TableRow className="border-b border-gray-200">
@@ -487,7 +487,7 @@ export function PrintInvoiceBase({ facilityId, invoiceId }: PrintInvoiceProps) {
               (p) => p.status === PaymentReconciliationStatus.active,
             ).length > 0 && (
               <>
-                <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2">
+                <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
                   <Table>
                     <TableHeader>
                       <TableRow className="border-b border-gray-200">
@@ -583,7 +583,7 @@ export function PrintInvoiceBase({ facilityId, invoiceId }: PrintInvoiceProps) {
               (p) => p.status === PaymentReconciliationStatus.active,
             ).length > 0 && (
               <>
-                <div className="border border-gray-300 rounded-md space-y-2">
+                <div className="border border-gray-300 rounded-md space-y-2 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
                   <div className="mt-2 px-3 font-medium">
                     {t("credit_notes_issued_against_this_invoice")}
                   </div>

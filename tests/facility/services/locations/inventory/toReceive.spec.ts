@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { openFacilityService } from "tests/facility/services/helpers";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -15,12 +16,9 @@ test.describe("Facility To-Receive Orders Inventory Flow", () => {
     if (isInitialized) return;
     const facilityId = getFacilityId();
     const servicesUrl = `/facility/${facilityId}/services/`;
-    await page.goto(servicesUrl);
-
-    await page.getByRole("link", { name: "Main Pharmacy" }).click();
+    await openFacilityService(page, servicesUrl, "Main Pharmacy");
     await page.getByRole("link", { name: "Pharmacy" }).click();
-    await page.goto(servicesUrl);
-    await page.getByRole("link", { name: "Pathology Lab" }).click();
+    await openFacilityService(page, servicesUrl, "Pathology Lab");
     await page.getByRole("link", { name: "Bio-Chemistry" }).click();
     bioChemLabLocationId =
       page

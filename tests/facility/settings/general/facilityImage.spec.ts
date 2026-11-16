@@ -19,7 +19,7 @@ test.describe("Facility Image Settings", () => {
     await fileInput.setInputFiles("tests/fixtures/images/test-image.jpg");
 
     await page.getByRole("button", { name: "Crop" }).click();
-    await page.getByRole("button", { name: "Upload" }).click();
+    await page.getByRole("button", { name: "Upload", exact: true }).click();
 
     await expect(page.getByText("Cover image updated")).toBeVisible();
 
@@ -38,7 +38,7 @@ test.describe("Facility Image Settings", () => {
       .setInputFiles("tests/fixtures/images/test-image.jpg");
 
     await page.getByRole("button", { name: "Crop" }).click();
-    await page.getByRole("button", { name: "Upload" }).click();
+    await page.getByRole("button", { name: "Upload", exact: true }).click();
 
     await expect(page.getByText("Cover image updated")).toBeVisible();
 
@@ -50,7 +50,7 @@ test.describe("Facility Image Settings", () => {
       .setInputFiles("tests/fixtures/images/test-image-2.jpg");
 
     await page.getByRole("button", { name: "Crop" }).click();
-    await page.getByRole("button", { name: "Upload" }).click();
+    await page.getByRole("button", { name: "Upload", exact: true }).click();
 
     await expect(page.getByText("Cover image updated")).toBeVisible();
 

@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { navigate } from "raviger";
-import { useCallback, useState } from "react";
+import { cloneElement, isValidElement, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -113,18 +114,20 @@ export function CreateDispenseSheet({
 
   // When patientId is provided, render a simple button that navigates directly
   if (patientId && preselectedPatient) {
-    const triggerElement = trigger || (
-      <Button>
+    if (isValidElement<{ onClick?: React.MouseEventHandler }>(trigger)) {
+      return cloneElement(trigger, {
+        onClick: (event) => {
+          trigger.props.onClick?.(event);
+          if (!event.defaultPrevented) handleDirectDispense();
+        },
+      });
+    }
+    return (
+      <Button onClick={handleDirectDispense}>
         <Plus className="size-4 mr-1" />
-        {t("new_dispense")}
+        {trigger || t("new_dispense")}
         <ShortcutBadge actionId="dispense-button" />
       </Button>
-    );
-
-    return (
-      <span onClick={handleDirectDispense} className="cursor-pointer">
-        {triggerElement}
-      </span>
     );
   }
 
@@ -145,7 +148,7 @@ export function CreateDispenseSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="sm:max-w-lg overflow-y-auto">
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>{t("new_dispense")}</SheetTitle>
           <SheetDescription>
@@ -157,7 +160,7 @@ export function CreateDispenseSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-6 mt-6">
+        <SheetBody>
           <PatientIdentifierSelector
             facilityId={facilityId}
             selectedPatient={selectedPatient}
@@ -165,22 +168,22 @@ export function CreateDispenseSheet({
             onClearPatient={handleClearPatient}
             onRegisterNewPatient={handleRegisterNewPatient}
           />
+        </SheetBody>
 
-          {selectedPatient && (
-            <SheetFooter className="gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-              >
-                {t("cancel")}
-              </Button>
-              <Button onClick={handleProceedToDispense}>
-                {t("proceed_to_dispense")}
-              </Button>
-            </SheetFooter>
-          )}
-        </div>
+        {selectedPatient && (
+          <SheetFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+            >
+              {t("cancel")}
+            </Button>
+            <Button onClick={handleProceedToDispense}>
+              {t("proceed_to_dispense")}
+            </Button>
+          </SheetFooter>
+        )}
       </SheetContent>
     </Sheet>
   );

@@ -24,6 +24,8 @@ import React, { useEffect, useState } from "react";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
+import { RegisteredGroupAnswerView } from "@/components/QuestionnaireV2/groups/RegisteredGroupAnswerView";
 import { cn } from "@/lib/utils";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -41,27 +43,38 @@ import {
 } from "@tanstack/react-query";
 import { t } from "i18next";
 import { BanIcon, ChevronDown, MoreVertical, Printer } from "lucide-react";
-import { Link } from "raviger";
+import { Link, useFullPath } from "raviger";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
 interface Props {
   encounterId?: string;
+  facilityId?: string;
+  title?: string;
+  showEmpty?: boolean;
+  readOnly?: boolean;
+  embedded?: boolean;
   patientId: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
   canAccess?: boolean;
   questionnaireSlug?: string;
+  authorRoleId?: string;
+  /** Only show responses submitted by this user. */
+  createdBy?: string;
+  /** Maximum total responses to show, newest first. Omit for infinite scrolling. */
+  limit?: number;
   renderItem?: (response: QuestionnaireResponse) => React.ReactNode;
   subjectType?: string;
+  presentation?: "default" | "panel";
 }
 
 export function formatValue(
   value: ResponseValue["value"],
   type: string,
 ): string {
-  if (!value) return "";
+  if (value === undefined || value === null || value === "") return "";
 
   // Handle complex objects
   if (
@@ -83,7 +96,9 @@ export function formatValue(
     case "integer":
       return typeof value === "number" ? value.toString() : value.toString();
     case "boolean":
-      return value === "true" ? t("yes") : t("no");
+      return value === true || value === "true" || value === "1"
+        ? t("yes")
+        : t("no");
     case "time":
       return value.toString().slice(0, 5);
     default:
@@ -91,194 +106,321 @@ export function formatValue(
   }
 }
 
-function QuestionGroup({
-  group,
+const hasResponseValue = (value: ResponseValue) =>
+  (value.value != null && value.value !== "") || !!value.coding;
+
+function ResponseRows({
+  questions,
   responses,
-  parentTitle = "",
-  isSingleGroup = false,
+  className,
+  presentation,
 }: {
-  group: Question;
+  questions: Question[];
   responses: QuestionnaireResponse["responses"];
-  parentTitle?: string;
-  isSingleGroup?: boolean;
+  className?: string;
+  presentation: "default" | "panel";
 }) {
   const { t } = useTranslation();
-  const hasResponses = group.questions?.some((q) => {
-    if (q.type === "group") {
-      return q.questions?.some((subQ) =>
-        responses.some((r) => r.question_id === subQ.id),
-      );
-    }
-    return responses.some((r) => r.question_id === q.id);
-  });
-
-  if (!hasResponses) return null;
-
-  const currentTitle = parentTitle
-    ? `${parentTitle} - ${group.text}`
-    : group.text;
-
-  // Filter out questions with responses and split them for two-column layout
-  const questionsWithResponses =
-    group.questions?.reduce((acc: Question[], question) => {
-      if (question.type === "structured") return acc;
-      if (question.type === "group") return acc;
-
-      const response = responses.find((r) => r.question_id === question.id);
-      if (!response) return acc;
-
-      const value = response.values[0]?.value;
-      if (!value && !response.values[0]?.coding) return acc;
-
-      acc.push(question);
-      return acc;
-    }, []) || [];
-
-  // Check if any response has long text (>100 chars)
-  const hasLongText = questionsWithResponses.some((question) => {
+  const rows = questions.flatMap((question) => {
     const response = responses.find((r) => r.question_id === question.id);
-    if (!response) return false;
-
-    const value = response.values[0]?.value;
-    const coding = response.values[0]?.coding;
-    const text = [
-      value?.toString() || "",
-      coding?.display || "",
-      coding?.code || "",
-    ].join(" ");
-
-    return text.length > 50;
+    const values = response?.values ?? [];
+    return response && values.some(hasResponseValue)
+      ? [{ question, response, values }]
+      : [];
   });
+  if (!rows.length) return null;
 
-  // Use single column if any response has long text
-  const shouldUseTwoColumns = isSingleGroup && !hasLongText;
-  const midPoint = shouldUseTwoColumns
-    ? Math.ceil(questionsWithResponses.length / 2)
-    : questionsWithResponses.length;
-  const leftQuestions = questionsWithResponses.slice(0, midPoint);
-  const rightQuestions = shouldUseTwoColumns
-    ? questionsWithResponses.slice(midPoint)
-    : [];
-
-  const renderQuestionRow = (question: Question) => {
-    const response = responses.find((r) => r.question_id === question.id);
-    if (!response) return null;
-
-    const values = response.values;
-    if (!values?.length) return null;
-
-    const hasAnyValue = values.some((v) => v.value || v.coding);
-    if (!hasAnyValue) return null;
-
+  if (presentation === "default") {
     return (
-      <TableRow key={question.id} className="flex flex-col md:table-row">
-        <TableCell className="py-1 pl-0 align-top">
-          <div className="text-sm text-gray-600 break-words whitespace-normal">
-            {question.text}
-          </div>
-        </TableCell>
-        <TableCell
-          className="py-1 pr-0 align-top"
-          colSpan={response.note ? 1 : 2}
+      <Table className={className}>
+        <TableBody>
+          {rows.map(({ question, response, values }) => (
+            <TableRow key={question.id}>
+              <TableCell className="w-2/5 align-top text-sm text-gray-600">
+                {question.text}
+              </TableCell>
+              <TableCell className="align-top text-sm font-medium whitespace-pre-wrap text-gray-900">
+                {values.map((val, idx) => (
+                  <React.Fragment key={idx}>
+                    {idx > 0 && ", "}
+                    {formatValue(val.value, question.type)}
+                    {val.unit && (
+                      <span className="ml-1 font-normal text-gray-600">
+                        {val.unit.code}
+                      </span>
+                    )}
+                    {val.coding && (
+                      <span className="ml-1 font-normal text-gray-600">
+                        {val.coding.display} ({val.coding.code})
+                      </span>
+                    )}
+                  </React.Fragment>
+                ))}
+                {response.note && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2 h-6 px-2 text-xs"
+                      >
+                        {t("see_note")}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="max-w-[90vw] p-3">
+                      <p className="text-xs whitespace-pre-wrap text-gray-700">
+                        {response.note}
+                      </p>
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  }
+
+  return (
+    <dl className={cn("min-w-0 divide-y divide-gray-100", className)}>
+      {rows.map(({ question, response, values }) => (
+        <div
+          key={question.id}
+          className="grid gap-x-4 gap-y-0.5 py-1.5 @md/response-card:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
         >
-          <div className="text-sm font-medium break-words whitespace-pre-wrap">
-            {values.map((val, idx) => (
-              <React.Fragment key={idx}>
-                {idx > 0 && ", "}
-                {val.value && formatValue(val.value, question.type)}
-                {val.unit && (
-                  <span className="ml-1 text-gray-600">{val.unit.code}</span>
-                )}
-                {val.coding && (
-                  <span className="ml-1 text-gray-600">
-                    {val.coding.display} ({val.coding.code})
-                  </span>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </TableCell>
-        {response.note && (
-          <TableCell className="py-1 pr-0 align-top text-right md:table-cell">
-            <div className="flex justify-end">
+          <dt className="text-sm leading-5 break-words text-gray-600">
+            {question.text}
+          </dt>
+          <dd className="flex min-w-0 items-start justify-between gap-2">
+            <span className="min-w-0 text-sm leading-5 font-medium wrap-break-word whitespace-pre-wrap text-gray-900">
+              {values.map((val, idx) => (
+                <React.Fragment key={idx}>
+                  {idx > 0 && ", "}
+                  {formatValue(val.value, question.type)}
+                  {val.unit && (
+                    <span className="ml-1 font-normal text-gray-600">
+                      {val.unit.code}
+                    </span>
+                  )}
+                  {val.coding && (
+                    <span className="ml-1 font-normal text-gray-600">
+                      {val.coding.display} ({val.coding.code})
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
+            </span>
+            {response.note && (
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-6 text-xs shrink-0 px-2"
+                    className="h-6 shrink-0 px-2 text-xs"
                   >
                     {t("see_note")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="max-w-[90vw] p-3">
-                  <p className="text-xs text-gray-700 whitespace-pre-wrap">
+                  <p className="text-xs whitespace-pre-wrap text-gray-700">
                     {response.note}
                   </p>
                 </PopoverContent>
               </Popover>
-            </div>
-          </TableCell>
-        )}
-      </TableRow>
+            )}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+const groupHasAnswer = (
+  question: Question,
+  responses: QuestionnaireResponse["responses"],
+): boolean =>
+  question.type === "group"
+    ? question.repeats
+      ? !!responses.find((answer) => answer.question_id === question.id)
+          ?.sub_results?.length
+      : (question.questions?.some((sub) => groupHasAnswer(sub, responses)) ??
+        false)
+    : responses.some((response) => response.question_id === question.id);
+
+/** Groups read as headed sections of the card; nested groups keep the parent's value column. */
+function GroupFrame({
+  title,
+  depth,
+  children,
+}: {
+  title: string;
+  depth: number;
+  children: React.ReactNode;
+}) {
+  if (depth === 0) {
+    return (
+      <section className="min-w-0 pt-2">
+        <h3 className="pb-0.5 text-sm font-semibold text-gray-900">{title}</h3>
+        {children}
+      </section>
     );
-  };
+  }
+  return (
+    <section className="min-w-0 border-t border-gray-100 pt-2">
+      <h4 className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+        {title}
+      </h4>
+      {children}
+    </section>
+  );
+}
+
+function QuestionGroup({
+  group,
+  responses,
+  depth = 0,
+  isSingleGroup = false,
+  presentation,
+}: {
+  group: Question;
+  responses: QuestionnaireResponse["responses"];
+  depth?: number;
+  isSingleGroup?: boolean;
+  presentation: "default" | "panel";
+}) {
+  if (group.repeats) {
+    const rows =
+      responses.find((answer) => answer.question_id === group.id)
+        ?.sub_results ?? [];
+    if (!rows.length) return null;
+    return (
+      <GroupFrame title={group.text} depth={depth}>
+        <RegisteredGroupAnswerView
+          question={group}
+          responses={responses}
+          fallback={rows.map((row, index) => (
+            <QuestionGroup
+              key={index}
+              group={{
+                ...group,
+                repeats: false,
+                structured_type: undefined,
+                text: `${group.text} (${index + 1})`,
+              }}
+              responses={row}
+              depth={depth + 1}
+              presentation={presentation}
+            />
+          ))}
+        />
+      </GroupFrame>
+    );
+  }
+  if (!groupHasAnswer(group, responses)) return null;
+
+  const questionsWithResponses =
+    group.questions?.filter((question) => {
+      if (question.type === "structured" || question.type === "group")
+        return false;
+      return !!responses
+        .find((r) => r.question_id === question.id)
+        ?.values?.some(hasResponseValue);
+    }) ?? [];
+
+  // Long answers read better in a single column.
+  const hasLongText = questionsWithResponses.some((question) => {
+    const response = responses.find((r) => r.question_id === question.id);
+    const value = response?.values?.[0]?.value;
+    const coding = response?.values?.[0]?.coding;
+    const text = [
+      value?.toString() || "",
+      coding?.display || "",
+      coding?.code || "",
+    ].join(" ");
+    return text.length > 50;
+  });
+
+  const shouldUseTwoColumns = isSingleGroup && !hasLongText;
+  const midPoint = shouldUseTwoColumns
+    ? Math.ceil(questionsWithResponses.length / 2)
+    : questionsWithResponses.length;
+  const leftQuestions = questionsWithResponses.slice(0, midPoint);
+  const rightQuestions = questionsWithResponses.slice(midPoint);
 
   return (
-    <div className="border border-gray-200 rounded-md px-3 py-1.5">
-      <h3 className="text-sm font-semibold text-gray-900 border-b border-gray-200 pb-1 mb-1">
-        {group.text}
-      </h3>
-      <div
-        className={cn("w-full", {
-          "grid md:grid-cols-2 grid-cols-1 gap-4": shouldUseTwoColumns,
-        })}
-      >
-        {leftQuestions.length > 0 && (
-          <div className="w-full">
-            <Table className="w-full">
-              <TableBody>{leftQuestions.map(renderQuestionRow)}</TableBody>
-            </Table>
-          </div>
-        )}
-
-        {shouldUseTwoColumns && rightQuestions.length > 0 && (
-          <div className="w-full">
-            <Table className="w-full">
-              <TableBody>{rightQuestions.map(renderQuestionRow)}</TableBody>
-            </Table>
-          </div>
-        )}
-
-        {group.questions?.map((subQuestion, idx) => {
-          if (subQuestion.type === "structured" || !subQuestion.type)
-            return null;
-          if (subQuestion.type !== "group") return null;
-
-          return (
-            <QuestionGroup
-              key={idx}
-              group={subQuestion}
-              responses={responses}
-              parentTitle={currentTitle}
-            />
-          );
-        })}
-      </div>
-    </div>
+    <GroupFrame title={group.text} depth={depth}>
+      <RegisteredGroupAnswerView
+        question={group}
+        responses={responses}
+        fallback={
+          <>
+            {questionsWithResponses.length > 0 && (
+              <div
+                className={cn(
+                  "min-w-0",
+                  shouldUseTwoColumns &&
+                    "grid gap-x-6 @3xl/response-card:grid-cols-2",
+                )}
+              >
+                <ResponseRows
+                  questions={leftQuestions}
+                  responses={responses}
+                  presentation={presentation}
+                />
+                {rightQuestions.length > 0 && (
+                  <ResponseRows
+                    questions={rightQuestions}
+                    responses={responses}
+                    className="border-t border-gray-100 @3xl/response-card:border-t-0"
+                    presentation={presentation}
+                  />
+                )}
+              </div>
+            )}
+            {group.questions?.map((subQuestion, idx) =>
+              subQuestion.type === "group" ? (
+                <QuestionGroup
+                  key={idx}
+                  group={subQuestion}
+                  responses={responses}
+                  depth={depth + 1}
+                  presentation={presentation}
+                />
+              ) : null,
+            )}
+          </>
+        }
+      />
+    </GroupFrame>
   );
 }
 
 function ResponseActionsMenu({
   item,
   patientId,
+  encounterId,
+  facilityId,
+  readOnly = false,
+  embedded = false,
 }: {
   item: QuestionnaireResponse;
   patientId: string;
+  encounterId?: string;
+  facilityId?: string;
+  readOnly?: boolean;
+  embedded?: boolean;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const fullPath = useFullPath();
+  const routeScope = fullPath.match(/^\/(facility|organization)\/[^/]+/)?.[0];
+  const scope = facilityId ? `/facility/${facilityId}` : routeScope;
+  const printEncounterId =
+    encounterId ??
+    (embedded ? undefined : fullPath.match(/\/encounter\/([^/?]+)/)?.[1]);
+  const printBase = `${scope ?? ""}/patient/${patientId}${scope && printEncounterId ? `/encounter/${printEncounterId}` : ""}`;
 
   const isUnstructured = !!item.questionnaire;
   const isEnteredInError =
@@ -315,7 +457,11 @@ function ResponseActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <Link href={`questionnaire_response/${item.id}/print`}>
+          <Link
+            href={`${printBase}/questionnaire_response/${item.id}/print`}
+            target={embedded ? "_blank" : undefined}
+            rel={embedded ? "noopener noreferrer" : undefined}
+          >
             <DropdownMenuItem>
               <Printer className="size-4" />
               {t("print_this_response")}
@@ -323,7 +469,9 @@ function ResponseActionsMenu({
           </Link>
           {item.questionnaire && (
             <Link
-              href={`questionnaire/${item.questionnaire.id}/responses/print`}
+              href={`${printBase}/questionnaire/${item.questionnaire.id}/responses/print`}
+              target={embedded ? "_blank" : undefined}
+              rel={embedded ? "noopener noreferrer" : undefined}
             >
               <DropdownMenuItem>
                 <Printer className="size-4" />
@@ -333,7 +481,7 @@ function ResponseActionsMenu({
               </DropdownMenuItem>
             </Link>
           )}
-          {isUnstructured && (
+          {isUnstructured && !readOnly && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -349,13 +497,16 @@ function ResponseActionsMenu({
       </DropdownMenu>
 
       <ConfirmActionDialog
-        open={showConfirmDialog}
+        open={showConfirmDialog && !readOnly}
         onOpenChange={setShowConfirmDialog}
         title={t("mark_as_entered_in_error")}
         description={t("questionnaire_response_entered_in_error_warning")}
-        onConfirm={() =>
-          updateStatus({ status: QuestionnaireResponseStatus.EnteredInError })
-        }
+        onConfirm={() => {
+          if (!readOnly)
+            updateStatus({
+              status: QuestionnaireResponseStatus.EnteredInError,
+            });
+        }}
         confirmText={t("confirm")}
         variant="destructive"
         disabled={isPending}
@@ -364,7 +515,13 @@ function ResponseActionsMenu({
   );
 }
 
-function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
+function ResponseCardContent({
+  item,
+  presentation,
+}: {
+  item: QuestionnaireResponse;
+  presentation: "default" | "panel";
+}) {
   const { t } = useTranslation();
   const groups =
     item.questionnaire?.questions.filter(
@@ -383,113 +540,52 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
 
   // Helper function to render a column of questions
   const renderColumn = (questions: Question[]) => {
-    const result: React.ReactElement[] = [];
+    const result: { kind: "rows" | "group"; element: React.ReactElement }[] =
+      [];
     let currentNonGroupQuestions: Question[] = [];
 
     const flushNonGroupQuestions = () => {
-      if (currentNonGroupQuestions.length > 0) {
-        result.push(
-          <div
-            key={`group-${result.length}`}
-            className="border border-gray-200 rounded-md px-3 py-1.5"
-          >
-            <div className="w-full">
-              <Table className="table-fixed w-full">
-                <TableBody>
-                  {currentNonGroupQuestions.map((question) => {
-                    const response = item.responses.find(
-                      (r) => r.question_id === question.id,
-                    );
-                    if (!response) return null;
-
-                    const values = response.values;
-                    if (!values?.length) return null;
-
-                    const hasAnyValue = values.some((v) => v.value || v.coding);
-                    if (!hasAnyValue) return null;
-
-                    return (
-                      <TableRow
-                        key={question.id}
-                        className="flex flex-col md:table-row"
-                      >
-                        <TableCell className="py-1 pl-0 align-top">
-                          <div className="text-sm text-gray-600 break-words whitespace-normal">
-                            {question.text}
-                          </div>
-                        </TableCell>
-                        <TableCell
-                          className="py-1 pr-0 align-top"
-                          colSpan={response.note ? 1 : 2}
-                        >
-                          <div className="text-sm font-medium break-words whitespace-pre-wrap">
-                            {values.map((val, idx) => (
-                              <React.Fragment key={idx}>
-                                {idx > 0 && ", "}
-                                {val.value &&
-                                  formatValue(val.value, question.type)}
-                                {val.unit && (
-                                  <span className="ml-1 text-gray-600">
-                                    {val.unit.code}
-                                  </span>
-                                )}
-                                {val.coding && (
-                                  <span className="ml-1 text-gray-600">
-                                    {val.coding.display} ({val.coding.code})
-                                  </span>
-                                )}
-                              </React.Fragment>
-                            ))}
-                          </div>
-                        </TableCell>
-                        {response.note && (
-                          <TableCell className="py-1 pr-0 align-top text-right md:table-cell">
-                            <div className="flex justify-end">
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-6 text-xs shrink-0 px-2"
-                                  >
-                                    {t("see_note")}
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="max-w-[90vw] p-3">
-                                  <p className="text-xs text-gray-700 whitespace-pre-wrap">
-                                    {response.note}
-                                  </p>
-                                </PopoverContent>
-                              </Popover>
-                            </div>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          </div>,
-        );
-        currentNonGroupQuestions = [];
+      const answered = currentNonGroupQuestions.some(
+        (question) =>
+          !!item.responses
+            .find((r) => r.question_id === question.id)
+            ?.values?.some(hasResponseValue),
+      );
+      if (answered) {
+        result.push({
+          kind: "rows",
+          element: (
+            <ResponseRows
+              key={`rows-${result.length}`}
+              questions={currentNonGroupQuestions}
+              responses={item.responses}
+              presentation={presentation}
+            />
+          ),
+        });
       }
+      currentNonGroupQuestions = [];
     };
 
     questions.forEach((question, index) => {
       if (question.type === "structured") return;
 
       if (question.type === "group") {
+        // Unanswered groups render nothing, so they must not split the rows around them.
+        if (!groupHasAnswer(question, item.responses)) return;
         flushNonGroupQuestions();
-        result.push(
-          <React.Fragment key={`group-${index}`}>
+        result.push({
+          kind: "group",
+          element: (
             <QuestionGroup
+              key={`group-${index}`}
               group={question}
               responses={item.responses}
-              isSingleGroup={groups.length === 1 && question.type === "group"}
+              isSingleGroup={groups.length === 1}
+              presentation={presentation}
             />
-          </React.Fragment>,
-        );
+          ),
+        });
       } else {
         currentNonGroupQuestions.push(question);
       }
@@ -499,24 +595,38 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
     return result;
   };
 
+  const leftSegments = renderColumn(leftGroups);
+  const rightSegments = renderColumn(rightGroups);
+  // When the columns stack, a split inside a run of rows must read as one list, not a new section.
+  const rightContinuesRows =
+    leftSegments.at(-1)?.kind === "rows" && rightSegments[0]?.kind === "rows";
+
   return (
     <div className="w-full">
       <div
         className={cn(
-          "grid gap-3",
-          shouldUseTwoColumns ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1",
+          "grid gap-x-6",
+          shouldUseTwoColumns
+            ? "grid-cols-1 @3xl/response-card:grid-cols-2"
+            : "grid-cols-1",
         )}
       >
-        {/* Left Column */}
-        <div className="space-y-2">{renderColumn(leftGroups)}</div>
-
-        {/* Right Column */}
-        {shouldUseTwoColumns && (
-          <div className="space-y-2">{renderColumn(rightGroups)}</div>
+        <div className="flex min-w-0 flex-col divide-y divide-gray-200">
+          {leftSegments.map((segment) => segment.element)}
+        </div>
+        {rightSegments.length > 0 && (
+          <div
+            className={cn(
+              "flex min-w-0 flex-col divide-y divide-gray-200 border-t @3xl/response-card:border-t-0",
+              rightContinuesRows ? "border-gray-100" : "border-gray-200",
+            )}
+          >
+            {rightSegments.map((segment) => segment.element)}
+          </div>
         )}
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-gray-200 pt-2 text-xs text-gray-500">
+      <div className="mt-2 flex flex-col border-t border-gray-100 pt-2 text-xs text-gray-500 @md/response-card:flex-row @md/response-card:items-center @md/response-card:justify-between">
         <div>
           <span className="text-gray-600">{t("filed_by")}</span>{" "}
           <span className="font-medium text-gray-700">
@@ -534,19 +644,31 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
   );
 }
 
-export function ResponseCard({
-  item,
-  patientId,
-  onTitleClick,
-  showTitle = true,
-  isPrintPreview = false,
-}: {
+interface ResponseCardProps {
   item: QuestionnaireResponse;
+  encounterId?: string;
+  facilityId?: string;
+  readOnly?: boolean;
+  embedded?: boolean;
   patientId: string;
   isPrintPreview?: boolean;
   onTitleClick?: (questionnaireSlug: string) => void;
   showTitle?: boolean;
-}) {
+  presentation?: "default" | "panel";
+}
+
+export function ResponseCard({
+  item,
+  patientId,
+  encounterId,
+  facilityId,
+  readOnly = false,
+  embedded = false,
+  onTitleClick,
+  showTitle = true,
+  isPrintPreview = false,
+  presentation = "default",
+}: ResponseCardProps) {
   const { t } = useTranslation();
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
@@ -561,7 +683,10 @@ export function ResponseCard({
   return (
     <Card
       className={cn(
-        "shadow-none border rounded-md",
+        "@container/response-card min-w-0 shadow-none border",
+        presentation === "panel"
+          ? "overflow-hidden rounded-xl border-gray-200 bg-white"
+          : "rounded-md",
         isEnteredInError && "opacity-70",
       )}
     >
@@ -569,14 +694,22 @@ export function ResponseCard({
         <CollapsibleTrigger asChild className="cursor-pointer">
           <CardHeader
             className={cn(
-              "flex flex-row items-center py-2 px-3",
+              "flex flex-row items-center",
+              presentation === "panel"
+                ? "gap-2 space-y-0 px-3 py-2"
+                : "py-2 px-3",
+              presentation === "panel" &&
+                isExpanded &&
+                "border-b border-gray-200",
               isEnteredInError && "hover:bg-gray-50",
             )}
           >
             {showTitle && (
               <CardTitle
                 className={cn(
-                  "text-base font-medium",
+                  presentation === "panel"
+                    ? "min-w-0 break-words text-sm font-bold tracking-wide text-gray-600 uppercase"
+                    : "text-base font-medium",
                   onTitleClick &&
                     !isEnteredInError &&
                     "cursor-pointer hover:bg-gray-100 rounded px-1.5 py-0.5",
@@ -600,7 +733,7 @@ export function ResponseCard({
                 {t("entered_in_error")}
               </Badge>
             )}
-            <div className="ml-auto flex items-center gap-1">
+            <div className="ml-auto flex shrink-0 items-center gap-1">
               {isEnteredInError && (
                 <ChevronDown
                   className={cn(
@@ -611,15 +744,26 @@ export function ResponseCard({
               )}
               {!isPrintPreview && (
                 <div onClick={(e) => e.stopPropagation()}>
-                  <ResponseActionsMenu item={item} patientId={patientId} />
+                  <ResponseActionsMenu
+                    item={item}
+                    patientId={patientId}
+                    encounterId={encounterId}
+                    facilityId={facilityId}
+                    readOnly={readOnly}
+                    embedded={embedded}
+                  />
                 </div>
               )}
             </div>
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="px-3 pb-3 pt-0">
-            <ResponseCardContent item={item} />
+          <CardContent
+            className={
+              presentation === "panel" ? "px-3 pt-1 pb-2" : "px-3 pb-3 pt-0"
+            }
+          >
+            <ResponseCardContent item={item} presentation={presentation} />
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
@@ -631,75 +775,149 @@ const RESULTS_PER_PAGE_LIMIT = 10;
 export default function QuestionnaireResponsesList({
   encounterId,
   patientId,
+  facilityId,
+  title,
+  showEmpty = true,
+  readOnly = false,
+  embedded = false,
   isPrintPreview = false,
   onlyUnstructured,
   canAccess = true,
   questionnaireSlug,
+  authorRoleId,
+  createdBy,
+  limit,
   renderItem,
   subjectType = "encounter",
+  presentation = "default",
 }: Props) {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteQuery({
-      queryKey: [
-        "questionnaireResponses",
-        patientId,
-        questionnaireSlug,
-        encounterId,
-      ],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(questionnaireResponseApi.list, {
-          pathParams: { patientId },
-          queryParams: {
-            ...(!isPrintPreview && {
-              limit: String(RESULTS_PER_PAGE_LIMIT),
-              offset: String(pageParam),
-            }),
-            encounter: encounterId,
-            only_unstructured: onlyUnstructured,
-            subject_type: subjectType,
-            ...(questionnaireSlug
-              ? { questionnaire_slug: questionnaireSlug }
-              : {}),
-          },
-        })({ signal });
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: [
+      "questionnaireResponses",
+      patientId,
+      questionnaireSlug,
+      encounterId,
+      authorRoleId,
+      createdBy,
+      { onlyUnstructured, subjectType, isPrintPreview, limit },
+    ],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(questionnaireResponseApi.list, {
+        pathParams: { patientId },
+        silent: true,
+        queryParams: {
+          ...(!isPrintPreview && {
+            limit: String(
+              limit === undefined ? RESULTS_PER_PAGE_LIMIT : limit - pageParam,
+            ),
+            offset: String(pageParam),
+          }),
+          encounter: encounterId,
+          role: authorRoleId,
+          created_by: createdBy,
+          // The backend treats presence of this parameter as true.
+          only_unstructured: onlyUnstructured ? true : undefined,
+          subject_type: subjectType,
+          ...(questionnaireSlug
+            ? { questionnaire_slug: questionnaireSlug }
+            : {}),
+        },
+      })({ signal });
 
-        return response;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-      select: (data) => data?.pages.flatMap((p) => p.results) || [],
-      enabled: canAccess,
-    });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (isPrintPreview) return undefined;
+      const currentOffset = allPages.reduce(
+        (count, page) => count + page.results.length,
+        0,
+      );
+      const total =
+        limit === undefined ? lastPage.count : Math.min(lastPage.count, limit);
+      return lastPage.results.length > 0 && currentOffset < total
+        ? currentOffset
+        : undefined;
+    },
+    select: (data) => {
+      // The response API orders by -created_date before applying limit/offset.
+      const responses = data.pages.flatMap((page) => page.results);
+      return limit === undefined ? responses : responses.slice(0, limit);
+    },
+    enabled: canAccess,
+  });
 
   const responses = data ?? [];
   useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage();
-  }, [inView, hasNextPage, fetchNextPage]);
+    if (
+      canAccess &&
+      (limit !== undefined || inView) &&
+      hasNextPage &&
+      !isFetching &&
+      !isError
+    )
+      fetchNextPage();
+  }, [
+    canAccess,
+    inView,
+    hasNextPage,
+    fetchNextPage,
+    isFetching,
+    isError,
+    limit,
+  ]);
+
+  if (!canAccess || (!isLoading && !isError && !responses.length && !showEmpty))
+    return null;
 
   return (
-    <div>
+    <section
+      aria-label={title ?? t("questionnaire_responses")}
+      className="min-w-0 space-y-3"
+    >
+      {title && (
+        <h2 className="text-sm font-semibold text-gray-600">{title}</h2>
+      )}
+      {isError && (
+        <ClinicalListError isFetching={isFetching} onRetry={refetch} />
+      )}
       <div className="max-w-full">
         {isLoading ? (
           <div className="grid gap-3">
-            <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
+            <CardListSkeleton
+              count={Math.min(
+                RESULTS_PER_PAGE_LIMIT,
+                limit ?? RESULTS_PER_PAGE_LIMIT,
+              )}
+            />
           </div>
         ) : responses.length === 0 ? (
-          <Card
-            className={cn(
-              "p-4",
-              isPrintPreview && "shadow-none border-gray-200",
-            )}
-          >
-            <div className="text-sm font-medium text-gray-500">
-              {t("no_responses_found")}
-            </div>
-          </Card>
+          !isError && (
+            <Card
+              className={cn(
+                "p-4",
+                presentation === "panel" &&
+                  "rounded-xl border-gray-200 bg-white p-2 shadow-none",
+                isPrintPreview && "shadow-none border-gray-200",
+              )}
+            >
+              <div className="text-sm font-medium text-gray-500">
+                {t("no_responses_found")}
+              </div>
+            </Card>
+          )
         ) : (
           <ul className="grid gap-3">
             {responses.map((item: QuestionnaireResponse) => (
@@ -711,7 +929,12 @@ export default function QuestionnaireResponsesList({
                     key={item.id}
                     item={item}
                     patientId={patientId}
+                    facilityId={facilityId}
+                    encounterId={encounterId}
+                    readOnly={readOnly}
+                    embedded={embedded}
                     isPrintPreview={isPrintPreview}
+                    presentation={presentation}
                   />
                 )}
               </li>
@@ -720,13 +943,20 @@ export default function QuestionnaireResponsesList({
             {!isPrintPreview && hasNextPage && (
               <li ref={ref} className="flex justify-center py-2">
                 {isFetchingNextPage && (
-                  <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
+                  <CardListSkeleton
+                    count={Math.min(
+                      RESULTS_PER_PAGE_LIMIT,
+                      limit === undefined
+                        ? RESULTS_PER_PAGE_LIMIT
+                        : limit - responses.length,
+                    )}
+                  />
                 )}
               </li>
             )}
           </ul>
         )}
       </div>
-    </div>
+    </section>
   );
 }

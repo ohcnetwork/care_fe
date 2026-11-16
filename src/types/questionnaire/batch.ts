@@ -2,12 +2,13 @@ import {
   BatchResponseBase,
   BatchSuccessResponse,
 } from "@/types/base/batch/batch";
+import type { ResponsePath } from "@/types/questionnaire/form";
 
 // Error types
 
 export interface BatchRequestError {
   question_id?: string;
-  msg?: string;
+  msg?: string | BatchRequestError;
   error?: string;
   type?: string;
   loc?: string[];
@@ -43,6 +44,7 @@ export interface StructuredDataError {
 
 export interface QuestionValidationError {
   question_id: string;
+  response_path?: ResponsePath;
   error?: string;
   msg?: string;
   type?: string;

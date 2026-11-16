@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ChevronRight } from "lucide-react";
 import { Link } from "raviger";
@@ -63,13 +64,14 @@ export const UpcomingAppointmentCard = ({
       </h5>
       <AppointmentRow appointment={appointment} patientId={patientId} />
       {totalCount > 1 && onViewAllAppointments && (
-        <button
+        <Button
+          variant="link"
           type="button"
           onClick={onViewAllAppointments}
-          className="text-sm font-medium text-gray-700 hover:text-gray-900 underline"
+          className="h-auto p-0 text-sm font-medium text-gray-700 hover:text-gray-900 underline"
         >
           {t("view_all_appointments", { count: totalCount })}
-        </button>
+        </Button>
       )}
     </div>
   );
