@@ -245,7 +245,7 @@ function ChargeItemsTable({
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
-      queryKey: ["infinite-chargeItems", accountId],
+      queryKey: ["infinite-chargeItems", facilityId, accountId],
     });
     setSelectedItems(new Set());
   };
@@ -742,7 +742,7 @@ function ChargeItemsTable({
         chargeItems={selectedChargeItem ? [selectedChargeItem] : []}
         onSuccess={() => {
           queryClient.invalidateQueries({
-            queryKey: ["infinite-chargeItems", accountId],
+            queryKey: ["infinite-chargeItems", facilityId, accountId],
           });
         }}
         title={t("edit_charge_item")}
