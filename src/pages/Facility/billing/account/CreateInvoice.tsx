@@ -107,10 +107,50 @@ const formSchema = z.object({
     .refine((val) => !val || new Date(val) <= new Date(), {
       message: i18nT("issue_date_cannot_be_in_future"),
     }),
-  charge_items: z.array(z.string()),
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+/**
+ * Selection is modelled as the set of items the user has explicitly
+ * *unchecked*, rather than the set that is checked. Everything else in
+ * `chargeItems` is selected. This makes the selection a pure function of the
+ * current list:
+ *  - freshly fetched / newly added / "load more" items are selected by default,
+ *  - items that leave the list (aborted, not billable, ...) drop out of the
+ *    selection automatically,
+ *  - what's rendered, the total, and what's submitted can never disagree.
+ */
+function useChargeItemSelection(chargeItems: ChargeItemRead[]) {
+  const [excludedIds, setExcludedIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+
+  const selectedItems = useMemo(
+    () => chargeItems.filter((item) => !excludedIds.has(item.id)),
+    [chargeItems, excludedIds],
+  );
+
+  const allSelected =
+    chargeItems.length > 0 && selectedItems.length === chargeItems.length;
+
+  const isSelected = (id: string) => !excludedIds.has(id);
+
+  const toggle = (id: string) =>
+    setExcludedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const toggleAll = () =>
+    setExcludedIds(
+      allSelected ? new Set(chargeItems.map((item) => item.id)) : new Set(),
+    );
+
+  return { selectedItems, allSelected, isSelected, toggle, toggleAll };
+}
 
 interface CreateInvoicePageProps {
   facilityId: string;
@@ -143,25 +183,11 @@ export function CreateInvoicePage({
 }: CreateInvoicePageProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const hasInitializedSelections = useRef(false);
   const quantityInputRef = useRef<HTMLInputElement>(null);
   const pickerRef = useRef<HTMLButtonElement>(null);
-  const hasAutoOpenedPicker = useRef(false);
   const [optionalFieldsOpen, setOptionalFieldsOpen] = useState(false);
 
   useShortcutSubContext("facility:billing");
-  const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>(
-    () => {
-      if (!preSelectedChargeItems) return {};
-      return preSelectedChargeItems.reduce(
-        (acc, item) => {
-          acc[item.id] = true;
-          return acc;
-        },
-        {} as Record<string, boolean>,
-      );
-    },
-  );
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -181,7 +207,6 @@ export function CreateInvoicePage({
       onSuccess: () => {
         handleChargeItemsAdded();
         setPendingItem(null);
-        hasAutoOpenedPicker.current = true;
         toast.success(t("charge_items_added_successfully"));
         setTimeout(() => pickerRef.current?.focus(), 100);
       },
@@ -197,7 +222,6 @@ export function CreateInvoicePage({
       payment_terms: import.meta.env.REACT_DEFAULT_PAYMENT_TERMS || "",
       note: "",
       issue_date: "",
-      charge_items: preSelectedChargeItems?.map((item) => item.id) || [],
     },
   });
 
@@ -209,9 +233,6 @@ export function CreateInvoicePage({
     enabled: !!facilityId && !!accountId,
   });
 
-  // Track known item IDs to detect new items
-  const knownItemIds = useRef<Set<string>>(new Set());
-
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
       queryKey: ["chargeItems", facilityId, accountId],
@@ -221,6 +242,7 @@ export function CreateInvoicePage({
   const {
     data: chargeItemsData,
     isLoading,
+    isFetching,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -249,6 +271,33 @@ export function CreateInvoicePage({
     },
     enabled: !!facilityId && !!accountId && !preSelectedChargeItems,
   });
+
+  // Items whose status was changed from this page (aborted, not billable,
+  // etc.). Hides them immediately, and is the only way they drop out when the
+  // list comes from `preSelectedChargeItems` (which is never refetched).
+  const [removedIds, setRemovedIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+
+  // The single source of truth for what's listed: every billable item, either
+  // pre-selected by the caller or fetched for the account.
+  const chargeItems = useMemo(() => {
+    const source =
+      preSelectedChargeItems ??
+      chargeItemsData?.pages.flatMap((page) => page.results) ??
+      [];
+    return source.filter(
+      (item) =>
+        item.status === ChargeItemStatus.billable && !removedIds.has(item.id),
+    );
+  }, [preSelectedChargeItems, chargeItemsData, removedIds]);
+
+  const selection = useChargeItemSelection(chargeItems);
+
+  // While the list is being (re)fetched, what's on screen may not be what the
+  // server has. Block submission until it settles so we never invoice stale
+  // items.
+  const isSyncingChargeItems = isFetching && !isFetchingNextPage;
 
   const createMutation = useMutation({
     mutationFn: mutate(invoiceApi.createInvoice, {
@@ -281,24 +330,13 @@ export function CreateInvoicePage({
       ...values,
       account: accountId,
       issue_date: values.issue_date || undefined,
+      charge_items: selection.selectedItems.map((item) => item.id),
     };
     createMutation.mutate(payload);
   };
 
-  const handleRowSelection = (id: string) => {
-    setSelectedRows((prev: Record<string, boolean>) => {
-      const newSelection = { ...prev };
-      newSelection[id] = !prev[id];
-
-      // Update form value
-      const selectedIds = Object.entries(newSelection)
-        .filter(([_, selected]) => selected)
-        .map(([id]) => id);
-
-      form.setValue("charge_items", selectedIds);
-
-      return newSelection;
-    });
+  const handleChargeItemStatusChange = (item: ChargeItemRead) => {
+    setRemovedIds((prev) => new Set(prev).add(item.id));
   };
 
   const getBaseComponent = (item: ChargeItemRead) => {
@@ -311,66 +349,19 @@ export function CreateInvoicePage({
     fetchNextPage();
   };
 
-  const chargeItems =
-    preSelectedChargeItems ??
-    chargeItemsData?.pages.flatMap((page) => page.results) ??
-    [];
-
-  // Calculate total of selected items
   const selectedItemsTotal = useMemo(() => {
-    return chargeItems
-      .filter((item) => selectedRows[item.id])
+    return selection.selectedItems
       .reduce((sum, item) => add(sum, item.total_price ?? 0), add(0, 0))
       .toString();
-  }, [chargeItems, selectedRows]);
+  }, [selection.selectedItems]);
 
-  useEffect(() => {
-    if (chargeItems.length === 0) return;
-
-    // First load - select all items
-    if (!hasInitializedSelections.current) {
-      setSelectedRows(
-        chargeItems.reduce(
-          (acc, item) => {
-            acc[item.id] = true;
-            return acc;
-          },
-          {} as Record<string, boolean>,
-        ),
-      );
-      form.setValue(
-        "charge_items",
-        chargeItems.map((item) => item.id),
-      );
-      // Track all current items as known
-      knownItemIds.current = new Set(chargeItems.map((item) => item.id));
-      hasInitializedSelections.current = true;
-      if (chargeItems.length > 0) {
-        hasAutoOpenedPicker.current = true;
-      }
-      return;
-    }
-
-    // After initial load - auto-select any new items (e.g., from Quick Add)
-    const newItems = chargeItems.filter(
-      (item) => !knownItemIds.current.has(item.id),
-    );
-    if (newItems.length > 0) {
-      setSelectedRows((prev) => {
-        const updated = { ...prev };
-        newItems.forEach((item) => {
-          updated[item.id] = true;
-        });
-        return updated;
-      });
-      form.setValue("charge_items", [
-        ...form.getValues("charge_items"),
-        ...newItems.map((item) => item.id),
-      ]);
-      // Update known items
-      newItems.forEach((item) => knownItemIds.current.add(item.id));
-    }
-  }, [chargeItems, form]);
+  // Auto-open the definition picker only if the account had nothing billable
+  // when the page first settled. Decided once; picking a definition turns it
+  // off so the picker doesn't pop open again when it remounts.
+  const [autoOpenPicker, setAutoOpenPicker] = useState<boolean | null>(null);
+  if (autoOpenPicker === null && !isLoading) {
+    setAutoOpenPicker(chargeItems.length === 0);
+  }
 
   const handleConfirmPendingItem = useCallback(() => {
     if (!pendingItem || !account?.patient) return;
@@ -404,17 +395,13 @@ export function CreateInvoicePage({
     }
   }, []);
 
-  // Auto-focus the picker when the page loads (only if it won't auto-open)
+  // Focus the picker once the list settles (and whenever its size changes),
+  // unless it is about to auto-open by itself.
   useEffect(() => {
-    if (!disableCreateChargeItems && !isLoading) {
-      const willAutoOpen =
-        !hasAutoOpenedPicker.current && chargeItems.length === 0;
-      if (!willAutoOpen) {
-        const timer = setTimeout(() => pickerRef.current?.focus(), 200);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [disableCreateChargeItems, isLoading, chargeItems.length]);
+    if (disableCreateChargeItems || autoOpenPicker !== false) return;
+    const timer = setTimeout(() => pickerRef.current?.focus(), 200);
+    return () => clearTimeout(timer);
+  }, [disableCreateChargeItems, autoOpenPicker, chargeItems.length]);
 
   const tableHeadClass = "border-r border-gray-200 font-semibold text-center";
   const tableCellClass =
@@ -512,30 +499,8 @@ export function CreateInvoicePage({
                         >
                           <div className="flex items-center p-1">
                             <Checkbox
-                              checked={
-                                chargeItems.length > 0 &&
-                                chargeItems.every(
-                                  (item) => selectedRows[item.id],
-                                )
-                              }
-                              onCheckedChange={(_checked) => {
-                                const newSelection = { ...selectedRows };
-                                const allSelected = chargeItems.every(
-                                  (item) => selectedRows[item.id],
-                                );
-
-                                chargeItems.forEach((item) => {
-                                  newSelection[item.id] = !allSelected;
-                                });
-
-                                setSelectedRows(newSelection);
-                                form.setValue(
-                                  "charge_items",
-                                  Object.entries(newSelection)
-                                    .filter(([_, selected]) => selected)
-                                    .map(([id]) => id),
-                                );
-                              }}
+                              checked={selection.allSelected}
+                              onCheckedChange={selection.toggleAll}
                               disabled={chargeItems.length === 0}
                             />
                           </div>
@@ -571,7 +536,7 @@ export function CreateInvoicePage({
                           </TableCell>
                         </TableRow>
                       ) : (
-                        chargeItems.filter(Boolean).map((item) => {
+                        chargeItems.map((item) => {
                           const baseComponent = getBaseComponent(item);
                           const baseAmount = baseComponent?.amount || "0";
 
@@ -585,9 +550,9 @@ export function CreateInvoicePage({
                               >
                                 <div className="flex items-center p-1">
                                   <Checkbox
-                                    checked={selectedRows[item.id] || false}
+                                    checked={selection.isSelected(item.id)}
                                     onCheckedChange={() =>
-                                      handleRowSelection(item.id)
+                                      selection.toggle(item.id)
                                     }
                                   />
                                 </div>
@@ -643,6 +608,7 @@ export function CreateInvoicePage({
                                     setSelectedChargeItem(item);
                                     setIsEditDialogOpen(true);
                                   }}
+                                  onStatusChange={handleChargeItemStatusChange}
                                 />
                               </TableCell>
                             </TableRow>
@@ -784,6 +750,7 @@ export function CreateInvoicePage({
                         value={undefined}
                         onValueChange={(selectedDef) => {
                           if (!selectedDef) return;
+                          setAutoOpenPicker(false);
                           setPendingItem({
                             definition: selectedDef as ChargeItemDefinitionRead,
                             quantity: "1",
@@ -792,11 +759,7 @@ export function CreateInvoicePage({
                         placeholder={t("select_charge_item_definition")}
                         disabled={isApplyingInline}
                         className="w-full"
-                        defaultOpen={
-                          !hasAutoOpenedPicker.current &&
-                          chargeItems.length === 0 &&
-                          !isLoading
-                        }
+                        defaultOpen={autoOpenPicker === true}
                         resourceType={
                           ResourceCategoryResourceType.charge_item_definition
                         }
@@ -815,19 +778,13 @@ export function CreateInvoicePage({
                 </div>
               )}
 
-              <FormField
-                control={form.control}
-                name="charge_items"
-                render={({ field }) => (
-                  <FormMessage className="text-xs text-gray-950 italic mt-3">
-                    {field.value.length > 0
-                      ? t("selected_items_count_one", {
-                          count: field.value.length,
-                        })
-                      : t("no_items_selected")}
-                  </FormMessage>
-                )}
-              />
+              <p className="text-xs text-gray-950 italic mt-3">
+                {selection.selectedItems.length > 0
+                  ? t("selected_items_count_one", {
+                      count: selection.selectedItems.length,
+                    })
+                  : t("no_items_selected")}
+              </p>
 
               {/* Invoice Total */}
               {chargeItems.length > 0 && (
@@ -985,7 +942,8 @@ export function CreateInvoicePage({
                   isQuickAddOpen ||
                   isEditDialogOpen ||
                   isApplyingInline ||
-                  chargeItems.length === 0
+                  isSyncingChargeItems ||
+                  selection.selectedItems.length === 0
                 }
               >
                 {createMutation.isPending ? (
