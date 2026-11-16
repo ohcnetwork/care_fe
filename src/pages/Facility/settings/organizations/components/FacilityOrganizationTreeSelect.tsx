@@ -248,22 +248,28 @@ function useFavoriteOrganizations(facilityId: string, favoriteList?: string) {
 }
 
 // The user's preferred departments, else their only department.
+// Already-linked departments are never defaulted.
 function pickDefaultIds({
   loaded,
   hasValue,
   preferredIds,
   assignedIds,
+  linkedIds,
   optional,
 }: {
   loaded: boolean;
   hasValue: boolean;
   preferredIds: string[];
   assignedIds?: string[];
+  linkedIds?: string[];
   optional?: boolean;
 }) {
   if (hasValue || !loaded) return [];
-  if (preferredIds.length > 0) return preferredIds;
-  return !optional && assignedIds?.length === 1 ? assignedIds : [];
+  const linked = new Set(linkedIds);
+  const preferred = preferredIds.filter((id) => !linked.has(id));
+  if (preferred.length > 0) return preferred;
+  const assigned = assignedIds?.filter((id) => !linked.has(id));
+  return !optional && assigned?.length === 1 ? assigned : [];
 }
 
 function useDefaultSelection(ids: string[], apply: (ids: string[]) => void) {
@@ -346,6 +352,7 @@ export default function FacilityOrganizationTreeSelect(
     );
   // Undefined until loaded, so the "my departments" group is not shown empty.
   const assignedIds = mine?.results.map(({ id }) => id);
+  const linkedIds = currentOrganizations?.map(({ id }) => id);
   const { preferredIds } = favorites;
 
   const pagination: TreeSelectPagination = {
@@ -372,6 +379,7 @@ export default function FacilityOrganizationTreeSelect(
       hasValue: value.length > 0,
       preferredIds,
       assignedIds,
+      linkedIds,
       optional,
     }),
     (ids) => select(singleSelection ? ids.slice(0, 1) : ids),
@@ -385,7 +393,7 @@ export default function FacilityOrganizationTreeSelect(
     },
     placeholder: t("select_department"),
     assignedIds,
-    linkedIds: currentOrganizations?.map(({ id }) => id),
+    linkedIds,
     preferredIds,
     onPreferredIdsChange: favoriteList
       ? favorites.changePreferredIds

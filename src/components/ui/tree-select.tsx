@@ -690,11 +690,9 @@ function TreeSelect(props: TreeSelectProps) {
             <Spinner />
           </div>
         ) : (
-          !searching && (
-            <p className="text-soft-foreground px-2 py-8 text-center text-sm">
-              {t("no_results_found")}
-            </p>
-          )
+          <p className="text-soft-foreground px-2 py-8 text-center text-sm">
+            {t("no_results_found")}
+          </p>
         )}
       </div>
     </div>
@@ -931,8 +929,8 @@ function TreeSelect(props: TreeSelectProps) {
         )}
       </div>
       {cardEntries.length > 0 && (
-        <div className="mt-3 flex flex-col gap-2">
-          <ul aria-label={selectedHeading} className="flex flex-col gap-2">
+        <div className="mt-1 flex flex-col gap-2">
+          <ul aria-label={selectedHeading} className="flex flex-col gap-1.5">
             {cardEntries.map((entry) => {
               const nodeId = entry.node.id;
               const preferred = preferredSet.has(nodeId);

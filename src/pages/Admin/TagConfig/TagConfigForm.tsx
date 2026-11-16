@@ -15,7 +15,7 @@ import {
   isExpiryOffsetTooLong,
 } from "@/components/Tags/tagExpiry";
 import { TagExpiryOffsetInput } from "@/components/Tags/TagExpiryOffsetInput";
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 
 import { Badge } from "@/components/ui/badge";
 
@@ -324,7 +324,7 @@ export default function TagConfigForm({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="flex flex-col">
+      <SheetContent className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -637,13 +637,13 @@ export default function TagConfigForm({
                       <FormItem>
                         <FormLabel>Facility Organisation</FormLabel>
                         <FormControl>
-                          <FacilityOrganizationSelector
+                          <FacilityOrganizationTreeSelect
                             facilityId={facilityId}
                             value={field.value ? [field.value] : null}
                             onChange={(value: string[] | null) => {
                               field.onChange(value?.[0] || null);
                             }}
-                            currentOrganizations={
+                            knownOrganizations={
                               existingConfig?.facility_organization
                                 ? [existingConfig.facility_organization]
                                 : []

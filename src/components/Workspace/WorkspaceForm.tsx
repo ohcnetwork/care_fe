@@ -52,7 +52,7 @@ import { Textarea } from "@/components/ui/textarea";
 import useAuthUser from "@/hooks/useAuthUser";
 import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
 import { useCareAppTabs } from "@/hooks/useCareApps";
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 
 import mutate from "@/Utils/request/mutate";
 import {
@@ -597,7 +597,7 @@ export function WorkspaceForm({
                               {t("workspace_owner_department")}
                             </FormLabel>
                             <fieldset disabled={busy}>
-                              <FacilityOrganizationSelector
+                              <FacilityOrganizationTreeSelect
                                 facilityId={scope.facilityId}
                                 singleSelection
                                 optional
