@@ -5,6 +5,7 @@ import {
   getEncounterCreateDialog,
   openCreateEncounterDialog,
 } from "tests/facility/patient/encounter/encounterFormHelpers";
+import { createPatient } from "tests/helper/patient";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
@@ -16,7 +17,7 @@ async function createEncounter(
   page: Page,
   encounterClass: "Ambulatory" | "Inpatient",
 ) {
-  await openCreateEncounterDialog(page);
+  await openCreateEncounterDialog(page, await createPatient("Encounter Test"));
   const dialog = getEncounterCreateDialog(page);
   await dialog
     .getByRole("button", { name: new RegExp(`^${encounterClass}`) })
@@ -198,6 +199,18 @@ test.describe("Mark as Completed Shortcut ('m c')", () => {
     await expect(page).toHaveURL(/questionnaire\/encounter\?toDischarge=true/);
     await expect(encounterStatusCombobox(page)).toHaveText("Discharged");
 
+    const encounterId = page.url().match(/\/encounter\/([^/]+)/)?.[1];
+    expect(encounterId).toBeTruthy();
+    // The shortcut acts on the encounter that the overview refetches after the
+    // discharge. Other "Discharged" text can render before that refetch returns.
+    const dischargedEncounter = page.waitForResponse(
+      async (response) =>
+        new URL(response.url()).pathname ===
+          `/api/v1/encounter/${encounterId}/` &&
+        response.request().method() === "GET" &&
+        (await response.json()).status === "discharged",
+    );
+
     await dischargeDispositionCombobox(page).click();
     await page.getByRole("option", { name: "Home", exact: true }).click();
     await page.getByRole("button", { name: "Submit", exact: true }).click();
@@ -207,6 +220,7 @@ test.describe("Mark as Completed Shortcut ('m c')", () => {
     ).toBeVisible();
     await expect(page).toHaveURL(/\/updates$/);
     await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
+    await dischargedEncounter;
 
     await expect(page.getByText("Discharged").nth(1)).toBeVisible();
     await expect(
@@ -216,8 +230,6 @@ test.describe("Mark as Completed Shortcut ('m c')", () => {
         .locator(".."),
     ).toContainText("Home");
 
-    const encounterId = page.url().match(/\/encounter\/([^/]+)/)?.[1];
-    expect(encounterId).toBeTruthy();
     const response = await page.request.get(
       `${getApiUrl()}/api/v1/encounter/${encounterId}/`,
       { headers: getApiHeaders() },
