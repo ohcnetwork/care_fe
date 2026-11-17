@@ -235,7 +235,7 @@ export function CreateInvoicePage({
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
-      queryKey: ["chargeItems", facilityId, accountId],
+      queryKey: ["infinite-chargeItems", accountId],
     });
   };
 
@@ -247,7 +247,7 @@ export function CreateInvoicePage({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["chargeItems", facilityId, accountId],
+    queryKey: ["infinite-chargeItems", accountId, "billable"],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(chargeItemApi.listChargeItem, {
         pathParams: { facilityId },
