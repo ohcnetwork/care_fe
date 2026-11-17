@@ -57,6 +57,7 @@
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src ./tests --write",
     "sort-locales": "node ./scripts/sort-locales.js",
+    "lint:locale": "node ./scripts/check-locale.mjs",
     "clone-component": "tsx scripts/clone-component.ts",
     "doctor": "npx react-doctor@latest"
   },
@@ -195,6 +196,9 @@
       "prettier --write --ignore-unknown --plugin prettier-plugin-tailwindcss --plugin prettier-plugin-organize-imports",
       "cross-env PRE_COMMIT=true eslint --fix --config eslint.config.mjs",
       "git update-index --again"
+    ],
+    "{src/**/*.{ts,tsx},public/locale/en.json}": [
+      "node ./scripts/check-locale.mjs"
     ],
     "public/locale/*.json": [
       "npm run sort-locales"

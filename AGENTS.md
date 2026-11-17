@@ -74,6 +74,8 @@ portless prune         # kill orphaned dev servers
 - **Naming**: PascalCase for component files (`AuthWizard.tsx`), camelCase for hooks/utils (`useAuth.ts`), kebab-case for directories
 - **Components**: Functional components only, named exports preferred, one component per file
 - **i18n**: All user-facing strings must use i18next. English translations go in `public/locale/en.json`. Non-English managed via Crowdin — do not edit directly.
+  - Translation keys must be statically analyzable: never build a key at runtime (``t(`status__${s}`)``, `t("status__" + s)`). Use a lookup whose values are literal calls, e.g. `{ open: t("status__open") } satisfies Record<Status, string>`. The `care-i18n/static-translation-keys` ESLint rule enforces this (legacy violations are grandfathered in `eslint-suppressions.json`; fix them when you touch the code and run `npx eslint <file> --prune-suppressions`).
+  - Every key in `en.json` must appear as a string literal somewhere in `src/`. `npm run lint:locale` (also run in CI and pre-commit) fails on unused keys; `npm run lint:locale -- --fix` removes them. Plural keys (`x_one`, `x_other`) are covered by a literal `x` passed with `{ count }`.
 
 Path-specific rules live in [`.github/instructions/`](.github/instructions/) (auto-applied by matching glob).
 
