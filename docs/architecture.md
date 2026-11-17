@@ -19,6 +19,12 @@ The app is moving from raviger to TanStack Router in phases. Both run at the sam
 
 **raviger compatibility shim.** Every `import ... from "raviger"` (core, local plugins, and the federated shared module) resolves to `src/compat/raviger.tsx` through a Vite alias and a `tsconfig` path. The shim keeps raviger's API but reads location from the router state and sends every write (`navigate`, `Link`, `useQueryParams` setters, `Redirect`, `useRedirect`) through `router.navigate`. Do not call `window.history.pushState` directly: it breaks the router's back-stack index.
 
+The shim keeps raviger's timing where legacy code depends on it:
+
+- `navigate()` flushes the history write, so `window.location` is current when it returns.
+- A query-only change is visible to `useQueryParams` at once. A path change becomes visible when the router commits the new matches, so legacy route tables do not flash "not found".
+- A second `navigate()` to the URL that is already in flight is skipped, so a page that navigates during render does not restart the load.
+
 Legacy route tables look like this until their area is migrated:
 
 ```typescript

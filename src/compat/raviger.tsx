@@ -111,41 +111,31 @@ function trimTrailingSlash(path: string) {
   return path.length > 1 ? path.replace(/\/+$/, "") : path;
 }
 
-function shallowEqualRecords(
-  a: Record<string, unknown> | undefined,
-  b: Record<string, unknown> | undefined,
-) {
-  if (a === b) return true;
-  if (!a || !b) return false;
-  const keysA = Object.keys(a);
-  if (keysA.length !== Object.keys(b).length) return false;
-  return keysA.every((key) => a[key] === b[key]);
-}
-
 /**
- * The location of the committed route matches.
+ * The location that legacy readers see.
  *
- * `state.location` moves as soon as a navigation starts, before the new
- * matches render; `state.resolvedLocation` moves only after they painted.
- * Legacy route tables and query readers need the value that matches what
- * React renders: the new location in the same render the new matches
- * commit (so a page that mounts reads its own `?tab=...`), and the previous
- * one before that (so legacy tables do not flash "not found").
+ * `state.location` moves as soon as a navigation starts (synchronously in
+ * `router.navigate`), before the new matches render; `state.resolvedLocation`
+ * moves only after they painted.
+ *
+ * - Same pathname (a query-only change): the same page stays, so it sees the
+ *   new query at once, as with raviger. Code that writes the query twice in
+ *   a row then merges with the latest value, not a stale one.
+ * - New pathname: the previous location until the new matches commit, so
+ *   legacy route tables do not flash "not found". In the render that commits
+ *   the new matches, the new location, so a page that mounts reads its own
+ *   query (for example `?tab=versions`).
  */
 function useRouterLocation(): ParsedLocation {
   return useRouterState({
     router: getRouter(),
     select: (state) => {
       const deepest = state.matches[state.matches.length - 1];
-      const committed =
+      const current =
         !deepest ||
-        (trimTrailingSlash(deepest.pathname) ===
-          trimTrailingSlash(state.location.pathname) &&
-          shallowEqualRecords(
-            deepest.search as Record<string, unknown>,
-            state.location.search as Record<string, unknown>,
-          ));
-      return committed
+        trimTrailingSlash(deepest.pathname) ===
+          trimTrailingSlash(state.location.pathname);
+      return current
         ? state.location
         : (state.resolvedLocation ?? state.location);
     },
@@ -478,6 +468,10 @@ export function navigate(url: string, options?: NavigateOptions): void {
     replace: !!options?.replace,
     state,
   });
+  // raviger changed `window.location` before `navigate()` returned, and some
+  // code reads it right after a write. The browser history queues the write
+  // to a microtask; flush it now.
+  router.history.flush();
 }
 
 export function useNavigate(optBasePath = "") {
