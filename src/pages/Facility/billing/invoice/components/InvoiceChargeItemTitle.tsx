@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import type { TFunction } from "i18next";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -13,6 +14,36 @@ import {
 import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { batchQuery } from "@/Utils/request/batch";
+
+/** A dispensed medicine's title is the product name, with lot and expiry as a subtitle. */
+export function getChargeItemTitle(
+  item: ChargeItemRead,
+  dispenseMap: Record<string, MedicationDispenseRead | undefined>,
+  t: TFunction,
+): { title: string; subtitle: string | null } {
+  const dispense =
+    item.service_resource === ChargeItemServiceResource.medication_dispense &&
+    item.service_resource_id
+      ? dispenseMap[item.service_resource_id]
+      : undefined;
+
+  if (!dispense) return { title: item.title, subtitle: null };
+
+  const medicineName = dispense.item?.product?.product_knowledge?.name;
+  const lotNumber = dispense.item?.product?.batch?.lot_number;
+  const expiryDate = dispense.item?.product?.expiration_date;
+
+  const details = [
+    lotNumber && `${t("lot")}: ${lotNumber}`,
+    expiryDate &&
+      `${t("expiry")}: ${format(new Date(expiryDate), "dd/MM/yyyy")}`,
+  ].filter(Boolean);
+
+  return {
+    title: medicineName || item.title,
+    subtitle: details.length ? details.join(" | ") : null,
+  };
+}
 
 interface InvoiceChargeItemTitleProps {
   item: ChargeItemRead;
@@ -42,31 +73,16 @@ export function InvoiceChargeItemTitle({
     );
   }
 
-  // Try to get dispense data
-  const dispense = item.service_resource_id
-    ? dispenseMap[item.service_resource_id]
-    : undefined;
+  const { title, subtitle } = getChargeItemTitle(item, dispenseMap, t);
 
-  // If no dispense data found, fallback to original title
-  if (!dispense) {
-    return <span>{item.title}</span>;
+  if (!subtitle) {
+    return <span>{title}</span>;
   }
-
-  const medicineName = dispense.item?.product?.product_knowledge?.name;
-  const lotNumber = dispense.item?.product?.batch?.lot_number;
-  const expiryDate = dispense.item?.product?.expiration_date;
 
   return (
     <div className="flex flex-col">
-      <span>{medicineName || item.title}</span>
-      {(lotNumber || expiryDate) && (
-        <span className="text-xs text-gray-500">
-          {lotNumber && `${t("lot")}: ${lotNumber}`}
-          {lotNumber && expiryDate && " | "}
-          {expiryDate &&
-            `${t("expiry")}: ${format(new Date(expiryDate), "dd/MM/yyyy")}`}
-        </span>
-      )}
+      <span>{title}</span>
+      <span className="text-xs text-gray-500">{subtitle}</span>
     </div>
   );
 }
