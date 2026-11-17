@@ -303,7 +303,7 @@ test.describe("Specimen Definitions Create", () => {
       page.getByRole("textbox", { name: "Slug *" }),
     );
     await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText(/atleast \d+.*atmost 50/i);
+    await expect(errorMessage).toHaveText(/at least \d+.*at most 50/i);
 
     // Test: Slug too long (more than 50 characters)
     const longSlug = faker.string.alphanumeric(MAX_SLUG_LENGTH + 1);
@@ -313,7 +313,7 @@ test.describe("Specimen Definitions Create", () => {
     await page.getByRole("button", { name: /save/i }).click();
 
     await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText(/atleast \d+.*atmost 50/i);
+    await expect(errorMessage).toHaveText(/at least \d+.*at most 50/i);
 
     const validSlug = faker.string.alphanumeric(
       faker.number.int({ min: MIN_SLUG_LENGTH, max: MAX_SLUG_LENGTH }),
