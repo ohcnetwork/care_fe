@@ -491,8 +491,13 @@ test.describe("Facility Creation", () => {
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
 
-    // Click Delete Facility button
-    await page.getByRole("button", { name: "Delete Facility" }).click();
+    // Expand the delete section, then click Delete Facility button
+    await page
+      .getByRole("button", { name: "Delete facility", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Delete Facility", exact: true })
+      .click();
 
     // Type the confirmation text
     await page
