@@ -1,5 +1,7 @@
-import { Redirect, useRoutes } from "raviger";
+import { Redirect, useFullPath, useRoutes } from "raviger";
+import { useTranslation } from "react-i18next";
 
+import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { PrintPrescriptions } from "@/components/Prescription/PrintPrescriptions";
 
@@ -8,6 +10,7 @@ import AppointmentDetail from "@/pages/Appointments/AppointmentDetail";
 import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
 import PrintAppointments from "@/pages/Appointments/components/PrintAppointments";
 import BedsList from "@/pages/Facility/locations/BedsList";
+import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
@@ -463,6 +466,24 @@ export function LocationLayout({
       locationId,
     },
   });
+
+  const { t } = useTranslation();
+  const fullPath = useFullPath();
+  const { location, isLoading } = useCurrentLocation();
+
+  // External supply is only for Store locations
+  if (fullPath.startsWith(`${basePath}/inventory/external`)) {
+    if (isLoading) return <Loading />;
+    if (location?.inventory_usage !== "store") {
+      return (
+        <ErrorPage
+          forError="CUSTOM_ERROR"
+          title={t("external_supply_unavailable")}
+          message={t("external_supply_store_only")}
+        />
+      );
+    }
+  }
 
   return <div>{routeResult}</div>;
 }
