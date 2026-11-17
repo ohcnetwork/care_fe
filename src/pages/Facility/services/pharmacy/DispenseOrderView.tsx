@@ -532,19 +532,34 @@ export function DispenseOrderView({
           />
         </div>
         {!!relatedPrescriptionIds.length && (
-          <Button
-            variant="link"
-            asChild
-            className="text-gray-700 hover:text-gray-900"
-          >
-            <Link
-              href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${dispenseOrder.patient.id}/prescriptions/${relatedPrescriptionIds.join(",")}`}
-              basePath="/"
+          <div className="flex items-center">
+            <Button
+              variant="link"
+              asChild
+              className="text-gray-700 hover:text-gray-900"
             >
-              <EyeIcon className="size-4" />
-              {t("preview_rx")}
-            </Link>
-          </Button>
+              <Link
+                href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${dispenseOrder.patient.id}/prescriptions/${relatedPrescriptionIds.join(",")}`}
+                basePath="/"
+              >
+                <EyeIcon className="size-4" />
+                {t("preview_rx")}
+              </Link>
+            </Button>
+            <Button
+              variant="link"
+              asChild
+              className="text-gray-700 hover:text-gray-900"
+            >
+              <Link
+                href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${dispenseOrder.patient.id}/prescriptions/${relatedPrescriptionIds.join(",")}/print`}
+                basePath="/"
+              >
+                <PrinterIcon className="size-4" />
+                {t("print_rx")}
+              </Link>
+            </Button>
+          </div>
         )}
       </div>
 

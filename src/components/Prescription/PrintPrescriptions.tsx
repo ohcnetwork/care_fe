@@ -8,6 +8,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Markdown } from "@/components/ui/markdown";
 
 import Loading from "@/components/Common/Loading";
+import PatientPrintPageHeader from "@/components/Common/PatientPrintPageHeader";
 import PrintTable from "@/components/Common/PrintTable";
 import {
   formatAdditionalInstructions,
@@ -197,17 +198,17 @@ const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
   );
 };
 
-interface PrescriptionPreviewProps {
+interface Props {
   prescriptionIds: string[];
   patientId: string;
   facilityId: string;
 }
 
-export const PrescriptionPreview = ({
+export const PrintPrescriptions = ({
   prescriptionIds,
   patientId,
   facilityId,
-}: PrescriptionPreviewProps) => {
+}: Props) => {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
 
@@ -277,6 +278,7 @@ export const PrescriptionPreview = ({
           <span>{formatDateTime(new Date(), "MMMM D, YYYY [at] h:mm A")}</span>
         </div>
       }
+      pageHeader={<PatientPrintPageHeader patient={patient} />}
     >
       <div className="max-w-5xl mx-auto">
         <div>

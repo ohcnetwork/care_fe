@@ -7,7 +7,7 @@ import { getPatientId } from "tests/support/patientId";
 
 import type { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 
-import { createServiceRequest } from "./serviceRequest";
+import { createServiceRequest, reportTypeCombobox } from "./serviceRequest";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -20,10 +20,7 @@ function getReportCards(page: Page, reportType: string) {
 }
 
 async function createReport(page: Page, reportType: string) {
-  await page
-    .getByRole("combobox")
-    .filter({ hasText: "Select Diagnostic Report Type" })
-    .click();
+  await reportTypeCombobox(page).click();
   await page.getByRole("option", { name: reportType }).click();
   await page
     .getByRole("button", { name: "Create Report", exact: true })

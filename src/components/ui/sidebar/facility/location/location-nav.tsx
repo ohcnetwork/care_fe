@@ -12,7 +12,9 @@ export function LocationNav() {
   const { t } = useTranslation();
 
   const { facilityId } = useCurrentFacility();
-  const { locationId } = useCurrentLocation();
+  const { locationId, location } = useCurrentLocation();
+  const usesInventory = (location?.inventory_usage ?? "none") !== "none";
+  const isStore = location?.inventory_usage === "store";
 
   const baseUrl = `/facility/${facilityId}/locations/${locationId}`;
 
@@ -39,6 +41,7 @@ export function LocationNav() {
           name: t("pharmacy"),
           url: `${baseUrl}/pharmacy`,
           icon: <CareIcon icon="l-medical-drip" />,
+          visibility: usesInventory,
           children: [
             {
               name: t("prescription_queue"),
@@ -58,6 +61,7 @@ export function LocationNav() {
           name: t("inventory"),
           url: `${baseUrl}/inventory/summary`,
           icon: <CareIcon icon="l-shop" />,
+          visibility: usesInventory,
           children: [
             {
               name: t("items"),
@@ -72,15 +76,19 @@ export function LocationNav() {
               name: t("to_dispatch"),
               url: `${baseUrl}/inventory/internal/dispatch/`,
             },
-            {
-              header: t("external_supply"),
-              name: t("purchase_orders"),
-              url: `${baseUrl}/inventory/external/orders/outgoing`,
-            },
-            {
-              name: t("purchase_deliveries"),
-              url: `${baseUrl}/inventory/external/deliveries/incoming`,
-            },
+            ...(isStore
+              ? [
+                  {
+                    header: t("external_supply"),
+                    name: t("purchase_orders"),
+                    url: `${baseUrl}/inventory/external/orders/outgoing`,
+                  },
+                  {
+                    name: t("purchase_deliveries"),
+                    url: `${baseUrl}/inventory/external/deliveries/incoming`,
+                  },
+                ]
+              : []),
           ],
         },
         {

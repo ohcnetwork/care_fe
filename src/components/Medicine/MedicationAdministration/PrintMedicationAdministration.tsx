@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/popover";
 
 import Loading from "@/components/Common/Loading";
+import PatientPrintPageHeader from "@/components/Common/PatientPrintPageHeader";
 import PrintFooter from "@/components/Common/PrintFooter";
 import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
@@ -264,6 +265,9 @@ export const PrintMedicationAdministration = (props: {
       disabled={!hasData}
       facility={facility}
       templateSlug={PrintTemplateType.medication_administration}
+      pageHeader={
+        encounter && <PatientPrintPageHeader patient={encounter.patient} />
+      }
     >
       {/* Force landscape with tight margins so the wide drug chart fits on
           a single A4 sheet per week. The parent print container also adds
