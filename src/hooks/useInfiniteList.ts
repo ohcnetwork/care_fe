@@ -7,7 +7,6 @@ import {
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
 } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { IntersectionOptions, useInView } from "react-intersection-observer";
 
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -122,17 +121,22 @@ export function useInfiniteList<
 ): UseInfiniteListResult<unknown, TError> {
   const result = useInfiniteQuery({ ...options, select }, queryClient);
 
-  const { ref, inView } = useInView(inViewOptions);
   const { hasNextPage, isFetching, isFetchNextPageError, fetchNextPage } =
     result;
 
-  // `isFetching` is a dependency so that the next page is fetched again when
-  // the sentinel stays in view after a page loads (a short page).
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetching && !isFetchNextPageError) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, isFetching, isFetchNextPageError, fetchNextPage]);
+  const canFetchNextPage =
+    !!hasNextPage && !isFetching && !isFetchNextPageError;
+
+  const { ref } = useInView({
+    ...inViewOptions,
+    skip: inViewOptions?.skip || !canFetchNextPage,
+    onChange: (inView, entry) => {
+      inViewOptions?.onChange?.(inView, entry);
+      if (inView && canFetchNextPage) {
+        fetchNextPage();
+      }
+    },
+  });
 
   return withRef(result, ref);
 }
