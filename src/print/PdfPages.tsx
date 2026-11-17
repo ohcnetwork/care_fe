@@ -51,9 +51,9 @@ export function PdfPages({ url }: { url: string }) {
               renderAnnotationLayer={false}
               devicePixelRatio={RENDER_SCALE}
               loading={
-                <Skeleton className="mx-auto mb-6 aspect-[210/297] w-full rounded-md" />
+                <Skeleton className="mx-auto mb-6 aspect-210/297 w-full rounded-md" />
               }
-              className="mx-auto mb-6 w-fit bg-white shadow-2xl"
+              className="mx-auto mb-6 w-fit overflow-hidden rounded-sm bg-white shadow-xl"
             />
           ))}
       </Document>

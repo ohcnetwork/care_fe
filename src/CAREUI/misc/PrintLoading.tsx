@@ -12,7 +12,7 @@ export default function PrintLoading() {
       aria-busy="true"
       className="mx-auto my-4 sm:my-8 flex w-full max-w-4xl flex-col gap-3"
     >
-      <div className="aspect-[210/297] w-full space-y-6 rounded-md border border-gray-200 bg-white p-8 shadow-sm">
+      <div className="aspect-210/297 w-full space-y-6 rounded-md border border-gray-200 bg-white p-8 shadow-sm">
         <div className="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
           <div className="space-y-2">
             <Skeleton className="h-6 w-56" />
