@@ -56,7 +56,7 @@ export function DeliveryOrderRoutingField({
       pathParams: { facility_id: facilityId },
       queryParams: {
         name: searchDeliveryFrom,
-        limit: 200,
+        limit: 100,
         mode: "kind",
         ordering: "sort_index",
       },
