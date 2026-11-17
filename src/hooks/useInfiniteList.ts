@@ -124,8 +124,7 @@ export function useInfiniteList<
   const { hasNextPage, isFetching, isFetchNextPageError, fetchNextPage } =
     result;
 
-  const canFetchNextPage =
-    !!hasNextPage && !isFetching && !isFetchNextPageError;
+  const canFetchNextPage = hasNextPage && !isFetching && !isFetchNextPageError;
 
   const { ref } = useInView({
     ...inViewOptions,
