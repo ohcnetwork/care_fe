@@ -78,7 +78,9 @@ interface LayoutFlags {
  */
 function useLayoutFlags(currentPath: string): LayoutFlags {
   const matches = useMatches();
-  const isLegacy = matches.some((m) => m.routeId === LEGACY_SPLAT_ROUTE_ID);
+  const isLegacy = matches.some(
+    (m) => m.routeId === LEGACY_SPLAT_ROUTE_ID || m.staticData.pluginRoute,
+  );
 
   if (isLegacy) {
     const sidebar = !LEGACY_PATHS_WITHOUT_SIDEBAR.some((path) =>

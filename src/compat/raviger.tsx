@@ -107,15 +107,48 @@ export function useBasePath() {
 // Location (port of raviger `location.ts` on top of the router state)
 // ---------------------------------------------------------------------------
 
+function trimTrailingSlash(path: string) {
+  return path.length > 1 ? path.replace(/\/+$/, "") : path;
+}
+
+function shallowEqualRecords(
+  a: Record<string, unknown> | undefined,
+  b: Record<string, unknown> | undefined,
+) {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  const keysA = Object.keys(a);
+  if (keysA.length !== Object.keys(b).length) return false;
+  return keysA.every((key) => a[key] === b[key]);
+}
+
 /**
- * The location the TanStack router has finished rendering. Legacy route
- * tables read this so they switch pages in the same commit as the TanStack
- * route tree, which avoids a flash of "not found" between the two routers.
+ * The location of the committed route matches.
+ *
+ * `state.location` moves as soon as a navigation starts, before the new
+ * matches render; `state.resolvedLocation` moves only after they painted.
+ * Legacy route tables and query readers need the value that matches what
+ * React renders: the new location in the same render the new matches
+ * commit (so a page that mounts reads its own `?tab=...`), and the previous
+ * one before that (so legacy tables do not flash "not found").
  */
 function useRouterLocation(): ParsedLocation {
   return useRouterState({
     router: getRouter(),
-    select: (state) => state.resolvedLocation ?? state.location,
+    select: (state) => {
+      const deepest = state.matches[state.matches.length - 1];
+      const committed =
+        !deepest ||
+        (trimTrailingSlash(deepest.pathname) ===
+          trimTrailingSlash(state.location.pathname) &&
+          shallowEqualRecords(
+            deepest.search as Record<string, unknown>,
+            state.location.search as Record<string, unknown>,
+          ));
+      return committed
+        ? state.location
+        : (state.resolvedLocation ?? state.location);
+    },
   });
 }
 
@@ -229,6 +262,7 @@ export function useHash({ stripHash = true } = {}): string {
   return hash ? `#${hash}` : "";
 }
 
+/** @public raviger API parity for plugins. */
 export function useHistory(): RavigerHistory {
   useRouterLocation();
   return {
@@ -377,6 +411,7 @@ function usePathParamsImpl(
 export const usePathParams =
   usePathParamsImpl as unknown as typeof RavigerUsePathParams;
 
+/** @public raviger API parity for plugins. */
 export function useMatch(
   routes: string | string[],
   options: PathParamOptions = {},
@@ -408,12 +443,16 @@ export function navigate(url: string, options?: NavigateOptions): void {
   if (options?.query) {
     url += "?" + new URLSearchParams(options.query).toString();
   }
-  if (isAbsolute(url)) {
-    if (!isCurrentOrigin(url)) {
-      window.location.assign(url);
-      return;
-    }
-    const parsed = new URL(url);
+  if (isAbsolute(url) && !isCurrentOrigin(url)) {
+    window.location.assign(url);
+    return;
+  }
+  if (isAbsolute(url) || !url.startsWith("/")) {
+    // `history.pushState` resolved relative URLs (`questionnaire/123`,
+    // `?page=2`) against the current document URL. Do the same before the
+    // router, which would resolve them against the origin.
+    const base = window.location.origin + currentHistoryLocation().href;
+    const parsed = new URL(url, base);
     url = parsed.pathname + parsed.search + parsed.hash;
   }
   const state =
@@ -589,6 +628,7 @@ function absolutePathName(path: string) {
   return path.startsWith("/") ? path : new URL(path, document.baseURI).pathname;
 }
 
+/** @public raviger API parity for plugins. */
 export const ActiveLink = forwardRef<HTMLAnchorElement, ActiveLinkProps>(
   function ActiveLink(
     { basePath, className, exactActiveClass, activeClass, ...props },

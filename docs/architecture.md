@@ -2,9 +2,18 @@
 
 Frontend architecture reference for the CARE frontend (React 19 + TypeScript + Vite). See [`AGENTS.md`](../AGENTS.md) for the top-level agent guidance that links here.
 
-## Routing (Raviger)
+## Routing (TanStack Router + raviger, in migration)
 
-Routes defined in `src/Routers/routes/` (e.g., `FacilityRoutes.tsx`, `PatientRoutes.tsx`). Combined in `src/Routers/AppRouter.tsx`. Three routers: `PublicRouter`, `PatientRouter`, `AppRouter` — selected by auth state. Plugin routes injected via `usePluginRoutes()`.
+The app is moving from raviger to TanStack Router in phases. Both run at the same time:
+
+- **TanStack Router** owns the history. The route tree is file-based under `src/routes/` (`@tanstack/router-plugin`, `autoCodeSplitting: true`). The plugin generates `src/routeTree.gen.ts`; the file is committed and is regenerated on every dev/build run. `src/router.tsx` creates the router with a string-preserving search serializer (`src/lib/router/searchParams.ts`), `queryClient` in context, intent preloading and scroll restoration.
+- `src/routes/__root.tsx` keeps the auth gate (`AuthUserProvider`). `src/routes/_app.tsx` renders the app chrome (`src/Routers/AppShell.tsx`). `src/routes/_app/$.tsx` is the legacy splat: it renders the raviger route tables in `src/Routers/AppRouter.tsx` for every path that has no file route yet.
+- Migrated areas (Facility Settings) set `staticData` on their routes: `crumb` for breadcrumbs (`src/components/Common/Breadcrumbs.tsx`), `sidebar` and `workspace` for layout flags (`src/lib/router/staticData.ts`). Legacy paths still use the URL regexes in `AppShell`.
+- Plugin manifest `routes` are attached to the live tree at runtime (`src/lib/router/pluginRoutes.tsx`). A core route always wins over a plugin route with the same path.
+
+**raviger compatibility shim.** Every `import ... from "raviger"` (core, local plugins, and the federated shared module) resolves to `src/compat/raviger.tsx` through a Vite alias and a `tsconfig` path. The shim keeps raviger's API but reads location from the router state and sends every write (`navigate`, `Link`, `useQueryParams` setters, `Redirect`, `useRedirect`) through `router.navigate`. Do not call `window.history.pushState` directly: it breaks the router's back-stack index.
+
+Legacy route tables look like this until their area is migrated:
 
 ```typescript
 const FacilityRoutes: AppRoutes = {
@@ -12,7 +21,9 @@ const FacilityRoutes: AppRoutes = {
 };
 ```
 
-Use `navigate()` from raviger for programmatic navigation.
+Pages still under a nested raviger table write links relative to the table's `basePath`. A migrated layout route keeps that context with the shim's `RouterProvider` (see `src/routes/_app/facility.$facilityId.settings/route.tsx`) until the links are rewritten.
+
+Use `navigate()` from raviger (the shim) in legacy code. Use `useNavigate()` and `<Link to>` from `@tanstack/react-router` in migrated routes.
 
 ## API Layer (TanStack Query + custom wrappers)
 

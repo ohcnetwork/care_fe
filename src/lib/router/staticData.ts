@@ -26,6 +26,11 @@ export interface RouteStaticData {
   sidebar?: boolean;
   workspace?: Workspace;
   crumb?: Crumb;
+  /**
+   * The route was attached from a plugin manifest at runtime. The shell
+   * derives its layout from the URL, as it does for legacy routes.
+   */
+  pluginRoute?: boolean;
 }
 
 declare module "@tanstack/react-router" {

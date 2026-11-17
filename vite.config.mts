@@ -513,21 +513,16 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       }),
     ],
     resolve: {
-      alias: [
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+        "@careConfig": path.resolve(__dirname, "./care.config.ts"),
+        "@core": path.resolve(__dirname, "src/"),
         // Every `raviger` import (core, local plugins and the federated
-        // shared module) resolves to the compatibility shim. The shim sends
-        // all navigation through the TanStack router.
-        {
-          find: /^raviger$/,
-          replacement: path.resolve(__dirname, "src/compat/raviger.tsx"),
-        },
-        { find: "@", replacement: path.resolve(__dirname, "./src") },
-        {
-          find: "@careConfig",
-          replacement: path.resolve(__dirname, "./care.config.ts"),
-        },
-        { find: "@core", replacement: path.resolve(__dirname, "src/") },
-      ],
+        // shared module) resolves to the compatibility shim, which sends all
+        // navigation through the TanStack router. Type-only imports of
+        // `raviger/dist/*` inside the shim are erased before resolution.
+        raviger: path.resolve(__dirname, "src/compat/raviger.tsx"),
+      },
       // Dedupe shared packages so locally-served plugin source (apps/*) resolves
       // these from the main app's node_modules instead of the plugin's own copy.
       // Without this, hooks break with "Should have a queue" / hook order errors

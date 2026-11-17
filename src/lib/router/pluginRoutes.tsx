@@ -101,6 +101,7 @@ export function attachPluginRoutes(
       createRoute({
         getParentRoute: () => parent,
         path: routerPath,
+        staticData: { pluginRoute: true },
         component: () => (
           <PluginRouteComponent plugin={plugin} render={render} />
         ),
