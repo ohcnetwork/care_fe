@@ -64,7 +64,13 @@ export function useInvoiceChargeItems({
       : {};
 
   const list = useInfiniteQuery({
-    queryKey: ["infinite-chargeItems", accountId, "invoice", scopeParams],
+    queryKey: [
+      "infinite-chargeItems",
+      accountId,
+      "invoice",
+      scope.kind,
+      scopeParams,
+    ],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(chargeItemApi.listChargeItem, {
         pathParams: { facilityId },

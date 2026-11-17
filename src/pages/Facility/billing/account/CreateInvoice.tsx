@@ -202,7 +202,6 @@ export function CreateInvoicePage({
         handleChargeItemsAdded();
         setPendingItem(null);
         toast.success(t("charge_items_added_successfully"));
-        setTimeout(() => pickerRef.current?.focus(), 100);
       },
       onError: () => {
         toast.error(t("charge_items_add_failed"));
@@ -336,17 +335,21 @@ export function CreateInvoicePage({
     if (e.key === "Escape") {
       e.preventDefault();
       setPendingItem(null);
-      pickerRef.current?.focus();
     }
   }, []);
 
-  // Focus the picker once the list settles (and whenever its size changes),
-  // unless it is about to auto-open by itself.
+  // Focus the picker once the list settles, whenever its size changes, and
+  // whenever it remounts after a pending item is confirmed or cancelled
+  // (it is unmounted while one is shown), unless it is about to auto-open by
+  // itself.
+  const hasPendingItem = pendingItem !== null;
   useEffect(() => {
-    if (!canAddChargeItems || autoOpenPicker !== false) return;
+    if (!canAddChargeItems || autoOpenPicker !== false || hasPendingItem) {
+      return;
+    }
     const timer = setTimeout(() => pickerRef.current?.focus(), 200);
     return () => clearTimeout(timer);
-  }, [canAddChargeItems, autoOpenPicker, chargeItems.length]);
+  }, [canAddChargeItems, autoOpenPicker, hasPendingItem, chargeItems.length]);
 
   const tableHeadClass = "border-r border-gray-200 font-semibold text-center";
   const tableCellClass =
@@ -664,15 +667,11 @@ export function CreateInvoicePage({
                                 size="icon"
                                 variant="ghost"
                                 className="size-8"
-                                onClick={() => {
-                                  setPendingItem(null);
-                                  pickerRef.current?.focus();
-                                }}
+                                onClick={() => setPendingItem(null)}
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter") {
                                     e.preventDefault();
                                     setPendingItem(null);
-                                    pickerRef.current?.focus();
                                   }
                                 }}
                                 disabled={isApplyingInline}
@@ -724,7 +723,7 @@ export function CreateInvoicePage({
 
               <p className="text-xs text-gray-950 italic mt-3">
                 {selection.selectedItems.length > 0
-                  ? t("selected_items_count_one", {
+                  ? t("selected_items_count", {
                       count: selection.selectedItems.length,
                     })
                   : t("no_items_selected")}
@@ -890,10 +889,11 @@ export function CreateInvoicePage({
                   selection.selectedItems.length === 0
                 }
               >
-                {createMutation.isPending ? (
+                {createMutation.isPending ||
+                (isSyncingChargeItems && !isLoading) ? (
                   <div className="flex items-center gap-2">
                     <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                    {t("creating")}
+                    {createMutation.isPending ? t("creating") : t("updating")}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
