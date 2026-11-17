@@ -4,9 +4,11 @@ import { ENCOUNTER_CLASSES } from "tests/facility/patient/encounter/encounterCla
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
-export async function openCreateEncounterDialog(page: Page) {
+export async function openCreateEncounterDialog(
+  page: Page,
+  patientId = getPatientId(),
+) {
   const facilityId = getFacilityId();
-  const patientId = getPatientId();
 
   await page.goto(`/facility/${facilityId}/patient/${patientId}`);
   await page.getByRole("link", { name: "Patient Home" }).first().click();

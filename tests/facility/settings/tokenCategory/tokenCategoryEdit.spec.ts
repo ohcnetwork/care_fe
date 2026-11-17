@@ -10,7 +10,6 @@ test.describe("Token Category Edit - Permission Tests", () => {
   let resourceType: string;
   let updatedName: string;
   let updatedShorthand: string;
-  let updatedResourceType: string;
   let facilityId: string;
 
   // Resource types available for token categories
@@ -25,7 +24,6 @@ test.describe("Token Category Edit - Permission Tests", () => {
     // Generate data for updates
     updatedName = faker.company.name();
     updatedShorthand = faker.string.alphanumeric(4).toUpperCase();
-    updatedResourceType = faker.helpers.arrayElement(resourceTypes);
     facilityId = getFacilityId();
   });
 
@@ -93,8 +91,6 @@ test.describe("Token Category Edit - Permission Tests", () => {
 
       // Step 6: Update the token category
       await page.getByRole("textbox", { name: "Name" }).fill(updatedName);
-      await page.getByRole("combobox", { name: "Resource Type" }).click();
-      await page.getByRole("option", { name: updatedResourceType }).click();
       await page
         .getByRole("textbox", { name: "Shorthand" })
         .fill(updatedShorthand);
@@ -115,7 +111,40 @@ test.describe("Token Category Edit - Permission Tests", () => {
       const tableBody = page.locator("tbody");
       await expect(tableBody).toContainText(updatedName);
       await expect(tableBody).toContainText(updatedShorthand);
-      await expect(tableBody).toContainText(updatedResourceType);
+      await expect(tableBody).toContainText(resourceType);
+    });
+
+    test("Admin cannot change the resource type of an existing token category", async ({
+      page,
+    }) => {
+      const categoryRow = page
+        .locator("tbody tr")
+        .filter({ hasText: tokenCategoryName });
+
+      // Create a token category with a resource type
+      await page.goto(`/facility/${facilityId}/settings/token_category/new`);
+      await page.getByRole("textbox", { name: "Name" }).fill(tokenCategoryName);
+      await page.getByRole("combobox", { name: "Resource Type" }).click();
+      await page.getByRole("option", { name: resourceType }).click();
+      await page.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
+      await page.getByRole("button", { name: "Create" }).click();
+      await page.waitForURL(
+        /\/facility\/[^/]+\/settings\/token_category(?!\/new)/,
+      );
+
+      // The resource type is locked once the category exists
+      await page
+        .getByRole("textbox", { name: "Search Token Categories" })
+        .fill(tokenCategoryName);
+      await categoryRow.getByRole("link", { name: "Edit" }).click();
+      await expect(
+        page.getByRole("heading", { name: "Edit Token Category" }),
+      ).toBeVisible();
+      const resourceTypeSelect = page.getByRole("combobox", {
+        name: "Resource Type",
+      });
+      await expect(resourceTypeSelect).toBeDisabled();
+      await expect(resourceTypeSelect).toContainText(resourceType);
     });
 
     test("Admin can access Set as default and Edit buttons after clicking View button", async ({
