@@ -1869,6 +1869,8 @@
   "external_id": "External ID",
   "external_identifier": "External Identifier",
   "external_supply": "External Supply",
+  "external_supply_store_only": "Purchase orders and deliveries are only available at locations whose inventory usage is Store.",
+  "external_supply_unavailable": "External supply isn't available here",
   "extra_details": "Extra Details",
   "facilities": "Facilities",
   "facility": "Facility",
