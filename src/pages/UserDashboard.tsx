@@ -107,7 +107,7 @@ export default function UserDashboard() {
         {/* Welcome Section */}
         <div
           data-cy="dashboard-greeting"
-          className="relative overflow-hidden rounded-xl border border-sky-100 bg-linear-to-r from-sky-50 to-emerald-100 text-gray-900"
+          className="relative overflow-hidden rounded-xl border border-inverse-border inset-shadow-sm bg-linear-to-r from-sky-50 to-emerald-100 text-foreground"
         >
           <img
             src="/images/home-banner.svg"
