@@ -40,7 +40,7 @@ type Props = {
   templateSlug: string;
   hideFacilityHeader?: boolean;
   footer?: ReactNode;
-  /** Print-only `@page` header, shown in the top margin of every page after the first. */
+  /** Rendered above the content and repeated on every printed page except the first. */
   pageHeader?: ReactNode;
 };
 
@@ -102,12 +102,12 @@ export default function PrintPreview(props: Props) {
       {templateWatermark?.enabled && templateWatermark.text && (
         <TiledWatermark watermark={templateWatermark} />
       )}
-      {props.pageHeader}
       <FacilityPrintLayout
         facility={props.facility}
         templateSlug={props.templateSlug}
         hideFacilityHeader={props.hideFacilityHeader}
         footer={props.footer}
+        pageHeader={props.pageHeader}
       >
         {props.children}
       </FacilityPrintLayout>
@@ -312,23 +312,63 @@ function FacilityLogo({
   );
 }
 
+function PageHeaderRepeater({
+  pageHeader,
+  children,
+}: {
+  pageHeader?: ReactNode;
+  children: ReactNode;
+}) {
+  if (!pageHeader) return <>{children}</>;
+
+  return (
+    <table
+      className="w-full border-collapse"
+      style={{ tableLayout: "fixed", fontSize: "inherit" }}
+    >
+      <thead className="hidden print:table-header-group">
+        <tr>
+          <td className="p-0! font-normal">
+            <div className="h-5 overflow-hidden">{pageHeader}</div>
+          </td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          {/* align-top: Firefox otherwise baseline-aligns the cell and offsets the mask. */}
+          <td className="p-0! align-top">
+            <div aria-hidden="true" className="relative hidden h-0 print:block">
+              <div className="absolute inset-x-0 bottom-0 h-5 bg-white" />
+            </div>
+            <div className="relative print:-mt-5">{children}</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  );
+}
+
 function FacilityPrintLayout({
   templateSlug,
   facility,
   children,
   hideFacilityHeader,
   footer,
+  pageHeader,
 }: {
   templateSlug?: string;
   facility?: FacilityRead;
   children: ReactNode;
   hideFacilityHeader?: boolean;
   footer?: ReactNode;
+  pageHeader?: ReactNode;
 }) {
   if (!facility) {
     return (
       <>
-        {children}
+        <PageHeaderRepeater pageHeader={pageHeader}>
+          {children}
+        </PageHeaderRepeater>
         {footer && <div>{footer}</div>}
       </>
     );
@@ -380,7 +420,11 @@ function FacilityPrintLayout({
           )}
         </div>
       )}
-      <div className="flex-1">{children}</div>
+      <div className="flex-1">
+        <PageHeaderRepeater pageHeader={pageHeader}>
+          {children}
+        </PageHeaderRepeater>
+      </div>
       {footerImage?.url && (
         <div className="mt-auto pt-2">
           <img
