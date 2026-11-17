@@ -146,6 +146,13 @@ const careConfig = {
   ),
 
   /**
+   * Generate print documents as PDFs with Typst (src/print) instead of the
+   * browser's print engine. Only documents that have a Typst template are
+   * affected; the rest keep using the browser.
+   */
+  typstPrint: booleanFromString(env.REACT_ENABLE_TYPST_PRINT, false),
+
+  /**
    * Default payment method to preselect when recording a new payment
    * Valid values: cash, ccca, cchk, cdac, chck, ddpo, debc
    */

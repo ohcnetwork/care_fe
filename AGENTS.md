@@ -38,6 +38,7 @@ Detailed guidance is split into focused files so agents only load what's relevan
 - [`docs/testing.md`](docs/testing.md) — Playwright E2E setup, commands, DB snapshot workflow, and writing tests.
 - [`docs/architecture.md`](docs/architecture.md) — Routing, API layer, state management, UI components, plugins, auth, key directories, and config.
 - [`docs/care-apps-architecture-note.md`](docs/care-apps-architecture-note.md), [`docs/care-apps-local-dev.md`](docs/care-apps-local-dev.md), [`docs/care-apps-override-architecture.md`](docs/care-apps-override-architecture.md) — Plugin system deep dives.
+- [`docs/printing.md`](docs/printing.md) — Print documents as PDFs with Typst: templates, the `care.typ` library, facility print settings, deployment.
 - [`tests/PLAYWRIGHT_GUIDE.md`](tests/PLAYWRIGHT_GUIDE.md) — Complete Playwright patterns for form interactions, selectors, assertions, and helpers.
 
 ## Quick Commands

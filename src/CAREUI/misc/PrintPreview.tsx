@@ -15,6 +15,7 @@ import BackButton from "@/components/Common/BackButton";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAutoPrint from "@/hooks/useAutoPrint";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { resolvePrintTemplate } from "@/print/printLayout";
 import { FacilityRead } from "@/types/facility/facility";
 import type {
   LogoConfig,
@@ -231,20 +232,6 @@ function TiledWatermark({ watermark }: { watermark: WatermarkConfig }) {
       />
     </>
   );
-}
-
-function resolvePrintTemplate(
-  facility: FacilityRead,
-  templateSlug?: string,
-): PrintTemplate | undefined {
-  const templates = facility.print_templates;
-  if (!templates?.length) return undefined;
-
-  const match = templateSlug
-    ? templates.find((t) => t.slug === templateSlug)
-    : undefined;
-
-  return match ?? templates.find((t) => t.slug === "default");
 }
 
 function buildPageStyle(template?: PrintTemplate): string | null {

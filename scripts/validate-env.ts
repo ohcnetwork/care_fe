@@ -153,6 +153,7 @@ const envSchema = z
     REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API:
       booleanAsStringSchema.optional(),
     REACT_PAYMENT_LOCATION_REQUIRED: booleanAsStringSchema.optional(),
+    REACT_ENABLE_TYPST_PRINT: booleanAsStringSchema.optional(),
     REACT_ENCOUNTER_DEFAULT_DATE_FILTER: numberAsString.optional(),
     REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE: booleanAsStringSchema.optional(),
     REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME:

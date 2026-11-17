@@ -22,6 +22,7 @@ interface ImportMetaEnv {
   readonly REACT_APPOINTMENTS_DEFAULT_DATE_FILTER?: string;
   readonly REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API?: string;
   readonly REACT_PAYMENT_LOCATION_REQUIRED?: string;
+  readonly REACT_ENABLE_TYPST_PRINT?: string;
   readonly REACT_DEFAULT_PAYMENT_METHOD?: string;
   readonly REACT_TOAST_POSITION?: string;
   readonly REACT_ALLOWED_ENCOUNTER_CLASSES?: string;

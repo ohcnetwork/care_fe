@@ -1,0 +1,742 @@
+{
+  "layout": {
+    "title": "Invoice INV-2026-000184",
+    "lang": "en",
+    "page": {
+      "paper": "a4",
+      "flipped": false,
+      "margin": {
+        "top": 10,
+        "right": 10,
+        "bottom": 10,
+        "left": 10
+      }
+    },
+    "header": {
+      "hidden": false,
+      "image": null,
+      "logo": null,
+      "facility": {
+        "name": "Government Taluk Hospital, Kottayam",
+        "address": "MC Road, Near KSRTC Bus Stand\nKottayam, Kerala 686001",
+        "phone": "+91 481 256 0000"
+      }
+    },
+    "footer_image": null,
+    "watermark": null,
+    "status_watermark": null,
+    "labels": {
+      "page_x_of_y": "Page {current} of {total}"
+    }
+  },
+  "content": {
+    "labels": {
+      "invoice": "Invoice",
+      "issue_date": "Issue Date",
+      "bill_to": "Bill To",
+      "address": "Address",
+      "no_address_provided": "No address provided",
+      "item": "Item",
+      "unit_price": "Unit Price (₹)",
+      "qty": "Qty",
+      "discount": "Discount",
+      "total": "Total (₹)",
+      "no_charge_items": "No charge items",
+      "net_amount": "Net Amount",
+      "grand_total": "Total",
+      "date_and_time": "Date & Time",
+      "payment_method": "Payment Method",
+      "reference": "Reference",
+      "amount": "Amount (₹)",
+      "total_received": "Total Received",
+      "credit_notes_title": "Credit notes issued against this invoice",
+      "total_credit_notes": "Total Credit Notes",
+      "payment_terms": "Payment Terms",
+      "created_by": "Created by",
+      "location": "Location"
+    },
+    "number": "INV-2026-000184",
+    "issue_date": "17 Nov, 2026 11:42 AM",
+    "patient": {
+      "name": "അനന്യ കൃഷ്ണൻ (Ananya Krishnan)",
+      "gender_age": "Female, 34 Y",
+      "identifiers": [
+        {
+          "label": "ABHA Number",
+          "value": "91-1234-5678-9012"
+        }
+      ],
+      "address": "बी-12, शांति नगर\nKottayam, Kerala"
+    },
+    "qr_code": null,
+    "tax_columns": ["CGST", "SGST"],
+    "items": [
+      {
+        "index": 1,
+        "title": "Amoxicillin 250mg Capsule",
+        "subtitle": "Lot: B2401 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "2",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 2,
+        "title": "Pantoprazole 40mg Tablet",
+        "subtitle": "Lot: B2402 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "3",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 3,
+        "title": "Dressing - Minor",
+        "subtitle": null,
+        "unit_price": "120.00",
+        "quantity": "4",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 4,
+        "title": "Metformin 500mg Tablet",
+        "subtitle": "Lot: B2404 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "1",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 5,
+        "title": "ORS Sachet",
+        "subtitle": "Lot: B2405 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "2",
+        "discount": {
+          "total": "12.00",
+          "parts": ["10.00%"]
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 6,
+        "title": "X-Ray Chest PA View",
+        "subtitle": null,
+        "unit_price": "120.00",
+        "quantity": "3",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 7,
+        "title": "Azithromycin 500mg Tablet",
+        "subtitle": "Lot: B2407 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "4",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 8,
+        "title": "Paracetamol 500mg Tablet",
+        "subtitle": "Lot: B2408 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "1",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 9,
+        "title": "Complete Blood Count (CBC)",
+        "subtitle": null,
+        "unit_price": "120.00",
+        "quantity": "2",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 10,
+        "title": "Pantoprazole 40mg Tablet",
+        "subtitle": "Lot: B2410 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "3",
+        "discount": {
+          "total": "12.00",
+          "parts": ["10.00%"]
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 11,
+        "title": "Cetirizine 10mg Tablet",
+        "subtitle": "Lot: B2411 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "4",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 12,
+        "title": "Consultation - General Medicine",
+        "subtitle": null,
+        "unit_price": "120.00",
+        "quantity": "1",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 13,
+        "title": "ORS Sachet",
+        "subtitle": "Lot: B2413 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "2",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 14,
+        "title": "Vitamin B Complex Syrup 200ml",
+        "subtitle": "Lot: B2414 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "3",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 15,
+        "title": "Dressing - Minor",
+        "subtitle": null,
+        "unit_price": "120.00",
+        "quantity": "4",
+        "discount": {
+          "total": "12.00",
+          "parts": ["10.00%"]
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 16,
+        "title": "Paracetamol 500mg Tablet",
+        "subtitle": "Lot: B2416 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "1",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 17,
+        "title": "Amoxicillin 250mg Capsule",
+        "subtitle": "Lot: B2417 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "2",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 18,
+        "title": "X-Ray Chest PA View",
+        "subtitle": null,
+        "unit_price": "120.00",
+        "quantity": "3",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 19,
+        "title": "Cetirizine 10mg Tablet",
+        "subtitle": "Lot: B2419 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "4",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 20,
+        "title": "Metformin 500mg Tablet",
+        "subtitle": "Lot: B2420 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "1",
+        "discount": {
+          "total": "12.00",
+          "parts": ["10.00%"]
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 21,
+        "title": "Complete Blood Count (CBC)",
+        "subtitle": null,
+        "unit_price": "120.00",
+        "quantity": "2",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 22,
+        "title": "Vitamin B Complex Syrup 200ml",
+        "subtitle": "Lot: B2422 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "3",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 23,
+        "title": "Azithromycin 500mg Tablet",
+        "subtitle": "Lot: B2423 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "4",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 24,
+        "title": "Consultation - General Medicine",
+        "subtitle": null,
+        "unit_price": "120.00",
+        "quantity": "1",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 25,
+        "title": "Amoxicillin 250mg Capsule",
+        "subtitle": "Lot: B2425 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "2",
+        "discount": {
+          "total": "12.00",
+          "parts": ["10.00%"]
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 26,
+        "title": "Pantoprazole 40mg Tablet",
+        "subtitle": "Lot: B2426 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "3",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 27,
+        "title": "Dressing - Minor",
+        "subtitle": null,
+        "unit_price": "120.00",
+        "quantity": "4",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      },
+      {
+        "index": 28,
+        "title": "Metformin 500mg Tablet",
+        "subtitle": "Lot: B2428 | Expiry: 03/2028",
+        "unit_price": "120.00",
+        "quantity": "1",
+        "discount": {
+          "total": "0.00",
+          "parts": []
+        },
+        "taxes": [
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          },
+          {
+            "total": "5.40",
+            "unit": "2.50%"
+          }
+        ],
+        "total": "130.80"
+      }
+    ],
+    "totals": {
+      "components": [
+        {
+          "label": "Base Amount:",
+          "value": "₹3,360.00"
+        },
+        {
+          "label": "Senior citizen (Discount)",
+          "value": "- ₹33.60",
+          "muted": true
+        },
+        {
+          "label": "CGST (Tax)",
+          "value": "+ ₹151.20",
+          "muted": true
+        },
+        {
+          "label": "SGST (Tax)",
+          "value": "+ ₹151.20",
+          "muted": true
+        }
+      ],
+      "net": "₹3,628.80",
+      "gross": "₹3,628.80"
+    },
+    "payments": {
+      "rows": [
+        {
+          "index": 1,
+          "datetime": "17 Nov 2026, 11:45 AM",
+          "id": "6f1c2a9e-3b7d-4c55-9a1e-0d2b7f3e8c41",
+          "method": "UPI",
+          "reference": "UPI/431829",
+          "amount": "2,000.00"
+        },
+        {
+          "index": 2,
+          "datetime": "17 Nov 2026, 11:47 AM",
+          "id": "a2d9e7c4-51f0-4b8e-8d63-7c1e9b0f2a55",
+          "method": "Cash",
+          "reference": "",
+          "amount": "1,628.80"
+        }
+      ],
+      "total": "₹3,628.80"
+    },
+    "credit_notes": null,
+    "payment_terms": "Payment due on receipt. Bring this invoice for any refunds or corrections.",
+    "created_by": "Asha Nair",
+    "location": "Pharmacy Counter 1"
+  }
+}

@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
@@ -28,6 +29,7 @@ import {
   InvoiceChargeItemTitle,
   useMedicationDispenseData,
 } from "@/pages/Facility/billing/invoice/components/InvoiceChargeItemTitle";
+import { TypstInvoicePrint } from "@/pages/Facility/billing/invoice/TypstInvoicePrint";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
@@ -66,19 +68,20 @@ export function PrintInvoiceBase({ facilityId, invoiceId }: PrintInvoiceProps) {
   const patient = invoice?.account.patient;
 
   // Fetch patient data for identifiers
-  const { data: verifiedPatient } = useQuery({
-    queryKey: ["patient-verify", patient?.id, patient?.year_of_birth],
-    queryFn: query(patientApi.searchRetrieve, {
-      pathParams: { facilityId },
-      body: {
-        phone_number: patient?.phone_number ?? "",
-        year_of_birth: patient?.year_of_birth?.toString() ?? "",
-        partial_id: patient ? getPartialId(patient) : "",
-        facility: facilityId,
-      },
-    }),
-    enabled: !!patient,
-  });
+  const { data: verifiedPatient, isLoading: isVerifiedPatientLoading } =
+    useQuery({
+      queryKey: ["patient-verify", patient?.id, patient?.year_of_birth],
+      queryFn: query(patientApi.searchRetrieve, {
+        pathParams: { facilityId },
+        body: {
+          phone_number: patient?.phone_number ?? "",
+          year_of_birth: patient?.year_of_birth?.toString() ?? "",
+          partial_id: patient ? getPartialId(patient) : "",
+          facility: facilityId,
+        },
+      }),
+      enabled: !!patient,
+    });
 
   // Pre-fetch medication dispense data for charge items
   const { dispenseMap, isLoadingDispenses } = useMedicationDispenseData(
@@ -136,6 +139,20 @@ export function PrintInvoiceBase({ facilityId, invoiceId }: PrintInvoiceProps) {
     }
     return undefined;
   };
+
+  if (careConfig.typstPrint) {
+    return (
+      <TypstInvoicePrint
+        invoice={invoice}
+        facility={facility}
+        verifiedPatient={verifiedPatient}
+        isVerifiedPatientLoading={isVerifiedPatientLoading}
+        dispenseMap={dispenseMap}
+        isLoadingDispenses={isLoadingDispenses}
+        statusWatermark={getWatermark()}
+      />
+    );
+  }
 
   return (
     <PrintPreview

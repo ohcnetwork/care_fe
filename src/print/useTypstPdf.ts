@@ -1,0 +1,166 @@
+import careConfig from "@careConfig";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+
+import type { FacilityRead } from "@/types/facility/facility";
+
+import { fetchPrintImage } from "@/print/printAssets";
+import {
+  BRANDING_ASSET_PATHS,
+  type BrandingAsset,
+  buildPrintLayout,
+  getBrandingAssetUrls,
+  isAutoPrintEnabled,
+} from "@/print/printLayout";
+import { resolvePrintTheme } from "@/print/printTheme";
+import type { PrintDocument, StatusWatermark } from "@/print/types";
+import { compileTypstPdf } from "@/print/typstClient";
+
+export interface TypstPdfOptions<TContent> {
+  /** Template name: `src/print/templates/<template>.typ`. */
+  template: string;
+  /** The template's data. Leave undefined until it's ready. */
+  content: TContent | undefined;
+  /** Shown as the PDF's title and used for its file name. */
+  title: string;
+  facility?: FacilityRead;
+  /** Which of the facility's print templates to apply. */
+  templateSlug: string;
+  hideFacilityHeader?: boolean;
+  statusWatermark?: StatusWatermark;
+  /**
+   * Extra files for the template by virtual path, e.g. a QR code SVG. Keep
+   * them small: they're fingerprinted on every render.
+   */
+  files?: Record<string, Uint8Array>;
+}
+
+/** A short fingerprint of a small file, for query keys. */
+function fingerprint(bytes: Uint8Array) {
+  let hash = 0x811c9dc5;
+  for (const byte of bytes) hash = Math.imul(hash ^ byte, 0x01000193);
+  return (hash >>> 0).toString(36);
+}
+
+/** Fetches the facility's branding images. Failures are reported, not thrown. */
+async function fetchBrandingAssets(
+  urls: Partial<Record<BrandingAsset, string>>,
+) {
+  const entries = Object.entries(urls) as [BrandingAsset, string][];
+  const results = await Promise.allSettled(
+    entries.map(([, url]) => fetchPrintImage(url)),
+  );
+
+  const files: Record<string, Uint8Array> = {};
+  const loaded = new Set<BrandingAsset>();
+  const failed: BrandingAsset[] = [];
+  results.forEach((result, i) => {
+    const asset = entries[i][0];
+    if (result.status === "fulfilled") {
+      files[BRANDING_ASSET_PATHS[asset]] = result.value;
+      loaded.add(asset);
+    } else {
+      console.warn(`Print: couldn't load the ${asset}`, result.reason);
+      failed.push(asset);
+    }
+  });
+  return { files, loaded, failed };
+}
+
+/** Compiles a Typst print template to a PDF. */
+export function useTypstPdf<TContent>({
+  template,
+  content,
+  title,
+  facility,
+  templateSlug,
+  hideFacilityHeader,
+  statusWatermark,
+  files,
+}: TypstPdfOptions<TContent>) {
+  const { t, i18n } = useTranslation();
+
+  const assetUrls = useMemo(
+    () =>
+      getBrandingAssetUrls({
+        facility,
+        templateSlug,
+        hideFacilityHeader,
+        defaultLogoUrl: careConfig.mainLogo?.dark,
+      }),
+    [facility, templateSlug, hideFacilityHeader],
+  );
+
+  const assets = useQuery({
+    queryKey: ["print-branding-assets", assetUrls],
+    queryFn: () => fetchBrandingAssets(assetUrls),
+    staleTime: Infinity,
+  });
+
+  const layout = useMemo(
+    () =>
+      assets.data &&
+      buildPrintLayout({
+        facility,
+        templateSlug,
+        hideFacilityHeader,
+        title,
+        lang: i18n.language?.split("-")[0] ?? "en",
+        statusWatermark,
+        loadedAssets: assets.data.loaded,
+        t,
+      }),
+    [
+      assets.data,
+      facility,
+      templateSlug,
+      hideFacilityHeader,
+      title,
+      i18n.language,
+      statusWatermark?.text,
+      statusWatermark?.color,
+      t,
+    ],
+  );
+
+  const pdf = useQuery({
+    queryKey: [
+      "typst-pdf",
+      template,
+      layout,
+      content,
+      assetUrls,
+      Object.entries(files ?? {}).map(([path, bytes]) => [
+        path,
+        fingerprint(bytes),
+      ]),
+    ],
+    queryFn: () => {
+      const document: PrintDocument<TContent> = {
+        layout: layout!,
+        content: content!,
+      };
+      return compileTypstPdf({
+        template,
+        data: document,
+        theme: resolvePrintTheme(),
+        files: { ...assets.data!.files, ...files },
+      });
+    },
+    enabled: !!layout && content !== undefined,
+    staleTime: Infinity,
+    gcTime: 60_000,
+    retry: false,
+  });
+
+  return {
+    pdf: pdf.data,
+    error: pdf.error,
+    isLoading: assets.isLoading || pdf.isLoading || content === undefined,
+    retry: pdf.refetch,
+    /** Branding images that couldn't be loaded and were left out. */
+    failedAssets: assets.data?.failed ?? [],
+    autoPrint: isAutoPrintEnabled(facility, templateSlug),
+  };
+}

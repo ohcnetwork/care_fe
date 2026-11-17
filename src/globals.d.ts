@@ -24,3 +24,10 @@ declare module "virtual:care-local-plugins" {
   export const localDevPluginConfigs: PlugConfig[];
   export const localDevPluginManifests: Record<string, PluginManifest>;
 }
+
+/** The Typst compiler's WebAssembly module (see plugins/typstCompilerWasm.ts). */
+declare module "virtual:typst-compiler-wasm" {
+  /** URL of the compiler. Gzipped in production builds. */
+  const url: string;
+  export default url;
+}
