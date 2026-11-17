@@ -14,8 +14,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { AppSidebarToggle } from "@/components/ui/sidebar/sidebar-toggle";
 
-interface InnerPageBreadcrumb {
-  label: string;
+export interface InnerPageBreadcrumb {
+  label: React.ReactNode;
   href?: string;
   hideOnMobile?: boolean;
 }
@@ -37,7 +37,7 @@ export function InnerPageHeader({ breadcrumbs, dataCy }: InnerPageHeaderProps) {
       <Breadcrumb className="min-w-0">
         <BreadcrumbList className="flex-nowrap">
           {breadcrumbs.map((item, index) => (
-            <Fragment key={item.href ?? item.label}>
+            <Fragment key={item.href ?? index}>
               <BreadcrumbItem
                 className={cn("min-w-0", item.hideOnMobile && "hidden sm:flex")}
               >

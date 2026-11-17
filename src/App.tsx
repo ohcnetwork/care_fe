@@ -7,18 +7,15 @@ import { ShortcutProvider } from "@/context/ShortcutContext";
 import Integrations from "@/Integrations";
 import { OverrideProvider } from "@/lib/override";
 import PluginEngine from "@/PluginEngine";
-import AuthUserProvider from "@/Providers/AuthUserProvider";
-import PublicRouter from "@/Routers/PublicRouter";
+import { router } from "@/router";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
 import careConfig from "@careConfig";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { RouterProvider } from "@tanstack/react-router";
 import { useLocationChange } from "raviger";
-import { lazy, Suspense, useEffect } from "react";
-
-const PatientRouter = lazy(() => import("@/Routers/PatientRouter"));
-const AppRouter = lazy(() => import("@/Routers/AppRouter"));
+import { Suspense, useEffect } from "react";
 
 const ScrollToTop = () => {
   useLocationChange(() => {
@@ -44,18 +41,8 @@ const App = () => {
             <ShortcutProvider>
               <PluginEngine>
                 <OverrideProvider>
-                  <AuthUserProvider
-                    unauthorized={<PublicRouter />}
-                    otpAuthorized={
-                      <Suspense fallback={<Loading />}>
-                        <PatientRouter />
-                      </Suspense>
-                    }
-                  >
-                    <Suspense fallback={<Loading />}>
-                      <AppRouter />
-                    </Suspense>
-                  </AuthUserProvider>
+                  {/* Route tree: src/routes/. The auth gate renders in the root route. */}
+                  <RouterProvider router={router} />
                 </OverrideProvider>
                 <Toaster
                   position={careConfig.toastPosition}
