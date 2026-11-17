@@ -1,10 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t as i18nT } from "i18next";
 import {
   CheckIcon,
@@ -62,10 +57,7 @@ import { cn } from "@/lib/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
-import {
-  ChargeItemRead,
-  ChargeItemStatus,
-} from "@/types/billing/chargeItem/chargeItem";
+import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import {
   InvoiceCreate,
@@ -76,7 +68,6 @@ import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { UserReadMinimal } from "@/types/user/user";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName, goBack } from "@/Utils/utils";
 
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
@@ -94,8 +85,10 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 import ChargeItemActionsMenu from "./components/ChargeItemActions";
 import QuickAddChargeItemsSheet from "./components/QuickAddChargeItemsSheet";
-
-const ITEMS_PER_PAGE = 200;
+import {
+  ChargeItemScope,
+  useInvoiceChargeItems,
+} from "./useInvoiceChargeItems";
 
 const formSchema = z.object({
   status: z.enum(InvoiceStatus),
@@ -152,17 +145,19 @@ function useChargeItemSelection(chargeItems: ChargeItemRead[]) {
   return { selectedItems, allSelected, isSelected, toggle, toggleAll };
 }
 
+const ACCOUNT_SCOPE: ChargeItemScope = { kind: "account" };
+
 interface CreateInvoicePageProps {
   facilityId: string;
   accountId: string;
-  preSelectedChargeItems?: ChargeItemRead[];
+  /** Which of the account's billable items to invoice. Defaults to all. */
+  scope?: ChargeItemScope;
   redirectInNewTab?: boolean;
   onSuccess?: () => void;
   onCancel?: () => void;
   showHeader?: boolean;
   sourceUrl?: string;
   locationId?: string;
-  disableCreateChargeItems?: boolean;
   dispenseOrderId?: string;
   skipNavigation?: boolean;
 }
@@ -170,14 +165,13 @@ interface CreateInvoicePageProps {
 export function CreateInvoicePage({
   facilityId,
   accountId,
-  preSelectedChargeItems,
+  scope = ACCOUNT_SCOPE,
   redirectInNewTab = false,
   onSuccess,
   onCancel,
   showHeader = true,
   sourceUrl,
   locationId,
-  disableCreateChargeItems = false,
   dispenseOrderId,
   skipNavigation = false,
 }: CreateInvoicePageProps) {
@@ -240,64 +234,19 @@ export function CreateInvoicePage({
   };
 
   const {
-    data: chargeItemsData,
+    chargeItems,
     isLoading,
-    isFetching,
-    fetchNextPage,
+    isSyncing: isSyncingChargeItems,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["infinite-chargeItems", accountId, "billable"],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(chargeItemApi.listChargeItem, {
-        pathParams: { facilityId },
-        queryParams: {
-          limit: String(ITEMS_PER_PAGE),
-          offset: String(pageParam),
-          status: ChargeItemStatus.billable,
-          account: accountId,
-          ordering: "created_date",
-        },
-      })({ signal });
-      return response as PaginatedResponse<ChargeItemRead>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (
-      lastPage: PaginatedResponse<ChargeItemRead>,
-      allPages: PaginatedResponse<ChargeItemRead>[],
-    ) => {
-      const currentOffset = allPages.length * ITEMS_PER_PAGE;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    enabled: !!facilityId && !!accountId && !preSelectedChargeItems,
-  });
+    fetchNextPage,
+  } = useInvoiceChargeItems({ facilityId, accountId, scope });
 
-  // Items whose status was changed from this page (aborted, not billable,
-  // etc.). Hides them immediately, and is the only way they drop out when the
-  // list comes from `preSelectedChargeItems` (which is never refetched).
-  const [removedIds, setRemovedIds] = useState<ReadonlySet<string>>(
-    () => new Set(),
-  );
-
-  // The single source of truth for what's listed: every billable item, either
-  // pre-selected by the caller or fetched for the account.
-  const chargeItems = useMemo(() => {
-    const source =
-      preSelectedChargeItems ??
-      chargeItemsData?.pages.flatMap((page) => page.results) ??
-      [];
-    return source.filter(
-      (item) =>
-        item.status === ChargeItemStatus.billable && !removedIds.has(item.id),
-    );
-  }, [preSelectedChargeItems, chargeItemsData, removedIds]);
+  // Adding new items only makes sense when invoicing the whole account; they
+  // would fall outside any narrower scope and never show up here.
+  const canAddChargeItems = scope.kind === "account";
 
   const selection = useChargeItemSelection(chargeItems);
-
-  // While the list is being (re)fetched, what's on screen may not be what the
-  // server has. Block submission until it settles so we never invoice stale
-  // items.
-  const isSyncingChargeItems = isFetching && !isFetchingNextPage;
 
   const createMutation = useMutation({
     mutationFn: mutate(invoiceApi.createInvoice, {
@@ -333,10 +282,6 @@ export function CreateInvoicePage({
       charge_items: selection.selectedItems.map((item) => item.id),
     };
     createMutation.mutate(payload);
-  };
-
-  const handleChargeItemStatusChange = (item: ChargeItemRead) => {
-    setRemovedIds((prev) => new Set(prev).add(item.id));
   };
 
   const getBaseComponent = (item: ChargeItemRead) => {
@@ -398,10 +343,10 @@ export function CreateInvoicePage({
   // Focus the picker once the list settles (and whenever its size changes),
   // unless it is about to auto-open by itself.
   useEffect(() => {
-    if (disableCreateChargeItems || autoOpenPicker !== false) return;
+    if (!canAddChargeItems || autoOpenPicker !== false) return;
     const timer = setTimeout(() => pickerRef.current?.focus(), 200);
     return () => clearTimeout(timer);
-  }, [disableCreateChargeItems, autoOpenPicker, chargeItems.length]);
+  }, [canAddChargeItems, autoOpenPicker, chargeItems.length]);
 
   const tableHeadClass = "border-r border-gray-200 font-semibold text-center";
   const tableCellClass =
@@ -460,7 +405,7 @@ export function CreateInvoicePage({
             </span>
             <Badge variant="secondary">{t("draft")}</Badge>
           </div>
-          {!disableCreateChargeItems && (
+          {canAddChargeItems && (
             <div className="flex items-center gap-2">
               <Button
                 type="button"
@@ -608,7 +553,6 @@ export function CreateInvoicePage({
                                     setSelectedChargeItem(item);
                                     setIsEditDialogOpen(true);
                                   }}
-                                  onStatusChange={handleChargeItemStatusChange}
                                 />
                               </TableCell>
                             </TableRow>
@@ -620,7 +564,7 @@ export function CreateInvoicePage({
                 </div>
               )}
 
-              {!disableCreateChargeItems && account?.patient && (
+              {canAddChargeItems && account?.patient && (
                 <div className="border-x border-b border-gray-300 -mt-0 rounded-b-sm">
                   {pendingItem && (
                     <div
@@ -991,6 +935,7 @@ export function CreateInvoicePage({
             facilityId={facilityId}
             chargeItems={selectedChargeItem ? [selectedChargeItem] : []}
             onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ["chargeItems"] });
               handleChargeItemsAdded();
               setIsEditDialogOpen(false);
               setSelectedChargeItem(null);

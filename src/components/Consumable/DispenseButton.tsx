@@ -33,8 +33,8 @@ export const DispenseButton = ({
   const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [showDrawer, setShowDrawer] = useState(false);
   const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
-  const [extractedChargeItems, setExtractedChargeItems] = useState<
-    ChargeItemRead[]
+  const [dispensedChargeItemIds, setDispensedChargeItemIds] = useState<
+    string[]
   >([]);
   const [accountId, setAccountId] = useState<string | undefined>(undefined);
   const { selectedEncounter } = useEncounter();
@@ -63,7 +63,7 @@ export const DispenseButton = ({
     setIsInvoiceSheetOpen(false);
     setAccountId(undefined);
     setLocation(undefined);
-    setExtractedChargeItems([]);
+    setDispensedChargeItemIds([]);
   };
 
   return (
@@ -110,7 +110,7 @@ export const DispenseButton = ({
               careConfig.enableAutoInvoiceAfterDispense &&
               chargeItems.length > 0
             ) {
-              setExtractedChargeItems(chargeItems);
+              setDispensedChargeItemIds(chargeItems.map((item) => item.id));
               const result = await refetchAccount();
               const fetchedAccountId = result.data?.results?.[0]?.id;
 
@@ -129,7 +129,7 @@ export const DispenseButton = ({
           accountId={accountId}
           open={isInvoiceSheetOpen}
           onOpenChange={(open) => !open && resetInvoiceState()}
-          preSelectedChargeItems={extractedChargeItems}
+          scope={{ kind: "ids", ids: dispensedChargeItemIds }}
           onSuccess={resetInvoiceState}
           sourceUrl={buildEncounterUrl(
             selectedEncounter.patient.id,

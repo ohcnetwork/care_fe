@@ -10,19 +10,18 @@ import {
 } from "@/components/ui/sheet";
 
 import { CreateInvoicePage } from "@/pages/Facility/billing/account/CreateInvoice";
-import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
+import { ChargeItemScope } from "@/pages/Facility/billing/account/useInvoiceChargeItems";
 
 interface CreateInvoiceSheetProps {
   facilityId: string;
   accountId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  preSelectedChargeItems?: ChargeItemRead[];
+  scope?: ChargeItemScope;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
   sourceUrl?: string;
   locationId?: string;
-  disableCreateChargeItems?: boolean;
   dispenseOrderId?: string;
   skipNavigation?: boolean;
 }
@@ -32,12 +31,11 @@ export function CreateInvoiceSheet({
   accountId,
   open,
   onOpenChange,
-  preSelectedChargeItems,
+  scope,
   trigger,
   onSuccess,
   sourceUrl,
   locationId,
-  disableCreateChargeItems = false,
   dispenseOrderId,
   skipNavigation = false,
 }: CreateInvoiceSheetProps) {
@@ -55,13 +53,12 @@ export function CreateInvoiceSheet({
           <CreateInvoicePage
             facilityId={facilityId}
             accountId={accountId}
-            preSelectedChargeItems={preSelectedChargeItems}
+            scope={scope}
             onSuccess={onSuccess}
             onCancel={() => onOpenChange(false)}
             showHeader={false}
             sourceUrl={sourceUrl}
             locationId={locationId}
-            disableCreateChargeItems={disableCreateChargeItems}
             dispenseOrderId={dispenseOrderId}
             skipNavigation={skipNavigation}
           />

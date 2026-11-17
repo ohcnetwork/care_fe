@@ -49,7 +49,6 @@ interface ChargeItemActionsMenuProps {
   accountId: string;
   onEdit: (item: ChargeItemRead) => void;
   onChangeAccount?: (item: ChargeItemRead) => void;
-  onStatusChange?: (item: ChargeItemRead, status: ChargeItemStatus) => void;
 }
 
 export default function ChargeItemActionsMenu({
@@ -58,7 +57,6 @@ export default function ChargeItemActionsMenu({
   accountId,
   onEdit,
   onChangeAccount,
-  onStatusChange,
 }: ChargeItemActionsMenuProps) {
   const { t } = useTranslation();
   const [pendingStatus, setPendingStatus] = useState<ChargeItemStatus | null>(
@@ -78,9 +76,8 @@ export default function ChargeItemActionsMenu({
         override_reason: item.override_reason,
         note: item.note,
       }),
-    onSuccess: (_, status) => {
+    onSuccess: () => {
       toast.success(t("charge_item_updated"));
-      onStatusChange?.(item, status);
       queryClient.invalidateQueries({ queryKey: ["chargeItems"] });
       queryClient.invalidateQueries({
         queryKey: ["infinite-chargeItems", accountId],

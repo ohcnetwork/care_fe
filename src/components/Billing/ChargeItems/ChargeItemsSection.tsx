@@ -18,7 +18,6 @@ import {
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 import {
-  ChargeItemRead,
   ChargeItemServiceResource,
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
@@ -33,8 +32,6 @@ interface ChargeItemsSectionProps {
   serviceResourceType: ChargeItemServiceResource;
   sourceUrl?: string;
   encounterId?: string;
-  disableCreateChargeItems?: boolean;
-  disableCreateChargeItemsSection?: boolean;
   viewOnly?: boolean;
   className?: string;
 }
@@ -46,8 +43,6 @@ export function ChargeItemsSection({
   serviceResourceType,
   sourceUrl,
   encounterId,
-  disableCreateChargeItems = false,
-  disableCreateChargeItemsSection = false,
   viewOnly = false,
   className,
 }: ChargeItemsSectionProps) {
@@ -56,13 +51,7 @@ export function ChargeItemsSection({
   const queryClient = useQueryClient();
 
   const [isMultiAddOpen, setIsMultiAddOpen] = useState(false);
-  const [invoiceSheetState, setInvoiceSheetState] = useState<{
-    open: boolean;
-    chargeItems: ChargeItemRead[];
-  }>({
-    open: false,
-    chargeItems: [],
-  });
+  const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
 
   const { data: chargeItems } = useQuery({
     queryKey: ["chargeItems", facilityId, resourceId],
@@ -111,8 +100,7 @@ export function ChargeItemsSection({
               : t("add_charge_item")}
           </CardTitle>
           <div className="contents sm:ml-auto sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:gap-2">
-            {!disableCreateChargeItemsSection &&
-              !viewOnly &&
+            {!viewOnly &&
               account?.results[0] &&
               isAccountActiveAndBillable(account?.results[0]) && (
                 <Button
@@ -131,12 +119,7 @@ export function ChargeItemsSection({
                 variant="outline"
                 size="sm"
                 className="ml-auto sm:ml-0"
-                onClick={() =>
-                  setInvoiceSheetState({
-                    open: true,
-                    chargeItems: billableChargeItems,
-                  })
-                }
+                onClick={() => setIsInvoiceSheetOpen(true)}
               >
                 <ReceiptIndianRupee className="size-4" />
                 {t("create_invoice")}
@@ -160,21 +143,22 @@ export function ChargeItemsSection({
       </div>
 
       {/* Add the sheets for invoice creation and charge items */}
-      {invoiceSheetState.open && (
+      {isInvoiceSheetOpen && (
         <CreateInvoiceSheet
           facilityId={facilityId}
           accountId={account?.results[0]?.id ?? ""}
-          open={invoiceSheetState.open}
-          disableCreateChargeItems={disableCreateChargeItems}
-          onOpenChange={() =>
-            setInvoiceSheetState({ open: false, chargeItems: [] })
-          }
-          preSelectedChargeItems={invoiceSheetState.chargeItems}
+          open={isInvoiceSheetOpen}
+          onOpenChange={() => setIsInvoiceSheetOpen(false)}
+          scope={{
+            kind: "service_resource",
+            serviceResource: serviceResourceType,
+            serviceResourceId: resourceId,
+          }}
           onSuccess={() => {
             queryClient.invalidateQueries({
               queryKey: ["chargeItems", facilityId, resourceId],
             });
-            setInvoiceSheetState({ open: false, chargeItems: [] });
+            setIsInvoiceSheetOpen(false);
           }}
           sourceUrl={sourceUrl}
         />
