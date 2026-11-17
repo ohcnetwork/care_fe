@@ -118,24 +118,31 @@ function trimTrailingSlash(path: string) {
  * `router.navigate`), before the new matches render; `state.resolvedLocation`
  * moves only after they painted.
  *
- * - Same pathname (a query-only change): the same page stays, so it sees the
- *   new query at once, as with raviger. Code that writes the query twice in
- *   a row then merges with the latest value, not a stale one.
- * - New pathname: the previous location until the new matches commit, so
- *   legacy route tables do not flash "not found". In the render that commits
- *   the new matches, the new location, so a page that mounts reads its own
- *   query (for example `?tab=versions`).
+ * - The new path renders in the same route as the current page (a query
+ *   change, or one legacy page to another in the `$` splat): the new
+ *   location at once, as with raviger. The page changes in the same render
+ *   as the click, and code that writes the query twice in a row merges with
+ *   the latest value.
+ * - The new path needs a different route: the previous location until the
+ *   new matches commit, so legacy route tables do not flash "not found". In
+ *   the render that commits the new matches, the new location, so a page
+ *   that mounts reads its own query (for example `?tab=versions`).
  */
 function useRouterLocation(): ParsedLocation {
+  const router = getRouter();
   return useRouterState({
-    router: getRouter(),
+    router,
     select: (state) => {
       const deepest = state.matches[state.matches.length - 1];
-      const current =
+      if (
         !deepest ||
         trimTrailingSlash(deepest.pathname) ===
-          trimTrailingSlash(state.location.pathname);
-      return current
+          trimTrailingSlash(state.location.pathname)
+      ) {
+        return state.location;
+      }
+      const [, , route] = router.getMatchedRoutes(state.location.pathname);
+      return route?.id === deepest.routeId
         ? state.location
         : (state.resolvedLocation ?? state.location);
     },

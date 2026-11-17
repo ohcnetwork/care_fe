@@ -1,4 +1,8 @@
-import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import {
+  createRootRouteWithContext,
+  Outlet,
+  useRouterState,
+} from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 
 import Loading from "@/components/Common/Loading";
@@ -14,6 +18,31 @@ const RouterDevtools = import.meta.env.DEV
       })),
     )
   : () => null;
+
+function trimTrailingSlash(path: string) {
+  return path.length > 1 ? path.replace(/\/+$/, "") : path;
+}
+
+/**
+ * While the router loads a new path, the page the user leaves stays on
+ * screen. raviger removed it at once. Make it inert (no clicks, out of the
+ * accessibility tree) until the new page commits, so a click cannot land on
+ * the old page and cancel the navigation. Query-only changes (for example,
+ * typing in a search filter) are not affected.
+ */
+function LeavingPageGuard({ children }: { children: React.ReactNode }) {
+  const leaving = useRouterState({
+    select: (state) =>
+      state.status === "pending" &&
+      trimTrailingSlash(state.location.pathname) !==
+        trimTrailingSlash((state.resolvedLocation ?? state.location).pathname),
+  });
+  return (
+    <div className="contents" inert={leaving}>
+      {children}
+    </div>
+  );
+}
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootComponent,
@@ -32,7 +61,9 @@ function RootComponent() {
     <>
       {area ? (
         <AreaChrome area={area}>
-          <Outlet />
+          <LeavingPageGuard>
+            <Outlet />
+          </LeavingPageGuard>
         </AreaChrome>
       ) : (
         <Loading />

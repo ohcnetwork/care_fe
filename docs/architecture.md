@@ -22,7 +22,8 @@ The app is moving from raviger to TanStack Router in phases. Both run at the sam
 The shim keeps raviger's timing where legacy code depends on it:
 
 - `navigate()` flushes the history write, so `window.location` is current when it returns.
-- A query-only change is visible to `useQueryParams` at once. A path change becomes visible when the router commits the new matches, so legacy route tables do not flash "not found".
+- A change that renders in the same route (a query change, or one legacy page to another in the `$` splat) is visible at once. A change to a different route becomes visible when the router commits the new matches, so legacy route tables do not flash "not found".
+- While a path change is pending, the root route makes the page that the user leaves `inert`, so a click cannot land on it and cancel the navigation (raviger removed the old page at once).
 - A second `navigate()` to the URL that is already in flight is skipped, so a page that navigates during render does not restart the load.
 
 Legacy route tables look like this until their area is migrated:
