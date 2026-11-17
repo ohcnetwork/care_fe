@@ -145,7 +145,7 @@ export default function RequestOrderForm({
       pathParams: { facility_id: facilityId },
       queryParams: {
         name: searchDeliveryFrom,
-        limit: 100,
+        limit: 200,
         mode: "kind",
         ordering: "sort_index",
       },
