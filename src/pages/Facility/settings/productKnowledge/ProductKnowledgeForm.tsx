@@ -575,7 +575,7 @@ function ProductKnowledgeFormContent({
                       {t("alternative_names")}
                     </h2>
                     <p className="mt-0.5 text-sm text-gray-500">
-                      {t("add_product_alternative name")}
+                      {t("add_product_alternative_name")}
                     </p>
                   </div>
                   <Button

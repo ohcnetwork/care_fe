@@ -137,7 +137,8 @@ export function ReferralAvailabilityForm({
       };
       return mutate(referralAvailabilityApi.create)(createPayload);
     },
-    onSuccess: () => {
+    onSuccess: (saved) => {
+      queryClient.setQueryData(["referral-availability", saved.id], saved);
       queryClient.invalidateQueries({
         queryKey: ["referral-availability-config"],
       });

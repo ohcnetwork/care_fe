@@ -48,6 +48,8 @@ export function LocationOverview({
     }),
   });
 
+  const isStore = location?.inventory_usage === "store";
+
   const linkGroups = [
     {
       title: t("patient_care"),
@@ -73,14 +75,19 @@ export function LocationOverview({
         { label: t("items"), path: "/inventory/summary" },
         { label: t("to_receive"), path: "/inventory/internal/receive/" },
         { label: t("to_dispatch"), path: "/inventory/internal/dispatch/" },
-        {
-          label: t("purchase_orders"),
-          path: "/inventory/external/orders/outgoing",
-        },
-        {
-          label: t("purchase_deliveries"),
-          path: "/inventory/external/deliveries/incoming",
-        },
+        // External supply is only for Store locations
+        ...(isStore
+          ? [
+              {
+                label: t("purchase_orders"),
+                path: "/inventory/external/orders/outgoing",
+              },
+              {
+                label: t("purchase_deliveries"),
+                path: "/inventory/external/deliveries/incoming",
+              },
+            ]
+          : []),
       ],
     },
     {
