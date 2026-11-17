@@ -23,7 +23,7 @@ The shim keeps raviger's timing where legacy code depends on it:
 
 - `navigate()` flushes the history write, so `window.location` is current when it returns.
 - A change that renders in the same route (a query change, or one legacy page to another in the `$` splat) is visible at once. A change to a different route becomes visible when the router commits the new matches, so legacy route tables do not flash "not found".
-- While a path change is pending, the root route makes the page that the user leaves `inert`, so a click cannot land on it and cancel the navigation (raviger removed the old page at once).
+- While the router loads a page for a different route, the root route makes the previous page `inert`, so a click cannot land on it and cancel the navigation (raviger removed the old page at once). `isShowingPreviousPage` in `src/lib/router/previousPage.ts` holds the rule for the shim and the guard.
 - A second `navigate()` to the URL that is already in flight is skipped, so a page that navigates during render does not restart the load.
 
 Legacy route tables look like this until their area is migrated:

@@ -1,6 +1,7 @@
 import {
   createRootRouteWithContext,
   Outlet,
+  useRouter,
   useRouterState,
 } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
@@ -8,6 +9,7 @@ import { lazy, Suspense } from "react";
 import Loading from "@/components/Common/Loading";
 
 import { PluginRouteAttacher } from "@/lib/router/pluginRoutes";
+import { isShowingPreviousPage } from "@/lib/router/previousPage";
 import type { RouterContext } from "@/router";
 import { AreaChrome, useResolvedArea } from "@/Routers/AreaChrome";
 
@@ -19,26 +21,21 @@ const RouterDevtools = import.meta.env.DEV
     )
   : () => null;
 
-function trimTrailingSlash(path: string) {
-  return path.length > 1 ? path.replace(/\/+$/, "") : path;
-}
-
 /**
- * While the router loads a new path, the page the user leaves stays on
- * screen. raviger removed it at once. Make it inert (no clicks, out of the
- * accessibility tree) until the new page commits, so a click cannot land on
- * the old page and cancel the navigation. Query-only changes (for example,
- * typing in a search filter) are not affected.
+ * While the router loads a page for a different route, the previous page
+ * stays on screen. raviger removed it at once. Make it inert (no clicks, out
+ * of the accessibility tree) until the new page commits, so a click cannot
+ * land on it and cancel the navigation. Query-only changes and legacy page
+ * changes (shown at once by the raviger shim) are not affected.
  */
-function LeavingPageGuard({ children }: { children: React.ReactNode }) {
-  const leaving = useRouterState({
+function PreviousPageGuard({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const showingPrevious = useRouterState({
     select: (state) =>
-      state.status === "pending" &&
-      trimTrailingSlash(state.location.pathname) !==
-        trimTrailingSlash((state.resolvedLocation ?? state.location).pathname),
+      state.status === "pending" && isShowingPreviousPage(router, state),
   });
   return (
-    <div className="contents" inert={leaving}>
+    <div className="contents" inert={showingPrevious}>
       {children}
     </div>
   );
@@ -61,9 +58,9 @@ function RootComponent() {
     <>
       {area ? (
         <AreaChrome area={area}>
-          <LeavingPageGuard>
+          <PreviousPageGuard>
             <Outlet />
-          </LeavingPageGuard>
+          </PreviousPageGuard>
         </AreaChrome>
       ) : (
         <Loading />

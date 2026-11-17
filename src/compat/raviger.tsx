@@ -57,6 +57,7 @@ import type {
 } from "raviger/dist/router";
 
 import { getRouter } from "@/compat/routerRef";
+import { isShowingPreviousPage } from "@/lib/router/previousPage";
 
 export type {
   ActiveLinkProps,
@@ -107,10 +108,6 @@ export function useBasePath() {
 // Location (port of raviger `location.ts` on top of the router state)
 // ---------------------------------------------------------------------------
 
-function trimTrailingSlash(path: string) {
-  return path.length > 1 ? path.replace(/\/+$/, "") : path;
-}
-
 /**
  * The location that legacy readers see.
  *
@@ -132,20 +129,10 @@ function useRouterLocation(): ParsedLocation {
   const router = getRouter();
   return useRouterState({
     router,
-    select: (state) => {
-      const deepest = state.matches[state.matches.length - 1];
-      if (
-        !deepest ||
-        trimTrailingSlash(deepest.pathname) ===
-          trimTrailingSlash(state.location.pathname)
-      ) {
-        return state.location;
-      }
-      const [, , route] = router.getMatchedRoutes(state.location.pathname);
-      return route?.id === deepest.routeId
-        ? state.location
-        : (state.resolvedLocation ?? state.location);
-    },
+    select: (state) =>
+      isShowingPreviousPage(router, state)
+        ? (state.resolvedLocation ?? state.location)
+        : state.location,
   });
 }
 
