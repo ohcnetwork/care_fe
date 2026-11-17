@@ -223,6 +223,12 @@ test.describe("Mark as Completed Shortcut ('m c')", () => {
     await dischargedEncounter;
 
     await expect(page.getByText("Discharged").nth(1)).toBeVisible();
+    await expect(
+      page
+        .getByText("Discharge Disposition:", { exact: true })
+        .filter({ visible: true })
+        .locator(".."),
+    ).toContainText("Home");
 
     const response = await page.request.get(
       `${getApiUrl()}/api/v1/encounter/${encounterId}/`,
