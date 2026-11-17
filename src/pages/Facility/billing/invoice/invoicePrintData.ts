@@ -9,9 +9,11 @@ import {
 } from "@/components/ui/monetary-display";
 
 import { formatPatientAddress } from "@/components/Patient/utils";
-import { getChargeItemTitle } from "@/pages/Facility/billing/invoice/components/InvoiceChargeItemTitle";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
-import type { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
+import {
+  type ChargeItemRead,
+  ChargeItemServiceResource,
+} from "@/types/billing/chargeItem/chargeItem";
 import type { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
   PAYMENT_RECONCILIATION_METHOD_MAP,
@@ -26,6 +28,36 @@ import {
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { add, multiply, round, toNumber } from "@/Utils/decimal";
 import { formatName, formatPatientAge } from "@/Utils/utils";
+
+/** A dispensed medicine's title is the product name, with lot and expiry as a subtitle. */
+export function getChargeItemTitle(
+  item: ChargeItemRead,
+  dispenseMap: Record<string, MedicationDispenseRead | undefined>,
+  t: TFunction,
+): { title: string; subtitle: string | null } {
+  const dispense =
+    item.service_resource === ChargeItemServiceResource.medication_dispense &&
+    item.service_resource_id
+      ? dispenseMap[item.service_resource_id]
+      : undefined;
+
+  if (!dispense) return { title: item.title, subtitle: null };
+
+  const medicineName = dispense.item?.product?.product_knowledge?.name;
+  const lotNumber = dispense.item?.product?.batch?.lot_number;
+  const expiryDate = dispense.item?.product?.expiration_date;
+
+  const details = [
+    lotNumber && `${t("lot")}: ${lotNumber}`,
+    expiryDate &&
+      `${t("expiry")}: ${format(new Date(expiryDate), "dd/MM/yyyy")}`,
+  ].filter(Boolean);
+
+  return {
+    title: medicineName || item.title,
+    subtitle: details.length ? details.join(" | ") : null,
+  };
+}
 
 export interface InvoicePrintContent {
   labels: Record<string, string>;

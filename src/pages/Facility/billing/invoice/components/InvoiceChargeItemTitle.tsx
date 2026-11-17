@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import type { TFunction } from "i18next";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { getChargeItemTitle } from "@/pages/Facility/billing/invoice/invoicePrintData";
 import {
   ChargeItemRead,
   ChargeItemServiceResource,
@@ -14,36 +13,6 @@ import {
 import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { batchQuery } from "@/Utils/request/batch";
-
-/** A dispensed medicine's title is the product name, with lot and expiry as a subtitle. */
-export function getChargeItemTitle(
-  item: ChargeItemRead,
-  dispenseMap: Record<string, MedicationDispenseRead | undefined>,
-  t: TFunction,
-): { title: string; subtitle: string | null } {
-  const dispense =
-    item.service_resource === ChargeItemServiceResource.medication_dispense &&
-    item.service_resource_id
-      ? dispenseMap[item.service_resource_id]
-      : undefined;
-
-  if (!dispense) return { title: item.title, subtitle: null };
-
-  const medicineName = dispense.item?.product?.product_knowledge?.name;
-  const lotNumber = dispense.item?.product?.batch?.lot_number;
-  const expiryDate = dispense.item?.product?.expiration_date;
-
-  const details = [
-    lotNumber && `${t("lot")}: ${lotNumber}`,
-    expiryDate &&
-      `${t("expiry")}: ${format(new Date(expiryDate), "dd/MM/yyyy")}`,
-  ].filter(Boolean);
-
-  return {
-    title: medicineName || item.title,
-    subtitle: details.length ? details.join(" | ") : null,
-  };
-}
 
 interface InvoiceChargeItemTitleProps {
   item: ChargeItemRead;

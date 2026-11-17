@@ -80,6 +80,8 @@ export function useTypstPdf<TContent>({
   files,
 }: TypstPdfOptions<TContent>) {
   const { t } = useTranslation();
+  const watermarkText = statusWatermark?.text;
+  const watermarkColor = statusWatermark?.color;
 
   const assetUrls = useMemo(
     () =>
@@ -108,7 +110,9 @@ export function useTypstPdf<TContent>({
         title,
         landscape,
         defaultMargin,
-        statusWatermark,
+        statusWatermark: watermarkText
+          ? { text: watermarkText, color: watermarkColor }
+          : undefined,
         loadedAssets: assets.data.loaded,
         t,
       }),
@@ -120,8 +124,8 @@ export function useTypstPdf<TContent>({
       title,
       landscape,
       defaultMargin,
-      statusWatermark?.text,
-      statusWatermark?.color,
+      watermarkText,
+      watermarkColor,
       t,
     ],
   );

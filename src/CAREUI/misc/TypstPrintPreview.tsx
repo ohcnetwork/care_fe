@@ -58,21 +58,18 @@ export default function TypstPrintPreview<TContent>({
   const { pdf, error, isLoading, retry, failedAssets, autoPrint } =
     useTypstPdf(options);
 
-  const url = useMemo(
-    () =>
-      pdf
-        ? URL.createObjectURL(
-            new Blob([pdf as BlobPart], { type: "application/pdf" }),
-          )
-        : undefined,
-    [pdf],
-  );
-  useEffect(
-    () => () => {
-      if (url) URL.revokeObjectURL(url);
-    },
-    [url],
-  );
+  const [url, setUrl] = useState<string>();
+  useEffect(() => {
+    const objectUrl = pdf
+      ? URL.createObjectURL(
+          new Blob([pdf as BlobPart], { type: "application/pdf" }),
+        )
+      : undefined;
+    setUrl(objectUrl);
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [pdf]);
 
   const fileName = pdfFileName(options.title);
   const method = useMemo(() => getPdfPrintMethod(), []);
