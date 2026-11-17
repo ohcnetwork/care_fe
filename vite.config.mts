@@ -15,6 +15,7 @@ import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import { marked } from "marked";
+import { createRequire } from "module";
 import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
@@ -22,6 +23,10 @@ import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 import validateEnv from "./scripts/validate-env";
+
+const ravigerVersion: string = createRequire(import.meta.url)(
+  "raviger/package.json",
+).version;
 
 const LOCAL_PLUGIN_MODULE_ID = "virtual:care-local-plugins";
 const RESOLVED_LOCAL_PLUGIN_MODULE_ID = `\0${LOCAL_PLUGIN_MODULE_ID}`;
@@ -458,7 +463,10 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "react-dom",
           "react-i18next",
           "@tanstack/react-query",
-          "raviger",
+          // The alias points `raviger` at the shim, so give the version
+          // here; otherwise the plugin reads `raviger/package.json` through
+          // the alias and fails.
+          { raviger: { version: ravigerVersion } },
           "sonner",
           "decimal.js",
         ],
