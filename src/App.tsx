@@ -7,6 +7,7 @@ import { ShortcutProvider } from "@/context/ShortcutContext";
 import Integrations from "@/Integrations";
 import { OverrideProvider } from "@/lib/override";
 import PluginEngine from "@/PluginEngine";
+import AuthUserProvider from "@/Providers/AuthUserProvider";
 import { router } from "@/router";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
@@ -41,8 +42,11 @@ const App = () => {
             <ShortcutProvider>
               <PluginEngine>
                 <OverrideProvider>
-                  {/* Route tree: src/routes/. The auth gate renders in the root route. */}
-                  <RouterProvider router={router} />
+                  {/* Route tree: src/routes/. Route guards read the session
+                      from AuthUserProvider through the router context. */}
+                  <AuthUserProvider>
+                    <RouterProvider router={router} />
+                  </AuthUserProvider>
                 </OverrideProvider>
                 <Toaster
                   position={careConfig.toastPosition}

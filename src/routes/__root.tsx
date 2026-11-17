@@ -4,11 +4,8 @@ import { lazy, Suspense } from "react";
 import Loading from "@/components/Common/Loading";
 
 import { PluginRouteAttacher } from "@/lib/router/pluginRoutes";
-import AuthUserProvider from "@/Providers/AuthUserProvider";
 import type { RouterContext } from "@/router";
-import PublicRouter from "@/Routers/PublicRouter";
-
-const PatientRouter = lazy(() => import("@/Routers/PatientRouter"));
+import { AreaChrome, useResolvedArea } from "@/Routers/AreaChrome";
 
 const RouterDevtools = import.meta.env.DEV
   ? lazy(() =>
@@ -23,25 +20,24 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 
 /**
- * Phase 1: the auth gate stays in React. Signed-out users get the legacy
- * public router for every path; OTP users get the legacy patient router;
- * signed-in users get the TanStack route tree (whose `$` splat still renders
- * the legacy app routes). Phase 2 moves the gate into `beforeLoad`.
+ * Pathless layouts guard the areas (`_public`, `_patient`, `_app`); shared
+ * URLs resolve their area in `beforeLoad`. This component selects the
+ * chrome of the resolved area, so it stays mounted while the area is the
+ * same, and shows the loading screen until the session is known.
  */
 function RootComponent() {
+  const area = useResolvedArea();
+
   return (
     <>
-      <AuthUserProvider
-        unauthorized={<PublicRouter />}
-        otpAuthorized={
-          <Suspense fallback={<Loading />}>
-            <PatientRouter />
-          </Suspense>
-        }
-      >
-        <PluginRouteAttacher />
-        <Outlet />
-      </AuthUserProvider>
+      {area ? (
+        <AreaChrome area={area}>
+          <Outlet />
+        </AreaChrome>
+      ) : (
+        <Loading />
+      )}
+      <PluginRouteAttacher />
       <Suspense>
         <RouterDevtools position="bottom-right" />
       </Suspense>

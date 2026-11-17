@@ -1,12 +1,11 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
-import { AppShell } from "@/Routers/AppShell";
+import { requireStaff } from "@/lib/router/auth";
 
-/** Signed-in area: app chrome (sidebar, headers) around every child route. */
+/**
+ * Staff area. Signed-out users and patients go to the staff sign-in. The
+ * root route renders the staff shell around these pages.
+ */
 export const Route = createFileRoute("/_app")({
-  component: () => (
-    <AppShell>
-      <Outlet />
-    </AppShell>
-  ),
+  beforeLoad: requireStaff,
 });

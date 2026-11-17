@@ -7,7 +7,13 @@ Frontend architecture reference for the CARE frontend (React 19 + TypeScript + V
 The app is moving from raviger to TanStack Router in phases. Both run at the same time:
 
 - **TanStack Router** owns the history. The route tree is file-based under `src/routes/` (`@tanstack/router-plugin`, `autoCodeSplitting: true`). The plugin generates `src/routeTree.gen.ts`; the file is committed and is regenerated on every dev/build run. `src/router.tsx` creates the router with a string-preserving search serializer (`src/lib/router/searchParams.ts`), `queryClient` in context, intent preloading and scroll restoration.
-- `src/routes/__root.tsx` keeps the auth gate (`AuthUserProvider`). `src/routes/_app.tsx` renders the app chrome (`src/Routers/AppShell.tsx`). `src/routes/_app/$.tsx` is the legacy splat: it renders the raviger route tables in `src/Routers/AppRouter.tsx` for every path that has no file route yet.
+- **Areas.** The router context holds `{ queryClient, auth }` (`src/lib/router/auth.ts`). `auth.status` is `loading`, `user` (staff), `patient` (OTP) or `anonymous`. Pathless layouts guard each area in `beforeLoad`:
+  - `_public` (sign-in, password reset, public facility pages): staff users go to `/`.
+  - `_patient` (patient portal): signed-out users go to `/login?redirect=<url>`; staff users get a not-found.
+  - `_app` (staff pages): signed-out users and patients go to `/login?redirect=<url>`. `src/routes/_app/$.tsx` is the legacy splat: it renders the raviger route tables in `src/Routers/AppRouter.tsx` for every staff path that has no file route yet.
+- **Shared URLs.** Some URLs belong to more than one area: `/`, `/session-expired` and `/licenses` (staff and public), and `/patient/home`, `/patient/$id`, `/patient/$id/$tab`, `/referrals/$referralId` and `/referrals/$referralId/respond` (staff and patient). The router matches by path only, so each of these is one route at the root. Its `beforeLoad` resolves the area from `context.auth`, and its component uses `useArea()` to pick the page. Keep new URLs area-specific where possible.
+- **Chrome.** `src/routes/__root.tsx` renders the chrome of the resolved area (`AreaChrome` in `src/Routers/AreaChrome.tsx`): the staff shell (`AppShell`), the patient shell (`PatientShell`) or the public chrome. The chrome stays mounted while the area is the same. The root shows the loading screen until the session is known.
+- **Side effects during render.** The router renders a route change inside a React transition. A page that calls `toast` (or another update of a different component) during render interrupts that transition, and the render restarts without end. Call `toast` and `navigate` in effects or event handlers.
 - Migrated areas (Facility Settings) set `staticData` on their routes: `crumb` for breadcrumbs (`src/components/Common/Breadcrumbs.tsx`), `sidebar` and `workspace` for layout flags (`src/lib/router/staticData.ts`). Legacy paths still use the URL regexes in `AppShell`.
 - Plugin manifest `routes` are attached to the live tree at runtime (`src/lib/router/pluginRoutes.tsx`). A core route always wins over a plugin route with the same path.
 
@@ -110,7 +116,7 @@ Detailed plugin references:
 
 ## Auth Flow
 
-JWT tokens in localStorage. `AuthUserProvider` handles login/logout, token refresh (every 5 minutes), 2FA, and cross-tab session sync. Patient login uses separate OTP-based flow via `PatientRouter`.
+JWT tokens in localStorage. `AuthUserProvider` (outside the router, in `src/App.tsx`) handles login/logout, token refresh (every 5 minutes), 2FA, and cross-tab session sync. It registers the session status that the route guards read, and calls `router.invalidate()` when the status changes. Patients sign in with an OTP; their pages are in the `_patient` area.
 
 ## Key Directories
 

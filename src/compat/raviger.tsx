@@ -459,7 +459,21 @@ export function navigate(url: string, options?: NavigateOptions): void {
     options?.state && typeof options.state === "object"
       ? (options.state as Record<string, unknown>)
       : undefined;
-  void getRouter().navigate({
+  const router = getRouter();
+  // Some pages call `navigate()` during render. raviger changed the URL at
+  // once; the router renders the new page only when it commits, so each
+  // render would start the same navigation again and the load would never
+  // finish. Skip a navigation to the URL the router is already moving to.
+  const parsed = new URL(url, window.location.origin);
+  const target =
+    parsed.pathname +
+    router.options.stringifySearch(router.options.parseSearch(parsed.search)) +
+    parsed.hash;
+  const rendered = router.state.resolvedLocation ?? router.state.location;
+  if (target === router.latestLocation.href && target !== rendered.href) {
+    return;
+  }
+  void router.navigate({
     href: url,
     replace: !!options?.replace,
     state,

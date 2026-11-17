@@ -32,11 +32,6 @@ import { useNavigationTrail } from "@/Utils/navigationTrail";
  */
 const LEGACY_PATHS_WITHOUT_SIDEBAR = [
   /^\/referrals\/[^/]+(?:\/respond)?$/,
-  // Exact matches
-  "/",
-  "/login",
-  "/session-expired",
-  // Pattern matches (using regex)
   /^\/facility\/[^/]+\/service_requests\/[^/]+$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/service_requests\/[^/]+$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/to_receive\/[^/]+$/,
@@ -73,13 +68,21 @@ interface LayoutFlags {
 
 /**
  * Reads layout flags from the matched routes. The deepest route that sets a
- * flag wins. Legacy paths (rendered by the `$` splat) fall back to the URL
- * regexes until their area is migrated.
+ * flag wins. Legacy paths (rendered by the `$` splat, plugin routes, and
+ * shared routes that render the legacy tables) fall back to the URL regexes
+ * until their area is migrated.
  */
 function useLayoutFlags(currentPath: string): LayoutFlags {
-  const matches = useMatches();
+  const allMatches = useMatches();
+  // A route that failed (for example, a not-found from a guard) does not
+  // set the layout of the error page.
+  const failedIndex = allMatches.findIndex(
+    (m) => m.status === "notFound" || m.status === "error",
+  );
+  const matches =
+    failedIndex === -1 ? allMatches : allMatches.slice(0, failedIndex);
   const isLegacy = matches.some(
-    (m) => m.routeId === LEGACY_SPLAT_ROUTE_ID || m.staticData.pluginRoute,
+    (m) => m.routeId === LEGACY_SPLAT_ROUTE_ID || m.staticData.legacyLayout,
   );
 
   if (isLegacy) {

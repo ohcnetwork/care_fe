@@ -22,15 +22,20 @@ export type Crumb = string | ((match: CrumbMatch) => ReactNode);
  * regexes in the legacy `AppRouter`.
  */
 export interface RouteStaticData {
-  /** Hide the app sidebar when `false`. Defaults to `true`. */
+  /**
+   * `false` shows the page without navigation chrome. Staff pages keep the
+   * page frame and lose the sidebar and header; patient pages lose all
+   * chrome. Defaults to `true`.
+   */
   sidebar?: boolean;
   workspace?: Workspace;
   crumb?: Crumb;
   /**
-   * The route was attached from a plugin manifest at runtime. The shell
-   * derives its layout from the URL, as it does for legacy routes.
+   * The staff shell derives `sidebar` and `workspace` from the URL regexes
+   * of the legacy route tables. Set on plugin routes and on shared routes
+   * that render the legacy tables.
    */
-  pluginRoute?: boolean;
+  legacyLayout?: boolean;
 }
 
 declare module "@tanstack/react-router" {
