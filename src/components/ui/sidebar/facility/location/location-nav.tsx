@@ -21,6 +21,7 @@ export function LocationNav() {
 
   const { facilityId } = useCurrentFacility();
   const { locationId, location } = useCurrentLocation();
+  const usesInventory = (location?.inventory_usage ?? "none") !== "none";
   const isStore = location?.inventory_usage === "store";
 
   const baseUrl = `/facility/${facilityId}/locations/${locationId}`;
@@ -49,6 +50,7 @@ export function LocationNav() {
           name: t("pharmacy"),
           url: `${baseUrl}/pharmacy`,
           icon: <Pill />,
+          visibility: usesInventory,
           children: [
             {
               name: t("prescription_queue"),
@@ -68,6 +70,7 @@ export function LocationNav() {
           name: t("inventory"),
           url: `${baseUrl}/inventory/summary`,
           icon: <Package />,
+          visibility: usesInventory,
           children: [
             {
               name: t("items"),
