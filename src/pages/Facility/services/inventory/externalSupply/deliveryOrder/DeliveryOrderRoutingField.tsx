@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import Autocomplete from "@/components/ui/autocomplete";
@@ -33,6 +33,7 @@ export function DeliveryOrderRoutingField({
 }: DeliveryOrderRoutingFieldProps) {
   const { t } = useTranslation();
   const form = useFormContext<{ supplier?: string; destination: string }>();
+  const destination = useWatch({ control: form.control, name: "destination" });
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
   const [searchDeliveryFrom, setSearchDeliveryFrom] = useState("");
 
@@ -61,7 +62,13 @@ export function DeliveryOrderRoutingField({
       },
     }),
     select: (data: PaginatedResponse<LocationRead>) =>
-      data.results.filter((location) => location.id !== locationId),
+      // Only inventory locations other than the current one; keep the selected
+      // destination (e.g. from a supply order) so it still shows
+      data.results.filter(
+        (location) =>
+          location.id !== locationId &&
+          (location.inventory_usage !== "none" || location.id === destination),
+      ),
   });
 
   const vendorOptions =
