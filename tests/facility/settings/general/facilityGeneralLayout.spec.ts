@@ -209,7 +209,7 @@ test.describe("Facility general settings layout", () => {
 
     const details = page.getByRole("region", { name: "Facility Details" });
     const mapLink = details.getByRole("link", { name: "Show on Map" });
-    await expect(mapLink).toHaveAttribute("data-variant", "ghost");
+    await expect(mapLink).toHaveAttribute("aria-label", "Show on Map");
     await expect(mapLink).toHaveAttribute("href", /12\.3.*76\.6/);
     await expect(mapLink).toHaveAttribute("target", "_blank");
     const phoneLink = details.getByRole("link", { name: "+91 98765 43210" });

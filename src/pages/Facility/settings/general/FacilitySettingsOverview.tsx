@@ -1,9 +1,4 @@
-import {
-  ImagePlus,
-  PhoneOutgoing,
-  SquareArrowOutUpRight,
-  Trash2,
-} from "lucide-react";
+import { ImagePlus, PhoneOutgoing, Trash2 } from "lucide-react";
 import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -17,11 +12,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
 
 import FacilityDeleteDialog from "@/components/Facility/FacilityDeleteDialog";
+import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
@@ -30,12 +26,6 @@ import {
   type FacilityRead,
 } from "@/types/facility/facility";
 import { renderGeoOrganizations } from "@/types/organization/organization";
-import {
-  getMapUrl,
-  isAndroidDevice,
-  isValidLatitude,
-  isValidLongitude,
-} from "@/Utils/utils";
 
 interface FacilitySettingsOverviewProps {
   facility: FacilityRead;
@@ -62,13 +52,6 @@ export function FacilitySettingsOverview({
     facility.features?.filter((feature) =>
       FACILITY_FEATURE_TYPES.some(({ id }) => id === feature),
     ) ?? [];
-  const mapUrl =
-    facility.latitude &&
-    facility.longitude &&
-    isValidLatitude(Number(facility.latitude)) &&
-    isValidLongitude(Number(facility.longitude))
-      ? getMapUrl(facility.latitude, facility.longitude)
-      : undefined;
   const phoneNumber = facility.phone_number
     ? formatPhoneNumberIntl(String(facility.phone_number))
     : undefined;
@@ -175,26 +158,16 @@ export function FacilitySettingsOverview({
                     <p className="whitespace-pre-wrap">
                       {facility.address || t("not_specified")}
                     </p>
-                    {mapUrl && (
+                    {facility.latitude && facility.longitude && (
                       // Offset ghost padding and border so labels align with other values.
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="-mb-1.5 -ml-3.25 underline underline-offset-4"
-                        asChild
-                      >
-                        <a
-                          href={mapUrl}
-                          target={isAndroidDevice ? "_self" : "_blank"}
-                          rel="noreferrer"
-                        >
-                          {t("show_on_map")}
-                          <SquareArrowOutUpRight
-                            data-icon="inline-end"
-                            aria-hidden="true"
-                          />
-                        </a>
-                      </Button>
+                      <FacilityMapsLink
+                        latitude={facility.latitude}
+                        longitude={facility.longitude}
+                        className={cn(
+                          buttonVariants({ variant: "ghost", size: "sm" }),
+                          "-mb-1.5 -ml-3.25 text-foreground underline underline-offset-4",
+                        )}
+                      />
                     )}
                   </dd>
                 </div>
