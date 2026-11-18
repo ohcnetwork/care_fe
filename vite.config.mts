@@ -463,6 +463,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "react-dom",
           "react-i18next",
           "@tanstack/react-query",
+          // One router instance: plugins read the host router's context.
+          "@tanstack/react-router",
           // The alias points `raviger` at the shim, so give the version
           // here; otherwise the plugin reads `raviger/package.json` through
           // the alias and fails.
@@ -541,6 +543,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         "react-i18next",
         "i18next",
         "@tanstack/react-query",
+        "@tanstack/react-router",
         "raviger",
         "sonner",
         "decimal.js",

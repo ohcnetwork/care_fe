@@ -20,6 +20,35 @@ function settingsBreadcrumb(page: Page) {
     .getByRole("navigation", { name: "breadcrumb" });
 }
 
+const testPluginRemoteEntryUrl =
+  "http://localhost:4000/test-plugin/remoteEntry.js";
+
+/** Loads `tests/fixtures/plugin/remoteEntry.js` as the only plugin. */
+async function mockTestPlugin(page: Page) {
+  const remoteEntry = fs.readFileSync(
+    path.resolve("tests/fixtures/plugin/remoteEntry.js"),
+    "utf-8",
+  );
+  await page.route("**/api/v1/plug_config/", (route) =>
+    route.fulfill({
+      json: {
+        configs: [
+          {
+            slug: "care_test_plugin",
+            meta: { url: testPluginRemoteEntryUrl },
+          },
+        ],
+      },
+    }),
+  );
+  await page.route(testPluginRemoteEntryUrl, (route) =>
+    route.fulfill({
+      body: remoteEntry,
+      contentType: "application/javascript",
+    }),
+  );
+}
+
 test.describe("TanStack Router navigation", () => {
   let facilityId: string;
 
@@ -135,27 +164,7 @@ test.describe("TanStack Router navigation", () => {
   test("plugin route deep link works on a cold load and after a reload", async ({
     page,
   }) => {
-    const remoteEntryUrl = "http://localhost:4000/test-plugin/remoteEntry.js";
-    const remoteEntry = fs.readFileSync(
-      path.resolve("tests/fixtures/plugin/remoteEntry.js"),
-      "utf-8",
-    );
-
-    await page.route("**/api/v1/plug_config/", (route) =>
-      route.fulfill({
-        json: {
-          configs: [
-            { slug: "care_test_plugin", meta: { url: remoteEntryUrl } },
-          ],
-        },
-      }),
-    );
-    await page.route(remoteEntryUrl, (route) =>
-      route.fulfill({
-        body: remoteEntry,
-        contentType: "application/javascript",
-      }),
-    );
+    await mockTestPlugin(page);
 
     await page.goto("/test-plugin/items/42");
     await expect(page.locator('[data-cy="test-plugin-page"]')).toHaveText(
@@ -174,20 +183,30 @@ test.describe("TanStack Router navigation", () => {
     ).toHaveText("General");
   });
 
+  test("a plugin uses the host router through the shared module", async ({
+    page,
+  }) => {
+    await mockTestPlugin(page);
+
+    await page.goto("/test-plugin/router");
+    const routerPage = page.locator('[data-cy="test-plugin-router"]');
+    await expect(routerPage).toHaveText("/test-plugin/router");
+
+    await routerPage.click();
+    await expect(page).toHaveURL(/\/test-plugin\/items\/7$/);
+    await expect(page.locator('[data-cy="test-plugin-page"]')).toHaveText(
+      "Test plugin item 7",
+    );
+
+    await page.goBack();
+    await expect(routerPage).toHaveText("/test-plugin/router");
+  });
+
   test("a plugin that fails to load shows not found for its routes", async ({
     page,
   }) => {
-    const remoteEntryUrl = "http://localhost:4000/test-plugin/remoteEntry.js";
-    await page.route("**/api/v1/plug_config/", (route) =>
-      route.fulfill({
-        json: {
-          configs: [
-            { slug: "care_test_plugin", meta: { url: remoteEntryUrl } },
-          ],
-        },
-      }),
-    );
-    await page.route(remoteEntryUrl, (route) => route.abort());
+    await mockTestPlugin(page);
+    await page.route(testPluginRemoteEntryUrl, (route) => route.abort());
 
     await page.goto("/test-plugin/items/42");
     await expect(
