@@ -253,7 +253,7 @@ export function FacilitySettingsOverview({
             <Card>
               <Accordion type="single" collapsible>
                 <AccordionItem value="delete-facility">
-                  <AccordionTrigger className="items-center rounded-xl px-6 py-4 text-sm text-destructive font-medium">
+                  <AccordionTrigger className="items-center rounded-lg px-6 py-4 text-sm text-destructive font-medium">
                     {t("facility_settings_delete_section")}
                   </AccordionTrigger>
                   <AccordionContent className="space-y-4 px-6 pb-6 [&_p:not(:last-child)]:mb-0">

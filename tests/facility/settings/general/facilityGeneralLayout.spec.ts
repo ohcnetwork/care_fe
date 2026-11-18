@@ -487,6 +487,44 @@ test.describe("Facility general settings layout", () => {
     });
   }
 
+  test("loading skeleton and delete trigger share the card corner radius", async ({
+    page,
+  }) => {
+    let releaseFacility!: () => void;
+    const facilityHeld = new Promise<void>((resolve) => {
+      releaseFacility = resolve;
+    });
+    await page.route(`**/api/v1/facility/${facility.id}/`, async (route) => {
+      await facilityHeld;
+      await route.fulfill({ json: facility });
+    });
+
+    await page.goto(`/facility/${facility.id}/settings/general`);
+    const skeleton = page.getByRole("status").filter({ hasText: "Loading" });
+    await expect(skeleton).toBeVisible();
+    const skeletonRadii = await skeleton.evaluate((status) => {
+      const [cover, grid] = [...status.children].filter(
+        (child) => !child.classList.contains("sr-only"),
+      );
+      return [cover, ...grid.children].map(
+        (block) => getComputedStyle(block).borderTopLeftRadius,
+      );
+    });
+    expect(skeletonRadii).toHaveLength(3);
+
+    releaseFacility();
+    await expect(skeleton).toBeHidden();
+    const cardRadius = await page
+      .locator('[data-cy="facility-forms"] [data-slot="card"]')
+      .evaluate((card) => getComputedStyle(card).borderTopLeftRadius);
+    expect(skeletonRadii).toEqual([cardRadius, cardRadius, cardRadius]);
+
+    const deleteToggle = page
+      .locator('[data-cy="facility-delete-section"]')
+      .getByRole("button", { name: "Delete facility", exact: true });
+    await expect(deleteToggle).toHaveCSS("border-top-left-radius", cardRadius);
+  });
+
   test("keeps the compact banner and General page width stable while cropping uploads at 16:9", async ({
     page,
   }) => {

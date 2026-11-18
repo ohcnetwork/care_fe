@@ -117,7 +117,7 @@ export const FacilityHome = ({
     return isSettings ? (
       <div role="status" className="space-y-6">
         <span className="sr-only">{t("loading")}</span>
-        <div className="overflow-hidden rounded-xl border border-border">
+        <div className="overflow-hidden rounded-lg border border-border">
           <Skeleton className="h-48 rounded-none sm:h-40" />
           <div className="space-y-2 p-6">
             <Skeleton className="h-7 w-56 max-w-full" />
@@ -125,8 +125,8 @@ export const FacilityHome = ({
           </div>
         </div>
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <Skeleton className="h-64 rounded-xl" />
-          <Skeleton className="h-48 rounded-xl" />
+          <Skeleton className="h-64 rounded-lg" />
+          <Skeleton className="h-48 rounded-lg" />
         </div>
       </div>
     ) : (
