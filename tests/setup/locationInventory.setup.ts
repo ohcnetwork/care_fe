@@ -2,9 +2,23 @@ import { expect, test } from "@playwright/test";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
-import type { InventoryUsage, LocationRead } from "@/types/location/location";
-
 test.use({ storageState: "tests/.auth/user.json" });
+
+// Kept independent of src types: the setup states the API contract it relies on.
+type InventoryUsage = "none" | "store" | "consumption";
+
+interface LocationRead {
+  id: string;
+  name: string;
+  description: string;
+  status: string;
+  operational_status: string;
+  form: string;
+  mode: string;
+  inventory_usage: InventoryUsage;
+  location_type?: { code?: string };
+  sort_index: number;
+}
 
 /**
  * Fixture locations come with `inventory_usage: "none"`, which hides their

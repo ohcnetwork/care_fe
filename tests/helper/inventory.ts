@@ -1,9 +1,13 @@
 import { expect, Page } from "@playwright/test";
 
-import type { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
-import type { RequestOrderStatus } from "@/types/inventory/requestOrder/requestOrder";
-
 const ORDER_UPDATE_PATH = /\/order\/(request|delivery)\/[^/]+\/$/;
+
+/**
+ * Status an order is expected to move to: "pending" when approved,
+ * "completed" when marked as completed. Kept independent of src so the test
+ * states the expected behaviour instead of following the app's definitions.
+ */
+type OrderStatusUpdate = "pending" | "completed";
 
 /**
  * Runs `action` (e.g. clicking "Mark as Approved") and waits for the request
@@ -13,7 +17,7 @@ const ORDER_UPDATE_PATH = /\/order\/(request|delivery)\/[^/]+\/$/;
  */
 export async function waitForOrderUpdate(
   page: Page,
-  status: `${RequestOrderStatus}` | `${DeliveryOrderStatus}`,
+  status: OrderStatusUpdate,
   action: () => Promise<unknown>,
 ) {
   // Start listening before triggering the action, otherwise a fast response
