@@ -735,7 +735,7 @@ export function DiagnosisQuestion({
         <EntitySelectionDrawer
           open={showDiagnosisSelection}
           onOpenChange={setShowDiagnosisSelection}
-          system="system-diagnosis-code"
+          system="system-condition-code"
           entityType="diagnosis"
           disabled={disabled}
           onEntitySelected={handleCodeSelect}
@@ -752,7 +752,7 @@ export function DiagnosisQuestion({
         </EntitySelectionDrawer>
       ) : (
         <ValueSetSelect
-          system="system-diagnosis-code"
+          system="system-condition-code"
           placeholder={addDiagnosisPlaceholder}
           onSelect={handleCodeSelect}
           disabled={disabled}
