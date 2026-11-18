@@ -106,7 +106,11 @@ export function FacilitySettingsOverview({
                   {t("facility_settings_cover_empty")}
                 </p>
                 {canUpdateFacility && (
-                  <Button variant="ghost" onClick={onEditCoverImage}>
+                  <Button
+                    variant="ghost"
+                    className="underline underline-offset-4"
+                    onClick={onEditCoverImage}
+                  >
                     <ImagePlus aria-hidden="true" />
                     {t("facility_settings_add_cover")}
                   </Button>
@@ -176,7 +180,7 @@ export function FacilitySettingsOverview({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="-mb-1.5 -ml-3.25"
+                        className="-mb-1.5 -ml-3.25 underline underline-offset-4"
                         asChild
                       >
                         <a
@@ -201,7 +205,7 @@ export function FacilitySettingsOverview({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="-my-1.5 -ml-2.75"
+                        className="-my-1.5 -ml-2.75 underline underline-offset-4"
                         asChild
                       >
                         <a href={`tel:${phoneNumber}`}>
@@ -252,7 +256,7 @@ export function FacilitySettingsOverview({
                             trigger={
                               <Button
                                 variant="ghost"
-                                className="px-2 text-primary"
+                                className="px-2 text-primary underline underline-offset-4"
                               >
                                 {t("facility_settings_add_description")}
                               </Button>

@@ -76,7 +76,7 @@ export function FacilityOverviewActions({
                   type="button"
                   variant="ghost"
                   disabled={disabled}
-                  className="w-full justify-start whitespace-normal text-left font-normal tracking-normal no-underline"
+                  className="w-full justify-start whitespace-normal text-left font-normal tracking-normal"
                 >
                   <FilePlus2 aria-hidden="true" />
                   {t("submit_forms")}
@@ -86,7 +86,7 @@ export function FacilityOverviewActions({
             />
             <Button
               variant="ghost"
-              className="w-full justify-start whitespace-normal text-left font-normal tracking-normal no-underline"
+              className="w-full justify-start whitespace-normal text-left font-normal tracking-normal"
               asChild
             >
               <Link basePath="/" href={`${baseUrl}/responses`}>
@@ -120,7 +120,7 @@ export function FacilityOverviewActions({
                 <li key={path}>
                   <Button
                     variant="ghost"
-                    className="h-auto min-h-12 w-full justify-start whitespace-normal py-2 text-left font-normal tracking-normal no-underline md:min-h-10"
+                    className="h-auto min-h-12 w-full justify-start whitespace-normal py-2 text-left font-normal tracking-normal md:min-h-10"
                     asChild
                   >
                     <Link basePath="/" href={`${baseUrl}${path}`}>

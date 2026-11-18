@@ -120,7 +120,7 @@ test.describe("Facility general settings layout", () => {
     }
   });
 
-  test("keeps Forms and Quick links ghost actions undecorated", async ({
+  test("keeps shared ghost actions undecorated and underlines General text actions locally", async ({
     page,
   }) => {
     await page.goto(`/facility/${facility.id}/settings/general`);
@@ -133,6 +133,8 @@ test.describe("Facility general settings layout", () => {
     await expect(actions).toHaveCount(8);
     for (const action of await actions.all()) {
       await expect(action).toHaveAttribute("data-variant", "ghost");
+      // No local opt-out: "none" must come from the shared ghost variant.
+      await expect(action).not.toHaveClass(/\bno-underline\b/);
       await expect(action).toHaveCSS("text-decoration-line", "none");
       await action.hover();
       await expect(action).toHaveCSS("text-decoration-line", "none");
@@ -144,6 +146,7 @@ test.describe("Facility general settings layout", () => {
       page.getByRole("button", { name: "Add cover photo" }),
       page.getByRole("link", { name: "Show on Map" }),
       page.getByRole("link", { name: "+91 98765 43210" }),
+      page.getByRole("button", { name: "Add a description" }),
     ]) {
       await expect(action).toHaveCSS("text-decoration-line", "underline");
     }
