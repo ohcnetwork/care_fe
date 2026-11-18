@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import PatientPrintPageHeader from "@/components/Common/PatientPrintPageHeader";
 
 import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
@@ -132,6 +133,7 @@ const MedicationReturnPreview = ({
       disabled={!supplyDeliveries?.length}
       facility={facility}
       templateSlug={PrintTemplateType.medication_return}
+      pageHeader={<PatientPrintPageHeader patient={patient} />}
     >
       <div className="max-w-4xl mx-auto">
         <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mb-2">
