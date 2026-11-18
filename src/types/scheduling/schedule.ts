@@ -33,12 +33,6 @@ export enum SchedulableResourceType {
   HealthcareService = "healthcare_service",
 }
 
-export const SCHEDULABLE_RESOURCE_TYPE_COLORS = {
-  practitioner: "blue",
-  location: "green",
-  healthcare_service: "yellow",
-} as const satisfies Record<SchedulableResourceType, string>;
-
 export interface AvailabilityDateTime {
   day_of_week: DayOfWeek;
   start_time: Time;
