@@ -145,14 +145,17 @@ export default function TypstPrintPreview<TContent>({
               <CircleAlert />
               <AlertTitle>{t("pdf_generation_failed")}</AlertTitle>
               <AlertDescription>
-                <p>{error.message}</p>
-                {import.meta.env.DEV &&
-                  error instanceof TypstCompileError &&
-                  error.diagnostics.length > 0 && (
-                    <pre className="mt-2 max-w-full overflow-x-auto whitespace-pre-wrap text-xs">
-                      {error.diagnostics.join("\n")}
-                    </pre>
-                  )}
+                <p>{t("pdf_generation_failed_description")}</p>
+                {import.meta.env.DEV && (
+                  <pre className="mt-2 max-w-full overflow-x-auto whitespace-pre-wrap text-xs">
+                    {[
+                      error.message,
+                      ...(error instanceof TypstCompileError
+                        ? error.diagnostics
+                        : []),
+                    ].join("\n")}
+                  </pre>
+                )}
                 <Button
                   variant="outline"
                   size="sm"

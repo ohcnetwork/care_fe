@@ -3471,6 +3471,7 @@
   "payments_received_against_this_invoice": "Payments Received Against This Invoice",
   "pdf": "PDF",
   "pdf_generation_failed": "Couldn't prepare the document",
+  "pdf_generation_failed_description": "Something went wrong while preparing this document. Try again, and contact your administrator if it keeps happening.",
   "pdf_preview_not_supported": "PDF Preview Not Available",
   "pdf_preview_not_supported_description": "Your browser doesn't support inline PDF viewing. Please open the PDF in a new tab.",
   "pending": "Pending",
