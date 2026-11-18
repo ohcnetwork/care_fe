@@ -4520,7 +4520,9 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
   await expect(observationHistory).toHaveCount(0);
   await expect(vitalRow("Oxygen saturation")).toContainText("97");
   const temperature = vitalRow("Body temperature");
-  await expect(temperature).toContainText("No reading");
+  await expect(
+    temperature.getByRole("cell", { name: "No reading", exact: true }).first(),
+  ).toHaveText("-");
   await expect(temperature).not.toContainText(/\d/);
   await expect(vitals).toContainText(`by ${actorName}`);
   await expect(

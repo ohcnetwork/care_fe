@@ -542,7 +542,7 @@ function VitalMatrixCell({
         )}
         aria-label={t("workspace_vitals_no_reading")}
       >
-        {t("workspace_vitals_no_reading")}
+        -
       </td>
     );
   }
