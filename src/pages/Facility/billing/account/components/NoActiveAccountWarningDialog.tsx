@@ -76,7 +76,7 @@ export default function NoActiveAccountWarningDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>
             <ShortcutBadge actionId="cancel-action" />
-            {t("proceed")}
+            {t("create_account")}
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={() =>

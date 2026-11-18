@@ -391,7 +391,7 @@ const AppointmentEncounterHeaderActions = ({
     >
       {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
         <span className="hidden text-sm text-gray-700 xl:inline">
-          {t("how_do_you_to_finish_this_visit")}
+          {t("how_would_you_like_to_finish_this_visit")}
         </span>
       )}
       <div className="flex min-w-0 items-center gap-1">

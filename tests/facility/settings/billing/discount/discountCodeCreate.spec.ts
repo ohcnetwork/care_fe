@@ -98,7 +98,7 @@ test.describe("Discount Code Settings", () => {
     await searchInput.fill(nonMatchingQuery);
 
     await expect(
-      page.getByText(/no discount codes matches this search/i),
+      page.getByText(/no discount codes match this search/i),
     ).toBeVisible();
   });
 });
