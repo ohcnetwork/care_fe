@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -1492,7 +1492,7 @@ function InvoiceShow({
                 <ShortcutBadge actionId="cancel-action" />
               </AlertDialogCancel>
               <AlertDialogAction
-                className={cn(buttonVariants({ variant: "destructive" }))}
+                variant="destructive"
                 onClick={handleRemoveChargeItem}
                 disabled={isRemoving}
               >

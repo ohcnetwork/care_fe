@@ -337,6 +337,118 @@ test.describe("Facility general settings layout", () => {
     ).toBeDisabled();
   });
 
+  for (const theme of ["light", "dark"] as const) {
+    test(`keeps critical confirmation spacing and shadows consistent in ${theme} mode`, async ({
+      page,
+    }) => {
+      user.preferences = { appearance: { theme } };
+      if (theme === "dark") {
+        facility.name = `${faker.company.name()} ${faker.string.alphanumeric(80)}`;
+      }
+      await page.goto(`/facility/${facility.id}/settings/general`);
+      await expect(page.locator("#app-loading")).toBeHidden();
+      const deleteSection = page.locator('[data-cy="facility-delete-section"]');
+      await deleteSection
+        .getByRole("button", { name: "Delete facility", exact: true })
+        .click();
+      await deleteSection
+        .getByRole("button", { name: "Delete Facility", exact: true })
+        .click();
+
+      const dialog = page.getByRole("alertdialog", { name: "Delete Facility" });
+      const input = dialog.getByRole("textbox", {
+        name: /To confirm, please type/,
+      });
+      const confirm = dialog.getByRole("button", {
+        name: "Delete Facility",
+        exact: true,
+      });
+      await expect(dialog).toBeVisible();
+      await expect(input).toBeFocused();
+      await expect(confirm).toBeDisabled();
+      await expect(confirm).toHaveAttribute("data-variant", "destructive");
+      await expect(confirm).toHaveCSS("text-shadow", "none");
+
+      for (const viewport of [
+        { width: 1440, height: 1000 },
+        { width: 768, height: 1000 },
+        { width: 390, height: 844 },
+        { width: 320, height: 568 },
+        { width: 640, height: 360 },
+      ]) {
+        await page.setViewportSize(viewport);
+        await expect(dialog).toHaveCSS(
+          "max-height",
+          `${viewport.height - 32}px`,
+        );
+        const padding = viewport.width >= 768 ? "24px" : "16px";
+        const header = dialog.locator('[data-slot="alert-dialog-header"]');
+        const footer = dialog.locator('[data-slot="alert-dialog-footer"]');
+        await expect(header).toHaveCSS("padding-left", padding);
+        await expect(footer).toHaveCSS("padding-left", padding);
+        await expect
+          .poll(() =>
+            input.evaluate((element) => {
+              const popup = element.closest('[role="alertdialog"]')!;
+              return Math.round(
+                element.getBoundingClientRect().left -
+                  popup.getBoundingClientRect().left,
+              );
+            }),
+          )
+          .toBe(parseInt(padding));
+        const bounds = await dialog.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            left: rect.left,
+            right: rect.right,
+            top: rect.top,
+            bottom: rect.bottom,
+            overflow: element.scrollWidth - element.clientWidth,
+          };
+        });
+        expect(bounds.left).toBeGreaterThanOrEqual(15);
+        expect(bounds.right).toBeLessThanOrEqual(viewport.width - 15);
+        expect(bounds.top).toBeGreaterThanOrEqual(15);
+        expect(bounds.bottom).toBeLessThanOrEqual(viewport.height - 15);
+        expect(bounds.overflow).toBe(0);
+        await confirm.scrollIntoViewIfNeeded();
+        await expect(confirm).toBeInViewport();
+        if (viewport.width === 1440 || viewport.width === 320) {
+          await test.info().attach(`confirmation-${theme}-${viewport.width}`, {
+            body: await dialog.screenshot(),
+            contentType: "image/png",
+          });
+        }
+      }
+
+      await input.fill(`Delete ${facility.name}`);
+      await expect(confirm).toBeEnabled();
+      await expect(confirm).toHaveCSS("text-shadow", "none");
+      await expect
+        .poll(() =>
+          confirm.evaluate((element) => getComputedStyle(element).boxShadow),
+        )
+        .not.toContain("inset");
+      await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+      await expect(dialog).toBeHidden();
+      await deleteSection
+        .getByRole("button", { name: "Delete Facility", exact: true })
+        .click();
+      await expect(input).toHaveValue("");
+      await input.fill(`Delete ${facility.name} incorrect`);
+      await expect(confirm).toBeDisabled();
+      await page.keyboard.press("Escape");
+      await expect(dialog).toBeHidden();
+      await expect(
+        deleteSection.getByRole("button", {
+          name: "Delete Facility",
+          exact: true,
+        }),
+      ).toBeFocused();
+    });
+  }
+
   test("keeps the compact banner and General page width stable while cropping uploads at 16:9", async ({
     page,
   }) => {
