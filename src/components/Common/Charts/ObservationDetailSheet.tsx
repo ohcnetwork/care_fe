@@ -79,6 +79,7 @@ export function ObservationDetailSheet({
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
+    ref: loadMoreRef,
   } = useInfiniteList({
     queryKey: [
       "observation-history",
@@ -220,8 +221,7 @@ export function ObservationDetailSheet({
                     entriesByCode={entriesByCode}
                     totalCount={totalCount}
                     hasNextPage={hasNextPage}
-                    isFetchingNextPage={isFetchingNextPage}
-                    fetchNextPage={fetchNextPage}
+                    loadMoreRef={loadMoreRef}
                   />
                 </TabsContent>
               </Tabs>

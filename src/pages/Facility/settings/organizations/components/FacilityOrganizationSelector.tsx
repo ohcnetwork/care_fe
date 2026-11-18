@@ -10,7 +10,6 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -101,7 +100,6 @@ export default function FacilityOrganizationSelector(
   const [open, setOpen] = useState(false);
   const preferredSelectionApplied = useRef(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
-  const { ref: inViewRef, inView } = useInView();
 
   // Fetch preferred organizations
   const { data: preferredOrganizations, isLoading: isLoadingPreferred } =
@@ -125,9 +123,8 @@ export default function FacilityOrganizationSelector(
   const {
     data: rootOrganizationsData,
     isLoading: isLoadingRoot,
-    fetchNextPage: fetchNextPageRoot,
-    hasNextPage: hasNextPageRoot,
     isFetchingNextPage: isFetchingNextPageRoot,
+    ref: rootLoadMoreRef,
   } = useInfiniteList({
     queryKey: [
       "facilityOrganization",
@@ -154,9 +151,8 @@ export default function FacilityOrganizationSelector(
   const {
     data: childOrganizationsData,
     isLoading: isLoadingChild,
-    fetchNextPage: fetchNextPageChild,
-    hasNextPage: hasNextPageChild,
     isFetchingNextPage: isFetchingNextPageChild,
+    ref: childLoadMoreRef,
   } = useInfiniteList({
     queryKey: [
       "organizations",
@@ -211,22 +207,10 @@ export default function FacilityOrganizationSelector(
     isFetchingNextPageChild,
   ]);
 
-  useEffect(() => {
-    if (inView) {
-      if (navigationLevels.length === 0 && hasNextPageRoot) {
-        fetchNextPageRoot();
-      } else if (navigationLevels.length > 0 && hasNextPageChild) {
-        fetchNextPageChild();
-      }
-    }
-  }, [
-    inView,
-    navigationLevels.length,
-    hasNextPageRoot,
-    hasNextPageChild,
-    fetchNextPageRoot,
-    fetchNextPageChild,
-  ]);
+  // The list shows one level at a time, so the sentinel loads more of the
+  // level on screen. Switching levels moves the sentinel to the other query.
+  const loadMoreRef =
+    navigationLevels.length === 0 ? rootLoadMoreRef : childLoadMoreRef;
 
   // Query results can supply the form's initial department. The parent owns
   // the selected IDs; notify it once when this external default becomes ready,
@@ -427,7 +411,7 @@ export default function FacilityOrganizationSelector(
                 );
               })}
             {getCurrentLevelOrganizations().length > 0 && (
-              <div ref={inViewRef} className="h-1" />
+              <div ref={loadMoreRef} className="h-1" />
             )}
             {getCurrentLevelFetchingNextPage() && (
               <div className="flex items-center justify-center py-2">
