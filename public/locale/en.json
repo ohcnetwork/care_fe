@@ -1072,6 +1072,8 @@
   "contact_info": "Contact Information",
   "contact_information": "Contact Information",
   "contact_information_description": "Provide contact details for follow-up communication.",
+  "contact_link_call": "Call {{number}}",
+  "contact_link_email": "Email {{email}}",
   "contact_number": "Contact Number",
   "contact_person": "Name of Contact Person at Facility",
   "contact_person_description": "Name of the person to contact regarding this request.",

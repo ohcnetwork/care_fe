@@ -1,4 +1,4 @@
-import { ImagePlus, PhoneOutgoing, Trash2 } from "lucide-react";
+import { ImagePlus, Trash2 } from "lucide-react";
 import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -16,6 +16,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
 
+import ContactLink from "@/components/Common/ContactLink";
 import FacilityDeleteDialog from "@/components/Facility/FacilityDeleteDialog";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 
@@ -174,21 +175,16 @@ export function FacilitySettingsOverview({
                 <div>
                   <dt>{t("mobile_number")}</dt>
                   <dd>
-                    {phoneNumber ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="-my-1.5 -ml-2.75 underline underline-offset-4"
-                        asChild
-                      >
-                        <a href={`tel:${phoneNumber}`}>
-                          <PhoneOutgoing
-                            data-icon="inline-start"
-                            aria-hidden="true"
-                          />
-                          {phoneNumber}
-                        </a>
-                      </Button>
+                    {facility.phone_number && phoneNumber ? (
+                      // Offset ghost padding and border so the icon aligns with other values.
+                      <ContactLink
+                        tel={String(facility.phone_number)}
+                        label={phoneNumber}
+                        className={cn(
+                          buttonVariants({ variant: "ghost", size: "sm" }),
+                          "-my-1.5 -ml-3.25 text-foreground underline underline-offset-4",
+                        )}
+                      />
                     ) : (
                       t("not_specified")
                     )}

@@ -212,9 +212,11 @@ test.describe("Facility general settings layout", () => {
     await expect(mapLink).toHaveAttribute("aria-label", "Show on Map");
     await expect(mapLink).toHaveAttribute("href", /12\.3.*76\.6/);
     await expect(mapLink).toHaveAttribute("target", "_blank");
-    const phoneLink = details.getByRole("link", { name: "+91 98765 43210" });
-    await expect(phoneLink).toHaveAttribute("data-variant", "ghost");
-    await expect(phoneLink).toHaveAttribute("href", "tel:+91 98765 43210");
+    const phoneLink = details.getByRole("link", {
+      name: "Call +91 98765 43210",
+    });
+    await expect(phoneLink).toHaveText("+91 98765 43210");
+    await expect(phoneLink).toHaveAttribute("href", "tel:+919876543210");
     const valueStarts = await details.evaluate((section) => {
       const textStart = (element: Element | null | undefined) => {
         const text = [...(element?.childNodes ?? [])].find(
