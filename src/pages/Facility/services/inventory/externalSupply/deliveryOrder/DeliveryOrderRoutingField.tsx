@@ -23,6 +23,9 @@ interface DeliveryOrderRoutingFieldProps {
   locationId: string;
   internal: boolean;
   supplyOrderId?: string;
+  // Internal transfers to a supplier location also name the supplier the stock goes back to
+  showSupplier?: boolean;
+  isEditMode?: boolean;
 }
 
 export function DeliveryOrderRoutingField({
@@ -30,12 +33,16 @@ export function DeliveryOrderRoutingField({
   locationId,
   internal,
   supplyOrderId,
+  showSupplier = false,
+  isEditMode = false,
 }: DeliveryOrderRoutingFieldProps) {
   const { t } = useTranslation();
   const form = useFormContext<{ supplier?: string; destination: string }>();
   const destination = useWatch({ control: form.control, name: "destination" });
+  const supplier = useWatch({ control: form.control, name: "supplier" });
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
   const [searchDeliveryFrom, setSearchDeliveryFrom] = useState("");
+  const hasSupplierField = !internal || showSupplier;
 
   const { data: availableSuppliers } = useQuery({
     queryKey: ["organizations", supplierSearchQuery],
@@ -45,6 +52,18 @@ export function DeliveryOrderRoutingField({
         name: supplierSearchQuery || undefined,
       },
     }),
+    enabled: hasSupplierField,
+  });
+  const suppliers = availableSuppliers?.results ?? [];
+  const isSupplierListed = suppliers.some((s) => s.id === supplier);
+
+  // A saved supplier may not be on the first page of results, so fetch it to show its name
+  const { data: selectedSupplier } = useQuery({
+    queryKey: ["organizations", supplier, "selected"],
+    queryFn: query(organizationApi.get, {
+      pathParams: { id: supplier! },
+    }),
+    enabled: hasSupplierField && !!supplier && !isSupplierListed,
   });
 
   const {
@@ -69,43 +88,72 @@ export function DeliveryOrderRoutingField({
           location.id !== locationId &&
           (location.inventory_usage !== "none" || location.id === destination),
       ),
+    enabled: internal,
   });
 
-  const vendorOptions =
-    availableSuppliers?.results.map((s) => ({ label: s.name, value: s.id })) ||
-    [];
+  const vendorOptions = [
+    ...suppliers,
+    ...(selectedSupplier && !isSupplierListed ? [selectedSupplier] : []),
+  ].map((s) => ({ label: s.name, value: s.id }));
   const deliveryFromOptions =
     deliveryFromLocations?.map((l) => ({ label: l.name, value: l.id })) || [];
 
-  return (
+  const supplierField = (
     <FormField
       control={form.control}
-      name={internal ? "destination" : "supplier"}
+      name="supplier"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{internal ? t("deliver_to") : t("vendor")}</FormLabel>
+          <FormLabel>{t("vendor")}</FormLabel>
           <FormControl>
             <Autocomplete
-              disabled={internal && !!supplyOrderId}
-              options={internal ? deliveryFromOptions : vendorOptions}
+              // Care sets a transfer's supplier only when it is created
+              disabled={internal && isEditMode}
+              options={vendorOptions}
               value={field.value || ""}
               onChange={field.onChange}
-              isLoading={internal ? isLoadingDeliveryFromLocations : false}
-              onSearch={
-                internal ? setSearchDeliveryFrom : setSupplierSearchQuery
-              }
-              placeholder={internal ? t("select_location") : t("select_vendor")}
-              inputPlaceholder={
-                internal ? t("search_location") : t("search_vendor")
-              }
-              noOptionsMessage={
-                internal ? t("no_location_found") : t("no_vendor_found")
-              }
+              onSearch={setSupplierSearchQuery}
+              placeholder={t("select_vendor")}
+              inputPlaceholder={t("search_vendor")}
+              noOptionsMessage={t("no_vendor_found")}
             />
           </FormControl>
           <FormMessage />
         </FormItem>
       )}
     />
+  );
+
+  if (!internal) {
+    return supplierField;
+  }
+
+  return (
+    <>
+      <FormField
+        control={form.control}
+        name="destination"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t("deliver_to")}</FormLabel>
+            <FormControl>
+              <Autocomplete
+                disabled={!!supplyOrderId}
+                options={deliveryFromOptions}
+                value={field.value || ""}
+                onChange={field.onChange}
+                isLoading={isLoadingDeliveryFromLocations}
+                onSearch={setSearchDeliveryFrom}
+                placeholder={t("select_location")}
+                inputPlaceholder={t("search_location")}
+                noOptionsMessage={t("no_location_found")}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      {showSupplier && supplierField}
+    </>
   );
 }

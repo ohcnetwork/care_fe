@@ -49,6 +49,7 @@ interface DeliveryOrderFormContentProps {
   status: DeliveryOrderStatus;
   isEditMode: boolean;
   isPending: boolean;
+  showSupplier: boolean;
   onSubmit: SubmitEventHandler<HTMLFormElement>;
   children: ReactNode;
 }
@@ -62,6 +63,7 @@ export function DeliveryOrderFormContent({
   status,
   isEditMode,
   isPending,
+  showSupplier,
   onSubmit,
   children,
 }: DeliveryOrderFormContentProps) {
@@ -127,6 +129,8 @@ export function DeliveryOrderFormContent({
                   locationId={locationId}
                   internal={internal}
                   supplyOrderId={supplyOrderId}
+                  showSupplier={showSupplier}
+                  isEditMode={isEditMode}
                 />
               </div>
 
