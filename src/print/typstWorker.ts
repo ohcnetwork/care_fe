@@ -84,7 +84,6 @@ async function createCompiler(assets: TypstAssets) {
 }
 
 let compiler: Promise<TypstCompiler> | undefined;
-let mappedFiles: string[] = [];
 
 async function compile(
   assets: TypstAssets,
@@ -101,33 +100,39 @@ async function compile(
   });
   const typst = await compiler;
 
-  // Files from the previous document must not leak into this one.
-  for (const path of mappedFiles) typst.unmapShadow(path);
-  mappedFiles = ["/data.json", ...Object.keys(files)];
-  typst.mapShadow("/data.json", new TextEncoder().encode(JSON.stringify(data)));
-  for (const [path, bytes] of Object.entries(files)) {
-    typst.mapShadow(path, bytes);
-  }
-
-  const result = await typst.runWithWorld(
-    {
-      mainFilePath,
-      inputs: { data: "/data.json", theme: JSON.stringify(theme) },
-    },
-    async (world) => {
-      const compiled = await world.compile({ diagnostics: "unix" });
-      if (compiled.hasError) return { diagnostics: compiled.diagnostics };
-      return world.pdf({ diagnostics: "unix" });
-    },
-  );
-
-  if (!("result" in result) || !result.result) {
-    throw new CompileError(
-      `Couldn't compile the ${template} template`,
-      result.diagnostics,
+  // The files hold patient data: unmap them as soon as this document is done.
+  const paths = ["/data.json", ...Object.keys(files)];
+  try {
+    typst.mapShadow(
+      "/data.json",
+      new TextEncoder().encode(JSON.stringify(data)),
     );
+    for (const [path, bytes] of Object.entries(files)) {
+      typst.mapShadow(path, bytes);
+    }
+
+    const result = await typst.runWithWorld(
+      {
+        mainFilePath,
+        inputs: { data: "/data.json", theme: JSON.stringify(theme) },
+      },
+      async (world) => {
+        const compiled = await world.compile({ diagnostics: "unix" });
+        if (compiled.hasError) return { diagnostics: compiled.diagnostics };
+        return world.pdf({ diagnostics: "unix" });
+      },
+    );
+
+    if (!("result" in result) || !result.result) {
+      throw new CompileError(
+        `Couldn't compile the ${template} template`,
+        result.diagnostics,
+      );
+    }
+    return result.result;
+  } finally {
+    for (const path of paths) typst.unmapShadow(path);
   }
-  return result.result;
 }
 
 class CompileError extends Error {
