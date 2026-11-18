@@ -36,6 +36,11 @@ const combineDetailQueries = (results: UseQueryResult<ChargeItemRead>[]) => ({
   items: results.flatMap((result) => (result.data ? [result.data] : [])),
   isLoading: results.some((result) => result.isLoading),
   isFetching: results.some((result) => result.isFetching),
+  isError: results.some((result) => result.isError),
+  retryFailed: () =>
+    results.forEach((result) => {
+      if (result.isError) result.refetch();
+    }),
 });
 
 /**
@@ -129,6 +134,13 @@ export function useInvoiceChargeItems({
     isSyncing: isIdsScope
       ? details.isFetching
       : list.isFetching && !list.isFetchingNextPage,
+    /**
+     * Some items of an `ids` scope failed to load, so `chargeItems` is
+     * incomplete (or stale) and must not be invoiced as is. Queries aren't
+     * retried automatically. List errors are left to the global handler.
+     */
+    hasFailedItems: isIdsScope && details.isError,
+    retryFailedItems: details.retryFailed,
     hasNextPage: !isIdsScope && list.hasNextPage,
     isFetchingNextPage: list.isFetchingNextPage,
     fetchNextPage: list.fetchNextPage,

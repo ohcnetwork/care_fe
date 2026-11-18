@@ -236,6 +236,8 @@ export function CreateInvoicePage({
     chargeItems,
     isLoading,
     isSyncing: isSyncingChargeItems,
+    hasFailedItems,
+    retryFailedItems,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
@@ -721,6 +723,24 @@ export function CreateInvoicePage({
                 </div>
               )}
 
+              {hasFailedItems && (
+                <div
+                  role="alert"
+                  className="mt-3 flex items-center justify-between gap-3 rounded-sm border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+                >
+                  <span>{t("charge_items_load_failed")}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={retryFailedItems}
+                    disabled={isSyncingChargeItems}
+                  >
+                    {t("try_again")}
+                  </Button>
+                </div>
+              )}
+
               <p className="text-xs text-gray-950 italic mt-3">
                 {selection.selectedItems.length > 0
                   ? t("selected_items_count", {
@@ -886,6 +906,7 @@ export function CreateInvoicePage({
                   isEditDialogOpen ||
                   isApplyingInline ||
                   isSyncingChargeItems ||
+                  hasFailedItems ||
                   selection.selectedItems.length === 0
                 }
               >
