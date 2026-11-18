@@ -19,12 +19,18 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { formatDateTime, formatName, properCase } from "@/Utils/utils";
 import React, { useEffect, useState } from "react";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { cn } from "@/lib/utils";
+import { Code } from "@/types/base/code/code";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import {
@@ -40,7 +46,13 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { t } from "i18next";
-import { BanIcon, ChevronDown, MoreVertical, Printer } from "lucide-react";
+import {
+  BanIcon,
+  ChevronDown,
+  EyeIcon,
+  MoreVertical,
+  Printer,
+} from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -89,6 +101,24 @@ export function formatValue(
     default:
       return value.toString();
   }
+}
+
+function CodingValue({ coding }: { coding: Code }) {
+  const { t } = useTranslation();
+  return (
+    <span className="ml-1 inline-flex items-center gap-1 text-gray-600">
+      {coding.display}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <EyeIcon
+            className="size-3.5 shrink-0 cursor-help text-gray-400 hover:text-gray-600"
+            aria-label={t("code")}
+          />
+        </TooltipTrigger>
+        <TooltipContent>{coding.code}</TooltipContent>
+      </Tooltip>
+    </span>
+  );
 }
 
 function QuestionGroup({
@@ -141,11 +171,7 @@ function QuestionGroup({
 
     const value = response.values[0]?.value;
     const coding = response.values[0]?.coding;
-    const text = [
-      value?.toString() || "",
-      coding?.display || "",
-      coding?.code || "",
-    ].join(" ");
+    const text = [value?.toString() || "", coding?.display || ""].join(" ");
 
     return text.length > 50;
   });
@@ -189,11 +215,7 @@ function QuestionGroup({
                 {val.unit && (
                   <span className="ml-1 text-gray-600">{val.unit.code}</span>
                 )}
-                {val.coding && (
-                  <span className="ml-1 text-gray-600">
-                    {val.coding.display} ({val.coding.code})
-                  </span>
-                )}
+                {val.coding && <CodingValue coding={val.coding} />}
               </React.Fragment>
             ))}
           </div>
@@ -434,9 +456,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                                   </span>
                                 )}
                                 {val.coding && (
-                                  <span className="ml-1 text-gray-600">
-                                    {val.coding.display} ({val.coding.code})
-                                  </span>
+                                  <CodingValue coding={val.coding} />
                                 )}
                               </React.Fragment>
                             ))}
