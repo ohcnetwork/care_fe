@@ -422,9 +422,10 @@ test.describe("Facility Creation", () => {
     // Verify the phone link is visible
     await expect(phoneLink).toBeVisible();
 
-    // Verify the href attribute contains tel: link with phone number format
+    // The href uses the raw E.164 number; the formatted number is display-only
     const href = await phoneLink.getAttribute("href");
-    expect(href).toMatch(/^tel:\+91\s\d{5}\s\d{5}$/);
+    expect(href).toMatch(/^tel:\+91\d{10}$/);
+    await expect(phoneLink).toHaveText(/^\+91 \d{5} \d{5}$/);
   });
 
   test("Add location to an existing facility and verify Show on Map link redirection", async ({
@@ -491,8 +492,13 @@ test.describe("Facility Creation", () => {
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
 
-    // Click Delete Facility button
-    await page.getByRole("button", { name: "Delete Facility" }).click();
+    // Expand the delete section, then click Delete Facility button
+    await page
+      .getByRole("button", { name: "Delete facility", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Delete Facility", exact: true })
+      .click();
 
     // Type the confirmation text
     await page

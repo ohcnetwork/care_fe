@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -1236,7 +1236,7 @@ const AppointmentActions = ({
                     note,
                   })
                 }
-                className={cn(buttonVariants({ variant: "destructive" }))}
+                variant="destructive"
                 disabled={!hasMarkdownContent(note)}
               >
                 {isUpdating ? (
@@ -1275,7 +1275,7 @@ const AppointmentActions = ({
               <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => addCancelAppointment("cancelled", note)}
-                className={cn(buttonVariants({ variant: "destructive" }))}
+                variant="destructive"
                 disabled={!hasMarkdownContent(note)}
               >
                 {isPending ? (
@@ -1307,7 +1307,7 @@ const AppointmentActions = ({
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => addCancelAppointment("entered_in_error", note)}
-              className={cn(buttonVariants({ variant: "destructive" }))}
+              variant="destructive"
             >
               {isPending ? (
                 <Spinner className="size-4 animate-spin mr-2" />
