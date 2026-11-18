@@ -20,19 +20,24 @@ export async function waitForOrderUpdate(
   status: OrderStatusUpdate,
   action: () => Promise<unknown>,
 ) {
-  // Start listening before triggering the action, otherwise a fast response
-  // can arrive before the listener exists and the wait never resolves.
-  const response = page.waitForResponse(
-    (res) =>
-      res.request().method() === "PUT" &&
-      ORDER_UPDATE_PATH.test(new URL(res.url()).pathname) &&
-      res.request().postDataJSON()?.status === status,
-  );
-  await action();
-  // `toBeOK()` only accepts APIResponse, so surface the status and body here.
-  const res = await response;
-  expect(
-    res.ok(),
-    `Order update to "${status}" failed: ${res.status()} ${await res.text()}`,
-  ).toBe(true);
+  // The response wait is created before the action runs (array order), so a
+  // fast response cannot arrive before the listener exists. Awaiting both
+  // together also handles the wait's rejection if the action itself fails.
+  const [res] = await Promise.all([
+    page.waitForResponse(
+      (res) =>
+        res.request().method() === "PUT" &&
+        ORDER_UPDATE_PATH.test(new URL(res.url()).pathname) &&
+        res.request().postDataJSON()?.status === status,
+    ),
+    action(),
+  ]);
+  if (!res.ok()) {
+    // `toBeOK()` only accepts APIResponse, so surface the status and body here.
+    const body = await res.text().catch(() => "(body unavailable)");
+    expect(
+      res.ok(),
+      `Order update to "${status}" failed: ${res.status()} ${body}`,
+    ).toBe(true);
+  }
 }
