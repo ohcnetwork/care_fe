@@ -1,10 +1,4 @@
-import {
-  ArrowLeft,
-  CircleAlert,
-  Printer,
-  Share2,
-  TriangleAlert,
-} from "lucide-react";
+import { ArrowLeft, CircleAlert, Printer, TriangleAlert } from "lucide-react";
 import {
   type ReactNode,
   useCallback,
@@ -24,12 +18,7 @@ import PageTitle from "@/components/Common/PageTitle";
 import PrintLoading from "@/CAREUI/misc/PrintLoading";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { PdfPages } from "@/print/PdfPages";
-import {
-  getPdfPrintMethod,
-  pdfFileName,
-  sharePdf,
-  waitForPrintDialogToClose,
-} from "@/print/printPdf";
+import { getPdfPrintMethod, waitForPrintDialogToClose } from "@/print/printPdf";
 import { TypstCompileError } from "@/print/typstClient";
 import { type TypstPdfOptions, useTypstPdf } from "@/print/useTypstPdf";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -71,18 +60,13 @@ export default function TypstPrintPreview<TContent>({
     };
   }, [pdf]);
 
-  const fileName = pdfFileName(options.title);
   const method = useMemo(() => getPdfPrintMethod(), []);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loadedUrl, setLoadedUrl] = useState<string>();
   const iframeLoaded = !!url && loadedUrl === url;
 
   const print = useCallback(() => {
-    if (!pdf || !url) return;
-    if (method === "share") {
-      void sharePdf(pdf, url, fileName);
-      return;
-    }
+    if (!url) return;
     const frame = iframeRef.current?.contentWindow;
     if (method === "iframe" && frame && iframeLoaded) {
       frame.focus();
@@ -90,7 +74,7 @@ export default function TypstPrintPreview<TContent>({
       return;
     }
     window.open(url, "_blank", "noopener");
-  }, [pdf, url, method, fileName, iframeLoaded]);
+  }, [url, method, iframeLoaded]);
 
   // The print dialog can only open by itself from the hidden iframe; other
   // methods need a click.
@@ -131,8 +115,8 @@ export default function TypstPrintPreview<TContent>({
                 onClick={print}
                 data-shortcut-id="print-button"
               >
-                {method === "share" ? <Share2 /> : <Printer />}
-                {method === "share" ? t("share") : t("print")}
+                <Printer />
+                {t("print")}
                 <ShortcutBadge actionId="print-button" className="bg-white" />
               </Button>
             </div>

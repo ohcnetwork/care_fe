@@ -10,9 +10,6 @@ import "@/lib/pdfWorker";
 
 const MAX_PAGE_WIDTH = 900;
 
-/** Canvas pixels per CSS px: high enough for crisp text on standard and retina screens. */
-const RENDER_SCALE = Math.max(window.devicePixelRatio || 1, 2) * 1.5;
-
 export function PdfPages({ url }: { url: string }) {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -49,7 +46,6 @@ export function PdfPages({ url }: { url: string }) {
               width={Math.min(width, MAX_PAGE_WIDTH)}
               renderTextLayer={false}
               renderAnnotationLayer={false}
-              devicePixelRatio={RENDER_SCALE}
               loading={
                 <Skeleton className="mx-auto mb-6 aspect-210/297 w-full rounded-md" />
               }

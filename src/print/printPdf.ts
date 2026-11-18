@@ -1,4 +1,4 @@
-import { isIOSDevice, sleep } from "@/Utils/utils";
+import { sleep } from "@/Utils/utils";
 
 /**
  * Resolves once the print dialog has closed. `print()` on an iframe returns
@@ -18,50 +18,13 @@ export async function waitForPrintDialogToClose() {
 }
 
 /**
- * How a PDF is printed in this browser: a hidden `iframe` (Chromium, Firefox),
- * a `new-tab` PDF viewer (Safari and iOS, which can't print from an iframe),
- * or the OS `share` sheet (Android, where browsers can't display PDFs).
+ * How a PDF is printed in this browser: a hidden `iframe` (desktop browsers), or
+ * a `new-tab` PDF viewer (touch-first devices such as iPhone, iPad and Android,
+ * which can't print from an iframe).
  */
-export type PdfPrintMethod = "iframe" | "new-tab" | "share";
+export type PdfPrintMethod = "iframe" | "new-tab";
 
 export function getPdfPrintMethod(): PdfPrintMethod {
-  const ua = navigator.userAgent;
-  if (/Android/i.test(ua)) return "share";
-
-  // iPadOS reports itself as a Mac.
-  const isIPad = /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
-  const isSafari =
-    /Safari/.test(ua) && !/Chrome|Chromium|Edg|OPR|Firefox/.test(ua);
-  if (isIOSDevice || isIPad || isSafari) return "new-tab";
-
+  if (matchMedia("(pointer: coarse)").matches) return "new-tab";
   return "iframe";
-}
-
-export function pdfFileName(title: string) {
-  const name = title.replace(/[\\/:*?"<>|]+/g, "-").trim() || "document";
-  return `${name}.pdf`;
-}
-
-function downloadPdf(url: string, fileName: string) {
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = fileName;
-  link.click();
-}
-
-/** Opens the OS share sheet with the PDF, or downloads it if sharing files isn't supported. */
-export async function sharePdf(pdf: Uint8Array, url: string, fileName: string) {
-  const file = new File([pdf as BlobPart], fileName, {
-    type: "application/pdf",
-  });
-  if (navigator.canShare?.({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file], title: fileName });
-      return;
-    } catch (error) {
-      // Closing the share sheet isn't an error.
-      if (error instanceof DOMException && error.name === "AbortError") return;
-    }
-  }
-  downloadPdf(url, fileName);
 }
