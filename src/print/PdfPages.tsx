@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import PrintLoading from "@/CAREUI/misc/PrintLoading";
 
+import "react-pdf/dist/Page/TextLayer.css";
+
 import "@/lib/pdfWorker";
 
 const MAX_PAGE_WIDTH = 900;
@@ -44,7 +46,6 @@ export function PdfPages({ url }: { url: string }) {
               key={i}
               pageNumber={i + 1}
               width={Math.min(width, MAX_PAGE_WIDTH)}
-              renderTextLayer={false}
               renderAnnotationLayer={false}
               loading={
                 <Skeleton className="mx-auto mb-6 aspect-210/297 w-full rounded-md" />

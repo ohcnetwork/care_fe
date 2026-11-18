@@ -44,7 +44,7 @@ export default function TypstPrintPreview<TContent>({
   const { t } = useTranslation();
   useShortcutSubContext();
 
-  const { pdf, error, isLoading, retry, failedAssets, autoPrint } =
+  const { pdf, error, isLoading, isFetching, retry, failedAssets, autoPrint } =
     useTypstPdf(options);
 
   const [url, setUrl] = useState<string>();
@@ -140,7 +140,7 @@ export default function TypstPrintPreview<TContent>({
             </Alert>
           )}
 
-          {error ? (
+          {error && !isFetching ? (
             <Alert variant="destructive">
               <CircleAlert />
               <AlertTitle>{t("pdf_generation_failed")}</AlertTitle>
@@ -166,7 +166,7 @@ export default function TypstPrintPreview<TContent>({
                 </Button>
               </AlertDescription>
             </Alert>
-          ) : isLoading || !url ? (
+          ) : isLoading || isFetching || !url ? (
             <PrintLoading />
           ) : (
             <>

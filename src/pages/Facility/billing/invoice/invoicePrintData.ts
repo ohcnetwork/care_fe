@@ -130,18 +130,19 @@ const byType =
     c.monetary_component_type === type;
 
 function getTaxCodes(items: ChargeItemRead[]) {
-  const codes = new Set<string>();
+  const codes = new Map<string, string | undefined>();
   for (const item of items) {
     for (const component of item.unit_price_components ?? []) {
       if (
         component.monetary_component_type === MonetaryComponentType.tax &&
-        component.code?.code
+        component.code?.code &&
+        !codes.has(component.code.code)
       ) {
-        codes.add(component.code.code);
+        codes.set(component.code.code, component.code.display);
       }
     }
   }
-  return Array.from(codes);
+  return Array.from(codes, ([code, display]) => ({ code, display }));
 }
 
 function buildTransactions(
@@ -246,7 +247,9 @@ export function buildInvoicePrintContent({
       address: formatPatientAddress(patient.address) || null,
     },
     qr_code: qrCodePath,
-    tax_columns: taxCodes.map((code) => t(code)),
+    tax_columns: taxCodes.map(({ code, display }) =>
+      t(code, { defaultValue: display || code }),
+    ),
     items: invoice.charge_items.map((item, index) => {
       const { title, subtitle } = getChargeItemTitle(item, dispenseMap, t);
       const discount = byType(MonetaryComponentType.discount);
@@ -279,7 +282,7 @@ export function buildInvoicePrintContent({
             .filter(discount)
             .map((c) => formatMonetary(c, { hideCurrency: true })),
         },
-        taxes: taxCodes.map((code) => {
+        taxes: taxCodes.map(({ code }) => {
           const total = item.total_price_components.find(
             (c) => c.code?.code === code,
           )?.amount;

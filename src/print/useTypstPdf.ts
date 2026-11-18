@@ -167,6 +167,7 @@ export function useTypstPdf<TContent>({
     pdf: pdf.data,
     error: pdf.error,
     isLoading: assets.isLoading || pdf.isLoading || content === undefined,
+    isFetching: pdf.isFetching,
     retry: pdf.refetch,
     /** Branding images that couldn't be loaded and were left out. */
     failedAssets: assets.data?.failed ?? [],
