@@ -130,12 +130,15 @@ export function useTypstPdf<TContent>({
     ],
   );
 
+  // The key is hashed on every render: a string is far cheaper than a deep object.
+  const contentKey = useMemo(() => JSON.stringify(content), [content]);
+
   const pdf = useQuery({
     queryKey: [
       "typst-pdf",
       template,
       layout,
-      content,
+      contentKey,
       assetUrls,
       Object.entries(files ?? {}).map(([path, bytes]) => [
         path,
