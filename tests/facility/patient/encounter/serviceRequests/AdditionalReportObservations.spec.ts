@@ -15,7 +15,9 @@ import type {
   QuestionType,
 } from "@/types/emr/observationDefinition/observationDefinition";
 
-import { createServiceRequest } from "./serviceRequest";
+import { createServiceRequest, reportTypeCombobox } from "./serviceRequest";
+
+const COMPONENT_RESULT = "96.5";
 
 test.use({
   storageState: "tests/.auth/user.json",
@@ -44,12 +46,7 @@ function getObservationGroup(
 }
 
 async function createReport(page: Page, reportType: string) {
-  await page
-    .getByRole("combobox", {
-      name: "Select Diagnostic Report Type",
-      exact: true,
-    })
-    .click();
+  await reportTypeCombobox(page).click();
   await page.getByRole("option", { name: reportType }).click();
   const created = page.waitForResponse(
     (response) =>
@@ -339,7 +336,7 @@ test.describe("Additional diagnostic report observations", () => {
       await expect(secondEntry.getByText(textDefinition.title)).toHaveCount(0);
 
       await addObservation(page, secondEntry, componentDefinition);
-      await componentInputs.fill("96.5");
+      await componentInputs.fill(COMPONENT_RESULT);
       await expect(firstEntry.getByText(componentDefinition.title)).toHaveCount(
         0,
       );
@@ -351,7 +348,7 @@ test.describe("Additional diagnostic report observations", () => {
 
     await test.step("Saving one report preserves the other's added draft", async () => {
       await saveResults(page, firstEntry);
-      await expect(componentInputs).toHaveValue("96.5");
+      await expect(componentInputs).toHaveValue(COMPONENT_RESULT);
       await saveResults(page, secondEntry);
       const firstResults = await readObservations(firstReportId);
       expect(firstResults).toHaveLength(2);
@@ -370,7 +367,7 @@ test.describe("Additional diagnostic report observations", () => {
           {
             code: componentDefinition.component![0].code,
             value: {
-              value: "96.5",
+              value: COMPONENT_RESULT,
               unit: componentDefinition.component![0].permitted_unit,
             },
           },
@@ -386,7 +383,7 @@ test.describe("Additional diagnostic report observations", () => {
       await expect(textCard.getByPlaceholder("Result value")).toHaveValue(
         "No growth detected",
       );
-      await expect(componentInputs).toHaveValue("96.5");
+      await expect(componentInputs).toHaveValue(COMPONENT_RESULT);
 
       await page.screenshot({
         path: testInfo.outputPath("extra-observations-saved.png"),
