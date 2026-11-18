@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
+import type { InventoryUsage, LocationRead } from "@/types/location/location";
+
 test.use({ storageState: "tests/.auth/user.json" });
 
 /**
@@ -10,23 +12,10 @@ test.use({ storageState: "tests/.auth/user.json" });
  * internal order/delivery location pickers. Give the locations used by the
  * inventory specs the usage those flows expect.
  */
-const LOCATION_INVENTORY_USAGE: Record<string, string> = {
+const LOCATION_INVENTORY_USAGE: Record<string, InventoryUsage> = {
   Pharmacy: "store",
   "Bio-Chemistry Lab": "consumption",
 };
-
-interface LocationRead {
-  id: string;
-  name: string;
-  description: string;
-  status: string;
-  operational_status: string;
-  form: string;
-  mode: string;
-  inventory_usage: string;
-  location_type?: { code?: string };
-  sort_index?: number;
-}
 
 test("set inventory usage on inventory fixture locations", async ({
   request,
@@ -45,23 +34,25 @@ test("set inventory usage on inventory fixture locations", async ({
     LOCATION_INVENTORY_USAGE,
   )) {
     const location = results.find((l) => l.name === name);
-    expect(location, `fixture location "${name}" not found`).toBeDefined();
-    if (location!.inventory_usage === inventoryUsage) continue;
+    if (!location) throw new Error(`Fixture location "${name}" not found`);
+    if (location.inventory_usage === inventoryUsage) continue;
 
-    const updated = await request.put(`${locationUrl}${location!.id}/`, {
+    // Location updates leave organizations and parent untouched, so only the
+    // location's own fields are sent.
+    const updated = await request.put(`${locationUrl}${location.id}/`, {
       headers,
       data: {
-        name: location!.name,
-        description: location!.description,
-        status: location!.status,
-        operational_status: location!.operational_status,
-        form: location!.form,
-        mode: location!.mode,
+        name: location.name,
+        description: location.description,
+        status: location.status,
+        operational_status: location.operational_status,
+        form: location.form,
+        mode: location.mode,
         // An unset location_type is read back as `{}`, which is not a valid write
-        ...(location!.location_type?.code
-          ? { location_type: location!.location_type }
+        ...(location.location_type?.code
+          ? { location_type: location.location_type }
           : {}),
-        sort_index: location!.sort_index,
+        sort_index: location.sort_index,
         inventory_usage: inventoryUsage,
       },
     });
