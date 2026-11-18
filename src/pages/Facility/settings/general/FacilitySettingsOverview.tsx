@@ -257,8 +257,8 @@ export function FacilitySettingsOverview({
                     {t("facility_settings_delete_section")}
                   </AccordionTrigger>
                   <AccordionContent className="space-y-4 px-6 pb-6 [&_p:not(:last-child)]:mb-0">
-                    <div className="flex p-2 justify-between border border-red-300 rounded-md items-center">
-                      <p className="text-muted-foreground">
+                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-md border border-destructive/30 p-2">
+                      <p className="flex-1 basis-40 text-muted-foreground">
                         {t("delete_facility_description")}
                       </p>
                       <FacilityDeleteDialog

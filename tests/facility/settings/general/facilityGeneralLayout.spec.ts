@@ -327,6 +327,39 @@ test.describe("Facility general settings layout", () => {
       body: await page.screenshot({ fullPage: true }),
       contentType: "image/png",
     });
+
+    // The warning must keep a gutter from the button and stay readable
+    // instead of collapsing into a narrow column beside it.
+    const deleteWarning = deleteSection.getByText("Once you delete a facility");
+    for (const width of [320, 360, 390, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      const row = await deleteWarning.evaluate((warning) => {
+        const range = document.createRange();
+        range.selectNodeContents(warning);
+        const lines = [...range.getClientRects()];
+        const text = {
+          right: Math.max(...lines.map((line) => line.right)),
+          bottom: Math.max(...lines.map((line) => line.bottom)),
+        };
+        const button = warning
+          .parentElement!.querySelector("button")!
+          .getBoundingClientRect();
+        return {
+          sideGap: button.left - text.right,
+          stackGap: button.top - text.bottom,
+          warningWidth: warning.getBoundingClientRect().width,
+          overflows:
+            warning.parentElement!.scrollWidth >
+            warning.parentElement!.clientWidth,
+        };
+      });
+      expect(row.overflows, `${width}px`).toBe(false);
+      expect(row.warningWidth, `${width}px`).toBeGreaterThanOrEqual(160);
+      expect(
+        Math.max(row.sideGap, row.stackGap),
+        `${width}px`,
+      ).toBeGreaterThanOrEqual(12);
+    }
     await page.setViewportSize({ width: 1440, height: 1000 });
 
     await deleteButton.click();
