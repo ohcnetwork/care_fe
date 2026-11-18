@@ -182,7 +182,7 @@ export function ForgotPasswordPhone({
       <AuthCard
         back={{ label: t("back_to_email_reset"), onClick: onBackToEmail }}
         title={t("reset_using_phone_number")}
-        description={t("forget_password_phone_instruction")}
+        description={t("forgot_password_phone_instruction")}
       >
         <form noValidate className="grid gap-6" onSubmit={handleSendOtp}>
           <Field data-invalid={!!phoneError}>
@@ -222,7 +222,7 @@ export function ForgotPasswordPhone({
     <AuthCard
       back={{ label: t("change_phone_number"), onClick: handleChangePhone }}
       title={t("reset_password")}
-      description={t("forget_password_phone_otp_instruction")}
+      description={t("forgot_password_phone_otp_instruction")}
     >
       <form noValidate className="grid gap-6" onSubmit={handleConfirm}>
         <Field data-invalid={!!errors.otp}>
