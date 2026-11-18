@@ -649,6 +649,8 @@ test.describe("External delivery draft items", () => {
   test("preserves cancelled history and replaces an item only when an edit is saved", async ({
     page,
   }, testInfo) => {
+    // Long multi-step flow; regularly runs close to the default 60s timeout.
+    test.slow();
     const {
       facilityId,
       apiUrl,
@@ -730,6 +732,11 @@ test.describe("External delivery draft items", () => {
         })
         .first()
         .click();
+      // The search dialog is modal; until it closes the edit form is hidden
+      // from role queries.
+      await expect(
+        page.getByPlaceholder("Search Product Knowledge"),
+      ).toBeHidden();
     };
 
     await test.step("Require an explicit pack quantity for a new item and preserve it when selecting a batch", async () => {

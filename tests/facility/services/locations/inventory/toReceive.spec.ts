@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { waitForOrderUpdate } from "tests/helper/inventory";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -61,7 +62,9 @@ test.describe("Facility To-Receive Orders Inventory Flow", () => {
     let tableRow1 = page.locator("table tbody tr").nth(0);
     await expect(tableRow1).toContainText("Paracetamol");
     await expect(tableRow1).toContainText("5");
-    await page.getByRole("button", { name: "Mark as Approved" }).click();
+    await waitForOrderUpdate(page, () =>
+      page.getByRole("button", { name: "Mark as Approved" }).click(),
+    );
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     // verify item appears in table
     const orderRow = page
@@ -92,13 +95,17 @@ test.describe("Facility To-Receive Orders Inventory Flow", () => {
     let tableRow1 = page.locator("table tbody tr").nth(0);
     await expect(tableRow1).toContainText("Paracetamol");
     await expect(tableRow1).toContainText("5");
-    await page
-      .getByRole("button", { name: "Mark as Approved" })
-      .click({ timeout: 5000 });
+    await waitForOrderUpdate(page, () =>
+      page
+        .getByRole("button", { name: "Mark as Approved" })
+        .click({ timeout: 5000 }),
+    );
     await page
       .locator('[data-slot="dropdown-menu-trigger"]:has(.care-l-ellipsis-v)')
       .click();
-    await page.getByRole("menuitem", { name: "Mark as Completed" }).click();
+    await waitForOrderUpdate(page, () =>
+      page.getByRole("menuitem", { name: "Mark as Completed" }).click(),
+    );
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     await page.getByRole("tab", { name: "Completed" }).click();
     // verify item appears in table
