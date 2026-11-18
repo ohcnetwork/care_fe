@@ -161,7 +161,7 @@ for (const encounterClass of ["amb", "imp"]) {
       .getByRole("option", { name: "Discontinued", exact: true })
       .click();
 
-    const identifier = section.getByPlaceholder("Ip/op/obs/emr number", {
+    const identifier = section.getByPlaceholder("IP/OP/OBS/EMR number", {
       exact: true,
     });
     const editedIdentifier = `REMOUNT-${faker.string.alphanumeric(8)}`;
@@ -229,7 +229,7 @@ test("old encounter drafts drop incompatible class edits while retaining clinici
   const fillUrl = page.url();
   const questionnaireId = new URL(fillUrl).pathname.split("/").at(-1)!;
   const section = questionBlock(page, SECTION_LABEL);
-  const identifier = section.getByPlaceholder("Ip/op/obs/emr number", {
+  const identifier = section.getByPlaceholder("IP/OP/OBS/EMR number", {
     exact: true,
   });
   const draftedIdentifier = `OLD-DRAFT-${faker.string.alphanumeric(8)}`;

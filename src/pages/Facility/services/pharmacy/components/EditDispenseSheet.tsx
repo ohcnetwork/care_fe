@@ -465,7 +465,7 @@ function ExistingDispenseDetails({
           )}
           {expiryDate && (
             <>
-              {t("expiry_abbrevated")}:{" "}
+              {t("expiry_abbreviated")}:{" "}
               <span className="font-medium text-gray-900">
                 {format(new Date(expiryDate), "dd/MM/yyyy")}
               </span>
