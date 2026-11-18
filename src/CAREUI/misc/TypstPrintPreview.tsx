@@ -1,4 +1,4 @@
-import { ArrowLeft, CircleAlert, Printer, TriangleAlert } from "lucide-react";
+import { ArrowLeft, Printer, Share2, TriangleAlert } from "lucide-react";
 import {
   type ReactNode,
   useCallback,
@@ -18,7 +18,11 @@ import PageTitle from "@/components/Common/PageTitle";
 import PrintLoading from "@/CAREUI/misc/PrintLoading";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { PdfPages } from "@/print/PdfPages";
-import { getPdfPrintMethod, waitForPrintDialogToClose } from "@/print/printPdf";
+import {
+  getPdfPrintMethod,
+  sharePdf,
+  waitForPrintDialogToClose,
+} from "@/print/printPdf";
 import { TypstCompileError } from "@/print/typstClient";
 import { type TypstPdfOptions, useTypstPdf } from "@/print/useTypstPdf";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -67,6 +71,10 @@ export default function TypstPrintPreview<TContent>({
 
   const print = useCallback(() => {
     if (!url) return;
+    if (method === "share") {
+      if (pdf) void sharePdf(pdf, options.title);
+      return;
+    }
     const frame = iframeRef.current?.contentWindow;
     if (method === "iframe" && frame && iframeLoaded) {
       frame.focus();
@@ -74,7 +82,7 @@ export default function TypstPrintPreview<TContent>({
       return;
     }
     window.open(url, "_blank", "noopener");
-  }, [url, method, iframeLoaded]);
+  }, [url, pdf, options.title, method, iframeLoaded]);
 
   // The print dialog can only open by itself from the hidden iframe; other
   // methods need a click.
@@ -115,8 +123,8 @@ export default function TypstPrintPreview<TContent>({
                 onClick={print}
                 data-shortcut-id="print-button"
               >
-                <Printer />
-                {t("print")}
+                {method === "share" ? <Share2 /> : <Printer />}
+                {method === "share" ? t("share") : t("print")}
                 <ShortcutBadge actionId="print-button" className="bg-white" />
               </Button>
             </div>
@@ -142,7 +150,7 @@ export default function TypstPrintPreview<TContent>({
 
           {error && !isFetching ? (
             <Alert variant="destructive">
-              <CircleAlert />
+              <TriangleAlert />
               <AlertTitle>{t("pdf_generation_failed")}</AlertTitle>
               <AlertDescription>
                 <p>{t("pdf_generation_failed_description")}</p>
