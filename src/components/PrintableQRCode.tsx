@@ -1,7 +1,8 @@
 "use client";
 
 import { QRCodeSVG } from "qrcode.react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -26,10 +27,19 @@ export function PrintableQRCode({
   // Calculate logo size as 25% of QR code size
   const logoSize = Math.floor(size * 0.25);
 
+  // Only the code being printed carries the print id, so other codes on the
+  // page don't print on top of it.
+  const [isPrinting, setIsPrinting] = useState(false);
+  const handlePrint = () => {
+    flushSync(() => setIsPrinting(true));
+    window.print();
+    setIsPrinting(false);
+  };
+
   return (
     <>
       <div
-        id="single-print"
+        id={isPrinting ? "single-print" : undefined}
         className="flex print:scale-60 print:justify-start flex-col sm:flex-row print:flex-row print:items-start justify-between items-center sm:items-start gap-4 sm:gap-6"
       >
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center sm:items-start print:flex-row print:items-start">
@@ -66,7 +76,7 @@ export function PrintableQRCode({
           size="sm"
           className="w-auto print:hidden"
           type="button"
-          onClick={() => print()}
+          onClick={handlePrint}
         >
           {t("PRINTABLE_QR_CODE__print_button")}
         </Button>

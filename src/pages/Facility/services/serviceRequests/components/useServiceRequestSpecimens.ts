@@ -16,7 +16,7 @@ import {
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 
-function createDraftPayload(
+export function createDraftPayload(
   requirement: SpecimenDefinitionRead,
 ): SpecimenFromDefinitionCreate {
   return {

@@ -19,6 +19,8 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { ServiceRequestSelectionBar } from "@/pages/Facility/services/serviceRequests/components/ServiceRequestSelectionBar";
+import { useServiceRequestSelection } from "@/pages/Facility/services/serviceRequests/components/useServiceRequestSelection";
 import { Priority, Status } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 
@@ -57,6 +59,14 @@ export const EncounterServiceRequestTab = () => {
       },
     }),
     enabled: !!facilityId,
+  });
+
+  // Active requests can be ticked on the All and Active tabs.
+  const selection = useServiceRequestSelection(data?.results ?? [], {
+    enabled:
+      canWriteClinicalData &&
+      (!qParams.status || qParams.status === Status.active),
+    resetKey: JSON.stringify(qParams),
   });
 
   const handleClearPriority = () => {
@@ -142,6 +152,12 @@ export const EncounterServiceRequestTab = () => {
         <TableSkeleton count={6} />
       ) : (
         <div className="space-y-6">
+          {facilityId && selection.enabled && !!data?.results?.length && (
+            <ServiceRequestSelectionBar
+              facilityId={facilityId}
+              selection={selection}
+            />
+          )}
           <Card className="overflow-hidden">
             <CardContent className="p-0">
               {data?.results?.length ? (
@@ -150,6 +166,7 @@ export const EncounterServiceRequestTab = () => {
                   facilityId={facilityId || ""}
                   showPatientInfo={false}
                   readOnly={!canWriteClinicalData}
+                  selection={selection}
                 />
               ) : (
                 <div className="p-6 text-center text-gray-500">

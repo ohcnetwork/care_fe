@@ -9,6 +9,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
@@ -39,6 +40,11 @@ import {
   longDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { ServiceRequestSelectionBar } from "@/pages/Facility/services/serviceRequests/components/ServiceRequestSelectionBar";
+import {
+  type ServiceRequestSelection,
+  useServiceRequestSelection,
+} from "@/pages/Facility/services/serviceRequests/components/useServiceRequestSelection";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import {
   Priority,
@@ -76,10 +82,12 @@ function ServiceRequestCard({
   request,
   facilityId,
   locationId,
+  selection,
 }: {
   request: ServiceRequestReadSpec;
   facilityId: string;
   locationId: string;
+  selection: ServiceRequestSelection;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -89,12 +97,24 @@ function ServiceRequestCard({
       <CardContent className="p-4">
         <div className="mb-2 flex flex-col sm:flex-row sm:items-start gap-4">
           <div className="flex-1 min-w-0">
-            <div className="mb-2">
-              <div className="font-semibold text-gray-900">
-                {request.encounter.patient.name}
-              </div>
-              <div className="text-xs text-gray-500">
-                {request.encounter.patient.id}
+            <div className="mb-2 flex items-start gap-3">
+              {selection.enabled && selection.canSelect(request) && (
+                <Checkbox
+                  className="mt-0.5"
+                  checked={selection.isSelected(request)}
+                  onCheckedChange={(checked) =>
+                    selection.setSelected(request, checked)
+                  }
+                  aria-label={request.title}
+                />
+              )}
+              <div>
+                <div className="font-semibold text-gray-900">
+                  {request.encounter.patient.name}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {request.encounter.patient.id}
+                </div>
               </div>
             </div>
             <div className="mb-2 flex items-center gap-2">
@@ -328,6 +348,14 @@ export default function ServiceRequestList({
   });
 
   const serviceRequests = response?.results || [];
+  // Like the prescription queue, tests can be ticked once the list shows one
+  // patient's active requests.
+  const selection = useServiceRequestSelection(serviceRequests, {
+    enabled:
+      !!qParams.patient &&
+      (!qParams.status || qParams.status === Status.active),
+    resetKey: JSON.stringify(qParams),
+  });
 
   return (
     <Page title={t("service_requests")} hideTitleOnPage>
@@ -402,6 +430,15 @@ export default function ServiceRequestList({
           </div>
         </div>
 
+        {selection.enabled && serviceRequests.length > 0 && (
+          <div className="mb-4">
+            <ServiceRequestSelectionBar
+              facilityId={facilityId}
+              selection={selection}
+            />
+          </div>
+        )}
+
         {isLoading ? (
           <>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:hidden">
@@ -425,6 +462,7 @@ export default function ServiceRequestList({
                   request={request}
                   facilityId={facilityId}
                   locationId={locationId}
+                  selection={selection}
                 />
               ))}
             </div>
@@ -441,6 +479,7 @@ export default function ServiceRequestList({
                     patient_name: request.encounter.patient.name,
                   })
                 }
+                selection={selection}
               />
             </div>
           </>

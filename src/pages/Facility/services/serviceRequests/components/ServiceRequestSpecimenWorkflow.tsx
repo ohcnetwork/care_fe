@@ -1,10 +1,9 @@
-import { ChevronsDownUp, MoreVertical, PrinterIcon } from "lucide-react";
+import { MoreVertical, PrinterIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +17,7 @@ import {
 } from "@/types/emr/specimen/specimen";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 import { MultiQRCodePrintSheet } from "./MultiQRCodePrintSheet";
+import { SpecimenCollectCard } from "./SpecimenCollectCard";
 import { SpecimenForm } from "./SpecimenForm";
 import { SpecimenHistorySheet } from "./SpecimenHistorySheet";
 import { SpecimenWorkflowCard } from "./SpecimenWorkflowCard";
@@ -102,6 +102,9 @@ export function ServiceRequestSpecimenWorkflow({
                 open={isQRCodeSheetOpen}
                 onOpenChange={setIsQRCodeSheetOpen}
                 isLoading={isPrintingAllQRCodes}
+                getLabelText={() =>
+                  `${request.encounter.patient.name} · ${request.title}`
+                }
               >
                 <Button
                   variant="outline"
@@ -197,47 +200,24 @@ export function ServiceRequestSpecimenWorkflow({
             </h5>
             <Badge variant="orange">{pendingRequirementsCount}</Badge>
           </div>
-          <Card className="overflow-hidden rounded-lg shadow-xs">
-            <CardHeader className="p-0">
-              <Button
-                variant="ghost"
-                onClick={() => setSelectedSpecimenDefinition(null)}
-                className="h-auto w-full flex-col items-stretch gap-3 bg-muted p-3 text-left font-normal tracking-normal sm:flex-row sm:items-center sm:justify-between sm:gap-2"
-                aria-label={t("collapse")}
-              >
-                <div className="min-w-0 m-0">
-                  <span className="text-sm text-muted-foreground">
-                    {t("required")}:
-                  </span>
-                  <CardTitle className="flex flex-wrap items-center gap-2 text-base font-semibold">
-                    <span className="truncate">
-                      {selectedSpecimenDefinition.title}
-                    </span>
-                    {getExistingDraftSpecimen(
-                      selectedSpecimenDefinition.slug,
-                    ) && <Badge variant="indigo">{t("draft")}</Badge>}
-                  </CardTitle>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 sm:shrink-0 justify-between">
-                  <Badge variant="orange">{t("collection_pending")}</Badge>
-                  <ChevronsDownUp className="size-4 mx-2" />
-                </div>
-              </Button>
-            </CardHeader>
-            <CardContent className="bg-muted p-2 pt-0">
-              <SpecimenForm
-                specimenDefinition={selectedSpecimenDefinition}
-                onCancel={() => setSelectedSpecimenDefinition(null)}
-                facilityId={facilityId}
-                draftSpecimen={getExistingDraftSpecimen(
-                  selectedSpecimenDefinition.slug,
-                )}
-                serviceRequestId={serviceRequestId}
-                disableEdit={disableEdit}
-              />
-            </CardContent>
-          </Card>
+          <SpecimenCollectCard
+            requirement={selectedSpecimenDefinition}
+            hasDraft={
+              !!getExistingDraftSpecimen(selectedSpecimenDefinition.slug)
+            }
+            onToggle={() => setSelectedSpecimenDefinition(null)}
+          >
+            <SpecimenForm
+              specimenDefinition={selectedSpecimenDefinition}
+              onCancel={() => setSelectedSpecimenDefinition(null)}
+              facilityId={facilityId}
+              draftSpecimen={getExistingDraftSpecimen(
+                selectedSpecimenDefinition.slug,
+              )}
+              serviceRequestId={serviceRequestId}
+              disableEdit={disableEdit}
+            />
+          </SpecimenCollectCard>
         </div>
       )}
     </>

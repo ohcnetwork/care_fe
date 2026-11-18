@@ -35,6 +35,8 @@ interface MultiQRCodePrintSheetProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   isLoading?: boolean;
+  /** The patient and the test, printed under the specimen ID. */
+  getLabelText?: (specimen: SpecimenRead) => string;
 }
 
 export function MultiQRCodePrintSheet({
@@ -43,6 +45,7 @@ export function MultiQRCodePrintSheet({
   open,
   onOpenChange,
   isLoading = false,
+  getLabelText,
 }: MultiQRCodePrintSheetProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -245,6 +248,11 @@ export function MultiQRCodePrintSheet({
                             <div className="font-semibold uppercase text-sm text-gray-700">
                               {specimen.accession_identifier || specimen.id}
                             </div>
+                            {getLabelText && (
+                              <div className="text-sm font-medium">
+                                {getLabelText(specimen)}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -264,6 +272,7 @@ export function MultiQRCodePrintSheet({
             logoSize={logoSize}
             printSize={printSize}
             showDetails={showDetails}
+            getLabelText={getLabelText}
           />
         </div>
       )}
