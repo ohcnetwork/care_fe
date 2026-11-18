@@ -1,9 +1,13 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { batchQuery, useBatchRequest } from "@/Utils/request/batch";
+import {
+  BatchRequestObject,
+  batchQuery,
+  useBatchRequest,
+} from "@/Utils/request/batch";
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceRequest";
@@ -21,9 +25,34 @@ export interface PendingSpecimen {
   draft?: SpecimenRead;
 }
 
+// The backend takes at most 20 requests in one batch.
+const BATCH_SIZE = 20;
+
+/**
+ * Sends the requests 20 at a time, one batch after another, and returns how
+ * many went through. A batch saves all or nothing, so after a failed batch
+ * the earlier ones stay saved.
+ */
+async function sendInBatches(
+  send: (requests: BatchRequestObject[]) => Promise<unknown>,
+  requests: BatchRequestObject[],
+) {
+  let sent = 0;
+  try {
+    while (sent < requests.length) {
+      const batch = requests.slice(sent, sent + BATCH_SIZE);
+      await send(batch);
+      sent += batch.length;
+    }
+  } catch {
+    // useBatchRequest has already shown the error.
+  }
+  return sent;
+}
+
 /**
  * Loads requests and their activity definitions in batch requests, creates
- * missing drafts as Print All QR Codes does, and saves in one batch.
+ * missing drafts as Print All QR Codes does, and saves them, 20 to a batch.
  */
 export function useBatchSpecimenCollection(
   facilityId: string,
@@ -33,6 +62,7 @@ export function useBatchSpecimenCollection(
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
+  // Ticks cover one page of at most 20 requests, so one batch loads them.
   const ids = requests.map(({ id }) => id);
   const requestBatch = useQuery({
     queryKey: ["service_request_batch", facilityId, ids],
@@ -112,10 +142,11 @@ export function useBatchSpecimenCollection(
 
   const missing = pending.filter(({ draft }) => !draft);
   const {
-    mutate: createDrafts,
+    mutateAsync: createDrafts,
     isPending: isCreatingDrafts,
     isError: draftsFailed,
   } = useBatchRequest({
+    // After each batch, so drafts made before a failed batch still show.
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["service_request_batch"] }),
   });
@@ -124,7 +155,8 @@ export function useBatchSpecimenCollection(
   useEffect(() => {
     if (isFetching || !missing.length || draftsRequested.current) return;
     draftsRequested.current = true;
-    createDrafts(
+    sendInBatches(
+      createDrafts,
       missing.map(({ key, request, requirement }) => ({
         api: specimenApi.createSpecimenFromDefinition,
         pathParams: { facilityId, serviceRequestId: request.id },
@@ -134,18 +166,33 @@ export function useBatchSpecimenCollection(
     );
   }, [isFetching, missing, createDrafts, facilityId]);
 
-  const { mutate: saveBatch, isPending: isSaving } = useBatchRequest({
-    onSuccess: (_, collected) => {
-      toast.success(
-        t("specimens_collected_count", { count: collected.length }),
-      );
+  const { mutateAsync: saveBatch } = useBatchRequest({});
+  const { mutate: save, isPending: isSaving } = useMutation({
+    mutationFn: (specimens: SpecimenRead[]) =>
+      sendInBatches(
+        saveBatch,
+        specimens.map((specimen) => ({
+          api: specimenApi.updateSpecimen,
+          pathParams: { facilityId, specimenId: specimen.id },
+          referenceId: specimen.id,
+          body: specimen,
+        })),
+      ),
+    onSuccess: (collected, specimens) => {
+      if (!collected) return;
+      toast.success(t("specimens_collected_count", { count: collected }));
       queryClient.invalidateQueries({
         queryKey: ["serviceRequests", facilityId],
       });
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId],
       });
-      onSaved();
+      if (collected === specimens.length) {
+        onSaved();
+      } else {
+        // A later batch failed: stay open, and reload so only the rest show.
+        queryClient.invalidateQueries({ queryKey: ["service_request_batch"] });
+      }
     },
   });
 
@@ -154,14 +201,6 @@ export function useBatchSpecimenCollection(
     isPreparing:
       isLoading || isCreatingDrafts || (missing.length > 0 && !draftsFailed),
     isSaving,
-    save: (specimens: SpecimenRead[]) =>
-      saveBatch(
-        specimens.map((specimen) => ({
-          api: specimenApi.updateSpecimen,
-          pathParams: { facilityId, specimenId: specimen.id },
-          referenceId: specimen.id,
-          body: specimen,
-        })),
-      ),
+    save,
   };
 }
