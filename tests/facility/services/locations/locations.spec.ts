@@ -43,12 +43,19 @@ test.describe("Locations", () => {
       page.getByRole("heading").getByText("Prescription Queue"),
     ).toBeVisible();
     await toggleSidebar(page, true);
-    await page.getByRole("button", { name: "Pharmacy" }).click();
+    // Locations that use inventory also get a "Pharmacy" nav group button, so
+    // target the location switcher by its "Current Location" label.
+    await page
+      .getByRole("button", { name: "Pharmacy" })
+      .filter({ hasText: /Current Location/ })
+      .click();
     await expect(page.getByText("Current Location:Pharmacy")).toBeVisible();
     await page.getByPlaceholder("Search").fill("Bio-Chemistry Lab");
     await page.getByRole("option", { name: "Bio-Chemistry Lab" }).click();
     await expect(
-      page.getByRole("button", { name: "Bio-Chemistry Lab" }),
+      page
+        .getByRole("button", { name: "Bio-Chemistry Lab" })
+        .filter({ hasText: /Current Location/ }),
     ).toBeVisible();
   });
 
