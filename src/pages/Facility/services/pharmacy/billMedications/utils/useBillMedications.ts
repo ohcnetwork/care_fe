@@ -1,3 +1,4 @@
+import { navigate } from "@/lib/router/navigate";
 import { BillMedicationLineItemSchemaType } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { createAndIssueInvoice } from "@/pages/Facility/services/pharmacy/utils/createAndIssueInvoice";
 import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDefaultBillingAccount";
@@ -20,7 +21,6 @@ import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -132,10 +132,15 @@ export default function useBillMedications({
       if (!invoiceFailed) {
         toast.success(t("medications_billed_successfully"));
       }
-      navigate(
-        `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}?autoAdvanceStatus=true${issuedInvoiceId ? `&collectPayment=${issuedInvoiceId}` : ""}`,
-        { replace: true },
-      );
+      navigate({
+        to: "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId",
+        params: { facilityId, locationId, dispenseOrderId: dispenseOrder.id },
+        search: {
+          autoAdvanceStatus: "true",
+          collectPayment: issuedInvoiceId,
+        },
+        replace: true,
+      });
     },
   });
 
