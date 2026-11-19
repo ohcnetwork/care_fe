@@ -72,6 +72,7 @@ import {
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import {
   QuestionnaireResponse,
+  ResponseContext,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -85,6 +86,7 @@ interface DiagnosisQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  setResponseContext: (questionId: string, context: ResponseContext[]) => void;
   disabled?: boolean;
   question: Question;
 }
@@ -348,6 +350,7 @@ export function DiagnosisQuestion({
   encounterId,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  setResponseContext,
   disabled,
   question,
 }: DiagnosisQuestionProps) {
@@ -401,6 +404,10 @@ export function DiagnosisQuestion({
           },
         ],
         questionnaireResponse.question_id,
+      );
+      setResponseContext(
+        questionnaireResponse.question_id,
+        patientDiagnoses.results,
       );
     }
   }, [patientDiagnoses]);

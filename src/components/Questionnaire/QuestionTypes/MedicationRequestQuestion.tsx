@@ -100,6 +100,7 @@ import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowl
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
+  ResponseContext,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { QuestionnaireResponseTemplateReadSpec } from "@/types/questionnaire/questionnaireResponseTemplate";
@@ -213,6 +214,7 @@ interface MedicationRequestQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  setResponseContext: (questionId: string, context: ResponseContext[]) => void;
   disabled?: boolean;
   encounterId: string;
   errors?: QuestionValidationError[];
@@ -345,6 +347,7 @@ export function validateMedicationRequestQuestion(
 export function MedicationRequestQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  setResponseContext,
   disabled,
   patientId,
   encounterId,
@@ -389,7 +392,13 @@ export function MedicationRequestQuestion({
   });
 
   useEffect(() => {
-    if (prescriptionId && patientMedications?.results) {
+    // Without a prescription there is no existing-medication fetch; still mark
+    // context as populated ([]) so draft reconciliation doesn't wait on it.
+    if (!prescriptionId) {
+      setResponseContext(questionnaireResponse.question_id, []);
+      return;
+    }
+    if (patientMedications?.results) {
       updateQuestionnaireResponseCB(
         [
           {
@@ -404,6 +413,10 @@ export function MedicationRequestQuestion({
           },
         ],
         questionnaireResponse.question_id,
+      );
+      setResponseContext(
+        questionnaireResponse.question_id,
+        patientMedications.results,
       );
     }
   }, [patientMedications, prescriptionId]);
