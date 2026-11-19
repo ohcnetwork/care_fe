@@ -73,11 +73,11 @@ export const Demography = (props: PatientProps) => {
     }
   };
 
-  const EmergencyContact = (props: { number?: string; name?: string }) => (
+  const EmergencyContact = (props: { number?: string }) => (
     <div className="w-full">
-      <div className="mr-6 flex flex-col items-start justify-between rounded-md border border-orange-300 bg-orange-50 p-4">
+      <div className="mr-6 rounded-md border border-orange-300 bg-orange-50 p-4">
         {/* Emergency Contact Section */}
-        <div className="flex-1">
+        <div>
           <div className="text-sm font-normal leading-5 text-gray-600">
             {t("emergency_contact")}
           </div>
@@ -216,7 +216,6 @@ export const Demography = (props: PatientProps) => {
         <EmergencyContact
           key="emergency-contact"
           number={patientData.emergency_phone_number}
-          name={patientData.name}
         />,
         {
           label: t("current_address"),
