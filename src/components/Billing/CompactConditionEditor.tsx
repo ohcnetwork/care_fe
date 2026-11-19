@@ -75,7 +75,7 @@ function TagSelector({
   };
 
   return (
-    <div className="flex gap-1 items-center">
+    <div className="flex min-w-0 gap-1 items-center">
       <TagSelectorPopover
         selected={selectedTags}
         resource={resource}
@@ -309,7 +309,7 @@ function RenderInput({
         control={form.control}
         name="value"
         render={({ field }) => (
-          <FormItem className="flex-1">
+          <FormItem className="min-w-0 flex-1">
             <FormControl>
               <TagSelector
                 value={field.value as TagOperationValue}
