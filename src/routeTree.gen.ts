@@ -76,7 +76,6 @@ import { Route as AppResponsibilitiesIdReferralsRouteImport } from "./routes/_ap
 import { Route as AppResponsibilitiesIdUsersRouteImport } from "./routes/_app/responsibilities.$id.users";
 import { Route as AppUsersUsernameIndexRouteImport } from "./routes/_app/users.$username.index";
 import { Route as AppUsersUsernameTabRouteImport } from "./routes/_app/users.$username.$tab";
-import { Route as AppLegacyPatientPatientIdQuestionnaireRouteImport } from "./routes/_app/_legacy/patient.$patientId.questionnaire";
 import { Route as AppAdminOrganizationsGovtIndexRouteImport } from "./routes/_app/admin.organizations.govt.index";
 import { Route as AppAdminOrganizationsGovtIdRouteImport } from "./routes/_app/admin.organizations.govt.$id";
 import { Route as AppAdminOrganizationsProduct_supplierIndexRouteImport } from "./routes/_app/admin.organizations.product_supplier.index";
@@ -91,7 +90,12 @@ import { Route as AppAdminValuesetsIdEditRouteImport } from "./routes/_app/admin
 import { Route as AppAdminWorkspacesIdEditRouteImport } from "./routes/_app/admin.workspaces.$id.edit";
 import { Route as AppFacilityFacilityIdAppointmentsIndexRouteImport } from "./routes/_app/facility.$facilityId.appointments.index";
 import { Route as AppFacilityFacilityIdAppointmentsPrintRouteImport } from "./routes/_app/facility.$facilityId.appointments.print";
+import { Route as AppFacilityFacilityIdEncountersIndexRouteImport } from "./routes/_app/facility.$facilityId.encounters.index";
+import { Route as AppFacilityFacilityIdEncountersTabRouteImport } from "./routes/_app/facility.$facilityId.encounters.$tab";
 import { Route as AppFacilityFacilityIdLocationsLocationIdRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId";
+import { Route as AppFacilityFacilityIdPatientCreateRouteImport } from "./routes/_app/facility.$facilityId.patient.create";
+import { Route as AppFacilityFacilityIdPatientsIndexRouteImport } from "./routes/_app/facility.$facilityId.patients.index";
+import { Route as AppFacilityFacilityIdPatientsHomeRouteImport } from "./routes/_app/facility.$facilityId.patients.home";
 import { Route as AppFacilityFacilityIdResourceIndexRouteImport } from "./routes/_app/facility.$facilityId.resource.index";
 import { Route as AppFacilityFacilityIdResourceNewRouteImport } from "./routes/_app/facility.$facilityId.resource.new";
 import { Route as AppFacilityFacilityIdService_requestsServiceRequestIdRouteImport } from "./routes/_app/facility.$facilityId.service_requests.$serviceRequestId";
@@ -124,12 +128,17 @@ import { Route as AppFacilityFacilityIdTemplateIndexRouteImport } from "./routes
 import { Route as AppFacilityFacilityIdTemplateSplatRouteImport } from "./routes/_app/facility.$facilityId.template.$";
 import { Route as AppFacilityFacilityIdUsersIndexRouteImport } from "./routes/_app/facility.$facilityId.users.index";
 import { Route as AppOrganizationIdSettingsReferralsRouteImport } from "./routes/_app/organization.$id.settings.referrals";
+import { Route as AppPatientPatientIdHistoryTabRouteImport } from "./routes/_app/patient.$patientId.history.$tab";
+import { Route as AppPatientPatientIdQuestionnaireIndexRouteImport } from "./routes/_app/patient.$patientId.questionnaire.index";
 import { Route as AppResponsibilitiesIdSettingsReferralsRouteImport } from "./routes/_app/responsibilities.$id.settings.referrals";
-import { Route as AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRouteImport } from "./routes/_app/_legacy/patient.$patientId.questionnaire.$questionnaireId";
 import { Route as AppAdminQuestionnairesIdVersionsRevisionIdRouteImport } from "./routes/_app/admin.questionnaires.$id.versions.$revisionId";
 import { Route as AppFacilityFacilityIdBillingAccountIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.account.index";
 import { Route as AppFacilityFacilityIdBillingInvoicesIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.invoices.index";
 import { Route as AppFacilityFacilityIdBillingPaymentsIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.payments.index";
+import { Route as AppFacilityFacilityIdEncountersLocationsLocationIdRouteImport } from "./routes/_app/facility.$facilityId.encounters.locations.$locationId";
+import { Route as AppFacilityFacilityIdEncountersPatientsIndexRouteImport } from "./routes/_app/facility.$facilityId.encounters.patients.index";
+import { Route as AppFacilityFacilityIdEncountersPatientsEncounterClassRouteImport } from "./routes/_app/facility.$facilityId.encounters.patients.$encounterClass";
+import { Route as AppFacilityFacilityIdEncountersPatientsAllRouteImport } from "./routes/_app/facility.$facilityId.encounters.patients.all";
 import { Route as AppFacilityFacilityIdLocationsLocationIdIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdSplatRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.$";
 import { Route as AppFacilityFacilityIdLocationsLocationIdBedsRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.beds";
@@ -138,6 +147,19 @@ import { Route as AppFacilityFacilityIdLocationsLocationIdOverviewRouteImport } 
 import { Route as AppFacilityFacilityIdLocationsLocationIdResponsesRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.responses";
 import { Route as AppFacilityFacilityIdLocationsLocationIdScheduleRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.schedule";
 import { Route as AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRouteImport } from "./routes/_app/facility.$facilityId.medication_dispense.redirect.$medicationDispenseId";
+import { Route as AppFacilityFacilityIdPatientPatientIdIndexRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.index";
+import { Route as AppFacilityFacilityIdPatientPatientIdAccountsRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.accounts";
+import { Route as AppFacilityFacilityIdPatientPatientIdClinical_historyRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.clinical_history";
+import { Route as AppFacilityFacilityIdPatientPatientIdConsultationRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.consultation";
+import { Route as AppFacilityFacilityIdPatientPatientIdDemographyRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.demography";
+import { Route as AppFacilityFacilityIdPatientPatientIdEncountersRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounters";
+import { Route as AppFacilityFacilityIdPatientPatientIdFilesRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.files";
+import { Route as AppFacilityFacilityIdPatientPatientIdNotesRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.notes";
+import { Route as AppFacilityFacilityIdPatientPatientIdReferralsRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.referrals";
+import { Route as AppFacilityFacilityIdPatientPatientIdResource_requestsRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.resource_requests";
+import { Route as AppFacilityFacilityIdPatientPatientIdUpdateRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.update";
+import { Route as AppFacilityFacilityIdPatientPatientIdUpdatesRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.updates";
+import { Route as AppFacilityFacilityIdPatientPatientIdUsersRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.users";
 import { Route as AppFacilityFacilityIdResourceIdIndexRouteImport } from "./routes/_app/facility.$facilityId.resource.$id.index";
 import { Route as AppFacilityFacilityIdResourceIdPrintRouteImport } from "./routes/_app/facility.$facilityId.resource.$id.print";
 import { Route as AppFacilityFacilityIdResourceIdUpdateRouteImport } from "./routes/_app/facility.$facilityId.resource.$id.update";
@@ -198,12 +220,12 @@ import { Route as AppOrganizationNavOrganizationIdChildrenIdPatientsRouteImport 
 import { Route as AppOrganizationNavOrganizationIdChildrenIdReferralsRouteImport } from "./routes/_app/organization.$navOrganizationId.children.$id.referrals";
 import { Route as AppOrganizationNavOrganizationIdChildrenIdService_accountsRouteImport } from "./routes/_app/organization.$navOrganizationId.children.$id.service_accounts";
 import { Route as AppOrganizationNavOrganizationIdChildrenIdUsersRouteImport } from "./routes/_app/organization.$navOrganizationId.children.$id.users";
+import { Route as AppPatientPatientIdQuestionnaireQuestionnaireIdIndexRouteImport } from "./routes/_app/patient.$patientId.questionnaire.$questionnaireId.index";
+import { Route as AppPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport } from "./routes/_app/patient.$patientId.questionnaire_response.$questionnaireResponseId.print";
 import { Route as PatientFacilityFacilityIdAppointmentsAppointmentIdSuccessRouteImport } from "./routes/_patient/facility.$facilityId.appointments.$appointmentId.success";
 import { Route as PatientFacilityFacilityIdAppointmentsStaffIdBookAppointmentRouteImport } from "./routes/_patient/facility.$facilityId.appointments.$staffId.book-appointment";
 import { Route as PatientFacilityFacilityIdAppointmentsStaffIdPatientRegistrationRouteImport } from "./routes/_patient/facility.$facilityId.appointments.$staffId.patient-registration";
 import { Route as PatientFacilityFacilityIdAppointmentsStaffIdPatientSelectRouteImport } from "./routes/_patient/facility.$facilityId.appointments.$staffId.patient-select";
-import { Route as AppLegacyFacilityFacilityIdPatientPatientIdConsultationRouteImport } from "./routes/_app/_legacy/facility.$facilityId.patient.$patientId.consultation";
-import { Route as AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteImport } from "./routes/_app/_legacy/facility.$facilityId.patient.$patientId.questionnaire";
 import { Route as AppFacilityFacilityIdBillingAccountAccountIdIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.account.$accountId.index";
 import { Route as AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRouteImport } from "./routes/_app/facility.$facilityId.billing.invoice.$invoiceId.print";
 import { Route as AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.invoices.$invoiceId.index";
@@ -223,6 +245,9 @@ import { Route as AppFacilityFacilityIdLocationsLocationIdQuestionnaireQuestionn
 import { Route as AppFacilityFacilityIdLocationsLocationIdQueuesIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.queues.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdService_requestsIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.service_requests.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdService_requestsServiceRequestIdRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.service_requests.$serviceRequestId";
+import { Route as AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.appointments.index";
+import { Route as AppFacilityFacilityIdPatientPatientIdHistoryTabRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.history.$tab";
+import { Route as AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.questionnaire.index";
 import { Route as AppFacilityFacilityIdQueueQueueIdTokenTokenIdRouteImport } from "./routes/_app/facility.$facilityId.queue.$queueId.token.$tokenId";
 import { Route as AppFacilityFacilityIdServicesServiceIdAppointmentsIndexRouteImport } from "./routes/_app/facility.$facilityId.services.$serviceId/appointments.index";
 import { Route as AppFacilityFacilityIdServicesServiceIdAppointmentsAppointmentIdRouteImport } from "./routes/_app/facility.$facilityId.services.$serviceId/appointments.$appointmentId";
@@ -253,9 +278,10 @@ import { Route as AppFacilityFacilityIdSettingsSpecimen_definitionsSpecimenSlugE
 import { Route as AppFacilityFacilityIdSettingsValuesetsIdEditRouteImport } from "./routes/_app/facility.$facilityId.settings/valuesets.$id.edit";
 import { Route as AppFacilityFacilityIdSettingsWorkspacesIdEditRouteImport } from "./routes/_app/facility.$facilityId.settings/workspaces.$id.edit";
 import { Route as AppOrganizationNavOrganizationIdChildrenIdSettingsReferralsRouteImport } from "./routes/_app/organization.$navOrganizationId.children.$id.settings.referrals";
+import { Route as AppPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport } from "./routes/_app/patient.$patientId.history.questionnaire_response.$questionnaireResponseId.print";
+import { Route as AppPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport } from "./routes/_app/patient.$patientId.questionnaire.$questionnaireId.responses.print";
 import { Route as PatientFacilityFacilityIdAppointmentsStaffIdRescheduleAppointmentIdRouteImport } from "./routes/_patient/facility.$facilityId.appointments.$staffId.reschedule.$appointmentId";
 import { Route as PublicFacilityFacilityIdAppointmentsStaffIdOtpPageRouteImport } from "./routes/_public/facility.$facilityId.appointments.$staffId.otp.$page";
-import { Route as AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRouteImport } from "./routes/_app/_legacy/facility.$facilityId.patient.$patientId.questionnaire.$questionnaireId";
 import { Route as AppFacilityFacilityIdBillingAccountAccountIdTabIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.account.$accountId.$tab.index";
 import { Route as AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRouteImport } from "./routes/_app/facility.$facilityId.billing.account.$accountId.charge_items.print";
 import { Route as AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRouteImport } from "./routes/_app/facility.$facilityId.billing.account.$accountId.invoices.create";
@@ -264,6 +290,12 @@ import { Route as AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdCompleted
 import { Route as AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdOngoingRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.queues.$queueId.ongoing";
 import { Route as AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdIndexRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.appointments.$appointmentId.index";
 import { Route as AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdPrintRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.appointments.$appointmentId.print";
+import { Route as AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.diagnostic_reports.$diagnosticReportId.index";
+import { Route as AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.diagnostic_reports.$diagnosticReportId.print";
+import { Route as AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounter.$encounterId.$tab";
+import { Route as AppFacilityFacilityIdPatientPatientIdPrescriptionPrescriptionIdPrintRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.prescription.$prescriptionId.print";
+import { Route as AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdIndexRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.questionnaire.$questionnaireId.index";
+import { Route as AppFacilityFacilityIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.questionnaire_response.$questionnaireResponseId.print";
 import { Route as AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdIndexRouteImport } from "./routes/_app/facility.$facilityId.practitioner.$practitionerId.queues.$queueId.index";
 import { Route as AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdCompletedRouteImport } from "./routes/_app/facility.$facilityId.practitioner.$practitionerId.queues.$queueId.completed";
 import { Route as AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdOngoingRouteImport } from "./routes/_app/facility.$facilityId.practitioner.$practitionerId.queues.$queueId.ongoing";
@@ -279,9 +311,11 @@ import { Route as AppFacilityFacilityIdSettingsDevicesIdQuestionnaireQuestionnai
 import { Route as AppFacilityFacilityIdSettingsProduct_knowledgeCategoriesCategorySlugIndexRouteImport } from "./routes/_app/facility.$facilityId.settings/product_knowledge.categories.$categorySlug.index";
 import { Route as AppFacilityFacilityIdSettingsProduct_knowledgeCategoriesCategorySlugNewRouteImport } from "./routes/_app/facility.$facilityId.settings/product_knowledge.categories.$categorySlug.new";
 import { Route as AppFacilityFacilityIdSettingsQuestionnairesIdVersionsRevisionIdRouteImport } from "./routes/_app/facility.$facilityId.settings/questionnaires.$id.versions.$revisionId";
-import { Route as AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRouteImport } from "./routes/_app/_legacy/facility.$facilityId.patient.$patientId.encounter.$encounterId.$tab";
-import { Route as AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteImport } from "./routes/_app/_legacy/facility.$facilityId.patient.$patientId.encounter.$encounterId.questionnaire";
-import { Route as AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRouteImport } from "./routes/_app/_legacy/organization.$organizationId.patient.$patientId.encounter.$encounterId.$tab";
+import { Route as AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRouteImport } from "./routes/_app/organization.$organizationId.patient.$patientId.diagnostic_reports.$diagnosticReportId.index";
+import { Route as AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRouteImport } from "./routes/_app/organization.$organizationId.patient.$patientId.diagnostic_reports.$diagnosticReportId.print";
+import { Route as AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRouteImport } from "./routes/_app/organization.$organizationId.patient.$patientId.encounter.$encounterId.$tab";
+import { Route as AppOrganizationOrganizationIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport } from "./routes/_app/organization.$organizationId.patient.$patientId.questionnaire_response.$questionnaireResponseId.print";
+import { Route as AppPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRouteImport } from "./routes/_app/patient.$patientId.history.questionnaire.$questionnaireId.responses.print";
 import { Route as AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRouteImport } from "./routes/_app/facility.$facilityId.billing.account.$accountId.$tab.payment.$paymentType";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.internal.dispatch.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchTabRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.internal.dispatch.$tab";
@@ -292,13 +326,28 @@ import { Route as AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrd
 import { Route as AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdPrintRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.medication_dispense.order.$dispenseOrderId.print";
 import { Route as AppFacilityFacilityIdLocationsLocationIdMedication_returnOrderDeliveryOrderIdIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.medication_return.order.$deliveryOrderId.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdMedication_returnOrderDeliveryOrderIdPrintRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.medication_return.order.$deliveryOrderId.print";
-import { Route as AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdRouteImport } from "./routes/_app/_legacy/facility.$facilityId.patient.$patientId.encounter.$encounterId.questionnaire.$questionnaireId";
+import { Route as AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounter.$encounterId.consents.$consentId";
+import { Route as AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdPrescriptionsPrintRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounter.$encounterId.prescriptions.print";
+import { Route as AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireIndexRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounter.$encounterId.questionnaire.index";
+import { Route as AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportReportIdRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounter.$encounterId.report.$reportId";
+import { Route as AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.history.questionnaire_response.$questionnaireResponseId.print";
+import { Route as AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.questionnaire.$questionnaireId.responses.print";
+import { Route as AppFacilityFacilityIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.service_request.$serviceRequestId.diagnostic_reports.print";
+import { Route as AppOrganizationOrganizationIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport } from "./routes/_app/organization.$organizationId.patient.$patientId.questionnaire.$questionnaireId.responses.print";
+import { Route as AppOrganizationOrganizationIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRouteImport } from "./routes/_app/organization.$organizationId.patient.$patientId.service_request.$serviceRequestId.diagnostic_reports.print";
+import { Route as AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRouteImport } from "./routes/_app/organization.organizationId.patient.$patientId.encounter.$encounterId.consents.$consentId";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.external.deliveries.$tab.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabNewRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.external.deliveries.$tab.new";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.external.orders.$tab.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabNewRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.external.orders.$tab.new";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeDeliveriesNewRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.internal.$type.deliveries.new";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeOrdersNewRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.internal.$type.orders.new";
+import { Route as AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdIndexRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounter.$encounterId.questionnaire.$questionnaireId.index";
+import { Route as AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdIndexRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounter.$encounterId.questionnaire_response.$questionnaireResponseId.index";
+import { Route as AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounter.$encounterId.questionnaire_response.$questionnaireResponseId.print";
+import { Route as AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportTemplateTemplateSlugRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounter.$encounterId.report.template.$templateSlug";
+import { Route as AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.history.questionnaire.$questionnaireId.responses.print";
+import { Route as AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport } from "./routes/_app/organization.$organizationId.patient.$patientId.encounter.$encounterId.questionnaire_response.$questionnaireResponseId.print";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.external.deliveries.$tab.$id.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdEditRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.external.deliveries.$tab.$id.edit";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdPrintRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.external.deliveries.$tab.$id.print";
@@ -315,6 +364,9 @@ import { Route as AppFacilityFacilityIdLocationsLocationIdMedication_requestsPat
 import { Route as AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdBillPrescriptionsPrescriptionIdsRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.medication_requests.patient.$patientId.bill.prescriptions.$prescriptionIds";
 import { Route as AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdPrescriptionsPrescriptionIdsIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.medication_requests.patient.$patientId.prescriptions.$prescriptionIds.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdPrescriptionsPrescriptionIdsPrintRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.medication_requests.patient.$patientId.prescriptions.$prescriptionIds.print";
+import { Route as AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounter.$encounterId.questionnaire.$questionnaireId.responses.print";
+import { Route as AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTypeProductTypeAdministrationsPrintRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounter.$encounterId.type.$productType.administrations.print";
+import { Route as AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport } from "./routes/_app/organization.$organizationId.patient.$patientId.encounter.$encounterId.questionnaire.$questionnaireId.responses.print";
 
 const IndexRoute = IndexRouteImport.update({
   id: "/",
@@ -673,12 +725,6 @@ const AppUsersUsernameTabRoute = AppUsersUsernameTabRouteImport.update({
   path: "/users/$username/$tab",
   getParentRoute: () => AppRoute,
 } as any);
-const AppLegacyPatientPatientIdQuestionnaireRoute =
-  AppLegacyPatientPatientIdQuestionnaireRouteImport.update({
-    id: "/patient/$patientId/questionnaire",
-    path: "/patient/$patientId/questionnaire",
-    getParentRoute: () => AppLegacyRoute,
-  } as any);
 const AppAdminOrganizationsGovtIndexRoute =
   AppAdminOrganizationsGovtIndexRouteImport.update({
     id: "/organizations/govt/",
@@ -762,10 +808,40 @@ const AppFacilityFacilityIdAppointmentsPrintRoute =
     path: "/facility/$facilityId/appointments/print",
     getParentRoute: () => AppRoute,
   } as any);
+const AppFacilityFacilityIdEncountersIndexRoute =
+  AppFacilityFacilityIdEncountersIndexRouteImport.update({
+    id: "/facility/$facilityId/encounters/",
+    path: "/facility/$facilityId/encounters/",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdEncountersTabRoute =
+  AppFacilityFacilityIdEncountersTabRouteImport.update({
+    id: "/facility/$facilityId/encounters/$tab",
+    path: "/facility/$facilityId/encounters/$tab",
+    getParentRoute: () => AppRoute,
+  } as any);
 const AppFacilityFacilityIdLocationsLocationIdRoute =
   AppFacilityFacilityIdLocationsLocationIdRouteImport.update({
     id: "/facility/$facilityId/locations/$locationId",
     path: "/facility/$facilityId/locations/$locationId",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientCreateRoute =
+  AppFacilityFacilityIdPatientCreateRouteImport.update({
+    id: "/facility/$facilityId/patient/create",
+    path: "/facility/$facilityId/patient/create",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientsIndexRoute =
+  AppFacilityFacilityIdPatientsIndexRouteImport.update({
+    id: "/facility/$facilityId/patients/",
+    path: "/facility/$facilityId/patients/",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientsHomeRoute =
+  AppFacilityFacilityIdPatientsHomeRouteImport.update({
+    id: "/facility/$facilityId/patients/home",
+    path: "/facility/$facilityId/patients/home",
     getParentRoute: () => AppRoute,
   } as any);
 const AppFacilityFacilityIdResourceIndexRoute =
@@ -960,17 +1036,23 @@ const AppOrganizationIdSettingsReferralsRoute =
     path: "/organization/$id/settings/referrals",
     getParentRoute: () => AppRoute,
   } as any);
+const AppPatientPatientIdHistoryTabRoute =
+  AppPatientPatientIdHistoryTabRouteImport.update({
+    id: "/patient/$patientId/history/$tab",
+    path: "/patient/$patientId/history/$tab",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppPatientPatientIdQuestionnaireIndexRoute =
+  AppPatientPatientIdQuestionnaireIndexRouteImport.update({
+    id: "/patient/$patientId/questionnaire/",
+    path: "/patient/$patientId/questionnaire/",
+    getParentRoute: () => AppRoute,
+  } as any);
 const AppResponsibilitiesIdSettingsReferralsRoute =
   AppResponsibilitiesIdSettingsReferralsRouteImport.update({
     id: "/responsibilities/$id/settings/referrals",
     path: "/responsibilities/$id/settings/referrals",
     getParentRoute: () => AppRoute,
-  } as any);
-const AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute =
-  AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRouteImport.update({
-    id: "/$questionnaireId",
-    path: "/$questionnaireId",
-    getParentRoute: () => AppLegacyPatientPatientIdQuestionnaireRoute,
   } as any);
 const AppAdminQuestionnairesIdVersionsRevisionIdRoute =
   AppAdminQuestionnairesIdVersionsRevisionIdRouteImport.update({
@@ -994,6 +1076,30 @@ const AppFacilityFacilityIdBillingPaymentsIndexRoute =
   AppFacilityFacilityIdBillingPaymentsIndexRouteImport.update({
     id: "/facility/$facilityId/billing/payments/",
     path: "/facility/$facilityId/billing/payments/",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdEncountersLocationsLocationIdRoute =
+  AppFacilityFacilityIdEncountersLocationsLocationIdRouteImport.update({
+    id: "/facility/$facilityId/encounters/locations/$locationId",
+    path: "/facility/$facilityId/encounters/locations/$locationId",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdEncountersPatientsIndexRoute =
+  AppFacilityFacilityIdEncountersPatientsIndexRouteImport.update({
+    id: "/facility/$facilityId/encounters/patients/",
+    path: "/facility/$facilityId/encounters/patients/",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdEncountersPatientsEncounterClassRoute =
+  AppFacilityFacilityIdEncountersPatientsEncounterClassRouteImport.update({
+    id: "/facility/$facilityId/encounters/patients/$encounterClass",
+    path: "/facility/$facilityId/encounters/patients/$encounterClass",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdEncountersPatientsAllRoute =
+  AppFacilityFacilityIdEncountersPatientsAllRouteImport.update({
+    id: "/facility/$facilityId/encounters/patients/all",
+    path: "/facility/$facilityId/encounters/patients/all",
     getParentRoute: () => AppRoute,
   } as any);
 const AppFacilityFacilityIdLocationsLocationIdIndexRoute =
@@ -1046,6 +1152,84 @@ const AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute 
       getParentRoute: () => AppRoute,
     } as any,
   );
+const AppFacilityFacilityIdPatientPatientIdIndexRoute =
+  AppFacilityFacilityIdPatientPatientIdIndexRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/",
+    path: "/facility/$facilityId/patient/$patientId/",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdAccountsRoute =
+  AppFacilityFacilityIdPatientPatientIdAccountsRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/accounts",
+    path: "/facility/$facilityId/patient/$patientId/accounts",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdClinical_historyRoute =
+  AppFacilityFacilityIdPatientPatientIdClinical_historyRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/clinical_history",
+    path: "/facility/$facilityId/patient/$patientId/clinical_history",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdConsultationRoute =
+  AppFacilityFacilityIdPatientPatientIdConsultationRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/consultation",
+    path: "/facility/$facilityId/patient/$patientId/consultation",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdDemographyRoute =
+  AppFacilityFacilityIdPatientPatientIdDemographyRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/demography",
+    path: "/facility/$facilityId/patient/$patientId/demography",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdEncountersRoute =
+  AppFacilityFacilityIdPatientPatientIdEncountersRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/encounters",
+    path: "/facility/$facilityId/patient/$patientId/encounters",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdFilesRoute =
+  AppFacilityFacilityIdPatientPatientIdFilesRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/files",
+    path: "/facility/$facilityId/patient/$patientId/files",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdNotesRoute =
+  AppFacilityFacilityIdPatientPatientIdNotesRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/notes",
+    path: "/facility/$facilityId/patient/$patientId/notes",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdReferralsRoute =
+  AppFacilityFacilityIdPatientPatientIdReferralsRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/referrals",
+    path: "/facility/$facilityId/patient/$patientId/referrals",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdResource_requestsRoute =
+  AppFacilityFacilityIdPatientPatientIdResource_requestsRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/resource_requests",
+    path: "/facility/$facilityId/patient/$patientId/resource_requests",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdUpdateRoute =
+  AppFacilityFacilityIdPatientPatientIdUpdateRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/update",
+    path: "/facility/$facilityId/patient/$patientId/update",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdUpdatesRoute =
+  AppFacilityFacilityIdPatientPatientIdUpdatesRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/updates",
+    path: "/facility/$facilityId/patient/$patientId/updates",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdUsersRoute =
+  AppFacilityFacilityIdPatientPatientIdUsersRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/users",
+    path: "/facility/$facilityId/patient/$patientId/users",
+    getParentRoute: () => AppRoute,
+  } as any);
 const AppFacilityFacilityIdResourceIdIndexRoute =
   AppFacilityFacilityIdResourceIdIndexRouteImport.update({
     id: "/facility/$facilityId/resource/$id/",
@@ -1421,6 +1605,20 @@ const AppOrganizationNavOrganizationIdChildrenIdUsersRoute =
     path: "/organization/$navOrganizationId/children/$id/users",
     getParentRoute: () => AppRoute,
   } as any);
+const AppPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute =
+  AppPatientPatientIdQuestionnaireQuestionnaireIdIndexRouteImport.update({
+    id: "/patient/$patientId/questionnaire/$questionnaireId/",
+    path: "/patient/$patientId/questionnaire/$questionnaireId/",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute =
+  AppPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport.update(
+    {
+      id: "/patient/$patientId/questionnaire_response/$questionnaireResponseId/print",
+      path: "/patient/$patientId/questionnaire_response/$questionnaireResponseId/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
 const PatientFacilityFacilityIdAppointmentsAppointmentIdSuccessRoute =
   PatientFacilityFacilityIdAppointmentsAppointmentIdSuccessRouteImport.update({
     id: "/facility/$facilityId/appointments/$appointmentId/success",
@@ -1448,18 +1646,6 @@ const PatientFacilityFacilityIdAppointmentsStaffIdPatientSelectRoute =
     id: "/facility/$facilityId/appointments/$staffId/patient-select",
     path: "/facility/$facilityId/appointments/$staffId/patient-select",
     getParentRoute: () => PatientRoute,
-  } as any);
-const AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute =
-  AppLegacyFacilityFacilityIdPatientPatientIdConsultationRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/consultation",
-    path: "/facility/$facilityId/patient/$patientId/consultation",
-    getParentRoute: () => AppLegacyRoute,
-  } as any);
-const AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRoute =
-  AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/questionnaire",
-    path: "/facility/$facilityId/patient/$patientId/questionnaire",
-    getParentRoute: () => AppLegacyRoute,
   } as any);
 const AppFacilityFacilityIdBillingAccountAccountIdIndexRoute =
   AppFacilityFacilityIdBillingAccountAccountIdIndexRouteImport.update({
@@ -1593,6 +1779,24 @@ const AppFacilityFacilityIdLocationsLocationIdService_requestsServiceRequestIdRo
       getParentRoute: () => AppFacilityFacilityIdLocationsLocationIdRoute,
     } as any,
   );
+const AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute =
+  AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/appointments/",
+    path: "/facility/$facilityId/patient/$patientId/appointments/",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdHistoryTabRoute =
+  AppFacilityFacilityIdPatientPatientIdHistoryTabRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/history/$tab",
+    path: "/facility/$facilityId/patient/$patientId/history/$tab",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute =
+  AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/questionnaire/",
+    path: "/facility/$facilityId/patient/$patientId/questionnaire/",
+    getParentRoute: () => AppRoute,
+  } as any);
 const AppFacilityFacilityIdQueueQueueIdTokenTokenIdRoute =
   AppFacilityFacilityIdQueueQueueIdTokenTokenIdRouteImport.update({
     id: "/facility/$facilityId/queue/$queueId/token/$tokenId",
@@ -1807,6 +2011,22 @@ const AppOrganizationNavOrganizationIdChildrenIdSettingsReferralsRoute =
       getParentRoute: () => AppRoute,
     } as any,
   );
+const AppPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute =
+  AppPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport.update(
+    {
+      id: "/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print",
+      path: "/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute =
+  AppPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport.update(
+    {
+      id: "/patient/$patientId/questionnaire/$questionnaireId/responses/print",
+      path: "/patient/$patientId/questionnaire/$questionnaireId/responses/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
 const PatientFacilityFacilityIdAppointmentsStaffIdRescheduleAppointmentIdRoute =
   PatientFacilityFacilityIdAppointmentsStaffIdRescheduleAppointmentIdRouteImport.update(
     {
@@ -1821,15 +2041,6 @@ const PublicFacilityFacilityIdAppointmentsStaffIdOtpPageRoute =
     path: "/facility/$facilityId/appointments/$staffId/otp/$page",
     getParentRoute: () => PublicRoute,
   } as any);
-const AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRoute =
-  AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRouteImport.update(
-    {
-      id: "/$questionnaireId",
-      path: "/$questionnaireId",
-      getParentRoute: () =>
-        AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRoute,
-    } as any,
-  );
 const AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute =
   AppFacilityFacilityIdBillingAccountAccountIdTabIndexRouteImport.update({
     id: "/facility/$facilityId/billing/account/$accountId/$tab/",
@@ -1885,6 +2096,54 @@ const AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdPrintRoute =
     {
       id: "/facility/$facilityId/patient/$patientId/appointments/$appointmentId/print",
       path: "/facility/$facilityId/patient/$patientId/appointments/$appointmentId/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute =
+  AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/",
+      path: "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute =
+  AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print",
+      path: "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute =
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdPrescriptionPrescriptionIdPrintRoute =
+  AppFacilityFacilityIdPatientPatientIdPrescriptionPrescriptionIdPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print",
+      path: "/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute =
+  AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdIndexRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/",
+      path: "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute =
+  AppFacilityFacilityIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print",
+      path: "/facility/$facilityId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print",
       getParentRoute: () => AppRoute,
     } as any,
   );
@@ -2006,28 +2265,44 @@ const AppFacilityFacilityIdSettingsQuestionnairesIdVersionsRevisionIdRoute =
       getParentRoute: () => AppFacilityFacilityIdSettingsQuestionnairesRoute,
     } as any,
   );
-const AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute =
-  AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRouteImport.update(
+const AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute =
+  AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRouteImport.update(
     {
-      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
-      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
-      getParentRoute: () => AppLegacyRoute,
+      id: "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/",
+      path: "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/",
+      getParentRoute: () => AppRoute,
     } as any,
   );
-const AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRoute =
-  AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteImport.update(
+const AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute =
+  AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRouteImport.update(
     {
-      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire",
-      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire",
-      getParentRoute: () => AppLegacyRoute,
+      id: "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print",
+      path: "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print",
+      getParentRoute: () => AppRoute,
     } as any,
   );
-const AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute =
-  AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRouteImport.update(
+const AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute =
+  AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRouteImport.update(
     {
       id: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab",
       path: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab",
-      getParentRoute: () => AppLegacyRoute,
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppOrganizationOrganizationIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute =
+  AppOrganizationOrganizationIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport.update(
+    {
+      id: "/organization/$organizationId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print",
+      path: "/organization/$organizationId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute =
+  AppPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRouteImport.update(
+    {
+      id: "/patient/$patientId/history/questionnaire/$questionnaireId/responses/print",
+      path: "/patient/$patientId/history/questionnaire/$questionnaireId/responses/print",
+      getParentRoute: () => AppRoute,
     } as any,
   );
 const AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute =
@@ -2110,13 +2385,84 @@ const AppFacilityFacilityIdLocationsLocationIdMedication_returnOrderDeliveryOrde
       getParentRoute: () => AppFacilityFacilityIdLocationsLocationIdRoute,
     } as any,
   );
-const AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdRoute =
-  AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdRouteImport.update(
+const AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute =
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRouteImport.update(
     {
-      id: "/$questionnaireId",
-      path: "/$questionnaireId",
-      getParentRoute: () =>
-        AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRoute,
+      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId",
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdPrescriptionsPrintRoute =
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdPrescriptionsPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/prescriptions/print",
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/prescriptions/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireIndexRoute =
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireIndexRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/",
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportReportIdRoute =
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportReportIdRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId",
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute =
+  AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print",
+      path: "/facility/$facilityId/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute =
+  AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/responses/print",
+      path: "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/responses/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute =
+  AppFacilityFacilityIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print",
+      path: "/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppOrganizationOrganizationIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute =
+  AppOrganizationOrganizationIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport.update(
+    {
+      id: "/organization/$organizationId/patient/$patientId/questionnaire/$questionnaireId/responses/print",
+      path: "/organization/$organizationId/patient/$patientId/questionnaire/$questionnaireId/responses/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppOrganizationOrganizationIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute =
+  AppOrganizationOrganizationIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRouteImport.update(
+    {
+      id: "/organization/$organizationId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print",
+      path: "/organization/$organizationId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute =
+  AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRouteImport.update(
+    {
+      id: "/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId",
+      path: "/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId",
+      getParentRoute: () => AppRoute,
     } as any,
   );
 const AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIndexRoute =
@@ -2165,6 +2511,54 @@ const AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeOrdersNewRout
       id: "/inventory/internal/$type/orders/new",
       path: "/inventory/internal/$type/orders/new",
       getParentRoute: () => AppFacilityFacilityIdLocationsLocationIdRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdIndexRoute =
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdIndexRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/",
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdIndexRoute =
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdIndexRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/",
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute =
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print",
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportTemplateTemplateSlugRoute =
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportTemplateTemplateSlugRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug",
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute =
+  AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/history/questionnaire/$questionnaireId/responses/print",
+      path: "/facility/$facilityId/patient/$patientId/history/questionnaire/$questionnaireId/responses/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute =
+  AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport.update(
+    {
+      id: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print",
+      path: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print",
+      getParentRoute: () => AppRoute,
     } as any,
   );
 const AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdIndexRoute =
@@ -2295,6 +2689,30 @@ const AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientI
       getParentRoute: () => AppFacilityFacilityIdLocationsLocationIdRoute,
     } as any,
   );
+const AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute =
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print",
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTypeProductTypeAdministrationsPrintRoute =
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTypeProductTypeAdministrationsPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/type/$productType/administrations/print",
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/type/$productType/administrations/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute =
+  AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport.update(
+    {
+      id: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print",
+      path: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
@@ -2361,7 +2779,6 @@ export interface FileRoutesByFullPath {
   "/responsibilities/$id/": typeof AppResponsibilitiesIdIndexRoute;
   "/users/$username/": typeof AppUsersUsernameIndexRoute;
   "/facility/$facilityId/services/$serviceId": typeof AppFacilityFacilityIdServicesServiceIdRouteRouteWithChildren;
-  "/patient/$patientId/questionnaire": typeof AppLegacyPatientPatientIdQuestionnaireRouteWithChildren;
   "/admin/organizations/govt/$id": typeof AppAdminOrganizationsGovtIdRoute;
   "/admin/organizations/product_supplier/$id": typeof AppAdminOrganizationsProduct_supplierIdRoute;
   "/admin/organizations/role/$id": typeof AppAdminOrganizationsRoleIdRoute;
@@ -2370,7 +2787,10 @@ export interface FileRoutesByFullPath {
   "/admin/valuesets/$id/edit": typeof AppAdminValuesetsIdEditRoute;
   "/admin/workspaces/$id/edit": typeof AppAdminWorkspacesIdEditRoute;
   "/facility/$facilityId/appointments/print": typeof AppFacilityFacilityIdAppointmentsPrintRoute;
+  "/facility/$facilityId/encounters/$tab": typeof AppFacilityFacilityIdEncountersTabRoute;
   "/facility/$facilityId/locations/$locationId": typeof AppFacilityFacilityIdLocationsLocationIdRouteWithChildren;
+  "/facility/$facilityId/patient/create": typeof AppFacilityFacilityIdPatientCreateRoute;
+  "/facility/$facilityId/patients/home": typeof AppFacilityFacilityIdPatientsHomeRoute;
   "/facility/$facilityId/resource/new": typeof AppFacilityFacilityIdResourceNewRoute;
   "/facility/$facilityId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdService_requestsServiceRequestIdRoute;
   "/facility/$facilityId/settings/$": typeof AppFacilityFacilityIdSettingsSplatRoute;
@@ -2397,6 +2817,7 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/settings/workspaces": typeof AppFacilityFacilityIdSettingsWorkspacesRouteWithChildren;
   "/facility/$facilityId/template/$": typeof AppFacilityFacilityIdTemplateSplatRoute;
   "/organization/$id/settings/referrals": typeof AppOrganizationIdSettingsReferralsRoute;
+  "/patient/$patientId/history/$tab": typeof AppPatientPatientIdHistoryTabRoute;
   "/responsibilities/$id/settings/referrals": typeof AppResponsibilitiesIdSettingsReferralsRoute;
   "/admin/organizations/govt/": typeof AppAdminOrganizationsGovtIndexRoute;
   "/admin/organizations/product_supplier/": typeof AppAdminOrganizationsProduct_supplierIndexRoute;
@@ -2404,13 +2825,18 @@ export interface FileRoutesByFullPath {
   "/admin/patient_identifier_config/$id/": typeof AppAdminPatient_identifier_configIdIndexRoute;
   "/admin/questionnaires/$id/": typeof AppAdminQuestionnairesIdIndexRoute;
   "/facility/$facilityId/appointments/": typeof AppFacilityFacilityIdAppointmentsIndexRoute;
+  "/facility/$facilityId/encounters/": typeof AppFacilityFacilityIdEncountersIndexRoute;
+  "/facility/$facilityId/patients/": typeof AppFacilityFacilityIdPatientsIndexRoute;
   "/facility/$facilityId/resource/": typeof AppFacilityFacilityIdResourceIndexRoute;
   "/facility/$facilityId/services/": typeof AppFacilityFacilityIdServicesIndexRoute;
   "/facility/$facilityId/settings/": typeof AppFacilityFacilityIdSettingsIndexRoute;
   "/facility/$facilityId/template/": typeof AppFacilityFacilityIdTemplateIndexRoute;
   "/facility/$facilityId/users/": typeof AppFacilityFacilityIdUsersIndexRoute;
-  "/patient/$patientId/questionnaire/$questionnaireId": typeof AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute;
+  "/patient/$patientId/questionnaire/": typeof AppPatientPatientIdQuestionnaireIndexRoute;
   "/admin/questionnaires/$id/versions/$revisionId": typeof AppAdminQuestionnairesIdVersionsRevisionIdRoute;
+  "/facility/$facilityId/encounters/locations/$locationId": typeof AppFacilityFacilityIdEncountersLocationsLocationIdRoute;
+  "/facility/$facilityId/encounters/patients/$encounterClass": typeof AppFacilityFacilityIdEncountersPatientsEncounterClassRoute;
+  "/facility/$facilityId/encounters/patients/all": typeof AppFacilityFacilityIdEncountersPatientsAllRoute;
   "/facility/$facilityId/locations/$locationId/$": typeof AppFacilityFacilityIdLocationsLocationIdSplatRoute;
   "/facility/$facilityId/locations/$locationId/beds": typeof AppFacilityFacilityIdLocationsLocationIdBedsRoute;
   "/facility/$facilityId/locations/$locationId/forms": typeof AppFacilityFacilityIdLocationsLocationIdFormsRoute;
@@ -2418,6 +2844,18 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/locations/$locationId/responses": typeof AppFacilityFacilityIdLocationsLocationIdResponsesRoute;
   "/facility/$facilityId/locations/$locationId/schedule": typeof AppFacilityFacilityIdLocationsLocationIdScheduleRoute;
   "/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId": typeof AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute;
+  "/facility/$facilityId/patient/$patientId/accounts": typeof AppFacilityFacilityIdPatientPatientIdAccountsRoute;
+  "/facility/$facilityId/patient/$patientId/clinical_history": typeof AppFacilityFacilityIdPatientPatientIdClinical_historyRoute;
+  "/facility/$facilityId/patient/$patientId/consultation": typeof AppFacilityFacilityIdPatientPatientIdConsultationRoute;
+  "/facility/$facilityId/patient/$patientId/demography": typeof AppFacilityFacilityIdPatientPatientIdDemographyRoute;
+  "/facility/$facilityId/patient/$patientId/encounters": typeof AppFacilityFacilityIdPatientPatientIdEncountersRoute;
+  "/facility/$facilityId/patient/$patientId/files": typeof AppFacilityFacilityIdPatientPatientIdFilesRoute;
+  "/facility/$facilityId/patient/$patientId/notes": typeof AppFacilityFacilityIdPatientPatientIdNotesRoute;
+  "/facility/$facilityId/patient/$patientId/referrals": typeof AppFacilityFacilityIdPatientPatientIdReferralsRoute;
+  "/facility/$facilityId/patient/$patientId/resource_requests": typeof AppFacilityFacilityIdPatientPatientIdResource_requestsRoute;
+  "/facility/$facilityId/patient/$patientId/update": typeof AppFacilityFacilityIdPatientPatientIdUpdateRoute;
+  "/facility/$facilityId/patient/$patientId/updates": typeof AppFacilityFacilityIdPatientPatientIdUpdatesRoute;
+  "/facility/$facilityId/patient/$patientId/users": typeof AppFacilityFacilityIdPatientPatientIdUsersRoute;
   "/facility/$facilityId/resource/$id/print": typeof AppFacilityFacilityIdResourceIdPrintRoute;
   "/facility/$facilityId/resource/$id/update": typeof AppFacilityFacilityIdResourceIdUpdateRoute;
   "/facility/$facilityId/services/$serviceId/$": typeof AppFacilityFacilityIdServicesServiceIdSplatRoute;
@@ -2455,6 +2893,7 @@ export interface FileRoutesByFullPath {
   "/organization/$navOrganizationId/children/$id/referrals": typeof AppOrganizationNavOrganizationIdChildrenIdReferralsRoute;
   "/organization/$navOrganizationId/children/$id/service_accounts": typeof AppOrganizationNavOrganizationIdChildrenIdService_accountsRoute;
   "/organization/$navOrganizationId/children/$id/users": typeof AppOrganizationNavOrganizationIdChildrenIdUsersRoute;
+  "/patient/$patientId/questionnaire_response/$questionnaireResponseId/print": typeof AppPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
   "/facility/$facilityId/appointments/$appointmentId/success": typeof PatientFacilityFacilityIdAppointmentsAppointmentIdSuccessRoute;
   "/facility/$facilityId/appointments/$staffId/book-appointment": typeof PatientFacilityFacilityIdAppointmentsStaffIdBookAppointmentRoute;
   "/facility/$facilityId/appointments/$staffId/patient-registration": typeof PatientFacilityFacilityIdAppointmentsStaffIdPatientRegistrationRoute;
@@ -2462,7 +2901,9 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/billing/account/": typeof AppFacilityFacilityIdBillingAccountIndexRoute;
   "/facility/$facilityId/billing/invoices/": typeof AppFacilityFacilityIdBillingInvoicesIndexRoute;
   "/facility/$facilityId/billing/payments/": typeof AppFacilityFacilityIdBillingPaymentsIndexRoute;
+  "/facility/$facilityId/encounters/patients/": typeof AppFacilityFacilityIdEncountersPatientsIndexRoute;
   "/facility/$facilityId/locations/$locationId/": typeof AppFacilityFacilityIdLocationsLocationIdIndexRoute;
+  "/facility/$facilityId/patient/$patientId/": typeof AppFacilityFacilityIdPatientPatientIdIndexRoute;
   "/facility/$facilityId/resource/$id/": typeof AppFacilityFacilityIdResourceIdIndexRoute;
   "/facility/$facilityId/services/$serviceId/": typeof AppFacilityFacilityIdServicesServiceIdIndexRoute;
   "/facility/$facilityId/settings/activity_definitions/": typeof AppFacilityFacilityIdSettingsActivity_definitionsIndexRoute;
@@ -2486,8 +2927,7 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/template/builder/": typeof AppFacilityFacilityIdTemplateBuilderIndexRoute;
   "/facility/$facilityId/users/$username/": typeof AppFacilityFacilityIdUsersUsernameIndexRoute;
   "/organization/$navOrganizationId/children/$id/": typeof AppOrganizationNavOrganizationIdChildrenIdIndexRoute;
-  "/facility/$facilityId/patient/$patientId/consultation": typeof AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute;
-  "/facility/$facilityId/patient/$patientId/questionnaire": typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteWithChildren;
+  "/patient/$patientId/questionnaire/$questionnaireId/": typeof AppPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute;
   "/facility/$facilityId/billing/invoice/$invoiceId/print": typeof AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute;
   "/facility/$facilityId/billing/invoices/$invoiceId/pay": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute;
   "/facility/$facilityId/billing/invoices/$invoiceIds/print": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute;
@@ -2497,6 +2937,7 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/locations/$locationId/inventory/summary": typeof AppFacilityFacilityIdLocationsLocationIdInventorySummaryRoute;
   "/facility/$facilityId/locations/$locationId/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdLocationsLocationIdQuestionnaireQuestionnaireIdRoute;
   "/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdLocationsLocationIdService_requestsServiceRequestIdRoute;
+  "/facility/$facilityId/patient/$patientId/history/$tab": typeof AppFacilityFacilityIdPatientPatientIdHistoryTabRoute;
   "/facility/$facilityId/queue/$queueId/token/$tokenId": typeof AppFacilityFacilityIdQueueQueueIdTokenTokenIdRoute;
   "/facility/$facilityId/services/$serviceId/appointments/$appointmentId": typeof AppFacilityFacilityIdServicesServiceIdAppointmentsAppointmentIdRoute;
   "/facility/$facilityId/services/$serviceId/appointments/print": typeof AppFacilityFacilityIdServicesServiceIdAppointmentsPrintRoute;
@@ -2515,6 +2956,8 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/settings/valuesets/$id/edit": typeof AppFacilityFacilityIdSettingsValuesetsIdEditRoute;
   "/facility/$facilityId/settings/workspaces/$id/edit": typeof AppFacilityFacilityIdSettingsWorkspacesIdEditRoute;
   "/organization/$navOrganizationId/children/$id/settings/referrals": typeof AppOrganizationNavOrganizationIdChildrenIdSettingsReferralsRoute;
+  "/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print": typeof AppPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  "/patient/$patientId/questionnaire/$questionnaireId/responses/print": typeof AppPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
   "/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId": typeof PatientFacilityFacilityIdAppointmentsStaffIdRescheduleAppointmentIdRoute;
   "/facility/$facilityId/appointments/$staffId/otp/$page": typeof PublicFacilityFacilityIdAppointmentsStaffIdOtpPageRoute;
   "/facility/$facilityId/billing/account/$accountId/": typeof AppFacilityFacilityIdBillingAccountAccountIdIndexRoute;
@@ -2527,6 +2970,8 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/locations/$locationId/questionnaire/": typeof AppFacilityFacilityIdLocationsLocationIdQuestionnaireIndexRoute;
   "/facility/$facilityId/locations/$locationId/queues/": typeof AppFacilityFacilityIdLocationsLocationIdQueuesIndexRoute;
   "/facility/$facilityId/locations/$locationId/service_requests/": typeof AppFacilityFacilityIdLocationsLocationIdService_requestsIndexRoute;
+  "/facility/$facilityId/patient/$patientId/appointments/": typeof AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute;
+  "/facility/$facilityId/patient/$patientId/questionnaire/": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute;
   "/facility/$facilityId/services/$serviceId/appointments/": typeof AppFacilityFacilityIdServicesServiceIdAppointmentsIndexRoute;
   "/facility/$facilityId/services/$serviceId/queues/": typeof AppFacilityFacilityIdServicesServiceIdQueuesIndexRoute;
   "/facility/$facilityId/settings/activity_definitions/$activityDefinitionSlug/": typeof AppFacilityFacilityIdSettingsActivity_definitionsActivityDefinitionSlugIndexRoute;
@@ -2539,12 +2984,15 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/settings/product_knowledge/$slug/": typeof AppFacilityFacilityIdSettingsProduct_knowledgeSlugIndexRoute;
   "/facility/$facilityId/settings/questionnaires/$id/": typeof AppFacilityFacilityIdSettingsQuestionnairesIdIndexRoute;
   "/facility/$facilityId/settings/specimen_definitions/$specimenSlug/": typeof AppFacilityFacilityIdSettingsSpecimen_definitionsSpecimenSlugIndexRoute;
-  "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId": typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRoute;
   "/facility/$facilityId/billing/account/$accountId/charge_items/print": typeof AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute;
   "/facility/$facilityId/billing/account/$accountId/invoices/create": typeof AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute;
   "/facility/$facilityId/locations/$locationId/queues/$queueId/completed": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdCompletedRoute;
   "/facility/$facilityId/locations/$locationId/queues/$queueId/ongoing": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdOngoingRoute;
   "/facility/$facilityId/patient/$patientId/appointments/$appointmentId/print": typeof AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdPrintRoute;
+  "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print": typeof AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute;
+  "/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print": typeof AppFacilityFacilityIdPatientPatientIdPrescriptionPrescriptionIdPrintRoute;
+  "/facility/$facilityId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
   "/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/completed": typeof AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdCompletedRoute;
   "/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/ongoing": typeof AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdOngoingRoute;
   "/facility/$facilityId/services/$serviceId/queues/$queueId/completed": typeof AppFacilityFacilityIdServicesServiceIdQueuesQueueIdCompletedRoute;
@@ -2554,35 +3002,54 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/settings/devices/$id/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdSettingsDevicesIdQuestionnaireQuestionnaireIdRoute;
   "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new": typeof AppFacilityFacilityIdSettingsProduct_knowledgeCategoriesCategorySlugNewRoute;
   "/facility/$facilityId/settings/questionnaires/$id/versions/$revisionId": typeof AppFacilityFacilityIdSettingsQuestionnairesIdVersionsRevisionIdRoute;
+  "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print": typeof AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute;
+  "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab": typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute;
+  "/organization/$organizationId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print": typeof AppOrganizationOrganizationIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  "/patient/$patientId/history/questionnaire/$questionnaireId/responses/print": typeof AppPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute;
   "/facility/$facilityId/billing/account/$accountId/$tab/": typeof AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute;
   "/facility/$facilityId/locations/$locationId/queues/$queueId/": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdIndexRoute;
   "/facility/$facilityId/patient/$patientId/appointments/$appointmentId/": typeof AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdIndexRoute;
+  "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/": typeof AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute;
+  "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute;
   "/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/": typeof AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdIndexRoute;
   "/facility/$facilityId/services/$serviceId/queues/$queueId/": typeof AppFacilityFacilityIdServicesServiceIdQueuesQueueIdIndexRoute;
   "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug/": typeof AppFacilityFacilityIdSettingsActivity_definitionsCategoriesCategorySlugIndexRoute;
   "/facility/$facilityId/settings/charge_item_definitions/categories/$slug/": typeof AppFacilityFacilityIdSettingsCharge_item_definitionsCategoriesSlugIndexRoute;
   "/facility/$facilityId/settings/devices/$id/questionnaire/": typeof AppFacilityFacilityIdSettingsDevicesIdQuestionnaireIndexRoute;
   "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/": typeof AppFacilityFacilityIdSettingsProduct_knowledgeCategoriesCategorySlugIndexRoute;
-  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute;
-  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteWithChildren;
-  "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab": typeof AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute;
+  "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/": typeof AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute;
   "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType": typeof AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchTabRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/receive/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalReceiveTabRoute;
   "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/completed": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdCompletedRoute;
   "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/print": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdPrintRoute;
   "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/print": typeof AppFacilityFacilityIdLocationsLocationIdMedication_returnOrderDeliveryOrderIdPrintRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/prescriptions/print": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdPrescriptionsPrintRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportReportIdRoute;
+  "/facility/$facilityId/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print": typeof AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/responses/print": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  "/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print": typeof AppFacilityFacilityIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute;
+  "/organization/$organizationId/patient/$patientId/questionnaire/$questionnaireId/responses/print": typeof AppOrganizationOrganizationIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  "/organization/$organizationId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print": typeof AppOrganizationOrganizationIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute;
+  "/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId": typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchIndexRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/receive/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalReceiveIndexRoute;
   "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdIndexRoute;
   "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/": typeof AppFacilityFacilityIdLocationsLocationIdMedication_returnOrderDeliveryOrderIdIndexRoute;
-  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireIndexRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/new": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabNewRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/new": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabNewRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/$type/deliveries/new": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeDeliveriesNewRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/$type/orders/new": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeOrdersNewRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportTemplateTemplateSlugRoute;
+  "/facility/$facilityId/patient/$patientId/history/questionnaire/$questionnaireId/responses/print": typeof AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print": typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIndexRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabIndexRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdIndexRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdIndexRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/edit": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdEditRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/print": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdPrintRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/$id/edit": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabIdEditRoute;
@@ -2594,6 +3061,9 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/dispense/$encounterId": typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdBillDispenseEncounterIdRoute;
   "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds": typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdBillPrescriptionsPrescriptionIdsRoute;
   "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds/print": typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdPrescriptionsPrescriptionIdsPrintRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/type/$productType/administrations/print": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTypeProductTypeAdministrationsPrintRoute;
+  "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print": typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdIndexRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/$id/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabIdIndexRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/$type/deliveries/$id/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeDeliveriesIdIndexRoute;
@@ -2662,7 +3132,6 @@ export interface FileRoutesByTo {
   "/organization/$id": typeof AppOrganizationIdIndexRoute;
   "/responsibilities/$id": typeof AppResponsibilitiesIdIndexRoute;
   "/users/$username": typeof AppUsersUsernameIndexRoute;
-  "/patient/$patientId/questionnaire": typeof AppLegacyPatientPatientIdQuestionnaireRouteWithChildren;
   "/admin/organizations/govt/$id": typeof AppAdminOrganizationsGovtIdRoute;
   "/admin/organizations/product_supplier/$id": typeof AppAdminOrganizationsProduct_supplierIdRoute;
   "/admin/organizations/role/$id": typeof AppAdminOrganizationsRoleIdRoute;
@@ -2671,6 +3140,9 @@ export interface FileRoutesByTo {
   "/admin/valuesets/$id/edit": typeof AppAdminValuesetsIdEditRoute;
   "/admin/workspaces/$id/edit": typeof AppAdminWorkspacesIdEditRoute;
   "/facility/$facilityId/appointments/print": typeof AppFacilityFacilityIdAppointmentsPrintRoute;
+  "/facility/$facilityId/encounters/$tab": typeof AppFacilityFacilityIdEncountersTabRoute;
+  "/facility/$facilityId/patient/create": typeof AppFacilityFacilityIdPatientCreateRoute;
+  "/facility/$facilityId/patients/home": typeof AppFacilityFacilityIdPatientsHomeRoute;
   "/facility/$facilityId/resource/new": typeof AppFacilityFacilityIdResourceNewRoute;
   "/facility/$facilityId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdService_requestsServiceRequestIdRoute;
   "/facility/$facilityId/settings/$": typeof AppFacilityFacilityIdSettingsSplatRoute;
@@ -2680,6 +3152,7 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/settings/token_category": typeof AppFacilityFacilityIdSettingsToken_categoryRoute;
   "/facility/$facilityId/template/$": typeof AppFacilityFacilityIdTemplateSplatRoute;
   "/organization/$id/settings/referrals": typeof AppOrganizationIdSettingsReferralsRoute;
+  "/patient/$patientId/history/$tab": typeof AppPatientPatientIdHistoryTabRoute;
   "/responsibilities/$id/settings/referrals": typeof AppResponsibilitiesIdSettingsReferralsRoute;
   "/admin/organizations/govt": typeof AppAdminOrganizationsGovtIndexRoute;
   "/admin/organizations/product_supplier": typeof AppAdminOrganizationsProduct_supplierIndexRoute;
@@ -2687,13 +3160,18 @@ export interface FileRoutesByTo {
   "/admin/patient_identifier_config/$id": typeof AppAdminPatient_identifier_configIdIndexRoute;
   "/admin/questionnaires/$id": typeof AppAdminQuestionnairesIdIndexRoute;
   "/facility/$facilityId/appointments": typeof AppFacilityFacilityIdAppointmentsIndexRoute;
+  "/facility/$facilityId/encounters": typeof AppFacilityFacilityIdEncountersIndexRoute;
+  "/facility/$facilityId/patients": typeof AppFacilityFacilityIdPatientsIndexRoute;
   "/facility/$facilityId/resource": typeof AppFacilityFacilityIdResourceIndexRoute;
   "/facility/$facilityId/services": typeof AppFacilityFacilityIdServicesIndexRoute;
   "/facility/$facilityId/settings": typeof AppFacilityFacilityIdSettingsIndexRoute;
   "/facility/$facilityId/template": typeof AppFacilityFacilityIdTemplateIndexRoute;
   "/facility/$facilityId/users": typeof AppFacilityFacilityIdUsersIndexRoute;
-  "/patient/$patientId/questionnaire/$questionnaireId": typeof AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute;
+  "/patient/$patientId/questionnaire": typeof AppPatientPatientIdQuestionnaireIndexRoute;
   "/admin/questionnaires/$id/versions/$revisionId": typeof AppAdminQuestionnairesIdVersionsRevisionIdRoute;
+  "/facility/$facilityId/encounters/locations/$locationId": typeof AppFacilityFacilityIdEncountersLocationsLocationIdRoute;
+  "/facility/$facilityId/encounters/patients/$encounterClass": typeof AppFacilityFacilityIdEncountersPatientsEncounterClassRoute;
+  "/facility/$facilityId/encounters/patients/all": typeof AppFacilityFacilityIdEncountersPatientsAllRoute;
   "/facility/$facilityId/locations/$locationId/$": typeof AppFacilityFacilityIdLocationsLocationIdSplatRoute;
   "/facility/$facilityId/locations/$locationId/beds": typeof AppFacilityFacilityIdLocationsLocationIdBedsRoute;
   "/facility/$facilityId/locations/$locationId/forms": typeof AppFacilityFacilityIdLocationsLocationIdFormsRoute;
@@ -2701,6 +3179,18 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/locations/$locationId/responses": typeof AppFacilityFacilityIdLocationsLocationIdResponsesRoute;
   "/facility/$facilityId/locations/$locationId/schedule": typeof AppFacilityFacilityIdLocationsLocationIdScheduleRoute;
   "/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId": typeof AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute;
+  "/facility/$facilityId/patient/$patientId/accounts": typeof AppFacilityFacilityIdPatientPatientIdAccountsRoute;
+  "/facility/$facilityId/patient/$patientId/clinical_history": typeof AppFacilityFacilityIdPatientPatientIdClinical_historyRoute;
+  "/facility/$facilityId/patient/$patientId/consultation": typeof AppFacilityFacilityIdPatientPatientIdConsultationRoute;
+  "/facility/$facilityId/patient/$patientId/demography": typeof AppFacilityFacilityIdPatientPatientIdDemographyRoute;
+  "/facility/$facilityId/patient/$patientId/encounters": typeof AppFacilityFacilityIdPatientPatientIdEncountersRoute;
+  "/facility/$facilityId/patient/$patientId/files": typeof AppFacilityFacilityIdPatientPatientIdFilesRoute;
+  "/facility/$facilityId/patient/$patientId/notes": typeof AppFacilityFacilityIdPatientPatientIdNotesRoute;
+  "/facility/$facilityId/patient/$patientId/referrals": typeof AppFacilityFacilityIdPatientPatientIdReferralsRoute;
+  "/facility/$facilityId/patient/$patientId/resource_requests": typeof AppFacilityFacilityIdPatientPatientIdResource_requestsRoute;
+  "/facility/$facilityId/patient/$patientId/update": typeof AppFacilityFacilityIdPatientPatientIdUpdateRoute;
+  "/facility/$facilityId/patient/$patientId/updates": typeof AppFacilityFacilityIdPatientPatientIdUpdatesRoute;
+  "/facility/$facilityId/patient/$patientId/users": typeof AppFacilityFacilityIdPatientPatientIdUsersRoute;
   "/facility/$facilityId/resource/$id/print": typeof AppFacilityFacilityIdResourceIdPrintRoute;
   "/facility/$facilityId/resource/$id/update": typeof AppFacilityFacilityIdResourceIdUpdateRoute;
   "/facility/$facilityId/services/$serviceId/$": typeof AppFacilityFacilityIdServicesServiceIdSplatRoute;
@@ -2737,6 +3227,7 @@ export interface FileRoutesByTo {
   "/organization/$navOrganizationId/children/$id/referrals": typeof AppOrganizationNavOrganizationIdChildrenIdReferralsRoute;
   "/organization/$navOrganizationId/children/$id/service_accounts": typeof AppOrganizationNavOrganizationIdChildrenIdService_accountsRoute;
   "/organization/$navOrganizationId/children/$id/users": typeof AppOrganizationNavOrganizationIdChildrenIdUsersRoute;
+  "/patient/$patientId/questionnaire_response/$questionnaireResponseId/print": typeof AppPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
   "/facility/$facilityId/appointments/$appointmentId/success": typeof PatientFacilityFacilityIdAppointmentsAppointmentIdSuccessRoute;
   "/facility/$facilityId/appointments/$staffId/book-appointment": typeof PatientFacilityFacilityIdAppointmentsStaffIdBookAppointmentRoute;
   "/facility/$facilityId/appointments/$staffId/patient-registration": typeof PatientFacilityFacilityIdAppointmentsStaffIdPatientRegistrationRoute;
@@ -2744,7 +3235,9 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/billing/account": typeof AppFacilityFacilityIdBillingAccountIndexRoute;
   "/facility/$facilityId/billing/invoices": typeof AppFacilityFacilityIdBillingInvoicesIndexRoute;
   "/facility/$facilityId/billing/payments": typeof AppFacilityFacilityIdBillingPaymentsIndexRoute;
+  "/facility/$facilityId/encounters/patients": typeof AppFacilityFacilityIdEncountersPatientsIndexRoute;
   "/facility/$facilityId/locations/$locationId": typeof AppFacilityFacilityIdLocationsLocationIdIndexRoute;
+  "/facility/$facilityId/patient/$patientId": typeof AppFacilityFacilityIdPatientPatientIdIndexRoute;
   "/facility/$facilityId/resource/$id": typeof AppFacilityFacilityIdResourceIdIndexRoute;
   "/facility/$facilityId/services/$serviceId": typeof AppFacilityFacilityIdServicesServiceIdIndexRoute;
   "/facility/$facilityId/settings/activity_definitions": typeof AppFacilityFacilityIdSettingsActivity_definitionsIndexRoute;
@@ -2768,8 +3261,7 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/template/builder": typeof AppFacilityFacilityIdTemplateBuilderIndexRoute;
   "/facility/$facilityId/users/$username": typeof AppFacilityFacilityIdUsersUsernameIndexRoute;
   "/organization/$navOrganizationId/children/$id": typeof AppOrganizationNavOrganizationIdChildrenIdIndexRoute;
-  "/facility/$facilityId/patient/$patientId/consultation": typeof AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute;
-  "/facility/$facilityId/patient/$patientId/questionnaire": typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteWithChildren;
+  "/patient/$patientId/questionnaire/$questionnaireId": typeof AppPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute;
   "/facility/$facilityId/billing/invoice/$invoiceId/print": typeof AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute;
   "/facility/$facilityId/billing/invoices/$invoiceId/pay": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute;
   "/facility/$facilityId/billing/invoices/$invoiceIds/print": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute;
@@ -2779,6 +3271,7 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/locations/$locationId/inventory/summary": typeof AppFacilityFacilityIdLocationsLocationIdInventorySummaryRoute;
   "/facility/$facilityId/locations/$locationId/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdLocationsLocationIdQuestionnaireQuestionnaireIdRoute;
   "/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdLocationsLocationIdService_requestsServiceRequestIdRoute;
+  "/facility/$facilityId/patient/$patientId/history/$tab": typeof AppFacilityFacilityIdPatientPatientIdHistoryTabRoute;
   "/facility/$facilityId/queue/$queueId/token/$tokenId": typeof AppFacilityFacilityIdQueueQueueIdTokenTokenIdRoute;
   "/facility/$facilityId/services/$serviceId/appointments/$appointmentId": typeof AppFacilityFacilityIdServicesServiceIdAppointmentsAppointmentIdRoute;
   "/facility/$facilityId/services/$serviceId/appointments/print": typeof AppFacilityFacilityIdServicesServiceIdAppointmentsPrintRoute;
@@ -2797,6 +3290,8 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/settings/valuesets/$id/edit": typeof AppFacilityFacilityIdSettingsValuesetsIdEditRoute;
   "/facility/$facilityId/settings/workspaces/$id/edit": typeof AppFacilityFacilityIdSettingsWorkspacesIdEditRoute;
   "/organization/$navOrganizationId/children/$id/settings/referrals": typeof AppOrganizationNavOrganizationIdChildrenIdSettingsReferralsRoute;
+  "/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print": typeof AppPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  "/patient/$patientId/questionnaire/$questionnaireId/responses/print": typeof AppPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
   "/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId": typeof PatientFacilityFacilityIdAppointmentsStaffIdRescheduleAppointmentIdRoute;
   "/facility/$facilityId/appointments/$staffId/otp/$page": typeof PublicFacilityFacilityIdAppointmentsStaffIdOtpPageRoute;
   "/facility/$facilityId/billing/account/$accountId": typeof AppFacilityFacilityIdBillingAccountAccountIdIndexRoute;
@@ -2809,6 +3304,8 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/locations/$locationId/questionnaire": typeof AppFacilityFacilityIdLocationsLocationIdQuestionnaireIndexRoute;
   "/facility/$facilityId/locations/$locationId/queues": typeof AppFacilityFacilityIdLocationsLocationIdQueuesIndexRoute;
   "/facility/$facilityId/locations/$locationId/service_requests": typeof AppFacilityFacilityIdLocationsLocationIdService_requestsIndexRoute;
+  "/facility/$facilityId/patient/$patientId/appointments": typeof AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute;
+  "/facility/$facilityId/patient/$patientId/questionnaire": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute;
   "/facility/$facilityId/services/$serviceId/appointments": typeof AppFacilityFacilityIdServicesServiceIdAppointmentsIndexRoute;
   "/facility/$facilityId/services/$serviceId/queues": typeof AppFacilityFacilityIdServicesServiceIdQueuesIndexRoute;
   "/facility/$facilityId/settings/activity_definitions/$activityDefinitionSlug": typeof AppFacilityFacilityIdSettingsActivity_definitionsActivityDefinitionSlugIndexRoute;
@@ -2821,12 +3318,15 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/settings/product_knowledge/$slug": typeof AppFacilityFacilityIdSettingsProduct_knowledgeSlugIndexRoute;
   "/facility/$facilityId/settings/questionnaires/$id": typeof AppFacilityFacilityIdSettingsQuestionnairesIdIndexRoute;
   "/facility/$facilityId/settings/specimen_definitions/$specimenSlug": typeof AppFacilityFacilityIdSettingsSpecimen_definitionsSpecimenSlugIndexRoute;
-  "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId": typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRoute;
   "/facility/$facilityId/billing/account/$accountId/charge_items/print": typeof AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute;
   "/facility/$facilityId/billing/account/$accountId/invoices/create": typeof AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute;
   "/facility/$facilityId/locations/$locationId/queues/$queueId/completed": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdCompletedRoute;
   "/facility/$facilityId/locations/$locationId/queues/$queueId/ongoing": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdOngoingRoute;
   "/facility/$facilityId/patient/$patientId/appointments/$appointmentId/print": typeof AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdPrintRoute;
+  "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print": typeof AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute;
+  "/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print": typeof AppFacilityFacilityIdPatientPatientIdPrescriptionPrescriptionIdPrintRoute;
+  "/facility/$facilityId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
   "/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/completed": typeof AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdCompletedRoute;
   "/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/ongoing": typeof AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdOngoingRoute;
   "/facility/$facilityId/services/$serviceId/queues/$queueId/completed": typeof AppFacilityFacilityIdServicesServiceIdQueuesQueueIdCompletedRoute;
@@ -2836,35 +3336,54 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/settings/devices/$id/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdSettingsDevicesIdQuestionnaireQuestionnaireIdRoute;
   "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new": typeof AppFacilityFacilityIdSettingsProduct_knowledgeCategoriesCategorySlugNewRoute;
   "/facility/$facilityId/settings/questionnaires/$id/versions/$revisionId": typeof AppFacilityFacilityIdSettingsQuestionnairesIdVersionsRevisionIdRoute;
+  "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print": typeof AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute;
+  "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab": typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute;
+  "/organization/$organizationId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print": typeof AppOrganizationOrganizationIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  "/patient/$patientId/history/questionnaire/$questionnaireId/responses/print": typeof AppPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute;
   "/facility/$facilityId/billing/account/$accountId/$tab": typeof AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute;
   "/facility/$facilityId/locations/$locationId/queues/$queueId": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdIndexRoute;
   "/facility/$facilityId/patient/$patientId/appointments/$appointmentId": typeof AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdIndexRoute;
+  "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId": typeof AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute;
+  "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute;
   "/facility/$facilityId/practitioner/$practitionerId/queues/$queueId": typeof AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdIndexRoute;
   "/facility/$facilityId/services/$serviceId/queues/$queueId": typeof AppFacilityFacilityIdServicesServiceIdQueuesQueueIdIndexRoute;
   "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug": typeof AppFacilityFacilityIdSettingsActivity_definitionsCategoriesCategorySlugIndexRoute;
   "/facility/$facilityId/settings/charge_item_definitions/categories/$slug": typeof AppFacilityFacilityIdSettingsCharge_item_definitionsCategoriesSlugIndexRoute;
   "/facility/$facilityId/settings/devices/$id/questionnaire": typeof AppFacilityFacilityIdSettingsDevicesIdQuestionnaireIndexRoute;
   "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug": typeof AppFacilityFacilityIdSettingsProduct_knowledgeCategoriesCategorySlugIndexRoute;
-  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute;
-  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteWithChildren;
-  "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab": typeof AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute;
+  "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId": typeof AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute;
   "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType": typeof AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchTabRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/receive/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalReceiveTabRoute;
   "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/completed": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdCompletedRoute;
   "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/print": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdPrintRoute;
   "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/print": typeof AppFacilityFacilityIdLocationsLocationIdMedication_returnOrderDeliveryOrderIdPrintRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/prescriptions/print": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdPrescriptionsPrintRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportReportIdRoute;
+  "/facility/$facilityId/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print": typeof AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/responses/print": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  "/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print": typeof AppFacilityFacilityIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute;
+  "/organization/$organizationId/patient/$patientId/questionnaire/$questionnaireId/responses/print": typeof AppOrganizationOrganizationIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  "/organization/$organizationId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print": typeof AppOrganizationOrganizationIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute;
+  "/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId": typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/dispatch": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchIndexRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/receive": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalReceiveIndexRoute;
   "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdIndexRoute;
   "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId": typeof AppFacilityFacilityIdLocationsLocationIdMedication_returnOrderDeliveryOrderIdIndexRoute;
-  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireIndexRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/new": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabNewRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/new": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabNewRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/$type/deliveries/new": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeDeliveriesNewRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/$type/orders/new": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeOrdersNewRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportTemplateTemplateSlugRoute;
+  "/facility/$facilityId/patient/$patientId/history/questionnaire/$questionnaireId/responses/print": typeof AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print": typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIndexRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabIndexRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdIndexRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdIndexRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/edit": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdEditRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/print": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdPrintRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/$id/edit": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabIdEditRoute;
@@ -2876,6 +3395,9 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/dispense/$encounterId": typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdBillDispenseEncounterIdRoute;
   "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds": typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdBillPrescriptionsPrescriptionIdsRoute;
   "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds/print": typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdPrescriptionsPrescriptionIdsPrintRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  "/facility/$facilityId/patient/$patientId/encounter/$encounterId/type/$productType/administrations/print": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTypeProductTypeAdministrationsPrintRoute;
+  "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print": typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdIndexRoute;
   "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/$id": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabIdIndexRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/$type/deliveries/$id": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeDeliveriesIdIndexRoute;
@@ -2952,7 +3474,6 @@ export interface FileRoutesById {
   "/_app/responsibilities/$id/": typeof AppResponsibilitiesIdIndexRoute;
   "/_app/users/$username/": typeof AppUsersUsernameIndexRoute;
   "/_app/facility/$facilityId/services/$serviceId": typeof AppFacilityFacilityIdServicesServiceIdRouteRouteWithChildren;
-  "/_app/_legacy/patient/$patientId/questionnaire": typeof AppLegacyPatientPatientIdQuestionnaireRouteWithChildren;
   "/_app/admin/organizations/govt/$id": typeof AppAdminOrganizationsGovtIdRoute;
   "/_app/admin/organizations/product_supplier/$id": typeof AppAdminOrganizationsProduct_supplierIdRoute;
   "/_app/admin/organizations/role/$id": typeof AppAdminOrganizationsRoleIdRoute;
@@ -2961,7 +3482,10 @@ export interface FileRoutesById {
   "/_app/admin/valuesets/$id/edit": typeof AppAdminValuesetsIdEditRoute;
   "/_app/admin/workspaces/$id/edit": typeof AppAdminWorkspacesIdEditRoute;
   "/_app/facility/$facilityId/appointments/print": typeof AppFacilityFacilityIdAppointmentsPrintRoute;
+  "/_app/facility/$facilityId/encounters/$tab": typeof AppFacilityFacilityIdEncountersTabRoute;
   "/_app/facility/$facilityId/locations/$locationId": typeof AppFacilityFacilityIdLocationsLocationIdRouteWithChildren;
+  "/_app/facility/$facilityId/patient/create": typeof AppFacilityFacilityIdPatientCreateRoute;
+  "/_app/facility/$facilityId/patients/home": typeof AppFacilityFacilityIdPatientsHomeRoute;
   "/_app/facility/$facilityId/resource/new": typeof AppFacilityFacilityIdResourceNewRoute;
   "/_app/facility/$facilityId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdService_requestsServiceRequestIdRoute;
   "/_app/facility/$facilityId/settings/$": typeof AppFacilityFacilityIdSettingsSplatRoute;
@@ -2988,6 +3512,7 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/settings/workspaces": typeof AppFacilityFacilityIdSettingsWorkspacesRouteWithChildren;
   "/_app/facility/$facilityId/template/$": typeof AppFacilityFacilityIdTemplateSplatRoute;
   "/_app/organization/$id/settings/referrals": typeof AppOrganizationIdSettingsReferralsRoute;
+  "/_app/patient/$patientId/history/$tab": typeof AppPatientPatientIdHistoryTabRoute;
   "/_app/responsibilities/$id/settings/referrals": typeof AppResponsibilitiesIdSettingsReferralsRoute;
   "/_app/admin/organizations/govt/": typeof AppAdminOrganizationsGovtIndexRoute;
   "/_app/admin/organizations/product_supplier/": typeof AppAdminOrganizationsProduct_supplierIndexRoute;
@@ -2995,13 +3520,18 @@ export interface FileRoutesById {
   "/_app/admin/patient_identifier_config/$id/": typeof AppAdminPatient_identifier_configIdIndexRoute;
   "/_app/admin/questionnaires/$id/": typeof AppAdminQuestionnairesIdIndexRoute;
   "/_app/facility/$facilityId/appointments/": typeof AppFacilityFacilityIdAppointmentsIndexRoute;
+  "/_app/facility/$facilityId/encounters/": typeof AppFacilityFacilityIdEncountersIndexRoute;
+  "/_app/facility/$facilityId/patients/": typeof AppFacilityFacilityIdPatientsIndexRoute;
   "/_app/facility/$facilityId/resource/": typeof AppFacilityFacilityIdResourceIndexRoute;
   "/_app/facility/$facilityId/services/": typeof AppFacilityFacilityIdServicesIndexRoute;
   "/_app/facility/$facilityId/settings/": typeof AppFacilityFacilityIdSettingsIndexRoute;
   "/_app/facility/$facilityId/template/": typeof AppFacilityFacilityIdTemplateIndexRoute;
   "/_app/facility/$facilityId/users/": typeof AppFacilityFacilityIdUsersIndexRoute;
-  "/_app/_legacy/patient/$patientId/questionnaire/$questionnaireId": typeof AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute;
+  "/_app/patient/$patientId/questionnaire/": typeof AppPatientPatientIdQuestionnaireIndexRoute;
   "/_app/admin/questionnaires/$id/versions/$revisionId": typeof AppAdminQuestionnairesIdVersionsRevisionIdRoute;
+  "/_app/facility/$facilityId/encounters/locations/$locationId": typeof AppFacilityFacilityIdEncountersLocationsLocationIdRoute;
+  "/_app/facility/$facilityId/encounters/patients/$encounterClass": typeof AppFacilityFacilityIdEncountersPatientsEncounterClassRoute;
+  "/_app/facility/$facilityId/encounters/patients/all": typeof AppFacilityFacilityIdEncountersPatientsAllRoute;
   "/_app/facility/$facilityId/locations/$locationId/$": typeof AppFacilityFacilityIdLocationsLocationIdSplatRoute;
   "/_app/facility/$facilityId/locations/$locationId/beds": typeof AppFacilityFacilityIdLocationsLocationIdBedsRoute;
   "/_app/facility/$facilityId/locations/$locationId/forms": typeof AppFacilityFacilityIdLocationsLocationIdFormsRoute;
@@ -3009,6 +3539,18 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/locations/$locationId/responses": typeof AppFacilityFacilityIdLocationsLocationIdResponsesRoute;
   "/_app/facility/$facilityId/locations/$locationId/schedule": typeof AppFacilityFacilityIdLocationsLocationIdScheduleRoute;
   "/_app/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId": typeof AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute;
+  "/_app/facility/$facilityId/patient/$patientId/accounts": typeof AppFacilityFacilityIdPatientPatientIdAccountsRoute;
+  "/_app/facility/$facilityId/patient/$patientId/clinical_history": typeof AppFacilityFacilityIdPatientPatientIdClinical_historyRoute;
+  "/_app/facility/$facilityId/patient/$patientId/consultation": typeof AppFacilityFacilityIdPatientPatientIdConsultationRoute;
+  "/_app/facility/$facilityId/patient/$patientId/demography": typeof AppFacilityFacilityIdPatientPatientIdDemographyRoute;
+  "/_app/facility/$facilityId/patient/$patientId/encounters": typeof AppFacilityFacilityIdPatientPatientIdEncountersRoute;
+  "/_app/facility/$facilityId/patient/$patientId/files": typeof AppFacilityFacilityIdPatientPatientIdFilesRoute;
+  "/_app/facility/$facilityId/patient/$patientId/notes": typeof AppFacilityFacilityIdPatientPatientIdNotesRoute;
+  "/_app/facility/$facilityId/patient/$patientId/referrals": typeof AppFacilityFacilityIdPatientPatientIdReferralsRoute;
+  "/_app/facility/$facilityId/patient/$patientId/resource_requests": typeof AppFacilityFacilityIdPatientPatientIdResource_requestsRoute;
+  "/_app/facility/$facilityId/patient/$patientId/update": typeof AppFacilityFacilityIdPatientPatientIdUpdateRoute;
+  "/_app/facility/$facilityId/patient/$patientId/updates": typeof AppFacilityFacilityIdPatientPatientIdUpdatesRoute;
+  "/_app/facility/$facilityId/patient/$patientId/users": typeof AppFacilityFacilityIdPatientPatientIdUsersRoute;
   "/_app/facility/$facilityId/resource/$id/print": typeof AppFacilityFacilityIdResourceIdPrintRoute;
   "/_app/facility/$facilityId/resource/$id/update": typeof AppFacilityFacilityIdResourceIdUpdateRoute;
   "/_app/facility/$facilityId/services/$serviceId/$": typeof AppFacilityFacilityIdServicesServiceIdSplatRoute;
@@ -3046,6 +3588,7 @@ export interface FileRoutesById {
   "/_app/organization/$navOrganizationId/children/$id/referrals": typeof AppOrganizationNavOrganizationIdChildrenIdReferralsRoute;
   "/_app/organization/$navOrganizationId/children/$id/service_accounts": typeof AppOrganizationNavOrganizationIdChildrenIdService_accountsRoute;
   "/_app/organization/$navOrganizationId/children/$id/users": typeof AppOrganizationNavOrganizationIdChildrenIdUsersRoute;
+  "/_app/patient/$patientId/questionnaire_response/$questionnaireResponseId/print": typeof AppPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
   "/_patient/facility/$facilityId/appointments/$appointmentId/success": typeof PatientFacilityFacilityIdAppointmentsAppointmentIdSuccessRoute;
   "/_patient/facility/$facilityId/appointments/$staffId/book-appointment": typeof PatientFacilityFacilityIdAppointmentsStaffIdBookAppointmentRoute;
   "/_patient/facility/$facilityId/appointments/$staffId/patient-registration": typeof PatientFacilityFacilityIdAppointmentsStaffIdPatientRegistrationRoute;
@@ -3053,7 +3596,9 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/billing/account/": typeof AppFacilityFacilityIdBillingAccountIndexRoute;
   "/_app/facility/$facilityId/billing/invoices/": typeof AppFacilityFacilityIdBillingInvoicesIndexRoute;
   "/_app/facility/$facilityId/billing/payments/": typeof AppFacilityFacilityIdBillingPaymentsIndexRoute;
+  "/_app/facility/$facilityId/encounters/patients/": typeof AppFacilityFacilityIdEncountersPatientsIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/": typeof AppFacilityFacilityIdLocationsLocationIdIndexRoute;
+  "/_app/facility/$facilityId/patient/$patientId/": typeof AppFacilityFacilityIdPatientPatientIdIndexRoute;
   "/_app/facility/$facilityId/resource/$id/": typeof AppFacilityFacilityIdResourceIdIndexRoute;
   "/_app/facility/$facilityId/services/$serviceId/": typeof AppFacilityFacilityIdServicesServiceIdIndexRoute;
   "/_app/facility/$facilityId/settings/activity_definitions/": typeof AppFacilityFacilityIdSettingsActivity_definitionsIndexRoute;
@@ -3077,8 +3622,7 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/template/builder/": typeof AppFacilityFacilityIdTemplateBuilderIndexRoute;
   "/_app/facility/$facilityId/users/$username/": typeof AppFacilityFacilityIdUsersUsernameIndexRoute;
   "/_app/organization/$navOrganizationId/children/$id/": typeof AppOrganizationNavOrganizationIdChildrenIdIndexRoute;
-  "/_app/_legacy/facility/$facilityId/patient/$patientId/consultation": typeof AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute;
-  "/_app/_legacy/facility/$facilityId/patient/$patientId/questionnaire": typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteWithChildren;
+  "/_app/patient/$patientId/questionnaire/$questionnaireId/": typeof AppPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute;
   "/_app/facility/$facilityId/billing/invoice/$invoiceId/print": typeof AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute;
   "/_app/facility/$facilityId/billing/invoices/$invoiceId/pay": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute;
   "/_app/facility/$facilityId/billing/invoices/$invoiceIds/print": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute;
@@ -3088,6 +3632,7 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/locations/$locationId/inventory/summary": typeof AppFacilityFacilityIdLocationsLocationIdInventorySummaryRoute;
   "/_app/facility/$facilityId/locations/$locationId/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdLocationsLocationIdQuestionnaireQuestionnaireIdRoute;
   "/_app/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdLocationsLocationIdService_requestsServiceRequestIdRoute;
+  "/_app/facility/$facilityId/patient/$patientId/history/$tab": typeof AppFacilityFacilityIdPatientPatientIdHistoryTabRoute;
   "/_app/facility/$facilityId/queue/$queueId/token/$tokenId": typeof AppFacilityFacilityIdQueueQueueIdTokenTokenIdRoute;
   "/_app/facility/$facilityId/services/$serviceId/appointments/$appointmentId": typeof AppFacilityFacilityIdServicesServiceIdAppointmentsAppointmentIdRoute;
   "/_app/facility/$facilityId/services/$serviceId/appointments/print": typeof AppFacilityFacilityIdServicesServiceIdAppointmentsPrintRoute;
@@ -3106,6 +3651,8 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/settings/valuesets/$id/edit": typeof AppFacilityFacilityIdSettingsValuesetsIdEditRoute;
   "/_app/facility/$facilityId/settings/workspaces/$id/edit": typeof AppFacilityFacilityIdSettingsWorkspacesIdEditRoute;
   "/_app/organization/$navOrganizationId/children/$id/settings/referrals": typeof AppOrganizationNavOrganizationIdChildrenIdSettingsReferralsRoute;
+  "/_app/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print": typeof AppPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  "/_app/patient/$patientId/questionnaire/$questionnaireId/responses/print": typeof AppPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
   "/_patient/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId": typeof PatientFacilityFacilityIdAppointmentsStaffIdRescheduleAppointmentIdRoute;
   "/_public/facility/$facilityId/appointments/$staffId/otp/$page": typeof PublicFacilityFacilityIdAppointmentsStaffIdOtpPageRoute;
   "/_app/facility/$facilityId/billing/account/$accountId/": typeof AppFacilityFacilityIdBillingAccountAccountIdIndexRoute;
@@ -3118,6 +3665,8 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/locations/$locationId/questionnaire/": typeof AppFacilityFacilityIdLocationsLocationIdQuestionnaireIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/queues/": typeof AppFacilityFacilityIdLocationsLocationIdQueuesIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/service_requests/": typeof AppFacilityFacilityIdLocationsLocationIdService_requestsIndexRoute;
+  "/_app/facility/$facilityId/patient/$patientId/appointments/": typeof AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute;
+  "/_app/facility/$facilityId/patient/$patientId/questionnaire/": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute;
   "/_app/facility/$facilityId/services/$serviceId/appointments/": typeof AppFacilityFacilityIdServicesServiceIdAppointmentsIndexRoute;
   "/_app/facility/$facilityId/services/$serviceId/queues/": typeof AppFacilityFacilityIdServicesServiceIdQueuesIndexRoute;
   "/_app/facility/$facilityId/settings/activity_definitions/$activityDefinitionSlug/": typeof AppFacilityFacilityIdSettingsActivity_definitionsActivityDefinitionSlugIndexRoute;
@@ -3130,12 +3679,15 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/settings/product_knowledge/$slug/": typeof AppFacilityFacilityIdSettingsProduct_knowledgeSlugIndexRoute;
   "/_app/facility/$facilityId/settings/questionnaires/$id/": typeof AppFacilityFacilityIdSettingsQuestionnairesIdIndexRoute;
   "/_app/facility/$facilityId/settings/specimen_definitions/$specimenSlug/": typeof AppFacilityFacilityIdSettingsSpecimen_definitionsSpecimenSlugIndexRoute;
-  "/_app/_legacy/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId": typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRoute;
   "/_app/facility/$facilityId/billing/account/$accountId/charge_items/print": typeof AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute;
   "/_app/facility/$facilityId/billing/account/$accountId/invoices/create": typeof AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute;
   "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/completed": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdCompletedRoute;
   "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/ongoing": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdOngoingRoute;
   "/_app/facility/$facilityId/patient/$patientId/appointments/$appointmentId/print": typeof AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdPrintRoute;
+  "/_app/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print": typeof AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute;
+  "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute;
+  "/_app/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print": typeof AppFacilityFacilityIdPatientPatientIdPrescriptionPrescriptionIdPrintRoute;
+  "/_app/facility/$facilityId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
   "/_app/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/completed": typeof AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdCompletedRoute;
   "/_app/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/ongoing": typeof AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdOngoingRoute;
   "/_app/facility/$facilityId/services/$serviceId/queues/$queueId/completed": typeof AppFacilityFacilityIdServicesServiceIdQueuesQueueIdCompletedRoute;
@@ -3145,35 +3697,54 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/settings/devices/$id/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdSettingsDevicesIdQuestionnaireQuestionnaireIdRoute;
   "/_app/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new": typeof AppFacilityFacilityIdSettingsProduct_knowledgeCategoriesCategorySlugNewRoute;
   "/_app/facility/$facilityId/settings/questionnaires/$id/versions/$revisionId": typeof AppFacilityFacilityIdSettingsQuestionnairesIdVersionsRevisionIdRoute;
+  "/_app/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print": typeof AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute;
+  "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab": typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute;
+  "/_app/organization/$organizationId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print": typeof AppOrganizationOrganizationIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  "/_app/patient/$patientId/history/questionnaire/$questionnaireId/responses/print": typeof AppPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute;
   "/_app/facility/$facilityId/billing/account/$accountId/$tab/": typeof AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdIndexRoute;
   "/_app/facility/$facilityId/patient/$patientId/appointments/$appointmentId/": typeof AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdIndexRoute;
+  "/_app/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/": typeof AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute;
+  "/_app/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute;
   "/_app/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/": typeof AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdIndexRoute;
   "/_app/facility/$facilityId/services/$serviceId/queues/$queueId/": typeof AppFacilityFacilityIdServicesServiceIdQueuesQueueIdIndexRoute;
   "/_app/facility/$facilityId/settings/activity_definitions/categories/$categorySlug/": typeof AppFacilityFacilityIdSettingsActivity_definitionsCategoriesCategorySlugIndexRoute;
   "/_app/facility/$facilityId/settings/charge_item_definitions/categories/$slug/": typeof AppFacilityFacilityIdSettingsCharge_item_definitionsCategoriesSlugIndexRoute;
   "/_app/facility/$facilityId/settings/devices/$id/questionnaire/": typeof AppFacilityFacilityIdSettingsDevicesIdQuestionnaireIndexRoute;
   "/_app/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/": typeof AppFacilityFacilityIdSettingsProduct_knowledgeCategoriesCategorySlugIndexRoute;
-  "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute;
-  "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteWithChildren;
-  "/_app/_legacy/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab": typeof AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute;
+  "/_app/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/": typeof AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute;
   "/_app/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType": typeof AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchTabRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/internal/receive/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalReceiveTabRoute;
   "/_app/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/completed": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdCompletedRoute;
   "/_app/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/print": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdPrintRoute;
   "/_app/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/print": typeof AppFacilityFacilityIdLocationsLocationIdMedication_returnOrderDeliveryOrderIdPrintRoute;
+  "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute;
+  "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/prescriptions/print": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdPrescriptionsPrintRoute;
+  "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportReportIdRoute;
+  "/_app/facility/$facilityId/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print": typeof AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  "/_app/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/responses/print": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  "/_app/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print": typeof AppFacilityFacilityIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute;
+  "/_app/organization/$organizationId/patient/$patientId/questionnaire/$questionnaireId/responses/print": typeof AppOrganizationOrganizationIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  "/_app/organization/$organizationId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print": typeof AppOrganizationOrganizationIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute;
+  "/_app/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId": typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/internal/receive/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalReceiveIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/": typeof AppFacilityFacilityIdLocationsLocationIdMedication_returnOrderDeliveryOrderIdIndexRoute;
-  "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdRoute;
+  "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/new": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabNewRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/new": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabNewRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/internal/$type/deliveries/new": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeDeliveriesNewRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/internal/$type/orders/new": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeOrdersNewRoute;
+  "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportTemplateTemplateSlugRoute;
+  "/_app/facility/$facilityId/patient/$patientId/history/questionnaire/$questionnaireId/responses/print": typeof AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print": typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabIndexRoute;
+  "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdIndexRoute;
+  "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/edit": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdEditRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/print": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdPrintRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/$id/edit": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabIdEditRoute;
@@ -3185,6 +3756,9 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/dispense/$encounterId": typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdBillDispenseEncounterIdRoute;
   "/_app/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds": typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdBillPrescriptionsPrescriptionIdsRoute;
   "/_app/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds/print": typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdPrescriptionsPrescriptionIdsPrintRoute;
+  "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/type/$productType/administrations/print": typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTypeProductTypeAdministrationsPrintRoute;
+  "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print": typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalDeliveriesTabIdIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/$id/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryExternalOrdersTabIdIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/internal/$type/deliveries/$id/": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeDeliveriesIdIndexRoute;
@@ -3258,7 +3832,6 @@ export interface FileRouteTypes {
     | "/responsibilities/$id/"
     | "/users/$username/"
     | "/facility/$facilityId/services/$serviceId"
-    | "/patient/$patientId/questionnaire"
     | "/admin/organizations/govt/$id"
     | "/admin/organizations/product_supplier/$id"
     | "/admin/organizations/role/$id"
@@ -3267,7 +3840,10 @@ export interface FileRouteTypes {
     | "/admin/valuesets/$id/edit"
     | "/admin/workspaces/$id/edit"
     | "/facility/$facilityId/appointments/print"
+    | "/facility/$facilityId/encounters/$tab"
     | "/facility/$facilityId/locations/$locationId"
+    | "/facility/$facilityId/patient/create"
+    | "/facility/$facilityId/patients/home"
     | "/facility/$facilityId/resource/new"
     | "/facility/$facilityId/service_requests/$serviceRequestId"
     | "/facility/$facilityId/settings/$"
@@ -3294,6 +3870,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/workspaces"
     | "/facility/$facilityId/template/$"
     | "/organization/$id/settings/referrals"
+    | "/patient/$patientId/history/$tab"
     | "/responsibilities/$id/settings/referrals"
     | "/admin/organizations/govt/"
     | "/admin/organizations/product_supplier/"
@@ -3301,13 +3878,18 @@ export interface FileRouteTypes {
     | "/admin/patient_identifier_config/$id/"
     | "/admin/questionnaires/$id/"
     | "/facility/$facilityId/appointments/"
+    | "/facility/$facilityId/encounters/"
+    | "/facility/$facilityId/patients/"
     | "/facility/$facilityId/resource/"
     | "/facility/$facilityId/services/"
     | "/facility/$facilityId/settings/"
     | "/facility/$facilityId/template/"
     | "/facility/$facilityId/users/"
-    | "/patient/$patientId/questionnaire/$questionnaireId"
+    | "/patient/$patientId/questionnaire/"
     | "/admin/questionnaires/$id/versions/$revisionId"
+    | "/facility/$facilityId/encounters/locations/$locationId"
+    | "/facility/$facilityId/encounters/patients/$encounterClass"
+    | "/facility/$facilityId/encounters/patients/all"
     | "/facility/$facilityId/locations/$locationId/$"
     | "/facility/$facilityId/locations/$locationId/beds"
     | "/facility/$facilityId/locations/$locationId/forms"
@@ -3315,6 +3897,18 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/locations/$locationId/responses"
     | "/facility/$facilityId/locations/$locationId/schedule"
     | "/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId"
+    | "/facility/$facilityId/patient/$patientId/accounts"
+    | "/facility/$facilityId/patient/$patientId/clinical_history"
+    | "/facility/$facilityId/patient/$patientId/consultation"
+    | "/facility/$facilityId/patient/$patientId/demography"
+    | "/facility/$facilityId/patient/$patientId/encounters"
+    | "/facility/$facilityId/patient/$patientId/files"
+    | "/facility/$facilityId/patient/$patientId/notes"
+    | "/facility/$facilityId/patient/$patientId/referrals"
+    | "/facility/$facilityId/patient/$patientId/resource_requests"
+    | "/facility/$facilityId/patient/$patientId/update"
+    | "/facility/$facilityId/patient/$patientId/updates"
+    | "/facility/$facilityId/patient/$patientId/users"
     | "/facility/$facilityId/resource/$id/print"
     | "/facility/$facilityId/resource/$id/update"
     | "/facility/$facilityId/services/$serviceId/$"
@@ -3352,6 +3946,7 @@ export interface FileRouteTypes {
     | "/organization/$navOrganizationId/children/$id/referrals"
     | "/organization/$navOrganizationId/children/$id/service_accounts"
     | "/organization/$navOrganizationId/children/$id/users"
+    | "/patient/$patientId/questionnaire_response/$questionnaireResponseId/print"
     | "/facility/$facilityId/appointments/$appointmentId/success"
     | "/facility/$facilityId/appointments/$staffId/book-appointment"
     | "/facility/$facilityId/appointments/$staffId/patient-registration"
@@ -3359,7 +3954,9 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/billing/account/"
     | "/facility/$facilityId/billing/invoices/"
     | "/facility/$facilityId/billing/payments/"
+    | "/facility/$facilityId/encounters/patients/"
     | "/facility/$facilityId/locations/$locationId/"
+    | "/facility/$facilityId/patient/$patientId/"
     | "/facility/$facilityId/resource/$id/"
     | "/facility/$facilityId/services/$serviceId/"
     | "/facility/$facilityId/settings/activity_definitions/"
@@ -3383,8 +3980,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/template/builder/"
     | "/facility/$facilityId/users/$username/"
     | "/organization/$navOrganizationId/children/$id/"
-    | "/facility/$facilityId/patient/$patientId/consultation"
-    | "/facility/$facilityId/patient/$patientId/questionnaire"
+    | "/patient/$patientId/questionnaire/$questionnaireId/"
     | "/facility/$facilityId/billing/invoice/$invoiceId/print"
     | "/facility/$facilityId/billing/invoices/$invoiceId/pay"
     | "/facility/$facilityId/billing/invoices/$invoiceIds/print"
@@ -3394,6 +3990,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/locations/$locationId/inventory/summary"
     | "/facility/$facilityId/locations/$locationId/questionnaire/$questionnaireId"
     | "/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId"
+    | "/facility/$facilityId/patient/$patientId/history/$tab"
     | "/facility/$facilityId/queue/$queueId/token/$tokenId"
     | "/facility/$facilityId/services/$serviceId/appointments/$appointmentId"
     | "/facility/$facilityId/services/$serviceId/appointments/print"
@@ -3412,6 +4009,8 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/valuesets/$id/edit"
     | "/facility/$facilityId/settings/workspaces/$id/edit"
     | "/organization/$navOrganizationId/children/$id/settings/referrals"
+    | "/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print"
+    | "/patient/$patientId/questionnaire/$questionnaireId/responses/print"
     | "/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId"
     | "/facility/$facilityId/appointments/$staffId/otp/$page"
     | "/facility/$facilityId/billing/account/$accountId/"
@@ -3424,6 +4023,8 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/locations/$locationId/questionnaire/"
     | "/facility/$facilityId/locations/$locationId/queues/"
     | "/facility/$facilityId/locations/$locationId/service_requests/"
+    | "/facility/$facilityId/patient/$patientId/appointments/"
+    | "/facility/$facilityId/patient/$patientId/questionnaire/"
     | "/facility/$facilityId/services/$serviceId/appointments/"
     | "/facility/$facilityId/services/$serviceId/queues/"
     | "/facility/$facilityId/settings/activity_definitions/$activityDefinitionSlug/"
@@ -3436,12 +4037,15 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/product_knowledge/$slug/"
     | "/facility/$facilityId/settings/questionnaires/$id/"
     | "/facility/$facilityId/settings/specimen_definitions/$specimenSlug/"
-    | "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId"
     | "/facility/$facilityId/billing/account/$accountId/charge_items/print"
     | "/facility/$facilityId/billing/account/$accountId/invoices/create"
     | "/facility/$facilityId/locations/$locationId/queues/$queueId/completed"
     | "/facility/$facilityId/locations/$locationId/queues/$queueId/ongoing"
     | "/facility/$facilityId/patient/$patientId/appointments/$appointmentId/print"
+    | "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
+    | "/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print"
+    | "/facility/$facilityId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print"
     | "/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/completed"
     | "/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/ongoing"
     | "/facility/$facilityId/services/$serviceId/queues/$queueId/completed"
@@ -3451,35 +4055,54 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/devices/$id/questionnaire/$questionnaireId"
     | "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new"
     | "/facility/$facilityId/settings/questionnaires/$id/versions/$revisionId"
+    | "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print"
+    | "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab"
+    | "/organization/$organizationId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print"
+    | "/patient/$patientId/history/questionnaire/$questionnaireId/responses/print"
     | "/facility/$facilityId/billing/account/$accountId/$tab/"
     | "/facility/$facilityId/locations/$locationId/queues/$queueId/"
     | "/facility/$facilityId/patient/$patientId/appointments/$appointmentId/"
+    | "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/"
+    | "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/"
     | "/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/"
     | "/facility/$facilityId/services/$serviceId/queues/$queueId/"
     | "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug/"
     | "/facility/$facilityId/settings/charge_item_definitions/categories/$slug/"
     | "/facility/$facilityId/settings/devices/$id/questionnaire/"
     | "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/"
-    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
-    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire"
-    | "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab"
+    | "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/"
     | "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/$tab"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/receive/$tab"
     | "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/completed"
     | "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/print"
     | "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/print"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/prescriptions/print"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId"
+    | "/facility/$facilityId/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print"
+    | "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/responses/print"
+    | "/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print"
+    | "/organization/$organizationId/patient/$patientId/questionnaire/$questionnaireId/responses/print"
+    | "/organization/$organizationId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print"
+    | "/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/receive/"
     | "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/"
     | "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/"
-    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/"
     | "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/new"
     | "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/new"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/$type/deliveries/new"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/$type/orders/new"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug"
+    | "/facility/$facilityId/patient/$patientId/history/questionnaire/$questionnaireId/responses/print"
+    | "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print"
     | "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/"
     | "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/"
     | "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/edit"
     | "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/print"
     | "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/$id/edit"
@@ -3491,6 +4114,9 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/dispense/$encounterId"
     | "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds"
     | "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds/print"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/type/$productType/administrations/print"
+    | "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print"
     | "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/"
     | "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/$id/"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/$type/deliveries/$id/"
@@ -3559,7 +4185,6 @@ export interface FileRouteTypes {
     | "/organization/$id"
     | "/responsibilities/$id"
     | "/users/$username"
-    | "/patient/$patientId/questionnaire"
     | "/admin/organizations/govt/$id"
     | "/admin/organizations/product_supplier/$id"
     | "/admin/organizations/role/$id"
@@ -3568,6 +4193,9 @@ export interface FileRouteTypes {
     | "/admin/valuesets/$id/edit"
     | "/admin/workspaces/$id/edit"
     | "/facility/$facilityId/appointments/print"
+    | "/facility/$facilityId/encounters/$tab"
+    | "/facility/$facilityId/patient/create"
+    | "/facility/$facilityId/patients/home"
     | "/facility/$facilityId/resource/new"
     | "/facility/$facilityId/service_requests/$serviceRequestId"
     | "/facility/$facilityId/settings/$"
@@ -3577,6 +4205,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/token_category"
     | "/facility/$facilityId/template/$"
     | "/organization/$id/settings/referrals"
+    | "/patient/$patientId/history/$tab"
     | "/responsibilities/$id/settings/referrals"
     | "/admin/organizations/govt"
     | "/admin/organizations/product_supplier"
@@ -3584,13 +4213,18 @@ export interface FileRouteTypes {
     | "/admin/patient_identifier_config/$id"
     | "/admin/questionnaires/$id"
     | "/facility/$facilityId/appointments"
+    | "/facility/$facilityId/encounters"
+    | "/facility/$facilityId/patients"
     | "/facility/$facilityId/resource"
     | "/facility/$facilityId/services"
     | "/facility/$facilityId/settings"
     | "/facility/$facilityId/template"
     | "/facility/$facilityId/users"
-    | "/patient/$patientId/questionnaire/$questionnaireId"
+    | "/patient/$patientId/questionnaire"
     | "/admin/questionnaires/$id/versions/$revisionId"
+    | "/facility/$facilityId/encounters/locations/$locationId"
+    | "/facility/$facilityId/encounters/patients/$encounterClass"
+    | "/facility/$facilityId/encounters/patients/all"
     | "/facility/$facilityId/locations/$locationId/$"
     | "/facility/$facilityId/locations/$locationId/beds"
     | "/facility/$facilityId/locations/$locationId/forms"
@@ -3598,6 +4232,18 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/locations/$locationId/responses"
     | "/facility/$facilityId/locations/$locationId/schedule"
     | "/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId"
+    | "/facility/$facilityId/patient/$patientId/accounts"
+    | "/facility/$facilityId/patient/$patientId/clinical_history"
+    | "/facility/$facilityId/patient/$patientId/consultation"
+    | "/facility/$facilityId/patient/$patientId/demography"
+    | "/facility/$facilityId/patient/$patientId/encounters"
+    | "/facility/$facilityId/patient/$patientId/files"
+    | "/facility/$facilityId/patient/$patientId/notes"
+    | "/facility/$facilityId/patient/$patientId/referrals"
+    | "/facility/$facilityId/patient/$patientId/resource_requests"
+    | "/facility/$facilityId/patient/$patientId/update"
+    | "/facility/$facilityId/patient/$patientId/updates"
+    | "/facility/$facilityId/patient/$patientId/users"
     | "/facility/$facilityId/resource/$id/print"
     | "/facility/$facilityId/resource/$id/update"
     | "/facility/$facilityId/services/$serviceId/$"
@@ -3634,6 +4280,7 @@ export interface FileRouteTypes {
     | "/organization/$navOrganizationId/children/$id/referrals"
     | "/organization/$navOrganizationId/children/$id/service_accounts"
     | "/organization/$navOrganizationId/children/$id/users"
+    | "/patient/$patientId/questionnaire_response/$questionnaireResponseId/print"
     | "/facility/$facilityId/appointments/$appointmentId/success"
     | "/facility/$facilityId/appointments/$staffId/book-appointment"
     | "/facility/$facilityId/appointments/$staffId/patient-registration"
@@ -3641,7 +4288,9 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/billing/account"
     | "/facility/$facilityId/billing/invoices"
     | "/facility/$facilityId/billing/payments"
+    | "/facility/$facilityId/encounters/patients"
     | "/facility/$facilityId/locations/$locationId"
+    | "/facility/$facilityId/patient/$patientId"
     | "/facility/$facilityId/resource/$id"
     | "/facility/$facilityId/services/$serviceId"
     | "/facility/$facilityId/settings/activity_definitions"
@@ -3665,8 +4314,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/template/builder"
     | "/facility/$facilityId/users/$username"
     | "/organization/$navOrganizationId/children/$id"
-    | "/facility/$facilityId/patient/$patientId/consultation"
-    | "/facility/$facilityId/patient/$patientId/questionnaire"
+    | "/patient/$patientId/questionnaire/$questionnaireId"
     | "/facility/$facilityId/billing/invoice/$invoiceId/print"
     | "/facility/$facilityId/billing/invoices/$invoiceId/pay"
     | "/facility/$facilityId/billing/invoices/$invoiceIds/print"
@@ -3676,6 +4324,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/locations/$locationId/inventory/summary"
     | "/facility/$facilityId/locations/$locationId/questionnaire/$questionnaireId"
     | "/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId"
+    | "/facility/$facilityId/patient/$patientId/history/$tab"
     | "/facility/$facilityId/queue/$queueId/token/$tokenId"
     | "/facility/$facilityId/services/$serviceId/appointments/$appointmentId"
     | "/facility/$facilityId/services/$serviceId/appointments/print"
@@ -3694,6 +4343,8 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/valuesets/$id/edit"
     | "/facility/$facilityId/settings/workspaces/$id/edit"
     | "/organization/$navOrganizationId/children/$id/settings/referrals"
+    | "/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print"
+    | "/patient/$patientId/questionnaire/$questionnaireId/responses/print"
     | "/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId"
     | "/facility/$facilityId/appointments/$staffId/otp/$page"
     | "/facility/$facilityId/billing/account/$accountId"
@@ -3706,6 +4357,8 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/locations/$locationId/questionnaire"
     | "/facility/$facilityId/locations/$locationId/queues"
     | "/facility/$facilityId/locations/$locationId/service_requests"
+    | "/facility/$facilityId/patient/$patientId/appointments"
+    | "/facility/$facilityId/patient/$patientId/questionnaire"
     | "/facility/$facilityId/services/$serviceId/appointments"
     | "/facility/$facilityId/services/$serviceId/queues"
     | "/facility/$facilityId/settings/activity_definitions/$activityDefinitionSlug"
@@ -3718,12 +4371,15 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/product_knowledge/$slug"
     | "/facility/$facilityId/settings/questionnaires/$id"
     | "/facility/$facilityId/settings/specimen_definitions/$specimenSlug"
-    | "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId"
     | "/facility/$facilityId/billing/account/$accountId/charge_items/print"
     | "/facility/$facilityId/billing/account/$accountId/invoices/create"
     | "/facility/$facilityId/locations/$locationId/queues/$queueId/completed"
     | "/facility/$facilityId/locations/$locationId/queues/$queueId/ongoing"
     | "/facility/$facilityId/patient/$patientId/appointments/$appointmentId/print"
+    | "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
+    | "/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print"
+    | "/facility/$facilityId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print"
     | "/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/completed"
     | "/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/ongoing"
     | "/facility/$facilityId/services/$serviceId/queues/$queueId/completed"
@@ -3733,35 +4389,54 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/devices/$id/questionnaire/$questionnaireId"
     | "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new"
     | "/facility/$facilityId/settings/questionnaires/$id/versions/$revisionId"
+    | "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print"
+    | "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab"
+    | "/organization/$organizationId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print"
+    | "/patient/$patientId/history/questionnaire/$questionnaireId/responses/print"
     | "/facility/$facilityId/billing/account/$accountId/$tab"
     | "/facility/$facilityId/locations/$locationId/queues/$queueId"
     | "/facility/$facilityId/patient/$patientId/appointments/$appointmentId"
+    | "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId"
+    | "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId"
     | "/facility/$facilityId/practitioner/$practitionerId/queues/$queueId"
     | "/facility/$facilityId/services/$serviceId/queues/$queueId"
     | "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug"
     | "/facility/$facilityId/settings/charge_item_definitions/categories/$slug"
     | "/facility/$facilityId/settings/devices/$id/questionnaire"
     | "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug"
-    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
-    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire"
-    | "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab"
+    | "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId"
     | "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/$tab"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/receive/$tab"
     | "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/completed"
     | "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/print"
     | "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/print"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/prescriptions/print"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId"
+    | "/facility/$facilityId/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print"
+    | "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/responses/print"
+    | "/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print"
+    | "/organization/$organizationId/patient/$patientId/questionnaire/$questionnaireId/responses/print"
+    | "/organization/$organizationId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print"
+    | "/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/dispatch"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/receive"
     | "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId"
     | "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId"
-    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire"
     | "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/new"
     | "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/new"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/$type/deliveries/new"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/$type/orders/new"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug"
+    | "/facility/$facilityId/patient/$patientId/history/questionnaire/$questionnaireId/responses/print"
+    | "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print"
     | "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab"
     | "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId"
     | "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/edit"
     | "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/print"
     | "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/$id/edit"
@@ -3773,6 +4448,9 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/dispense/$encounterId"
     | "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds"
     | "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds/print"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print"
+    | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/type/$productType/administrations/print"
+    | "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print"
     | "/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id"
     | "/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/$id"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/$type/deliveries/$id"
@@ -3848,7 +4526,6 @@ export interface FileRouteTypes {
     | "/_app/responsibilities/$id/"
     | "/_app/users/$username/"
     | "/_app/facility/$facilityId/services/$serviceId"
-    | "/_app/_legacy/patient/$patientId/questionnaire"
     | "/_app/admin/organizations/govt/$id"
     | "/_app/admin/organizations/product_supplier/$id"
     | "/_app/admin/organizations/role/$id"
@@ -3857,7 +4534,10 @@ export interface FileRouteTypes {
     | "/_app/admin/valuesets/$id/edit"
     | "/_app/admin/workspaces/$id/edit"
     | "/_app/facility/$facilityId/appointments/print"
+    | "/_app/facility/$facilityId/encounters/$tab"
     | "/_app/facility/$facilityId/locations/$locationId"
+    | "/_app/facility/$facilityId/patient/create"
+    | "/_app/facility/$facilityId/patients/home"
     | "/_app/facility/$facilityId/resource/new"
     | "/_app/facility/$facilityId/service_requests/$serviceRequestId"
     | "/_app/facility/$facilityId/settings/$"
@@ -3884,6 +4564,7 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/settings/workspaces"
     | "/_app/facility/$facilityId/template/$"
     | "/_app/organization/$id/settings/referrals"
+    | "/_app/patient/$patientId/history/$tab"
     | "/_app/responsibilities/$id/settings/referrals"
     | "/_app/admin/organizations/govt/"
     | "/_app/admin/organizations/product_supplier/"
@@ -3891,13 +4572,18 @@ export interface FileRouteTypes {
     | "/_app/admin/patient_identifier_config/$id/"
     | "/_app/admin/questionnaires/$id/"
     | "/_app/facility/$facilityId/appointments/"
+    | "/_app/facility/$facilityId/encounters/"
+    | "/_app/facility/$facilityId/patients/"
     | "/_app/facility/$facilityId/resource/"
     | "/_app/facility/$facilityId/services/"
     | "/_app/facility/$facilityId/settings/"
     | "/_app/facility/$facilityId/template/"
     | "/_app/facility/$facilityId/users/"
-    | "/_app/_legacy/patient/$patientId/questionnaire/$questionnaireId"
+    | "/_app/patient/$patientId/questionnaire/"
     | "/_app/admin/questionnaires/$id/versions/$revisionId"
+    | "/_app/facility/$facilityId/encounters/locations/$locationId"
+    | "/_app/facility/$facilityId/encounters/patients/$encounterClass"
+    | "/_app/facility/$facilityId/encounters/patients/all"
     | "/_app/facility/$facilityId/locations/$locationId/$"
     | "/_app/facility/$facilityId/locations/$locationId/beds"
     | "/_app/facility/$facilityId/locations/$locationId/forms"
@@ -3905,6 +4591,18 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/locations/$locationId/responses"
     | "/_app/facility/$facilityId/locations/$locationId/schedule"
     | "/_app/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId"
+    | "/_app/facility/$facilityId/patient/$patientId/accounts"
+    | "/_app/facility/$facilityId/patient/$patientId/clinical_history"
+    | "/_app/facility/$facilityId/patient/$patientId/consultation"
+    | "/_app/facility/$facilityId/patient/$patientId/demography"
+    | "/_app/facility/$facilityId/patient/$patientId/encounters"
+    | "/_app/facility/$facilityId/patient/$patientId/files"
+    | "/_app/facility/$facilityId/patient/$patientId/notes"
+    | "/_app/facility/$facilityId/patient/$patientId/referrals"
+    | "/_app/facility/$facilityId/patient/$patientId/resource_requests"
+    | "/_app/facility/$facilityId/patient/$patientId/update"
+    | "/_app/facility/$facilityId/patient/$patientId/updates"
+    | "/_app/facility/$facilityId/patient/$patientId/users"
     | "/_app/facility/$facilityId/resource/$id/print"
     | "/_app/facility/$facilityId/resource/$id/update"
     | "/_app/facility/$facilityId/services/$serviceId/$"
@@ -3942,6 +4640,7 @@ export interface FileRouteTypes {
     | "/_app/organization/$navOrganizationId/children/$id/referrals"
     | "/_app/organization/$navOrganizationId/children/$id/service_accounts"
     | "/_app/organization/$navOrganizationId/children/$id/users"
+    | "/_app/patient/$patientId/questionnaire_response/$questionnaireResponseId/print"
     | "/_patient/facility/$facilityId/appointments/$appointmentId/success"
     | "/_patient/facility/$facilityId/appointments/$staffId/book-appointment"
     | "/_patient/facility/$facilityId/appointments/$staffId/patient-registration"
@@ -3949,7 +4648,9 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/billing/account/"
     | "/_app/facility/$facilityId/billing/invoices/"
     | "/_app/facility/$facilityId/billing/payments/"
+    | "/_app/facility/$facilityId/encounters/patients/"
     | "/_app/facility/$facilityId/locations/$locationId/"
+    | "/_app/facility/$facilityId/patient/$patientId/"
     | "/_app/facility/$facilityId/resource/$id/"
     | "/_app/facility/$facilityId/services/$serviceId/"
     | "/_app/facility/$facilityId/settings/activity_definitions/"
@@ -3973,8 +4674,7 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/template/builder/"
     | "/_app/facility/$facilityId/users/$username/"
     | "/_app/organization/$navOrganizationId/children/$id/"
-    | "/_app/_legacy/facility/$facilityId/patient/$patientId/consultation"
-    | "/_app/_legacy/facility/$facilityId/patient/$patientId/questionnaire"
+    | "/_app/patient/$patientId/questionnaire/$questionnaireId/"
     | "/_app/facility/$facilityId/billing/invoice/$invoiceId/print"
     | "/_app/facility/$facilityId/billing/invoices/$invoiceId/pay"
     | "/_app/facility/$facilityId/billing/invoices/$invoiceIds/print"
@@ -3984,6 +4684,7 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/locations/$locationId/inventory/summary"
     | "/_app/facility/$facilityId/locations/$locationId/questionnaire/$questionnaireId"
     | "/_app/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId"
+    | "/_app/facility/$facilityId/patient/$patientId/history/$tab"
     | "/_app/facility/$facilityId/queue/$queueId/token/$tokenId"
     | "/_app/facility/$facilityId/services/$serviceId/appointments/$appointmentId"
     | "/_app/facility/$facilityId/services/$serviceId/appointments/print"
@@ -4002,6 +4703,8 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/settings/valuesets/$id/edit"
     | "/_app/facility/$facilityId/settings/workspaces/$id/edit"
     | "/_app/organization/$navOrganizationId/children/$id/settings/referrals"
+    | "/_app/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print"
+    | "/_app/patient/$patientId/questionnaire/$questionnaireId/responses/print"
     | "/_patient/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId"
     | "/_public/facility/$facilityId/appointments/$staffId/otp/$page"
     | "/_app/facility/$facilityId/billing/account/$accountId/"
@@ -4014,6 +4717,8 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/locations/$locationId/questionnaire/"
     | "/_app/facility/$facilityId/locations/$locationId/queues/"
     | "/_app/facility/$facilityId/locations/$locationId/service_requests/"
+    | "/_app/facility/$facilityId/patient/$patientId/appointments/"
+    | "/_app/facility/$facilityId/patient/$patientId/questionnaire/"
     | "/_app/facility/$facilityId/services/$serviceId/appointments/"
     | "/_app/facility/$facilityId/services/$serviceId/queues/"
     | "/_app/facility/$facilityId/settings/activity_definitions/$activityDefinitionSlug/"
@@ -4026,12 +4731,15 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/settings/product_knowledge/$slug/"
     | "/_app/facility/$facilityId/settings/questionnaires/$id/"
     | "/_app/facility/$facilityId/settings/specimen_definitions/$specimenSlug/"
-    | "/_app/_legacy/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId"
     | "/_app/facility/$facilityId/billing/account/$accountId/charge_items/print"
     | "/_app/facility/$facilityId/billing/account/$accountId/invoices/create"
     | "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/completed"
     | "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/ongoing"
     | "/_app/facility/$facilityId/patient/$patientId/appointments/$appointmentId/print"
+    | "/_app/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print"
+    | "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
+    | "/_app/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print"
+    | "/_app/facility/$facilityId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print"
     | "/_app/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/completed"
     | "/_app/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/ongoing"
     | "/_app/facility/$facilityId/services/$serviceId/queues/$queueId/completed"
@@ -4041,35 +4749,54 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/settings/devices/$id/questionnaire/$questionnaireId"
     | "/_app/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new"
     | "/_app/facility/$facilityId/settings/questionnaires/$id/versions/$revisionId"
+    | "/_app/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print"
+    | "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab"
+    | "/_app/organization/$organizationId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print"
+    | "/_app/patient/$patientId/history/questionnaire/$questionnaireId/responses/print"
     | "/_app/facility/$facilityId/billing/account/$accountId/$tab/"
     | "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/"
     | "/_app/facility/$facilityId/patient/$patientId/appointments/$appointmentId/"
+    | "/_app/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/"
+    | "/_app/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/"
     | "/_app/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/"
     | "/_app/facility/$facilityId/services/$serviceId/queues/$queueId/"
     | "/_app/facility/$facilityId/settings/activity_definitions/categories/$categorySlug/"
     | "/_app/facility/$facilityId/settings/charge_item_definitions/categories/$slug/"
     | "/_app/facility/$facilityId/settings/devices/$id/questionnaire/"
     | "/_app/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/"
-    | "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
-    | "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire"
-    | "/_app/_legacy/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab"
+    | "/_app/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/"
     | "/_app/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/$tab"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/internal/receive/$tab"
     | "/_app/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/completed"
     | "/_app/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/print"
     | "/_app/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/print"
+    | "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId"
+    | "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/prescriptions/print"
+    | "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId"
+    | "/_app/facility/$facilityId/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print"
+    | "/_app/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/responses/print"
+    | "/_app/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print"
+    | "/_app/organization/$organizationId/patient/$patientId/questionnaire/$questionnaireId/responses/print"
+    | "/_app/organization/$organizationId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print"
+    | "/_app/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/internal/receive/"
     | "/_app/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/"
     | "/_app/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/"
-    | "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId"
+    | "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/new"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/new"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/internal/$type/deliveries/new"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/internal/$type/orders/new"
+    | "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print"
+    | "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug"
+    | "/_app/facility/$facilityId/patient/$patientId/history/questionnaire/$questionnaireId/responses/print"
+    | "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/"
+    | "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/"
+    | "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/edit"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/print"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/$id/edit"
@@ -4081,6 +4808,9 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/dispense/$encounterId"
     | "/_app/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds"
     | "/_app/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds/print"
+    | "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print"
+    | "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/type/$productType/administrations/print"
+    | "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/external/orders/$tab/$id/"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/internal/$type/deliveries/$id/"
@@ -4573,13 +5303,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppUsersUsernameTabRouteImport;
       parentRoute: typeof AppRoute;
     };
-    "/_app/_legacy/patient/$patientId/questionnaire": {
-      id: "/_app/_legacy/patient/$patientId/questionnaire";
-      path: "/patient/$patientId/questionnaire";
-      fullPath: "/patient/$patientId/questionnaire";
-      preLoaderRoute: typeof AppLegacyPatientPatientIdQuestionnaireRouteImport;
-      parentRoute: typeof AppLegacyRoute;
-    };
     "/_app/admin/organizations/govt/": {
       id: "/_app/admin/organizations/govt/";
       path: "/organizations/govt";
@@ -4678,11 +5401,46 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppFacilityFacilityIdAppointmentsPrintRouteImport;
       parentRoute: typeof AppRoute;
     };
+    "/_app/facility/$facilityId/encounters/": {
+      id: "/_app/facility/$facilityId/encounters/";
+      path: "/facility/$facilityId/encounters";
+      fullPath: "/facility/$facilityId/encounters/";
+      preLoaderRoute: typeof AppFacilityFacilityIdEncountersIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/encounters/$tab": {
+      id: "/_app/facility/$facilityId/encounters/$tab";
+      path: "/facility/$facilityId/encounters/$tab";
+      fullPath: "/facility/$facilityId/encounters/$tab";
+      preLoaderRoute: typeof AppFacilityFacilityIdEncountersTabRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     "/_app/facility/$facilityId/locations/$locationId": {
       id: "/_app/facility/$facilityId/locations/$locationId";
       path: "/facility/$facilityId/locations/$locationId";
       fullPath: "/facility/$facilityId/locations/$locationId";
       preLoaderRoute: typeof AppFacilityFacilityIdLocationsLocationIdRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/create": {
+      id: "/_app/facility/$facilityId/patient/create";
+      path: "/facility/$facilityId/patient/create";
+      fullPath: "/facility/$facilityId/patient/create";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientCreateRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patients/": {
+      id: "/_app/facility/$facilityId/patients/";
+      path: "/facility/$facilityId/patients";
+      fullPath: "/facility/$facilityId/patients/";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientsIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patients/home": {
+      id: "/_app/facility/$facilityId/patients/home";
+      path: "/facility/$facilityId/patients/home";
+      fullPath: "/facility/$facilityId/patients/home";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientsHomeRouteImport;
       parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/resource/": {
@@ -4909,19 +5667,26 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppOrganizationIdSettingsReferralsRouteImport;
       parentRoute: typeof AppRoute;
     };
+    "/_app/patient/$patientId/history/$tab": {
+      id: "/_app/patient/$patientId/history/$tab";
+      path: "/patient/$patientId/history/$tab";
+      fullPath: "/patient/$patientId/history/$tab";
+      preLoaderRoute: typeof AppPatientPatientIdHistoryTabRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/patient/$patientId/questionnaire/": {
+      id: "/_app/patient/$patientId/questionnaire/";
+      path: "/patient/$patientId/questionnaire";
+      fullPath: "/patient/$patientId/questionnaire/";
+      preLoaderRoute: typeof AppPatientPatientIdQuestionnaireIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     "/_app/responsibilities/$id/settings/referrals": {
       id: "/_app/responsibilities/$id/settings/referrals";
       path: "/responsibilities/$id/settings/referrals";
       fullPath: "/responsibilities/$id/settings/referrals";
       preLoaderRoute: typeof AppResponsibilitiesIdSettingsReferralsRouteImport;
       parentRoute: typeof AppRoute;
-    };
-    "/_app/_legacy/patient/$patientId/questionnaire/$questionnaireId": {
-      id: "/_app/_legacy/patient/$patientId/questionnaire/$questionnaireId";
-      path: "/$questionnaireId";
-      fullPath: "/patient/$patientId/questionnaire/$questionnaireId";
-      preLoaderRoute: typeof AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRouteImport;
-      parentRoute: typeof AppLegacyPatientPatientIdQuestionnaireRoute;
     };
     "/_app/admin/questionnaires/$id/versions/$revisionId": {
       id: "/_app/admin/questionnaires/$id/versions/$revisionId";
@@ -4949,6 +5714,34 @@ declare module "@tanstack/react-router" {
       path: "/facility/$facilityId/billing/payments";
       fullPath: "/facility/$facilityId/billing/payments/";
       preLoaderRoute: typeof AppFacilityFacilityIdBillingPaymentsIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/encounters/locations/$locationId": {
+      id: "/_app/facility/$facilityId/encounters/locations/$locationId";
+      path: "/facility/$facilityId/encounters/locations/$locationId";
+      fullPath: "/facility/$facilityId/encounters/locations/$locationId";
+      preLoaderRoute: typeof AppFacilityFacilityIdEncountersLocationsLocationIdRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/encounters/patients/": {
+      id: "/_app/facility/$facilityId/encounters/patients/";
+      path: "/facility/$facilityId/encounters/patients";
+      fullPath: "/facility/$facilityId/encounters/patients/";
+      preLoaderRoute: typeof AppFacilityFacilityIdEncountersPatientsIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/encounters/patients/$encounterClass": {
+      id: "/_app/facility/$facilityId/encounters/patients/$encounterClass";
+      path: "/facility/$facilityId/encounters/patients/$encounterClass";
+      fullPath: "/facility/$facilityId/encounters/patients/$encounterClass";
+      preLoaderRoute: typeof AppFacilityFacilityIdEncountersPatientsEncounterClassRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/encounters/patients/all": {
+      id: "/_app/facility/$facilityId/encounters/patients/all";
+      path: "/facility/$facilityId/encounters/patients/all";
+      fullPath: "/facility/$facilityId/encounters/patients/all";
+      preLoaderRoute: typeof AppFacilityFacilityIdEncountersPatientsAllRouteImport;
       parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/locations/$locationId/": {
@@ -5005,6 +5798,97 @@ declare module "@tanstack/react-router" {
       path: "/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId";
       fullPath: "/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId";
       preLoaderRoute: typeof AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/": {
+      id: "/_app/facility/$facilityId/patient/$patientId/";
+      path: "/facility/$facilityId/patient/$patientId";
+      fullPath: "/facility/$facilityId/patient/$patientId/";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/accounts": {
+      id: "/_app/facility/$facilityId/patient/$patientId/accounts";
+      path: "/facility/$facilityId/patient/$patientId/accounts";
+      fullPath: "/facility/$facilityId/patient/$patientId/accounts";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdAccountsRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/clinical_history": {
+      id: "/_app/facility/$facilityId/patient/$patientId/clinical_history";
+      path: "/facility/$facilityId/patient/$patientId/clinical_history";
+      fullPath: "/facility/$facilityId/patient/$patientId/clinical_history";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdClinical_historyRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/consultation": {
+      id: "/_app/facility/$facilityId/patient/$patientId/consultation";
+      path: "/facility/$facilityId/patient/$patientId/consultation";
+      fullPath: "/facility/$facilityId/patient/$patientId/consultation";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdConsultationRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/demography": {
+      id: "/_app/facility/$facilityId/patient/$patientId/demography";
+      path: "/facility/$facilityId/patient/$patientId/demography";
+      fullPath: "/facility/$facilityId/patient/$patientId/demography";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdDemographyRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/encounters": {
+      id: "/_app/facility/$facilityId/patient/$patientId/encounters";
+      path: "/facility/$facilityId/patient/$patientId/encounters";
+      fullPath: "/facility/$facilityId/patient/$patientId/encounters";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncountersRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/files": {
+      id: "/_app/facility/$facilityId/patient/$patientId/files";
+      path: "/facility/$facilityId/patient/$patientId/files";
+      fullPath: "/facility/$facilityId/patient/$patientId/files";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdFilesRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/notes": {
+      id: "/_app/facility/$facilityId/patient/$patientId/notes";
+      path: "/facility/$facilityId/patient/$patientId/notes";
+      fullPath: "/facility/$facilityId/patient/$patientId/notes";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdNotesRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/referrals": {
+      id: "/_app/facility/$facilityId/patient/$patientId/referrals";
+      path: "/facility/$facilityId/patient/$patientId/referrals";
+      fullPath: "/facility/$facilityId/patient/$patientId/referrals";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdReferralsRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/resource_requests": {
+      id: "/_app/facility/$facilityId/patient/$patientId/resource_requests";
+      path: "/facility/$facilityId/patient/$patientId/resource_requests";
+      fullPath: "/facility/$facilityId/patient/$patientId/resource_requests";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdResource_requestsRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/update": {
+      id: "/_app/facility/$facilityId/patient/$patientId/update";
+      path: "/facility/$facilityId/patient/$patientId/update";
+      fullPath: "/facility/$facilityId/patient/$patientId/update";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdUpdateRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/updates": {
+      id: "/_app/facility/$facilityId/patient/$patientId/updates";
+      path: "/facility/$facilityId/patient/$patientId/updates";
+      fullPath: "/facility/$facilityId/patient/$patientId/updates";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdUpdatesRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/users": {
+      id: "/_app/facility/$facilityId/patient/$patientId/users";
+      path: "/facility/$facilityId/patient/$patientId/users";
+      fullPath: "/facility/$facilityId/patient/$patientId/users";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdUsersRouteImport;
       parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/resource/$id/": {
@@ -5427,6 +6311,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppOrganizationNavOrganizationIdChildrenIdUsersRouteImport;
       parentRoute: typeof AppRoute;
     };
+    "/_app/patient/$patientId/questionnaire/$questionnaireId/": {
+      id: "/_app/patient/$patientId/questionnaire/$questionnaireId/";
+      path: "/patient/$patientId/questionnaire/$questionnaireId";
+      fullPath: "/patient/$patientId/questionnaire/$questionnaireId/";
+      preLoaderRoute: typeof AppPatientPatientIdQuestionnaireQuestionnaireIdIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/patient/$patientId/questionnaire_response/$questionnaireResponseId/print": {
+      id: "/_app/patient/$patientId/questionnaire_response/$questionnaireResponseId/print";
+      path: "/patient/$patientId/questionnaire_response/$questionnaireResponseId/print";
+      fullPath: "/patient/$patientId/questionnaire_response/$questionnaireResponseId/print";
+      preLoaderRoute: typeof AppPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     "/_patient/facility/$facilityId/appointments/$appointmentId/success": {
       id: "/_patient/facility/$facilityId/appointments/$appointmentId/success";
       path: "/facility/$facilityId/appointments/$appointmentId/success";
@@ -5454,20 +6352,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/facility/$facilityId/appointments/$staffId/patient-select";
       preLoaderRoute: typeof PatientFacilityFacilityIdAppointmentsStaffIdPatientSelectRouteImport;
       parentRoute: typeof PatientRoute;
-    };
-    "/_app/_legacy/facility/$facilityId/patient/$patientId/consultation": {
-      id: "/_app/_legacy/facility/$facilityId/patient/$patientId/consultation";
-      path: "/facility/$facilityId/patient/$patientId/consultation";
-      fullPath: "/facility/$facilityId/patient/$patientId/consultation";
-      preLoaderRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdConsultationRouteImport;
-      parentRoute: typeof AppLegacyRoute;
-    };
-    "/_app/_legacy/facility/$facilityId/patient/$patientId/questionnaire": {
-      id: "/_app/_legacy/facility/$facilityId/patient/$patientId/questionnaire";
-      path: "/facility/$facilityId/patient/$patientId/questionnaire";
-      fullPath: "/facility/$facilityId/patient/$patientId/questionnaire";
-      preLoaderRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteImport;
-      parentRoute: typeof AppLegacyRoute;
     };
     "/_app/facility/$facilityId/billing/account/$accountId/": {
       id: "/_app/facility/$facilityId/billing/account/$accountId/";
@@ -5601,6 +6485,27 @@ declare module "@tanstack/react-router" {
       fullPath: "/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId";
       preLoaderRoute: typeof AppFacilityFacilityIdLocationsLocationIdService_requestsServiceRequestIdRouteImport;
       parentRoute: typeof AppFacilityFacilityIdLocationsLocationIdRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/appointments/": {
+      id: "/_app/facility/$facilityId/patient/$patientId/appointments/";
+      path: "/facility/$facilityId/patient/$patientId/appointments";
+      fullPath: "/facility/$facilityId/patient/$patientId/appointments/";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/history/$tab": {
+      id: "/_app/facility/$facilityId/patient/$patientId/history/$tab";
+      path: "/facility/$facilityId/patient/$patientId/history/$tab";
+      fullPath: "/facility/$facilityId/patient/$patientId/history/$tab";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdHistoryTabRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/questionnaire/": {
+      id: "/_app/facility/$facilityId/patient/$patientId/questionnaire/";
+      path: "/facility/$facilityId/patient/$patientId/questionnaire";
+      fullPath: "/facility/$facilityId/patient/$patientId/questionnaire/";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRouteImport;
+      parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/queue/$queueId/token/$tokenId": {
       id: "/_app/facility/$facilityId/queue/$queueId/token/$tokenId";
@@ -5812,6 +6717,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppOrganizationNavOrganizationIdChildrenIdSettingsReferralsRouteImport;
       parentRoute: typeof AppRoute;
     };
+    "/_app/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print": {
+      id: "/_app/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print";
+      path: "/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print";
+      fullPath: "/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print";
+      preLoaderRoute: typeof AppPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/patient/$patientId/questionnaire/$questionnaireId/responses/print": {
+      id: "/_app/patient/$patientId/questionnaire/$questionnaireId/responses/print";
+      path: "/patient/$patientId/questionnaire/$questionnaireId/responses/print";
+      fullPath: "/patient/$patientId/questionnaire/$questionnaireId/responses/print";
+      preLoaderRoute: typeof AppPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     "/_patient/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId": {
       id: "/_patient/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId";
       path: "/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId";
@@ -5825,13 +6744,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/facility/$facilityId/appointments/$staffId/otp/$page";
       preLoaderRoute: typeof PublicFacilityFacilityIdAppointmentsStaffIdOtpPageRouteImport;
       parentRoute: typeof PublicRoute;
-    };
-    "/_app/_legacy/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId": {
-      id: "/_app/_legacy/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId";
-      path: "/$questionnaireId";
-      fullPath: "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId";
-      preLoaderRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRouteImport;
-      parentRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRoute;
     };
     "/_app/facility/$facilityId/billing/account/$accountId/$tab/": {
       id: "/_app/facility/$facilityId/billing/account/$accountId/$tab/";
@@ -5887,6 +6799,48 @@ declare module "@tanstack/react-router" {
       path: "/facility/$facilityId/patient/$patientId/appointments/$appointmentId/print";
       fullPath: "/facility/$facilityId/patient/$patientId/appointments/$appointmentId/print";
       preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/": {
+      id: "/_app/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/";
+      path: "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId";
+      fullPath: "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print": {
+      id: "/_app/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print";
+      path: "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print";
+      fullPath: "/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab": {
+      id: "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab";
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab";
+      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print": {
+      id: "/_app/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print";
+      path: "/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print";
+      fullPath: "/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdPrescriptionPrescriptionIdPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/": {
+      id: "/_app/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/";
+      path: "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId";
+      fullPath: "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print": {
+      id: "/_app/facility/$facilityId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print";
+      path: "/facility/$facilityId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print";
+      fullPath: "/facility/$facilityId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport;
       parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/": {
@@ -5994,26 +6948,40 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppFacilityFacilityIdSettingsQuestionnairesIdVersionsRevisionIdRouteImport;
       parentRoute: typeof AppFacilityFacilityIdSettingsQuestionnairesRoute;
     };
-    "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab": {
-      id: "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab";
-      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab";
-      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab";
-      preLoaderRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRouteImport;
-      parentRoute: typeof AppLegacyRoute;
+    "/_app/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/": {
+      id: "/_app/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/";
+      path: "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId";
+      fullPath: "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/";
+      preLoaderRoute: typeof AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRouteImport;
+      parentRoute: typeof AppRoute;
     };
-    "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire": {
-      id: "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire";
-      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire";
-      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire";
-      preLoaderRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteImport;
-      parentRoute: typeof AppLegacyRoute;
+    "/_app/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print": {
+      id: "/_app/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print";
+      path: "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print";
+      fullPath: "/organization/$organizationId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print";
+      preLoaderRoute: typeof AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRouteImport;
+      parentRoute: typeof AppRoute;
     };
-    "/_app/_legacy/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab": {
-      id: "/_app/_legacy/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab";
+    "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab": {
+      id: "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab";
       path: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab";
       fullPath: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab";
-      preLoaderRoute: typeof AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRouteImport;
-      parentRoute: typeof AppLegacyRoute;
+      preLoaderRoute: typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/organization/$organizationId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print": {
+      id: "/_app/organization/$organizationId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print";
+      path: "/organization/$organizationId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print";
+      fullPath: "/organization/$organizationId/patient/$patientId/questionnaire_response/$questionnaireResponseId/print";
+      preLoaderRoute: typeof AppOrganizationOrganizationIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/patient/$patientId/history/questionnaire/$questionnaireId/responses/print": {
+      id: "/_app/patient/$patientId/history/questionnaire/$questionnaireId/responses/print";
+      path: "/patient/$patientId/history/questionnaire/$questionnaireId/responses/print";
+      fullPath: "/patient/$patientId/history/questionnaire/$questionnaireId/responses/print";
+      preLoaderRoute: typeof AppPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRouteImport;
+      parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType": {
       id: "/_app/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType";
@@ -6085,12 +7053,75 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppFacilityFacilityIdLocationsLocationIdMedication_returnOrderDeliveryOrderIdPrintRouteImport;
       parentRoute: typeof AppFacilityFacilityIdLocationsLocationIdRoute;
     };
-    "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId": {
-      id: "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId";
-      path: "/$questionnaireId";
-      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId";
-      preLoaderRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdRouteImport;
-      parentRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRoute;
+    "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId": {
+      id: "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId";
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId";
+      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/prescriptions/print": {
+      id: "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/prescriptions/print";
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/prescriptions/print";
+      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/prescriptions/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdPrescriptionsPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/": {
+      id: "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/";
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire";
+      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId": {
+      id: "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId";
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId";
+      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportReportIdRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print": {
+      id: "/_app/facility/$facilityId/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print";
+      path: "/facility/$facilityId/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print";
+      fullPath: "/facility/$facilityId/patient/$patientId/history/questionnaire_response/$questionnaireResponseId/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/responses/print": {
+      id: "/_app/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/responses/print";
+      path: "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/responses/print";
+      fullPath: "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId/responses/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print": {
+      id: "/_app/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print";
+      path: "/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print";
+      fullPath: "/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/organization/$organizationId/patient/$patientId/questionnaire/$questionnaireId/responses/print": {
+      id: "/_app/organization/$organizationId/patient/$patientId/questionnaire/$questionnaireId/responses/print";
+      path: "/organization/$organizationId/patient/$patientId/questionnaire/$questionnaireId/responses/print";
+      fullPath: "/organization/$organizationId/patient/$patientId/questionnaire/$questionnaireId/responses/print";
+      preLoaderRoute: typeof AppOrganizationOrganizationIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/organization/$organizationId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print": {
+      id: "/_app/organization/$organizationId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print";
+      path: "/organization/$organizationId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print";
+      fullPath: "/organization/$organizationId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print";
+      preLoaderRoute: typeof AppOrganizationOrganizationIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId": {
+      id: "/_app/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId";
+      path: "/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId";
+      fullPath: "/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId";
+      preLoaderRoute: typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRouteImport;
+      parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/": {
       id: "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/";
@@ -6133,6 +7164,48 @@ declare module "@tanstack/react-router" {
       fullPath: "/facility/$facilityId/locations/$locationId/inventory/internal/$type/orders/new";
       preLoaderRoute: typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalTypeOrdersNewRouteImport;
       parentRoute: typeof AppFacilityFacilityIdLocationsLocationIdRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/": {
+      id: "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/";
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId";
+      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/": {
+      id: "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/";
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId";
+      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print": {
+      id: "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print";
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print";
+      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug": {
+      id: "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug";
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug";
+      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportTemplateTemplateSlugRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/history/questionnaire/$questionnaireId/responses/print": {
+      id: "/_app/facility/$facilityId/patient/$patientId/history/questionnaire/$questionnaireId/responses/print";
+      path: "/facility/$facilityId/patient/$patientId/history/questionnaire/$questionnaireId/responses/print";
+      fullPath: "/facility/$facilityId/patient/$patientId/history/questionnaire/$questionnaireId/responses/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print": {
+      id: "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print";
+      path: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print";
+      fullPath: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire_response/$questionnaireResponseId/print";
+      preLoaderRoute: typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRouteImport;
+      parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/": {
       id: "/_app/facility/$facilityId/locations/$locationId/inventory/external/deliveries/$tab/$id/";
@@ -6246,78 +7319,36 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsPatientPatientIdPrescriptionsPrescriptionIdsPrintRouteImport;
       parentRoute: typeof AppFacilityFacilityIdLocationsLocationIdRoute;
     };
+    "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print": {
+      id: "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print";
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print";
+      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/type/$productType/administrations/print": {
+      id: "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/type/$productType/administrations/print";
+      path: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/type/$productType/administrations/print";
+      fullPath: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/type/$productType/administrations/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTypeProductTypeAdministrationsPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print": {
+      id: "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print";
+      path: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print";
+      fullPath: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId/responses/print";
+      preLoaderRoute: typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
   }
 }
 
-interface AppLegacyPatientPatientIdQuestionnaireRouteChildren {
-  AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute: typeof AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute;
-}
-
-const AppLegacyPatientPatientIdQuestionnaireRouteChildren: AppLegacyPatientPatientIdQuestionnaireRouteChildren =
-  {
-    AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute:
-      AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute,
-  };
-
-const AppLegacyPatientPatientIdQuestionnaireRouteWithChildren =
-  AppLegacyPatientPatientIdQuestionnaireRoute._addFileChildren(
-    AppLegacyPatientPatientIdQuestionnaireRouteChildren,
-  );
-
-interface AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteChildren {
-  AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRoute;
-}
-
-const AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteChildren: AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteChildren =
-  {
-    AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRoute:
-      AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRoute,
-  };
-
-const AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteWithChildren =
-  AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRoute._addFileChildren(
-    AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteChildren,
-  );
-
-interface AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteChildren {
-  AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdRoute;
-}
-
-const AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteChildren: AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteChildren =
-  {
-    AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdRoute:
-      AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdRoute,
-  };
-
-const AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteWithChildren =
-  AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRoute._addFileChildren(
-    AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteChildren,
-  );
-
 interface AppLegacyRouteChildren {
   AppLegacySplatRoute: typeof AppLegacySplatRoute;
-  AppLegacyPatientPatientIdQuestionnaireRoute: typeof AppLegacyPatientPatientIdQuestionnaireRouteWithChildren;
-  AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute;
-  AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteWithChildren;
-  AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute;
-  AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteWithChildren;
-  AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute: typeof AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute;
 }
 
 const AppLegacyRouteChildren: AppLegacyRouteChildren = {
   AppLegacySplatRoute: AppLegacySplatRoute,
-  AppLegacyPatientPatientIdQuestionnaireRoute:
-    AppLegacyPatientPatientIdQuestionnaireRouteWithChildren,
-  AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute:
-    AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute,
-  AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRoute:
-    AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteWithChildren,
-  AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute:
-    AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute,
-  AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRoute:
-    AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteWithChildren,
-  AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute:
-    AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute,
 };
 
 const AppLegacyRouteWithChildren = AppLegacyRoute._addFileChildren(
@@ -7204,16 +8235,38 @@ interface AppRouteChildren {
   AppUsersUsernameIndexRoute: typeof AppUsersUsernameIndexRoute;
   AppFacilityFacilityIdServicesServiceIdRouteRoute: typeof AppFacilityFacilityIdServicesServiceIdRouteRouteWithChildren;
   AppFacilityFacilityIdAppointmentsPrintRoute: typeof AppFacilityFacilityIdAppointmentsPrintRoute;
+  AppFacilityFacilityIdEncountersTabRoute: typeof AppFacilityFacilityIdEncountersTabRoute;
   AppFacilityFacilityIdLocationsLocationIdRoute: typeof AppFacilityFacilityIdLocationsLocationIdRouteWithChildren;
+  AppFacilityFacilityIdPatientCreateRoute: typeof AppFacilityFacilityIdPatientCreateRoute;
+  AppFacilityFacilityIdPatientsHomeRoute: typeof AppFacilityFacilityIdPatientsHomeRoute;
   AppFacilityFacilityIdResourceNewRoute: typeof AppFacilityFacilityIdResourceNewRoute;
   AppFacilityFacilityIdService_requestsServiceRequestIdRoute: typeof AppFacilityFacilityIdService_requestsServiceRequestIdRoute;
   AppOrganizationIdSettingsReferralsRoute: typeof AppOrganizationIdSettingsReferralsRoute;
+  AppPatientPatientIdHistoryTabRoute: typeof AppPatientPatientIdHistoryTabRoute;
   AppResponsibilitiesIdSettingsReferralsRoute: typeof AppResponsibilitiesIdSettingsReferralsRoute;
   AppFacilityFacilityIdAppointmentsIndexRoute: typeof AppFacilityFacilityIdAppointmentsIndexRoute;
+  AppFacilityFacilityIdEncountersIndexRoute: typeof AppFacilityFacilityIdEncountersIndexRoute;
+  AppFacilityFacilityIdPatientsIndexRoute: typeof AppFacilityFacilityIdPatientsIndexRoute;
   AppFacilityFacilityIdResourceIndexRoute: typeof AppFacilityFacilityIdResourceIndexRoute;
   AppFacilityFacilityIdServicesIndexRoute: typeof AppFacilityFacilityIdServicesIndexRoute;
   AppFacilityFacilityIdUsersIndexRoute: typeof AppFacilityFacilityIdUsersIndexRoute;
+  AppPatientPatientIdQuestionnaireIndexRoute: typeof AppPatientPatientIdQuestionnaireIndexRoute;
+  AppFacilityFacilityIdEncountersLocationsLocationIdRoute: typeof AppFacilityFacilityIdEncountersLocationsLocationIdRoute;
+  AppFacilityFacilityIdEncountersPatientsEncounterClassRoute: typeof AppFacilityFacilityIdEncountersPatientsEncounterClassRoute;
+  AppFacilityFacilityIdEncountersPatientsAllRoute: typeof AppFacilityFacilityIdEncountersPatientsAllRoute;
   AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute: typeof AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute;
+  AppFacilityFacilityIdPatientPatientIdAccountsRoute: typeof AppFacilityFacilityIdPatientPatientIdAccountsRoute;
+  AppFacilityFacilityIdPatientPatientIdClinical_historyRoute: typeof AppFacilityFacilityIdPatientPatientIdClinical_historyRoute;
+  AppFacilityFacilityIdPatientPatientIdConsultationRoute: typeof AppFacilityFacilityIdPatientPatientIdConsultationRoute;
+  AppFacilityFacilityIdPatientPatientIdDemographyRoute: typeof AppFacilityFacilityIdPatientPatientIdDemographyRoute;
+  AppFacilityFacilityIdPatientPatientIdEncountersRoute: typeof AppFacilityFacilityIdPatientPatientIdEncountersRoute;
+  AppFacilityFacilityIdPatientPatientIdFilesRoute: typeof AppFacilityFacilityIdPatientPatientIdFilesRoute;
+  AppFacilityFacilityIdPatientPatientIdNotesRoute: typeof AppFacilityFacilityIdPatientPatientIdNotesRoute;
+  AppFacilityFacilityIdPatientPatientIdReferralsRoute: typeof AppFacilityFacilityIdPatientPatientIdReferralsRoute;
+  AppFacilityFacilityIdPatientPatientIdResource_requestsRoute: typeof AppFacilityFacilityIdPatientPatientIdResource_requestsRoute;
+  AppFacilityFacilityIdPatientPatientIdUpdateRoute: typeof AppFacilityFacilityIdPatientPatientIdUpdateRoute;
+  AppFacilityFacilityIdPatientPatientIdUpdatesRoute: typeof AppFacilityFacilityIdPatientPatientIdUpdatesRoute;
+  AppFacilityFacilityIdPatientPatientIdUsersRoute: typeof AppFacilityFacilityIdPatientPatientIdUsersRoute;
   AppFacilityFacilityIdResourceIdPrintRoute: typeof AppFacilityFacilityIdResourceIdPrintRoute;
   AppFacilityFacilityIdResourceIdUpdateRoute: typeof AppFacilityFacilityIdResourceIdUpdateRoute;
   AppFacilityFacilityIdUsersUsernameTabRoute: typeof AppFacilityFacilityIdUsersUsernameTabRoute;
@@ -7222,30 +8275,69 @@ interface AppRouteChildren {
   AppOrganizationNavOrganizationIdChildrenIdReferralsRoute: typeof AppOrganizationNavOrganizationIdChildrenIdReferralsRoute;
   AppOrganizationNavOrganizationIdChildrenIdService_accountsRoute: typeof AppOrganizationNavOrganizationIdChildrenIdService_accountsRoute;
   AppOrganizationNavOrganizationIdChildrenIdUsersRoute: typeof AppOrganizationNavOrganizationIdChildrenIdUsersRoute;
+  AppPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute: typeof AppPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
   AppFacilityFacilityIdBillingAccountIndexRoute: typeof AppFacilityFacilityIdBillingAccountIndexRoute;
   AppFacilityFacilityIdBillingInvoicesIndexRoute: typeof AppFacilityFacilityIdBillingInvoicesIndexRoute;
   AppFacilityFacilityIdBillingPaymentsIndexRoute: typeof AppFacilityFacilityIdBillingPaymentsIndexRoute;
+  AppFacilityFacilityIdEncountersPatientsIndexRoute: typeof AppFacilityFacilityIdEncountersPatientsIndexRoute;
+  AppFacilityFacilityIdPatientPatientIdIndexRoute: typeof AppFacilityFacilityIdPatientPatientIdIndexRoute;
   AppFacilityFacilityIdResourceIdIndexRoute: typeof AppFacilityFacilityIdResourceIdIndexRoute;
   AppFacilityFacilityIdUsersUsernameIndexRoute: typeof AppFacilityFacilityIdUsersUsernameIndexRoute;
   AppOrganizationNavOrganizationIdChildrenIdIndexRoute: typeof AppOrganizationNavOrganizationIdChildrenIdIndexRoute;
+  AppPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute: typeof AppPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute;
   AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute: typeof AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute;
   AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute: typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute;
   AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute: typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute;
   AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRoute: typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRoute;
+  AppFacilityFacilityIdPatientPatientIdHistoryTabRoute: typeof AppFacilityFacilityIdPatientPatientIdHistoryTabRoute;
   AppFacilityFacilityIdQueueQueueIdTokenTokenIdRoute: typeof AppFacilityFacilityIdQueueQueueIdTokenTokenIdRoute;
   AppOrganizationNavOrganizationIdChildrenIdSettingsReferralsRoute: typeof AppOrganizationNavOrganizationIdChildrenIdSettingsReferralsRoute;
+  AppPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute: typeof AppPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  AppPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute: typeof AppPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
   AppFacilityFacilityIdBillingAccountAccountIdIndexRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdIndexRoute;
   AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute: typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute;
   AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute: typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute;
+  AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute: typeof AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute;
+  AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute: typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute;
   AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute;
   AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute;
   AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdPrintRoute: typeof AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdPrintRoute;
+  AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute: typeof AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute;
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute;
+  AppFacilityFacilityIdPatientPatientIdPrescriptionPrescriptionIdPrintRoute: typeof AppFacilityFacilityIdPatientPatientIdPrescriptionPrescriptionIdPrintRoute;
+  AppFacilityFacilityIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute: typeof AppFacilityFacilityIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
   AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdCompletedRoute: typeof AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdCompletedRoute;
   AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdOngoingRoute: typeof AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdOngoingRoute;
+  AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute: typeof AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute;
+  AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute: typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute;
+  AppOrganizationOrganizationIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute: typeof AppOrganizationOrganizationIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  AppPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute: typeof AppPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute;
   AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute;
   AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdIndexRoute: typeof AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdIndexRoute;
+  AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute: typeof AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute;
+  AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute: typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute;
   AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdIndexRoute: typeof AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdIndexRoute;
+  AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute: typeof AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute;
   AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute;
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute;
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdPrescriptionsPrintRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdPrescriptionsPrintRoute;
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportReportIdRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportReportIdRoute;
+  AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute: typeof AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute: typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  AppFacilityFacilityIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute: typeof AppFacilityFacilityIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute;
+  AppOrganizationOrganizationIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute: typeof AppOrganizationOrganizationIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  AppOrganizationOrganizationIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute: typeof AppOrganizationOrganizationIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute;
+  AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute: typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute;
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireIndexRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireIndexRoute;
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportTemplateTemplateSlugRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportTemplateTemplateSlugRoute;
+  AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute: typeof AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute: typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute;
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdIndexRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdIndexRoute;
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdIndexRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdIndexRoute;
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTypeProductTypeAdministrationsPrintRoute: typeof AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTypeProductTypeAdministrationsPrintRoute;
+  AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute: typeof AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute;
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -7283,24 +8375,67 @@ const AppRouteChildren: AppRouteChildren = {
     AppFacilityFacilityIdServicesServiceIdRouteRouteWithChildren,
   AppFacilityFacilityIdAppointmentsPrintRoute:
     AppFacilityFacilityIdAppointmentsPrintRoute,
+  AppFacilityFacilityIdEncountersTabRoute:
+    AppFacilityFacilityIdEncountersTabRoute,
   AppFacilityFacilityIdLocationsLocationIdRoute:
     AppFacilityFacilityIdLocationsLocationIdRouteWithChildren,
+  AppFacilityFacilityIdPatientCreateRoute:
+    AppFacilityFacilityIdPatientCreateRoute,
+  AppFacilityFacilityIdPatientsHomeRoute:
+    AppFacilityFacilityIdPatientsHomeRoute,
   AppFacilityFacilityIdResourceNewRoute: AppFacilityFacilityIdResourceNewRoute,
   AppFacilityFacilityIdService_requestsServiceRequestIdRoute:
     AppFacilityFacilityIdService_requestsServiceRequestIdRoute,
   AppOrganizationIdSettingsReferralsRoute:
     AppOrganizationIdSettingsReferralsRoute,
+  AppPatientPatientIdHistoryTabRoute: AppPatientPatientIdHistoryTabRoute,
   AppResponsibilitiesIdSettingsReferralsRoute:
     AppResponsibilitiesIdSettingsReferralsRoute,
   AppFacilityFacilityIdAppointmentsIndexRoute:
     AppFacilityFacilityIdAppointmentsIndexRoute,
+  AppFacilityFacilityIdEncountersIndexRoute:
+    AppFacilityFacilityIdEncountersIndexRoute,
+  AppFacilityFacilityIdPatientsIndexRoute:
+    AppFacilityFacilityIdPatientsIndexRoute,
   AppFacilityFacilityIdResourceIndexRoute:
     AppFacilityFacilityIdResourceIndexRoute,
   AppFacilityFacilityIdServicesIndexRoute:
     AppFacilityFacilityIdServicesIndexRoute,
   AppFacilityFacilityIdUsersIndexRoute: AppFacilityFacilityIdUsersIndexRoute,
+  AppPatientPatientIdQuestionnaireIndexRoute:
+    AppPatientPatientIdQuestionnaireIndexRoute,
+  AppFacilityFacilityIdEncountersLocationsLocationIdRoute:
+    AppFacilityFacilityIdEncountersLocationsLocationIdRoute,
+  AppFacilityFacilityIdEncountersPatientsEncounterClassRoute:
+    AppFacilityFacilityIdEncountersPatientsEncounterClassRoute,
+  AppFacilityFacilityIdEncountersPatientsAllRoute:
+    AppFacilityFacilityIdEncountersPatientsAllRoute,
   AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute:
     AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute,
+  AppFacilityFacilityIdPatientPatientIdAccountsRoute:
+    AppFacilityFacilityIdPatientPatientIdAccountsRoute,
+  AppFacilityFacilityIdPatientPatientIdClinical_historyRoute:
+    AppFacilityFacilityIdPatientPatientIdClinical_historyRoute,
+  AppFacilityFacilityIdPatientPatientIdConsultationRoute:
+    AppFacilityFacilityIdPatientPatientIdConsultationRoute,
+  AppFacilityFacilityIdPatientPatientIdDemographyRoute:
+    AppFacilityFacilityIdPatientPatientIdDemographyRoute,
+  AppFacilityFacilityIdPatientPatientIdEncountersRoute:
+    AppFacilityFacilityIdPatientPatientIdEncountersRoute,
+  AppFacilityFacilityIdPatientPatientIdFilesRoute:
+    AppFacilityFacilityIdPatientPatientIdFilesRoute,
+  AppFacilityFacilityIdPatientPatientIdNotesRoute:
+    AppFacilityFacilityIdPatientPatientIdNotesRoute,
+  AppFacilityFacilityIdPatientPatientIdReferralsRoute:
+    AppFacilityFacilityIdPatientPatientIdReferralsRoute,
+  AppFacilityFacilityIdPatientPatientIdResource_requestsRoute:
+    AppFacilityFacilityIdPatientPatientIdResource_requestsRoute,
+  AppFacilityFacilityIdPatientPatientIdUpdateRoute:
+    AppFacilityFacilityIdPatientPatientIdUpdateRoute,
+  AppFacilityFacilityIdPatientPatientIdUpdatesRoute:
+    AppFacilityFacilityIdPatientPatientIdUpdatesRoute,
+  AppFacilityFacilityIdPatientPatientIdUsersRoute:
+    AppFacilityFacilityIdPatientPatientIdUsersRoute,
   AppFacilityFacilityIdResourceIdPrintRoute:
     AppFacilityFacilityIdResourceIdPrintRoute,
   AppFacilityFacilityIdResourceIdUpdateRoute:
@@ -7317,18 +8452,26 @@ const AppRouteChildren: AppRouteChildren = {
     AppOrganizationNavOrganizationIdChildrenIdService_accountsRoute,
   AppOrganizationNavOrganizationIdChildrenIdUsersRoute:
     AppOrganizationNavOrganizationIdChildrenIdUsersRoute,
+  AppPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute:
+    AppPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute,
   AppFacilityFacilityIdBillingAccountIndexRoute:
     AppFacilityFacilityIdBillingAccountIndexRoute,
   AppFacilityFacilityIdBillingInvoicesIndexRoute:
     AppFacilityFacilityIdBillingInvoicesIndexRoute,
   AppFacilityFacilityIdBillingPaymentsIndexRoute:
     AppFacilityFacilityIdBillingPaymentsIndexRoute,
+  AppFacilityFacilityIdEncountersPatientsIndexRoute:
+    AppFacilityFacilityIdEncountersPatientsIndexRoute,
+  AppFacilityFacilityIdPatientPatientIdIndexRoute:
+    AppFacilityFacilityIdPatientPatientIdIndexRoute,
   AppFacilityFacilityIdResourceIdIndexRoute:
     AppFacilityFacilityIdResourceIdIndexRoute,
   AppFacilityFacilityIdUsersUsernameIndexRoute:
     AppFacilityFacilityIdUsersUsernameIndexRoute,
   AppOrganizationNavOrganizationIdChildrenIdIndexRoute:
     AppOrganizationNavOrganizationIdChildrenIdIndexRoute,
+  AppPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute:
+    AppPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute,
   AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute:
     AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute,
   AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute:
@@ -7337,34 +8480,104 @@ const AppRouteChildren: AppRouteChildren = {
     AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute,
   AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRoute:
     AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRoute,
+  AppFacilityFacilityIdPatientPatientIdHistoryTabRoute:
+    AppFacilityFacilityIdPatientPatientIdHistoryTabRoute,
   AppFacilityFacilityIdQueueQueueIdTokenTokenIdRoute:
     AppFacilityFacilityIdQueueQueueIdTokenTokenIdRoute,
   AppOrganizationNavOrganizationIdChildrenIdSettingsReferralsRoute:
     AppOrganizationNavOrganizationIdChildrenIdSettingsReferralsRoute,
+  AppPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute:
+    AppPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute,
+  AppPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute:
+    AppPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute,
   AppFacilityFacilityIdBillingAccountAccountIdIndexRoute:
     AppFacilityFacilityIdBillingAccountAccountIdIndexRoute,
   AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute:
     AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute,
   AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute:
     AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute,
+  AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute:
+    AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute,
+  AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute:
+    AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute,
   AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute:
     AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute,
   AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute:
     AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute,
   AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdPrintRoute:
     AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdPrintRoute,
+  AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute:
+    AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute,
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute:
+    AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute,
+  AppFacilityFacilityIdPatientPatientIdPrescriptionPrescriptionIdPrintRoute:
+    AppFacilityFacilityIdPatientPatientIdPrescriptionPrescriptionIdPrintRoute,
+  AppFacilityFacilityIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute:
+    AppFacilityFacilityIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute,
   AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdCompletedRoute:
     AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdCompletedRoute,
   AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdOngoingRoute:
     AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdOngoingRoute,
+  AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute:
+    AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdPrintRoute,
+  AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute:
+    AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute,
+  AppOrganizationOrganizationIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute:
+    AppOrganizationOrganizationIdPatientPatientIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute,
+  AppPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute:
+    AppPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute,
   AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute:
     AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute,
   AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdIndexRoute:
     AppFacilityFacilityIdPatientPatientIdAppointmentsAppointmentIdIndexRoute,
+  AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute:
+    AppFacilityFacilityIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute,
+  AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute:
+    AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdIndexRoute,
   AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdIndexRoute:
     AppFacilityFacilityIdPractitionerPractitionerIdQueuesQueueIdIndexRoute,
+  AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute:
+    AppOrganizationOrganizationIdPatientPatientIdDiagnostic_reportsDiagnosticReportIdIndexRoute,
   AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute:
     AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute,
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute:
+    AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute,
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdPrescriptionsPrintRoute:
+    AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdPrescriptionsPrintRoute,
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportReportIdRoute:
+    AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportReportIdRoute,
+  AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute:
+    AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaire_responseQuestionnaireResponseIdPrintRoute,
+  AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute:
+    AppFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute,
+  AppFacilityFacilityIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute:
+    AppFacilityFacilityIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute,
+  AppOrganizationOrganizationIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute:
+    AppOrganizationOrganizationIdPatientPatientIdQuestionnaireQuestionnaireIdResponsesPrintRoute,
+  AppOrganizationOrganizationIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute:
+    AppOrganizationOrganizationIdPatientPatientIdService_requestServiceRequestIdDiagnostic_reportsPrintRoute,
+  AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute:
+    AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdConsentsConsentIdRoute,
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireIndexRoute:
+    AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireIndexRoute,
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute:
+    AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute,
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportTemplateTemplateSlugRoute:
+    AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdReportTemplateTemplateSlugRoute,
+  AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute:
+    AppFacilityFacilityIdPatientPatientIdHistoryQuestionnaireQuestionnaireIdResponsesPrintRoute,
+  AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute:
+    AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdPrintRoute,
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdIndexRoute:
+    AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdIndexRoute,
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdIndexRoute:
+    AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaire_responseQuestionnaireResponseIdIndexRoute,
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute:
+    AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute,
+  AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTypeProductTypeAdministrationsPrintRoute:
+    AppFacilityFacilityIdPatientPatientIdEncounterEncounterIdTypeProductTypeAdministrationsPrintRoute,
+  AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute:
+    AppOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdQuestionnaireQuestionnaireIdResponsesPrintRoute,
 };
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren);
