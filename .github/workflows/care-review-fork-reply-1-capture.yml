@@ -37,10 +37,12 @@ permissions: {}
 
 # Cheap trigger-level gate on the event payload only, so most comments never spin up Stage 2:
 #   - upstream repo, humans only (see the reply agent's bot rationale);
-#   - not a draft — unsolicited replies on unfinished work stay muted, as care-review mutes reviews;
-#   - a reply inside an existing thread, or a comment that mentions `@github-actions`. A new top-level
-#     review comment with no mention can never be a reply to care-review, so a human's own review with
-#     twenty inline comments starts nothing.
+#   - a reply inside an existing thread, on a non-draft PR only: unsolicited replies on unfinished
+#     work stay muted, as care-review mutes reviews; or
+#   - a comment that mentions `@github-actions`, draft or not: an explicit ask gets an answer, the
+#     same rule the reply agent applies to conversation mentions.
+# A new top-level review comment with no mention can never be a reply to care-review, so a human's
+# own review with twenty inline comments starts nothing.
 # Whose thread a reply is in needs a token, so Stage 2 owns that check and must not dispatch Stage 3
 # unless it passes.
 jobs:
@@ -49,8 +51,8 @@ jobs:
     if: >-
       ${{ github.repository == 'ohcnetwork/care_fe' &&
           github.event.comment.user.type != 'Bot' &&
-          github.event.pull_request.draft == false &&
-          (github.event.comment.in_reply_to_id != null ||
+          ((github.event.pull_request.draft == false &&
+            github.event.comment.in_reply_to_id != null) ||
            contains(github.event.comment.body, '@github-actions')) }}
     steps:
       # Pointers only. Stage 2 re-fetches the comment via the API by id, so the attacker-controlled

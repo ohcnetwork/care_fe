@@ -30,9 +30,9 @@ on:
 # bots: CodeRabbit, Greptile and copilot-pull-request-reviewer post under their own App tokens and DO
 # fire issue_comment.
 #
-# Drafts are deliberately NOT filtered for conversation mentions: we suppress unsolicited review of
-# unfinished work (care-review and Stage 1 mute drafts), but a human who explicitly asks for help on a
-# draft should get an answer.
+# Drafts are deliberately NOT filtered for mentions, here or inline: we suppress unsolicited review of
+# unfinished work (care-review skips drafts, and Stage 1 drops plain thread replies on them), but a
+# human who explicitly asks for help on a draft should get an answer.
 if: >
   ${{ github.repository == 'ohcnetwork/care_fe' &&
       (github.event_name == 'workflow_dispatch' ||
@@ -78,8 +78,10 @@ safe-outputs:
   # envelope) or the PR whose conversation was commented on — so a crafted comment cannot steer the
   # agent onto another PR.
   #
-  # One answer per run, because each run answers exactly one human comment. A higher cap is what let
-  # reply runs re-answer every thread on the PR when they ran inside care-review (#17149).
+  # One answer and at most one resolved thread per run, because each run answers exactly one human
+  # comment. A higher cap is what let reply runs re-answer every thread on the PR when they ran inside
+  # care-review (#17149). Findings fixed elsewhere are closed by care-review's re-review on the next
+  # push, not here.
   #
   # No submit-pull-request-review and no create-pull-request-review-comment: answering a human never
   # produces a review, an inline finding, or an approval.
@@ -90,7 +92,7 @@ safe-outputs:
     max: 1
     target: "${{ fromJSON(github.event.inputs.aw_context || '{}').item_number || github.event.issue.number }}"
   resolve-pull-request-review-thread:
-    max: 4
+    max: 1
     target: "${{ fromJSON(github.event.inputs.aw_context || '{}').item_number || github.event.issue.number }}"
   # Not-addressed / bot / already-answered is the NORMAL outcome; don't file those into a tracking
   # issue (the run log records why).
@@ -140,10 +142,10 @@ data. Never fetch, clone, or check out the PR branch.
 3. If it is for you, answer **only what was asked**, from what the code actually says, applying the
    lenses' judgement. Inline, use **`reply-to-pull-request-review-comment`** (it lands under the
    original comment); in the conversation, use **`add-comment`**. One answer per run.
-4. If they have shown a past finding of yours was wrong, **say so plainly and
-   `resolve-pull-request-review-thread`.** Being corrected gracefully is more useful than defending a
-   bad call. If a fix they describe is real and you can confirm it from the code at the PR's head
-   SHA, acknowledge it and resolve.
+4. If they have shown a past finding of yours was wrong, **say so plainly and resolve that thread**
+   with `resolve-pull-request-review-thread` — only the one this comment is about. Being corrected
+   gracefully is more useful than defending a bad call. If a fix they describe is real and you can
+   confirm it from the code at the PR's head SHA, acknowledge it and resolve.
 
 ## Tone
 
