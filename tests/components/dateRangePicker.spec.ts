@@ -139,6 +139,7 @@ test("popover discards drafts on Escape and outside click, and closes on Apply",
   const trigger = page.getByRole("button", { name: "Select date range", exact: true });
   await trigger.click();
   await day(page, "2026-11-03").click();
+  await page.getByRole("button", { name: "November 2026", exact: true }).focus();
   await page.keyboard.press("Escape");
   await trigger.click();
   await expect(from(page)).toHaveValue("");
@@ -311,4 +312,118 @@ test("a populated popover starts on To rather than letting autofocus select From
   await day(page, "2026-11-16").click();
   await expect(from(page)).toHaveValue("09/11/2026");
   await expect(to(page)).toHaveValue("16/11/2026");
+});
+
+test("arrow keys select and edit date segments, clamping month and leap-year ends", async ({ page }) => {
+  await open(page);
+  const input = from(page);
+  await input.fill("31/01/2024");
+  await input.evaluate((element: HTMLInputElement) => element.setSelectionRange(0, 2));
+  await input.press("ArrowRight");
+  expect(await input.evaluate((element: HTMLInputElement) => [element.selectionStart, element.selectionEnd])).toEqual([3, 5]);
+  await input.press("ArrowUp");
+  await expect(input).toHaveValue("29/02/2024");
+  await input.press("ArrowRight");
+  await input.press("ArrowUp");
+  await expect(input).toHaveValue("28/02/2025");
+  await input.press("ArrowLeft");
+  await input.press("ArrowLeft");
+  await input.press("ArrowDown");
+  await expect(input).toHaveValue("27/02/2025");
+});
+
+test("selected segments accept numeric replacement and advance to the next segment", async ({ page }) => {
+  await open(page);
+  const input = from(page);
+  await input.fill("09/11/2026");
+  await input.evaluate((element: HTMLInputElement) => element.setSelectionRange(0, 2));
+  await input.pressSequentially("16052027");
+  await expect(input).toHaveValue("16/05/2027");
+  expect(await input.evaluate((element: HTMLInputElement) => [element.selectionStart, element.selectionEnd])).toEqual([6, 10]);
+  await input.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
+  await input.pressSequentially("03112026");
+  await expect(input).toHaveValue("03/11/2026");
+});
+
+test("T commits today immediately and Escape clears only the focused edge without dismissing", async ({ page }) => {
+  await open(page, "menu&value");
+  await to(page).focus();
+  await to(page).press("T");
+  await expect(to(page)).toHaveValue("20/11/2026");
+  await to(page).press("Escape");
+  await expect(to(page)).toHaveValue("");
+  await expect(from(page)).toHaveValue("09/11/2026");
+  await expect(to(page)).toBeFocused();
+  await expect(apply(page)).toBeVisible();
+});
+
+test("embedded calendars share the field value and honor bounds inside the parent menu", async ({ page }) => {
+  await open(page, "menu&min&max");
+  await page.getByRole("button", { name: /select date.*start date/i }).click();
+  const popup = page.locator('[data-slot="popover-content"]');
+  await expect(popup).toBeVisible();
+  await expect(popup.locator('[data-day="2026-11-21"] button')).toBeDisabled();
+  await popup.locator('[data-day="2026-11-03"] button').click();
+  await expect(popup).toHaveCount(0);
+  await expect(from(page)).toHaveValue("03/11/2026");
+  await page.getByRole("button", { name: /select date.*end date/i }).click();
+  await popup.locator('[data-day="2026-11-16"] button').click();
+  await expect(to(page)).toHaveValue("16/11/2026");
+  await expect(page.getByText("14 days", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("applied")).toContainText('"count":0');
+});
+
+test("Escape dismisses only the embedded calendar and returns focus to its button", async ({ page }) => {
+  await open(page, "popover&value");
+  await page.getByRole("button", { name: "9 Nov – 19 Nov 2026", exact: true }).click();
+  const calendarButton = page.getByRole("button", { name: /select date.*end date/i });
+  await calendarButton.click();
+  await page.keyboard.press("Escape");
+  await expect(page.locator('[data-slot="popover-content"]')).toHaveCount(1);
+  await expect(calendarButton).toBeFocused();
+  await expect(to(page)).toHaveValue("19/11/2026");
+});
+
+test("shared CARE input and button sizes are retained at mobile and desktop widths", async ({ page }) => {
+  for (const [width, height] of [[320, 48], [1280, 40]]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await open(page);
+    await expect(page.locator('[data-slot="input-group"]').first()).toHaveCSS("height", `${height}px`);
+    await expect(apply(page)).toHaveCSS("height", "36px");
+    const caption = page.getByRole("button", { name: "November 2026", exact: true });
+    await expect(caption).toHaveAttribute("data-variant", "ghost");
+    await expect(caption).toHaveCSS("height", "36px");
+    const next = page.getByRole("button", { name: "Next month", exact: true });
+    await expect(next).toHaveAttribute("data-size", "icon-sm");
+    await expect(next).toHaveCSS("width", "36px");
+  }
+});
+
+test("segment stepping validates bounds and an empty field can start with the arrow keys", async ({ page }) => {
+  await open(page, "max");
+  await from(page).focus();
+  await from(page).press("ArrowDown");
+  await expect(from(page)).toHaveValue("19/11/2026");
+  await from(page).press("ArrowUp");
+  await expect(from(page)).toHaveValue("20/11/2026");
+  await from(page).press("ArrowUp");
+  await expect(from(page)).toHaveValue("21/11/2026");
+  await expect(from(page)).toHaveAttribute("aria-invalid", "true");
+  await expect(apply(page)).toBeDisabled();
+});
+
+test("populated fields and their embedded calendar fit a 320px surface", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 680 });
+  await open(page, "menu&integration&value");
+  await page.getByRole("menuitem", { name: /custom date range/i }).click();
+  await page.getByTestId("outside").evaluate((element) => { element.style.display = "none"; });
+  await page.getByTestId("applied").evaluate((element) => { element.style.display = "none"; });
+  await expect(apply(page)).toBeInViewport({ ratio: 1 });
+  await page.screenshot({ path: test.info().outputPath("after-320.png"), animations: "disabled" });
+  await page.getByRole("button", { name: /select date.*end date/i }).click();
+  const popup = page.locator('[data-slot="popover-content"]');
+  await expect(popup).toBeInViewport({ ratio: 1 });
+  const overflows = await popup.evaluate((element) => element.scrollWidth > element.clientWidth);
+  expect(overflows).toBe(false);
+  await page.screenshot({ path: test.info().outputPath("embedded-320.png"), animations: "disabled" });
 });
