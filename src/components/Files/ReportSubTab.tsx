@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -158,7 +157,6 @@ export function ReportSubTab({
               disabled={isFetching}
               onClick={async () => {
                 await refetch();
-                toast.success(t("refreshed"));
               }}
             >
               <RefreshCw className={cn(isFetching && "animate-spin")} />
@@ -402,7 +400,7 @@ function ReportRowActions({
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon-sm" aria-label={t("more_actions")}>
+          <Button variant="ghost" size="icon" aria-label={t("more_actions")}>
             <EllipsisVertical />
           </Button>
         </DropdownMenuTrigger>

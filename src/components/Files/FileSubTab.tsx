@@ -272,7 +272,7 @@ export const FilesPage = ({
                 <EmptyMedia variant="icon">
                   <FolderOpen />
                 </EmptyMedia>
-                <EmptyTitle>{t("no_files_found", { type: "" })}</EmptyTitle>
+                <EmptyTitle>{t("no_files_found")}</EmptyTitle>
                 <EmptyDescription>
                   {t(
                     isFiltered
