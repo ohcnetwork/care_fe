@@ -1,8 +1,4 @@
-import {
-  UseQueryResult,
-  useInfiniteQuery,
-  useQueries,
-} from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import {
@@ -28,29 +24,9 @@ export type ChargeItemScope =
       kind: "service_resource";
       serviceResource: ChargeItemServiceResource;
       serviceResourceId: string;
-    }
-  /** An arbitrary set of items (e.g. those created by a dispense). */
-  | { kind: "ids"; ids: string[] };
+    };
 
-const combineDetailQueries = (results: UseQueryResult<ChargeItemRead>[]) => ({
-  items: results.flatMap((result) => (result.data ? [result.data] : [])),
-  isLoading: results.some((result) => result.isLoading),
-  isFetching: results.some((result) => result.isFetching),
-  isError: results.some((result) => result.isError),
-  retryFailed: () =>
-    results.forEach((result) => {
-      if (result.isError) result.refetch();
-    }),
-});
-
-/**
- * Billable charge items of an account within `scope`.
- *
- * Scopes the list endpoint can filter on use a single paginated query. The
- * `ids` scope has no list filter, so each item is fetched individually; these
- * sets are small, and the per-item queries live under the `chargeItems` key so
- * they are refreshed along with every other charge item list.
- */
+/** Billable charge items of an account within `scope`. */
 export function useInvoiceChargeItems({
   facilityId,
   accountId,
@@ -98,50 +74,20 @@ export function useInvoiceChargeItems({
       const currentOffset = allPages.length * ITEMS_PER_PAGE;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
-    enabled: !!facilityId && !!accountId && scope.kind !== "ids",
+    enabled: !!facilityId && !!accountId,
   });
 
-  const details = useQueries({
-    queries: (scope.kind === "ids" ? scope.ids : []).map((chargeItemId) => ({
-      queryKey: ["chargeItems", "detail", facilityId, chargeItemId],
-      queryFn: query(chargeItemApi.retrieveChargeItem, {
-        pathParams: { facilityId, chargeItemId },
-      }),
-      enabled: !!facilityId,
-    })),
-    combine: combineDetailQueries,
-  });
-
-  const isIdsScope = scope.kind === "ids";
-  const source = isIdsScope
-    ? details.items
-    : list.data?.pages.flatMap((page) => page.results);
-
-  // Items fetched individually keep coming back after they stop being
-  // billable (e.g. aborted), so filter on status for every scope.
   const chargeItems = useMemo(
-    () =>
-      (source ?? []).filter(
-        (item) => item.status === ChargeItemStatus.billable,
-      ),
-    [source],
+    () => list.data?.pages.flatMap((page) => page.results) ?? [],
+    [list.data],
   );
 
   return {
     chargeItems,
-    isLoading: isIdsScope ? details.isLoading : list.isLoading,
+    isLoading: list.isLoading,
     /** A refetch is in flight, so `chargeItems` may not match the server. */
-    isSyncing: isIdsScope
-      ? details.isFetching
-      : list.isFetching && !list.isFetchingNextPage,
-    /**
-     * Some items of an `ids` scope failed to load, so `chargeItems` is
-     * incomplete (or stale) and must not be invoiced as is. Queries aren't
-     * retried automatically. List errors are left to the global handler.
-     */
-    hasFailedItems: isIdsScope && details.isError,
-    retryFailedItems: details.retryFailed,
-    hasNextPage: !isIdsScope && list.hasNextPage,
+    isSyncing: list.isFetching && !list.isFetchingNextPage,
+    hasNextPage: list.hasNextPage,
     isFetchingNextPage: list.isFetchingNextPage,
     fetchNextPage: list.fetchNextPage,
   };
