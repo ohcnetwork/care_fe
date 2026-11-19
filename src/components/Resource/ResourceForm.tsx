@@ -58,7 +58,7 @@ import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 interface ResourceProps {
-  facilityId: number;
+  facilityId: string;
   id?: string;
 }
 
