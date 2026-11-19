@@ -15,7 +15,7 @@ const responsiveButtonSize =
   "h-(--button-height) px-(--button-padding-x) [--button-height:--spacing(12)] [--button-padding-x:--spacing(4.5)] md:[--button-height:--spacing(10)] md:[--button-padding-x:--spacing(3.5)]";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-1.5 px-3 whitespace-nowrap rounded-md not-in-data-[slot=button-group]:rounded-squircle-lg border border-transparent bg-clip-padding text-sm font-semibold tracking-wide outline-0 select-none shrink-0 transition touch-action-manipulation [-webkit-tap-highlight-color:transparent] group/button [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring aria-invalid:outline-2 aria-invalid:outline-offset-2 aria-invalid:outline-destructive ",
+  "inline-flex items-center justify-center gap-1.5 px-3 whitespace-nowrap rounded-md not-in-data-[slot=button-group]:rounded-squircle-lg border border-transparent bg-clip-padding text-sm font-semibold tracking-wide outline-0 select-none shrink-0 transition touch-action-manipulation [-webkit-tap-highlight-color:transparent] group/button [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring aria-invalid:outline-2 aria-invalid:outline-offset-2 aria-invalid:outline-destructive ",
   {
     variants: {
       variant: {
@@ -53,13 +53,13 @@ const buttonVariants = cva(
         md: responsiveButtonSize,
         default: [
           responsiveButtonSize,
-          "[&_svg:not([class*='size-'])]:size-5 [&_svg]:stroke-[1.75] has-data-[icon=inline-start]:pl-3 has-data-[icon=inline-end]:pr-3 in-data-[slot=button-group]:rounded-[min(var(--radius-md),10px)]",
+          "[&_svg:not([class*='size-'])]:size-4 has-data-[icon=inline-start]:pl-3 has-data-[icon=inline-end]:pr-3 in-data-[slot=button-group]:rounded-[min(var(--radius-md),10px)]",
         ],
         xs: "h-8 gap-1 px-2.5 rounded-[min(var(--radius-md),8px)] text-xs [&_svg:not([class*='size-'])]:size-3.5 has-data-[icon=inline-start]:pl-2 has-data-[icon=inline-end]:pr-2 in-data-[slot=button-group]:rounded-md",
         sm: "h-9 gap-1.5 px-3 rounded-[min(var(--radius-md),10px)] [&_svg:not([class*='size-'])]:size-4 has-data-[icon=inline-start]:pl-2.5 has-data-[icon=inline-end]:pr-2.5 in-data-[slot=button-group]:rounded-md",
         lg: "h-11 gap-1.5 px-4 text-base [&_svg:not([class*='size-'])]:size-5 [&_svg]:stroke-[1.75] has-data-[icon=inline-start]:pl-3 has-data-[icon=inline-end]:pr-3 in-data-[slot=button-group]:rounded-[min(var(--radius-md),10px)]",
         xl: "h-12 gap-2 px-4.5 text-base [&_svg:not([class*='size-'])]:size-5 has-data-[icon=inline-start]:pl-4 has-data-[icon=inline-end]:pr-4 in-data-[slot=button-group]:rounded-[min(var(--radius-md),12px)]",
-        icon: "h-(--button-size) w-(--button-size) [--button-size:--spacing(12)] md:[--button-size:--spacing(10)] [&_svg:not([class*='size-'])]:size-5 [&_svg]:stroke-[1.75]",
+        icon: "h-(--button-size) w-(--button-size) [--button-size:--spacing(12)] md:[--button-size:--spacing(10)] [&_svg:not([class*='size-'])]:size-4",
         "icon-xs":
           "size-8 rounded-[min(var(--radius-md),8px)] [&_svg:not([class*='size-'])]:size-3.5 [&_svg]:stroke-2 in-data-[slot=button-group]:rounded-md",
         "icon-sm":
@@ -103,15 +103,20 @@ function resolveAsChild(
       render: React.createElement(child.type as React.ElementType, restProps),
       children: extractedChildren,
       isNonButtonTag: child.type !== "button",
-      isLink: child.type !== "button" && child.props.href != null,
+      isLink:
+        child.type !== "button" &&
+        (child.props.href != null || child.props.to != null),
     };
   }
 
-  const renderElement = React.isValidElement<{ href?: unknown }>(render)
+  const renderElement = React.isValidElement<{ href?: unknown; to?: unknown }>(
+    render,
+  )
     ? render
     : undefined;
   const isLink =
-    renderElement?.type !== "button" && renderElement?.props.href != null;
+    renderElement?.type !== "button" &&
+    (renderElement?.props.href != null || renderElement?.props.to != null);
 
   return {
     render,

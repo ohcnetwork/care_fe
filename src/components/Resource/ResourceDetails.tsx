@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -13,6 +12,7 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import CommentSection from "@/components/Resource/ResourceCommentSection";
+import { navigate } from "@/lib/router/navigate";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { getResourceRequestCategoryEnum } from "@/types/resourceRequest/resourceRequest";
@@ -133,7 +133,10 @@ export default function ResourceDetails({
           <div className="flex flex-wrap gap-2 w-full">
             <Button
               onClick={() =>
-                navigate(`/facility/${facilityId}/resource/${id}/print`)
+                navigate({
+                  to: "/facility/$facilityId/resource/$id/print",
+                  params: { facilityId, id },
+                })
               }
               className="w-full sm:w-auto"
             >
@@ -144,7 +147,10 @@ export default function ResourceDetails({
               variant="outline"
               className="w-full sm:w-auto"
               onClick={() =>
-                navigate(`/facility/${facilityId}/resource/${id}/update`)
+                navigate({
+                  to: "/facility/$facilityId/resource/$id/update",
+                  params: { facilityId, id },
+                })
               }
             >
               <CareIcon icon="l-pen" className="mr-2 size-4" />

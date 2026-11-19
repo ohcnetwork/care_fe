@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -84,7 +84,8 @@ export default function TemplateCard({
           {canWriteTemplate && (
             <Button variant="outline" size="sm" className="w-full" asChild>
               <Link
-                href={`/facility/${facilityId}/template/builder/${template.slug}`}
+                to="/facility/$facilityId/template/builder/$slug"
+                params={{ facilityId, slug: template.slug }}
               >
                 <CareIcon icon="l-pen" className="mr-1" />
                 <span>{t("edit")}</span>

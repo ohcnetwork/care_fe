@@ -24,3 +24,9 @@ declare module "virtual:care-local-plugins" {
   export const localDevPluginConfigs: PlugConfig[];
   export const localDevPluginManifests: Record<string, PluginManifest>;
 }
+
+declare module "virtual:typst-compiler-wasm" {
+  /** Gzipped in production builds. */
+  const url: string;
+  export default url;
+}

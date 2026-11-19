@@ -1,9 +1,10 @@
-import { navigate } from "raviger";
+import { navigate as ravigerNavigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
 import { ResourceCategoryList } from "@/components/Common/ResourceCategoryList";
+import { navigate } from "@/lib/router/navigate";
 import { ProductKnowledgeListContent } from "@/pages/Facility/settings/productKnowledge/ProductKnowledgeListComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ProductKnowledgeStatus } from "@/types/inventory/productKnowledge/productKnowledge";
@@ -22,13 +23,14 @@ export default function ProductKnowledgeList({
   const [allowCategoryCreate, setAllowCategoryCreate] = useState(false);
 
   const onNavigate = (slug: string) => {
-    navigate(
-      `/facility/${facilityId}/settings/product_knowledge/categories/${slug}`,
-    );
+    navigate({
+      to: "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug",
+      params: { facilityId, categorySlug: slug },
+    });
   };
 
   const onCreateItem = () => {
-    navigate(
+    ravigerNavigate(
       `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}/new`,
     );
   };

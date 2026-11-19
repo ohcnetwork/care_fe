@@ -12,10 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { buttonVariants } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
-
-import { cn } from "@/lib/utils";
 
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 
@@ -133,7 +130,7 @@ export function MarkInvoiceAsBalancedDialog({
             id={confirmButtonId}
             onClick={onConfirm}
             disabled={isPending}
-            className={cn(buttonVariants({ variant: "primary" }))}
+            variant="primary"
           >
             {t("confirm")}
             {confirmShortcutActionId && (

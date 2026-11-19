@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Check, Copy, Download, Eye, SquarePen } from "lucide-react";
-import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -36,6 +36,7 @@ import query from "@/Utils/request/query";
 
 import { buildUpdateBody } from "@/components/QuestionnaireV2/shared/buildUpdateBody";
 import { downloadQuestionnaireJson } from "@/components/QuestionnaireV2/shared/downloadQuestionnaireJson";
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { BasicInformationCard } from "./BasicInformationCard";
 import { CloneQuestionnaireDialog } from "./CloneQuestionnaireDialog";
 import { FormPropertiesSidebar } from "./FormPropertiesSidebar";
@@ -111,7 +112,7 @@ export function QuestionnaireDetailPage({
   // toast (see the hook's doc comment).
   const { mutate: save, isPending } = useUpdateQuestionnaire(id);
   const dirty = form.formState.isDirty || organizationDraft !== null;
-  useNavigationPrompt(dirty, t("unsaved_changes_warning"));
+  useNavigationBlocker(dirty, t("unsaved_changes_warning"));
 
   const onSubmit = (values: DetailFormValues) => {
     if (!questionnaire) return;

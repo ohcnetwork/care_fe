@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
+import { navigate } from "@/lib/router/navigate";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import { BillMedicationsLoadingCard } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsLoadingCard";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -32,6 +33,7 @@ import { getLocationPath } from "@/types/location/utils";
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import {
   CheckCircleIcon,
@@ -43,7 +45,6 @@ import {
   RotateCcwIcon,
   XCircleIcon,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -202,8 +203,12 @@ const PrescriptionCard = ({
           {/* Print button */}
           <Button variant="outline" size="icon" aria-label={t("print")} asChild>
             <Link
-              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
-              basePath="/"
+              to="/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print"
+              params={{
+                facilityId: encounter.facility.id,
+                patientId: encounter.patient.id,
+                prescriptionId: prescription.id,
+              }}
             >
               <PrinterIcon />
             </Link>
@@ -221,9 +226,15 @@ const PrescriptionCard = ({
                 <DropdownMenuItem
                   disabled={isPending}
                   onSelect={() => {
-                    navigate(
-                      `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${encounter.patient.id}/bill/prescriptions/${prescription.id}`,
-                    );
+                    navigate({
+                      to: "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds",
+                      params: {
+                        facilityId,
+                        locationId,
+                        patientId: encounter.patient.id,
+                        prescriptionIds: prescription.id,
+                      },
+                    });
                   }}
                 >
                   <FileTextIcon />
@@ -233,9 +244,14 @@ const PrescriptionCard = ({
               <DropdownMenuItem
                 disabled={isPending}
                 onSelect={() => {
-                  navigate(
-                    `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`,
-                  );
+                  navigate({
+                    to: "/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print",
+                    params: {
+                      facilityId: encounter.facility.id,
+                      patientId: encounter.patient.id,
+                      prescriptionId: prescription.id,
+                    },
+                  });
                 }}
               >
                 <PrinterIcon />

@@ -136,6 +136,7 @@ async function createLocationResponseHistory(
 async function createAndOpenLocation(
   page: Page,
   facilityId: string,
+  inventoryUsage?: string,
 ): Promise<{ id: string; name: string }> {
   const name = `Fill-${faker.string.alphanumeric(8)}`;
   await page.goto(`/facility/${facilityId}/settings/locations`);
@@ -143,6 +144,14 @@ async function createAndOpenLocation(
   await page.getByRole("combobox", { name: "Location Form" }).click();
   await page.getByRole("option", { name: "Ward" }).click();
   await page.getByRole("textbox", { name: "Name" }).fill(name);
+  if (inventoryUsage) {
+    await page
+      .getByRole("combobox", { name: "Inventory Usage", exact: true })
+      .click();
+    await page
+      .getByRole("option", { name: inventoryUsage, exact: true })
+      .click();
+  }
   await page.getByRole("button", { name: "Create" }).click();
 
   await page.getByRole("textbox", { name: "Search by name" }).fill(name);
@@ -176,7 +185,12 @@ test.describe("Location overview and forms", () => {
     page,
   }) => {
     const answer = `Loc-${faker.string.alphanumeric(10)}`;
-    const location = await createAndOpenLocation(page, facilityId);
+    // The sidebar only offers Pharmacy for locations that use inventory.
+    const location = await createAndOpenLocation(
+      page,
+      facilityId,
+      "Consumption",
+    );
 
     const locationPath = `/facility/${facilityId}/locations/${location.id}`;
 

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 
 import SearchInput from "@/components/Common/SearchInput";
+import { SectionHeader } from "@/components/Common/SectionHeader";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -15,7 +16,6 @@ import facilityApi from "@/types/facility/facilityApi";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import AddFacilitySheet from "./components/AddFacilitySheet";
-import EntityBadge from "./components/EntityBadge";
 import { OrganizationFacilityCard } from "./components/OrganizationFacilityCard";
 import { OrganizationFacilityCardSkeleton } from "./components/OrganizationFacilityCardSkeleton";
 import OrganizationLayout from "./components/OrganizationLayout";
@@ -69,7 +69,7 @@ export default function OrganizationFacilities({
         );
         return (
           <div className="space-y-4">
-            <EntityBadge
+            <SectionHeader
               title={t("facilities")}
               description={t("organization_facilities_description")}
               count={facilities?.count}
@@ -79,7 +79,7 @@ export default function OrganizationFacilities({
               }
             />
             <Frame>
-              <FrameHeader>
+              <FrameHeader className="p-1 md:p-2">
                 <SearchInput
                   options={[
                     {

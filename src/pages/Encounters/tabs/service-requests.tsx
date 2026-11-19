@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { PlusIcon } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -127,7 +127,13 @@ export const EncounterServiceRequestTab = () => {
           {encounter && facilityId && canWriteClinicalData && (
             <Button variant="primary" asChild className="w-full sm:w-auto">
               <Link
-                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`}
+                to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId"
+                params={{
+                  facilityId,
+                  patientId,
+                  encounterId,
+                  questionnaireId: "service_request",
+                }}
                 className="flex items-center"
               >
                 <PlusIcon className="size-5 mr-1" />
