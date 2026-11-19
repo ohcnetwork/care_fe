@@ -137,7 +137,6 @@ export function ServiceRequestDetails({
         sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/service_requests/${request.id}`}
         patientId={request.encounter.patient.id}
         viewOnly={disableEdit}
-        disableCreateChargeItems
         className="m-2 pt-2"
       />
     </section>
