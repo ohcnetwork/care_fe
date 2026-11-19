@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { LocationRead } from "@/types/location/location";
+import { LocationRead, usesInventory } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import organizationApi from "@/types/organization/organizationApi";
 import query from "@/Utils/request/query";
@@ -67,7 +67,7 @@ export function DeliveryOrderRoutingField({
       data.results.filter(
         (location) =>
           location.id !== locationId &&
-          (location.inventory_usage !== "none" || location.id === destination),
+          (usesInventory(location) || location.id === destination),
       ),
   });
 

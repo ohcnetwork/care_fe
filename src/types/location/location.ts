@@ -48,6 +48,15 @@ export interface LocationBase {
   inventory_usage: InventoryUsage;
 }
 
+// A location uses inventory unless its usage is None or unset
+export const usesInventory = (
+  location?: Pick<LocationBase, "inventory_usage">,
+) => (location?.inventory_usage ?? "none") !== "none";
+
+export const isStoreLocation = (
+  location?: Pick<LocationBase, "inventory_usage">,
+) => location?.inventory_usage === "store";
+
 export interface LocationDetail extends LocationBase {
   id: string;
   has_children: boolean;

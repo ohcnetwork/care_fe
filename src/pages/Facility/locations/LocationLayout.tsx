@@ -39,6 +39,7 @@ import { PrintDispenseOrder } from "@/pages/Facility/services/pharmacy/PrintDisp
 import { PrintMedicationReturn } from "@/pages/Facility/services/pharmacy/PrintMedicationReturn";
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
+import { isStoreLocation, usesInventory } from "@/types/location/location";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 
 interface LocationLayoutProps {
@@ -497,7 +498,7 @@ export function LocationLayout({
   // External supply is only for Store locations
   if (path.startsWith("/inventory/external")) {
     if (isLoading) return <Loading />;
-    if (location?.inventory_usage !== "store") {
+    if (!isStoreLocation(location)) {
       return (
         <ErrorPage
           forError="CUSTOM_ERROR"
@@ -511,7 +512,7 @@ export function LocationLayout({
   // Inventory and Pharmacy are only for locations that use inventory
   if (needsInventory(path)) {
     if (isLoading) return <Loading />;
-    if ((location?.inventory_usage ?? "none") === "none") {
+    if (!usesInventory(location)) {
       return (
         <ErrorPage
           forError="CUSTOM_ERROR"
