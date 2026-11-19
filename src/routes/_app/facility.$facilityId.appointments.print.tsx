@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { PrintAppointments } from "@/pages/Appointments/components/PrintAppointments";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
@@ -10,7 +10,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId } = Route.useParams();
+  const { facilityId } = useParams({
+    from: "/_app/facility/$facilityId/appointments/print",
+  });
   return (
     <PrintAppointments
       facilityId={facilityId}

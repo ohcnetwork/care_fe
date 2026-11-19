@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 
@@ -9,6 +9,8 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { id } = Route.useParams();
+  const { id } = useParams({
+    from: "/_app/admin/patient_identifier_config/$id/",
+  });
   return <PatientIdentifierConfigForm configId={id} />;
 }

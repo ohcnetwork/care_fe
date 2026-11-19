@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import ResourceList from "@/components/Resource/ResourceList";
 
@@ -7,6 +7,8 @@ export const Route = createFileRoute("/_app/facility/$facilityId/resource/")({
 });
 
 function RouteComponent() {
-  const { facilityId } = Route.useParams();
+  const { facilityId } = useParams({
+    from: "/_app/facility/$facilityId/resource/",
+  });
   return <ResourceList facilityId={facilityId} />;
 }

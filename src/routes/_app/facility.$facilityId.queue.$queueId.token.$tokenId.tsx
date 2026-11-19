@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import TokenEncounterRedirect from "@/pages/Facility/queues/TokenEncounterRedirect";
 
@@ -9,7 +9,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, queueId, tokenId } = Route.useParams();
+  const { facilityId, queueId, tokenId } = useParams({
+    from: "/_app/facility/$facilityId/queue/$queueId/token/$tokenId",
+  });
   return (
     <TokenEncounterRedirect
       facilityId={facilityId}

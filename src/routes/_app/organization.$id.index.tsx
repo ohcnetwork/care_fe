@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import OrganizationView from "@/pages/Organization/OrganizationView";
 
@@ -7,6 +7,6 @@ export const Route = createFileRoute("/_app/organization/$id/")({
 });
 
 function RouteComponent() {
-  const { id } = Route.useParams();
+  const { id } = useParams({ from: "/_app/organization/$id/" });
   return <OrganizationView id={id} />;
 }

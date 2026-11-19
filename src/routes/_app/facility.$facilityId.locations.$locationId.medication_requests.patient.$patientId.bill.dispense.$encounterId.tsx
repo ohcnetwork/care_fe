@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { fullScreenPage } from "@/lib/router/staticData";
 import BillMedicationsByNewDispense from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByNewDispense";
@@ -11,7 +11,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, locationId, patientId, encounterId } = Route.useParams();
+  const { facilityId, locationId, patientId, encounterId } = useParams({
+    from: "/_app/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/dispense/$encounterId",
+  });
   return (
     <BillMedicationsByNewDispense
       facilityId={facilityId}

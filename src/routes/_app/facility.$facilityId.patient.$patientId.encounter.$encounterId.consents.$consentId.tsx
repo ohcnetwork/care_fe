@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
@@ -10,7 +10,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, patientId, encounterId, consentId } = Route.useParams();
+  const { facilityId, patientId, encounterId, consentId } = useParams({
+    from: "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/consents/$consentId",
+  });
   return (
     <EncounterProvider
       encounterId={encounterId}

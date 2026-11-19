@@ -1,4 +1,9 @@
-import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  useLocation,
+  useParams,
+} from "@tanstack/react-router";
 import { RouterProvider as RavigerBasePathProvider } from "raviger";
 
 export const Route = createFileRoute(
@@ -9,7 +14,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, serviceId } = Route.useParams();
+  const { facilityId, serviceId } = useParams({
+    from: "/_app/facility/$facilityId/services/$serviceId",
+  });
   const { pathname } = useLocation();
   const basePath = `/facility/${facilityId}/services/${serviceId}`;
   // Service pages still write links and `navigate()` calls relative to this

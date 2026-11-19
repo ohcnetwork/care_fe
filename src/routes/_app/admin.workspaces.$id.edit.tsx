@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { WorkspaceEditor } from "@/components/Workspace/WorkspaceEditor";
 
@@ -9,6 +9,6 @@ export const Route = createFileRoute("/_app/admin/workspaces/$id/edit")({
 });
 
 function RouteComponent() {
-  const { id } = Route.useParams();
+  const { id } = useParams({ from: "/_app/admin/workspaces/$id/edit" });
   return <WorkspaceEditor scope={INSTANCE_WORKSPACE_SCOPE} id={id} />;
 }

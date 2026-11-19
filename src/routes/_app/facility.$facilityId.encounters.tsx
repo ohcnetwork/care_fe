@@ -14,7 +14,9 @@ export const Route = createFileRoute("/_app/facility/$facilityId/encounters")({
 });
 
 function RouteComponent() {
-  const { facilityId } = Route.useParams();
+  const { facilityId } = useParams({
+    from: "/_app/facility/$facilityId/encounters",
+  });
   const { tab, encounterClass, locationId } = useParams({ strict: false });
   if (locationId) {
     return (

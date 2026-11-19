@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { fullScreenPage } from "@/lib/router/staticData";
 
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_app/admin/questionnaires/$id/edit")({
 });
 
 function RouteComponent() {
-  const { id } = Route.useParams();
+  const { id } = useParams({ from: "/_app/admin/questionnaires/$id/edit" });
   return (
     <QuestionnaireStudioPage scope={INSTANCE_QUESTIONNAIRE_SCOPE} id={id} />
   );

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 
@@ -7,6 +7,6 @@ export const Route = createFileRoute("/_app/admin/apps/$slug")({
 });
 
 function RouteComponent() {
-  const { slug } = Route.useParams();
+  const { slug } = useParams({ from: "/_app/admin/apps/$slug" });
   return <PlugConfigEdit slug={slug} />;
 }

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { PatientRegistration } from "@/components/Patient/PatientRegistration";
 
@@ -9,6 +9,8 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { patientId } = Route.useParams();
+  const { patientId } = useParams({
+    from: "/_app/facility/$facilityId/patient/$patientId/update",
+  });
   return <PatientRegistration patientId={patientId} />;
 }

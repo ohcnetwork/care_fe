@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import AdminOrganizationList from "@/pages/Admin/organizations/AdminOrganizationList";
 
@@ -7,6 +7,6 @@ export const Route = createFileRoute("/_app/admin/organizations/role/$id")({
 });
 
 function RouteComponent() {
-  const { id } = Route.useParams();
+  const { id } = useParams({ from: "/_app/admin/organizations/role/$id" });
   return <AdminOrganizationList organizationType="role" organizationId={id} />;
 }

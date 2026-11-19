@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { ActionConfigurationForm } from "@/pages/Admin/actions/ActionConfigurationForm";
 
@@ -7,6 +7,6 @@ export const Route = createFileRoute("/_app/admin/actions/$id")({
 });
 
 function RouteComponent() {
-  const { id } = Route.useParams();
+  const { id } = useParams({ from: "/_app/admin/actions/$id" });
   return <ActionConfigurationForm id={id} />;
 }

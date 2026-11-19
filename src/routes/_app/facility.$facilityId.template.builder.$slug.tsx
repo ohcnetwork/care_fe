@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import TemplateBuilder from "@/pages/Encounters/TemplateBuilder/TemplateBuilder";
 
@@ -9,6 +9,8 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, slug } = Route.useParams();
+  const { facilityId, slug } = useParams({
+    from: "/_app/facility/$facilityId/template/builder/$slug",
+  });
   return <TemplateBuilder facilityId={facilityId} slug={slug} />;
 }

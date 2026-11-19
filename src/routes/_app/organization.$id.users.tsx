@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import OrganizationUsers from "@/pages/Organization/OrganizationUsers";
 
@@ -7,6 +7,6 @@ export const Route = createFileRoute("/_app/organization/$id/users")({
 });
 
 function RouteComponent() {
-  const { id } = Route.useParams();
+  const { id } = useParams({ from: "/_app/organization/$id/users" });
   return <OrganizationUsers id={id} />;
 }

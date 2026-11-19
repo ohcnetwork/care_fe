@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
@@ -10,7 +10,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, practitionerId, queueId } = Route.useParams();
+  const { facilityId, practitionerId, queueId } = useParams({
+    from: "/_app/facility/$facilityId/practitioner/$practitionerId/queues/$queueId/completed",
+  });
   return (
     <ManageQueuePage
       facilityId={facilityId}

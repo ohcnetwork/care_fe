@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { fullScreenPage } from "@/lib/router/staticData";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
@@ -13,7 +13,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { patientId, encounterId, tab } = Route.useParams();
+  const { patientId, encounterId, tab } = useParams({
+    from: "/_app/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab",
+  });
   return (
     <EncounterProvider encounterId={encounterId} patientId={patientId}>
       <EncounterShow tab={tab} />

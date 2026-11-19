@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import ObservationDefinitionView from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionView";
 
@@ -9,7 +9,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, observationSlug } = Route.useParams();
+  const { facilityId, observationSlug } = useParams({
+    from: "/_app/facility/$facilityId/settings/observation_definitions/$observationSlug/",
+  });
   return (
     <ObservationDefinitionView
       facilityId={facilityId}

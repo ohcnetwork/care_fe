@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { fullScreenPage } from "@/lib/router/staticData";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
@@ -11,7 +11,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, locationId, serviceRequestId } = Route.useParams();
+  const { facilityId, locationId, serviceRequestId } = useParams({
+    from: "/_app/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId",
+  });
   return (
     <ServiceRequestShow
       facilityId={facilityId}

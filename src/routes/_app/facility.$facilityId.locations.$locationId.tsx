@@ -1,4 +1,9 @@
-import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  useLocation,
+  useParams,
+} from "@tanstack/react-router";
 import { RouterProvider as RavigerBasePathProvider } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -15,7 +20,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, locationId } = Route.useParams();
+  const { facilityId, locationId } = useParams({
+    from: "/_app/facility/$facilityId/locations/$locationId",
+  });
   const { pathname } = useLocation();
   const { t } = useTranslation();
   const { location, isLoading } = useCurrentLocation();

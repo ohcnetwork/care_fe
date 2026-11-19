@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import UserHome from "@/components/Users/UserHome";
 
@@ -7,6 +7,6 @@ export const Route = createFileRoute("/_app/user/$tab")({
 });
 
 function RouteComponent() {
-  const { tab } = Route.useParams();
+  const { tab } = useParams({ from: "/_app/user/$tab" });
   return <UserHome tab={tab} />;
 }

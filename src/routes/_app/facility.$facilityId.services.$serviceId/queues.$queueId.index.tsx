@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 import { Redirect } from "raviger";
 
 export const Route = createFileRoute(
@@ -8,7 +8,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, serviceId, queueId } = Route.useParams();
+  const { facilityId, serviceId, queueId } = useParams({
+    from: "/_app/facility/$facilityId/services/$serviceId/queues/$queueId/",
+  });
   return (
     <Redirect
       to={`/facility/${facilityId}/services/${serviceId}/queues/${queueId}/ongoing`}

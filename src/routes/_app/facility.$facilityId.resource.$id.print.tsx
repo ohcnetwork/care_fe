@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import PrintResourceLetter from "@/components/Resource/PrintResourceLetter";
 
@@ -9,6 +9,8 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { id } = Route.useParams();
+  const { id } = useParams({
+    from: "/_app/facility/$facilityId/resource/$id/print",
+  });
   return <PrintResourceLetter id={id} />;
 }

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
 import { questionnaireScope } from "@/pages/Facility/settings/questionnaireScope";
@@ -11,7 +11,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, id } = Route.useParams();
+  const { facilityId, id } = useParams({
+    from: "/_app/facility/$facilityId/settings/questionnaires/$id/edit",
+  });
   return (
     <QuestionnaireStudioPage scope={questionnaireScope(facilityId)} id={id} />
   );

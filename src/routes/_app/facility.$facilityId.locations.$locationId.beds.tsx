@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import BedsList from "@/pages/Facility/locations/BedsList";
 
@@ -9,6 +9,8 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, locationId } = Route.useParams();
+  const { facilityId, locationId } = useParams({
+    from: "/_app/facility/$facilityId/locations/$locationId/beds",
+  });
   return <BedsList facilityId={facilityId} locationId={locationId} />;
 }

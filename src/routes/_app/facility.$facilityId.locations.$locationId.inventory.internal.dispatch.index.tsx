@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { ToDispatch } from "@/pages/Facility/services/inventory/ToDispatch";
 
@@ -9,7 +9,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, locationId } = Route.useParams();
+  const { facilityId, locationId } = useParams({
+    from: "/_app/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/",
+  });
   return (
     <ToDispatch
       facilityId={facilityId}

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import OrganizationReferralAvailability from "@/pages/Organization/OrganizationReferralAvailability";
 
@@ -9,7 +9,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { navOrganizationId, id } = Route.useParams();
+  const { navOrganizationId, id } = useParams({
+    from: "/_app/organization/$navOrganizationId/children/$id/settings/referrals",
+  });
   return (
     <OrganizationReferralAvailability
       id={id}

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { PluginPathNotFound } from "@/components/Common/PluginPathNotFound";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
@@ -23,7 +23,9 @@ export const Route = createFileRoute("/patient/$id/{-$tab}")({
 });
 
 function RouteComponent() {
-  const { id, tab = "demography" } = Route.useParams();
+  const { id, tab = "demography" } = useParams({
+    from: "/patient/$id/{-$tab}",
+  });
   const isPatient = useArea() === "patient";
   const isStaffTab = patientTabs.some(({ route }) => route === tab);
   if (isPatient || isStaffTab) {

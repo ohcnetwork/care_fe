@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import ActivityDefinitionList from "@/pages/Facility/settings/activityDefinition/ActivityDefinitionList";
 
@@ -9,7 +9,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, categorySlug } = Route.useParams();
+  const { facilityId, categorySlug } = useParams({
+    from: "/_app/facility/$facilityId/settings/activity_definitions/categories/$categorySlug/",
+  });
   return (
     <ActivityDefinitionList
       facilityId={facilityId}

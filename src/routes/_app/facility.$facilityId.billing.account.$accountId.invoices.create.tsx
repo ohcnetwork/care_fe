@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import CreateInvoicePage from "@/pages/Facility/billing/account/CreateInvoice";
 
@@ -9,6 +9,8 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, accountId } = Route.useParams();
+  const { facilityId, accountId } = useParams({
+    from: "/_app/facility/$facilityId/billing/account/$accountId/invoices/create",
+  });
   return <CreateInvoicePage facilityId={facilityId} accountId={accountId} />;
 }
