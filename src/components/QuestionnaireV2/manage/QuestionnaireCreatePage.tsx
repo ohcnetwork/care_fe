@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check } from "lucide-react";
-import { navigate } from "raviger";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -20,6 +19,7 @@ import { QuestionsEmptyState } from "@/components/QuestionnaireV2/shared/Questio
 import { SegmentedRadioGroup } from "@/components/QuestionnaireV2/shared/SegmentedRadioGroup";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
+import { navigate } from "@/lib/router/navigate";
 import {
   QUESTIONNAIRE_STATUSES,
   QuestionnaireRead,
@@ -99,7 +99,7 @@ export function QuestionnaireCreatePage({
     onSuccess: (created: QuestionnaireRead) => {
       queryClient.invalidateQueries({ queryKey: questionnaireKeys.all });
       toast.success(t("questionnaire_created_successfully"));
-      navigate(`${scope.basePath}/${created.id}`);
+      navigate({ href: `${scope.basePath}/${created.id}` });
     },
   });
 
@@ -139,7 +139,10 @@ export function QuestionnaireCreatePage({
           <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{t("permission_denied")}</AlertDescription>
         </Alert>
-        <Button variant="outline" onClick={() => navigate(scope.basePath)}>
+        <Button
+          variant="outline"
+          onClick={() => navigate({ href: scope.basePath })}
+        >
           <ArrowLeft className="size-4" />
           {t("back")}
         </Button>
@@ -152,7 +155,7 @@ export function QuestionnaireCreatePage({
       <Button
         variant="outline"
         size="xs"
-        onClick={() => navigate(scope.basePath)}
+        onClick={() => navigate({ href: scope.basePath })}
       >
         <ArrowLeft className="size-4" />
         {t("back")}
@@ -173,7 +176,7 @@ export function QuestionnaireCreatePage({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate(scope.basePath)}
+                onClick={() => navigate({ href: scope.basePath })}
               >
                 {t("cancel")}
               </Button>

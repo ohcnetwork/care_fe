@@ -2,7 +2,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, ChevronDown, Settings2, Trash2 } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useCallback, useId, useState } from "react";
 import { flushSync } from "react-dom";
 import { useForm, useWatch } from "react-hook-form";
@@ -56,6 +55,8 @@ import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
 import mutate from "@/Utils/request/mutate";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import {
   createEncounterWorkspaceSchema,
   normalizeWorkspaceTemplate,
@@ -277,7 +278,7 @@ export function WorkspaceForm({
         ),
       );
       toast.success(t(existing ? "workspace_updated" : "workspace_created"));
-      if (!existing) navigate(`${scope.basePath}/${data.id}/edit`);
+      if (!existing) navigate({ href: `${scope.basePath}/${data.id}/edit` });
     },
   });
 
@@ -299,7 +300,7 @@ export function WorkspaceForm({
       });
       queryClient.invalidateQueries({ queryKey: ["workspace-user-defaults"] });
       toast.success(t("workspace_deleted"));
-      navigate(returnPath);
+      navigate({ href: returnPath });
     },
   });
   const busy = save.isPending || remove.isPending || accessState.pending;
@@ -315,16 +316,15 @@ export function WorkspaceForm({
             className="shrink-0 rounded-lg border-gray-200 shadow-none"
             disabled={busy}
           >
-            <Link
+            <HrefLink
               href={returnPath}
-              basePath="/"
               onClick={(event) => {
                 if (busy) event.preventDefault();
               }}
             >
               <ArrowLeft className="size-4" aria-hidden="true" />
               <span className="sr-only">{t("back")}</span>
-            </Link>
+            </HrefLink>
           </Button>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
