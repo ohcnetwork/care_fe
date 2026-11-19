@@ -85,8 +85,6 @@ const careConfig = {
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
     "https://www.openstreetmap.org/?mlat={lat}&mlon={long}&zoom=15",
 
-  reCaptchaSiteKey: env.REACT_RECAPTCHA_SITE_KEY,
-
   auth: {
     tokenRefreshInterval: env.REACT_JWT_TOKEN_REFRESH_INTERVAL
       ? parseInt(env.REACT_JWT_TOKEN_REFRESH_INTERVAL)
