@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight, Pin, RotateCcw, Wrench, X } from "lucide-react";
+import { ArrowUpRight, RotateCcw, Wrench, X } from "lucide-react";
 import { Link } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -16,7 +16,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EmptyState } from "@/components/ui/empty-state";
 
 import Page from "@/components/Common/Page";
 
@@ -36,11 +35,9 @@ import {
   processCustomDashboardLinks,
   type DashboardShortcutIcon,
 } from "@/Utils/dashboardLinks";
-import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { useShortcutDisplay } from "@/context/ShortcutContext";
 import facilityApi from "@/types/facility/facilityApi";
 import careConfig from "@careConfig";
 
@@ -51,8 +48,6 @@ interface FacilityOverviewProps {
 export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
-  const getShortcutDisplay = useShortcutDisplay();
-  const pinShortcut = getShortcutDisplay("pin-page");
   const hour = new Date().getHours();
   const greeting =
     hour < 12
@@ -209,12 +204,12 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
         </div>
 
         {/* Pinned Links Section */}
-        <div className="group/pinned-links">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base/9 font-semibold text-foreground">
-              {t("pinned_links")}
-            </h2>
-            {customLinks.length > 0 && (
+        {customLinks.length > 0 && (
+          <div className="group/pinned-links">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base/9 font-semibold text-foreground">
+                {t("pinned_links")}
+              </h2>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -233,9 +228,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
-          </div>
-          {customLinks.length > 0 ? (
+            </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {customLinks.map((link) => (
                 <div key={link.link} className="relative group block h-full">
@@ -271,30 +264,8 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                 </div>
               ))}
             </div>
-          ) : (
-            <EmptyState
-              icon={<Pin />}
-              title={t("no_pinned_links")}
-              description={
-                pinShortcut ? (
-                  <Trans
-                    i18nKey="no_pinned_links_hint"
-                    components={{
-                      shortcut: (
-                        <ShortcutBadge
-                          actionId="pin-page"
-                          className="mx-1 align-middle"
-                        />
-                      ),
-                    }}
-                  />
-                ) : (
-                  t("no_pinned_links_description")
-                )
-              }
-            />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </Page>
   );
