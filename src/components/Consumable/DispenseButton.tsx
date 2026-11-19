@@ -97,14 +97,6 @@ export const DispenseButton = ({
           onDispenseComplete={async (chargeItems: ChargeItemRead[]) => {
             setShowDrawer(false);
 
-            queryClient.invalidateQueries({
-              queryKey: [
-                "dispenseOrders",
-                selectedEncounter.patient.id,
-                facilityId,
-              ],
-            });
-
             if (
               careConfig.enableAutoInvoiceAfterDispense &&
               chargeItems.length > 0

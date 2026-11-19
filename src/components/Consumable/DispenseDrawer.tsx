@@ -268,6 +268,9 @@ export default function DispenseDrawer({
   }, [productKnowledgeInventoriesMap, fields, form]);
 
   const { mutate: updateDispenseOrder } = useMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dispenseOrder"] });
+    },
     mutationFn: ({
       dispenseOrderId,
       status,
@@ -286,6 +289,7 @@ export default function DispenseDrawer({
       queryClient.invalidateQueries({
         queryKey: ["inventory", currentLocation.id],
       });
+      queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
 
       const chargeItems = extractChargeItemsFromBatchResponse(
         response as ChargeItemBatchResponse,
