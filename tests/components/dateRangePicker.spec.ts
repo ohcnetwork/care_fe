@@ -193,6 +193,42 @@ test("320px layout and 200% zoom have no inner scrolling or native date inputs",
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
+test("date presets fit without scrolling on a desktop and still apply", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await open(page, "menu&integration");
+  const menu = page.locator('[data-slot="dropdown-menu-content"]');
+  const options = menu.getByRole("menuitem");
+  await expect(options).toHaveCount(9);
+  for (const option of await options.all()) {
+    await expect(option).toBeInViewport({ ratio: 1 });
+  }
+  await expect(page.getByText("Navigate", { exact: true })).toBeVisible();
+  expect(await menu.evaluate((element) => element.scrollHeight <= element.clientHeight + 1)).toBe(true);
+  await page.getByRole("menuitem", { name: "Today", exact: true }).click();
+  await expect(page.getByTestId("applied")).toContainText('"from":"2026-11-20"');
+  await expect(page.getByTestId("applied")).toContainText('"count":1');
+});
+
+test("short screens use one menu scroller and keyboard navigation reaches custom range", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 360 });
+  await open(page, "menu&integration");
+  const menu = page.locator('[data-slot="dropdown-menu-content"]');
+  const scrollers = await menu.evaluate((root) =>
+    [root, ...root.querySelectorAll("*")].filter((element) =>
+      ["auto", "scroll"].includes(getComputedStyle(element).overflowY) &&
+      element.scrollHeight > element.clientHeight + 1,
+    ).length,
+  );
+  expect(scrollers).toBe(1);
+  const custom = page.getByRole("menuitem", { name: /custom date range/i });
+  await page.getByRole("menuitem", { name: "Today", exact: true }).focus();
+  await page.keyboard.press("ArrowUp");
+  await expect(custom).toBeFocused();
+  await expect(custom).toBeInViewport({ ratio: 1 });
+  await page.keyboard.press("Enter");
+  await expect(from(page)).toBeVisible();
+});
+
 test("the real multi-filter passes bounds through and returns to presets after Apply", async ({ page }) => {
   await open(page, "menu&integration&max");
   await page.getByRole("menuitem", { name: /custom date range/i }).click();
