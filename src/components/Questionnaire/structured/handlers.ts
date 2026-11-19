@@ -17,7 +17,7 @@ import fileApi from "@/types/files/fileApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { BatchRequestObject } from "@/Utils/request/batch";
-import { readFileAsDataURL } from "@/Utils/utils";
+import { generateAlternateIdentifier, readFileAsDataURL } from "@/Utils/utils";
 
 interface StructuredHandlerContext {
   patientId: string;
@@ -70,7 +70,7 @@ export const structuredHandlers: {
         return [];
       }
 
-      const prescriptionIdentifier = `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+      const prescriptionIdentifier = generateAlternateIdentifier(encounterId);
 
       return [
         {
