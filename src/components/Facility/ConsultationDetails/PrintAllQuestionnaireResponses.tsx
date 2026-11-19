@@ -257,11 +257,7 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
               {precedentUnit && (
                 <span className="ml-1 text-xs">{precedentUnit.code}</span>
               )}
-              {coding && (
-                <span className="ml-1 text-xs">
-                  {coding.display} ({coding.code})
-                </span>
-              )}
+              {coding && <span className="ml-1 text-xs">{coding.display}</span>}
               {index === response.values.length - 1 && response.note && (
                 <span className="text-gray-500">({response.note})</span>
               )}
