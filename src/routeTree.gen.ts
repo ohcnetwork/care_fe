@@ -43,6 +43,7 @@ import { Route as AppFacilityFacilityIdServicesServiceIdRouteRouteImport } from 
 import { Route as AppFacilityFacilityIdSettingsIndexRouteImport } from "./routes/_app/facility.$facilityId.settings/index";
 import { Route as AppFacilityFacilityIdSettingsSplatRouteImport } from "./routes/_app/facility.$facilityId.settings/$";
 import { Route as AppFacilityFacilityIdSettingsActivity_definitionsRouteImport } from "./routes/_app/facility.$facilityId.settings/activity_definitions";
+import { Route as AppFacilityFacilityIdSettingsBillingRouteImport } from "./routes/_app/facility.$facilityId.settings/billing";
 import { Route as AppFacilityFacilityIdSettingsCharge_item_definitionsRouteImport } from "./routes/_app/facility.$facilityId.settings/charge_item_definitions";
 import { Route as AppFacilityFacilityIdSettingsDepartmentsRouteImport } from "./routes/_app/facility.$facilityId.settings/departments";
 import { Route as AppFacilityFacilityIdSettingsDevicesRouteImport } from "./routes/_app/facility.$facilityId.settings/devices";
@@ -65,6 +66,9 @@ import { Route as AppFacilityFacilityIdSettingsWorkspacesRouteImport } from "./r
 import { Route as AppLegacyAdminQuestionnairesIdEditRouteImport } from "./routes/_app/_legacy/admin.questionnaires.$id.edit";
 import { Route as AppLegacyFacilityFacilityIdTemplateSplatRouteImport } from "./routes/_app/_legacy/facility.$facilityId.template.$";
 import { Route as AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRouteImport } from "./routes/_app/_legacy/patient.$patientId.questionnaire.$questionnaireId";
+import { Route as AppFacilityFacilityIdBillingAccountIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.account.index";
+import { Route as AppFacilityFacilityIdBillingInvoicesIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.invoices.index";
+import { Route as AppFacilityFacilityIdBillingPaymentsIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.payments.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdSplatRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.$";
 import { Route as AppFacilityFacilityIdLocationsLocationIdBedsRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.beds";
@@ -78,7 +82,15 @@ import { Route as AppFacilityFacilityIdServicesServiceIdLocationsRouteImport } f
 import { Route as AppFacilityFacilityIdServicesServiceIdScheduleRouteImport } from "./routes/_app/facility.$facilityId.services.$serviceId/schedule";
 import { Route as AppFacilityFacilityIdSettingsActivity_definitionsIndexRouteImport } from "./routes/_app/facility.$facilityId.settings/activity_definitions.index";
 import { Route as AppFacilityFacilityIdSettingsActivity_definitionsNewRouteImport } from "./routes/_app/facility.$facilityId.settings/activity_definitions.new";
+import { Route as AppFacilityFacilityIdSettingsBillingIndexRouteImport } from "./routes/_app/facility.$facilityId.settings/billing.index";
 import { Route as AppFacilityFacilityIdSettingsBillingSplatRouteImport } from "./routes/_app/facility.$facilityId.settings/billing.$";
+import { Route as AppFacilityFacilityIdSettingsBillingDiscount_codesRouteImport } from "./routes/_app/facility.$facilityId.settings/billing.discount_codes";
+import { Route as AppFacilityFacilityIdSettingsBillingDiscount_componentsRouteImport } from "./routes/_app/facility.$facilityId.settings/billing.discount_components";
+import { Route as AppFacilityFacilityIdSettingsBillingDiscount_configurationRouteImport } from "./routes/_app/facility.$facilityId.settings/billing.discount_configuration";
+import { Route as AppFacilityFacilityIdSettingsBillingInformational_codesRouteImport } from "./routes/_app/facility.$facilityId.settings/billing.informational_codes";
+import { Route as AppFacilityFacilityIdSettingsBillingSettingsRouteImport } from "./routes/_app/facility.$facilityId.settings/billing.settings";
+import { Route as AppFacilityFacilityIdSettingsBillingTax_codesRouteImport } from "./routes/_app/facility.$facilityId.settings/billing.tax_codes";
+import { Route as AppFacilityFacilityIdSettingsBillingTax_componentsRouteImport } from "./routes/_app/facility.$facilityId.settings/billing.tax_components";
 import { Route as AppFacilityFacilityIdSettingsCharge_item_definitionsIndexRouteImport } from "./routes/_app/facility.$facilityId.settings/charge_item_definitions.index";
 import { Route as AppFacilityFacilityIdSettingsDepartmentsIndexRouteImport } from "./routes/_app/facility.$facilityId.settings/departments.index";
 import { Route as AppFacilityFacilityIdSettingsDevicesIndexRouteImport } from "./routes/_app/facility.$facilityId.settings/devices.index";
@@ -117,6 +129,13 @@ import { Route as PatientFacilityFacilityIdAppointmentsStaffIdPatientRegistratio
 import { Route as PatientFacilityFacilityIdAppointmentsStaffIdPatientSelectRouteImport } from "./routes/_patient/facility.$facilityId.appointments.$staffId.patient-select";
 import { Route as AppLegacyFacilityFacilityIdPatientPatientIdConsultationRouteImport } from "./routes/_app/_legacy/facility.$facilityId.patient.$patientId.consultation";
 import { Route as AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteImport } from "./routes/_app/_legacy/facility.$facilityId.patient.$patientId.questionnaire";
+import { Route as AppFacilityFacilityIdBillingAccountAccountIdIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.account.$accountId.index";
+import { Route as AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRouteImport } from "./routes/_app/facility.$facilityId.billing.invoice.$invoiceId.print";
+import { Route as AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.invoices.$invoiceId.index";
+import { Route as AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRouteImport } from "./routes/_app/facility.$facilityId.billing.invoices.$invoiceId.pay";
+import { Route as AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRouteImport } from "./routes/_app/facility.$facilityId.billing.invoices.$invoiceIds.print";
+import { Route as AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.payments.$paymentReconciliationId.index";
+import { Route as AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRouteImport } from "./routes/_app/facility.$facilityId.billing.payments.$paymentReconciliationId.print";
 import { Route as AppFacilityFacilityIdLocationsLocationIdAppointmentsIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.appointments.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdAppointmentsAppointmentIdRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.appointments.$appointmentId";
 import { Route as AppFacilityFacilityIdLocationsLocationIdAppointmentsPrintRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.appointments.print";
@@ -160,6 +179,9 @@ import { Route as AppFacilityFacilityIdSettingsWorkspacesIdEditRouteImport } fro
 import { Route as PatientFacilityFacilityIdAppointmentsStaffIdRescheduleAppointmentIdRouteImport } from "./routes/_patient/facility.$facilityId.appointments.$staffId.reschedule.$appointmentId";
 import { Route as PublicFacilityFacilityIdAppointmentsStaffIdOtpPageRouteImport } from "./routes/_public/facility.$facilityId.appointments.$staffId.otp.$page";
 import { Route as AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRouteImport } from "./routes/_app/_legacy/facility.$facilityId.patient.$patientId.questionnaire.$questionnaireId";
+import { Route as AppFacilityFacilityIdBillingAccountAccountIdTabIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.account.$accountId.$tab.index";
+import { Route as AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRouteImport } from "./routes/_app/facility.$facilityId.billing.account.$accountId.charge_items.print";
+import { Route as AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRouteImport } from "./routes/_app/facility.$facilityId.billing.account.$accountId.invoices.create";
 import { Route as AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.queues.$queueId.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdCompletedRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.queues.$queueId.completed";
 import { Route as AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdOngoingRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.queues.$queueId.ongoing";
@@ -178,6 +200,7 @@ import { Route as AppFacilityFacilityIdSettingsQuestionnairesIdVersionsRevisionI
 import { Route as AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRouteImport } from "./routes/_app/_legacy/facility.$facilityId.patient.$patientId.encounter.$encounterId.$tab";
 import { Route as AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteImport } from "./routes/_app/_legacy/facility.$facilityId.patient.$patientId.encounter.$encounterId.questionnaire";
 import { Route as AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRouteImport } from "./routes/_app/_legacy/organization.$organizationId.patient.$patientId.encounter.$encounterId.$tab";
+import { Route as AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRouteImport } from "./routes/_app/facility.$facilityId.billing.account.$accountId.$tab.payment.$paymentType";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.internal.dispatch.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchTabRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.internal.dispatch.$tab";
 import { Route as AppFacilityFacilityIdLocationsLocationIdInventoryInternalReceiveIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.inventory.internal.receive.index";
@@ -391,6 +414,12 @@ const AppFacilityFacilityIdSettingsActivity_definitionsRoute =
     path: "/activity_definitions",
     getParentRoute: () => AppFacilityFacilityIdSettingsRouteRoute,
   } as any);
+const AppFacilityFacilityIdSettingsBillingRoute =
+  AppFacilityFacilityIdSettingsBillingRouteImport.update({
+    id: "/billing",
+    path: "/billing",
+    getParentRoute: () => AppFacilityFacilityIdSettingsRouteRoute,
+  } as any);
 const AppFacilityFacilityIdSettingsCharge_item_definitionsRoute =
   AppFacilityFacilityIdSettingsCharge_item_definitionsRouteImport.update({
     id: "/charge_item_definitions",
@@ -523,6 +552,24 @@ const AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute =
     path: "/$questionnaireId",
     getParentRoute: () => AppLegacyPatientPatientIdQuestionnaireRoute,
   } as any);
+const AppFacilityFacilityIdBillingAccountIndexRoute =
+  AppFacilityFacilityIdBillingAccountIndexRouteImport.update({
+    id: "/facility/$facilityId/billing/account/",
+    path: "/facility/$facilityId/billing/account/",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdBillingInvoicesIndexRoute =
+  AppFacilityFacilityIdBillingInvoicesIndexRouteImport.update({
+    id: "/facility/$facilityId/billing/invoices/",
+    path: "/facility/$facilityId/billing/invoices/",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdBillingPaymentsIndexRoute =
+  AppFacilityFacilityIdBillingPaymentsIndexRouteImport.update({
+    id: "/facility/$facilityId/billing/payments/",
+    path: "/facility/$facilityId/billing/payments/",
+    getParentRoute: () => AppRoute,
+  } as any);
 const AppFacilityFacilityIdLocationsLocationIdIndexRoute =
   AppFacilityFacilityIdLocationsLocationIdIndexRouteImport.update({
     id: "/",
@@ -603,11 +650,59 @@ const AppFacilityFacilityIdSettingsActivity_definitionsNewRoute =
     getParentRoute: () =>
       AppFacilityFacilityIdSettingsActivity_definitionsRoute,
   } as any);
+const AppFacilityFacilityIdSettingsBillingIndexRoute =
+  AppFacilityFacilityIdSettingsBillingIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AppFacilityFacilityIdSettingsBillingRoute,
+  } as any);
 const AppFacilityFacilityIdSettingsBillingSplatRoute =
   AppFacilityFacilityIdSettingsBillingSplatRouteImport.update({
-    id: "/billing/$",
-    path: "/billing/$",
-    getParentRoute: () => AppFacilityFacilityIdSettingsRouteRoute,
+    id: "/$",
+    path: "/$",
+    getParentRoute: () => AppFacilityFacilityIdSettingsBillingRoute,
+  } as any);
+const AppFacilityFacilityIdSettingsBillingDiscount_codesRoute =
+  AppFacilityFacilityIdSettingsBillingDiscount_codesRouteImport.update({
+    id: "/discount_codes",
+    path: "/discount_codes",
+    getParentRoute: () => AppFacilityFacilityIdSettingsBillingRoute,
+  } as any);
+const AppFacilityFacilityIdSettingsBillingDiscount_componentsRoute =
+  AppFacilityFacilityIdSettingsBillingDiscount_componentsRouteImport.update({
+    id: "/discount_components",
+    path: "/discount_components",
+    getParentRoute: () => AppFacilityFacilityIdSettingsBillingRoute,
+  } as any);
+const AppFacilityFacilityIdSettingsBillingDiscount_configurationRoute =
+  AppFacilityFacilityIdSettingsBillingDiscount_configurationRouteImport.update({
+    id: "/discount_configuration",
+    path: "/discount_configuration",
+    getParentRoute: () => AppFacilityFacilityIdSettingsBillingRoute,
+  } as any);
+const AppFacilityFacilityIdSettingsBillingInformational_codesRoute =
+  AppFacilityFacilityIdSettingsBillingInformational_codesRouteImport.update({
+    id: "/informational_codes",
+    path: "/informational_codes",
+    getParentRoute: () => AppFacilityFacilityIdSettingsBillingRoute,
+  } as any);
+const AppFacilityFacilityIdSettingsBillingSettingsRoute =
+  AppFacilityFacilityIdSettingsBillingSettingsRouteImport.update({
+    id: "/settings",
+    path: "/settings",
+    getParentRoute: () => AppFacilityFacilityIdSettingsBillingRoute,
+  } as any);
+const AppFacilityFacilityIdSettingsBillingTax_codesRoute =
+  AppFacilityFacilityIdSettingsBillingTax_codesRouteImport.update({
+    id: "/tax_codes",
+    path: "/tax_codes",
+    getParentRoute: () => AppFacilityFacilityIdSettingsBillingRoute,
+  } as any);
+const AppFacilityFacilityIdSettingsBillingTax_componentsRoute =
+  AppFacilityFacilityIdSettingsBillingTax_componentsRouteImport.update({
+    id: "/tax_components",
+    path: "/tax_components",
+    getParentRoute: () => AppFacilityFacilityIdSettingsBillingRoute,
   } as any);
 const AppFacilityFacilityIdSettingsCharge_item_definitionsIndexRoute =
   AppFacilityFacilityIdSettingsCharge_item_definitionsIndexRouteImport.update({
@@ -854,6 +949,52 @@ const AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRoute =
     path: "/facility/$facilityId/patient/$patientId/questionnaire",
     getParentRoute: () => AppLegacyRoute,
   } as any);
+const AppFacilityFacilityIdBillingAccountAccountIdIndexRoute =
+  AppFacilityFacilityIdBillingAccountAccountIdIndexRouteImport.update({
+    id: "/facility/$facilityId/billing/account/$accountId/",
+    path: "/facility/$facilityId/billing/account/$accountId/",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute =
+  AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRouteImport.update({
+    id: "/facility/$facilityId/billing/invoice/$invoiceId/print",
+    path: "/facility/$facilityId/billing/invoice/$invoiceId/print",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute =
+  AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRouteImport.update({
+    id: "/facility/$facilityId/billing/invoices/$invoiceId/",
+    path: "/facility/$facilityId/billing/invoices/$invoiceId/",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute =
+  AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRouteImport.update({
+    id: "/facility/$facilityId/billing/invoices/$invoiceId/pay",
+    path: "/facility/$facilityId/billing/invoices/$invoiceId/pay",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute =
+  AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRouteImport.update({
+    id: "/facility/$facilityId/billing/invoices/$invoiceIds/print",
+    path: "/facility/$facilityId/billing/invoices/$invoiceIds/print",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute =
+  AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRouteImport.update(
+    {
+      id: "/facility/$facilityId/billing/payments/$paymentReconciliationId/",
+      path: "/facility/$facilityId/billing/payments/$paymentReconciliationId/",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRoute =
+  AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/billing/payments/$paymentReconciliationId/print",
+      path: "/facility/$facilityId/billing/payments/$paymentReconciliationId/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
 const AppFacilityFacilityIdLocationsLocationIdAppointmentsIndexRoute =
   AppFacilityFacilityIdLocationsLocationIdAppointmentsIndexRouteImport.update({
     id: "/appointments/",
@@ -1163,6 +1304,26 @@ const AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRou
         AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRoute,
     } as any,
   );
+const AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute =
+  AppFacilityFacilityIdBillingAccountAccountIdTabIndexRouteImport.update({
+    id: "/facility/$facilityId/billing/account/$accountId/$tab/",
+    path: "/facility/$facilityId/billing/account/$accountId/$tab/",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute =
+  AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRouteImport.update(
+    {
+      id: "/facility/$facilityId/billing/account/$accountId/charge_items/print",
+      path: "/facility/$facilityId/billing/account/$accountId/charge_items/print",
+      getParentRoute: () => AppRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute =
+  AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRouteImport.update({
+    id: "/facility/$facilityId/billing/account/$accountId/invoices/create",
+    path: "/facility/$facilityId/billing/account/$accountId/invoices/create",
+    getParentRoute: () => AppRoute,
+  } as any);
 const AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdIndexRoute =
   AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdIndexRouteImport.update({
     id: "/queues/$queueId/",
@@ -1301,6 +1462,14 @@ const AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTab
       id: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab",
       path: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab",
       getParentRoute: () => AppLegacyRoute,
+    } as any,
+  );
+const AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute =
+  AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRouteImport.update(
+    {
+      id: "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType",
+      path: "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType",
+      getParentRoute: () => AppRoute,
     } as any,
   );
 const AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchIndexRoute =
@@ -1590,6 +1759,7 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdService_requestsServiceRequestIdRoute;
   "/facility/$facilityId/settings/$": typeof AppFacilityFacilityIdSettingsSplatRoute;
   "/facility/$facilityId/settings/activity_definitions": typeof AppFacilityFacilityIdSettingsActivity_definitionsRouteWithChildren;
+  "/facility/$facilityId/settings/billing": typeof AppFacilityFacilityIdSettingsBillingRouteWithChildren;
   "/facility/$facilityId/settings/charge_item_definitions": typeof AppFacilityFacilityIdSettingsCharge_item_definitionsRouteWithChildren;
   "/facility/$facilityId/settings/departments": typeof AppFacilityFacilityIdSettingsDepartmentsRouteWithChildren;
   "/facility/$facilityId/settings/devices": typeof AppFacilityFacilityIdSettingsDevicesRouteWithChildren;
@@ -1625,6 +1795,13 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/services/$serviceId/schedule": typeof AppFacilityFacilityIdServicesServiceIdScheduleRoute;
   "/facility/$facilityId/settings/activity_definitions/new": typeof AppFacilityFacilityIdSettingsActivity_definitionsNewRoute;
   "/facility/$facilityId/settings/billing/$": typeof AppFacilityFacilityIdSettingsBillingSplatRoute;
+  "/facility/$facilityId/settings/billing/discount_codes": typeof AppFacilityFacilityIdSettingsBillingDiscount_codesRoute;
+  "/facility/$facilityId/settings/billing/discount_components": typeof AppFacilityFacilityIdSettingsBillingDiscount_componentsRoute;
+  "/facility/$facilityId/settings/billing/discount_configuration": typeof AppFacilityFacilityIdSettingsBillingDiscount_configurationRoute;
+  "/facility/$facilityId/settings/billing/informational_codes": typeof AppFacilityFacilityIdSettingsBillingInformational_codesRoute;
+  "/facility/$facilityId/settings/billing/settings": typeof AppFacilityFacilityIdSettingsBillingSettingsRoute;
+  "/facility/$facilityId/settings/billing/tax_codes": typeof AppFacilityFacilityIdSettingsBillingTax_codesRoute;
+  "/facility/$facilityId/settings/billing/tax_components": typeof AppFacilityFacilityIdSettingsBillingTax_componentsRoute;
   "/facility/$facilityId/settings/devices/$id": typeof AppFacilityFacilityIdSettingsDevicesIdRouteWithChildren;
   "/facility/$facilityId/settings/devices/create": typeof AppFacilityFacilityIdSettingsDevicesCreateRoute;
   "/facility/$facilityId/settings/healthcare_services/new": typeof AppFacilityFacilityIdSettingsHealthcare_servicesNewRoute;
@@ -1645,9 +1822,13 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/appointments/$staffId/book-appointment": typeof PatientFacilityFacilityIdAppointmentsStaffIdBookAppointmentRoute;
   "/facility/$facilityId/appointments/$staffId/patient-registration": typeof PatientFacilityFacilityIdAppointmentsStaffIdPatientRegistrationRoute;
   "/facility/$facilityId/appointments/$staffId/patient-select": typeof PatientFacilityFacilityIdAppointmentsStaffIdPatientSelectRoute;
+  "/facility/$facilityId/billing/account/": typeof AppFacilityFacilityIdBillingAccountIndexRoute;
+  "/facility/$facilityId/billing/invoices/": typeof AppFacilityFacilityIdBillingInvoicesIndexRoute;
+  "/facility/$facilityId/billing/payments/": typeof AppFacilityFacilityIdBillingPaymentsIndexRoute;
   "/facility/$facilityId/locations/$locationId/": typeof AppFacilityFacilityIdLocationsLocationIdIndexRoute;
   "/facility/$facilityId/services/$serviceId/": typeof AppFacilityFacilityIdServicesServiceIdIndexRoute;
   "/facility/$facilityId/settings/activity_definitions/": typeof AppFacilityFacilityIdSettingsActivity_definitionsIndexRoute;
+  "/facility/$facilityId/settings/billing/": typeof AppFacilityFacilityIdSettingsBillingIndexRoute;
   "/facility/$facilityId/settings/charge_item_definitions/": typeof AppFacilityFacilityIdSettingsCharge_item_definitionsIndexRoute;
   "/facility/$facilityId/settings/departments/": typeof AppFacilityFacilityIdSettingsDepartmentsIndexRoute;
   "/facility/$facilityId/settings/devices/": typeof AppFacilityFacilityIdSettingsDevicesIndexRoute;
@@ -1666,6 +1847,10 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/settings/workspaces/": typeof AppFacilityFacilityIdSettingsWorkspacesIndexRoute;
   "/facility/$facilityId/patient/$patientId/consultation": typeof AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute;
   "/facility/$facilityId/patient/$patientId/questionnaire": typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteWithChildren;
+  "/facility/$facilityId/billing/invoice/$invoiceId/print": typeof AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute;
+  "/facility/$facilityId/billing/invoices/$invoiceId/pay": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute;
+  "/facility/$facilityId/billing/invoices/$invoiceIds/print": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute;
+  "/facility/$facilityId/billing/payments/$paymentReconciliationId/print": typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRoute;
   "/facility/$facilityId/locations/$locationId/appointments/$appointmentId": typeof AppFacilityFacilityIdLocationsLocationIdAppointmentsAppointmentIdRoute;
   "/facility/$facilityId/locations/$locationId/appointments/print": typeof AppFacilityFacilityIdLocationsLocationIdAppointmentsPrintRoute;
   "/facility/$facilityId/locations/$locationId/inventory/summary": typeof AppFacilityFacilityIdLocationsLocationIdInventorySummaryRoute;
@@ -1689,6 +1874,9 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/settings/workspaces/$id/edit": typeof AppFacilityFacilityIdSettingsWorkspacesIdEditRoute;
   "/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId": typeof PatientFacilityFacilityIdAppointmentsStaffIdRescheduleAppointmentIdRoute;
   "/facility/$facilityId/appointments/$staffId/otp/$page": typeof PublicFacilityFacilityIdAppointmentsStaffIdOtpPageRoute;
+  "/facility/$facilityId/billing/account/$accountId/": typeof AppFacilityFacilityIdBillingAccountAccountIdIndexRoute;
+  "/facility/$facilityId/billing/invoices/$invoiceId/": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute;
+  "/facility/$facilityId/billing/payments/$paymentReconciliationId/": typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute;
   "/facility/$facilityId/locations/$locationId/appointments/": typeof AppFacilityFacilityIdLocationsLocationIdAppointmentsIndexRoute;
   "/facility/$facilityId/locations/$locationId/medication_dispense/": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseIndexRoute;
   "/facility/$facilityId/locations/$locationId/medication_requests/": typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsIndexRoute;
@@ -1709,6 +1897,8 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/settings/questionnaires/$id/": typeof AppFacilityFacilityIdSettingsQuestionnairesIdIndexRoute;
   "/facility/$facilityId/settings/specimen_definitions/$specimenSlug/": typeof AppFacilityFacilityIdSettingsSpecimen_definitionsSpecimenSlugIndexRoute;
   "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId": typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRoute;
+  "/facility/$facilityId/billing/account/$accountId/charge_items/print": typeof AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute;
+  "/facility/$facilityId/billing/account/$accountId/invoices/create": typeof AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute;
   "/facility/$facilityId/locations/$locationId/queues/$queueId/completed": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdCompletedRoute;
   "/facility/$facilityId/locations/$locationId/queues/$queueId/ongoing": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdOngoingRoute;
   "/facility/$facilityId/services/$serviceId/queues/$queueId/completed": typeof AppFacilityFacilityIdServicesServiceIdQueuesQueueIdCompletedRoute;
@@ -1718,6 +1908,7 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/settings/devices/$id/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdSettingsDevicesIdQuestionnaireQuestionnaireIdRoute;
   "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new": typeof AppFacilityFacilityIdSettingsProduct_knowledgeCategoriesCategorySlugNewRoute;
   "/facility/$facilityId/settings/questionnaires/$id/versions/$revisionId": typeof AppFacilityFacilityIdSettingsQuestionnairesIdVersionsRevisionIdRoute;
+  "/facility/$facilityId/billing/account/$accountId/$tab/": typeof AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute;
   "/facility/$facilityId/locations/$locationId/queues/$queueId/": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdIndexRoute;
   "/facility/$facilityId/services/$serviceId/queues/$queueId/": typeof AppFacilityFacilityIdServicesServiceIdQueuesQueueIdIndexRoute;
   "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug/": typeof AppFacilityFacilityIdSettingsActivity_definitionsCategoriesCategorySlugIndexRoute;
@@ -1727,6 +1918,7 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute;
   "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteWithChildren;
   "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab": typeof AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute;
+  "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType": typeof AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchTabRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/receive/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalReceiveTabRoute;
   "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/completed": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdCompletedRoute;
@@ -1805,6 +1997,13 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/services/$serviceId/schedule": typeof AppFacilityFacilityIdServicesServiceIdScheduleRoute;
   "/facility/$facilityId/settings/activity_definitions/new": typeof AppFacilityFacilityIdSettingsActivity_definitionsNewRoute;
   "/facility/$facilityId/settings/billing/$": typeof AppFacilityFacilityIdSettingsBillingSplatRoute;
+  "/facility/$facilityId/settings/billing/discount_codes": typeof AppFacilityFacilityIdSettingsBillingDiscount_codesRoute;
+  "/facility/$facilityId/settings/billing/discount_components": typeof AppFacilityFacilityIdSettingsBillingDiscount_componentsRoute;
+  "/facility/$facilityId/settings/billing/discount_configuration": typeof AppFacilityFacilityIdSettingsBillingDiscount_configurationRoute;
+  "/facility/$facilityId/settings/billing/informational_codes": typeof AppFacilityFacilityIdSettingsBillingInformational_codesRoute;
+  "/facility/$facilityId/settings/billing/settings": typeof AppFacilityFacilityIdSettingsBillingSettingsRoute;
+  "/facility/$facilityId/settings/billing/tax_codes": typeof AppFacilityFacilityIdSettingsBillingTax_codesRoute;
+  "/facility/$facilityId/settings/billing/tax_components": typeof AppFacilityFacilityIdSettingsBillingTax_componentsRoute;
   "/facility/$facilityId/settings/devices/create": typeof AppFacilityFacilityIdSettingsDevicesCreateRoute;
   "/facility/$facilityId/settings/healthcare_services/new": typeof AppFacilityFacilityIdSettingsHealthcare_servicesNewRoute;
   "/facility/$facilityId/settings/immunization-policies/$id": typeof AppFacilityFacilityIdSettingsImmunizationPoliciesIdRoute;
@@ -1824,9 +2023,13 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/appointments/$staffId/book-appointment": typeof PatientFacilityFacilityIdAppointmentsStaffIdBookAppointmentRoute;
   "/facility/$facilityId/appointments/$staffId/patient-registration": typeof PatientFacilityFacilityIdAppointmentsStaffIdPatientRegistrationRoute;
   "/facility/$facilityId/appointments/$staffId/patient-select": typeof PatientFacilityFacilityIdAppointmentsStaffIdPatientSelectRoute;
+  "/facility/$facilityId/billing/account": typeof AppFacilityFacilityIdBillingAccountIndexRoute;
+  "/facility/$facilityId/billing/invoices": typeof AppFacilityFacilityIdBillingInvoicesIndexRoute;
+  "/facility/$facilityId/billing/payments": typeof AppFacilityFacilityIdBillingPaymentsIndexRoute;
   "/facility/$facilityId/locations/$locationId": typeof AppFacilityFacilityIdLocationsLocationIdIndexRoute;
   "/facility/$facilityId/services/$serviceId": typeof AppFacilityFacilityIdServicesServiceIdIndexRoute;
   "/facility/$facilityId/settings/activity_definitions": typeof AppFacilityFacilityIdSettingsActivity_definitionsIndexRoute;
+  "/facility/$facilityId/settings/billing": typeof AppFacilityFacilityIdSettingsBillingIndexRoute;
   "/facility/$facilityId/settings/charge_item_definitions": typeof AppFacilityFacilityIdSettingsCharge_item_definitionsIndexRoute;
   "/facility/$facilityId/settings/departments": typeof AppFacilityFacilityIdSettingsDepartmentsIndexRoute;
   "/facility/$facilityId/settings/devices": typeof AppFacilityFacilityIdSettingsDevicesIndexRoute;
@@ -1845,6 +2048,10 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/settings/workspaces": typeof AppFacilityFacilityIdSettingsWorkspacesIndexRoute;
   "/facility/$facilityId/patient/$patientId/consultation": typeof AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute;
   "/facility/$facilityId/patient/$patientId/questionnaire": typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteWithChildren;
+  "/facility/$facilityId/billing/invoice/$invoiceId/print": typeof AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute;
+  "/facility/$facilityId/billing/invoices/$invoiceId/pay": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute;
+  "/facility/$facilityId/billing/invoices/$invoiceIds/print": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute;
+  "/facility/$facilityId/billing/payments/$paymentReconciliationId/print": typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRoute;
   "/facility/$facilityId/locations/$locationId/appointments/$appointmentId": typeof AppFacilityFacilityIdLocationsLocationIdAppointmentsAppointmentIdRoute;
   "/facility/$facilityId/locations/$locationId/appointments/print": typeof AppFacilityFacilityIdLocationsLocationIdAppointmentsPrintRoute;
   "/facility/$facilityId/locations/$locationId/inventory/summary": typeof AppFacilityFacilityIdLocationsLocationIdInventorySummaryRoute;
@@ -1868,6 +2075,9 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/settings/workspaces/$id/edit": typeof AppFacilityFacilityIdSettingsWorkspacesIdEditRoute;
   "/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId": typeof PatientFacilityFacilityIdAppointmentsStaffIdRescheduleAppointmentIdRoute;
   "/facility/$facilityId/appointments/$staffId/otp/$page": typeof PublicFacilityFacilityIdAppointmentsStaffIdOtpPageRoute;
+  "/facility/$facilityId/billing/account/$accountId": typeof AppFacilityFacilityIdBillingAccountAccountIdIndexRoute;
+  "/facility/$facilityId/billing/invoices/$invoiceId": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute;
+  "/facility/$facilityId/billing/payments/$paymentReconciliationId": typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute;
   "/facility/$facilityId/locations/$locationId/appointments": typeof AppFacilityFacilityIdLocationsLocationIdAppointmentsIndexRoute;
   "/facility/$facilityId/locations/$locationId/medication_dispense": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseIndexRoute;
   "/facility/$facilityId/locations/$locationId/medication_requests": typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsIndexRoute;
@@ -1888,6 +2098,8 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/settings/questionnaires/$id": typeof AppFacilityFacilityIdSettingsQuestionnairesIdIndexRoute;
   "/facility/$facilityId/settings/specimen_definitions/$specimenSlug": typeof AppFacilityFacilityIdSettingsSpecimen_definitionsSpecimenSlugIndexRoute;
   "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId": typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRoute;
+  "/facility/$facilityId/billing/account/$accountId/charge_items/print": typeof AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute;
+  "/facility/$facilityId/billing/account/$accountId/invoices/create": typeof AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute;
   "/facility/$facilityId/locations/$locationId/queues/$queueId/completed": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdCompletedRoute;
   "/facility/$facilityId/locations/$locationId/queues/$queueId/ongoing": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdOngoingRoute;
   "/facility/$facilityId/services/$serviceId/queues/$queueId/completed": typeof AppFacilityFacilityIdServicesServiceIdQueuesQueueIdCompletedRoute;
@@ -1897,6 +2109,7 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/settings/devices/$id/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdSettingsDevicesIdQuestionnaireQuestionnaireIdRoute;
   "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new": typeof AppFacilityFacilityIdSettingsProduct_knowledgeCategoriesCategorySlugNewRoute;
   "/facility/$facilityId/settings/questionnaires/$id/versions/$revisionId": typeof AppFacilityFacilityIdSettingsQuestionnairesIdVersionsRevisionIdRoute;
+  "/facility/$facilityId/billing/account/$accountId/$tab": typeof AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute;
   "/facility/$facilityId/locations/$locationId/queues/$queueId": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdIndexRoute;
   "/facility/$facilityId/services/$serviceId/queues/$queueId": typeof AppFacilityFacilityIdServicesServiceIdQueuesQueueIdIndexRoute;
   "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug": typeof AppFacilityFacilityIdSettingsActivity_definitionsCategoriesCategorySlugIndexRoute;
@@ -1906,6 +2119,7 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute;
   "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteWithChildren;
   "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab": typeof AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute;
+  "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType": typeof AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchTabRoute;
   "/facility/$facilityId/locations/$locationId/inventory/internal/receive/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalReceiveTabRoute;
   "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/completed": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdCompletedRoute;
@@ -1973,6 +2187,7 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdService_requestsServiceRequestIdRoute;
   "/_app/facility/$facilityId/settings/$": typeof AppFacilityFacilityIdSettingsSplatRoute;
   "/_app/facility/$facilityId/settings/activity_definitions": typeof AppFacilityFacilityIdSettingsActivity_definitionsRouteWithChildren;
+  "/_app/facility/$facilityId/settings/billing": typeof AppFacilityFacilityIdSettingsBillingRouteWithChildren;
   "/_app/facility/$facilityId/settings/charge_item_definitions": typeof AppFacilityFacilityIdSettingsCharge_item_definitionsRouteWithChildren;
   "/_app/facility/$facilityId/settings/departments": typeof AppFacilityFacilityIdSettingsDepartmentsRouteWithChildren;
   "/_app/facility/$facilityId/settings/devices": typeof AppFacilityFacilityIdSettingsDevicesRouteWithChildren;
@@ -2008,6 +2223,13 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/services/$serviceId/schedule": typeof AppFacilityFacilityIdServicesServiceIdScheduleRoute;
   "/_app/facility/$facilityId/settings/activity_definitions/new": typeof AppFacilityFacilityIdSettingsActivity_definitionsNewRoute;
   "/_app/facility/$facilityId/settings/billing/$": typeof AppFacilityFacilityIdSettingsBillingSplatRoute;
+  "/_app/facility/$facilityId/settings/billing/discount_codes": typeof AppFacilityFacilityIdSettingsBillingDiscount_codesRoute;
+  "/_app/facility/$facilityId/settings/billing/discount_components": typeof AppFacilityFacilityIdSettingsBillingDiscount_componentsRoute;
+  "/_app/facility/$facilityId/settings/billing/discount_configuration": typeof AppFacilityFacilityIdSettingsBillingDiscount_configurationRoute;
+  "/_app/facility/$facilityId/settings/billing/informational_codes": typeof AppFacilityFacilityIdSettingsBillingInformational_codesRoute;
+  "/_app/facility/$facilityId/settings/billing/settings": typeof AppFacilityFacilityIdSettingsBillingSettingsRoute;
+  "/_app/facility/$facilityId/settings/billing/tax_codes": typeof AppFacilityFacilityIdSettingsBillingTax_codesRoute;
+  "/_app/facility/$facilityId/settings/billing/tax_components": typeof AppFacilityFacilityIdSettingsBillingTax_componentsRoute;
   "/_app/facility/$facilityId/settings/devices/$id": typeof AppFacilityFacilityIdSettingsDevicesIdRouteWithChildren;
   "/_app/facility/$facilityId/settings/devices/create": typeof AppFacilityFacilityIdSettingsDevicesCreateRoute;
   "/_app/facility/$facilityId/settings/healthcare_services/new": typeof AppFacilityFacilityIdSettingsHealthcare_servicesNewRoute;
@@ -2028,9 +2250,13 @@ export interface FileRoutesById {
   "/_patient/facility/$facilityId/appointments/$staffId/book-appointment": typeof PatientFacilityFacilityIdAppointmentsStaffIdBookAppointmentRoute;
   "/_patient/facility/$facilityId/appointments/$staffId/patient-registration": typeof PatientFacilityFacilityIdAppointmentsStaffIdPatientRegistrationRoute;
   "/_patient/facility/$facilityId/appointments/$staffId/patient-select": typeof PatientFacilityFacilityIdAppointmentsStaffIdPatientSelectRoute;
+  "/_app/facility/$facilityId/billing/account/": typeof AppFacilityFacilityIdBillingAccountIndexRoute;
+  "/_app/facility/$facilityId/billing/invoices/": typeof AppFacilityFacilityIdBillingInvoicesIndexRoute;
+  "/_app/facility/$facilityId/billing/payments/": typeof AppFacilityFacilityIdBillingPaymentsIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/": typeof AppFacilityFacilityIdLocationsLocationIdIndexRoute;
   "/_app/facility/$facilityId/services/$serviceId/": typeof AppFacilityFacilityIdServicesServiceIdIndexRoute;
   "/_app/facility/$facilityId/settings/activity_definitions/": typeof AppFacilityFacilityIdSettingsActivity_definitionsIndexRoute;
+  "/_app/facility/$facilityId/settings/billing/": typeof AppFacilityFacilityIdSettingsBillingIndexRoute;
   "/_app/facility/$facilityId/settings/charge_item_definitions/": typeof AppFacilityFacilityIdSettingsCharge_item_definitionsIndexRoute;
   "/_app/facility/$facilityId/settings/departments/": typeof AppFacilityFacilityIdSettingsDepartmentsIndexRoute;
   "/_app/facility/$facilityId/settings/devices/": typeof AppFacilityFacilityIdSettingsDevicesIndexRoute;
@@ -2049,6 +2275,10 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/settings/workspaces/": typeof AppFacilityFacilityIdSettingsWorkspacesIndexRoute;
   "/_app/_legacy/facility/$facilityId/patient/$patientId/consultation": typeof AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute;
   "/_app/_legacy/facility/$facilityId/patient/$patientId/questionnaire": typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteWithChildren;
+  "/_app/facility/$facilityId/billing/invoice/$invoiceId/print": typeof AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute;
+  "/_app/facility/$facilityId/billing/invoices/$invoiceId/pay": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute;
+  "/_app/facility/$facilityId/billing/invoices/$invoiceIds/print": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute;
+  "/_app/facility/$facilityId/billing/payments/$paymentReconciliationId/print": typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRoute;
   "/_app/facility/$facilityId/locations/$locationId/appointments/$appointmentId": typeof AppFacilityFacilityIdLocationsLocationIdAppointmentsAppointmentIdRoute;
   "/_app/facility/$facilityId/locations/$locationId/appointments/print": typeof AppFacilityFacilityIdLocationsLocationIdAppointmentsPrintRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/summary": typeof AppFacilityFacilityIdLocationsLocationIdInventorySummaryRoute;
@@ -2072,6 +2302,9 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/settings/workspaces/$id/edit": typeof AppFacilityFacilityIdSettingsWorkspacesIdEditRoute;
   "/_patient/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId": typeof PatientFacilityFacilityIdAppointmentsStaffIdRescheduleAppointmentIdRoute;
   "/_public/facility/$facilityId/appointments/$staffId/otp/$page": typeof PublicFacilityFacilityIdAppointmentsStaffIdOtpPageRoute;
+  "/_app/facility/$facilityId/billing/account/$accountId/": typeof AppFacilityFacilityIdBillingAccountAccountIdIndexRoute;
+  "/_app/facility/$facilityId/billing/invoices/$invoiceId/": typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute;
+  "/_app/facility/$facilityId/billing/payments/$paymentReconciliationId/": typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/appointments/": typeof AppFacilityFacilityIdLocationsLocationIdAppointmentsIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/medication_dispense/": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/medication_requests/": typeof AppFacilityFacilityIdLocationsLocationIdMedication_requestsIndexRoute;
@@ -2092,6 +2325,8 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/settings/questionnaires/$id/": typeof AppFacilityFacilityIdSettingsQuestionnairesIdIndexRoute;
   "/_app/facility/$facilityId/settings/specimen_definitions/$specimenSlug/": typeof AppFacilityFacilityIdSettingsSpecimen_definitionsSpecimenSlugIndexRoute;
   "/_app/_legacy/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId": typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRoute;
+  "/_app/facility/$facilityId/billing/account/$accountId/charge_items/print": typeof AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute;
+  "/_app/facility/$facilityId/billing/account/$accountId/invoices/create": typeof AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute;
   "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/completed": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdCompletedRoute;
   "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/ongoing": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdOngoingRoute;
   "/_app/facility/$facilityId/services/$serviceId/queues/$queueId/completed": typeof AppFacilityFacilityIdServicesServiceIdQueuesQueueIdCompletedRoute;
@@ -2101,6 +2336,7 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/settings/devices/$id/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdSettingsDevicesIdQuestionnaireQuestionnaireIdRoute;
   "/_app/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new": typeof AppFacilityFacilityIdSettingsProduct_knowledgeCategoriesCategorySlugNewRoute;
   "/_app/facility/$facilityId/settings/questionnaires/$id/versions/$revisionId": typeof AppFacilityFacilityIdSettingsQuestionnairesIdVersionsRevisionIdRoute;
+  "/_app/facility/$facilityId/billing/account/$accountId/$tab/": typeof AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/": typeof AppFacilityFacilityIdLocationsLocationIdQueuesQueueIdIndexRoute;
   "/_app/facility/$facilityId/services/$serviceId/queues/$queueId/": typeof AppFacilityFacilityIdServicesServiceIdQueuesQueueIdIndexRoute;
   "/_app/facility/$facilityId/settings/activity_definitions/categories/$categorySlug/": typeof AppFacilityFacilityIdSettingsActivity_definitionsCategoriesCategorySlugIndexRoute;
@@ -2110,6 +2346,7 @@ export interface FileRoutesById {
   "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdTabRoute;
   "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire": typeof AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnaireRouteWithChildren;
   "/_app/_legacy/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab": typeof AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRoute;
+  "/_app/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType": typeof AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalDispatchTabRoute;
   "/_app/facility/$facilityId/locations/$locationId/inventory/internal/receive/$tab": typeof AppFacilityFacilityIdLocationsLocationIdInventoryInternalReceiveTabRoute;
   "/_app/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/completed": typeof AppFacilityFacilityIdLocationsLocationIdMedication_dispenseOrderDispenseOrderIdCompletedRoute;
@@ -2174,6 +2411,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/service_requests/$serviceRequestId"
     | "/facility/$facilityId/settings/$"
     | "/facility/$facilityId/settings/activity_definitions"
+    | "/facility/$facilityId/settings/billing"
     | "/facility/$facilityId/settings/charge_item_definitions"
     | "/facility/$facilityId/settings/departments"
     | "/facility/$facilityId/settings/devices"
@@ -2209,6 +2447,13 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/services/$serviceId/schedule"
     | "/facility/$facilityId/settings/activity_definitions/new"
     | "/facility/$facilityId/settings/billing/$"
+    | "/facility/$facilityId/settings/billing/discount_codes"
+    | "/facility/$facilityId/settings/billing/discount_components"
+    | "/facility/$facilityId/settings/billing/discount_configuration"
+    | "/facility/$facilityId/settings/billing/informational_codes"
+    | "/facility/$facilityId/settings/billing/settings"
+    | "/facility/$facilityId/settings/billing/tax_codes"
+    | "/facility/$facilityId/settings/billing/tax_components"
     | "/facility/$facilityId/settings/devices/$id"
     | "/facility/$facilityId/settings/devices/create"
     | "/facility/$facilityId/settings/healthcare_services/new"
@@ -2229,9 +2474,13 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/appointments/$staffId/book-appointment"
     | "/facility/$facilityId/appointments/$staffId/patient-registration"
     | "/facility/$facilityId/appointments/$staffId/patient-select"
+    | "/facility/$facilityId/billing/account/"
+    | "/facility/$facilityId/billing/invoices/"
+    | "/facility/$facilityId/billing/payments/"
     | "/facility/$facilityId/locations/$locationId/"
     | "/facility/$facilityId/services/$serviceId/"
     | "/facility/$facilityId/settings/activity_definitions/"
+    | "/facility/$facilityId/settings/billing/"
     | "/facility/$facilityId/settings/charge_item_definitions/"
     | "/facility/$facilityId/settings/departments/"
     | "/facility/$facilityId/settings/devices/"
@@ -2250,6 +2499,10 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/workspaces/"
     | "/facility/$facilityId/patient/$patientId/consultation"
     | "/facility/$facilityId/patient/$patientId/questionnaire"
+    | "/facility/$facilityId/billing/invoice/$invoiceId/print"
+    | "/facility/$facilityId/billing/invoices/$invoiceId/pay"
+    | "/facility/$facilityId/billing/invoices/$invoiceIds/print"
+    | "/facility/$facilityId/billing/payments/$paymentReconciliationId/print"
     | "/facility/$facilityId/locations/$locationId/appointments/$appointmentId"
     | "/facility/$facilityId/locations/$locationId/appointments/print"
     | "/facility/$facilityId/locations/$locationId/inventory/summary"
@@ -2273,6 +2526,9 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/workspaces/$id/edit"
     | "/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId"
     | "/facility/$facilityId/appointments/$staffId/otp/$page"
+    | "/facility/$facilityId/billing/account/$accountId/"
+    | "/facility/$facilityId/billing/invoices/$invoiceId/"
+    | "/facility/$facilityId/billing/payments/$paymentReconciliationId/"
     | "/facility/$facilityId/locations/$locationId/appointments/"
     | "/facility/$facilityId/locations/$locationId/medication_dispense/"
     | "/facility/$facilityId/locations/$locationId/medication_requests/"
@@ -2293,6 +2549,8 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/questionnaires/$id/"
     | "/facility/$facilityId/settings/specimen_definitions/$specimenSlug/"
     | "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId"
+    | "/facility/$facilityId/billing/account/$accountId/charge_items/print"
+    | "/facility/$facilityId/billing/account/$accountId/invoices/create"
     | "/facility/$facilityId/locations/$locationId/queues/$queueId/completed"
     | "/facility/$facilityId/locations/$locationId/queues/$queueId/ongoing"
     | "/facility/$facilityId/services/$serviceId/queues/$queueId/completed"
@@ -2302,6 +2560,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/devices/$id/questionnaire/$questionnaireId"
     | "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new"
     | "/facility/$facilityId/settings/questionnaires/$id/versions/$revisionId"
+    | "/facility/$facilityId/billing/account/$accountId/$tab/"
     | "/facility/$facilityId/locations/$locationId/queues/$queueId/"
     | "/facility/$facilityId/services/$serviceId/queues/$queueId/"
     | "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug/"
@@ -2311,6 +2570,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
     | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire"
     | "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab"
+    | "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/$tab"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/receive/$tab"
     | "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/completed"
@@ -2389,6 +2649,13 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/services/$serviceId/schedule"
     | "/facility/$facilityId/settings/activity_definitions/new"
     | "/facility/$facilityId/settings/billing/$"
+    | "/facility/$facilityId/settings/billing/discount_codes"
+    | "/facility/$facilityId/settings/billing/discount_components"
+    | "/facility/$facilityId/settings/billing/discount_configuration"
+    | "/facility/$facilityId/settings/billing/informational_codes"
+    | "/facility/$facilityId/settings/billing/settings"
+    | "/facility/$facilityId/settings/billing/tax_codes"
+    | "/facility/$facilityId/settings/billing/tax_components"
     | "/facility/$facilityId/settings/devices/create"
     | "/facility/$facilityId/settings/healthcare_services/new"
     | "/facility/$facilityId/settings/immunization-policies/$id"
@@ -2408,9 +2675,13 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/appointments/$staffId/book-appointment"
     | "/facility/$facilityId/appointments/$staffId/patient-registration"
     | "/facility/$facilityId/appointments/$staffId/patient-select"
+    | "/facility/$facilityId/billing/account"
+    | "/facility/$facilityId/billing/invoices"
+    | "/facility/$facilityId/billing/payments"
     | "/facility/$facilityId/locations/$locationId"
     | "/facility/$facilityId/services/$serviceId"
     | "/facility/$facilityId/settings/activity_definitions"
+    | "/facility/$facilityId/settings/billing"
     | "/facility/$facilityId/settings/charge_item_definitions"
     | "/facility/$facilityId/settings/departments"
     | "/facility/$facilityId/settings/devices"
@@ -2429,6 +2700,10 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/workspaces"
     | "/facility/$facilityId/patient/$patientId/consultation"
     | "/facility/$facilityId/patient/$patientId/questionnaire"
+    | "/facility/$facilityId/billing/invoice/$invoiceId/print"
+    | "/facility/$facilityId/billing/invoices/$invoiceId/pay"
+    | "/facility/$facilityId/billing/invoices/$invoiceIds/print"
+    | "/facility/$facilityId/billing/payments/$paymentReconciliationId/print"
     | "/facility/$facilityId/locations/$locationId/appointments/$appointmentId"
     | "/facility/$facilityId/locations/$locationId/appointments/print"
     | "/facility/$facilityId/locations/$locationId/inventory/summary"
@@ -2452,6 +2727,9 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/workspaces/$id/edit"
     | "/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId"
     | "/facility/$facilityId/appointments/$staffId/otp/$page"
+    | "/facility/$facilityId/billing/account/$accountId"
+    | "/facility/$facilityId/billing/invoices/$invoiceId"
+    | "/facility/$facilityId/billing/payments/$paymentReconciliationId"
     | "/facility/$facilityId/locations/$locationId/appointments"
     | "/facility/$facilityId/locations/$locationId/medication_dispense"
     | "/facility/$facilityId/locations/$locationId/medication_requests"
@@ -2472,6 +2750,8 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/questionnaires/$id"
     | "/facility/$facilityId/settings/specimen_definitions/$specimenSlug"
     | "/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId"
+    | "/facility/$facilityId/billing/account/$accountId/charge_items/print"
+    | "/facility/$facilityId/billing/account/$accountId/invoices/create"
     | "/facility/$facilityId/locations/$locationId/queues/$queueId/completed"
     | "/facility/$facilityId/locations/$locationId/queues/$queueId/ongoing"
     | "/facility/$facilityId/services/$serviceId/queues/$queueId/completed"
@@ -2481,6 +2761,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/devices/$id/questionnaire/$questionnaireId"
     | "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new"
     | "/facility/$facilityId/settings/questionnaires/$id/versions/$revisionId"
+    | "/facility/$facilityId/billing/account/$accountId/$tab"
     | "/facility/$facilityId/locations/$locationId/queues/$queueId"
     | "/facility/$facilityId/services/$serviceId/queues/$queueId"
     | "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug"
@@ -2490,6 +2771,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
     | "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire"
     | "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab"
+    | "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/$tab"
     | "/facility/$facilityId/locations/$locationId/inventory/internal/receive/$tab"
     | "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/completed"
@@ -2556,6 +2838,7 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/service_requests/$serviceRequestId"
     | "/_app/facility/$facilityId/settings/$"
     | "/_app/facility/$facilityId/settings/activity_definitions"
+    | "/_app/facility/$facilityId/settings/billing"
     | "/_app/facility/$facilityId/settings/charge_item_definitions"
     | "/_app/facility/$facilityId/settings/departments"
     | "/_app/facility/$facilityId/settings/devices"
@@ -2591,6 +2874,13 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/services/$serviceId/schedule"
     | "/_app/facility/$facilityId/settings/activity_definitions/new"
     | "/_app/facility/$facilityId/settings/billing/$"
+    | "/_app/facility/$facilityId/settings/billing/discount_codes"
+    | "/_app/facility/$facilityId/settings/billing/discount_components"
+    | "/_app/facility/$facilityId/settings/billing/discount_configuration"
+    | "/_app/facility/$facilityId/settings/billing/informational_codes"
+    | "/_app/facility/$facilityId/settings/billing/settings"
+    | "/_app/facility/$facilityId/settings/billing/tax_codes"
+    | "/_app/facility/$facilityId/settings/billing/tax_components"
     | "/_app/facility/$facilityId/settings/devices/$id"
     | "/_app/facility/$facilityId/settings/devices/create"
     | "/_app/facility/$facilityId/settings/healthcare_services/new"
@@ -2611,9 +2901,13 @@ export interface FileRouteTypes {
     | "/_patient/facility/$facilityId/appointments/$staffId/book-appointment"
     | "/_patient/facility/$facilityId/appointments/$staffId/patient-registration"
     | "/_patient/facility/$facilityId/appointments/$staffId/patient-select"
+    | "/_app/facility/$facilityId/billing/account/"
+    | "/_app/facility/$facilityId/billing/invoices/"
+    | "/_app/facility/$facilityId/billing/payments/"
     | "/_app/facility/$facilityId/locations/$locationId/"
     | "/_app/facility/$facilityId/services/$serviceId/"
     | "/_app/facility/$facilityId/settings/activity_definitions/"
+    | "/_app/facility/$facilityId/settings/billing/"
     | "/_app/facility/$facilityId/settings/charge_item_definitions/"
     | "/_app/facility/$facilityId/settings/departments/"
     | "/_app/facility/$facilityId/settings/devices/"
@@ -2632,6 +2926,10 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/settings/workspaces/"
     | "/_app/_legacy/facility/$facilityId/patient/$patientId/consultation"
     | "/_app/_legacy/facility/$facilityId/patient/$patientId/questionnaire"
+    | "/_app/facility/$facilityId/billing/invoice/$invoiceId/print"
+    | "/_app/facility/$facilityId/billing/invoices/$invoiceId/pay"
+    | "/_app/facility/$facilityId/billing/invoices/$invoiceIds/print"
+    | "/_app/facility/$facilityId/billing/payments/$paymentReconciliationId/print"
     | "/_app/facility/$facilityId/locations/$locationId/appointments/$appointmentId"
     | "/_app/facility/$facilityId/locations/$locationId/appointments/print"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/summary"
@@ -2655,6 +2953,9 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/settings/workspaces/$id/edit"
     | "/_patient/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId"
     | "/_public/facility/$facilityId/appointments/$staffId/otp/$page"
+    | "/_app/facility/$facilityId/billing/account/$accountId/"
+    | "/_app/facility/$facilityId/billing/invoices/$invoiceId/"
+    | "/_app/facility/$facilityId/billing/payments/$paymentReconciliationId/"
     | "/_app/facility/$facilityId/locations/$locationId/appointments/"
     | "/_app/facility/$facilityId/locations/$locationId/medication_dispense/"
     | "/_app/facility/$facilityId/locations/$locationId/medication_requests/"
@@ -2675,6 +2976,8 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/settings/questionnaires/$id/"
     | "/_app/facility/$facilityId/settings/specimen_definitions/$specimenSlug/"
     | "/_app/_legacy/facility/$facilityId/patient/$patientId/questionnaire/$questionnaireId"
+    | "/_app/facility/$facilityId/billing/account/$accountId/charge_items/print"
+    | "/_app/facility/$facilityId/billing/account/$accountId/invoices/create"
     | "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/completed"
     | "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/ongoing"
     | "/_app/facility/$facilityId/services/$serviceId/queues/$queueId/completed"
@@ -2684,6 +2987,7 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/settings/devices/$id/questionnaire/$questionnaireId"
     | "/_app/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new"
     | "/_app/facility/$facilityId/settings/questionnaires/$id/versions/$revisionId"
+    | "/_app/facility/$facilityId/billing/account/$accountId/$tab/"
     | "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/"
     | "/_app/facility/$facilityId/services/$serviceId/queues/$queueId/"
     | "/_app/facility/$facilityId/settings/activity_definitions/categories/$categorySlug/"
@@ -2693,6 +2997,7 @@ export interface FileRouteTypes {
     | "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
     | "/_app/_legacy/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire"
     | "/_app/_legacy/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab"
+    | "/_app/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/$tab"
     | "/_app/facility/$facilityId/locations/$locationId/inventory/internal/receive/$tab"
     | "/_app/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/completed"
@@ -2981,6 +3286,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppFacilityFacilityIdSettingsActivity_definitionsRouteImport;
       parentRoute: typeof AppFacilityFacilityIdSettingsRouteRoute;
     };
+    "/_app/facility/$facilityId/settings/billing": {
+      id: "/_app/facility/$facilityId/settings/billing";
+      path: "/billing";
+      fullPath: "/facility/$facilityId/settings/billing";
+      preLoaderRoute: typeof AppFacilityFacilityIdSettingsBillingRouteImport;
+      parentRoute: typeof AppFacilityFacilityIdSettingsRouteRoute;
+    };
     "/_app/facility/$facilityId/settings/charge_item_definitions": {
       id: "/_app/facility/$facilityId/settings/charge_item_definitions";
       path: "/charge_item_definitions";
@@ -3135,6 +3447,27 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRouteImport;
       parentRoute: typeof AppLegacyPatientPatientIdQuestionnaireRoute;
     };
+    "/_app/facility/$facilityId/billing/account/": {
+      id: "/_app/facility/$facilityId/billing/account/";
+      path: "/facility/$facilityId/billing/account";
+      fullPath: "/facility/$facilityId/billing/account/";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingAccountIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/billing/invoices/": {
+      id: "/_app/facility/$facilityId/billing/invoices/";
+      path: "/facility/$facilityId/billing/invoices";
+      fullPath: "/facility/$facilityId/billing/invoices/";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingInvoicesIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/billing/payments/": {
+      id: "/_app/facility/$facilityId/billing/payments/";
+      path: "/facility/$facilityId/billing/payments";
+      fullPath: "/facility/$facilityId/billing/payments/";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingPaymentsIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     "/_app/facility/$facilityId/locations/$locationId/": {
       id: "/_app/facility/$facilityId/locations/$locationId/";
       path: "/";
@@ -3226,12 +3559,68 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppFacilityFacilityIdSettingsActivity_definitionsNewRouteImport;
       parentRoute: typeof AppFacilityFacilityIdSettingsActivity_definitionsRoute;
     };
+    "/_app/facility/$facilityId/settings/billing/": {
+      id: "/_app/facility/$facilityId/settings/billing/";
+      path: "/";
+      fullPath: "/facility/$facilityId/settings/billing/";
+      preLoaderRoute: typeof AppFacilityFacilityIdSettingsBillingIndexRouteImport;
+      parentRoute: typeof AppFacilityFacilityIdSettingsBillingRoute;
+    };
     "/_app/facility/$facilityId/settings/billing/$": {
       id: "/_app/facility/$facilityId/settings/billing/$";
-      path: "/billing/$";
+      path: "/$";
       fullPath: "/facility/$facilityId/settings/billing/$";
       preLoaderRoute: typeof AppFacilityFacilityIdSettingsBillingSplatRouteImport;
-      parentRoute: typeof AppFacilityFacilityIdSettingsRouteRoute;
+      parentRoute: typeof AppFacilityFacilityIdSettingsBillingRoute;
+    };
+    "/_app/facility/$facilityId/settings/billing/discount_codes": {
+      id: "/_app/facility/$facilityId/settings/billing/discount_codes";
+      path: "/discount_codes";
+      fullPath: "/facility/$facilityId/settings/billing/discount_codes";
+      preLoaderRoute: typeof AppFacilityFacilityIdSettingsBillingDiscount_codesRouteImport;
+      parentRoute: typeof AppFacilityFacilityIdSettingsBillingRoute;
+    };
+    "/_app/facility/$facilityId/settings/billing/discount_components": {
+      id: "/_app/facility/$facilityId/settings/billing/discount_components";
+      path: "/discount_components";
+      fullPath: "/facility/$facilityId/settings/billing/discount_components";
+      preLoaderRoute: typeof AppFacilityFacilityIdSettingsBillingDiscount_componentsRouteImport;
+      parentRoute: typeof AppFacilityFacilityIdSettingsBillingRoute;
+    };
+    "/_app/facility/$facilityId/settings/billing/discount_configuration": {
+      id: "/_app/facility/$facilityId/settings/billing/discount_configuration";
+      path: "/discount_configuration";
+      fullPath: "/facility/$facilityId/settings/billing/discount_configuration";
+      preLoaderRoute: typeof AppFacilityFacilityIdSettingsBillingDiscount_configurationRouteImport;
+      parentRoute: typeof AppFacilityFacilityIdSettingsBillingRoute;
+    };
+    "/_app/facility/$facilityId/settings/billing/informational_codes": {
+      id: "/_app/facility/$facilityId/settings/billing/informational_codes";
+      path: "/informational_codes";
+      fullPath: "/facility/$facilityId/settings/billing/informational_codes";
+      preLoaderRoute: typeof AppFacilityFacilityIdSettingsBillingInformational_codesRouteImport;
+      parentRoute: typeof AppFacilityFacilityIdSettingsBillingRoute;
+    };
+    "/_app/facility/$facilityId/settings/billing/settings": {
+      id: "/_app/facility/$facilityId/settings/billing/settings";
+      path: "/settings";
+      fullPath: "/facility/$facilityId/settings/billing/settings";
+      preLoaderRoute: typeof AppFacilityFacilityIdSettingsBillingSettingsRouteImport;
+      parentRoute: typeof AppFacilityFacilityIdSettingsBillingRoute;
+    };
+    "/_app/facility/$facilityId/settings/billing/tax_codes": {
+      id: "/_app/facility/$facilityId/settings/billing/tax_codes";
+      path: "/tax_codes";
+      fullPath: "/facility/$facilityId/settings/billing/tax_codes";
+      preLoaderRoute: typeof AppFacilityFacilityIdSettingsBillingTax_codesRouteImport;
+      parentRoute: typeof AppFacilityFacilityIdSettingsBillingRoute;
+    };
+    "/_app/facility/$facilityId/settings/billing/tax_components": {
+      id: "/_app/facility/$facilityId/settings/billing/tax_components";
+      path: "/tax_components";
+      fullPath: "/facility/$facilityId/settings/billing/tax_components";
+      preLoaderRoute: typeof AppFacilityFacilityIdSettingsBillingTax_componentsRouteImport;
+      parentRoute: typeof AppFacilityFacilityIdSettingsBillingRoute;
     };
     "/_app/facility/$facilityId/settings/charge_item_definitions/": {
       id: "/_app/facility/$facilityId/settings/charge_item_definitions/";
@@ -3498,6 +3887,55 @@ declare module "@tanstack/react-router" {
       fullPath: "/facility/$facilityId/patient/$patientId/questionnaire";
       preLoaderRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRouteImport;
       parentRoute: typeof AppLegacyRoute;
+    };
+    "/_app/facility/$facilityId/billing/account/$accountId/": {
+      id: "/_app/facility/$facilityId/billing/account/$accountId/";
+      path: "/facility/$facilityId/billing/account/$accountId";
+      fullPath: "/facility/$facilityId/billing/account/$accountId/";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/billing/invoice/$invoiceId/print": {
+      id: "/_app/facility/$facilityId/billing/invoice/$invoiceId/print";
+      path: "/facility/$facilityId/billing/invoice/$invoiceId/print";
+      fullPath: "/facility/$facilityId/billing/invoice/$invoiceId/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/billing/invoices/$invoiceId/": {
+      id: "/_app/facility/$facilityId/billing/invoices/$invoiceId/";
+      path: "/facility/$facilityId/billing/invoices/$invoiceId";
+      fullPath: "/facility/$facilityId/billing/invoices/$invoiceId/";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/billing/invoices/$invoiceId/pay": {
+      id: "/_app/facility/$facilityId/billing/invoices/$invoiceId/pay";
+      path: "/facility/$facilityId/billing/invoices/$invoiceId/pay";
+      fullPath: "/facility/$facilityId/billing/invoices/$invoiceId/pay";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/billing/invoices/$invoiceIds/print": {
+      id: "/_app/facility/$facilityId/billing/invoices/$invoiceIds/print";
+      path: "/facility/$facilityId/billing/invoices/$invoiceIds/print";
+      fullPath: "/facility/$facilityId/billing/invoices/$invoiceIds/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/billing/payments/$paymentReconciliationId/": {
+      id: "/_app/facility/$facilityId/billing/payments/$paymentReconciliationId/";
+      path: "/facility/$facilityId/billing/payments/$paymentReconciliationId";
+      fullPath: "/facility/$facilityId/billing/payments/$paymentReconciliationId/";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/billing/payments/$paymentReconciliationId/print": {
+      id: "/_app/facility/$facilityId/billing/payments/$paymentReconciliationId/print";
+      path: "/facility/$facilityId/billing/payments/$paymentReconciliationId/print";
+      fullPath: "/facility/$facilityId/billing/payments/$paymentReconciliationId/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRouteImport;
+      parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/locations/$locationId/appointments/": {
       id: "/_app/facility/$facilityId/locations/$locationId/appointments/";
@@ -3800,6 +4238,27 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireQuestionnaireIdRouteImport;
       parentRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdQuestionnaireRoute;
     };
+    "/_app/facility/$facilityId/billing/account/$accountId/$tab/": {
+      id: "/_app/facility/$facilityId/billing/account/$accountId/$tab/";
+      path: "/facility/$facilityId/billing/account/$accountId/$tab";
+      fullPath: "/facility/$facilityId/billing/account/$accountId/$tab/";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdTabIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/billing/account/$accountId/charge_items/print": {
+      id: "/_app/facility/$facilityId/billing/account/$accountId/charge_items/print";
+      path: "/facility/$facilityId/billing/account/$accountId/charge_items/print";
+      fullPath: "/facility/$facilityId/billing/account/$accountId/charge_items/print";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/billing/account/$accountId/invoices/create": {
+      id: "/_app/facility/$facilityId/billing/account/$accountId/invoices/create";
+      path: "/facility/$facilityId/billing/account/$accountId/invoices/create";
+      fullPath: "/facility/$facilityId/billing/account/$accountId/invoices/create";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/": {
       id: "/_app/facility/$facilityId/locations/$locationId/queues/$queueId/";
       path: "/queues/$queueId";
@@ -3925,6 +4384,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/organization/$organizationId/patient/$patientId/encounter/$encounterId/$tab";
       preLoaderRoute: typeof AppLegacyOrganizationOrganizationIdPatientPatientIdEncounterEncounterIdTabRouteImport;
       parentRoute: typeof AppLegacyRoute;
+    };
+    "/_app/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType": {
+      id: "/_app/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType";
+      path: "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType";
+      fullPath: "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType";
+      preLoaderRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRouteImport;
+      parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/": {
       id: "/_app/facility/$facilityId/locations/$locationId/inventory/internal/dispatch/";
@@ -4291,6 +4757,45 @@ const AppFacilityFacilityIdSettingsActivity_definitionsRouteChildren: AppFacilit
 const AppFacilityFacilityIdSettingsActivity_definitionsRouteWithChildren =
   AppFacilityFacilityIdSettingsActivity_definitionsRoute._addFileChildren(
     AppFacilityFacilityIdSettingsActivity_definitionsRouteChildren,
+  );
+
+interface AppFacilityFacilityIdSettingsBillingRouteChildren {
+  AppFacilityFacilityIdSettingsBillingSplatRoute: typeof AppFacilityFacilityIdSettingsBillingSplatRoute;
+  AppFacilityFacilityIdSettingsBillingDiscount_codesRoute: typeof AppFacilityFacilityIdSettingsBillingDiscount_codesRoute;
+  AppFacilityFacilityIdSettingsBillingDiscount_componentsRoute: typeof AppFacilityFacilityIdSettingsBillingDiscount_componentsRoute;
+  AppFacilityFacilityIdSettingsBillingDiscount_configurationRoute: typeof AppFacilityFacilityIdSettingsBillingDiscount_configurationRoute;
+  AppFacilityFacilityIdSettingsBillingInformational_codesRoute: typeof AppFacilityFacilityIdSettingsBillingInformational_codesRoute;
+  AppFacilityFacilityIdSettingsBillingSettingsRoute: typeof AppFacilityFacilityIdSettingsBillingSettingsRoute;
+  AppFacilityFacilityIdSettingsBillingTax_codesRoute: typeof AppFacilityFacilityIdSettingsBillingTax_codesRoute;
+  AppFacilityFacilityIdSettingsBillingTax_componentsRoute: typeof AppFacilityFacilityIdSettingsBillingTax_componentsRoute;
+  AppFacilityFacilityIdSettingsBillingIndexRoute: typeof AppFacilityFacilityIdSettingsBillingIndexRoute;
+}
+
+const AppFacilityFacilityIdSettingsBillingRouteChildren: AppFacilityFacilityIdSettingsBillingRouteChildren =
+  {
+    AppFacilityFacilityIdSettingsBillingSplatRoute:
+      AppFacilityFacilityIdSettingsBillingSplatRoute,
+    AppFacilityFacilityIdSettingsBillingDiscount_codesRoute:
+      AppFacilityFacilityIdSettingsBillingDiscount_codesRoute,
+    AppFacilityFacilityIdSettingsBillingDiscount_componentsRoute:
+      AppFacilityFacilityIdSettingsBillingDiscount_componentsRoute,
+    AppFacilityFacilityIdSettingsBillingDiscount_configurationRoute:
+      AppFacilityFacilityIdSettingsBillingDiscount_configurationRoute,
+    AppFacilityFacilityIdSettingsBillingInformational_codesRoute:
+      AppFacilityFacilityIdSettingsBillingInformational_codesRoute,
+    AppFacilityFacilityIdSettingsBillingSettingsRoute:
+      AppFacilityFacilityIdSettingsBillingSettingsRoute,
+    AppFacilityFacilityIdSettingsBillingTax_codesRoute:
+      AppFacilityFacilityIdSettingsBillingTax_codesRoute,
+    AppFacilityFacilityIdSettingsBillingTax_componentsRoute:
+      AppFacilityFacilityIdSettingsBillingTax_componentsRoute,
+    AppFacilityFacilityIdSettingsBillingIndexRoute:
+      AppFacilityFacilityIdSettingsBillingIndexRoute,
+  };
+
+const AppFacilityFacilityIdSettingsBillingRouteWithChildren =
+  AppFacilityFacilityIdSettingsBillingRoute._addFileChildren(
+    AppFacilityFacilityIdSettingsBillingRouteChildren,
   );
 
 interface AppFacilityFacilityIdSettingsCharge_item_definitionsRouteChildren {
@@ -4665,6 +5170,7 @@ const AppFacilityFacilityIdSettingsWorkspacesRouteWithChildren =
 interface AppFacilityFacilityIdSettingsRouteRouteChildren {
   AppFacilityFacilityIdSettingsSplatRoute: typeof AppFacilityFacilityIdSettingsSplatRoute;
   AppFacilityFacilityIdSettingsActivity_definitionsRoute: typeof AppFacilityFacilityIdSettingsActivity_definitionsRouteWithChildren;
+  AppFacilityFacilityIdSettingsBillingRoute: typeof AppFacilityFacilityIdSettingsBillingRouteWithChildren;
   AppFacilityFacilityIdSettingsCharge_item_definitionsRoute: typeof AppFacilityFacilityIdSettingsCharge_item_definitionsRouteWithChildren;
   AppFacilityFacilityIdSettingsDepartmentsRoute: typeof AppFacilityFacilityIdSettingsDepartmentsRouteWithChildren;
   AppFacilityFacilityIdSettingsDevicesRoute: typeof AppFacilityFacilityIdSettingsDevicesRouteWithChildren;
@@ -4685,7 +5191,6 @@ interface AppFacilityFacilityIdSettingsRouteRouteChildren {
   AppFacilityFacilityIdSettingsValuesetsRoute: typeof AppFacilityFacilityIdSettingsValuesetsRouteWithChildren;
   AppFacilityFacilityIdSettingsWorkspacesRoute: typeof AppFacilityFacilityIdSettingsWorkspacesRouteWithChildren;
   AppFacilityFacilityIdSettingsIndexRoute: typeof AppFacilityFacilityIdSettingsIndexRoute;
-  AppFacilityFacilityIdSettingsBillingSplatRoute: typeof AppFacilityFacilityIdSettingsBillingSplatRoute;
   AppFacilityFacilityIdSettingsQuestionnaireQuestionnaireIdRoute: typeof AppFacilityFacilityIdSettingsQuestionnaireQuestionnaireIdRoute;
   AppFacilityFacilityIdSettingsQuestionnaireIndexRoute: typeof AppFacilityFacilityIdSettingsQuestionnaireIndexRoute;
 }
@@ -4696,6 +5201,8 @@ const AppFacilityFacilityIdSettingsRouteRouteChildren: AppFacilityFacilityIdSett
       AppFacilityFacilityIdSettingsSplatRoute,
     AppFacilityFacilityIdSettingsActivity_definitionsRoute:
       AppFacilityFacilityIdSettingsActivity_definitionsRouteWithChildren,
+    AppFacilityFacilityIdSettingsBillingRoute:
+      AppFacilityFacilityIdSettingsBillingRouteWithChildren,
     AppFacilityFacilityIdSettingsCharge_item_definitionsRoute:
       AppFacilityFacilityIdSettingsCharge_item_definitionsRouteWithChildren,
     AppFacilityFacilityIdSettingsDepartmentsRoute:
@@ -4736,8 +5243,6 @@ const AppFacilityFacilityIdSettingsRouteRouteChildren: AppFacilityFacilityIdSett
       AppFacilityFacilityIdSettingsWorkspacesRouteWithChildren,
     AppFacilityFacilityIdSettingsIndexRoute:
       AppFacilityFacilityIdSettingsIndexRoute,
-    AppFacilityFacilityIdSettingsBillingSplatRoute:
-      AppFacilityFacilityIdSettingsBillingSplatRoute,
     AppFacilityFacilityIdSettingsQuestionnaireQuestionnaireIdRoute:
       AppFacilityFacilityIdSettingsQuestionnaireQuestionnaireIdRoute,
     AppFacilityFacilityIdSettingsQuestionnaireIndexRoute:
@@ -4973,6 +5478,20 @@ interface AppRouteChildren {
   AppFacilityFacilityIdLocationsLocationIdRoute: typeof AppFacilityFacilityIdLocationsLocationIdRouteWithChildren;
   AppFacilityFacilityIdService_requestsServiceRequestIdRoute: typeof AppFacilityFacilityIdService_requestsServiceRequestIdRoute;
   AppFacilityFacilityIdServicesIndexRoute: typeof AppFacilityFacilityIdServicesIndexRoute;
+  AppFacilityFacilityIdBillingAccountIndexRoute: typeof AppFacilityFacilityIdBillingAccountIndexRoute;
+  AppFacilityFacilityIdBillingInvoicesIndexRoute: typeof AppFacilityFacilityIdBillingInvoicesIndexRoute;
+  AppFacilityFacilityIdBillingPaymentsIndexRoute: typeof AppFacilityFacilityIdBillingPaymentsIndexRoute;
+  AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute: typeof AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute;
+  AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute: typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute;
+  AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute: typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute;
+  AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRoute: typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRoute;
+  AppFacilityFacilityIdBillingAccountAccountIdIndexRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdIndexRoute;
+  AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute: typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute;
+  AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute: typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute;
+  AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute;
+  AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute;
+  AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute;
+  AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute;
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -4988,6 +5507,34 @@ const AppRouteChildren: AppRouteChildren = {
     AppFacilityFacilityIdService_requestsServiceRequestIdRoute,
   AppFacilityFacilityIdServicesIndexRoute:
     AppFacilityFacilityIdServicesIndexRoute,
+  AppFacilityFacilityIdBillingAccountIndexRoute:
+    AppFacilityFacilityIdBillingAccountIndexRoute,
+  AppFacilityFacilityIdBillingInvoicesIndexRoute:
+    AppFacilityFacilityIdBillingInvoicesIndexRoute,
+  AppFacilityFacilityIdBillingPaymentsIndexRoute:
+    AppFacilityFacilityIdBillingPaymentsIndexRoute,
+  AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute:
+    AppFacilityFacilityIdBillingInvoiceInvoiceIdPrintRoute,
+  AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute:
+    AppFacilityFacilityIdBillingInvoicesInvoiceIdPayRoute,
+  AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute:
+    AppFacilityFacilityIdBillingInvoicesInvoiceIdsPrintRoute,
+  AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRoute:
+    AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdPrintRoute,
+  AppFacilityFacilityIdBillingAccountAccountIdIndexRoute:
+    AppFacilityFacilityIdBillingAccountAccountIdIndexRoute,
+  AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute:
+    AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute,
+  AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute:
+    AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute,
+  AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute:
+    AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute,
+  AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute:
+    AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute,
+  AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute:
+    AppFacilityFacilityIdBillingAccountAccountIdTabIndexRoute,
+  AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute:
+    AppFacilityFacilityIdBillingAccountAccountIdTabPaymentPaymentTypeRoute,
 };
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren);
