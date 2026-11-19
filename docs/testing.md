@@ -40,7 +40,7 @@ The date-range picker suite builds its fixture in memory with the existing Vite 
 npx playwright test tests/components/dateRangePicker.spec.ts --project=chromium --no-deps --workers=1 --reporter=line
 ```
 
-Keep a frontend server running at the configured base URL, or provide a production build so Playwright can start its preview server. The suite covers typed and clicked ranges, validation, bounds, keyboard focus, draft cancellation, month navigation, a 320px viewport and CSS 200% zoom. It also checks segment selection/stepping/replacement, leap-year clamping, T/Escape shortcuts, nested field-calendar popovers and the actual shared input/button dimensions at mobile and desktop widths. It does not replace authenticated list-page or mobile-device QA.
+Keep a frontend server running at the configured base URL, or provide a production build so Playwright can start its preview server. The suite covers typed and clicked ranges, validation, bounds, keyboard focus, draft cancellation, month navigation, a 320px viewport and CSS 200% zoom. It also checks segment selection/stepping/replacement, leap-year clamping, T/Escape shortcuts, side-by-side field layout and the actual shared input/button dimensions at mobile and desktop widths. It does not replace authenticated list-page or mobile-device QA.
 
 ## Database management for re-runs
 
