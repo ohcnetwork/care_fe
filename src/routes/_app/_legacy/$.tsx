@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 /**
- * Legacy splat: every signed-in path that has no route in `src/routes/`.
- * The `_legacy` layout renders its page. Remove it when the last area is
- * migrated.
+ * Catch-all for staff paths that have no file route. The `_legacy` layout
+ * renders it.
  */
 export const Route = createFileRoute("/_app/_legacy/$")({});
