@@ -2,7 +2,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, ChevronDown, Settings2, Trash2 } from "lucide-react";
-import { Link, navigate, useNavigationPrompt } from "raviger";
+import { Link, navigate } from "raviger";
 import { useCallback, useId, useState } from "react";
 import { flushSync } from "react-dom";
 import { useForm, useWatch } from "react-hook-form";
@@ -52,6 +52,7 @@ import { Textarea } from "@/components/ui/textarea";
 import useAuthUser from "@/hooks/useAuthUser";
 import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
 import { useCareAppTabs } from "@/hooks/useCareApps";
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 
 import mutate from "@/Utils/request/mutate";
@@ -233,7 +234,7 @@ export function WorkspaceForm({
 
   const title = t(existing ? "edit_workspace" : "create_workspace");
   const dirty = form.formState.isDirty || accessState.dirty || !isEditorValid;
-  useNavigationPrompt(dirty, t("unsaved_changes_warning"));
+  useNavigationBlocker(dirty, t("unsaved_changes_warning"));
 
   const save = useMutation({
     mutationFn: (values: WorkspaceFormValues) => {
@@ -687,11 +688,13 @@ export function WorkspaceForm({
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 {remove.isError && (
-                  <Alert variant="destructive">
-                    <AlertDescription>
-                      {t("workspace_delete_error")}
-                    </AlertDescription>
-                  </Alert>
+                  <div className="px-4 md:px-6">
+                    <Alert variant="destructive">
+                      <AlertDescription>
+                        {t("workspace_delete_error")}
+                      </AlertDescription>
+                    </Alert>
+                  </div>
                 )}
                 <AlertDialogFooter>
                   <AlertDialogCancel disabled={remove.isPending}>

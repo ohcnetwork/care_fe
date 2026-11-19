@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -29,6 +29,7 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
 import query from "@/Utils/request/query";
 
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { ActionsPanel } from "./ActionsPanel";
 import { FormSettingsPanel } from "./FormSettingsPanel";
 import { QuestionInspector } from "./QuestionInspector";
@@ -135,7 +136,7 @@ export function QuestionnaireStudioPage({
     }
   }, [state.questions, revealQuestion]);
 
-  useNavigationPrompt(dirty, t("unsaved_changes_warning"));
+  useNavigationBlocker(dirty, t("unsaved_changes_warning"));
 
   const { canWrite, isLoading: isPermissionLoading } =
     useCanWriteQuestionnaire(scope);

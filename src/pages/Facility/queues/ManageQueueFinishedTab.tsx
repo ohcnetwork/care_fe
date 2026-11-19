@@ -23,6 +23,7 @@ import {
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   BringToFront,
   DoorOpenIcon,
@@ -30,7 +31,7 @@ import {
   MoreHorizontal,
   RotateCcw,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link as RavigerLink } from "raviger";
 import { forwardRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -95,7 +96,7 @@ export function ManageQueueFinishedTab({
                     </TableCell>
                     <TableCell>
                       {token.patient ? (
-                        <Link
+                        <RavigerLink
                           basePath="/"
                           href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                             {
@@ -111,15 +112,19 @@ export function ManageQueueFinishedTab({
                         >
                           {token.patient.name}
                           <ExternalLink className="size-3" />
-                        </Link>
+                        </RavigerLink>
                       ) : (
                         <span className="text-gray-500">-</span>
                       )}
                     </TableCell>
                     <TableCell>
                       <Link
-                        basePath="/"
-                        href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+                        to="/facility/$facilityId/queue/$queueId/token/$tokenId"
+                        params={{
+                          facilityId,
+                          queueId: token.queue.id,
+                          tokenId: token.id,
+                        }}
                         className="hover:underline transition-colors flex items-center gap-1"
                       >
                         {t("encounter")}
@@ -211,7 +216,7 @@ const FinishedTokenCard = forwardRef<
             {renderTokenNumber(token)}
           </span>
           {token.patient ? (
-            <Link
+            <RavigerLink
               basePath="/"
               href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                 {
@@ -226,7 +231,7 @@ const FinishedTokenCard = forwardRef<
             >
               <span className="truncate">{token.patient.name}</span>
               <ExternalLink className="size-3 shrink-0" />
-            </Link>
+            </RavigerLink>
           ) : (
             <span className="text-sm text-gray-500">-</span>
           )}
@@ -259,8 +264,8 @@ const FinishedTokenCard = forwardRef<
           </span>
         </div>
         <Link
-          basePath="/"
-          href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+          to="/facility/$facilityId/queue/$queueId/token/$tokenId"
+          params={{ facilityId, queueId: token.queue.id, tokenId: token.id }}
           className="hover:underline transition-colors flex items-center gap-1 font-medium"
         >
           {t("encounter")}

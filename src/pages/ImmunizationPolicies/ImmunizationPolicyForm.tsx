@@ -2,7 +2,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { Link, navigate, useNavigationPrompt } from "raviger";
+import { Link, navigate } from "raviger";
 import { useMemo } from "react";
 import { flushSync } from "react-dom";
 import { useForm, useWatch } from "react-hook-form";
@@ -34,6 +34,7 @@ import {
 } from "@/types/emr/immunizationPolicy/immunizationPolicy";
 import immunizationPolicyApi from "@/types/emr/immunizationPolicy/immunizationPolicyApi";
 
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { PolicyTemplateEditor } from "./PolicyTemplateEditor";
 import {
   newPolicyTemplate,
@@ -162,7 +163,7 @@ function ImmunizationPolicyEditor({
   const issues =
     validation && !validation.success ? validation.error.issues : [];
   const isDirty = form.formState.isDirty;
-  useNavigationPrompt(isDirty, t("unsaved_changes_warning"));
+  useNavigationBlocker(isDirty, t("unsaved_changes_warning"));
 
   const handleSaved = () => {
     queryClient.invalidateQueries({ queryKey: ["immunization-policies"] });

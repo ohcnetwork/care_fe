@@ -1,6 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ScanQrCode } from "lucide-react";
-import { navigate } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -39,6 +38,7 @@ import {
   longDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { navigate } from "@/lib/router/navigate";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import {
   Priority,
@@ -135,9 +135,14 @@ function ServiceRequestCard({
             variant="outline"
             size="sm"
             onClick={() =>
-              navigate(
-                `/facility/${facilityId}/locations/${locationId}/service_requests/${request.id}`,
-              )
+              navigate({
+                to: "/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId",
+                params: {
+                  facilityId,
+                  locationId,
+                  serviceRequestId: request.id,
+                },
+              })
             }
           >
             <CareIcon icon="l-edit" />

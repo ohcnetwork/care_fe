@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { Link } from "@tanstack/react-router";
 import {
   Banknote,
   BanknoteArrowUp,
@@ -20,7 +21,6 @@ import {
   Signature,
   X,
 } from "lucide-react";
-import { Link } from "raviger";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -1047,8 +1047,8 @@ function PaymentReconciliationSuccessView({
           {invoice && (
             <Button type="button" variant="outline" asChild>
               <Link
-                href={`/facility/${facilityId}/billing/invoice/${invoice.id}/print`}
-                basePath="/"
+                to="/facility/$facilityId/billing/invoice/$invoiceId/print"
+                params={{ facilityId, invoiceId: invoice.id }}
               >
                 <PrinterIcon />
                 {t("print_receipt")}

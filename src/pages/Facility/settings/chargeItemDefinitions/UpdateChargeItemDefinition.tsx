@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -9,6 +9,7 @@ import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
 import { ChargeItemDefinitionForm } from "./ChargeItemDefinitionForm";
@@ -61,7 +62,8 @@ export function UpdateChargeItemDefinition({
           <div className="flex justify-end">
             <Button variant="link" asChild>
               <Link
-                href={`/facility/${facilityId}/settings/charge_item_definitions`}
+                to="/facility/$facilityId/settings/charge_item_definitions"
+                params={{ facilityId }}
               >
                 {t("return_to_list")}
               </Link>
@@ -74,17 +76,19 @@ export function UpdateChargeItemDefinition({
 
   if (!chargeItemDefinition) {
     console.warn("No charge item definition found with ID:", slug);
-    navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+    navigate({
+      to: "/facility/$facilityId/settings/charge_item_definitions",
+      params: { facilityId },
+    });
     return null;
   }
 
   const handleSuccess = () => {
-    navigate(
-      `/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition.category.slug}`,
-      {
-        replace: true,
-      },
-    );
+    navigate({
+      to: "/facility/$facilityId/settings/charge_item_definitions/categories/$slug",
+      params: { facilityId, slug: chargeItemDefinition.category.slug },
+      replace: true,
+    });
   };
 
   return (
