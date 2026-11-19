@@ -134,7 +134,10 @@ export function RoleOrgAccessEditor({
                 size="icon"
                 className="size-8 text-gray-400 hover:text-red-600"
                 onClick={() => removeEntry(index)}
-                disabled={disabled}
+                disabled={
+                  disabled ||
+                  (entries.length === 1 && !entry.organization && !entry.role)
+                }
               >
                 <Trash2 className="size-3.5" />
                 <span className="sr-only">{t("remove")}</span>
