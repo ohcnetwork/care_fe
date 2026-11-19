@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, Eye, QrCode, Scan /* User */ } from "lucide-react";
-import { useState } from "react";
+import { type Ref, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -48,6 +48,11 @@ import {
 import { isNegative, round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 
+export interface SpecimenFormHandle {
+  /** Shows any errors and returns the update, or null if it's invalid. */
+  collect: () => SpecimenRead | null;
+}
+
 interface SpecimenFormProps {
   specimenDefinition: SpecimenDefinitionRead;
   onCancel: () => void;
@@ -55,6 +60,8 @@ interface SpecimenFormProps {
   draftSpecimen: SpecimenRead | undefined;
   serviceRequestId: string;
   disableEdit: boolean;
+  hideActions?: boolean;
+  ref?: Ref<SpecimenFormHandle>;
 }
 
 export function SpecimenForm({
@@ -64,6 +71,8 @@ export function SpecimenForm({
   draftSpecimen,
   serviceRequestId,
   disableEdit,
+  hideActions = false,
+  ref,
 }: SpecimenFormProps) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
@@ -175,18 +184,16 @@ export function SpecimenForm({
     }));
   };
 
-  const handleSubmit = (e: React.SubmitEvent) => {
-    e.preventDefault();
-
+  const buildPayload = (): SpecimenRead | null => {
     // Ensure collector ID is available before submitting
     if (!currentUserId) {
       toast.error(t("specimen_collector_unavailable"));
-      return;
+      return null;
     }
 
     if (!draftSpecimen) {
       toast.error(t("specimen_draft_missing"));
-      return;
+      return null;
     }
 
     const quantity = specimenData.specimen.collection?.quantity;
@@ -206,7 +213,7 @@ export function SpecimenForm({
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      return;
+      return null;
     }
 
     setErrors({});
@@ -258,7 +265,15 @@ export function SpecimenForm({
       specimen_definition: draftSpecimen.specimen_definition,
     };
 
-    updateSpecimen(submissionPayload);
+    return submissionPayload;
+  };
+
+  useImperativeHandle(ref, () => ({ collect: buildPayload }));
+
+  const handleSubmit = (e: React.SubmitEvent) => {
+    e.preventDefault();
+    const payload = buildPayload();
+    if (payload) updateSpecimen(payload);
   };
 
   return (
@@ -596,15 +611,17 @@ export function SpecimenForm({
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={onCancel}>
-                {t("cancel")}
-              </Button>
-              <Button type="submit" disabled={disableEdit || isPending}>
-                <CheckIcon className="size-4" />
-                {t("mark_as_collected")}
-              </Button>
-            </div>
+            {!hideActions && (
+              <div className="flex flex-col sm:flex-row sm:justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={onCancel}>
+                  {t("cancel")}
+                </Button>
+                <Button type="submit" disabled={disableEdit || isPending}>
+                  <CheckIcon className="size-4" />
+                  {t("mark_as_collected")}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </form>
