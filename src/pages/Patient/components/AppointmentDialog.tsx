@@ -4,8 +4,6 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -18,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -158,9 +156,7 @@ function AppointmentDialog({
                         {t("cancel")}
                       </AlertDialogCancel>
                       <AlertDialogAction
-                        className={cn(
-                          buttonVariants({ variant: "destructive" }),
-                        )}
+                        variant="destructive"
                         onClick={() => {
                           cancelAppointment({
                             appointment: appointment.id,

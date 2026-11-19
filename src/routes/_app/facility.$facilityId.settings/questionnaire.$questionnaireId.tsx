@@ -1,0 +1,20 @@
+import { createFileRoute } from "@tanstack/react-router";
+
+import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
+
+export const Route = createFileRoute(
+  "/_app/facility/$facilityId/settings/questionnaire/$questionnaireId",
+)({
+  component: RouteComponent,
+  staticData: { sidebar: false },
+});
+
+function RouteComponent() {
+  const { facilityId, questionnaireId } = Route.useParams();
+  return (
+    <QuestionnaireFillPage
+      subject={{ type: "facility", facilityId }}
+      questionnaireId={questionnaireId}
+    />
+  );
+}

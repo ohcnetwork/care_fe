@@ -133,7 +133,7 @@ export function StudioTopBar({
     <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white px-4 py-2.5">
       {/* A real anchor (not navigate()) so middle-click and open-in-new-tab
           work; raviger's Link still routes client-side, and
-          useNavigationPrompt keeps guarding unsaved changes. basePath="/"
+          useNavigationBlocker keeps guarding unsaved changes. basePath="/"
           opts out of the nested settings router's basePath, which Link
           would otherwise prepend to this already-absolute href. */}
       <Button asChild variant="outline" size="xs">

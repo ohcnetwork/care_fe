@@ -22,6 +22,8 @@ export interface AuthContextType {
   endSessionKeepingDrafts: () => Promise<void>;
   patientLogin: (tokenData: TokenData, redirectUrl: string) => void;
   patientToken: TokenData | null;
+  /** True while the staff user behind a stored token is being loaded. */
+  isUserLoading: boolean;
 }
 
 export const AuthUserContext = createContext<AuthContextType | null>(null);

@@ -47,14 +47,19 @@ test.describe("Clear Cache in profile successfully", () => {
         ),
       ),
     ).toContain(testScope);
+    // The worker precaches the whole build, one file at a time, into its own
+    // scope's cache before it activates. Route code splitting makes that 600+
+    // files, which takes longer than the default 10s on CI.
     await expect
-      .poll(() =>
-        page.evaluate(async (scope) => {
-          const registrations =
-            await navigator.serviceWorker.getRegistrations();
-          return registrations.find((reg) => reg.scope === scope)?.active
-            ?.state;
-        }, testScope),
+      .poll(
+        () =>
+          page.evaluate(async (scope) => {
+            const registrations =
+              await navigator.serviceWorker.getRegistrations();
+            return registrations.find((reg) => reg.scope === scope)?.active
+              ?.state;
+          }, testScope),
+        { timeout: 30_000 },
       )
       .toBe("activated");
 

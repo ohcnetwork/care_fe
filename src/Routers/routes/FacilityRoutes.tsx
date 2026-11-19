@@ -29,7 +29,6 @@ import DiagnosticReportPrint from "@/pages/Facility/services/diagnosticReports/D
 import DiagnosticReportView from "@/pages/Facility/services/diagnosticReports/DiagnosticReportView";
 import { MultipleDiagnosticReportsPrint } from "@/pages/Facility/services/diagnosticReports/MultipleDiagnosticReportsPrint";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
-import { SettingsLayout } from "@/pages/Facility/settings/layout";
 
 const FacilityRoutes: AppRoutes = {
   "/facility/:facilityId/referrals": ({ facilityId }) => (
@@ -48,9 +47,7 @@ const FacilityRoutes: AppRoutes = {
   "/facility/:facilityId/resource/new": ({ facilityId }) => (
     <ResourceCreate facilityId={facilityId} />
   ),
-  "/facility/:facilityId/settings*": ({ facilityId }) => (
-    <SettingsLayout facilityId={facilityId} />
-  ),
+  // "/facility/:facilityId/settings*" moved to src/routes/_app/facility.$facilityId.settings/
   "/facility/:facilityId/locations/:locationId*": ({
     facilityId,
     locationId,
