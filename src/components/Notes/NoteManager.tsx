@@ -189,12 +189,14 @@ const NewThreadDialog = ({
   onCreate,
   isCreating,
   threadsUnused,
+  canWrite,
 }: {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (title: string) => void;
   isCreating: boolean;
   threadsUnused: string[];
+  canWrite: boolean;
 }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState("");
@@ -257,7 +259,7 @@ const NewThreadDialog = ({
 
           <Button
             onClick={() => onCreate(title)}
-            disabled={!title.trim() || isCreating}
+            disabled={!canWrite || !title.trim() || isCreating}
           >
             {isCreating ? (
               <Loader2 className="size-4 animate-spin mr-2" />
@@ -452,18 +454,15 @@ export function NoteManager({
   }, [messagesData]);
 
   const handleCreateThread = (title: string) => {
-    if (title.trim()) {
-      if (
-        threadsData?.results.some((thread) => thread.title === title.trim())
-      ) {
-        toast.error(t("thread_already_exists"));
-        return;
-      }
-      createThreadMutation.mutate({
-        title: title.trim(),
-        encounter: encounterId,
-      });
+    if (!canWrite || !title.trim()) return;
+    if (threadsData?.results.some((thread) => thread.title === title.trim())) {
+      toast.error(t("thread_already_exists"));
+      return;
     }
+    createThreadMutation.mutate({
+      title: title.trim(),
+      encounter: encounterId,
+    });
   };
 
   const handleSendMessage = (e: React.SyntheticEvent) => {
@@ -775,6 +774,7 @@ export function NoteManager({
         onCreate={handleCreateThread}
         isCreating={createThreadMutation.isPending}
         threadsUnused={threads}
+        canWrite={canWrite}
       />
     </div>
   );
