@@ -18,7 +18,6 @@
 import {
   type AnyRouter,
   type ParsedLocation,
-  useBlocker,
   useRouterState,
 } from "@tanstack/react-router";
 import React, {
@@ -57,6 +56,7 @@ import type {
 } from "raviger/dist/router";
 
 import { getRouter } from "@/compat/routerRef";
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { isShowingPreviousPage } from "@/lib/router/previousPage";
 
 export type {
@@ -482,16 +482,11 @@ export function useNavigate(optBasePath = "") {
 const DEFAULT_PROMPT = "Are you sure you want to leave this page?";
 
 /**
- * Blocks in-app navigation and page unload while `predicate` is true. Uses
- * the router's blocker so browser back is undone when the user cancels.
+ * @public raviger API parity for plugins. Core code uses
+ * `useNavigationBlocker` (`src/hooks/useNavigationBlocker.ts`).
  */
 export function useNavigationPrompt(predicate = true, prompt = DEFAULT_PROMPT) {
-  const shouldBlockFn = useCallback(() => !window.confirm(prompt), [prompt]);
-  useBlocker({
-    shouldBlockFn,
-    enableBeforeUnload: true,
-    disabled: !predicate,
-  });
+  useNavigationBlocker(predicate, prompt);
 }
 
 // ---------------------------------------------------------------------------
