@@ -43,7 +43,7 @@ export const Badge = ({
 }: BadgeProps) => {
   return (
     <div className="relative mb-4">
-      <div className="mt-1 h-1 w-6 bg-blue-600 mb-1" />
+      <div className="h-1 w-6 bg-blue-600 mb-1" />
       <span
         className={`
           inline-flex items-center rounded-full text-base font-semibold
