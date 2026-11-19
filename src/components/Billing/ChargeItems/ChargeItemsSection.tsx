@@ -37,6 +37,8 @@ interface ChargeItemsSectionProps {
   disableCreateChargeItemsSection?: boolean;
   viewOnly?: boolean;
   className?: string;
+  /** Create Invoice lists every billable charge item on the patient's account, not just this resource's. */
+  invoiceAllAccountChargeItems?: boolean;
 }
 
 export function ChargeItemsSection({
@@ -50,6 +52,7 @@ export function ChargeItemsSection({
   disableCreateChargeItemsSection = false,
   viewOnly = false,
   className,
+  invoiceAllAccountChargeItems = false,
 }: ChargeItemsSectionProps) {
   const { t } = useTranslation();
   useShortcutSubContext("facility:appointment");
@@ -79,7 +82,7 @@ export function ChargeItemsSection({
   });
 
   const { data: account } = useQuery({
-    queryKey: ["accounts", patientId],
+    queryKey: ["accounts", patientId, facilityId],
     queryFn: query(accountApi.listAccount, {
       pathParams: { facilityId },
       queryParams: {
@@ -101,6 +104,10 @@ export function ChargeItemsSection({
     (chargeItem) => chargeItem.status === ChargeItemStatus.billable,
   );
 
+  const openAccount = account?.results[0];
+  const isAccountBillable =
+    !!openAccount && isAccountActiveAndBillable(openAccount);
+
   return (
     <>
       <div className={className}>
@@ -113,8 +120,7 @@ export function ChargeItemsSection({
           <div className="contents sm:ml-auto sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:gap-2">
             {!disableCreateChargeItemsSection &&
               !viewOnly &&
-              account?.results[0] &&
-              isAccountActiveAndBillable(account?.results[0]) && (
+              isAccountBillable && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -126,23 +132,24 @@ export function ChargeItemsSection({
                   <ShortcutBadge actionId="add-a-charge-item" />
                 </Button>
               )}
-            {billableChargeItems.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="ml-auto sm:ml-0"
-                onClick={() =>
-                  setInvoiceSheetState({
-                    open: true,
-                    chargeItems: billableChargeItems,
-                  })
-                }
-              >
-                <ReceiptIndianRupee className="size-4" />
-                {t("create_invoice")}
-                <ShortcutBadge actionId="create-an-invoice" />
-              </Button>
-            )}
+            {billableChargeItems.length > 0 &&
+              (!invoiceAllAccountChargeItems || isAccountBillable) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="ml-auto sm:ml-0"
+                  onClick={() =>
+                    setInvoiceSheetState({
+                      open: true,
+                      chargeItems: billableChargeItems,
+                    })
+                  }
+                >
+                  <ReceiptIndianRupee className="size-4" />
+                  {t("create_invoice")}
+                  <ShortcutBadge actionId="create-an-invoice" />
+                </Button>
+              )}
           </div>
         </CardHeader>
         {chargeItems?.results.map((chargeItem) => (
@@ -169,7 +176,11 @@ export function ChargeItemsSection({
           onOpenChange={() =>
             setInvoiceSheetState({ open: false, chargeItems: [] })
           }
-          preSelectedChargeItems={invoiceSheetState.chargeItems}
+          preSelectedChargeItems={
+            invoiceAllAccountChargeItems
+              ? undefined
+              : invoiceSheetState.chargeItems
+          }
           onSuccess={() => {
             queryClient.invalidateQueries({
               queryKey: ["chargeItems", facilityId, resourceId],
