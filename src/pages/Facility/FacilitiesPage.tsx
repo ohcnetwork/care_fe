@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { Card } from "@/components/ui/card";
@@ -48,7 +48,7 @@ export function FacilitiesPage() {
   return (
     <div className="container px-4 py-8 mx-auto">
       <div className="flex items-start justify-between w-full">
-        <Link href="/" className="">
+        <Link to="/" className="">
           <img src={mainLogo?.dark} alt="Care Logo" className="w-auto h-12" />
         </Link>
         <LoginHeader />

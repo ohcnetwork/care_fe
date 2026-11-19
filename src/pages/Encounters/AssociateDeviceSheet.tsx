@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/drawer";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -118,7 +119,7 @@ export default function AssociateDeviceSheet({
             {t("associate_device_description")}
           </SheetDescription>
         </SheetHeader>
-        <div className="py-6">{deviceSearch}</div>
+        <SheetBody>{deviceSearch}</SheetBody>
         <SheetFooter>{footerButton}</SheetFooter>
       </SheetContent>
     </Sheet>

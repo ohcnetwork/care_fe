@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -201,336 +202,337 @@ export function WorkspaceSectionSettings({
     >
       <SheetContent
         aria-label={t("workspace_studio_section_settings")}
-        className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-md"
+        size="md"
+        className="overflow-hidden"
       >
-        <SheetHeader className="space-y-3 border-b border-border p-5 text-left">
-          <SheetTitle className="text-xs font-semibold tracking-wide text-soft-foreground uppercase">
-            {t("workspace_studio_section_settings")}
-          </SheetTitle>
-          <div className="flex items-start gap-3 pr-8">
+        <SheetHeader>
+          <div className="flex items-center gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700 ring-1 ring-primary-100 ring-inset">
               <Icon className="size-5" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <h3 className="text-base font-semibold break-words text-foreground">
-                {name}
-              </h3>
-              <SheetDescription className="mt-1 text-xs leading-5">
+              <SheetTitle className="break-words">{name}</SheetTitle>
+              <SheetDescription>
                 {catalogItem
                   ? t(catalogItem.descriptionKey)
                   : t("workspace_widget_plugin_description")}
               </SheetDescription>
             </div>
           </div>
-          <WorkspaceWidgetAvailability
-            type={widget.type}
-            capabilities={plugin}
-          />
         </SheetHeader>
 
-        <div className="flex-1 space-y-6 p-5">
-          <div className="space-y-2">
-            <Label htmlFor={`${id}-title`} className="text-sm font-medium">
-              {t("workspace_studio_section_title")}
-            </Label>
-            <Input
-              id={`${id}-title`}
-              value={widget.title ?? ""}
-              placeholder={name}
-              maxLength={120}
-              disabled={disabled}
-              onChange={(event) => {
-                const next = { ...widget };
-                if (event.target.value.trim()) next.title = event.target.value;
-                else delete next.title;
-                onChange(next);
-              }}
-              className="h-9 text-sm shadow-none"
+        <SheetBody>
+          <div className="space-y-6">
+            <WorkspaceWidgetAvailability
+              type={widget.type}
+              capabilities={plugin}
             />
-            <p className="text-xs leading-5 text-soft-foreground">
-              {t("workspace_widget_title_hint")}
-            </p>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor={`${id}-title`} className="text-sm font-medium">
+                {t("workspace_studio_section_title")}
+              </Label>
+              <Input
+                id={`${id}-title`}
+                value={widget.title ?? ""}
+                placeholder={name}
+                maxLength={120}
+                disabled={disabled}
+                onChange={(event) => {
+                  const next = { ...widget };
+                  if (event.target.value.trim())
+                    next.title = event.target.value;
+                  else delete next.title;
+                  onChange(next);
+                }}
+                className="h-9 text-sm shadow-none"
+              />
+              <p className="text-xs leading-5 text-soft-foreground">
+                {t("workspace_widget_title_hint")}
+              </p>
+            </div>
 
-          {preparedSchema ? (
-            hasSettings && (
-              <section
-                aria-label={t("workspace_studio_section_options")}
-                className="space-y-4"
-              >
-                <h4 className="text-xs font-semibold tracking-wide text-soft-foreground uppercase">
-                  {t("workspace_studio_section_options")}
-                </h4>
-                {fields.length > 0 && (
-                  <WorkspaceSchemaFields
-                    config={editedConfig ?? config}
-                    fields={fields}
-                    issues={issues}
-                    disabled={disabled || jsonError}
-                    onChange={updateConfig}
-                  />
-                )}
-                {widget.type === "observation_chart" && (
-                  <ObservationChartPicker
-                    plot={
-                      typeof activeConfig.plot === "string"
-                        ? activeConfig.plot
-                        : undefined
-                    }
-                    groups={chartGroups}
-                    disabled={disabled || jsonError}
-                    onChange={({ plot, groups }) => {
-                      const nextConfig = { ...activeConfig };
-                      if (plot) nextConfig.plot = plot;
-                      else delete nextConfig.plot;
-                      if (groups?.length) nextConfig.groups = groups;
-                      else delete nextConfig.groups;
-                      updateConfig(nextConfig);
-                    }}
-                  />
-                )}
-                {widget.type === "vitals" && (
-                  <VitalsCodePicker
-                    value={selectedCodes}
-                    disabled={disabled || jsonError}
-                    onChange={(codes) => {
-                      const nextConfig = { ...activeConfig };
-                      if (codes.length) nextConfig.codes = codes;
-                      else delete nextConfig.codes;
-                      updateConfig(nextConfig);
-                    }}
-                  />
-                )}
-                {widget.type === "questionnaire_responses" && (
-                  <div className="space-y-1.5">
-                    <AuthorRoleFilter
-                      value={
-                        typeof activeConfig.role === "string"
-                          ? activeConfig.role
+            {preparedSchema ? (
+              hasSettings && (
+                <section
+                  aria-label={t("workspace_studio_section_options")}
+                  className="space-y-4"
+                >
+                  <h4 className="text-xs font-semibold tracking-wide text-soft-foreground uppercase">
+                    {t("workspace_studio_section_options")}
+                  </h4>
+                  {fields.length > 0 && (
+                    <WorkspaceSchemaFields
+                      config={editedConfig ?? config}
+                      fields={fields}
+                      issues={issues}
+                      disabled={disabled || jsonError}
+                      onChange={updateConfig}
+                    />
+                  )}
+                  {widget.type === "observation_chart" && (
+                    <ObservationChartPicker
+                      plot={
+                        typeof activeConfig.plot === "string"
+                          ? activeConfig.plot
                           : undefined
                       }
+                      groups={chartGroups}
                       disabled={disabled || jsonError}
-                      onChange={(roleId) => {
+                      onChange={({ plot, groups }) => {
                         const nextConfig = { ...activeConfig };
-                        if (roleId) nextConfig.role = roleId;
-                        else delete nextConfig.role;
+                        if (plot) nextConfig.plot = plot;
+                        else delete nextConfig.plot;
+                        if (groups?.length) nextConfig.groups = groups;
+                        else delete nextConfig.groups;
                         updateConfig(nextConfig);
                       }}
                     />
-                    <p className="text-xs text-soft-foreground">
-                      {t("author_role_filter_hint")}
-                    </p>
-                  </div>
+                  )}
+                  {widget.type === "vitals" && (
+                    <VitalsCodePicker
+                      value={selectedCodes}
+                      disabled={disabled || jsonError}
+                      onChange={(codes) => {
+                        const nextConfig = { ...activeConfig };
+                        if (codes.length) nextConfig.codes = codes;
+                        else delete nextConfig.codes;
+                        updateConfig(nextConfig);
+                      }}
+                    />
+                  )}
+                  {widget.type === "questionnaire_responses" && (
+                    <div className="space-y-1.5">
+                      <AuthorRoleFilter
+                        value={
+                          typeof activeConfig.role === "string"
+                            ? activeConfig.role
+                            : undefined
+                        }
+                        disabled={disabled || jsonError}
+                        onChange={(roleId) => {
+                          const nextConfig = { ...activeConfig };
+                          if (roleId) nextConfig.role = roleId;
+                          else delete nextConfig.role;
+                          updateConfig(nextConfig);
+                        }}
+                      />
+                      <p className="text-xs text-soft-foreground">
+                        {t("author_role_filter_hint")}
+                      </p>
+                    </div>
+                  )}
+                  {!!issues.length && (
+                    <Alert variant="destructive" className="p-3">
+                      <AlertDescription className="space-y-1 text-xs">
+                        <p>{t("workspace_widget_config_schema_error")}</p>
+                        {issues.map((issue) => (
+                          <p key={`${issue.path.join(".")}:${issue.code}`}>
+                            {issue.path.length
+                              ? `${widgetConfigIssueLabel(issue.path, preparedSchema.fieldMetadata)}: `
+                              : ""}
+                            {issue.message}
+                          </p>
+                        ))}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </section>
+              )
+            ) : (
+              <p className="text-xs leading-5 text-soft-foreground">
+                {t(
+                  schema
+                    ? "workspace_widget_schema_unsupported"
+                    : "workspace_widget_schema_unavailable",
                 )}
-                {!!issues.length && (
+              </p>
+            )}
+
+            {surface === "patient_history" ? (
+              widget.visible_when && (
+                <section
+                  aria-label={t("workspace_studio_section_visibility")}
+                  className="space-y-3"
+                >
                   <Alert variant="destructive" className="p-3">
-                    <AlertDescription className="space-y-1 text-xs">
-                      <p>{t("workspace_widget_config_schema_error")}</p>
-                      {issues.map((issue) => (
-                        <p key={`${issue.path.join(".")}:${issue.code}`}>
-                          {issue.path.length
-                            ? `${widgetConfigIssueLabel(issue.path, preparedSchema.fieldMetadata)}: `
-                            : ""}
-                          {issue.message}
-                        </p>
-                      ))}
+                    <AlertDescription className="space-y-2 text-xs">
+                      <p>{t("workspace_studio_history_status_filter")}</p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={disabled}
+                        onClick={() =>
+                          onChange(applySectionVisibilityMode(widget, "always"))
+                        }
+                      >
+                        {t("workspace_studio_show_always_action")}
+                      </Button>
                     </AlertDescription>
                   </Alert>
-                )}
-              </section>
-            )
-          ) : (
-            <p className="text-xs leading-5 text-soft-foreground">
-              {t(
-                schema
-                  ? "workspace_widget_schema_unsupported"
-                  : "workspace_widget_schema_unavailable",
-              )}
-            </p>
-          )}
-
-          {surface === "patient_history" ? (
-            widget.visible_when && (
+                </section>
+              )
+            ) : (
               <section
                 aria-label={t("workspace_studio_section_visibility")}
                 className="space-y-3"
               >
-                <Alert variant="destructive" className="p-3">
-                  <AlertDescription className="space-y-2 text-xs">
-                    <p>{t("workspace_studio_history_status_filter")}</p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={disabled}
-                      onClick={() =>
-                        onChange(applySectionVisibilityMode(widget, "always"))
-                      }
-                    >
-                      {t("workspace_studio_show_always_action")}
-                    </Button>
-                  </AlertDescription>
-                </Alert>
-              </section>
-            )
-          ) : (
-            <section
-              aria-label={t("workspace_studio_section_visibility")}
-              className="space-y-3"
-            >
-              <h4 className="text-xs font-semibold tracking-wide text-soft-foreground uppercase">
-                {t("workspace_studio_section_visibility")}
-              </h4>
-              <div className="space-y-2">
-                <Label
-                  htmlFor={`${id}-visibility`}
-                  className="text-sm font-medium"
-                >
-                  {t("workspace_studio_show_section")}
-                </Label>
-                <Select
-                  value={visibility}
-                  disabled={disabled}
-                  onValueChange={(mode: SectionVisibilityMode) => {
-                    setCustomVisibility(mode === "custom");
-                    onChange(applySectionVisibilityMode(widget, mode));
-                  }}
-                >
-                  <SelectTrigger id={`${id}-visibility`} className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="always">
-                      {t("workspace_studio_show_always")}
-                    </SelectItem>
-                    <SelectItem value="active">
-                      {t("workspace_studio_show_active")}
-                    </SelectItem>
-                    <SelectItem
-                      value="closed"
-                      disabled={requirements.encounter === "active"}
-                    >
-                      {t("workspace_studio_show_closed")}
-                    </SelectItem>
-                    <SelectItem value="custom">
-                      {t("workspace_studio_show_custom")}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs leading-5 text-soft-foreground">
-                  {t(
-                    requirements.encounter === "active"
-                      ? "workspace_studio_show_hint_active_only"
-                      : requirements.encounter === "none"
-                        ? "workspace_studio_show_hint_patient"
-                        : "workspace_studio_show_hint",
-                  )}
-                </p>
-              </div>
-              {visibility === "custom" && statuses && (
-                <fieldset
-                  disabled={disabled}
-                  className="space-y-2.5 rounded-lg border border-border p-3"
-                >
-                  <legend className="sr-only">
-                    {t("workspace_widget_encounter_statuses")}
-                  </legend>
-                  {Object.values(EncounterStatus).map((status) => (
-                    <div key={status} className="flex items-center gap-2.5">
-                      <Checkbox
-                        id={`${id}-status-${status}`}
-                        checked={selectedStatuses.has(status)}
-                        disabled={
-                          disabled ||
-                          (statuses.length === 1 &&
-                            selectedStatuses.has(status))
-                        }
-                        onCheckedChange={(checked) => {
-                          const nextStatuses = checked
-                            ? [...statuses, status]
-                            : statuses.filter((value) => value !== status);
-                          if (nextStatuses.length)
-                            onChange({
-                              ...widget,
-                              visible_when: {
-                                "encounter.status": nextStatuses,
-                              },
-                            });
-                        }}
-                      />
-                      <Label
-                        htmlFor={`${id}-status-${status}`}
-                        className="text-sm leading-5 font-normal"
+                <h4 className="text-xs font-semibold tracking-wide text-soft-foreground uppercase">
+                  {t("workspace_studio_section_visibility")}
+                </h4>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor={`${id}-visibility`}
+                    className="text-sm font-medium"
+                  >
+                    {t("workspace_studio_show_section")}
+                  </Label>
+                  <Select
+                    value={visibility}
+                    disabled={disabled}
+                    onValueChange={(mode: SectionVisibilityMode) => {
+                      setCustomVisibility(mode === "custom");
+                      onChange(applySectionVisibilityMode(widget, mode));
+                    }}
+                  >
+                    <SelectTrigger id={`${id}-visibility`} className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="always">
+                        {t("workspace_studio_show_always")}
+                      </SelectItem>
+                      <SelectItem value="active">
+                        {t("workspace_studio_show_active")}
+                      </SelectItem>
+                      <SelectItem
+                        value="closed"
+                        disabled={requirements.encounter === "active"}
                       >
-                        {t(status)}
-                      </Label>
-                    </div>
-                  ))}
-                </fieldset>
-              )}
-            </section>
-          )}
+                        {t("workspace_studio_show_closed")}
+                      </SelectItem>
+                      <SelectItem value="custom">
+                        {t("workspace_studio_show_custom")}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs leading-5 text-soft-foreground">
+                    {t(
+                      requirements.encounter === "active"
+                        ? "workspace_studio_show_hint_active_only"
+                        : requirements.encounter === "none"
+                          ? "workspace_studio_show_hint_patient"
+                          : "workspace_studio_show_hint",
+                    )}
+                  </p>
+                </div>
+                {visibility === "custom" && statuses && (
+                  <fieldset
+                    disabled={disabled}
+                    className="space-y-2.5 rounded-lg border border-border p-3"
+                  >
+                    <legend className="sr-only">
+                      {t("workspace_widget_encounter_statuses")}
+                    </legend>
+                    {Object.values(EncounterStatus).map((status) => (
+                      <div key={status} className="flex items-center gap-2.5">
+                        <Checkbox
+                          id={`${id}-status-${status}`}
+                          checked={selectedStatuses.has(status)}
+                          disabled={
+                            disabled ||
+                            (statuses.length === 1 &&
+                              selectedStatuses.has(status))
+                          }
+                          onCheckedChange={(checked) => {
+                            const nextStatuses = checked
+                              ? [...statuses, status]
+                              : statuses.filter((value) => value !== status);
+                            if (nextStatuses.length)
+                              onChange({
+                                ...widget,
+                                visible_when: {
+                                  "encounter.status": nextStatuses,
+                                },
+                              });
+                          }}
+                        />
+                        <Label
+                          htmlFor={`${id}-status-${status}`}
+                          className="text-sm leading-5 font-normal"
+                        >
+                          {t(status)}
+                        </Label>
+                      </div>
+                    ))}
+                  </fieldset>
+                )}
+              </section>
+            )}
 
-          <details
-            className="group rounded-lg border border-border"
-            open={advancedOpen}
-            onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}
-          >
-            <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs font-semibold text-soft-foreground [&::-webkit-details-marker]:hidden">
-              <Braces className="size-3.5" aria-hidden="true" />
-              {t("workspace_widget_advanced_config")}
-              <ChevronDown
-                className="ml-auto size-3.5 transition-transform group-open:rotate-180"
-                aria-hidden="true"
-              />
-            </summary>
-            <div className="space-y-3 border-t border-soft-border p-3">
-              <p className="text-xs leading-5 text-soft-foreground">
-                {schema?.description && !preparedSchema?.fieldMetadata.length
-                  ? widgetSchemaText(schema.description, t)
-                  : t("workspace_widget_advanced_hint")}
-              </p>
-              <Label htmlFor={`${id}-config`} className="sr-only">
-                {t("workspace_widget_config_json")}
-              </Label>
-              <Textarea
-                id={`${id}-config`}
-                value={configText}
-                disabled={disabled}
-                spellCheck={false}
-                autoCapitalize="off"
-                autoCorrect="off"
-                rows={6}
-                aria-invalid={jsonError}
-                aria-describedby={jsonError ? `${id}-config-error` : undefined}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  const parsed = parseConfig(value);
-                  if (parsed !== undefined) {
-                    updateConfig(parsed, value);
-                    return;
+            <details
+              className="group rounded-lg border border-border"
+              open={advancedOpen}
+              onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}
+            >
+              <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs font-semibold text-soft-foreground [&::-webkit-details-marker]:hidden">
+                <Braces className="size-3.5" aria-hidden="true" />
+                {t("workspace_widget_advanced_config")}
+                <ChevronDown
+                  className="ml-auto size-3.5 transition-transform group-open:rotate-180"
+                  aria-hidden="true"
+                />
+              </summary>
+              <div className="space-y-3 border-t border-soft-border p-3">
+                <p className="text-xs leading-5 text-soft-foreground">
+                  {schema?.description && !preparedSchema?.fieldMetadata.length
+                    ? widgetSchemaText(schema.description, t)
+                    : t("workspace_widget_advanced_hint")}
+                </p>
+                <Label htmlFor={`${id}-config`} className="sr-only">
+                  {t("workspace_widget_config_json")}
+                </Label>
+                <Textarea
+                  id={`${id}-config`}
+                  value={configText}
+                  disabled={disabled}
+                  spellCheck={false}
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  rows={6}
+                  aria-invalid={jsonError}
+                  aria-describedby={
+                    jsonError ? `${id}-config-error` : undefined
                   }
-                  setConfigDraft({ text: value });
-                  onValidityChange?.(false);
-                }}
-                className="min-h-32 resize-y font-mono text-xs leading-5 shadow-none"
-              />
-              {jsonError && (
-                <Alert
-                  variant="destructive"
-                  id={`${id}-config-error`}
-                  className="p-3"
-                >
-                  <AlertDescription className="text-xs leading-5">
-                    {t("workspace_widget_config_json_error")}
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
-          </details>
-        </div>
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    const parsed = parseConfig(value);
+                    if (parsed !== undefined) {
+                      updateConfig(parsed, value);
+                      return;
+                    }
+                    setConfigDraft({ text: value });
+                    onValidityChange?.(false);
+                  }}
+                  className="min-h-32 resize-y font-mono text-xs leading-5 shadow-none"
+                />
+                {jsonError && (
+                  <Alert
+                    variant="destructive"
+                    id={`${id}-config-error`}
+                    className="p-3"
+                  >
+                    <AlertDescription className="text-xs leading-5">
+                      {t("workspace_widget_config_json_error")}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </details>
+          </div>
+        </SheetBody>
 
-        <SheetFooter className="gap-2 border-t border-border p-4 sm:justify-between">
+        <SheetFooter className="sm:justify-between">
           <Button
             type="button"
             variant="ghost"

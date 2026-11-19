@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
+  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
@@ -206,7 +207,7 @@ export default function CreateScheduleExceptionSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[45rem]">
+      <SheetContent size="lg" className="overflow-hidden bg-gray-100">
         <SheetHeader>
           <SheetTitle>{t("add_schedule_exceptions")}</SheetTitle>
           <SheetDescription>
@@ -214,10 +215,11 @@ export default function CreateScheduleExceptionSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="-mx-6 mb-16 overflow-auto px-6 pb-16 pt-6">
+        <SheetBody>
           <div className="rounded-md bg-white p-4 shadow-sm">
             <Form {...form}>
               <form
+                id="schedule-exception-form"
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
@@ -333,27 +335,31 @@ export default function CreateScheduleExceptionSheet({
                     )}
                   />
                 </div>
-
-                <SheetFooter>
-                  <SheetClose asChild>
-                    <Button
-                      variant="outline"
-                      className="mt-2 md:mt-0"
-                      type="button"
-                      disabled={isPending}
-                      onClick={() => form.reset()}
-                    >
-                      {t("cancel")}
-                    </Button>
-                  </SheetClose>
-                  <Button variant="primary" type="submit" disabled={isPending}>
-                    {t("confirm_unavailability")}
-                  </Button>
-                </SheetFooter>
               </form>
             </Form>
           </div>
-        </div>
+        </SheetBody>
+
+        <SheetFooter>
+          <SheetClose asChild>
+            <Button
+              variant="outline"
+              type="button"
+              disabled={isPending}
+              onClick={() => form.reset()}
+            >
+              {t("cancel")}
+            </Button>
+          </SheetClose>
+          <Button
+            variant="primary"
+            type="submit"
+            form="schedule-exception-form"
+            disabled={isPending}
+          >
+            {t("confirm_unavailability")}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

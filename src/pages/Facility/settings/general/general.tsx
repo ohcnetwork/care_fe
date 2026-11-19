@@ -17,7 +17,7 @@ export function GeneralSettings({ facilityId }: GeneralSettingsProps) {
 
   return (
     <div
-      className="space-y-6 text-foreground pt-4"
+      className="max-w-5xl mx-auto space-y-6 text-foreground pt-4"
       data-cy="facility-general-page"
     >
       <PageHeadTitle title={t("general")} />

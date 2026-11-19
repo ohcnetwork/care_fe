@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -126,94 +128,99 @@ export default function EditUserRoleSheet({
         <SheetTrigger asChild>
           {trigger || <Button variant="outline">{t("edit_role")}</Button>}
         </SheetTrigger>
-        <SheetContent className="w-[var(--anchor-width)]">
+        <SheetContent size="md">
           <SheetHeader>
             <SheetTitle>{t("edit_user_role")}</SheetTitle>
             <SheetDescription>
               {t("update_user_role_organization")}
             </SheetDescription>
           </SheetHeader>
-          <div className="space-y-6 py-4">
-            <div className="rounded-lg border border-gray-200 p-4 space-y-4">
-              <div className="flex items-start gap-4">
-                <Avatar
-                  name={formatName(userRole.user, true)}
-                  className="size-12"
-                  imageUrl={userRole.user.profile_picture_url}
-                />
-                <div className="flex flex-col flex-1">
-                  <span className="font-medium text-lg">
-                    {formatName(userRole.user)}
-                  </span>
+          <SheetBody>
+            <div className="space-y-6">
+              <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+                <div className="flex items-start gap-4">
+                  <Avatar
+                    name={formatName(userRole.user, true)}
+                    className="size-12"
+                    imageUrl={userRole.user.profile_picture_url}
+                  />
+                  <div className="flex flex-col flex-1">
+                    <span className="font-medium text-lg">
+                      {formatName(userRole.user)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+                  <div>
+                    <span className="text-sm text-gray-500">
+                      {t("username")}
+                    </span>
+                    <p className="text-sm font-medium">
+                      {userRole.user.username}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">
+                      {t("current_role")}
+                    </span>
+                    <p className="text-sm font-medium">{userRole.role.name}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-sm text-gray-500">
+                      {t("last_login")}{" "}
+                    </span>
+                    <UserStatusIndicator user={userRole.user} />
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  {t("select_new_role")}
+                </Label>
                 <div>
-                  <span className="text-sm text-gray-500">{t("username")}</span>
-                  <p className="text-sm font-medium">
-                    {userRole.user.username}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-500">
-                    {t("current_role")}
-                  </span>
-                  <p className="text-sm font-medium">{userRole.role.name}</p>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-sm text-gray-500">
-                    {t("last_login")}{" "}
-                  </span>
-                  <UserStatusIndicator user={userRole.user} />
+                  <RoleSelect
+                    value={selectedRole}
+                    onChange={setSelectedRole}
+                    context={getRoleContextForOrganizationType(
+                      organization?.org_type,
+                    )}
+                    disabled={!organization}
+                  />
                 </div>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                {t("select_new_role")}
-              </Label>
-              <div>
-                <RoleSelect
-                  value={selectedRole}
-                  onChange={setSelectedRole}
-                  context={getRoleContextForOrganizationType(
-                    organization?.org_type,
-                  )}
-                  disabled={!organization}
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Button
-                className="w-full"
-                onClick={handleUpdateRole}
-                disabled={!selectedRole || selectedRole.id === userRole.role.id}
-              >
-                {t("update_role")}
-              </Button>
-
-              <Button
-                variant="destructive"
-                className="w-full"
-                onClick={() => setShowRemoveDialog(true)}
-              >
-                {t("remove_user")}
-              </Button>
-
-              {canEditUser && (
+              <div className="flex flex-col gap-2">
                 <Button
-                  variant="outline"
+                  variant="destructive"
                   className="w-full"
-                  onClick={() => setShowEditUserSheet(true)}
+                  onClick={() => setShowRemoveDialog(true)}
                 >
-                  {t("edit_user")}
+                  {t("remove_user")}
                 </Button>
-              )}
+
+                {canEditUser && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setShowEditUserSheet(true)}
+                  >
+                    {t("edit_user")}
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
+          </SheetBody>
+
+          <SheetFooter>
+            <Button
+              onClick={handleUpdateRole}
+              disabled={!selectedRole || selectedRole.id === userRole.role.id}
+            >
+              {t("update_role")}
+            </Button>
+          </SheetFooter>
         </SheetContent>
       </Sheet>
       <ConfirmActionDialog

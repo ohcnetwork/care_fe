@@ -39,6 +39,9 @@ test.describe("Questionnaire v2 studio chrome", () => {
     const clickLeafBody = async (title: string) => {
       const answer = leafBlock(title).locator('input[id^="question-input-"]');
       await answer.scrollIntoViewIfNeeded();
+      // After a reload the pre-React loading screen lingers until its
+      // animation settles, and it takes raw pointer clicks.
+      await expect(page.locator("#app-loading")).toHaveCount(0);
       const bounds = await answer.boundingBox();
       expect(bounds).not.toBeNull();
       // The answer is intentionally inert in edit mode. A real pointer

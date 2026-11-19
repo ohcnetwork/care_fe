@@ -30,7 +30,7 @@ const SheetContext = React.createContext<{
   side: "top" | "right" | "bottom" | "left";
   containerClassName: string;
   scrolled: boolean;
-  setScrolled: (v: boolean) => void;
+  setScrolled: React.Dispatch<React.SetStateAction<boolean>>;
 } | null>(null);
 
 const SheetRootContext = React.createContext<{
@@ -143,6 +143,7 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
   if (modal !== true) return null;
   return (
     <SheetPrimitive.Backdrop
+      forceRender
       data-slot="sheet-overlay"
       className={cn(
         "data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 fixed inset-0 z-50 bg-black/10 duration-100 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-backdrop-filter:backdrop-blur-xs",
@@ -181,7 +182,7 @@ function SheetContent({
   containerClassName,
   initialFocus,
   finalFocus,
-  showCloseButton = true,
+  showCloseButton = false,
   onOpenAutoFocus,
   onCloseAutoFocus,
   onEscapeKeyDown,
@@ -310,7 +311,6 @@ function SheetContent({
           "bg-background data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-50 flex flex-col overflow-y-auto bg-clip-padding text-sm shadow-lg transition duration-200 ease-in-out",
           sheetSideClasses[side],
           (side === "left" || side === "right") && sheetSizeClasses[size],
-          "gap-4 p-6",
           className,
         )}
         {...focusProps}
@@ -354,7 +354,7 @@ function SheetContent({
 function SheetHeader({
   className,
   children,
-  showCloseButton = false,
+  showCloseButton = true,
   ...props
 }: React.ComponentProps<"div"> & {
   showCloseButton?: boolean;
@@ -365,13 +365,13 @@ function SheetHeader({
     <div
       data-slot="sheet-header"
       className={cn(
-        "bg-background relative flex shrink-0 flex-col gap-1.5 border-b pr-10 pb-4 transition-all duration-200",
-        showCloseButton && "pr-12",
+        "bg-background relative flex shrink-0 justify-between gap-1.5 border-b p-4 transition-all duration-200",
         className,
+        ctx?.scrolled && "py-2",
       )}
       {...props}
     >
-      {children}
+      <div className="flex flex-col justify-center">{children}</div>
       {showCloseButton && (
         <SheetClose
           render={
@@ -379,7 +379,6 @@ function SheetHeader({
               variant="ghost"
               size="icon"
               className={cn(
-                "absolute top-0 right-0 shrink-0",
                 ctx?.shaking &&
                   "bg-destructive/20 animate-sheet-shake will-change-transform",
               )}
@@ -401,12 +400,15 @@ function SheetBody({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sheet-body"
       className={cn(
-        "min-h-0 flex-1 overflow-y-auto overscroll-contain py-4 [scrollbar-gutter:stable]",
+        "min-h-0 flex-1 overflow-y-auto overscroll-contain py-4 scrollbar-gutter-auto",
         className,
       )}
-      onScroll={(e) =>
-        ctx?.setScrolled((e.currentTarget as HTMLElement).scrollTop > 0)
-      }
+      onScroll={(e) => {
+        const top = (e.currentTarget as HTMLElement).scrollTop;
+        // Collapsing the header grows the body and can clamp scrollTop back to 0,
+        // so collapse only past a threshold larger than the header shrink.
+        ctx?.setScrolled((prev) => (prev ? top > 0 : top > 64));
+      }}
     >
       <div className={cn(ctx?.containerClassName)} {...props} />
     </div>
@@ -418,7 +420,7 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sheet-footer"
       className={cn(
-        "bg-soft-background mt-auto flex shrink-0 flex-col-reverse gap-4 border-t pt-4 sm:flex-row sm:justify-end",
+        "bg-soft-background mt-auto flex shrink-0 flex-col-reverse gap-4 border-t p-4 sm:flex-row sm:justify-end",
         className,
       )}
       {...props}

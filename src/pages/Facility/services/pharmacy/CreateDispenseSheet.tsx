@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -147,7 +148,7 @@ export function CreateDispenseSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="sm:max-w-lg overflow-y-auto">
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>{t("new_dispense")}</SheetTitle>
           <SheetDescription>
@@ -159,7 +160,7 @@ export function CreateDispenseSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-6 mt-6">
+        <SheetBody>
           <PatientIdentifierSelector
             facilityId={facilityId}
             selectedPatient={selectedPatient}
@@ -167,22 +168,22 @@ export function CreateDispenseSheet({
             onClearPatient={handleClearPatient}
             onRegisterNewPatient={handleRegisterNewPatient}
           />
+        </SheetBody>
 
-          {selectedPatient && (
-            <SheetFooter className="gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-              >
-                {t("cancel")}
-              </Button>
-              <Button onClick={handleProceedToDispense}>
-                {t("proceed_to_dispense")}
-              </Button>
-            </SheetFooter>
-          )}
-        </div>
+        {selectedPatient && (
+          <SheetFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+            >
+              {t("cancel")}
+            </Button>
+            <Button onClick={handleProceedToDispense}>
+              {t("proceed_to_dispense")}
+            </Button>
+          </SheetFooter>
+        )}
       </SheetContent>
     </Sheet>
   );

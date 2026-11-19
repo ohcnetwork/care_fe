@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -86,14 +87,14 @@ export default function EditScheduleTemplateSheet({
       <SheetTrigger asChild>
         {trigger || <Button variant="outline" size="sm"></Button>}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-128">
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
             {t("edit_schedule_template")}
           </SheetDescription>
         </SheetHeader>
-        <div className="overflow-auto -mx-6 px-6 pb-16">
+        <SheetBody className="bg-muted-background">
           <ScheduleTemplateEditor
             template={template}
             facilityId={facilityId}
@@ -130,7 +131,7 @@ export default function EditScheduleTemplateSheet({
             resourceType={resourceType}
             resourceId={resourceId}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

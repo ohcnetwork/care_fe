@@ -16,7 +16,9 @@ import {
 } from "@/components/ui/select";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -127,18 +129,18 @@ export function TokenGenerationSheet({
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("generate_token")}</SheetTitle>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+        <SheetBody>
           {isLoadingCategories ? (
             <div className="flex items-center justify-center py-8">
               <Spinner className="size-6 animate-spin" />
             </div>
           ) : (
-            <>
+            <div className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="category" className="text-sm font-medium">
                   {t("token_category")} *
@@ -175,37 +177,32 @@ export function TokenGenerationSheet({
                   rows={4}
                 />
               </div>
-
-              <div className="flex gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => handleOpenChange(false)}
-                  className="flex-1"
-                >
-                  <ShortcutBadge actionId="cancel-action" />
-                  {t("cancel")}
-                </Button>
-                <Button
-                  onClick={handleGenerateToken}
-                  disabled={!selectedCategory || isGenerating}
-                  className="flex-1"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Spinner className="size-4 animate-spin mr-2" />
-                      {t("generating")}
-                    </>
-                  ) : (
-                    <>
-                      {t("generate_token")}
-                      <ShortcutBadge actionId="submit-action" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            </>
+            </div>
           )}
-        </div>
+        </SheetBody>
+
+        <SheetFooter>
+          <Button variant="outline" onClick={() => handleOpenChange(false)}>
+            <ShortcutBadge actionId="cancel-action" />
+            {t("cancel")}
+          </Button>
+          <Button
+            onClick={handleGenerateToken}
+            disabled={!selectedCategory || isGenerating || isLoadingCategories}
+          >
+            {isGenerating ? (
+              <>
+                <Spinner className="size-4 animate-spin mr-2" />
+                {t("generating")}
+              </>
+            ) : (
+              <>
+                {t("generate_token")}
+                <ShortcutBadge actionId="submit-action" />
+              </>
+            )}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

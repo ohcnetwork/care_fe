@@ -1,4 +1,4 @@
-import Loading from "@/components/Common/Loading";
+import PrintLoading from "@/CAREUI/misc/PrintLoading";
 import { DiagnosticReportPrintPreview } from "@/pages/Facility/services/diagnosticReports/DiagnosticReportPrintPreview";
 import {
   DiagnosticReportRead,
@@ -79,7 +79,7 @@ export const MultipleDiagnosticReportsPrint = ({
   });
 
   if (isFetching || isLoadingReports) {
-    return <Loading />;
+    return <PrintLoading />;
   }
 
   if (isError || isReportsError || isFilesError) {

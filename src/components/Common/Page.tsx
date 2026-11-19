@@ -23,10 +23,10 @@ export default function Page(props: PageProps) {
           changePageMetadata={props.changePageMetadata}
           title={props.title}
           componentRight={props.componentRight}
+          actions={props.options}
           isInsidePage={true}
           hideTitleOnPage={props.hideTitleOnPage}
         />
-        {props.options}
       </div>
       {props.children}
     </div>

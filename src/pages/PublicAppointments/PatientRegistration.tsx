@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -23,15 +23,16 @@ import { Textarea } from "@/components/ui/textarea";
 
 import GovtOrganizationPicker from "@/components/Organization/GovtOrganizationPicker";
 
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { GENDERS, GENDER_TYPES } from "@/common/constants";
 import { validateName } from "@/common/validation";
 
-import { usePubSub } from "@/Utils/pubsubContext";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
+import { navigate } from "@/lib/router/navigate";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import { Organization } from "@/types/organization/organization";
@@ -51,8 +52,6 @@ export default function PublicPatientRegistration(
   const [{ slotId, reason }] = useQueryParams();
 
   const queryClient = useQueryClient();
-
-  const { publish } = usePubSub();
 
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
@@ -126,12 +125,11 @@ export default function PublicPatientRegistration(
             ["appointment", tokenData.phoneNumber],
           ],
         });
-        navigate(
-          `/facility/${props.facilityId}/appointments/${data.id}/success`,
-          {
-            replace: true,
-          },
-        );
+        navigate({
+          to: "/facility/$facilityId/appointments/$appointmentId/success",
+          params: { facilityId: props.facilityId, appointmentId: data.id },
+          replace: true,
+        });
       },
     });
 
@@ -146,7 +144,6 @@ export default function PublicPatientRegistration(
       queryClient.invalidateQueries({
         queryKey: ["patients"],
       });
-      publish("patient:upsert", data);
       createAppointment({
         patient: data.id,
         note: reason ?? "",
@@ -170,9 +167,7 @@ export default function PublicPatientRegistration(
     createPatient(formattedData);
   });
 
-  // TODO: Use useBlocker hook after switching to tanstack router
-  // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
-  useNavigationPrompt(
+  useNavigationBlocker(
     form.formState.isDirty && !isCreatingAppointment,
     t("unsaved_changes"),
   );
@@ -187,9 +182,10 @@ export default function PublicPatientRegistration(
           className="border border-secondary-400"
           type="button"
           onClick={() =>
-            navigate(
-              `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
-            )
+            navigate({
+              to: "/facility/$facilityId/appointments/$staffId/patient-select",
+              params: { facilityId: props.facilityId, staffId },
+            })
           }
         >
           <span className="text-sm underline">{t("back")}</span>
@@ -410,9 +406,10 @@ export default function PublicPatientRegistration(
                 className="sm:w-1/5"
                 type="button"
                 onClick={() =>
-                  navigate(
-                    `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
-                  )
+                  navigate({
+                    to: "/facility/$facilityId/appointments/$staffId/patient-select",
+                    params: { facilityId: props.facilityId, staffId },
+                  })
                 }
               >
                 <span className="bg-linear-to-b from-white/15 to-transparent" />

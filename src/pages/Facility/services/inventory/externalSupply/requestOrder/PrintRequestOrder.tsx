@@ -1,166 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
-import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import PrintLoading from "@/CAREUI/misc/PrintLoading";
+import TypstPrintPreview from "@/CAREUI/misc/TypstPrintPreview";
 
-import Loading from "@/components/Common/Loading";
-import PrintFooter from "@/components/Common/PrintFooter";
-import PrintTable from "@/components/Common/PrintTable";
-
-import { Badge } from "@/components/ui/badge";
+import { buildRequestOrderPrintContent } from "@/pages/Facility/services/inventory/externalSupply/orderPrintData";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
-import {
-  REQUEST_ORDER_STATUS_COLORS,
-  RequestOrderRetrieve,
-} from "@/types/inventory/requestOrder/requestOrder";
 import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
-import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
-import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
-
-interface DetailRowProps {
-  label: string;
-  value?: string | null;
-  isStrong?: boolean;
-}
-
-const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
-  return (
-    <div className="flex">
-      <span className="text-gray-600 w-32">{label}</span>
-      <span className="text-gray-600">: </span>
-      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
-        {value || "-"}
-      </span>
-    </div>
-  );
-};
-
-interface RequestOrderContentProps {
-  requestOrder: RequestOrderRetrieve;
-  supplyRequests: SupplyRequestRead[];
-}
-
-const RequestOrderContent = ({
-  requestOrder,
-  supplyRequests,
-}: RequestOrderContentProps) => {
-  const { t } = useTranslation();
-
-  return (
-    <div>
-      {/* Request Order Header */}
-      <div className="mt-3">
-        <div className="text-xl font-semibold flex items-end gap-4">
-          <p>{requestOrder.name}</p>
-        </div>
-        {requestOrder.note && (
-          <p className="text-sm text-gray-600">{requestOrder.note}</p>
-        )}
-      </div>
-
-      {/* Supply Requests Table */}
-      {supplyRequests && supplyRequests.length > 0 && (
-        <div>
-          <p className="text-base font-semibold mb-2">{t("requested_items")}</p>
-          <PrintTable
-            headers={[
-              { key: "product" },
-              { key: "quantity" },
-              { key: "status" },
-            ]}
-            rows={supplyRequests.map((request) => ({
-              product: request.item.name || "-",
-              quantity: String(round(request.quantity)),
-              status: t(request.status),
-            }))}
-          />
-        </div>
-      )}
-    </div>
-  );
-};
-
-interface RequestOrderPreviewProps {
-  requestOrder: RequestOrderRetrieve;
-  supplyRequests: SupplyRequestRead[];
-}
-
-const RequestOrderPreview = ({
-  requestOrder,
-  supplyRequests,
-}: RequestOrderPreviewProps) => {
-  const { t } = useTranslation();
-  const { facility } = useCurrentFacility();
-
-  return (
-    <PrintPreview
-      title={`${t("request_order")} - ${requestOrder.name}`}
-      disabled={!supplyRequests?.length}
-      facility={facility}
-      templateSlug={PrintTemplateType.request_order}
-    >
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mb-2">
-          {t("request_order")}
-        </h2>
-
-        {/* Request Order Details */}
-        <div className="grid md:grid-cols-2 print:grid-cols-2 gap-6 border-t border-gray-200 pt-2">
-          <div className="space-y-2">
-            <DetailRow
-              label={t("deliver_to")}
-              value={requestOrder.destination?.name}
-              isStrong
-            />
-            {requestOrder.origin && (
-              <DetailRow
-                label={t("origin")}
-                value={requestOrder.origin.name}
-                isStrong
-              />
-            )}
-            {requestOrder.supplier && (
-              <DetailRow
-                label={t("supplier")}
-                value={requestOrder.supplier.name}
-                isStrong
-              />
-            )}
-          </div>
-          <div className="space-y-2">
-            <DetailRow
-              label={t("date")}
-              value={format(new Date(), "dd MMM yyyy, EEEE")}
-              isStrong
-            />
-            <div className="flex">
-              <span className="text-gray-600 w-32">{t("status")}</span>
-              <span className="text-gray-600">: </span>
-              <Badge
-                className="rounded-sm ml-1"
-                variant={REQUEST_ORDER_STATUS_COLORS[requestOrder.status]}
-              >
-                {t(requestOrder.status)}
-              </Badge>
-            </div>
-          </div>
-        </div>
-
-        <RequestOrderContent
-          requestOrder={requestOrder}
-          supplyRequests={supplyRequests}
-        />
-
-        {/* Footer */}
-        <PrintFooter leftContent={t("computer_generated_document")} />
-      </div>
-    </PrintPreview>
-  );
-};
 
 interface PrintRequestOrderProps {
   facilityId: string;
@@ -174,6 +23,7 @@ export const PrintRequestOrder = ({
   requestOrderId,
 }: PrintRequestOrderProps) => {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacility();
 
   const { data: requestOrder, isLoading: isLoadingOrder } = useQuery({
     queryKey: ["requestOrders", requestOrderId],
@@ -197,7 +47,7 @@ export const PrintRequestOrder = ({
   });
 
   if (isLoadingOrder || isLoadingRequests) {
-    return <Loading />;
+    return <PrintLoading />;
   }
 
   if (!requestOrder) {
@@ -217,9 +67,16 @@ export const PrintRequestOrder = ({
   }
 
   return (
-    <RequestOrderPreview
-      requestOrder={requestOrder}
-      supplyRequests={supplyRequests.results}
+    <TypstPrintPreview
+      template="details-table"
+      title={`${t("request_order")} - ${requestOrder.name}`}
+      content={buildRequestOrderPrintContent({
+        requestOrder,
+        supplyRequests: supplyRequests.results,
+        t,
+      })}
+      facility={facility}
+      templateSlug={PrintTemplateType.request_order}
     />
   );
 };

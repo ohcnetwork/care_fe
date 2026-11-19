@@ -11,6 +11,7 @@ import {
   createFilterConfig,
   FilterOption,
 } from "@/components/ui/multi-filter/utils/Utils";
+import { cn } from "@/lib/utils";
 
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
@@ -32,6 +33,7 @@ interface ReferralFiltersProps {
   statusOptions: FilterOption[];
   assignedToMe?: boolean;
   onChange: (updates: ReferralFilterUpdates) => void;
+  compact?: boolean;
 }
 
 export function ReferralFilters({
@@ -40,6 +42,7 @@ export function ReferralFilters({
   statusOptions,
   assignedToMe,
   onChange,
+  compact = false,
 }: ReferralFiltersProps) {
   const { t } = useTranslation();
   const [pickedDepartment, setPickedDepartment] =
@@ -111,7 +114,12 @@ export function ReferralFilters({
   });
 
   return (
-    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+    <div
+      className={cn(
+        "flex min-w-0 flex-wrap items-center gap-2",
+        compact ? "flex-none" : "flex-1",
+      )}
+    >
       <MultiFilter
         facilityId={departmentConfig?.facilityId}
         placeholder={t("filter")}
@@ -120,8 +128,13 @@ export function ReferralFilters({
         onOperationChange={filterState.handleOperationChange}
         onClearAll={filterState.handleClearAll}
         onClearFilter={filterState.handleClearFilter}
-        className="w-full min-w-0 items-start sm:flex-row sm:flex-wrap sm:items-center"
-        triggerButtonClassName="self-start sm:self-center"
+        className={cn(
+          "min-w-0 items-start sm:flex-row sm:flex-wrap sm:items-center",
+          compact ? "w-auto" : "w-full",
+        )}
+        triggerButtonClassName={
+          compact ? "self-center" : "self-start sm:self-center"
+        }
       />
       {departmentConfig?.departmentId && !selectedDepartment && (
         <Button

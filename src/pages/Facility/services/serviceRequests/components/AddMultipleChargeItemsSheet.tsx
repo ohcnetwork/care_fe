@@ -12,9 +12,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -414,10 +414,8 @@ export default function AddMultipleChargeItemsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-3xl p-2">
-        <ScrollArea className="h-full my-6 pb-12 pr-6 p-4">
-          {content}
-        </ScrollArea>
+      <SheetContent size="xl" className="overflow-hidden">
+        <SheetBody>{content}</SheetBody>
       </SheetContent>
     </Sheet>
   );

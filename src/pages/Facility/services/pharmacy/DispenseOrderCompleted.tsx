@@ -20,7 +20,8 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { Button } from "@/components/ui/button";
 import { DottedDivider } from "@/components/ui/dotted-divider";
 import { extractInvoicesFromDispenses } from "@/pages/Facility/services/pharmacy/utils/extractInvoicesFromDispenses";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
+import { Link as RavigerLink } from "raviger";
 
 interface Props {
   facilityId: string;
@@ -104,8 +105,8 @@ export default function DispenseOrderCompleted({
                 asChild
               >
                 <Link
-                  href={`/facility/${facilityId}/billing/invoices/${invoiceIds.join(",")}/print`}
-                  basePath="/"
+                  to="/facility/$facilityId/billing/invoices/$invoiceIds/print"
+                  params={{ facilityId, invoiceIds: invoiceIds.join(",") }}
                 >
                   <PrinterIcon className="size-4" />
                   {t("print_invoices")}
@@ -118,9 +119,9 @@ export default function DispenseOrderCompleted({
                 type="button"
                 asChild
               >
-                <Link href="/medication_requests">
+                <RavigerLink href="/medication_requests">
                   {t("prescription_queue")}
-                </Link>
+                </RavigerLink>
               </Button>
               <Button
                 variant="outline"
@@ -129,7 +130,9 @@ export default function DispenseOrderCompleted({
                 type="button"
                 asChild
               >
-                <Link href="/medication_dispense">{t("go_to_dispenses")}</Link>
+                <RavigerLink href="/medication_dispense">
+                  {t("go_to_dispenses")}
+                </RavigerLink>
               </Button>
               <Button
                 variant="link"
@@ -138,7 +141,9 @@ export default function DispenseOrderCompleted({
                 type="button"
                 asChild
               >
-                <Link href="/medication_return">{t("medicine_returns")}</Link>
+                <RavigerLink href="/medication_return">
+                  {t("medicine_returns")}
+                </RavigerLink>
               </Button>
             </div>
           </div>
