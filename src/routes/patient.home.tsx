@@ -11,7 +11,6 @@ import { useArea } from "@/Routers/AreaChrome";
  */
 export const Route = createFileRoute("/patient/home")({
   beforeLoad: staffOrPatient,
-  staticData: { legacyLayout: true },
   component: RouteComponent,
 });
 

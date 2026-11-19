@@ -10,6 +10,9 @@ import { useCareApps } from "@/hooks/useCareApps";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 
+import { foldLayoutFlags } from "@/lib/router/layoutFlags";
+import type { RouteStaticData } from "@/lib/router/staticData";
+
 /** Parent for plugin routes: the signed-in layout (`src/routes/_app.tsx`). */
 const PLUGIN_PARENT_ROUTE_ID = "/_app";
 
@@ -33,6 +36,49 @@ export function toRouterPath(ravigerPath: string): string {
 function routeFullPath(path: string) {
   const trimmed = path.replace(/\/+$/, "");
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
+
+function pathSegments(fullPath: string) {
+  return fullPath.split("/").filter(Boolean);
+}
+
+function hasChildren(route: AnyRoute) {
+  const children = route.children as AnyRoute[] | Record<string, AnyRoute>;
+  return !!children && Object.keys(children).length > 0;
+}
+
+/**
+ * Layout flags for a plugin route: those of the deepest core layout route
+ * (a route with children) whose path is a prefix of the plugin path. For
+ * example, `/facility/$facilityId/settings/encounter` gets the settings
+ * workspace from the settings layout. A route param matches any segment.
+ */
+function inheritedLayout(
+  routes: readonly AnyRoute[],
+  fullPath: string,
+): RouteStaticData {
+  const segments = pathSegments(fullPath);
+  let layout: AnyRoute | undefined;
+  let depth = -1;
+  for (const route of routes) {
+    if (!hasChildren(route)) continue;
+    const prefix = pathSegments(route.fullPath);
+    if (prefix.length >= segments.length || prefix.length <= depth) continue;
+    const matches = prefix.every((segment, index) =>
+      segment.startsWith("$") ? segment !== "$" : segment === segments[index],
+    );
+    if (matches) {
+      layout = route;
+      depth = prefix.length;
+    }
+  }
+
+  const branch: RouteStaticData[] = [];
+  for (let route = layout; route; route = route.parentRoute) {
+    branch.unshift(route.options?.staticData ?? {});
+  }
+  const { sidebar, workspace, navigation } = foldLayoutFlags(branch);
+  return { sidebar, workspace, navigation };
 }
 
 /** Children the parent had before any plugin route was attached. */
@@ -82,6 +128,9 @@ export function attachPluginRoutes(
       return !previous.has(route);
     }),
   );
+  const coreRoutes = (Object.values(router.routesById) as AnyRoute[]).filter(
+    (route) => !previous.has(route),
+  );
 
   const pluginRoutes: AnyRoute[] = [];
   const seen = new Set<string>();
@@ -101,7 +150,7 @@ export function attachPluginRoutes(
       createRoute({
         getParentRoute: () => parent,
         path: routerPath,
-        staticData: { legacyLayout: true },
+        staticData: inheritedLayout(coreRoutes, fullPath),
         component: () => (
           <PluginRouteComponent plugin={plugin} render={render} />
         ),

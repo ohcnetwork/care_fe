@@ -14,7 +14,6 @@ type PatientTab = React.ComponentProps<typeof PatientProfile>["page"];
  */
 export const Route = createFileRoute("/patient/$id/$tab")({
   beforeLoad: staffOrPatient,
-  staticData: { legacyLayout: true },
   component: RouteComponent,
 });
 

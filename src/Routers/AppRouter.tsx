@@ -59,9 +59,9 @@ const AdminRouter: AppRoutes = {
 };
 
 /**
- * Legacy staff route tables. The `$` splat (`src/routes/_app/$.tsx`)
- * renders them for every staff path that is not migrated yet; shared routes
- * render them for staff users. The staff shell lives in `AppShell`. Plugin
+ * Legacy staff route tables. The `_legacy` layout
+ * (`src/routes/_app/_legacy.tsx`) renders them for every staff path that is
+ * not migrated yet; shared routes render them for staff users. The staff shell lives in `AppShell`. Plugin
  * routes still merge here; the TanStack tree also attaches them, and a
  * TanStack match always wins over the splat.
  */

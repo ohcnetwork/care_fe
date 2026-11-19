@@ -53,6 +53,13 @@ export const get = (name) => {
               `Test plugin item ${itemId}`,
             ),
           "/test-plugin/router": () => React.createElement(RouterPage),
+          // Under the settings layout: takes the settings workspace.
+          "/facility/:facilityId/settings/test-plugin": ({ facilityId }) =>
+            React.createElement(
+              "h1",
+              { "data-cy": "test-plugin-settings-page" },
+              `Test plugin settings ${facilityId}`,
+            ),
         },
         extends: [],
         components: {},

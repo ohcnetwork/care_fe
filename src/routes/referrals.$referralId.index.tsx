@@ -6,7 +6,7 @@ import { ReferralDetailsPage } from "@/pages/Referrals/ReferralDetailsPage";
 /** Shared URL: the same page for staff and patients, in their chrome. */
 export const Route = createFileRoute("/referrals/$referralId/")({
   beforeLoad: staffOrPatient,
-  staticData: { legacyLayout: true },
+  staticData: { sidebar: false },
   component: RouteComponent,
 });
 

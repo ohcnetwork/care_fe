@@ -1,6 +1,3 @@
-import { useMatches } from "@tanstack/react-router";
-import { usePath } from "raviger";
-
 import { cn } from "@/lib/utils";
 
 import { SidebarInset } from "@/components/ui/sidebar";
@@ -19,107 +16,24 @@ import useSidebarState from "@/hooks/useSidebarState";
 import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDialog";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { useShortcuts } from "@/context/ShortcutContext";
-import type { Workspace } from "@/lib/router/staticData";
+import { useLayoutFlags } from "@/lib/router/layoutFlags";
 import { LocationPageHeader } from "@/pages/Facility/locations/components/LocationPageHeader";
 import { FacilitySettingsPageHeader } from "@/pages/Facility/settings/FacilitySettingsPageHeader";
-import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
 import { useNavigationTrail } from "@/Utils/navigationTrail";
-
-/**
- * Paths of the legacy (raviger) route tables where the sidebar is hidden.
- * Routes in the TanStack tree set `staticData.sidebar` instead. An entry
- * leaves this list when its area moves to `src/routes/`.
- */
-const LEGACY_PATHS_WITHOUT_SIDEBAR = [
-  /^\/referrals\/[^/]+(?:\/respond)?$/,
-  /^\/facility\/[^/]+\/service_requests\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/service_requests\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/to_receive\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/to_dispatch\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/create_delivery$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/requests\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/requests\/[^/]+\/edit$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/new$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/[^/]+\/edit$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/deliveries\/[^/]+$/,
-  /^\/facility\/[^/]+\/queues\/[^/]+\/tokens\/[^/]+$/,
-  // Encounter pages give the full width to the chart and carry their own back button
-  /^\/(?:facility|organization)\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+\/[^/]+$/,
-  // Questionnaire fill routes (fullscreen v2 fill experience)
-  /^\/facility\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+\/questionnaire(\/[^/]+)?$/,
-  /^\/facility\/[^/]+\/patient\/[^/]+\/questionnaire(\/[^/]+)?$/,
-  /^\/facility\/[^/]+\/patient\/[^/]+\/consultation$/,
-  /^\/patient\/[^/]+\/questionnaire(\/[^/]+)?$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/questionnaire(\/[^/]+)?$/,
-  // Questionnaire studio (fullscreen builder) routes
-  /^\/admin\/questionnaires\/[^/]+\/edit$/,
-  // Pharmacy related routes
-  /^\/facility\/[^/]+\/locations\/[^/]+\/medication_requests\/patient\/[^/]+\/bill\/prescriptions\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/medication_requests\/patient\/[^/]+\/bill\/dispense\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/medication_dispense\/order\/[^/]+$/,
-];
-
-const LEGACY_SPLAT_ROUTE_ID = "/_app/$";
-
-interface LayoutFlags {
-  sidebar: boolean;
-  workspace?: Workspace;
-}
-
-/**
- * Reads layout flags from the matched routes. The deepest route that sets a
- * flag wins. Legacy paths (rendered by the `$` splat, plugin routes, and
- * shared routes that render the legacy tables) fall back to the URL regexes
- * until their area is migrated.
- */
-function useLayoutFlags(currentPath: string): LayoutFlags {
-  const allMatches = useMatches();
-  // A route that failed (for example, a not-found from a guard) does not
-  // set the layout of the error page.
-  const failedIndex = allMatches.findIndex(
-    (m) => m.status === "notFound" || m.status === "error",
-  );
-  const matches =
-    failedIndex === -1 ? allMatches : allMatches.slice(0, failedIndex);
-  const isLegacy = matches.some(
-    (m) => m.routeId === LEGACY_SPLAT_ROUTE_ID || m.staticData.legacyLayout,
-  );
-
-  if (isLegacy) {
-    const sidebar = !LEGACY_PATHS_WITHOUT_SIDEBAR.some((path) =>
-      typeof path === "string" ? path === currentPath : path.test(currentPath),
-    );
-    let workspace: Workspace | undefined;
-    if (/^\/facility\/[^/]+\/locations\/[^/]+/.test(currentPath)) {
-      workspace = "location";
-    } else if (isFacilitySettingsPath(currentPath)) {
-      workspace = "settings";
-    } else if (/^\/facility\/[^/]+\/services\/[^/]+/.test(currentPath)) {
-      workspace = "service";
-    }
-    return { sidebar, workspace: sidebar ? workspace : undefined };
-  }
-
-  const flags = matches.reduce<LayoutFlags>(
-    (acc, m) => ({
-      sidebar: m.staticData.sidebar ?? acc.sidebar,
-      workspace: m.staticData.workspace ?? acc.workspace,
-    }),
-    { sidebar: true },
-  );
-  return { ...flags, workspace: flags.sidebar ? flags.workspace : undefined };
-}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   useRefreshStickyAfterScrollLock();
   useNavigationTrail();
 
-  const currentPath = usePath() ?? "/";
-  const isAdminPage = currentPath.startsWith("/admin");
-  const sidebarFor = isAdminPage ? SidebarFor.ADMIN : SidebarFor.FACILITY;
+  const {
+    sidebar: shouldShowSidebar,
+    workspace,
+    navigation,
+  } = useLayoutFlags();
+  const sidebarFor =
+    navigation === "admin" ? SidebarFor.ADMIN : SidebarFor.FACILITY;
 
   const user = useAuthUser();
-  const { sidebar: shouldShowSidebar, workspace } = useLayoutFlags(currentPath);
   const { commandDialogOpen, setCommandDialogOpen } = useShortcuts();
   const sidebarOpen = useSidebarState();
   const isInnerWorkspace = !!workspace;

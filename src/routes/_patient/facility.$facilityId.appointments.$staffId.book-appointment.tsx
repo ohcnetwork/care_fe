@@ -6,7 +6,7 @@ export const Route = createFileRoute(
   "/_patient/facility/$facilityId/appointments/$staffId/book-appointment",
 )({
   component: RouteComponent,
-  staticData: { sidebar: false },
+  staticData: { patientChrome: false },
 });
 
 function RouteComponent() {

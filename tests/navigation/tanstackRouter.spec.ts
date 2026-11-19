@@ -1,8 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import fs from "fs";
-import path from "path";
 import { adminApiHeaders, apiBaseUrl } from "tests/helper/questionnaireV2";
+import {
+  mockTestPlugin,
+  testPluginRemoteEntryUrl,
+} from "tests/helper/testPlugin";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -18,35 +20,6 @@ function settingsBreadcrumb(page: Page) {
   return page
     .locator('[data-cy="facility-settings-page-header"]')
     .getByRole("navigation", { name: "breadcrumb" });
-}
-
-const testPluginRemoteEntryUrl =
-  "http://localhost:4000/test-plugin/remoteEntry.js";
-
-/** Loads `tests/fixtures/plugin/remoteEntry.js` as the only plugin. */
-async function mockTestPlugin(page: Page) {
-  const remoteEntry = fs.readFileSync(
-    path.resolve("tests/fixtures/plugin/remoteEntry.js"),
-    "utf-8",
-  );
-  await page.route("**/api/v1/plug_config/", (route) =>
-    route.fulfill({
-      json: {
-        configs: [
-          {
-            slug: "care_test_plugin",
-            meta: { url: testPluginRemoteEntryUrl },
-          },
-        ],
-      },
-    }),
-  );
-  await page.route(testPluginRemoteEntryUrl, (route) =>
-    route.fulfill({
-      body: remoteEntry,
-      contentType: "application/javascript",
-    }),
-  );
 }
 
 test.describe("TanStack Router navigation", () => {

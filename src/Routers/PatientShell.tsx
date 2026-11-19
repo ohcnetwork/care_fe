@@ -1,5 +1,3 @@
-import { useMatches } from "@tanstack/react-router";
-
 import { SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 import { AppSidebarProvider } from "@/components/ui/sidebar/app-sidebar-provider";
@@ -12,23 +10,18 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { useRefreshStickyAfterScrollLock } from "@/hooks/useRefreshStickyAfterScrollLock";
 import useSidebarState from "@/hooks/useSidebarState";
 
+import { useLayoutFlags } from "@/lib/router/layoutFlags";
 import PatientUserProvider from "@/Providers/PatientUserProvider";
 
 /**
  * Chrome for the patient portal (OTP sign-in). Routes that set
- * `staticData.sidebar: false` (the appointment booking flow) render without
- * chrome. All patient pages get the patient user context.
+ * `staticData.patientChrome: false` (the appointment booking flow) render
+ * without chrome. All patient pages get the patient user context.
  */
 export function PatientShell({ children }: { children: React.ReactNode }) {
   useRefreshStickyAfterScrollLock();
   const sidebarOpen = useSidebarState();
-  const showChrome = useMatches({
-    select: (matches) =>
-      matches.reduce<boolean>(
-        (show, match) => match.staticData.sidebar ?? show,
-        true,
-      ),
-  });
+  const { patientChrome: showChrome } = useLayoutFlags();
 
   return (
     <PatientUserProvider>

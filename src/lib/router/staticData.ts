@@ -16,27 +16,44 @@ export interface CrumbMatch {
  */
 export type Crumb = string | ((match: CrumbMatch) => ReactNode);
 
+/** Which app sidebar the staff shell shows. */
+export type SidebarNavigation = "facility" | "admin";
+
 /**
  * Route-level layout flags. The deepest matched route that sets a flag wins.
- * A flag on a parent covers all of its children. These replace the URL
- * regexes in the legacy `AppRouter`.
+ * A flag on a parent covers all of its children. Read them with
+ * `useLayoutFlags()` (`src/lib/router/layoutFlags.ts`).
  */
 export interface RouteStaticData {
   /**
-   * `false` shows the page without navigation chrome. Staff pages keep the
-   * page frame and lose the sidebar and header; patient pages lose all
-   * chrome. Defaults to `true`.
+   * Staff shell: `false` keeps the page frame and removes the sidebar and
+   * header. Defaults to `true`.
    */
   sidebar?: boolean;
+  /** Staff shell: the inner workspace (header and inner sidebar). */
   workspace?: Workspace;
-  crumb?: Crumb;
+  /** Staff shell: the app sidebar to show. Defaults to `"facility"`. */
+  navigation?: SidebarNavigation;
   /**
-   * The staff shell derives `sidebar` and `workspace` from the URL regexes
-   * of the legacy route tables. Set on plugin routes and on shared routes
-   * that render the legacy tables.
+   * Patient shell: `false` removes all chrome (the appointment booking
+   * flow). Defaults to `true`.
    */
-  legacyLayout?: boolean;
+  patientChrome?: boolean;
+  crumb?: Crumb;
 }
+
+/**
+ * A full-screen staff page: no sidebar and no header. The page gives the
+ * width to its content and carries its own way back.
+ */
+export const fullScreenPage = { sidebar: false } satisfies RouteStaticData;
+
+/**
+ * Questionnaire fill pages (the full-screen fill experience). They sit in
+ * separate branches (facility patient, encounter, location and patient), so
+ * they share this constant.
+ */
+export const questionnaireFillPage = fullScreenPage;
 
 declare module "@tanstack/react-router" {
   interface StaticDataRouteOption extends RouteStaticData {}

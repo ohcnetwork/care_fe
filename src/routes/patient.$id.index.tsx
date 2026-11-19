@@ -9,7 +9,6 @@ import { useArea } from "@/Routers/AreaChrome";
 /** Shared URL: the patient's own profile, or the legacy staff page. */
 export const Route = createFileRoute("/patient/$id/")({
   beforeLoad: staffOrPatient,
-  staticData: { legacyLayout: true },
   component: RouteComponent,
 });
 
