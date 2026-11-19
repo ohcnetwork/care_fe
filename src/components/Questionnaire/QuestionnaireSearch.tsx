@@ -1,8 +1,7 @@
-import { CaretSortIcon } from "@radix-ui/react-icons";
-import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { ChevronsUpDown as CaretSortIcon, Plus } from "lucide-react";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -19,6 +18,8 @@ import {
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -32,7 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { conditionalAttribute, isIOSDevice } from "@/Utils/utils";
+import { conditionalAttribute } from "@/Utils/utils";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -41,16 +42,22 @@ interface QuestionnaireSearchProps {
   trigger?: React.ReactNode;
   onSelect?: (questionnaire: QuestionnaireRead) => void;
   subjectType?: string;
+  facilityId?: string;
+
   disabled?: boolean;
   size?: React.ComponentProps<typeof Button>["size"];
 }
+
+const QUESTIONNAIRES_PER_PAGE = 30;
 
 export function QuestionnaireSearch({
   placeholder,
   trigger,
   size = "default",
-  onSelect = (selected) => navigate(`questionnaire/${selected.slug}`),
+  onSelect = (selected) => navigate(`questionnaire/${selected.id}`),
   subjectType,
+  facilityId,
+
   disabled,
 }: QuestionnaireSearchProps) {
   const { t } = useTranslation();
@@ -58,74 +65,130 @@ export function QuestionnaireSearch({
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
 
-  const { data: questionnaires, isLoading } = useQuery({
-    queryKey: ["questionnaires", "list", search, subjectType],
-    queryFn: query.debounced(questionnaireApi.list, {
-      queryParams: {
-        title: search,
-        ...conditionalAttribute(!!subjectType, {
-          subject_type: subjectType,
-        }),
-        status: "active",
-      },
-    }),
-    enabled: isOpen,
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["questionnaires", "picker", search, subjectType, facilityId],
+    queryFn: ({ pageParam, signal }) =>
+      query.debounced(questionnaireApi.list, {
+        queryParams: {
+          title: search,
+          ...conditionalAttribute(!!subjectType, {
+            subject_type: subjectType,
+          }),
+          ...conditionalAttribute(!!facilityId, {
+            facility_or_instance: facilityId,
+          }),
+          status: "active",
+          limit: QUESTIONNAIRES_PER_PAGE,
+          offset: pageParam,
+        },
+      })({ signal }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      const offset = pages.length * QUESTIONNAIRES_PER_PAGE;
+      return offset < lastPage.count ? offset : undefined;
+    },
+    enabled: isOpen && !disabled,
   });
+  const questionnaires = data?.pages.flatMap((page) => page.results) ?? [];
 
-  useEffect(() => {
-    if (isOpen) {
+  const handleOpenChange = (open: boolean) => {
+    if (open && disabled) return;
+    if (open) {
       setSearch("");
     }
-  }, [isOpen]);
+    setIsOpen(open);
+  };
 
   const content = (
-    <Command filter={() => 1}>
-      <CommandInput
-        placeholder={t("search_forms")}
-        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
-        onValueChange={setSearch}
-        autoFocus={!isIOSDevice}
-      />
-      <CommandList className="overflow-y-auto">
-        <CommandEmpty>
-          {isLoading ? (
-            <div className="space-y-2 p-4">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-            </div>
-          ) : (
-            t("no_results_found")
-          )}
-        </CommandEmpty>
-
-        <CommandGroup>
-          {(questionnaires?.results ?? []).map((item: QuestionnaireRead) => (
-            <CommandItem
-              key={item.id}
-              value={item.title}
-              onSelect={() => {
-                onSelect(item);
-                setIsOpen(false);
-              }}
+    <Command shouldFilter={false}>
+      <div className="border-b border-gray-100 shadow-xs">
+        <CommandInput
+          aria-label={t("search_forms")}
+          placeholder={t("search_forms")}
+          onValueChange={setSearch}
+          value={search}
+        />
+      </div>
+      <CommandList className="w-full max-h-72">
+        {isLoading ? (
+          <div
+            role="status"
+            aria-label={t("loading")}
+            className="p-4 space-y-2"
+          >
+            <Skeleton className="w-full h-8" />
+            <Skeleton className="w-full h-8" />
+            <Skeleton className="w-full h-8" />
+          </div>
+        ) : isError ? (
+          <div role="alert" className="p-4 space-y-3 text-sm text-gray-600">
+            <p>{t("questionnaire_error_loading")}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={disabled || isFetching}
+              onClick={() => void refetch()}
             >
-              <CareIcon icon="l-file-export" className="mr-2 size-4" />
-              <span>{item.title}</span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
+              {t("try_again")}
+            </Button>
+          </div>
+        ) : (
+          <>
+            <CommandEmpty>{t("no_results_found")}</CommandEmpty>
+            <CommandGroup>
+              {questionnaires.map((item) => (
+                <CommandItem
+                  key={item.id}
+                  value={item.id}
+                  disabled={disabled}
+                  className="rounded-md cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100"
+                  onSelect={() => {
+                    onSelect(item);
+                    setIsOpen(false);
+                  }}
+                >
+                  <CareIcon
+                    icon="l-file-export"
+                    className="mr-2 size-4 shrink-0"
+                  />
+                  <span className="min-w-0 break-words">{item.title}</span>
+                </CommandItem>
+              ))}
+              {hasNextPage && (
+                <CommandItem
+                  value="load-more-questionnaires"
+                  disabled={disabled || isFetchingNextPage}
+                  onSelect={() => void fetchNextPage()}
+                  className="justify-center rounded-md cursor-pointer text-primary-700 hover:bg-gray-100 aria-selected:bg-gray-100"
+                >
+                  {isFetchingNextPage ? t("loading") : t("load_more")}
+                </CommandItem>
+              )}
+            </CommandGroup>
+          </>
+        )}
       </CommandList>
     </Command>
   );
 
   if (isMobile) {
     return (
-      <Drawer open={isOpen} onOpenChange={setIsOpen}>
+      <Drawer open={isOpen} onOpenChange={handleOpenChange}>
         <DrawerTrigger asChild>
           {trigger || (
             <Button
               variant="outline"
               role="combobox"
+              aria-label={placeholder || t("add_forms")}
               disabled={disabled || isLoading}
             >
               {isLoading ? (
@@ -139,29 +202,33 @@ export function QuestionnaireSearch({
               ) : (
                 <span>{placeholder || t("add_forms")}</span>
               )}
-              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+              <CaretSortIcon className="ml-2 opacity-50 size-4 shrink-0" />
             </Button>
           )}
         </DrawerTrigger>
 
-        <DrawerContent className="min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
-          <DrawerTitle className="sr-only">{t("forms")}</DrawerTitle>
-          <div className="mt-6 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
-            {content}
-          </div>
+        <DrawerContent height="fixed" className="p-1.5">
+          <DrawerHeader className="pl-1 md:pb-2" showCloseButton>
+            <DrawerTitle>{t("forms")}</DrawerTitle>
+            <DrawerDescription className="sr-only">
+              {t("search_forms")}
+            </DrawerDescription>
+          </DrawerHeader>
+          {content}
         </DrawerContent>
       </Drawer>
     );
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         {trigger || (
           <Button
             size={size}
             variant="outline"
             role="combobox"
+            aria-label={placeholder || t("add_forms")}
             className="w-full border border-primary-600"
             disabled={disabled || isLoading}
           >
@@ -174,7 +241,7 @@ export function QuestionnaireSearch({
                 {t("loading")}
               </>
             ) : (
-              <div className="flex justify-start items-center gap-2 text-primary-800 w-full">
+              <div className="flex items-center justify-start w-full gap-2 text-primary-800">
                 <Plus className="size-4" />
                 <span>{placeholder || t("add_forms")}</span>
               </div>
@@ -182,7 +249,11 @@ export function QuestionnaireSearch({
           </Button>
         )}
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
+      <PopoverContent
+        aria-label={t("forms")}
+        className="w-[min(24rem,calc(100vw-2rem))] overflow-clip p-1.5"
+        align="start"
+      >
         {content}
       </PopoverContent>
     </Popover>

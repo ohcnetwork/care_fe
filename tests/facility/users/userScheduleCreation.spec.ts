@@ -157,7 +157,7 @@ class ScheduleCardPage {
   async openEditForm(templateName: string): Promise<void> {
     const card = this.getScheduleCard(templateName);
     await card
-      .locator('button[data-slot="button"]')
+      .getByRole("button")
       .filter({ has: this.page.locator("svg.lucide-pen-line") })
       .first()
       .click();
@@ -288,7 +288,7 @@ test.describe("Schedule Template Management", () => {
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     await page.goto(`/facility/${facilityId}/users/admin`);
-    await page.getByRole("link", { name: "Availability" }).click();
+    await page.getByRole("tab", { name: "Availability" }).click();
   });
 
   test("should create and verify a weekday schedule template", async ({

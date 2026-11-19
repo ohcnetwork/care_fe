@@ -37,7 +37,7 @@ export const PatientInfoHoverCard = ({
         patient.facility_tags.length > 0));
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <div className="flex justify-between">
         <div className="flex items-center gap-4">
           <div className="size-12">
@@ -150,6 +150,6 @@ export const PatientInfoHoverCard = ({
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };

@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -101,35 +103,38 @@ export default function LinkUserToDepartmentSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("link_user_to_department")}</SheetTitle>
           <SheetDescription>
             {t("link_user_to_department_description")}
           </SheetDescription>
         </SheetHeader>
-        <div className="space-y-6 py-6">
-          <div className="space-y-2">
-            <FacilityOrganizationSelector
-              facilityId={facilityId}
-              value={selectedOrganizations}
-              onChange={setSelectedOrganizations}
-              singleSelection={true}
-              optional={true}
-            />
-          </div>
+        <SheetBody>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <FacilityOrganizationSelector
+                facilityId={facilityId}
+                value={selectedOrganizations}
+                onChange={setSelectedOrganizations}
+                singleSelection={true}
+                optional={true}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label>{t("select_role")}</Label>
-            <RoleSelect
-              value={selectedRole}
-              onChange={setSelectedRole}
-              context={RoleContext.FACILITY}
-            />
+            <div className="space-y-2">
+              <Label>{t("select_role")}</Label>
+              <RoleSelect
+                value={selectedRole}
+                onChange={setSelectedRole}
+                context={RoleContext.FACILITY}
+              />
+            </div>
           </div>
+        </SheetBody>
 
+        <SheetFooter>
           <Button
-            className="w-full"
             onClick={handleLinkUser}
             disabled={
               !selectedOrganizations ||
@@ -143,7 +148,7 @@ export default function LinkUserToDepartmentSheet({
             )}
             {t("link_to_department")}
           </Button>
-        </div>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

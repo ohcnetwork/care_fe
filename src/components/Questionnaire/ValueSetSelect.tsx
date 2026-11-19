@@ -1,4 +1,4 @@
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import { ChevronsUpDown as CaretSortIcon } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchContent";
+import { ValueSetPickerSearch } from "@/components/Questionnaire/ValueSetPickerSearch";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -27,60 +27,85 @@ type ButtonProps = Omit<React.ComponentProps<typeof Button>, keyof Props>;
 
 interface Props {
   system: string;
+  /** Pins the lookup to one exact valueset, bypassing slug resolution. */
+  valuesetId?: string;
   value?: Code | null;
   onSelect: (value: Code) => void;
   placeholder?: string;
   count?: number;
   searchPostFix?: string;
   hideTrigger?: boolean;
-  controlledOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   showCode?: boolean;
   title?: string;
   closeOnSelect?: boolean;
   mobileTrigger?: React.ReactNode;
+  /** Mobile only: rendered inside the drawer content, so a drawer it holds nests on top. */
+  drawerChildren?: React.ReactNode;
+  /** Always render the drawer, even at widths where this would be a popover. */
+  drawerOnly?: boolean;
 }
 
 export default function ValueSetSelect({
   system,
+  valuesetId,
   value,
   onSelect,
   placeholder = "Search...",
   count = 10,
   searchPostFix = "",
   hideTrigger = false,
-  controlledOpen = false,
+  open: controlledOpen,
+  onOpenChange: onControlledOpenChange,
   closeOnSelect = true,
   showCode = false,
   title,
   mobileTrigger,
+  drawerChildren,
+  drawerOnly = false,
   ...props
 }: Props & ButtonProps) {
   const { t } = useTranslation();
-  const [internalOpen, setInternalOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const isMobile = useBreakpoints({ default: true, sm: false });
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const setOpen = onControlledOpenChange ?? setUncontrolledOpen;
+  const isMobile = useBreakpoints({ default: true, sm: false }) || drawerOnly;
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (controlledOpen || internalOpen) {
-      setSearch("");
-    }
-  }, [controlledOpen, internalOpen]);
-
-  useEffect(() => {
-    if (internalOpen && isMobile) {
+    if (open && isMobile) {
       const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 200);
       return () => clearTimeout(timer);
     }
-  }, [internalOpen, isMobile]);
+  }, [open, isMobile]);
+  const searchContent = (
+    <ValueSetPickerSearch
+      key={String(open)}
+      inputRef={inputRef}
+      system={system}
+      valuesetId={valuesetId}
+      onSelect={(selected) => {
+        onSelect(selected);
+        if (closeOnSelect) {
+          setOpen(false);
+        } else if (!isMobile) {
+          inputRef.current?.focus();
+        }
+      }}
+      placeholder={placeholder}
+      count={count}
+      searchPostFix={searchPostFix}
+      showCode={showCode}
+      title={title}
+    />
+  );
+
   if (isMobile && !hideTrigger) {
     return (
-      <Drawer
-        open={internalOpen || controlledOpen}
-        onOpenChange={setInternalOpen}
-      >
+      <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
           {mobileTrigger ? (
             mobileTrigger
@@ -89,7 +114,7 @@ export default function ValueSetSelect({
               variant="white"
               role="combobox"
               className={cn(
-                "w-full flex justify-between h-auto whitespace-normal text-left font-normal border-gray-300 shadow-xs",
+                "w-full flex justify-between whitespace-normal text-left font-normal border-gray-300 shadow-xs",
                 !value?.display && "text-gray-500 hover:bg-white",
               )}
               {...props}
@@ -104,63 +129,25 @@ export default function ValueSetSelect({
             </Button>
           )}
         </DrawerTrigger>
-        <DrawerContent>
+
+        <DrawerContent height="fixed">
           <DrawerTitle className="sr-only">
             {title || t("select_value")}
           </DrawerTitle>
-          <ValueSetSearchContent
-            system={system}
-            onSelect={(selected) => {
-              onSelect(selected);
-              if (closeOnSelect) {
-                setInternalOpen(false);
-              } else {
-                inputRef.current?.focus();
-              }
-            }}
-            placeholder={placeholder}
-            count={count}
-            searchPostFix={searchPostFix}
-            showCode={showCode}
-            search={search}
-            onSearchChange={setSearch}
-            title={title}
-          />
+          {searchContent}
+          {drawerChildren}
         </DrawerContent>
       </Drawer>
     );
   }
 
   if (hideTrigger) {
-    return (
-      <ValueSetSearchContent
-        system={system}
-        onSelect={(selected) => {
-          onSelect(selected);
-          if (closeOnSelect) {
-            setInternalOpen(false);
-          } else {
-            inputRef.current?.focus();
-          }
-        }}
-        count={count}
-        searchPostFix={searchPostFix}
-        showCode={showCode}
-        search={search}
-        onSearchChange={setSearch}
-        title={title}
-        placeholder={placeholder}
-      />
-    );
+    return searchContent;
   }
 
   return (
     <>
-      <Popover
-        open={controlledOpen || internalOpen}
-        onOpenChange={setInternalOpen}
-        modal={true}
-      >
+      <Popover open={open} onOpenChange={setOpen} modal={true}>
         <PopoverTrigger asChild>
           <Button
             type="button"
@@ -181,25 +168,11 @@ export default function ValueSetSelect({
             <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="transition-all w-150 p-0" align="start">
-          <ValueSetSearchContent
-            system={system}
-            onSelect={(selected) => {
-              onSelect(selected);
-              if (closeOnSelect) {
-                setInternalOpen(false);
-              } else {
-                inputRef.current?.focus();
-              }
-            }}
-            placeholder={placeholder}
-            count={count}
-            searchPostFix={searchPostFix}
-            showCode={showCode}
-            search={search}
-            onSearchChange={setSearch}
-            title={title}
-          />
+        <PopoverContent
+          className="transition-all w-150 p-0 overflow-clip"
+          align="start"
+        >
+          {searchContent}
         </PopoverContent>
       </Popover>
     </>

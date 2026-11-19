@@ -19,7 +19,6 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 import { Priority, Status } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 
@@ -29,6 +28,7 @@ export const EncounterServiceRequestTab = () => {
     selectedEncounterId: encounterId,
     facilityId,
     patientId,
+    canWriteClinicalData,
   } = useEncounter();
   const { t } = useTranslation();
   const {
@@ -109,7 +109,7 @@ export const EncounterServiceRequestTab = () => {
           />
         </div>
 
-        <div className="flex items-center gap-4 md:ml-auto">
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center md:ml-auto md:w-auto">
           <div className="relative w-full md:w-[300px]">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
               <CareIcon icon="l-search" className="size-5" />
@@ -124,8 +124,8 @@ export const EncounterServiceRequestTab = () => {
             />
           </div>
 
-          {encounter && !inactiveEncounterStatus.includes(encounter.status) && (
-            <Button variant="primary">
+          {encounter && facilityId && canWriteClinicalData && (
+            <Button variant="primary" asChild className="w-full sm:w-auto">
               <Link
                 href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`}
                 className="flex items-center"
@@ -149,6 +149,7 @@ export const EncounterServiceRequestTab = () => {
                   requests={data.results}
                   facilityId={facilityId || ""}
                   showPatientInfo={false}
+                  readOnly={!canWriteClinicalData}
                 />
               ) : (
                 <div className="p-6 text-center text-gray-500">

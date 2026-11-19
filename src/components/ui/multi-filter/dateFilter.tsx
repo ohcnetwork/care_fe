@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
+import { parseLocalDate } from "@/Utils/utils";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -96,7 +97,7 @@ function CustomDateRange({
               value={dateFrom ? format(dateFrom, "yyyy-MM-dd") : ""}
               onChange={(e) => {
                 if (e.target.value) {
-                  setDateFrom(new Date(e.target.value));
+                  setDateFrom(parseLocalDate(e.target.value));
                 } else {
                   setDateFrom(undefined);
                 }
@@ -114,7 +115,7 @@ function CustomDateRange({
               value={dateTo ? format(dateTo, "yyyy-MM-dd") : ""}
               onChange={(e) => {
                 if (e.target.value) {
-                  setDateTo(new Date(e.target.value));
+                  setDateTo(parseLocalDate(e.target.value));
                 } else {
                   setDateTo(undefined);
                 }
@@ -266,10 +267,17 @@ export default function RenderDateFilter({
       ? !options.some((option) => isSameRange(option))
       : false;
 
+  // Sync from the applied filter by date value, not object identity: the
+  // parent hands over a new `selected` object on every render, which would
+  // otherwise wipe a custom range the user is still typing.
+  const selectedFrom = selected.from?.getTime();
+  const selectedTo = selected.to?.getTime();
   useEffect(() => {
-    setDateFrom(selected.from);
-    setDateTo(selected.to);
-  }, [selected]);
+    setDateFrom(
+      selectedFrom === undefined ? undefined : new Date(selectedFrom),
+    );
+    setDateTo(selectedTo === undefined ? undefined : new Date(selectedTo));
+  }, [selectedFrom, selectedTo]);
 
   return (
     <div className="pt-0">
@@ -317,10 +325,12 @@ export const SelectedDateBadge = ({
   selected,
   filter,
   onFilterChange,
+  interactive = true,
 }: {
   selected: FilterDateRange;
   filter: FilterConfig;
-  onFilterChange: (filterKey: string, values: FilterValues) => void;
+  onFilterChange?: (filterKey: string, values: FilterValues) => void;
+  interactive?: boolean;
 }) => {
   const { t } = useTranslation();
   const hasValidFrom = !!selected.from && isValid(selected.from);
@@ -351,12 +361,26 @@ export const SelectedDateBadge = ({
         ? format(presentDate, "d MMM yyyy")
         : "";
 
+  if (!interactive || !onFilterChange) {
+    return (
+      <span className="block min-w-0 truncate whitespace-nowrap">
+        {selectedDateLabel}
+      </span>
+    );
+  }
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="text-sm underline cursor-pointer">
-        <span className="block min-w-0 flex-1 truncate whitespace-nowrap">
-          {selectedDateLabel}
-        </span>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto min-w-0 flex-1 justify-start rounded-none border-0 p-0 font-normal shadow-none hover:bg-transparent focus-visible:outline-offset-0"
+        >
+          <span className="block min-w-0 truncate whitespace-nowrap">
+            {selectedDateLabel}
+          </span>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" sideOffset={15} className="w-80 p-0">
         <RenderDateFilter

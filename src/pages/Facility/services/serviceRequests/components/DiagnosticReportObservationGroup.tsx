@@ -35,12 +35,12 @@ export function DiagnosticReportObservationGroup({
     <Card
       role="group"
       aria-labelledby={titleId}
-      className="rounded-none border-0 not-first:border-t border-gray-200 bg-transparent shadow-none"
+      className="rounded-none border-0 not-first:border-t border-border bg-transparent shadow-none"
     >
       <CardContent className="grid gap-3 px-0 py-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:gap-6">
         <div
           id={titleId}
-          className="sm:pt-2 text-sm font-medium text-gray-950 wrap-break-word"
+          className="sm:pt-2 text-sm font-medium text-foreground wrap-break-word"
         >
           {definition.title || definition.code.display}
         </div>
@@ -59,7 +59,7 @@ export function DiagnosticReportObservationGroup({
                   className={cn(
                     "space-y-1.5",
                     hasComponents &&
-                      "not-first:border-t not-first:border-gray-100 not-first:pt-3",
+                      "not-first:border-t not-first:border-border not-first:pt-3",
                   )}
                 >
                   {isErrored && (
@@ -72,7 +72,7 @@ export function DiagnosticReportObservationGroup({
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "w-4 shrink-0 pt-2.5 text-xs text-gray-500 tabular-nums",
+                          "w-4 shrink-0 pt-2.5 text-xs text-muted-foreground tabular-nums",
                           hasComponents && "pt-1",
                         )}
                       >

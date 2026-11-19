@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Markdown } from "@/components/ui/markdown";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import { DiagnosticReportTimestamps } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportTimestamps";
 import {
@@ -48,6 +49,7 @@ export function DiagnosticReportReviewContent({
   const { t } = useTranslation();
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const isFinal = report.status === DiagnosticReportStatus.final;
+  const displayedConclusion = isFinal ? report.conclusion || "" : conclusion;
 
   return (
     <div className="space-y-6">
@@ -59,26 +61,34 @@ export function DiagnosticReportReviewContent({
       )}
       <DiagnosticReportResultsTable observations={observations} />
 
-      {(!isFinal || conclusion) && (
-        <Card className="mb-4 shadow-none rounded-lg border-gray-200 bg-white">
+      {(!isFinal || displayedConclusion) && (
+        <Card className="mb-4 shadow-none rounded-lg border-border bg-background">
           <CardContent className="p-2 space-y-2">
-            <h6 className="font-medium text-gray-950">{t("conclusion")}</h6>
-            <RichTextEditor
-              label={t("conclusion")}
-              placeholder={t("enter_conclusion_of_diagnostic_report")}
-              value={conclusion}
-              onChange={onConclusionChange}
-              disabled={isFinal || disableEdit}
-            />
+            <h6 className="font-medium text-foreground">{t("conclusion")}</h6>
+            {isFinal ? (
+              <Markdown
+                richText
+                content={displayedConclusion}
+                className="prose-sm wrap-anywhere [&>:first-child]:mt-0 [&>:last-child]:mb-0"
+              />
+            ) : (
+              <RichTextEditor
+                label={t("conclusion")}
+                placeholder={t("enter_conclusion_of_diagnostic_report")}
+                value={conclusion}
+                onChange={onConclusionChange}
+                disabled={disableEdit}
+              />
+            )}
           </CardContent>
         </Card>
       )}
 
       {files.length > 0 && (
-        <div className="space-y-4 rounded-lg border border-gray-300 bg-gray-300/30 p-2">
+        <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-2">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <h5 className="text-gray-950 font-semibold">
+              <h5 className="text-foreground font-semibold">
                 {t("uploaded_files")}
               </h5>
               <Badge variant="secondary">{files.length}</Badge>
@@ -93,7 +103,7 @@ export function DiagnosticReportReviewContent({
         </div>
       )}
 
-      <div className="flex sm:flex-row flex-col-reverse justify-between bg-white/50 -mx-2 p-2 pt-3 border-t border-gray-300 rounded-b-lg gap-3">
+      <div className="flex sm:flex-row flex-col-reverse justify-between bg-background/50 -mx-2 p-2 pt-3 border-t border-border rounded-b-lg gap-3">
         <div className="flex justify-start items-end">
           <DiagnosticReportTimestamps report={report} />
         </div>

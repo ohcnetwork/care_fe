@@ -15,8 +15,8 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Command,
   CommandEmpty,
@@ -28,6 +28,8 @@ import {
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -48,9 +50,9 @@ import {
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { isIOSDevice } from "@/Utils/utils";
 
 interface CategoryBreadcrumb {
   slug: string;
@@ -448,8 +450,8 @@ export function ResourceDefinitionCategoryPicker<T>({
     }
 
     return (
-      <div className="flex items-center gap-1 min-w-0">
-        <span className="wrap-anywhere text-wrap text-left">
+      <div className="flex items-center min-w-0 gap-1">
+        <span className="text-left truncate" title={selectedDefinition.title}>
           {selectedDefinition.title}
         </span>
       </div>
@@ -462,34 +464,33 @@ export function ResourceDefinitionCategoryPicker<T>({
   };
 
   const renderSearchInput = () => (
-    <div className="px-3 border-b">
+    <div className="border-b border-gray-100 shadow-xs">
       <CommandInput
         placeholder={t(`search_${translationBaseKey}`)}
         value={searchQuery}
         onValueChange={setSearchQuery}
-        className="h-9 border-0 focus:ring-0 text-base sm:text-sm"
-        autoFocus={!isIOSDevice}
+        autoFocus={!isMobile}
       />
     </div>
   );
 
   const renderBreadcrumbs = () =>
     breadcrumbs.length > 0 && (
-      <div className="px-3 py-2 border-b bg-gray-100">
-        <div className="flex items-center gap-1 text-xs overflow-auto">
+      <div className="px-3 py-2 bg-gray-100 border-b">
+        <div className="flex items-center gap-1 overflow-auto text-xs">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleBackToRoot}
             className="h-6 px-2 text-xs hover:bg-white"
           >
-            <Home className="size-3 mr-1" />
+            <Home className="mr-1 size-3" />
             {t("root")}
           </Button>
           {breadcrumbs.length <= 2 || breadcrumbsExpanded ? (
             breadcrumbs.map((breadcrumb, index) => (
               <div key={breadcrumb.slug} className="flex items-center">
-                <ChevronRight className="size-3 mx-1 text-gray-500" />
+                <ChevronRight className="mx-1 text-gray-500 size-3" />
                 <Button
                   variant="ghost"
                   size="sm"
@@ -502,7 +503,7 @@ export function ResourceDefinitionCategoryPicker<T>({
             ))
           ) : (
             <>
-              <ChevronRight className="size-3 mx-1 text-gray-500" />
+              <ChevronRight className="mx-1 text-gray-500 size-3" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -511,7 +512,7 @@ export function ResourceDefinitionCategoryPicker<T>({
               >
                 <MoreHorizontal className="size-3" />
               </Button>
-              <ChevronRight className="size-3 mx-1 text-gray-500" />
+              <ChevronRight className="mx-1 text-gray-500 size-3" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -531,23 +532,23 @@ export function ResourceDefinitionCategoryPicker<T>({
       {isLoading ? (
         <div className="p-6 space-y-3">
           <div className="flex items-center gap-3">
-            <Skeleton className="size-4 rounded" />
-            <div className="space-y-1 flex-1">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-1/2" />
+            <Skeleton className="rounded size-4" />
+            <div className="flex-1 space-y-1">
+              <Skeleton className="w-3/4 h-4" />
+              <Skeleton className="w-1/2 h-3" />
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Skeleton className="size-4 rounded" />
-            <div className="space-y-1 flex-1">
-              <Skeleton className="h-4 w-2/3" />
-              <Skeleton className="h-3 w-1/3" />
+            <Skeleton className="rounded size-4" />
+            <div className="flex-1 space-y-1">
+              <Skeleton className="w-2/3 h-4" />
+              <Skeleton className="w-1/3 h-3" />
             </div>
           </div>
         </div>
       ) : searchQuery ? (
         <div className="p-6 text-center text-gray-500">
-          <Search className="size-8 mx-auto mb-2 opacity-50" />
+          <Search className="mx-auto mb-2 opacity-50 size-8" />
           <div className="text-sm">
             {currentParent
               ? t("no_results_found_for", { term: searchQuery })
@@ -556,7 +557,7 @@ export function ResourceDefinitionCategoryPicker<T>({
         </div>
       ) : (
         <div className="p-6 text-center text-gray-500">
-          <Folder className="size-8 mx-auto mb-2 opacity-50" />
+          <Folder className="mx-auto mb-2 opacity-50 size-8" />
           <div className="text-sm">
             {currentParent
               ? t(`no_${translationBaseKey}_found`) || t("no_items_found")
@@ -584,19 +585,19 @@ export function ResourceDefinitionCategoryPicker<T>({
               onSelect={() =>
                 handleCategorySelect(category.slug, category.title)
               }
-              className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200"
+              className="[&>svg:last-child]:hidden"
             >
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className="flex-shrink-0">
+              <div className="flex items-center flex-1 min-w-0 gap-2">
+                <div className="shrink-0">
                   <FolderOpen className="size-4.5 text-gray-500" />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="font-medium text-sm truncate">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium line-clamp-2">
                     {category.title}
                   </div>
                 </div>
               </div>
-              <ChevronRight className="size-4 text-gray-500" />
+              <ChevronRight className="text-gray-500 size-4" />
             </CommandItem>
           ))}
       </>
@@ -611,14 +612,14 @@ export function ResourceDefinitionCategoryPicker<T>({
             key={category.id}
             value={category.title}
             onSelect={() => handleCategorySelect(category.slug, category.title)}
-            className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200"
+            className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200 [&>svg:last-child]:hidden"
           >
-            <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="flex items-center flex-1 min-w-0 gap-2">
               <div className="flex-shrink-0">
                 <FolderOpen className="size-4.5 text-gray-500" />
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="font-medium text-sm truncate">
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium truncate">
                   {category.title}
                 </div>
                 {category.description && (
@@ -628,7 +629,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 )}
               </div>
             </div>
-            <ChevronRight className="size-4 text-gray-500" />
+            <ChevronRight className="text-gray-500 size-4" />
           </CommandItem>
         ))}
       </>
@@ -636,90 +637,118 @@ export function ResourceDefinitionCategoryPicker<T>({
 
   const renderDefinitions = () =>
     (searchQuery || currentParent) &&
-    definitions.map((definition) => (
-      <CommandItem
-        key={definition.id}
-        value={`${definition.title}-${definition.id}`}
-        onSelect={() => handleDefinitionSelect(definition)}
-        className={cn(
-          "flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200 last:border-b-0",
-          searchQuery && definition.category && "py-1",
-        )}
-      >
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="min-w-0 flex-1">
-            <div className="font-medium text-sm break flex items-center justify-between gap-2">
-              <span className="break-all">{definition.title}</span>
-            </div>
-            {searchQuery && definition.category && (
-              <div className="text-xs text-gray-500 truncate mt-0.5">
-                {getDisplayPath(definition)}
-              </div>
+    definitions.map((definition) => {
+      const favorite = favorites.some(
+        (f: BaseCategoryPickerDefinition) => f.slug === definition.slug,
+      );
+      return (
+        <div
+          key={definition.id}
+          className="hidden items-center border-b border-gray-200 last:border-b-0 has-[[data-slot=command-item]]:flex"
+        >
+          <CommandItem
+            value={`${definition.title}-${definition.id}`}
+            onSelect={() => handleDefinitionSelect(definition)}
+            className={cn(
+              "min-w-0 flex-1 cursor-pointer p-3 transition-colors duration-150 hover:bg-gray-50 hover:text-gray-900",
+              searchQuery && definition.category && "py-1",
             )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
+          >
+            <div className="flex-1 min-w-0">
+              <span className="text-sm font-medium break-all">
+                {definition.title}
+              </span>
+              {searchQuery && definition.category && (
+                <div className="mt-0.5 truncate text-xs text-gray-500">
+                  {getDisplayPath(definition)}
+                </div>
+              )}
+            </div>
+            {value &&
+              (Array.isArray(value)
+                ? value.some((v: T) => mapper!(v).slug === definition.slug)
+                : mapper!(value).slug === definition.slug) && (
+                <Check className="text-gray-700 size-4" />
+              )}
+          </CommandItem>
           {enableFavorites && (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="mr-2 shrink-0"
+              aria-label={t(
+                favorite ? "remove_from_favorites" : "add_to_favorites",
+              )}
+              aria-pressed={favorite}
               onClick={(e) => {
                 e.stopPropagation();
                 handleToggleFavorite(definition);
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") e.stopPropagation();
+              }}
             >
-              <Star
-                className={cn(
-                  "size-4",
-                  favorites.some(
-                    (f: BaseCategoryPickerDefinition) =>
-                      f.slug === definition.slug,
-                  ) && "fill-current",
-                )}
-              />
-            </button>
+              <Star className={cn("size-4", favorite && "fill-current")} />
+            </Button>
           )}
-          {value &&
-            (Array.isArray(value)
-              ? value.some((v: T) => mapper!(v).slug === definition.slug)
-              : mapper!(value).slug === definition.slug) && (
-              <Check className="size-4 text-gray-700" />
-            )}
         </div>
-      </CommandItem>
-    ));
+      );
+    });
+
+  const renderSavedDefinition = (
+    definition: BaseCategoryPickerDefinition,
+    favorite = false,
+  ) => (
+    <div
+      key={definition.id}
+      className="flex items-center gap-1 border-b border-border last:border-b-0"
+    >
+      <Button
+        type="button"
+        variant="ghost"
+        className="h-auto min-w-0 flex-1 flex-col items-start gap-0.5 px-3 py-2 text-left whitespace-normal"
+        onClick={() => handleDefinitionSelect(definition)}
+      >
+        <span className="w-full text-sm font-medium break-all">
+          {definition.title}
+        </span>
+        {definition.category && (
+          <span className="w-full text-xs font-normal truncate text-muted-foreground">
+            {getDisplayPath(definition)}
+          </span>
+        )}
+      </Button>
+      {favorite && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label={t("remove_from_favorites")}
+          onClick={() => handleToggleFavorite(definition)}
+        >
+          <Star className="fill-current size-4" />
+        </Button>
+      )}
+    </div>
+  );
 
   const renderRecentItems = () => (
     <div
       className={cn(
         "overflow-auto min-h-0",
-        isMobile ? "max-h-full" : "max-h-[40vh]",
+        isMobile ? "max-h-full" : "max-h-63",
       )}
     >
       {recentlyUsed.length === 0 ? (
         <div className="p-6 text-center text-gray-500">
-          <Clock className="size-8 mx-auto mb-2 opacity-50" />
+          <Clock className="mx-auto mb-2 opacity-50 size-8" />
           <div className="text-sm">{t("no_recent_items")}</div>
-          <div className="text-xs mt-1">{t("items_will_appear_here")}</div>
+          <div className="mt-1 text-xs">{t("items_will_appear_here")}</div>
         </div>
       ) : (
         <div className="p-2">
-          {recentlyUsed.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center justify-between px-3 py-1 border-b rounded-md hover:bg-gray-50  cursor-pointer last:border-b-0"
-              onClick={() => handleDefinitionSelect(item)}
-            >
-              <div className="min-w-0 flex-1">
-                <div className="font-medium text-sm break flex items-center justify-between gap-2">
-                  <span className="break-all">{item.title}</span>
-                </div>
-                {item.category && (
-                  <div className="text-xs text-gray-500 truncate mt-0.5">
-                    {getDisplayPath(item)}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+          {recentlyUsed.map((item) => renderSavedDefinition(item))}
         </div>
       )}
     </div>
@@ -729,44 +758,18 @@ export function ResourceDefinitionCategoryPicker<T>({
     <div
       className={cn(
         "overflow-auto min-h-0",
-        isMobile ? "max-h-full" : "max-h-[40vh]",
+        isMobile ? "max-h-full" : "max-h-63",
       )}
     >
       {favorites.length === 0 ? (
         <div className="p-6 text-center text-gray-500">
-          <Star className="size-8 mx-auto mb-2 opacity-50" />
+          <Star className="mx-auto mb-2 opacity-50 size-8" />
           <div className="text-sm">{t("no_favorites_yet")}</div>
-          <div className="text-xs mt-1">{t("click_star_to_add")}</div>
+          <div className="mt-1 text-xs">{t("click_star_to_add")}</div>
         </div>
       ) : (
         <div className="p-2">
-          {favorites.map((favorite) => (
-            <div
-              key={favorite.id}
-              className="flex items-center justify-between px-3 py-1 rounded-md border-b hover:bg-gray-50 cursor-pointer last:border-b-0"
-              onClick={() => handleDefinitionSelect(favorite)}
-            >
-              <div className="min-w-0 flex-1">
-                <div className="font-medium text-sm truncate">
-                  {favorite.title}
-                </div>
-                {favorite.category && (
-                  <div className="text-xs text-gray-500 truncate mt-0.5">
-                    {getDisplayPath(favorite)}
-                  </div>
-                )}
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleFavorite(favorite);
-                }}
-                className="text-gray-500"
-              >
-                <Star className="size-4 fill-current" />
-              </button>
-            </div>
-          ))}
+          {favorites.map((item) => renderSavedDefinition(item, true))}
         </div>
       )}
     </div>
@@ -775,12 +778,15 @@ export function ResourceDefinitionCategoryPicker<T>({
   const renderMainContent = () => (
     <Command
       shouldFilter={false}
-      className={cn("border-0", isMobile ? "h-full" : "max-h-[40vh]")}
+      className={cn(
+        "border-0",
+        isMobile && "in-data-[slot=drawer-content]:h-full!",
+      )}
     >
       {renderSearchInput()}
       {renderBreadcrumbs()}
       <CommandList
-        className={cn(isMobile ? "max-h-full h-[40vh]" : "max-h-[40vh]")}
+        className={cn("scrollbar-gutter-auto", !isMobile && "max-h-63")}
       >
         {renderEmptyState()}
         <CommandGroup>
@@ -790,6 +796,45 @@ export function ResourceDefinitionCategoryPicker<T>({
         </CommandGroup>
       </CommandList>
     </Command>
+  );
+
+  const clearVisible = !!value && !shouldHideClearButton;
+
+  const triggerButton = (
+    <Button
+      type="button"
+      variant="outline"
+      role="combobox"
+      aria-expanded={open}
+      className={cn(
+        "min-w-0 flex-1 justify-between font-normal",
+        "rounded-l-md! border-l!",
+        disabled && "opacity-50 cursor-not-allowed",
+        className,
+      )}
+      disabled={disabled}
+      data-shortcut-id={shortcutId}
+    >
+      <div className="flex items-center flex-1 w-0 min-w-0 gap-2">
+        {getDisplayValue()}
+      </div>
+      {shortcutId && <ShortcutBadge actionId={shortcutId} />}
+      {!clearVisible && (
+        <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+      )}
+    </Button>
+  );
+
+  const clearButton = clearVisible && (
+    <Button
+      variant="outline"
+      size="icon"
+      type="button"
+      aria-label={t("clear_selection")}
+      onClick={handleClearSelection}
+    >
+      <X />
+    </Button>
   );
 
   return (
@@ -806,76 +851,20 @@ export function ResourceDefinitionCategoryPicker<T>({
             setActiveTab("search");
           }}
         >
-          <div className="flex relative">
-            <DrawerTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className={cn(
-                  "justify-between px-3 py-2 w-full shadow-xs border border-gray-300 font-medium h-auto min-h-9",
-                  disabled && "opacity-50 cursor-not-allowed",
-                  className,
-                )}
-                disabled={disabled}
-              >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  {getDisplayValue()}
-                </div>
-                <ChevronDown
-                  className={cn(
-                    "size-4 shrink-0 opacity-50 transition-transform duration-200",
-                    open && "rotate-180",
-                  )}
-                />
-              </Button>
-            </DrawerTrigger>
-            {value && !shouldHideClearButton && (
-              <Button
-                variant="outline"
-                type="button"
-                onClick={handleClearSelection}
-                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300 h-auto"
-              >
-                <X />
-                <span className="sr-only">{t("clear_selection")}</span>
-              </Button>
-            )}
-          </div>
+          <ButtonGroup className="w-full min-w-0">
+            <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
+            {clearButton}
+          </ButtonGroup>
 
-          <DrawerContent className="flex flex-col max-h-[85vh]">
-            <DrawerTitle className="sr-only">
-              {t(`select_${translationBaseKey}`) || t("select_item")}
-            </DrawerTitle>
-            <div className="px-4 py-3 border-b shrink-0">
-              {!isMobile && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Home className="size-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-600">
-                      {getCurrentLevelTitle()}
-                    </span>
-                    {breadcrumbs.length > 0 && (
-                      <Badge variant="secondary" className="text-xs truncate">
-                        {t("level")} {breadcrumbs.length + 1}
-                      </Badge>
-                    )}
-                  </div>
-                  {value && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleClearSelection}
-                      className="text-gray-500 hover:text-gray-700"
-                      type="button"
-                    >
-                      <X className="mr-1" />
-                      {t("clear")}
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
+          <DrawerContent height="fixed" className="p-1.5">
+            <DrawerHeader className="pl-1 md:pb-2" showCloseButton>
+              <DrawerTitle>
+                {t(`select_${translationBaseKey}`) || t("select_item")}
+              </DrawerTitle>
+              <DrawerDescription className="sr-only">
+                {t(`search_${translationBaseKey}`)}
+              </DrawerDescription>
+            </DrawerHeader>
 
             {enableFavorites ? (
               <Tabs
@@ -883,7 +872,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 onValueChange={setActiveTab}
                 className="flex flex-col flex-1 min-h-0"
               >
-                <div className="px-4 py-2 border-b shrink-0">
+                <div className="px-1 py-2 border-b shrink-0">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="search">{t("search")}</TabsTrigger>
                     <TabsTrigger value="recent">{t("recent")}</TabsTrigger>
@@ -894,11 +883,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 </div>
 
                 <div className="flex-1 min-h-0 overflow-hidden">
-                  <TabsContent
-                    value="search"
-                    className="h-full mt-0"
-                    autoFocus={!isIOSDevice}
-                  >
+                  <TabsContent value="search" className="h-full mt-0" autoFocus>
                     {renderMainContent()}
                   </TabsContent>
                   <TabsContent value="recent" className="h-full mt-0">
@@ -927,63 +912,15 @@ export function ResourceDefinitionCategoryPicker<T>({
           }}
           modal
         >
-          <div className="flex relative">
+          <ButtonGroup className="w-full min-w-0">
             <PopoverTrigger asChild ref={ref}>
-              <Button
-                type="button"
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className={cn(
-                  "justify-between px-3 py-2 w-full shadow-xs border-gray-300 h-auto min-h-9",
-                  "hover:bg-gray-50 hover:text-gray-900",
-                  "transition-all duration-200",
-                  disabled && "opacity-50 cursor-not-allowed",
-                  className,
-                )}
-                disabled={disabled}
-                data-shortcut-id={shortcutId}
-                onClick={() => {
-                  if (!open) {
-                    setOpen(true);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    setOpen(true);
-                  }
-                }}
-              >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  {getDisplayValue()}
-                </div>
-                <ChevronDown
-                  className={cn(
-                    "size-4 shrink-0 opacity-50 transition-transform duration-200",
-                    open && "rotate-180",
-                  )}
-                />
-              </Button>
+              {triggerButton}
             </PopoverTrigger>
-            {value && !shouldHideClearButton && (
-              <Button
-                variant="outline"
-                onClick={handleClearSelection}
-                className="rounded-l-none -ml-1 shadow-none text-gray-400 border-gray-300 h-auto"
-                type="button"
-              >
-                <X />
-                <span className="sr-only">{t("clear_selection")}</span>
-              </Button>
-            )}
-          </div>
+            {clearButton}
+          </ButtonGroup>
 
           <PopoverContent
-            className={cn(
-              "p-0 shadow-lg border-0 -w-[var(--radix-popover-trigger-width)] sm:max-w-[80vw]",
-              enableFavorites ? "md:max-w-[70vw]" : "min-w-[420px]",
-            )}
+            className="p-0 shadow-lg border-0 w-168 max-w-[80vw] overflow-clip min-h-40"
             align={alignContent}
             sideOffset={4}
           >
@@ -998,11 +935,11 @@ export function ResourceDefinitionCategoryPicker<T>({
                 )}
               >
                 {/* Header with current location */}
-                <div className="px-4 py-3 border-b bg-gray-50">
+                <div className="px-4 py-3.5 border-b bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Home className="size-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-600">
+                      <Home className="text-gray-500 size-4 shrink-0" />
+                      <span className="text-sm font-medium text-gray-600 line-clamp-1">
                         {getCurrentLevelTitle()}
                       </span>
                     </div>
@@ -1026,8 +963,8 @@ export function ResourceDefinitionCategoryPicker<T>({
 
               {/* Favorites panel */}
               {enableFavorites && (
-                <div className="max-w-72 w-full border-l border-gray-200">
-                  <div className="px-4 py-1 border-b bg-gray-50">
+                <div className="flex flex-col w-full border-l border-gray-200 max-w-72">
+                  <div className="px-4 py-1 border-b bg-gray-50 shrink-0">
                     <Tabs value={favSubTab} onValueChange={setFavSubTab}>
                       <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="recent">{t("recent")}</TabsTrigger>
@@ -1038,83 +975,43 @@ export function ResourceDefinitionCategoryPicker<T>({
                     </Tabs>
                   </div>
 
-                  <div className="overflow-auto min-h-0 max-h-[40vh]">
-                    {favSubTab === "recent" ? (
-                      recentlyUsed.length === 0 ? (
+                  {/* Absolute inner box keeps this list from growing the row; the left column sets the height. */}
+                  <div className="relative flex-1 min-h-32">
+                    <div className="absolute inset-0 overflow-auto">
+                      {favSubTab === "recent" ? (
+                        recentlyUsed.length === 0 ? (
+                          <div className="p-6 text-center text-gray-500">
+                            <Clock className="mx-auto mb-2 opacity-50 size-8" />
+                            <div className="text-sm">
+                              {t("no_recent_items")}
+                            </div>
+                            <div className="mt-1 text-xs">
+                              {t("items_will_appear_here")}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-2">
+                            {recentlyUsed.map((item) =>
+                              renderSavedDefinition(item),
+                            )}
+                          </div>
+                        )
+                      ) : favorites.length === 0 ? (
                         <div className="p-6 text-center text-gray-500">
-                          <Clock className="size-8 mx-auto mb-2 opacity-50" />
-                          <div className="text-sm">{t("no_recent_items")}</div>
-                          <div className="text-xs mt-1">
-                            {t("items_will_appear_here")}
+                          <Star className="mx-auto mb-2 opacity-50 size-8" />
+                          <div className="text-sm">{t("no_favorites_yet")}</div>
+                          <div className="mt-1 text-xs">
+                            {t("click_star_to_add")}
                           </div>
                         </div>
                       ) : (
                         <div className="p-2">
-                          {recentlyUsed.map(
-                            (item: BaseCategoryPickerDefinition) => (
-                              <div
-                                key={item.id}
-                                className="flex items-center justify-between px-3 py-1 border-b last:border-0 hover:bg-gray-50 cursor-pointer"
-                                onClick={() => handleDefinitionSelect(item)}
-                              >
-                                <div className="min-w-0 flex-1">
-                                  <div className="font-medium text-sm flex items-center justify-between gap-2">
-                                    <span className="break-all">
-                                      {item.title}
-                                    </span>
-                                  </div>
-                                  {item.category && (
-                                    <div className="text-xs text-gray-500 truncate mt-0.5">
-                                      {getDisplayPath(item)}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            ),
+                          {favorites.map((item) =>
+                            renderSavedDefinition(item, true),
                           )}
                         </div>
-                      )
-                    ) : favorites.length === 0 ? (
-                      <div className="p-6 text-center text-gray-500">
-                        <Star className="size-8 mx-auto mb-2 opacity-50" />
-                        <div className="text-sm">{t("no_favorites_yet")}</div>
-                        <div className="text-xs mt-1">
-                          {t("click_star_to_add")}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="p-2">
-                        {favorites.map(
-                          (favorite: BaseCategoryPickerDefinition) => (
-                            <div
-                              key={favorite.id}
-                              className="flex items-center justify-between px-3 py-1 border-b last:border-0 hover:bg-gray-50 cursor-pointer"
-                              onClick={() => handleDefinitionSelect(favorite)}
-                            >
-                              <div className="min-w-0 flex-1">
-                                <div className="font-medium text-sm truncate">
-                                  {favorite.title}
-                                </div>
-                                {favorite.category && (
-                                  <div className="text-xs text-gray-500 truncate mt-0.5">
-                                    {getDisplayPath(favorite)}
-                                  </div>
-                                )}
-                              </div>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleToggleFavorite(favorite);
-                                }}
-                                className="text-gray-500"
-                              >
-                                <Star className="size-4 fill-current" />
-                              </button>
-                            </div>
-                          ),
-                        )}
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -1131,15 +1028,15 @@ export function ResourceDefinitionCategoryPicker<T>({
                 return (
                   <div
                     key={def.id}
-                    className="flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
+                    className="flex items-center justify-between gap-2 px-3 py-2 text-sm border border-gray-200 rounded-md bg-gray-50"
                   >
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center min-w-0 gap-2">
                       {getDisplayPath(def)}
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="size-6 p-0 hover:bg-gray-200"
+                      className="p-0 size-6 hover:bg-gray-200"
                       onClick={() => handleRemoveDefinition(def)}
                       type="button"
                     >

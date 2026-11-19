@@ -1,21 +1,17 @@
-import careConfig from "@careConfig";
-import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
+import { usePath, useRoutes } from "raviger";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
+import { Spinner } from "@/components/ui/spinner";
 
-import ErrorBoundary from "@/components/Common/ErrorBoundary";
-import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
-import useAuthUser from "@/hooks/useAuthUser";
-import { useOrganizationRoutes, usePluginRoutes } from "@/hooks/useCareApps";
-import useSidebarState from "@/hooks/useSidebarState";
+import {
+  useCareApps,
+  useOrganizationRoutes,
+  usePluginRoutes,
+} from "@/hooks/useCareApps";
 
-import { routes as publicRoutes } from "@/Routers/PublicRouter";
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
 import OrganizationRoutes from "@/Routers/routes/OrganizationRoutes";
@@ -24,37 +20,6 @@ import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
 import AdminRoutes from "@/Routers/routes/adminRoutes";
-import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDialog";
-import { PermissionProvider } from "@/context/PermissionContext";
-import { useShortcuts } from "@/context/ShortcutContext";
-import { LicensesPage } from "@/pages/Licenses/Licenses";
-import UserDashboard from "@/pages/UserDashboard";
-
-// List of paths and patterns where the sidebar should be hidden
-const PATHS_WITHOUT_SIDEBAR = [
-  // Exact matches
-  "/",
-  "/login",
-  "/session-expired",
-  // Pattern matches (using regex)
-  /^\/facility\/[^/]+\/service_requests\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/service_requests\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/to_receive\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/to_dispatch\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/create_delivery$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/requests\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/requests\/[^/]+\/edit$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/new$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/[^/]+\/edit$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/deliveries\/[^/]+$/,
-  /^\/facility\/[^/]+\/queues\/[^/]+\/tokens\/[^/]+$/,
-  // Questionnaire form routes
-  /^\/facility\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+\/questionnaire(\/[^/]+)?$/,
-  // Pharmacy related routes
-  /^\/facility\/[^/]+\/locations\/[^/]+\/medication_requests\/patient\/[^/]+\/bill\/prescriptions\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/medication_requests\/patient\/[^/]+\/bill\/dispense\/[^/]+$/,
-  /^\/facility\/[^/]+\/locations\/[^/]+\/medication_dispense\/order\/[^/]+$/,
-];
 
 export type RouteParams<T extends string> =
   T extends `${string}:${infer Param}/${infer Rest}`
@@ -71,8 +36,9 @@ export type AppRoutes = {
   [K in string]: RouteFunction<K>;
 };
 
+// "/", "/session-expired", "/licenses", "/referrals/*", "/user" and the
+// public pages are routes in src/routes/.
 const Routes: AppRoutes = {
-  "/": () => <UserDashboard />,
   ...ConsultationRoutes,
   ...FacilityRoutes,
   ...PatientRoutes,
@@ -81,10 +47,8 @@ const Routes: AppRoutes = {
   ...UserRoutes,
   ...OrganizationRoutes,
 
-  "/session-expired": () => <SessionExpired />,
   "/not-found": () => <ErrorPage />,
   "/icons": () => <IconIndex />,
-  "/licenses": () => <LicensesPage />,
 
   // Only include the icon route in development environment
   ...(import.meta.env.PROD ? { "/icons": () => <IconIndex /> } : {}),
@@ -94,16 +58,18 @@ const AdminRouter: AppRoutes = {
   ...AdminRoutes,
 };
 
-const publicRedirects = Object.fromEntries(
-  Object.keys(publicRoutes).map((path) => [path, () => <Redirect to="/" />]),
-);
-
+/**
+ * Legacy staff route tables. The `_legacy` layout
+ * (`src/routes/_app/_legacy.tsx`) renders them for every staff path that is
+ * not migrated yet; shared routes render them for staff users. The staff shell lives in `AppShell`. Plugin
+ * routes still merge here; the TanStack tree also attaches them, and a
+ * TanStack match always wins over the splat.
+ */
 export default function AppRouter() {
   const pluginRoutes = usePluginRoutes();
   const organizationRoutes = useOrganizationRoutes();
+  const careApps = useCareApps();
   let routes = Routes;
-
-  useRedirect("/user", "/users");
 
   // Merge in Plugin Routes
   routes = {
@@ -114,63 +80,24 @@ export default function AppRouter() {
 
   const appPages = useRoutes(routes);
   const adminPages = useRoutes(AdminRouter);
-  const publicRedirectsPages = useRoutes(publicRedirects);
-
   const currentPath = usePath();
-  const isAdminPage = currentPath?.startsWith("/admin");
 
-  const sidebarFor = isAdminPage ? SidebarFor.ADMIN : SidebarFor.FACILITY;
+  const pages = appPages || adminPages;
+  if (pages) return pages;
 
-  const pages = appPages || adminPages || publicRedirectsPages || <ErrorPage />;
-
-  const user = useAuthUser();
-
-  // Check if the current path matches any of the paths without sidebar
-  const shouldShowSidebar =
-    currentPath &&
-    !PATHS_WITHOUT_SIDEBAR.some((path) =>
-      typeof path === "string" ? path === currentPath : path.test(currentPath),
-    );
-  const { commandDialogOpen, setCommandDialogOpen } = useShortcuts();
-  const sidebarOpen = useSidebarState();
-
-  return (
-    <SidebarProvider defaultOpen={sidebarOpen}>
-      <PermissionProvider
-        userPermissions={user?.permissions || []}
-        isSuperAdmin={user?.is_superuser || false}
+  // A plugin may still own this path. Show a spinner until every manifest has
+  // loaded, and not-found only after that.
+  if (careApps.some((app) => app.isLoading)) {
+    return (
+      <div
+        className="flex flex-1 items-center justify-center"
+        data-cy="plugin-routes-loading"
+        data-path={currentPath}
       >
-        {shouldShowSidebar && (
-          <AppSidebar user={user} sidebarFor={sidebarFor} />
-        )}
-        <main
-          id="pages"
-          className="flex flex-col flex-1 max-w-full min-h-[calc(100svh-(--spacing(4)))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border border-gray-200 rounded-lg shadow-sm bg-gray-50 focus:outline-hidden"
-        >
-          <ShortcutCommandDialog
-            open={commandDialogOpen}
-            onOpenChange={setCommandDialogOpen}
-          />
-          <BrowserWarning />
-          <div className="relative z-10 flex h-16 bg-white shadow-sm shrink-0 md:hidden">
-            <div className="flex items-center">
-              {shouldShowSidebar && <SidebarTrigger />}
-            </div>
-            <a className="flex items-center w-full h-full px-4 md:hidden">
-              <img
-                className="w-auto h-8"
-                src={careConfig.mainLogo?.dark}
-                alt="care logo"
-              />
-            </a>
-          </div>
-          <div className="p-3 mt-4" data-cui-page>
-            <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
-              {pages}
-            </ErrorBoundary>
-          </div>
-        </main>
-      </PermissionProvider>
-    </SidebarProvider>
-  );
+        <Spinner role="status" aria-label="Loading" className="size-6" />
+      </div>
+    );
+  }
+
+  return <ErrorPage />;
 }

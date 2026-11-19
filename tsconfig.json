@@ -24,7 +24,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@core/*": ["src/*"],
-      "@careConfig": ["./care.config.ts"]
+      "@careConfig": ["./care.config.ts"],
+      "raviger": ["./src/compat/raviger.tsx"]
     },
     "typeRoots": ["./node_modules/@types", "./src/remote-modules.d.ts"]
   },

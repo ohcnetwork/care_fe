@@ -31,11 +31,11 @@ import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { getLocationPath } from "@/types/location/utils";
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
-import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   CheckCircleIcon,
+  EllipsisVertical as DotsVerticalIcon,
   FileTextIcon,
   MinusCircleIcon,
   Pill,

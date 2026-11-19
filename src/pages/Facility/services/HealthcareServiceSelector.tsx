@@ -1,6 +1,9 @@
-import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { XIcon } from "lucide-react";
+import {
+  ChevronDown as CaretDownIcon,
+  Check as CheckIcon,
+  XIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -83,6 +86,7 @@ export const HealthcareServiceSelector = ({
     <Button
       variant="outline"
       role="combobox"
+      aria-label={t("select_healthcare_service")}
       className="min-w-60 w-full justify-start"
       disabled={isLoading}
     >
@@ -193,8 +197,9 @@ export const HealthcareServiceSelector = ({
       <Drawer open={open} onOpenChange={setOpen} direction="bottom">
         <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
         <DrawerContent
+          height="fixed"
           aria-describedby={undefined}
-          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
+          className="px-2 pt-2 pb-0"
         >
           <DrawerTitle className="sr-only">
             {t("select_healthcare_service")}
@@ -210,10 +215,7 @@ export const HealthcareServiceSelector = ({
       <PopoverTrigger asChild disabled={isLoading}>
         {triggerButton}
       </PopoverTrigger>
-      <PopoverContent
-        className="p-0 w-(--radix-popover-trigger-width)"
-        align="start"
-      >
+      <PopoverContent className="p-0 w-(--anchor-width)" align="start">
         {commandContent}
       </PopoverContent>
     </Popover>

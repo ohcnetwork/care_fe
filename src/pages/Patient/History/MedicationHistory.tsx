@@ -18,15 +18,23 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
-export const MedicationHistory = ({ patientId }: { patientId: string }) => {
+export const MedicationHistory = ({
+  patientId,
+  embedded = false,
+}: {
+  patientId: string;
+  embedded?: boolean;
+}) => {
   const { t } = useTranslation();
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="flex items-center gap-2 mb-5">
-        <MedicineIcon className="size-8 text-pink-800 bg-pink-100 border border-pink-400 rounded-md p-1" />
-        <h4 className="text-xl">{t("past_medications")}</h4>
-      </div>
+      {!embedded && (
+        <div className="flex items-center gap-2 mb-5">
+          <MedicineIcon className="size-8 text-pink-800 bg-pink-100 border border-pink-400 rounded-md p-1" />
+          <h4 className="text-xl">{t("past_medications")}</h4>
+        </div>
+      )}
       <Tabs defaultValue="prescriptions" className="w-full">
         <div className="overflow-x-auto">
           <TabsList className="mb-4">

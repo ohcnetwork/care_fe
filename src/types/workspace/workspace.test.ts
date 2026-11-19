@@ -1,0 +1,791 @@
+import i18next from "i18next";
+import assert from "node:assert/strict";
+import { before, test } from "node:test";
+
+import { visibleWorkspaceColumns } from "@/components/Workspace/visibleWorkspaceColumns";
+import { CORE_WIDGET_CATALOG } from "@/components/Workspace/workspaceEditorCatalog";
+import {
+  HISTORY_STARTERS,
+  standardWorkspaceTemplate,
+  WORKSPACE_STARTERS,
+} from "@/components/Workspace/workspacePresets";
+import {
+  widgetConfigConsistencyIssues,
+  workspaceWidgetIssues,
+} from "@/components/Workspace/workspaceValidation";
+import { parseEncounterWorkspace } from "@/pages/Encounters/workspace/parseEncounterWorkspace";
+import { EncounterStatus } from "@/types/emr/encounter/encounter";
+
+import type { CareAppEncounterWidget } from "@/hooks/useCareAppEncounterWidgets";
+import {
+  findPreferredWorkspaceId,
+  LEGACY_ENCOUNTER_CLASS_ATTRIBUTE,
+  WORKSPACE_SCOPE_ALL,
+  WORKSPACE_SCOPE_ATTRIBUTE,
+} from "@/pages/Encounters/workspace/workspacePreferences";
+import {
+  createEncounterWorkspaceSchema,
+  HISTORY_PAGE_KEYS,
+  normalizeWorkspaceTemplate,
+  SYSTEM_PAGE_KEYS,
+} from "./encounterWorkspace";
+import {
+  getWidgetAvailability,
+  getWidgetRequirements,
+  patientHistoryAccess,
+  type WorkspaceAvailabilityContext,
+} from "./widgetAvailability";
+import { ENCOUNTER_WIDGET_TYPES } from "./widgetConfigSchemas";
+import type { WorkspaceUserDefaultAttributes } from "./workspace";
+
+before(async () => {
+  await i18next.init({ lng: "en", resources: { en: { translation: {} } } });
+});
+
+const active: WorkspaceAvailabilityContext = {
+  facilityId: "test-facility",
+  selectedEncounter: { status: EncounterStatus.IN_PROGRESS },
+  canReadClinicalData: true,
+  canReadPatientHistory: true,
+  canReadSelectedEncounter: true,
+  canWriteSelectedEncounter: true,
+  canWriteClinicalData: true,
+};
+const closed: WorkspaceAvailabilityContext = {
+  ...active,
+  selectedEncounter: { status: EncounterStatus.COMPLETED },
+  canWriteSelectedEncounter: false,
+  canWriteClinicalData: false,
+};
+
+test("every core widget has a library entry without expanding deferred features", () => {
+  assert.deepEqual(
+    CORE_WIDGET_CATALOG.map(({ type }) => type).sort(),
+    [...ENCOUNTER_WIDGET_TYPES].sort(),
+  );
+  for (const type of ["notes", "devices", "immunizations", "files"]) {
+    assert.equal(ENCOUNTER_WIDGET_TYPES.includes(type), false);
+  }
+});
+
+test("version 2 presets are valid and preserve deferred system pages", () => {
+  const template = standardWorkspaceTemplate(i18next.t);
+  assert.equal(
+    createEncounterWorkspaceSchema().safeParse(template).success,
+    true,
+  );
+  assert.equal(workspaceWidgetIssues(template, new Map(), i18next.t).length, 0);
+  const overview = template.pages.find((page) => page.key === "updates");
+  assert.equal(overview?.kind, "custom");
+  if (overview?.kind === "custom") {
+    const types = overview.columns.flatMap((column) =>
+      column.widgets.map((widget) => widget.type),
+    );
+    assert.equal(types[types.indexOf("draft_forms") + 1], "referrals");
+  }
+  for (const key of ["notes", "devices", "immunizations", "files"]) {
+    assert.equal(
+      template.pages.find((page) => page.key === key)?.kind,
+      "system",
+    );
+  }
+  assert.equal(
+    template.pages.find((page) => page.key === "updates")?.kind,
+    "custom",
+  );
+  const rendered = parseEncounterWorkspace(template, SYSTEM_PAGE_KEYS);
+  assert.equal(rendered.invalid, false);
+  assert.equal(rendered.unsupportedVersion, false);
+  assert.equal(rendered.pages.length, template.pages.length);
+});
+
+test("legacy reserved custom page rules remain unchanged", () => {
+  const template = standardWorkspaceTemplate(i18next.t);
+  assert.equal(
+    createEncounterWorkspaceSchema().safeParse({
+      ...template,
+      schema_version: 1,
+    }).success,
+    false,
+  );
+  assert.equal(
+    createEncounterWorkspaceSchema().safeParse({
+      schema_version: 1,
+      pages: [{ key: "updates", kind: "system" }],
+    }).success,
+    true,
+  );
+});
+
+test("unavailable plugin pages remain saveable without losing references", () => {
+  for (const key of ["lab.results", "legacy_plugin_page"]) {
+    const template = { schema_version: 1, pages: [{ key, kind: "system" }] };
+    assert.equal(
+      createEncounterWorkspaceSchema([], template).safeParse(template).success,
+      true,
+    );
+    assert.equal(
+      createEncounterWorkspaceSchema().safeParse(template).success,
+      false,
+    );
+    assert.equal(parseEncounterWorkspace(template, []).pages[0]?.key, key);
+  }
+  assert.equal(
+    createEncounterWorkspaceSchema().safeParse({
+      schema_version: 2,
+      pages: [{ key: "questionnaire", kind: "system" }],
+    }).success,
+    false,
+  );
+});
+
+test("every known widget config is validated independently of selection or editing mode", () => {
+  const template = standardWorkspaceTemplate(i18next.t);
+  template.pages.push({
+    kind: "custom",
+    key: "invalid",
+    title: "Invalid configuration",
+    columns: [
+      {
+        span: 1,
+        widgets: [
+          { type: "questionnaire_responses", config: { limit: 0 } },
+          { type: "service_requests", config: { limit: 101 } },
+        ],
+      },
+    ],
+  });
+  assert.equal(workspaceWidgetIssues(template, new Map(), i18next.t).length, 2);
+});
+
+test("active-only widgets hide for closed encounters without an explicit status filter", () => {
+  for (const type of [
+    "quick_actions",
+    "favorite_forms",
+    "draft_forms",
+    "encounter_actions",
+  ]) {
+    assert.equal(getWidgetAvailability({ type }, active).state, "visible");
+    assert.deepEqual(getWidgetAvailability({ type }, closed), {
+      state: "hidden",
+      reason: "workspace_auto_hides_closed",
+    });
+  }
+  assert.equal(
+    getWidgetAvailability({ type: "symptoms" }, closed).state,
+    "visible",
+  );
+  assert.equal(
+    getWidgetAvailability({ type: "lab.widget" }, closed, {
+      requiresActiveEncounter: true,
+    }).state,
+    "hidden",
+  );
+});
+
+test("an actions-only summary follows encounter-management requirements", () => {
+  const actionsOnly = {
+    type: "encounter_summary",
+    config: { tabs: ["actions"] },
+  };
+  assert.equal(getWidgetAvailability(actionsOnly, active).state, "visible");
+  assert.deepEqual(getWidgetAvailability(actionsOnly, closed), {
+    state: "hidden",
+    reason: "workspace_auto_hides_closed",
+  });
+  assert.deepEqual(
+    getWidgetAvailability(actionsOnly, {
+      ...active,
+      canWriteSelectedEncounter: false,
+      canWriteClinicalData: false,
+    }),
+    { state: "hidden", reason: "workspace_requires_editable_encounter" },
+  );
+  const managementOnly = {
+    ...active,
+    canReadClinicalData: false,
+    canReadPatientHistory: false,
+    canWriteClinicalData: false,
+  };
+  assert.equal(
+    getWidgetAvailability(actionsOnly, managementOnly).state,
+    "visible",
+  );
+  assert.equal(
+    getWidgetAvailability({ type: "favorite_forms" }, managementOnly).state,
+    "denied",
+  );
+  assert.equal(
+    getWidgetAvailability(actionsOnly, {
+      ...managementOnly,
+      canReadSelectedEncounter: false,
+    }).state,
+    "denied",
+  );
+  assert.deepEqual(
+    getWidgetAvailability(actionsOnly, {
+      ...closed,
+      selectedEncounterPermissions: { canCreateReferral: true },
+    }),
+    { state: "hidden", reason: "workspace_auto_hides_closed" },
+  );
+  assert.equal(
+    getWidgetAvailability(
+      { type: "encounter_summary", config: { tabs: ["actions", "reports"] } },
+      closed,
+    ).state,
+    "visible",
+  );
+});
+
+test("quick actions hide on closed encounters, including referral creation", () => {
+  const referrer = {
+    ...closed,
+    selectedEncounterPermissions: { canCreateReferral: true },
+  };
+  assert.deepEqual(getWidgetAvailability({ type: "quick_actions" }, referrer), {
+    state: "hidden",
+    reason: "workspace_auto_hides_closed",
+  });
+  assert.equal(
+    getWidgetAvailability({ type: "favorite_forms" }, referrer).state,
+    "hidden",
+  );
+  assert.deepEqual(
+    getWidgetAvailability(
+      { type: "quick_actions" },
+      { ...referrer, facilityId: undefined },
+    ),
+    { state: "hidden", reason: "workspace_auto_hides_closed" },
+  );
+  assert.equal(
+    getWidgetAvailability({ type: "referrals" }, closed).state,
+    "visible",
+  );
+  assert.equal(
+    getWidgetAvailability(
+      { type: "referrals" },
+      { ...closed, canReadClinicalData: false, canReadSelectedEncounter: true },
+    ).state,
+    "visible",
+  );
+});
+
+test("a single saved workspace applies to every encounter class and history", () => {
+  const workspace = (id: string) => ({
+    id,
+    name: id,
+    description: "",
+    template: {},
+    status: "active" as const,
+  });
+  const preferred = workspace("global");
+  const legacy = workspace("inpatient");
+  const rules: WorkspaceUserDefaultAttributes[] = [
+    {
+      attribute: LEGACY_ENCOUNTER_CLASS_ATTRIBUTE,
+      value: "imp",
+      workspace: legacy,
+    },
+    {
+      attribute: WORKSPACE_SCOPE_ATTRIBUTE,
+      value: WORKSPACE_SCOPE_ALL,
+      workspace: preferred,
+    },
+  ];
+  const accessibleIds = new Set([preferred.id, legacy.id]);
+
+  assert.equal(findPreferredWorkspaceId(rules, accessibleIds), preferred.id);
+  assert.equal(
+    findPreferredWorkspaceId(rules, accessibleIds, "amb"),
+    preferred.id,
+  );
+  assert.equal(
+    findPreferredWorkspaceId(
+      rules.filter(({ attribute }) => attribute !== WORKSPACE_SCOPE_ATTRIBUTE),
+      accessibleIds,
+      "imp",
+    ),
+    legacy.id,
+  );
+  assert.equal(
+    findPreferredWorkspaceId(
+      rules.filter(({ attribute }) => attribute !== WORKSPACE_SCOPE_ATTRIBUTE),
+      accessibleIds,
+    ),
+    undefined,
+  );
+});
+
+test("read-only views and patient history have distinct requirements", () => {
+  assert.equal(
+    getWidgetAvailability(
+      { type: "quick_actions" },
+      { ...active, canWriteClinicalData: false },
+    ).state,
+    "hidden",
+  );
+  const patientOnly = {
+    ...active,
+    selectedEncounter: undefined,
+    facilityId: undefined,
+  };
+  // Clinical summaries read the whole history when no encounter is selected.
+  for (const type of ["diagnosis", "vitals", "observation_chart"]) {
+    assert.equal(
+      getWidgetAvailability({ type }, patientOnly).state,
+      "visible",
+      type,
+    );
+  }
+  assert.equal(
+    getWidgetAvailability({ type: "service_requests" }, patientOnly).state,
+    "hidden",
+  );
+  assert.equal(
+    getWidgetAvailability(
+      { type: "diagnosis" },
+      { ...patientOnly, canReadPatientHistory: false },
+    ).state,
+    "denied",
+  );
+  // Inside an encounter the same widget follows encounter access instead.
+  assert.equal(
+    getWidgetAvailability(
+      { type: "diagnosis" },
+      { ...active, canReadPatientHistory: false },
+    ).state,
+    "visible",
+  );
+  assert.equal(
+    getWidgetAvailability(
+      { type: "diagnosis" },
+      { ...active, canReadClinicalData: false },
+    ).state,
+    "denied",
+  );
+  assert.equal(
+    getWidgetAvailability(
+      {
+        type: "diagnosis",
+        visible_when: { "encounter.status": [EncounterStatus.IN_PROGRESS] },
+      },
+      patientOnly,
+    ).state,
+    "hidden",
+  );
+});
+
+test("plugins opt in to history pages explicitly", () => {
+  assert.equal(getWidgetRequirements("lab.widget").encounter, "any");
+  assert.equal(
+    getWidgetRequirements("lab.widget", { supportsPatientHistory: true })
+      .encounter,
+    "optional",
+  );
+  assert.equal(
+    getWidgetRequirements("lab.widget", { requiresActiveEncounter: true })
+      .encounter,
+    "active",
+  );
+  const patientOnly = {
+    ...active,
+    selectedEncounter: undefined,
+    facilityId: undefined,
+  };
+  assert.equal(
+    getWidgetAvailability({ type: "lab.widget" }, patientOnly).state,
+    "hidden",
+  );
+  assert.equal(
+    getWidgetAvailability({ type: "lab.widget" }, patientOnly, {
+      supportsPatientHistory: true,
+    }).state,
+    "visible",
+  );
+});
+
+test("patient-level widgets render without an encounter while order widgets need one", () => {
+  const patientOnly = {
+    ...active,
+    selectedEncounter: undefined,
+    facilityId: undefined,
+  };
+  for (const type of ["current_medications", "recent_encounters"]) {
+    assert.equal(getWidgetAvailability({ type }, patientOnly).state, "visible");
+    assert.equal(getWidgetAvailability({ type }, closed).state, "visible");
+  }
+  assert.deepEqual(
+    getWidgetAvailability({ type: "outstanding_orders" }, patientOnly),
+    {
+      state: "hidden",
+      reason: "workspace_requires_encounter",
+    },
+  );
+  assert.equal(
+    getWidgetAvailability({ type: "outstanding_orders" }, closed).state,
+    "visible",
+  );
+  // Encounter access alone opens recent encounters but not medication details.
+  const encounterOnly = {
+    ...active,
+    canReadClinicalData: false,
+    canReadPatientHistory: false,
+  };
+  assert.equal(
+    getWidgetAvailability({ type: "recent_encounters" }, encounterOnly).state,
+    "visible",
+  );
+  assert.equal(
+    getWidgetAvailability({ type: "current_medications" }, encounterOnly).state,
+    "denied",
+  );
+});
+
+test("vitals codes and encounter filters validate their limits", () => {
+  const code = { system: "http://loinc.org", code: "8867-4", display: "Pulse" };
+  const template = standardWorkspaceTemplate(i18next.t);
+  template.pages.push({
+    kind: "custom",
+    key: "checks",
+    title: "Configuration checks",
+    columns: [
+      {
+        span: 1,
+        widgets: [
+          { type: "vitals", config: { codes: [code] } },
+          { type: "vitals", config: { codes: [] } },
+          { type: "vitals", config: { codes: Array(21).fill(code) } },
+          { type: "vitals", config: { codes: [{ code: "8867-4" }] } },
+          {
+            type: "recent_encounters",
+            config: { care_team: "mine", limit: 5 },
+          },
+          { type: "recent_encounters", config: { limit: 21 } },
+          { type: "recent_encounters", config: { care_team: "team" } },
+          { type: "outstanding_orders", config: { category: "imaging" } },
+          { type: "outstanding_orders", config: { category: "radiology" } },
+          { type: "current_medications", config: { limit: 100 } },
+        ],
+      },
+    ],
+  });
+  assert.equal(workspaceWidgetIssues(template, new Map(), i18next.t).length, 6);
+});
+
+test("tab subsets, chart groups, author and encounter filters validate their options", () => {
+  const template = standardWorkspaceTemplate(i18next.t);
+  template.pages.push({
+    kind: "custom",
+    key: "tabs",
+    title: "Tab configuration",
+    columns: [
+      {
+        span: 1,
+        widgets: [
+          { type: "encounter_summary", config: { default_tab: "reports" } },
+          { type: "encounter_summary", config: { tabs: ["billing"] } },
+          {
+            type: "encounter_summary",
+            config: { tabs: ["reports"], default_tab: "actions" },
+          },
+          { type: "questionnaire_responses", config: { authored_by: "me" } },
+          {
+            type: "questionnaire_responses",
+            config: { authored_by: "someone" },
+          },
+          {
+            type: "observation_chart",
+            config: {
+              plot: "primary-parameters",
+              groups: ["Pulse"],
+              height: 240,
+              columns: 2,
+            },
+          },
+          { type: "observation_chart", config: { height: 100 } },
+          { type: "observation_chart", config: { columns: 3 } },
+          {
+            type: "recent_encounters",
+            config: {
+              encounter_class: "imp",
+              status: "completed",
+              exclude_current: true,
+            },
+          },
+          { type: "recent_encounters", config: { encounter_class: "ward" } },
+          { type: "outstanding_orders", config: { include_completed: false } },
+          { type: "current_medications", config: { sources: "statements" } },
+          { type: "current_medications", config: { sources: "all" } },
+        ],
+      },
+    ],
+  });
+  // A default tab outside the chosen subset is reported like any other invalid setting.
+  assert.equal(workspaceWidgetIssues(template, new Map(), i18next.t).length, 7);
+});
+
+test("automatically hidden columns collapse and an all-hidden page has no tracks", () => {
+  const actionColumn = {
+    span: 3,
+    invalid: false,
+    widgets: [{ type: "quick_actions" }],
+  };
+  const clinicalColumn = {
+    span: 1,
+    invalid: false,
+    widgets: [{ type: "vitals" }],
+  };
+  assert.deepEqual(
+    visibleWorkspaceColumns([clinicalColumn, actionColumn], closed),
+    [clinicalColumn],
+  );
+  assert.deepEqual(visibleWorkspaceColumns([actionColumn], closed), []);
+});
+
+test("questionnaire-response access admits only the history widgets that show responses", () => {
+  const responsesOnly: WorkspaceAvailabilityContext = {
+    ...active,
+    selectedEncounter: undefined,
+    facilityId: undefined,
+    canReadPatientHistory: false,
+    canReadPatientResponses: true,
+  };
+  assert.equal(
+    getWidgetAvailability({ type: "questionnaire_responses" }, responsesOnly)
+      .state,
+    "visible",
+  );
+  assert.equal(
+    getWidgetAvailability({ type: "diagnosis" }, responsesOnly).state,
+    "denied",
+  );
+  assert.deepEqual(patientHistoryAccess(responsesOnly), {
+    clinicalData: false,
+    responses: true,
+  });
+  // Without the explicit flag, response access follows clinical access.
+  assert.deepEqual(patientHistoryAccess(active), {
+    clinicalData: true,
+    responses: true,
+  });
+  assert.equal(
+    getWidgetAvailability(
+      { type: "questionnaire_responses" },
+      { ...responsesOnly, canReadPatientResponses: false },
+    ).state,
+    "denied",
+  );
+});
+
+test("the extension slot hides and collapses when no installed app adds encounter content", () => {
+  const slot = { type: "encounter_extensions" };
+  assert.deepEqual(
+    getWidgetAvailability(slot, { ...active, hasEncounterExtensions: false }),
+    { state: "hidden", reason: "workspace_no_extensions" },
+  );
+  assert.equal(
+    getWidgetAvailability(slot, { ...active, hasEncounterExtensions: true })
+      .state,
+    "visible",
+  );
+  // Contexts that cannot tell (such as the studio preview) keep the slot.
+  assert.equal(getWidgetAvailability(slot, active).state, "visible");
+  const slotColumn = { span: 1, invalid: false, widgets: [slot] };
+  const vitalsColumn = {
+    span: 1,
+    invalid: false,
+    widgets: [{ type: "vitals" }],
+  };
+  assert.deepEqual(
+    visibleWorkspaceColumns([slotColumn, vitalsColumn], {
+      ...active,
+      hasEncounterExtensions: false,
+    }),
+    [vitalsColumn],
+  );
+});
+
+test("encounter-only widgets cannot be published on the patient-history surface", () => {
+  const template = standardWorkspaceTemplate(i18next.t);
+  template.history_pages = HISTORY_STARTERS[0].build(i18next.t, []);
+  template.history_pages.push({
+    kind: "custom",
+    key: "invalid",
+    title: "Invalid context",
+    columns: [
+      {
+        span: 1,
+        widgets: [
+          { type: "quick_actions" },
+          { type: "unavailable.widget" },
+          { type: "legacy.tool" },
+          { type: "diagnosis" },
+          { type: "questionnaire_responses", config: { authored_by: "me" } },
+          { type: "lab.history" },
+        ],
+      },
+    ],
+  });
+  const plugins = new Map<string, CareAppEncounterWidget>([
+    ["legacy.tool", { component: () => null, pluginSlug: "legacy" }],
+    [
+      "lab.history",
+      {
+        component: () => null,
+        pluginSlug: "lab",
+        supportsPatientHistory: true,
+      },
+    ],
+  ]);
+  assert.equal(workspaceWidgetIssues(template, plugins, i18next.t).length, 2);
+});
+
+test("status filters and stray default tabs are reported before saving", () => {
+  const template = standardWorkspaceTemplate(i18next.t);
+  template.history_pages = HISTORY_STARTERS[0].build(i18next.t, []);
+  template.history_pages.push({
+    kind: "custom",
+    key: "filters",
+    title: "Filters",
+    columns: [
+      {
+        span: 1,
+        widgets: [
+          // No encounter exists on history screens, so this hides for everyone.
+          {
+            type: "diagnosis",
+            visible_when: { "encounter.status": [EncounterStatus.IN_PROGRESS] },
+          },
+          { type: "questionnaire_responses", config: { authored_by: "me" } },
+        ],
+      },
+    ],
+  });
+  const issues = workspaceWidgetIssues(template, new Map(), i18next.t);
+  assert.equal(issues.length, 1);
+  assert.deepEqual(
+    widgetConfigConsistencyIssues(
+      { tabs: ["responses"], default_tab: "allergies" },
+      i18next.t,
+    ).map((issue) => issue.path),
+    [["default_tab"]],
+  );
+  assert.deepEqual(
+    widgetConfigConsistencyIssues({ default_tab: "allergies" }, i18next.t),
+    [],
+  );
+});
+
+test("malformed stored templates pass through for the parser to reject", () => {
+  for (const template of [null, "pages", 2]) {
+    const malformed = template as unknown as Record<string, unknown>;
+    assert.equal(normalizeWorkspaceTemplate(malformed), malformed);
+    assert.equal(
+      parseEncounterWorkspace(malformed, SYSTEM_PAGE_KEYS).invalid,
+      true,
+    );
+  }
+});
+
+test("legacy history workspaces migrate without losing configured pages", () => {
+  const legacy = {
+    schema_version: 2,
+    surface: "patient_history",
+    pages: [{ key: "my_history", kind: "system" }],
+  };
+  const normalized = normalizeWorkspaceTemplate(legacy);
+  assert.equal("surface" in normalized, false);
+  assert.equal(normalized.schema_version, 2);
+  assert.equal(
+    (normalized.history_pages as { key: string }[])[0].key,
+    "my_history",
+  );
+  assert.equal(
+    (normalized.pages as { key: string }[]).length,
+    SYSTEM_PAGE_KEYS.length,
+  );
+  assert.equal(
+    createEncounterWorkspaceSchema([], normalized).safeParse(normalized)
+      .success,
+    true,
+  );
+  const parsedHistory = parseEncounterWorkspace(
+    legacy,
+    HISTORY_PAGE_KEYS,
+    "patient_history",
+  );
+  assert.equal(parsedHistory.invalid, false);
+  assert.equal(parsedHistory.pages[0]?.key, "my_history");
+});
+
+test("new system references cannot bypass page compatibility", () => {
+  const saved = {
+    schema_version: 2,
+    pages: [{ kind: "system", key: "medicines" }],
+  };
+  assert.equal(
+    createEncounterWorkspaceSchema([], saved).safeParse({
+      ...saved,
+      pages: [{ kind: "system", key: "medicnes" }],
+    }).success,
+    false,
+  );
+});
+
+test("every starter is valid and the My forms starter filters to the author", () => {
+  for (const starter of WORKSPACE_STARTERS) {
+    const template = starter.build(i18next.t, []);
+    assert.equal(
+      createEncounterWorkspaceSchema().safeParse(template).success,
+      true,
+      starter.id,
+    );
+    assert.equal(
+      workspaceWidgetIssues(template, new Map(), i18next.t).length,
+      0,
+      starter.id,
+    );
+  }
+  for (const starter of HISTORY_STARTERS) {
+    const template = {
+      ...standardWorkspaceTemplate(i18next.t),
+      history_pages: starter.build(i18next.t, []),
+    };
+    assert.equal(
+      createEncounterWorkspaceSchema().safeParse(template).success,
+      true,
+      starter.id,
+    );
+    assert.equal(
+      workspaceWidgetIssues(template, new Map(), i18next.t).length,
+      0,
+      starter.id,
+    );
+  }
+  const myForms = HISTORY_STARTERS.find(({ id }) => id === "my_forms")?.build(
+    i18next.t,
+    [],
+  );
+  const page = myForms?.[0];
+  assert.equal(page?.kind, "custom");
+  if (page?.kind === "custom") {
+    assert.deepEqual(page.columns[0].widgets[0].config, { authored_by: "me" });
+  }
+});
+
+test("standard pages stay system pages instead of full-page sections", () => {
+  const template = standardWorkspaceTemplate(i18next.t);
+  assert.deepEqual(
+    template.pages
+      .filter((page) => page.kind === "custom")
+      .map((page) => page.key),
+    ["updates"],
+  );
+  assert.deepEqual(
+    HISTORY_STARTERS[0]
+      .build(i18next.t, [])
+      .filter((page) => page.kind === "custom"),
+    [],
+  );
+});

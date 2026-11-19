@@ -322,6 +322,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       queryClient.invalidateQueries({
         queryKey: ["medication_requests_stopped"],
       });
+      queryClient.invalidateQueries({ queryKey: ["medication_requests"] });
     },
   });
 
@@ -697,18 +698,12 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                   setSearchQuery("");
                 }}
               >
-                <TabsList className="h-[38px] border border-gray-200">
-                  <TabsTrigger
-                    value={ProductKnowledgeType.medication}
-                    className="flex-1 data-[state=active]:bg-primary-700 data-[state=active]:text-white"
-                  >
+                <TabsList>
+                  <TabsTrigger value={ProductKnowledgeType.medication}>
                     <Pill className="size-4" />
                     {t("medications")}
                   </TabsTrigger>
-                  <TabsTrigger
-                    value={ProductKnowledgeType.nutritional_product}
-                    className="flex-1 data-[state=active]:bg-primary-700 data-[state=active]:text-white"
-                  >
+                  <TabsTrigger value={ProductKnowledgeType.nutritional_product}>
                     <Utensils className="size-4" />
                     {t("nutrition")}
                   </TabsTrigger>

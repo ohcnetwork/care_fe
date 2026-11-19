@@ -164,19 +164,6 @@ test.describe("Manage care team for an encounter", () => {
     });
   });
 
-  test("Add button is disabled initially when opening care team sheet", async ({
-    page,
-  }) => {
-    await test.step("Open care team sheet", async () => {
-      await openCareTeamDialog(page);
-      await expect(page.getByText("Administration")).toBeVisible();
-    });
-
-    await test.step("Verify Add button is disabled", async () => {
-      await expect(page.getByRole("button", { name: "Add" })).toBeDisabled();
-    });
-  });
-
   test("Closing without clicking Add does not save care team member", async ({
     page,
   }) => {

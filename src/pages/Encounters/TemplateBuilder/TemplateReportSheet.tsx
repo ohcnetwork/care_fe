@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -50,15 +51,16 @@ export default function TemplateReportSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-lg overflow-auto">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
-          <SheetTitle className="flex flex-col sm:flex-row justify-between mt-4">
-            <span>{t("available_templates")}</span>
+          <SheetTitle>{t("available_templates")}</SheetTitle>
+        </SheetHeader>
+        <SheetBody>
+          <div className="flex flex-col gap-2 mb-4">
             {canWriteTemplate && (
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full sm:w-auto"
                 onClick={() =>
                   navigate(`/facility/${facilityId}/template/builder/`)
                 }
@@ -66,9 +68,7 @@ export default function TemplateReportSheet({
                 {t("create_template")}
               </Button>
             )}
-          </SheetTitle>
-        </SheetHeader>
-        <div className="mt-3">
+          </div>
           <TemplateList
             facilityId={facilityId}
             associatingId={associatingId}
@@ -79,7 +79,7 @@ export default function TemplateReportSheet({
             reportType={reportType}
             className="flex flex-col"
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

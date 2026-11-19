@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Page, expect, test } from "@playwright/test";
-import { createPatient } from "tests/helper/patient";
+import { createTestPatient } from "tests/helper/patient";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -142,7 +142,7 @@ test.describe("Account Transfer Payment", () => {
 
   test.beforeAll(async () => {
     // Create a dedicated patient so we don't interfere with other tests
-    patientId = await createPatient("Transfer Test");
+    patientId = await createTestPatient("Transfer Test");
 
     const suffix = faker.string.alphanumeric(6);
 

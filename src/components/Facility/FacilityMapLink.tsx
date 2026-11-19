@@ -2,6 +2,8 @@ import { SquareArrowOutUpRight } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import {
   getMapUrl,
   isAndroidDevice,
@@ -12,9 +14,11 @@ import {
 export const FacilityMapsLink = ({
   latitude,
   longitude,
+  className,
 }: {
   latitude: string;
   longitude: string;
+  className?: string;
 }) => {
   const { t } = useTranslation();
 
@@ -28,7 +32,10 @@ export const FacilityMapsLink = ({
 
   return (
     <Link
-      className="text-primary hover:underline flex w-fit items-center gap-1"
+      className={cn(
+        "text-primary hover:underline flex w-fit items-center gap-1",
+        className,
+      )}
       href={getMapUrl(latitude, longitude)}
       target={target}
       rel="noreferrer"

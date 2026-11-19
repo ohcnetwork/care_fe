@@ -1,4 +1,4 @@
-import { CheckedState } from "@radix-ui/react-checkbox";
+import { CheckedState } from "@/components/ui/checkbox";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ArrowRightLeft, EyeIcon } from "lucide-react";

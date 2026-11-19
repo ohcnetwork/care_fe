@@ -1,3 +1,4 @@
+import FacilityReferrals from "@/pages/Facility/referrals/FacilityReferrals";
 import { Redirect } from "raviger";
 
 import FacilityUsers from "@/components/Facility/FacilityUsers";
@@ -28,9 +29,11 @@ import DiagnosticReportPrint from "@/pages/Facility/services/diagnosticReports/D
 import DiagnosticReportView from "@/pages/Facility/services/diagnosticReports/DiagnosticReportView";
 import { MultipleDiagnosticReportsPrint } from "@/pages/Facility/services/diagnosticReports/MultipleDiagnosticReportsPrint";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
-import { SettingsLayout } from "@/pages/Facility/settings/layout";
 
 const FacilityRoutes: AppRoutes = {
+  "/facility/:facilityId/referrals": ({ facilityId }) => (
+    <FacilityReferrals facilityId={facilityId} />
+  ),
   "/facility": () => <Redirect to="/" />,
   "/facility/:facilityId/overview": ({ facilityId }) => (
     <FacilityOverview facilityId={facilityId} />
@@ -44,9 +47,7 @@ const FacilityRoutes: AppRoutes = {
   "/facility/:facilityId/resource/new": ({ facilityId }) => (
     <ResourceCreate facilityId={facilityId} />
   ),
-  "/facility/:facilityId/settings*": ({ facilityId }) => (
-    <SettingsLayout facilityId={facilityId} />
-  ),
+  // "/facility/:facilityId/settings*" moved to src/routes/_app/facility.$facilityId.settings/
   "/facility/:facilityId/locations/:locationId*": ({
     facilityId,
     locationId,
@@ -69,7 +70,7 @@ const FacilityRoutes: AppRoutes = {
 
   ...[
     "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId",
-    "/organization/organizationId/patient/:patientId/diagnostic_reports/:diagnosticReportId",
+    "/organization/:organizationId/patient/:patientId/diagnostic_reports/:diagnosticReportId",
   ].reduce((acc: AppRoutes, path) => {
     acc[path] = ({ facilityId, patientId, diagnosticReportId }) => (
       <DiagnosticReportView
@@ -82,7 +83,7 @@ const FacilityRoutes: AppRoutes = {
   }, {}),
   ...[
     "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print",
-    "/organization/organizationId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print",
+    "/organization/:organizationId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print",
   ].reduce((acc: AppRoutes, path) => {
     acc[path] = ({ patientId, diagnosticReportId }) => (
       <DiagnosticReportPrint
@@ -94,7 +95,7 @@ const FacilityRoutes: AppRoutes = {
   }, {}),
   ...[
     "/facility/:facilityId/patient/:patientId/service_request/:serviceRequestId/diagnostic_reports/print",
-    "/organization/organizationId/patient/:patientId/service_request/:serviceRequestId/diagnostic_reports/print",
+    "/organization/:organizationId/patient/:patientId/service_request/:serviceRequestId/diagnostic_reports/print",
   ].reduce((acc: AppRoutes, path) => {
     acc[path] = ({ patientId, serviceRequestId }) => (
       <MultipleDiagnosticReportsPrint

@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -514,7 +515,7 @@ export function ProductFormContent({
                           {t("create_new")}
                         </Button>
                       </SheetTrigger>
-                      <SheetContent className="w-[90%] sm:max-w-2xl flex min-w-full flex-col bg-gray-100 sm:min-w-fit overflow-y-auto">
+                      <SheetContent size="lg" className="overflow-hidden">
                         <SheetHeader>
                           <SheetTitle>
                             {t("create_charge_item_definition")}
@@ -523,7 +524,7 @@ export function ProductFormContent({
                             {t("create_charge_item_definition_description")}
                           </SheetDescription>
                         </SheetHeader>
-                        <div className="mt-6">
+                        <SheetBody>
                           <ChargeItemDefinitionForm
                             facilityId={facilityId}
                             minimal={true}
@@ -541,7 +542,7 @@ export function ProductFormContent({
                             }}
                             onCancel={() => setCreateCidOpen(false)}
                           />
-                        </div>
+                        </SheetBody>
                       </SheetContent>
                     </Sheet>
                   </div>

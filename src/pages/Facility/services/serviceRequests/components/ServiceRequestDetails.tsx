@@ -43,7 +43,7 @@ export function ServiceRequestDetails({
   return (
     <section
       aria-labelledby={titleId}
-      className="rounded-lg border border-gray-200 bg-gray-100"
+      className="rounded-lg border border-border bg-muted"
     >
       <div className="relative flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
         <span
@@ -53,13 +53,13 @@ export function ServiceRequestDetails({
         <div className="min-w-0 flex-1 sm:ml-2">
           <h2
             id={titleId}
-            className="text-xl font-semibold text-gray-700 wrap-break-word"
+            className="text-xl font-semibold text-muted-foreground wrap-break-word"
           >
             {activityDefinition.title}
           </h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             {t("request id")}:
-            <span className="ml-1 break-all text-gray-700 font-medium">
+            <span className="ml-1 break-all text-muted-foreground font-medium">
               {request.id}
             </span>
           </p>
@@ -77,7 +77,7 @@ export function ServiceRequestDetails({
         </div>
       </div>
 
-      <div className="mx-1.5 mb-3 rounded-lg bg-white p-4 pb-2 shadow-md">
+      <div className="mx-1.5 mb-3 rounded-lg bg-background p-4 pb-2 shadow-md">
         <div className="grid gap-5 md:grid-cols-2 md:gap-6">
           <div className="min-w-0 space-y-5">
             <ServiceRequestContext
@@ -88,8 +88,8 @@ export function ServiceRequestDetails({
               activityDefinition={activityDefinition}
             />
           </div>
-          <div className="min-w-0 space-y-3 border-t border-gray-200 pt-5 text-sm md:border-t-0 md:border-l md:pt-0 md:pl-6">
-            <p className="text-gray-600">{t("tags")}</p>
+          <div className="min-w-0 space-y-3 border-t border-border pt-5 text-sm md:border-t-0 md:border-l md:pt-0 md:pl-6">
+            <p className="text-muted-foreground">{t("tags")}</p>
             <TagBadges tags={request.tags} className="pb-1" />
             <TagAssignmentSheet
               entityType="service_request"
@@ -112,8 +112,8 @@ export function ServiceRequestDetails({
             {request.note && (
               <dl className="pt-4">
                 <div className="space-y-1">
-                  <dt className="text-gray-600">{t("note")}</dt>
-                  <dd className="whitespace-pre-wrap text-gray-950 wrap-break-word">
+                  <dt className="text-muted-foreground">{t("note")}</dt>
+                  <dd className="whitespace-pre-wrap text-foreground wrap-break-word">
                     {request.note}
                   </dd>
                 </div>
@@ -122,7 +122,7 @@ export function ServiceRequestDetails({
           </div>
         </div>
         {request.created_by && (
-          <div className="mt-4 flex flex-wrap border-t border-gray-100 pt-2 text-xs text-gray-500">
+          <div className="mt-4 flex flex-wrap border-t border-border pt-2 text-xs text-muted-foreground">
             <span className="min-w-0 wrap-break-word">
               {t("created_by")}: {formatName(request.created_by)}
             </span>

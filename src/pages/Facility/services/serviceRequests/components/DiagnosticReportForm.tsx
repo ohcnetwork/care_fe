@@ -111,7 +111,7 @@ export function DiagnosticReportForm({
             ))}
           </div>
           {isMultipleDiagnosticReport && availableReportCodes.length > 0 && (
-            <div className="-mt-3 rounded-b-lg bg-gray-100 px-2 pb-2 pt-4">
+            <div className="-mt-3 rounded-b-lg bg-muted px-2 pb-2 pt-4">
               {showReportTypeSelect ? (
                 <ReportTypePicker
                   availableReportCodes={availableReportCodes}
@@ -125,8 +125,8 @@ export function DiagnosticReportForm({
                 />
               ) : (
                 <Button
-                  variant="ghost"
-                  className="gap-1.5 px-2 font-medium text-gray-950 underline hover:bg-transparent hover:text-gray-950"
+                  variant="link"
+                  className="px-2"
                   onClick={() => {
                     setShowReportTypeSelect(true);
                   }}

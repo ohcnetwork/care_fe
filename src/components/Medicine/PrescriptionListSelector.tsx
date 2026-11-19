@@ -176,11 +176,11 @@ export default function PrescriptionListSelector({
             )}
           </DrawerTrigger>
 
-          <DrawerContent className="max-h-[85vh]">
-            <DrawerHeader>
-              <DrawerTitle>{t("prescription")}</DrawerTitle>
+          <DrawerContent height="fixed">
+            <DrawerHeader showCloseButton className="border-b shadow-2xs">
+              <DrawerTitle>{t("select_prescription")}</DrawerTitle>
             </DrawerHeader>
-            <div className="overflow-y-auto pr-2">
+            <div className="overflow-y-auto">
               <PrescriptionListComponent
                 prescriptions={prescriptions}
                 loadMoreRef={loadMoreRef}
