@@ -83,11 +83,8 @@ export function ManageQueueFinishedTab({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tokens.map((token, index) => (
-                  <TableRow
-                    key={token.id}
-                    ref={index === tokens.length - 1 ? ref : undefined}
-                  >
+                {tokens.map((token) => (
+                  <TableRow key={token.id}>
                     <TableCell>
                       <span className="font-mono font-semibold">
                         {renderTokenNumber(token)}
@@ -166,17 +163,19 @@ export function ManageQueueFinishedTab({
 
           {/* Mobile card list */}
           <div className="lg:hidden flex flex-col gap-3">
-            {tokens.map((token, index) => (
+            {tokens.map((token) => (
               <FinishedTokenCard
                 key={token.id}
                 token={token}
                 facilityId={facilityId}
                 queueId={queueId}
-                ref={index === tokens.length - 1 ? ref : undefined}
               />
             ))}
             {isFetchingNextPage && <FinishedTokenCardSkeletons count={3} />}
           </div>
+
+          {/* One sentinel for both layouts; each layout is hidden on some screens. */}
+          <div ref={ref} className="-mt-4" />
         </>
       ) : (
         <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-16 lg:py-20 px-4 text-center border border-gray-100">

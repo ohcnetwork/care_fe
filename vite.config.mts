@@ -21,6 +21,7 @@ import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
+import { typstCompilerWasm } from "./plugins/typstCompilerWasm";
 import validateEnv from "./scripts/validate-env";
 
 const LOCAL_PLUGIN_MODULE_ID = "virtual:care-local-plugins";
@@ -468,6 +469,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       treeShakeCareIcons({
         iconWhitelist: ["default"],
       }),
+      typstCompilerWasm(),
       VitePWA({
         strategies: "injectManifest",
         srcDir: "src",
@@ -537,6 +539,11 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
     // optimizeDeps: {
     //   include: getPluginDependencies(),
     // },
+    worker: {
+      // The print worker (src/print) loads the Typst compiler with a dynamic
+      // import, which needs ES module workers.
+      format: "es",
+    },
     build: {
       target: "es2022",
       outDir: "build",

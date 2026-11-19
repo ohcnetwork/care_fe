@@ -47,22 +47,22 @@ import {
   Tags,
   Users,
 } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { cn } from "@/lib/utils";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { dateTimeQueryString, formatName } from "@/Utils/utils";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import {
   encounterFilterStorageKey,
@@ -236,8 +236,6 @@ interface Props {
 
 const EncounterHistoryList = ({ onSelect, filterScope }: Props) => {
   const { t } = useTranslation();
-  const { ref, inView } = useInView();
-
   const {
     primaryEncounter,
     primaryEncounterId,
@@ -304,11 +302,11 @@ const EncounterHistoryList = ({ onSelect, filterScope }: Props) => {
 
   const {
     data: encounters,
-    fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     isFetching,
-  } = useInfiniteQuery({
+    ref,
+  } = useInfiniteList({
     queryKey: [
       "infinite-encounters",
       "past",
@@ -321,52 +319,38 @@ const EncounterHistoryList = ({ onSelect, filterScope }: Props) => {
       filters.dateFrom,
       filters.dateTo,
     ],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(encounterApi.list, {
-        queryParams: {
-          limit: 14,
-          offset: String(pageParam),
-          ...historyScope,
-          ...(filters.status && { status: filters.status }),
-          ...(filters.selectedTags?.length > 0 && {
-            tags: filters.selectedTags.map((t) => t.id).join(","),
-            tags_behavior: filters.tagsBehavior || "any",
-          }),
-          ...(filters.selectedOrg && {
-            organization: filters.selectedOrg.id,
-          }),
-          ...(filters.selectedCareTeamMember && {
-            care_team_user: filters.selectedCareTeamMember.username,
-          }),
-          ...(dateFrom && {
-            created_date_after: dateTimeQueryString(dateFrom),
-          }),
-          ...(dateTo && {
-            created_date_before: dateTimeQueryString(dateTo, true),
-          }),
-        },
-      })({ signal });
-      return response as PaginatedResponse<EncounterRead>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * 14;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+    ...query.infinite(encounterApi.list, {
+      queryParams: {
+        ...historyScope,
+        ...(filters.status && { status: filters.status }),
+        ...(filters.selectedTags?.length > 0 && {
+          tags: filters.selectedTags.map((t) => t.id).join(","),
+          tags_behavior: filters.tagsBehavior || "any",
+        }),
+        ...(filters.selectedOrg && {
+          organization: filters.selectedOrg.id,
+        }),
+        ...(filters.selectedCareTeamMember && {
+          care_team_user: filters.selectedCareTeamMember.username,
+        }),
+        ...(dateFrom && {
+          created_date_after: dateTimeQueryString(dateFrom),
+        }),
+        ...(dateTo && {
+          created_date_before: dateTimeQueryString(dateTo, true),
+        }),
+      },
+      pageSize: 14,
+    }),
     enabled: !!primaryEncounter,
   });
 
-  const past = encounters?.pages.flatMap((page) => page.results) ?? [];
+  // The list endpoint returns EncounterListRead; cards historically treat it as EncounterRead.
+  const past = (encounters?.results ?? []) as EncounterRead[];
 
   const pastEncounters = past.filter(
     (encounter) => encounter.id !== primaryEncounterId,
   );
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
 
   const onFilterUpdate = (updateQuery: Record<string, unknown>) => {
     setFilters((prev) => {

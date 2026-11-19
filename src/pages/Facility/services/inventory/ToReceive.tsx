@@ -44,6 +44,9 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
   const { t } = useTranslation();
   const currentTab = tab === "deliveries" ? "deliveries" : "orders";
   const { location } = useCurrentLocation();
+  // To Receive stays open at locations that don't use inventory, so transfers
+  // already sent there can be received, but they can't raise stock requests
+  const canRaiseRequest = (location?.inventory_usage ?? "none") !== "none";
   return (
     <Page
       title={t("to_receive")}
@@ -72,7 +75,7 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
               )}
             </p>
           </div>
-          {currentTab === "orders" && (
+          {currentTab === "orders" && canRaiseRequest && (
             <div className="flex items-center gap-2">
               <Button
                 variant="primary"

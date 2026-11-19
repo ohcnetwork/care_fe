@@ -20,6 +20,7 @@ import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequ
 import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
+import { generateAlternateIdentifier } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -83,7 +84,7 @@ export default function useBillMedications({
           items,
           locationId,
           fallbackEncounterId,
-          alternateIdentifier: getDispenseCreateAlternateIdentifier(patientId),
+          alternateIdentifier: generateAlternateIdentifier(patientId),
         }),
 
         ...(prescriptionsToComplete
@@ -146,10 +147,6 @@ export default function useBillMedications({
 
   return billMedicationsMutation;
 }
-
-const getDispenseCreateAlternateIdentifier = (patientId: string) => {
-  return `${patientId}-${new Date().toISOString().replace(/[:.]/g, "-")}`;
-};
 
 const getDispenseCreateRequests = ({
   items,
