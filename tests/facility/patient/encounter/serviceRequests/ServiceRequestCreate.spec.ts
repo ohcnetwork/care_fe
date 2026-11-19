@@ -3,7 +3,7 @@ import { clickTabOrMenuItem, expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
-import { createServiceRequest } from "./serviceRequest";
+import { createServiceRequest, reportTypeCombobox } from "./serviceRequest";
 
 test.use({
   storageState: "tests/.auth/user.json",
@@ -172,10 +172,7 @@ test.describe("Patient Service Request Tab", () => {
       specimenResponse,
       specimenCollectedToast,
     ]);
-    const reportTypeSelect = page.getByRole("combobox", {
-      name: "Select Diagnostic Report Type",
-      exact: true,
-    });
+    const reportTypeSelect = reportTypeCombobox(page);
 
     if (!(await reportTypeSelect.isVisible())) {
       await page.getByText("Test Results Entry").click();
@@ -240,12 +237,7 @@ test("should fill result value, capture a photo and save results", async ({
   await Promise.all([collectButton.click(), specimenCollectedToast]);
 
   // Create the diagnostic report
-  await page
-    .getByRole("combobox", {
-      name: "Select Diagnostic Report Type",
-      exact: true,
-    })
-    .click();
+  await reportTypeCombobox(page).click();
   await page.getByRole("option").first().click();
   await page.getByRole("button", { name: "Create Report" }).click();
 

@@ -13,7 +13,14 @@ test.describe("Facility Image Settings", () => {
   });
 
   test("Upload and Remove facility image", async ({ page }) => {
-    await page.getByRole("button", { name: "Edit Cover Photo" }).click();
+    const banner = page.locator('[data-cy="facility-cover"]');
+    await expect(banner).toBeVisible();
+    const originalHeight = await banner.evaluate(
+      (element) => element.getBoundingClientRect().height,
+    );
+    await page
+      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
+      .click();
 
     const fileInput = page.locator("input[type='file']");
     await fileInput.setInputFiles("tests/fixtures/images/test-image.jpg");
@@ -22,16 +29,32 @@ test.describe("Facility Image Settings", () => {
     await page.getByRole("button", { name: "Upload", exact: true }).click();
 
     await expect(page.getByText("Cover image updated")).toBeVisible();
+    const cover = page.locator('[data-cy="facility-cover-image"]');
+    await expect(cover).toBeVisible();
+    await expect
+      .poll(() =>
+        banner.evaluate((element) => element.getBoundingClientRect().height),
+      )
+      .toBe(originalHeight);
+    await expect(cover).toHaveCSS("object-fit", "cover");
 
-    await page.getByRole("button", { name: "Edit Cover Photo" }).click();
+    await page
+      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
+      .click();
     await page.getByRole("button", { name: "Delete" }).click();
 
     await expect(page.getByText("Cover image deleted")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Add cover photo", exact: true }),
+    ).toBeVisible();
+    await expect(cover).toHaveCount(0);
   });
 
   test("Replace existing facility image with a new one", async ({ page }) => {
     // Upload first image
-    await page.getByRole("button", { name: "Edit Cover Photo" }).click();
+    await page
+      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
+      .click();
 
     await page
       .locator("input[type='file']")
@@ -43,7 +66,9 @@ test.describe("Facility Image Settings", () => {
     await expect(page.getByText("Cover image updated")).toBeVisible();
 
     // Replace with second image
-    await page.getByRole("button", { name: "Edit Cover Photo" }).click();
+    await page
+      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
+      .click();
 
     await page
       .locator("input[type='file']")
@@ -55,7 +80,9 @@ test.describe("Facility Image Settings", () => {
     await expect(page.getByText("Cover image updated")).toBeVisible();
 
     // Cleanup
-    await page.getByRole("button", { name: "Edit Cover Photo" }).click();
+    await page
+      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
+      .click();
     await page.getByRole("button", { name: "Delete" }).click();
     await expect(page.getByText("Cover image deleted")).toBeVisible();
   });
@@ -63,7 +90,9 @@ test.describe("Facility Image Settings", () => {
   test("Invalid image selection is cleared when upload popup is closed", async ({
     page,
   }) => {
-    await page.getByRole("button", { name: "Edit Cover Photo" }).click();
+    await page
+      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
+      .click();
 
     await page
       .locator("input[type='file']")
@@ -78,7 +107,9 @@ test.describe("Facility Image Settings", () => {
     await expect(page.getByRole("dialog")).toBeHidden();
 
     // Reopen and verify state was reset
-    await page.getByRole("button", { name: "Edit Cover Photo" }).click();
+    await page
+      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
+      .click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 

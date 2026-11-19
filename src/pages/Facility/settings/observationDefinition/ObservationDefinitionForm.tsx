@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -42,7 +42,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
 import { CodeSchema } from "@/types/base/code/code";
 import {
   getConditionDiscriminatorValue,
@@ -408,7 +407,7 @@ function ObservationDefinitionFormContent({
                 onClick={() => {
                   handleClearObservationInterpretation(clearRootLevel);
                 }}
-                className={cn(buttonVariants({ variant: "destructive" }))}
+                variant="destructive"
               >
                 {t("remove")}
               </AlertDialogAction>

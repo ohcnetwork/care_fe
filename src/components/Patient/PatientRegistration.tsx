@@ -44,6 +44,7 @@ import {
   useEntityExtensions,
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { tzAwareDateTime } from "@/lib/validators";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -72,7 +73,7 @@ import { format, isBefore, subYears } from "date-fns";
 import { TFunction } from "i18next";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { ArrowLeft, CheckIcon } from "lucide-react";
-import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -307,7 +308,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     !!isValidPhoneNumber(phoneNumber) &&
     !suppressDuplicateWarning;
 
-  useNavigationPrompt(
+  useNavigationBlocker(
     form.formState.isDirty && !isPending && !showDuplicate,
     t("unsaved_changes"),
   );

@@ -28,6 +28,17 @@ export type ServiceRequestOverrides = Partial<
   Pick<ServiceRequestTestData, "activityDefinition" | "priority">
 >;
 
+/**
+ * The report type picker preselects the only remaining report code, so the
+ * placeholder is not always shown. Locate the picker by its label instead.
+ */
+export function reportTypeCombobox(page: Page) {
+  return page.getByRole("combobox", {
+    name: "Select Diagnostic Report Type",
+    exact: true,
+  });
+}
+
 export function generateServiceRequestTestData(
   allFields: boolean = false,
 ): ServiceRequestTestData {

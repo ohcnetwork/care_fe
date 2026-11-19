@@ -147,7 +147,7 @@ export function ProcessSpecimen({
               </label>
               <ValueSetSelect
                 system="system-specimen-processing-method-code"
-                placeholder={t("process_specimen__valusetselect_placeholder")}
+                placeholder={t("process_specimen__valueset_select_placeholder")}
                 onSelect={handleSelectStep}
                 value={null}
                 disabled={disableEdit}
