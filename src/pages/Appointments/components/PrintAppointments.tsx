@@ -1,7 +1,6 @@
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
@@ -25,6 +24,7 @@ import {
   formatDateTime,
   formatPatientAge,
 } from "@/Utils/utils";
+import { useQueryParams } from "@/lib/router/queryParams";
 import {
   getPatientIdentifiers,
   PatientRead,

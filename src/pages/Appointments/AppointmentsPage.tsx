@@ -2,7 +2,6 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { addDays, differenceInDays } from "date-fns";
 import { TFunction } from "i18next";
 import { Check as CheckIcon, FilterIcon, InfoIcon } from "lucide-react";
-import { Link, navigate as ravigerNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -100,11 +99,14 @@ import {
 } from "@/components/ui/tooltip";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import careConfig from "@careConfig";
 import { PractitionerSelector } from "./components/PractitionerSelector";
+
+import { getAppointmentsPath } from "./utils";
 
 type AppointmentStatusGroup = {
   label: string;
@@ -431,7 +433,27 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 ) >= 31
               }
               onClick={() => {
-                ravigerNavigate("appointments/print", { query: qParams });
+                if (resourceType === SchedulableResourceType.Location) {
+                  navigate({
+                    to: "/facility/$facilityId/locations/$locationId/appointments/print",
+                    params: { facilityId, locationId: resourceId! },
+                    search: qParams,
+                  });
+                } else if (
+                  resourceType === SchedulableResourceType.HealthcareService
+                ) {
+                  navigate({
+                    to: "/facility/$facilityId/services/$serviceId/appointments/print",
+                    params: { facilityId, serviceId: resourceId! },
+                    search: qParams,
+                  });
+                } else {
+                  navigate({
+                    to: "/facility/$facilityId/appointments/print",
+                    params: { facilityId },
+                    search: qParams,
+                  });
+                }
               }}
             >
               <CareIcon icon="l-print" className="text-lg" />
@@ -689,12 +711,12 @@ function AppointmentColumn(props: {
                 key={appointment.id}
                 ref={index === appointments.length - 1 ? ref : undefined}
               >
-                <Link
+                <HrefLink
                   href={
                     appointment.resource_type ===
                     SchedulableResourceType.Practitioner
                       ? `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`
-                      : `appointments/${appointment.id}`
+                      : `${getAppointmentsPath({ facilityId, resourceType: props.resourceType, resourceId: props.resourceIds[0] })}/${appointment.id}`
                   }
                   className="text-inherit"
                 >
@@ -703,7 +725,7 @@ function AppointmentColumn(props: {
                     showStatus={props.statusGroup.statuses.length > 1}
                     showPractitioner={props.resourceIds.length > 1}
                   />
-                </Link>
+                </HrefLink>
               </li>
             ))}
             {isFetchingNextPage && <CardListSkeleton count={5} />}
