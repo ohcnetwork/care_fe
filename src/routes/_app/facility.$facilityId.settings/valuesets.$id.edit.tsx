@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
@@ -10,7 +10,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, id } = Route.useParams();
+  const { facilityId, id } = useParams({
+    from: "/_app/facility/$facilityId/settings/valuesets/$id/edit",
+  });
   return (
     <ValueSetEditor scope={valueSetScopeForFacility(facilityId)} id={id} />
   );

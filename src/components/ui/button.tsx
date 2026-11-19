@@ -103,15 +103,20 @@ function resolveAsChild(
       render: React.createElement(child.type as React.ElementType, restProps),
       children: extractedChildren,
       isNonButtonTag: child.type !== "button",
-      isLink: child.type !== "button" && child.props.href != null,
+      isLink:
+        child.type !== "button" &&
+        (child.props.href != null || child.props.to != null),
     };
   }
 
-  const renderElement = React.isValidElement<{ href?: unknown }>(render)
+  const renderElement = React.isValidElement<{ href?: unknown; to?: unknown }>(
+    render,
+  )
     ? render
     : undefined;
   const isLink =
-    renderElement?.type !== "button" && renderElement?.props.href != null;
+    renderElement?.type !== "button" &&
+    (renderElement?.props.href != null || renderElement?.props.to != null);
 
   return {
     render,

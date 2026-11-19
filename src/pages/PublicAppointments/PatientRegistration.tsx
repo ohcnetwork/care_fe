@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -32,6 +32,7 @@ import { validateName } from "@/common/validation";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
+import { navigate } from "@/lib/router/navigate";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import { Organization } from "@/types/organization/organization";
@@ -124,12 +125,11 @@ export default function PublicPatientRegistration(
             ["appointment", tokenData.phoneNumber],
           ],
         });
-        navigate(
-          `/facility/${props.facilityId}/appointments/${data.id}/success`,
-          {
-            replace: true,
-          },
-        );
+        navigate({
+          to: "/facility/$facilityId/appointments/$appointmentId/success",
+          params: { facilityId: props.facilityId, appointmentId: data.id },
+          replace: true,
+        });
       },
     });
 
@@ -182,9 +182,10 @@ export default function PublicPatientRegistration(
           className="border border-secondary-400"
           type="button"
           onClick={() =>
-            navigate(
-              `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
-            )
+            navigate({
+              to: "/facility/$facilityId/appointments/$staffId/patient-select",
+              params: { facilityId: props.facilityId, staffId },
+            })
           }
         >
           <span className="text-sm underline">{t("back")}</span>
@@ -405,9 +406,10 @@ export default function PublicPatientRegistration(
                 className="sm:w-1/5"
                 type="button"
                 onClick={() =>
-                  navigate(
-                    `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
-                  )
+                  navigate({
+                    to: "/facility/$facilityId/appointments/$staffId/patient-select",
+                    params: { facilityId: props.facilityId, staffId },
+                  })
                 }
               >
                 <span className="bg-linear-to-b from-white/15 to-transparent" />

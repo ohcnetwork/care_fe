@@ -1,4 +1,9 @@
-import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  useLocation,
+  useParams,
+} from "@tanstack/react-router";
 import { RouterProvider as RavigerBasePathProvider } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
@@ -10,7 +15,9 @@ export const Route = createFileRoute("/_app/facility/$facilityId/settings")({
 });
 
 function RouteComponent() {
-  const { facilityId } = Route.useParams();
+  const { facilityId } = useParams({
+    from: "/_app/facility/$facilityId/settings",
+  });
   const { pathname } = useLocation();
   const basePath = `/facility/${facilityId}/settings`;
   // Settings pages (and plugin components inside them) still write links and

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { SquarePen } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -105,7 +105,10 @@ export const Account = ({ title }: { title?: string } = {}) => {
         {!account ? (
           <EmptyState message={t("no_account_found")} />
         ) : (
-          <Link href={`/facility/${facilityId}/billing/account/${account.id}`}>
+          <Link
+            to="/facility/$facilityId/billing/account/$accountId"
+            params={{ facilityId, accountId: account.id }}
+          >
             <div
               className={cn(
                 "flex flex-row bg-gray-100 rounded-md p-2 border border-gray-200 justify-between",

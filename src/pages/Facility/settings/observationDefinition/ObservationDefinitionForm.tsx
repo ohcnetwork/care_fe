@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, X } from "lucide-react";
-import { navigate } from "raviger";
 import React, { useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -65,6 +64,7 @@ import observationDefinitionApi from "@/types/emr/observationDefinition/observat
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
+import { navigate } from "@/lib/router/navigate";
 import { generateSlugValue } from "@/Utils/slug";
 import { valuesOf } from "@/Utils/utils";
 import { ObservationInterpretation } from "./components/ObservationInterpretation";
@@ -128,9 +128,15 @@ function ObservationDefinitionFormContent({
   observationSlug,
   existingData,
   onSuccess = () =>
-    navigate(`/facility/${facilityId}/settings/observation_definitions`),
+    navigate({
+      to: "/facility/$facilityId/settings/observation_definitions",
+      params: { facilityId },
+    }),
   onCancel = () =>
-    navigate(`/facility/${facilityId}/settings/observation_definitions`),
+    navigate({
+      to: "/facility/$facilityId/settings/observation_definitions",
+      params: { facilityId },
+    }),
 }: {
   facilityId: string;
   observationSlug?: string;
@@ -311,9 +317,10 @@ function ObservationDefinitionFormContent({
       onSuccess: (observationDefinition: ObservationDefinitionRead) => {
         queryClient.invalidateQueries({ queryKey: ["observationDefinitions"] });
         toast.success(t("observation_definition_updated"));
-        navigate(
-          `/facility/${facilityId}/settings/observation_definitions/${observationDefinition.slug}`,
-        );
+        navigate({
+          to: "/facility/$facilityId/settings/observation_definitions/$observationSlug",
+          params: { facilityId, observationSlug: observationDefinition.slug },
+        });
       },
     });
 

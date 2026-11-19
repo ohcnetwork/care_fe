@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -25,6 +24,7 @@ import { useLocationManagement } from "@/hooks/useLocationManagement";
 
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
+import { navigate } from "@/lib/router/navigate";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
 import facilityApi from "@/types/facility/facilityApi";
 import { LocationRead as LocationListType } from "@/types/location/location";
@@ -110,7 +110,10 @@ export default function LocationSettings({
 
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
-      navigate(`/facility/${facilityId}/settings/locations/${location.id}`);
+      navigate({
+        to: "/facility/$facilityId/settings/locations/$id",
+        params: { facilityId, id: location.id },
+      });
     },
     [facilityId],
   );
@@ -218,7 +221,10 @@ export default function LocationSettings({
                     facilityId={facilityId}
                     isNested={true}
                     onBackToParent={() =>
-                      navigate(`/facility/${facilityId}/settings/locations`)
+                      navigate({
+                        to: "/facility/$facilityId/settings/locations",
+                        params: { facilityId },
+                      })
                     }
                     onSelectLocation={handleLocationSelect}
                   />

@@ -221,7 +221,8 @@ test("software Update flushes the last form edit before reloading", async ({
   const update = page.getByRole("button", { name: "Update", exact: true });
   await expect(update).toBeVisible();
   await input.fill("Last keystroke immediately before software update");
-  const reloaded = page.waitForEvent("domcontentloaded");
+  // Cache maintenance can wait for the split build's initial precache on CI.
+  const reloaded = page.waitForEvent("domcontentloaded", { timeout: 30_000 });
   await update.click();
   await reloaded;
   await expect(

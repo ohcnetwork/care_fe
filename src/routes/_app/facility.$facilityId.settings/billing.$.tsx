@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { BillingSettingsLayout } from "@/pages/Facility/settings/billing/layout";
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+
 import { LegacySettingsTitleCrumb } from "@/pages/Facility/settings/LegacySettingsTitleCrumb";
 
 export const Route = createFileRoute(
@@ -13,5 +14,5 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  return <BillingSettingsLayout />;
+  return <ErrorPage />;
 }

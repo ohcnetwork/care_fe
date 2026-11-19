@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { redirectKeepingQuery } from "@/lib/router/auth";
 import { FacilityDetailsPage } from "@/pages/Facility/FacilityDetailsPage";
@@ -14,6 +14,6 @@ export const Route = createFileRoute("/_public/facility/$id")({
 });
 
 function RouteComponent() {
-  const { id } = Route.useParams();
+  const { id } = useParams({ from: "/_public/facility/$id" });
   return <FacilityDetailsPage id={id} />;
 }

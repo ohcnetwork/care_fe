@@ -143,6 +143,15 @@ const config = [
           message:
             "Pass `context: ExtensionContexts.<slot>` in the options. Create a new context if needed.",
         },
+        {
+          // Route files: `Route.useParams()` in a lazy route component makes
+          // its chunk import the route file, and every route definition then
+          // loads as a separate chunk at startup.
+          selector:
+            "CallExpression[callee.object.name='Route'][callee.property.name=/^use[A-Z]/]",
+          message:
+            'In a route component, call the hook with the route id (`useParams({ from: "<route id>" })`), not `Route.useX()`.',
+        },
       ],
     },
   },
