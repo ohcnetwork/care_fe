@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { addDays, differenceInDays } from "date-fns";
 import { TFunction } from "i18next";
 import { Check as CheckIcon, FilterIcon, InfoIcon } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link, navigate as ravigerNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -100,6 +100,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
+import { navigate } from "@/lib/router/navigate";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import careConfig from "@careConfig";
@@ -430,7 +431,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 ) >= 31
               }
               onClick={() => {
-                navigate("appointments/print", { query: qParams });
+                ravigerNavigate("appointments/print", { query: qParams });
               }}
             >
               <CareIcon icon="l-print" className="text-lg" />
@@ -913,9 +914,14 @@ function AppointmentRow(props: {
                   key={appointment.id}
                   className="shadow-sm rounded-lg cursor-pointer group"
                   onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
-                    )
+                    navigate({
+                      to: "/facility/$facilityId/patient/$patientId/appointments/$appointmentId",
+                      params: {
+                        facilityId,
+                        patientId: appointment.patient.id,
+                        appointmentId: appointment.id,
+                      },
+                    })
                   }
                 >
                   <AppointmentRowItem appointment={appointment} />

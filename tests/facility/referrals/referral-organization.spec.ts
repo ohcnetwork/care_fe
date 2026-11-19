@@ -133,9 +133,7 @@ test("configures an organization destination and receives its referral in the or
         !url.searchParams.has("direction")
       );
     });
-    await page
-      .getByRole("menuitem", { name: "Referrals", exact: true })
-      .click();
+    await page.getByRole("tab", { name: "Referrals", exact: true }).click();
     expect((await incoming).ok()).toBeTruthy();
     await expect(page).toHaveURL(`/organization/${organization.id}/referrals`);
     await expect(

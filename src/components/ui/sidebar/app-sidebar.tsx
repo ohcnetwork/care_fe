@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { Link, useLocationChange, usePath } from "raviger";
+import { Link, useLocationChange } from "raviger";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -31,10 +31,10 @@ import { PatientNav } from "@/components/ui/sidebar/patient-nav";
 import { ResponsibilityNav } from "@/components/ui/sidebar/responsibility-switcher";
 
 import { useRouteParams } from "@/hooks/useRouteParams";
+import { useLayoutFlags } from "@/lib/router/layoutFlags";
 import { ServiceSwitcher } from "./facility/service/service-switcher";
 
 import PinPageDialog from "@/components/Common/PinPageDialog";
-import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { CurrentUserRead } from "@/types/user/user";
 
@@ -71,10 +71,10 @@ export function AppSidebar({
     "/facility/:facilityId/services/:serviceId",
   );
 
-  const path = usePath() ?? "";
+  const { workspace } = useLayoutFlags();
   const facilitySettingsSidebar =
     !!facilityId &&
-    isFacilitySettingsPath(path) &&
+    workspace === "settings" &&
     sidebarFor === SidebarFor.FACILITY;
 
   const facilitySidebar =

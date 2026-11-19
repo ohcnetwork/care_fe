@@ -1,5 +1,6 @@
 import { CheckedState } from "@/components/ui/checkbox";
 import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   ArrowRightLeft,
   ChevronDown,
@@ -9,7 +10,7 @@ import {
   PrinterIcon,
   Zap,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link as RavigerLink, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -520,13 +521,13 @@ function ChargeItemsTable({
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
                       {linkedResource !== "" ? (
-                        <Link
+                        <RavigerLink
                           href={linkedResource}
                           className="flex items-center gap-0.5 underline text-gray-600"
                         >
                           {t(item.service_resource)}
                           <ExternalLinkIcon className="size-3" />
-                        </Link>
+                        </RavigerLink>
                       ) : (
                         <span className="text-gray-500">
                           {t(item.service_resource)}
@@ -554,7 +555,11 @@ function ChargeItemsTable({
                         </Badge>
                         {item.paid_invoice && (
                           <Link
-                            href={`/facility/${facilityId}/billing/invoices/${item.paid_invoice.id}`}
+                            to="/facility/$facilityId/billing/invoices/$invoiceId"
+                            params={{
+                              facilityId,
+                              invoiceId: item.paid_invoice.id,
+                            }}
                             className="flex items-center gap-0.5 underline text-gray-600"
                             title={t("view_invoice")}
                           >
