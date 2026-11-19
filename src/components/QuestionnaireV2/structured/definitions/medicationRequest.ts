@@ -1,5 +1,6 @@
 import { validateMedicationRequestQuestion } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
 import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
+import { generateAlternateIdentifier } from "@/Utils/utils";
 
 import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
@@ -22,7 +23,7 @@ export const medicationRequestDefinition: StructuredTypeDefinition<"medication_r
     ) => {
       const dirtyMedications = medications.filter((m) => m.dirty);
       if (!patientId || dirtyMedications.length === 0) return [];
-      const prescriptionIdentifier = `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+      const prescriptionIdentifier = generateAlternateIdentifier(encounterId);
       return [
         {
           url: `/api/v1/patient/${patientId}/medication/request/upsert/`,

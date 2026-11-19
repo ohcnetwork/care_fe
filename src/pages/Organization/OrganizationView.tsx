@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 
 import SearchInput from "@/components/Common/SearchInput";
+import { SectionHeader } from "@/components/Common/SectionHeader";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -24,7 +25,6 @@ import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
-import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout, {
   type RouteContext,
 } from "./components/OrganizationLayout";
@@ -73,14 +73,14 @@ export default function OrganizationView({
       {() => {
         return (
           <div className="space-y-4">
-            <EntityBadge
+            <SectionHeader
               title={t("organizations")}
               description={t("organization_children_description")}
               count={children?.count}
               isFetching={isFetching}
             />
             <Frame>
-              <FrameHeader>
+              <FrameHeader className="p-1 md:p-2">
                 <SearchInput
                   options={[
                     {
@@ -123,7 +123,7 @@ export default function OrganizationView({
                         </TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody className="bg-white">
+                    <TableBody className="bg-background">
                       {isFetching
                         ? Array.from({ length: 5 }, (_, index) => (
                             <TableRow key={index} aria-hidden="true">
@@ -182,7 +182,7 @@ export default function OrganizationView({
                                 className="px-4 text-right"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <Button variant="ghost" asChild>
+                                <Button variant="tertiary" asChild>
                                   <Link
                                     href={`${baseUrl}/children/${orgChild.id}`}
                                     aria-label={`${t("open")} ${orgChild.name}`}

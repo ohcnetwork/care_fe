@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useEffect } from "react";
 
 import { usePermissions } from "@/context/PermissionContext";
@@ -7,6 +6,7 @@ import {
   hasResponsibilityUsersAccessViaNullRoleAssignment,
   useAccessibleRoleOrganizationsList,
 } from "@/hooks/useAccessibleRoleOrganizationsList";
+import { navigate } from "@/lib/router/navigate";
 import organizationApi from "@/types/organization/organizationApi";
 import query from "@/Utils/request/query";
 
@@ -46,7 +46,11 @@ export default function ResponsibilityLanding({ id }: Props) {
 
   useEffect(() => {
     if (!isLoading && !isLoadingAccessible && org && !canListUsers) {
-      navigate(`/responsibilities/${id}/patients`, { replace: true });
+      navigate({
+        to: "/responsibilities/$id/patients",
+        params: { id },
+        replace: true,
+      });
     }
   }, [isLoading, isLoadingAccessible, org, canListUsers, id]);
 

@@ -89,6 +89,7 @@ import {
 } from "@/Utils/decimal";
 import { isLotAllowedForDispensing } from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { generateAlternateIdentifier } from "@/Utils/utils";
 
 interface SelectedLocation extends LocationRead {
   path: string;
@@ -143,8 +144,8 @@ export default function DispenseDrawer({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { facilityId } = useCurrentFacility();
-  const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
-    `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
+  const [alternateIdentifier, setAlternateIdentifier] = useState(() =>
+    generateAlternateIdentifier(encounterId),
   );
   const [currentLocation, setCurrentLocation] =
     useState<LocationRead>(selectedLocation);
@@ -178,8 +179,11 @@ export default function DispenseDrawer({
   useEffect(() => {
     if (open) {
       form.reset({ items: [] });
+      // Each time the drawer opens is a new dispense session, so it should
+      // produce a new dispense order rather than reuse the previous one.
+      setAlternateIdentifier(generateAlternateIdentifier(encounterId));
     }
-  }, [open, form]);
+  }, [open, form, encounterId]);
 
   useEffect(() => {
     const fetchMissingInventories = async () => {
@@ -250,6 +254,9 @@ export default function DispenseDrawer({
   }, [productKnowledgeInventoriesMap, fields, form]);
 
   const { mutate: updateDispenseOrder } = useMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dispenseOrder"] });
+    },
     mutationFn: ({
       dispenseOrderId,
       status,
@@ -268,6 +275,8 @@ export default function DispenseDrawer({
       queryClient.invalidateQueries({
         queryKey: ["inventory", currentLocation.id],
       });
+      queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
+      queryClient.invalidateQueries({ queryKey: ["infinite-dispenseOrders"] });
 
       const chargeItems = extractChargeItemsFromBatchResponse(
         response as ChargeItemBatchResponse,
@@ -473,7 +482,12 @@ export default function DispenseDrawer({
 
       return requests;
     },
-    [productKnowledgeInventoriesMap, encounterId, currentLocation.id],
+    [
+      productKnowledgeInventoriesMap,
+      encounterId,
+      currentLocation.id,
+      alternateIdentifier,
+    ],
   );
 
   const handleDispense = useCallback(() => {

@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -33,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { PatientIdentifierSelector } from "@/components/Patient/PatientIdentifierSelector";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { navigate } from "@/lib/router/navigate";
 import NoActiveAccountWarningDialog from "@/pages/Facility/billing/account/components/NoActiveAccountWarningDialog";
 import {
   PartialPatientModel,
@@ -91,9 +91,10 @@ export function CreateMedicationReturnSheet({
       setIsOpen(false);
       resetState();
       // Navigate to the new medication return
-      navigate(
-        `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}`,
-      );
+      navigate({
+        to: "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId",
+        params: { facilityId, locationId, deliveryOrderId: deliveryOrder.id },
+      });
     },
     onError: () => {
       toast.error(t("error_creating_medication_return"));

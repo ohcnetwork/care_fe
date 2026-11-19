@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { formatDate, parseISO } from "date-fns";
 import { Edit, EllipsisVertical } from "lucide-react";
-import { Link } from "raviger";
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -118,10 +118,10 @@ function ProductLink({
   if (linkToProduct && facilityId && productId) {
     return (
       <Link
-        href={`/facility/${facilityId}/settings/product/${productId}`}
+        to="/facility/$facilityId/settings/product/$id"
+        params={{ facilityId, id: productId }}
         className="min-w-0 flex-1 font-medium text-wrap wrap-anywhere text-gray-950 underline underline-offset-2"
         onClick={(e) => e.stopPropagation()}
-        basePath="/"
       >
         {productName}
       </Link>
