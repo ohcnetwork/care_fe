@@ -51,6 +51,9 @@ test("opens Inventory and Pharmacy only when the location uses inventory", async
     await page.goto(`${basePath}/inventory/internal/receive`);
     await expect(heading("To Receive")).toBeVisible();
     await expect(unavailable).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Raise Stock Request" }),
+    ).toHaveCount(0);
   });
 
   await test.step("Opens Inventory but not External Supply for Consumption", async () => {
