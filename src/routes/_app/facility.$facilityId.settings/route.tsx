@@ -21,7 +21,7 @@ function RouteComponent() {
 
   return (
     <RavigerBasePathProvider basePath={basePath} path={relativePath}>
-      <div className="min-w-0 px-4 pb-4">
+      <div className="min-w-0">
         <Outlet />
       </div>
     </RavigerBasePathProvider>

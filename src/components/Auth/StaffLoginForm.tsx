@@ -141,7 +141,7 @@ export function StaffLoginForm({
             className="underline underline-offset-4"
             onClick={onForgotPassword}
           >
-            {t("forget_password")}
+            {t("forgot_password")}
           </Button>
         </div>
       </form>

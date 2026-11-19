@@ -688,11 +688,13 @@ export function WorkspaceForm({
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 {remove.isError && (
-                  <Alert variant="destructive">
-                    <AlertDescription>
-                      {t("workspace_delete_error")}
-                    </AlertDescription>
-                  </Alert>
+                  <div className="px-4 md:px-6">
+                    <Alert variant="destructive">
+                      <AlertDescription>
+                        {t("workspace_delete_error")}
+                      </AlertDescription>
+                    </Alert>
+                  </div>
                 )}
                 <AlertDialogFooter>
                   <AlertDialogCancel disabled={remove.isPending}>

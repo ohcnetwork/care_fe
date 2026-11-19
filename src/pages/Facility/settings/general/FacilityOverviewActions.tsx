@@ -1,6 +1,5 @@
 import {
-  ArrowRight,
-  ChevronDown,
+  ChevronRight,
   ClipboardList,
   FilePlus2,
   MapPin,
@@ -13,6 +12,13 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 import { ResourceFormPicker } from "@/components/Questionnaire/ResourceFormPicker";
 
@@ -45,90 +51,95 @@ export function FacilityOverviewActions({
   ];
 
   return (
-    <div className="overflow-hidden rounded-[10px] border border-neutral-200 bg-white shadow-xs">
+    <div className="space-y-4">
       <section
         aria-labelledby="facility-forms-heading"
-        className="space-y-4 border-b border-neutral-200 p-4"
         data-cy="facility-forms"
       >
-        <div className="space-y-2">
-          <h2
-            id="facility-forms-heading"
-            className="text-lg leading-6 font-semibold text-neutral-950"
-          >
-            {t("forms")}
-          </h2>
-          <p className="text-sm leading-6 text-neutral-600">
-            {t("facility_forms_description")}
-          </p>
-        </div>
-        <div className="space-y-2">
-          <ResourceFormPicker
-            facilityId={facilityId}
-            subjectType="facility"
-            subjectId={facilityId}
-            disabled={disabled}
-            trigger={
-              <Button
-                type="button"
-                disabled={disabled}
-                className="h-12 w-full justify-start border border-emerald-950 bg-emerald-800 px-3 text-white shadow-md hover:bg-emerald-900 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 md:h-10 [&_svg]:size-5"
-              >
-                <FilePlus2 aria-hidden="true" />
-                {t("submit_forms")}
-                <ChevronDown className="ml-auto" aria-hidden="true" />
-              </Button>
-            }
-          />
-          <Link
-            basePath="/"
-            href={`${baseUrl}/responses`}
-            className="group flex min-h-12 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-neutral-950 hover:bg-neutral-100/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 md:min-h-10"
-          >
-            <ClipboardList
-              className="size-5 shrink-0 text-neutral-600"
-              aria-hidden="true"
+        <Card>
+          <CardHeader className="border-b border-border p-4">
+            <CardTitle>
+              <h2 id="facility-forms-heading" className="text-sm font-semibold">
+                {t("forms")}
+              </h2>
+            </CardTitle>
+            <CardDescription>{t("facility_forms_description")}</CardDescription>
+          </CardHeader>
+          <CardContent className="divide-y divide-border p-2">
+            <ResourceFormPicker
+              facilityId={facilityId}
+              subjectType="facility"
+              subjectId={facilityId}
+              disabled={disabled}
+              trigger={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={disabled}
+                  className="w-full justify-start whitespace-normal text-left font-normal tracking-normal"
+                >
+                  <FilePlus2 aria-hidden="true" />
+                  {t("submit_forms")}
+                  <ChevronRight className="ml-auto size-4" aria-hidden="true" />
+                </Button>
+              }
             />
-            {t("responses")}
-            <ArrowRight
-              className="ml-auto size-4 shrink-0 text-neutral-400 group-hover:text-neutral-700"
-              aria-hidden="true"
-            />
-          </Link>
-        </div>
+            <Button
+              variant="ghost"
+              className="w-full justify-start whitespace-normal text-left font-normal tracking-normal"
+              asChild
+            >
+              <Link basePath="/" href={`${baseUrl}/responses`}>
+                <ClipboardList aria-hidden="true" />
+                {t("responses")}
+                <ChevronRight className="ml-auto size-4" aria-hidden="true" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
       </section>
 
       <section
         aria-labelledby="facility-quick-links-heading"
         data-cy="facility-quick-links"
       >
-        <h2
-          id="facility-quick-links-heading"
-          className="px-4 pt-4 text-lg leading-6 font-semibold text-neutral-950"
-        >
-          {t("quick_links")}
-        </h2>
-        <ul className="grid grid-cols-2 gap-x-2 p-2 lg:grid-cols-1">
-          {links.map(({ label, path, icon: Icon }) => (
-            <li key={path} className="min-w-0">
-              <Link
-                basePath="/"
-                href={`${baseUrl}${path}`}
-                className="group flex min-h-12 items-center gap-2 rounded-md px-2 py-2 text-sm text-neutral-700 hover:bg-neutral-100/50 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 md:min-h-10"
+        <Card>
+          <CardHeader className="border-b border-border p-4 pb-3">
+            <CardTitle>
+              <h2
+                id="facility-quick-links-heading"
+                className="text-sm font-semibold"
               >
-                <Icon
-                  className="size-4 shrink-0 text-neutral-500"
-                  aria-hidden="true"
-                />
-                <span className="min-w-0 break-words">{label}</span>
-                <ArrowRight
-                  className="ml-auto hidden size-4 shrink-0 text-neutral-400 group-hover:text-neutral-700 lg:block"
-                  aria-hidden="true"
-                />
-              </Link>
-            </li>
-          ))}
-        </ul>
+                {t("quick_links")}
+              </h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-2">
+            <ul>
+              {links.map(({ label, path, icon: Icon }) => (
+                <li key={path}>
+                  <Button
+                    variant="ghost"
+                    className="h-auto min-h-12 w-full justify-start whitespace-normal py-2 text-left font-normal tracking-normal md:min-h-10"
+                    asChild
+                  >
+                    <Link basePath="/" href={`${baseUrl}${path}`}>
+                      <Icon
+                        className="text-muted-foreground"
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0 break-words">{label}</span>
+                      <ChevronRight
+                        className="ml-auto size-4 text-muted-foreground"
+                        aria-hidden="true"
+                      />
+                    </Link>
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       </section>
     </div>
   );
