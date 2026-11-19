@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { startOfMinute } from "date-fns";
 import { useTranslation } from "react-i18next";
 import {
   CartesianGrid,
@@ -95,6 +96,11 @@ const formatChartDate = (
   };
 };
 
+// bucket by minutes since effective_datetime includes milliseconds
+// Needed for grouping observations (systolic + diastolic) by minute
+const toMinuteKey = (dateString: string) =>
+  startOfMinute(new Date(dateString)).toISOString();
+
 export const ObservationVisualizer = ({
   patientId,
   codeGroups,
@@ -175,7 +181,7 @@ export const ObservationVisualizer = ({
 
       resultGroup.results.forEach((observation) => {
         if (observation.effective_datetime) {
-          allTimestamps.add(observation.effective_datetime);
+          allTimestamps.add(toMinuteKey(observation.effective_datetime));
         }
       });
     });
@@ -195,8 +201,12 @@ export const ObservationVisualizer = ({
       if (!resultGroup || !code.display) return;
 
       resultGroup.results.forEach((observation) => {
-        const timestamp = observation.effective_datetime;
-        if (!timestamp || typeof timestamp !== "string") return;
+        if (
+          !observation.effective_datetime ||
+          typeof observation.effective_datetime !== "string"
+        )
+          return;
+        const timestamp = toMinuteKey(observation.effective_datetime);
 
         const value = Number(observation.value.value);
         if (!isNaN(value) && timestamp in processedData && code.display) {
