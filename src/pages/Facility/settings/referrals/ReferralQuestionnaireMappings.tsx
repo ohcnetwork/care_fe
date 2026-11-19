@@ -74,8 +74,6 @@ export function ReferralQuestionnaireMappings({
       </div>
 
       {value.length === 0 ? (
-        // CARE UI empty state, kept compact: description only, no icon or
-        // title, with Empty's dashed outline turned on via `border`.
         <Empty className="border">
           <EmptyDescription>{t("referral_no_forms_added")}</EmptyDescription>
         </Empty>
@@ -125,8 +123,6 @@ function QuestionnaireMappingRow({
 }) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
-  // Rows share the cache entry while their search is empty, so N rows still
-  // make one request.
   const { data, isFetching, isError } = useQuery({
     queryKey: ["referral-configuration-questionnaires", facilityId, search],
     queryFn: query.debounced(questionnaireApi.list, {
@@ -145,15 +141,11 @@ function QuestionnaireMappingRow({
       form.id !== row.id &&
       !takenIds.includes(form.id),
   );
-  // Autocomplete only labels a value found in `options`, so keep this row's
-  // form first; it may be inactive and therefore missing from the results.
   const options = [
     ...(row.id ? [{ value: row.id, label: row.title ?? row.id }] : []),
     ...results.map((form) => ({ value: form.id, label: form.title })),
   ];
   const formLabel = row.title ?? t("referral_search_active_forms");
-  // A form mapped while active that was later set to draft or retired. It only
-  // blocks saving when the forms list changes, so it is a warning, not an error.
   const isInactive = !!row.id && row.status !== "active";
   const inactiveHintId = useId();
 
@@ -201,8 +193,6 @@ function QuestionnaireMappingRow({
             onSearch={setSearch}
             placeholder={t("referral_search_active_forms")}
             isLoading={isFetching}
-            // The row's trash button is the one remove action; a clear (x)
-            // inside the picker beside it would be a confusing duplicate.
             showClearButton={false}
             disabled={disabled}
           />

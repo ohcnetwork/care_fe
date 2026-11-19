@@ -531,9 +531,7 @@ test.describe("Referrals", () => {
         dialog.getByText(questionnaireTitle, { exact: true }),
       ).toBeVisible();
       await setAvailabilityStatus(page, "Active");
-      await dialog
-        .getByRole("button", { name: "Save Changes", exact: true })
-        .click();
+      await dialog.getByRole("button", { name: "Save", exact: true }).click();
       await expect(dialog).not.toBeVisible();
       const row = page.getByRole("listitem").filter({
         has: page.getByRole("heading", {
@@ -1112,7 +1110,7 @@ test.describe("Referrals", () => {
         exact: true,
       });
       await editDialog
-        .getByRole("button", { name: "Save Changes", exact: true })
+        .getByRole("button", { name: "Save", exact: true })
         .click();
       await expect(editDialog).not.toBeVisible();
       await expect(

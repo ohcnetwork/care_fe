@@ -74,7 +74,7 @@ import {
 } from "./ReferralAvailabilityForm";
 
 const PAGE_SIZE = 15;
-// Adding an availability status fails the build until it has a badge variant.
+
 const STATUS_VARIANTS = {
   draft: "warning",
   active: "success",

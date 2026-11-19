@@ -73,7 +73,6 @@ function serialize(members: CareTeamResponse[]) {
   return members.map(({ member, role }) => ({ user_id: member.id, role }));
 }
 
-// Compares rows that may still be incomplete while editing.
 function draftKey(rows: CareTeamDraftMember[]) {
   return JSON.stringify(rows.map(({ member, role }) => [member?.id, role]));
 }

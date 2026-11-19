@@ -213,8 +213,6 @@ export function ReferralAvailabilityForm({
         data-cy="referral-availability-form"
       >
         <SheetBody>
-          {/* The sheet is the only surface: sections are split by separators,
-              not wrapped in cards, as in other CARE sheet forms. */}
           <FieldSet disabled={isPending}>
             <FieldGroup>
               <FormField
@@ -325,8 +323,6 @@ export function ReferralAvailabilityForm({
                   value={field.value}
                   onChange={field.onChange}
                   showErrors={form.formState.isSubmitted}
-                  // Set only for list-level rules; incomplete rows are
-                  // reported per row and carry no list-level message.
                   error={fieldState.error?.message}
                   disabled={isPending}
                 />

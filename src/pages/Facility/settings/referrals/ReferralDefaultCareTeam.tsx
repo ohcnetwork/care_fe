@@ -31,9 +31,6 @@ interface Props {
   description?: string;
 }
 
-// Each member is an editable row inside the parent form, like contact points
-// on the device form. Nothing is held outside `value`, so the parent's Save
-// always sees every row; incomplete rows are flagged instead of dropped.
 export function ReferralDefaultCareTeam({
   facilityId,
   organizationId,

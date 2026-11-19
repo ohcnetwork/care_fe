@@ -242,7 +242,6 @@ export default function CreateScheduleTemplateSheet({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // The schema already rejects incomplete rows; this narrows the type.
     if (!isCareTeamComplete(values.care_team)) return;
     createTemplate({
       valid_from: dateQueryString(values.valid_from),
