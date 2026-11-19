@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check } from "lucide-react";
-import { navigate, useNavigationPrompt } from "raviger";
+import { navigate } from "raviger";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -34,6 +34,7 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
 import { generateSlugValue } from "@/Utils/slug";
 
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { BasicInformationCard } from "./BasicInformationCard";
 import {
   DetailFormValues,
@@ -104,7 +105,7 @@ export function QuestionnaireCreatePage({
 
   // The sibling builder page guards unsaved edits the same way; `!isPending`
   // keeps the post-create navigate() in onSuccess from tripping the prompt.
-  useNavigationPrompt(
+  useNavigationBlocker(
     form.formState.isDirty && !isPending,
     t("unsaved_changes_warning"),
   );

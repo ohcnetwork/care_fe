@@ -2,9 +2,35 @@
 
 Frontend architecture reference for the CARE frontend (React 19 + TypeScript + Vite). See [`AGENTS.md`](../AGENTS.md) for the top-level agent guidance that links here.
 
-## Routing (Raviger)
+## Routing (TanStack Router + raviger, in migration)
 
-Routes defined in `src/Routers/routes/` (e.g., `FacilityRoutes.tsx`, `PatientRoutes.tsx`). Combined in `src/Routers/AppRouter.tsx`. Three routers: `PublicRouter`, `PatientRouter`, `AppRouter` — selected by auth state. Plugin routes injected via `usePluginRoutes()`.
+The app is moving from raviger to TanStack Router in phases. Both run at the same time:
+
+- **TanStack Router** owns the history. The route tree is file-based under `src/routes/` (`@tanstack/router-plugin`, `autoCodeSplitting: true`). The plugin generates `src/routeTree.gen.ts`; the file is committed and is regenerated on every dev/build run. `src/router.tsx` creates the router with a string-preserving search serializer (`src/lib/router/searchParams.ts`), `queryClient` in context, intent preloading and scroll restoration.
+- **Areas.** The router context holds `{ queryClient, auth }` (`src/lib/router/auth.ts`). `auth.status` is `loading`, `user` (staff), `patient` (OTP) or `anonymous`. Pathless layouts guard each area in `beforeLoad`:
+  - `_public` (sign-in, password reset, public facility pages): staff users go to `/`.
+  - `_patient` (patient portal): signed-out users go to `/login?redirect=<url>`; staff users get a not-found.
+  - `_app` (staff pages): signed-out users and patients go to `/login?redirect=<url>`.
+- **Legacy pages.** `src/routes/_app/_legacy.tsx` renders the raviger route tables in `src/Routers/AppRouter.tsx` once, for all of its children. Its `$` splat catches every staff path that has no file route yet. Its other children have no component: they carry layout flags for legacy URLs (full-screen pages, workspaces, the admin sidebar). A legacy page does not remount when the user moves to another legacy page. When an area is migrated, give its routes a component and move them out of `_legacy`.
+- **Shared URLs.** Some URLs belong to more than one area: `/`, `/session-expired` and `/licenses` (staff and public), and `/patient/home`, `/patient/$id`, `/patient/$id/$tab`, `/referrals/$referralId` and `/referrals/$referralId/respond` (staff and patient). The router matches by path only, so each of these is one route at the root. Its `beforeLoad` resolves the area from `context.auth`, and its component uses `useArea()` to pick the page. Keep new URLs area-specific where possible.
+- **Chrome.** `src/routes/__root.tsx` renders the chrome of the resolved area (`AreaChrome` in `src/Routers/AreaChrome.tsx`): the staff shell (`AppShell`), the patient shell (`PatientShell`) or the public chrome. The chrome stays mounted while the area is the same. The root shows the loading screen until the session is known.
+- **Side effects during render.** The router renders a route change inside a React transition. A page that calls `toast` (or another update of a different component) during render interrupts that transition, and the render restarts without end. Call `toast` and `navigate` in effects or event handlers.
+- **Layout flags.** Routes set `staticData` (`src/lib/router/staticData.ts`): `sidebar`, `workspace` and `navigation` for the staff shell, `patientChrome` for the patient shell, and `crumb` for breadcrumbs (`src/components/Common/Breadcrumbs.tsx`). The deepest matched route that sets a flag wins, and a flag on a layout covers its children. Read them with `useLayoutFlags()` (`src/lib/router/layoutFlags.ts`). Do not test the URL to choose a layout. Use `fullScreenPage` or `questionnaireFillPage` for pages without the sidebar.
+- **Plugin routes.** Manifest `routes` are attached to the live tree at runtime (`src/lib/router/pluginRoutes.tsx`). A core route always wins over a plugin route with the same path. A plugin route takes its layout flags from the deepest core layout route above its path (for example, `/facility/$facilityId/settings/<page>` gets the settings workspace).
+- **Back.** `goBack(fallback?)` (`src/Utils/utils.ts`) and `<BackButton>` go back when the previous history entry belongs to the app (`router.history.canGoBack()`). Otherwise they replace the URL with the fallback or the nearest parent route, so the user does not leave the app. `navigateBackFrom()` (`src/Utils/navigationTrail.ts`) goes back past a group of pages (for example, all of an encounter's tabs) with `history.go(-n)`. It keys the trail by the router's history index.
+- **Unsaved changes.** Use `useNavigationBlocker(when, message)` (`src/hooks/useNavigationBlocker.ts`), a `useBlocker` wrapper. It also covers reload and closing the tab.
+- Federation shares `@tanstack/react-router`, so a plugin can use the host router (`useNavigate`, `useLocation`, `useBlocker`, `useCanGoBack`). Plugin code does not know the core route tree. Use an absolute `to`, or add `unsafeRelative: "path"` to resolve a relative `to` from the URL path. Without it, a relative `to` resolves from the nearest match, and for a legacy page that match is the `$` splat.
+
+**raviger compatibility shim.** Every `import ... from "raviger"` (core, local plugins, and the federated shared module) resolves to `src/compat/raviger.tsx` through a Vite alias and a `tsconfig` path. The shim keeps raviger's API but reads location from the router state and sends every write (`navigate`, `Link`, `useQueryParams` setters, `Redirect`, `useRedirect`) through `router.navigate`. Do not call `window.history.pushState` directly: it breaks the router's back-stack index.
+
+The shim keeps raviger's timing where legacy code depends on it:
+
+- `navigate()` flushes the history write, so `window.location` is current when it returns.
+- A change that renders in the same route (a query change, or one legacy page to another under `_legacy`) is visible at once, and so are its layout flags. A change to a different route becomes visible when the router commits the new matches, so legacy route tables do not flash "not found".
+- While the router loads a page for a different route, the root route makes the previous page `inert`, so a click cannot land on it and cancel the navigation (raviger removed the old page at once). `isShowingPreviousPage` in `src/lib/router/previousPage.ts` holds the rule for the shim and the guard.
+- A second `navigate()` to the URL that is already in flight is skipped, so a page that navigates during render does not restart the load.
+
+Legacy route tables look like this until their area is migrated:
 
 ```typescript
 const FacilityRoutes: AppRoutes = {
@@ -12,7 +38,9 @@ const FacilityRoutes: AppRoutes = {
 };
 ```
 
-Use `navigate()` from raviger for programmatic navigation.
+Pages still under a nested raviger table write links relative to the table's `basePath`. A migrated layout route keeps that context with the shim's `RouterProvider` (see `src/routes/_app/facility.$facilityId.settings/route.tsx`) until the links are rewritten.
+
+Use `navigate()` from raviger (the shim) in legacy code. Use `useNavigate()` and `<Link to>` from `@tanstack/react-router` in migrated routes.
 
 ## API Layer (TanStack Query + custom wrappers)
 
@@ -105,7 +133,7 @@ Detailed plugin references:
 
 ## Auth Flow
 
-JWT tokens in localStorage. `AuthUserProvider` handles login/logout, token refresh (every 5 minutes), 2FA, and cross-tab session sync. Patient login uses separate OTP-based flow via `PatientRouter`.
+JWT tokens in localStorage. `AuthUserProvider` (outside the router, in `src/App.tsx`) handles login/logout, token refresh (every 5 minutes), 2FA, and cross-tab session sync. It registers the session status that the route guards read, and calls `router.invalidate()` when the status changes. Patients sign in with an OTP; their pages are in the `_patient` area.
 
 ## Key Directories
 
