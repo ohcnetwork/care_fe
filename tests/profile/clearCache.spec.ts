@@ -159,7 +159,8 @@ for (const action of ["Clear Cache", "Update Now"]) {
         page.getByRole("button", { name: action, exact: true }),
       ).toBeVisible();
     }
-    const reloaded = page.waitForEvent("domcontentloaded");
+    // Cache maintenance can wait for the split build's initial precache on CI.
+    const reloaded = page.waitForEvent("domcontentloaded", { timeout: 30_000 });
     await page.getByRole("button", { name: action, exact: true }).click();
     await reloaded;
     await expect(
