@@ -29,6 +29,7 @@ import {
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   BringToFront,
   Check,
@@ -41,7 +42,6 @@ import {
   RotateCcw,
   TicketCheck,
 } from "lucide-react";
-import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -322,8 +322,12 @@ function OngoingQueueTokenCardInner({
         >
           <div className="flex items-center justify-between gap-2 md:w-auto w-full min-w-0">
             <Link
-              basePath="/"
-              href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+              to="/facility/$facilityId/queue/$queueId/token/$tokenId"
+              params={{
+                facilityId,
+                queueId: token.queue.id,
+                tokenId: token.id,
+              }}
               className="font-semibold hover:underline transition-colors min-w-0"
             >
               <span className="font-semibold flex items-center gap-1 min-w-0">
@@ -352,8 +356,12 @@ function OngoingQueueTokenCardInner({
           <div className="flex w-full md:w-auto items-center flex-wrap gap-2 md:gap-3">
             <Button variant="outline" asChild size="sm">
               <Link
-                basePath="/"
-                href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+                to="/facility/$facilityId/queue/$queueId/token/$tokenId"
+                params={{
+                  facilityId,
+                  queueId: token.queue.id,
+                  tokenId: token.id,
+                }}
               >
                 {t("encounter")}
               </Link>

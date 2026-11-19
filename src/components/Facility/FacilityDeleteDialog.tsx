@@ -5,8 +5,6 @@ import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { buttonVariants } from "@/components/ui/button";
-
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 
 import facilityApi from "@/types/facility/facilityApi";
@@ -59,12 +57,7 @@ const FacilityDeleteDialog = ({
   });
 
   const defaultTrigger = (
-    <Button
-      variant="destructive"
-      size="sm"
-      type="button"
-      className={buttonVariants({ variant: "destructive", size: "sm" })}
-    >
+    <Button variant="destructive" size="sm" type="button">
       <Trash2Icon className="mr-2 size-4" />
       {t("delete_facility")}
     </Button>

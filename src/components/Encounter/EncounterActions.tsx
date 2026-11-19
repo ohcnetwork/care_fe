@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw, Settings } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -12,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { navigate } from "@/lib/router/navigate";
 import {
   EncounterListRead,
   EncounterRead,
@@ -38,9 +38,15 @@ export function EncounterActions({ encounter }: EncounterActionsProps) {
       toast.success(t("encounter_restarted_successfully"));
       queryClient.invalidateQueries({ queryKey: ["encounters"] });
       queryClient.invalidateQueries({ queryKey: ["encounter", encounter.id] });
-      navigate(
-        `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`,
-      );
+      navigate({
+        to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
+        params: {
+          facilityId: encounter.facility.id,
+          patientId: encounter.patient.id,
+          encounterId: encounter.id,
+          tab: "updates",
+        },
+      });
     },
     onError: () => {
       toast.error(t("failed_to_restart_encounter"));

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -22,11 +22,11 @@ import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading"
 import query from "@/Utils/request/query";
 import BackButton from "@/components/Common/BackButton";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { navigate } from "@/lib/router/navigate";
 import { PRODUCT_STATUS_COLORS } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import { PRODUCT_KNOWLEDGE_TYPE_COLORS } from "@/types/inventory/productKnowledge/productKnowledge";
 import { ArrowLeft } from "lucide-react";
-import { Link } from "raviger";
 
 interface Props {
   facilityId: string;
@@ -66,7 +66,12 @@ export default function ProductView({ facilityId, productId }: Props) {
           <Button
             variant="outline"
             className="mt-4"
-            onClick={() => navigate(`/facility/${facilityId}/settings/product`)}
+            onClick={() =>
+              navigate({
+                to: "/facility/$facilityId/settings/product",
+                params: { facilityId },
+              })
+            }
           >
             <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
             {t("back_to_list")}
@@ -103,9 +108,10 @@ export default function ProductView({ facilityId, productId }: Props) {
           <Button
             variant="outline"
             onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/product/${product.id}/edit`,
-              )
+              navigate({
+                to: "/facility/$facilityId/settings/product/$id/edit",
+                params: { facilityId, id: product.id },
+              })
             }
           >
             <CareIcon icon="l-pen" className="mr-2 size-4" />
@@ -190,9 +196,13 @@ export default function ProductView({ facilityId, productId }: Props) {
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/settings/product_knowledge/${product.product_knowledge.slug}`,
-                      )
+                      navigate({
+                        to: "/facility/$facilityId/settings/product_knowledge/$slug",
+                        params: {
+                          facilityId,
+                          slug: product.product_knowledge.slug,
+                        },
+                      })
                     }
                   >
                     <CareIcon icon="l-eye" className="mr-2 size-4" />
@@ -226,8 +236,11 @@ export default function ProductView({ facilityId, productId }: Props) {
                   </div>
                   <Button variant="outline" size="sm" asChild>
                     <Link
-                      basePath="/"
-                      href={`/facility/${facilityId}/settings/charge_item_definitions/${product.charge_item_definition.slug}`}
+                      to="/facility/$facilityId/settings/charge_item_definitions/$slug"
+                      params={{
+                        facilityId,
+                        slug: product.charge_item_definition.slug,
+                      }}
                     >
                       <CareIcon icon="l-eye" className="mr-2 size-4" />
                       {t("view_details")}

@@ -1,8 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { buttonVariants } from "@/components/ui/button";
 
 import {
   ACTIVE_MEDICATION_STATUSES,
@@ -104,7 +101,7 @@ export const DiscontinueConfirmDialog: React.FC<
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isPending}
-            className={cn(buttonVariants({ variant: "destructive" }))}
+            variant="destructive"
           >
             {isPending ? t("discontinuing") : t("discontinue")}
           </AlertDialogAction>

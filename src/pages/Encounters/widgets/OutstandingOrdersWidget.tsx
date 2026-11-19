@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { CircleAlert, CircleCheck, CirclePause } from "lucide-react";
-import { Link } from "raviger";
+import { Link as RavigerLink } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -278,15 +279,16 @@ export function OutstandingOrdersWidget({
                         {t(style.labelKey)}
                       </span>
                       {report ? (
-                        <Link
+                        <RavigerLink
                           href={`${reportBase}/${report.id}`}
                           className="text-xs font-medium text-primary-700 underline-offset-2 hover:underline"
                         >
                           {t("view_report")}
-                        </Link>
+                        </RavigerLink>
                       ) : sameFacility ? (
                         <Link
-                          href={`/facility/${facilityId}/service_requests/${order.id}`}
+                          to="/facility/$facilityId/service_requests/$serviceRequestId"
+                          params={{ facilityId, serviceRequestId: order.id }}
                           className="text-xs font-medium text-primary-700 underline-offset-2 hover:underline"
                         >
                           {t("check_status")}

@@ -70,11 +70,14 @@ export function useDeliveryRowItem({
     is_tax_inclusive: isTaxInclusive,
     is_total_purchase_price_edited: isTotalPurchasePriceEdited,
     is_charge_item_edited: isChargeItemEdited,
+    is_manually_edited: isManuallyEdited,
     _created_charge_item_definition: createdChargeItemDefinition,
     _created_product: createdProduct,
     replaces_delivery: replacesDelivery,
   } = item || {};
   const isReplacement = Boolean(replacesDelivery);
+  // Plugins set the form flag directly, bypassing markAsEdited
+  const isNewProduct = isCreatingNew || Boolean(isManuallyEdited);
 
   // Helper to set a form field value
   const setField = useCallback(
@@ -244,10 +247,11 @@ export function useDeliveryRowItem({
 
   // Auto-fill from last product when product knowledge is selected
   useEffect(() => {
-    const isManuallyEdited = form.getValues(
+    // getValues (not the watched value) so this effect doesn't re-run on edits
+    const manuallyEditedNow = form.getValues(
       `items.${index}.is_manually_edited`,
     );
-    if (products.length > 0 && !suppliedItem && !isManuallyEdited) {
+    if (products.length > 0 && !suppliedItem && !manuallyEditedNow) {
       fillFromProduct(products[0]);
     }
   }, [products, suppliedItem, index, form, fillFromProduct]);
@@ -255,10 +259,10 @@ export function useDeliveryRowItem({
   // Whether category selection is needed for charge item definition
   const needsCategorySelection = useMemo(() => {
     if (!productKnowledge) return false;
-    if (isCreatingNew) return true;
+    if (isNewProduct) return true;
     if (suppliedItem?.charge_item_definition?.category) return false;
     return products.length === 0;
-  }, [productKnowledge, suppliedItem, products.length, isCreatingNew]);
+  }, [productKnowledge, suppliedItem, products.length, isNewProduct]);
 
   // Available tax components from facility
   const availableTaxes = useMemo(
@@ -427,7 +431,7 @@ export function useDeliveryRowItem({
 
     // Computed values
     needsCategorySelection,
-    isCreatingNew,
+    isCreatingNew: isNewProduct,
     isLoadingProducts,
     isLoadingInventory,
     products,

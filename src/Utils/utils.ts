@@ -4,12 +4,12 @@ import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
+import { getRouter } from "@/compat/routerRef";
 import {
   PatientListRead,
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import { navigate } from "raviger";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -384,11 +384,31 @@ export function deepFreeze<T>(obj: T): T {
   return obj;
 }
 
+/**
+ * Goes back in the browser history when the previous entry belongs to this
+ * app. Otherwise it replaces the current entry with `fallback`, or with the
+ * nearest parent route, so the user never leaves the app.
+ */
 export const goBack = (fallback?: string) => {
-  if (window.history.length > 1) {
-    return history.back();
-  } else if (fallback) {
-    return navigate(fallback);
+  const router = getRouter();
+  if (router.history.canGoBack()) {
+    router.history.back();
+    return;
   }
-  history.back();
+  const matches = router.state.matches;
+  const current = matches.at(-1)?.pathname;
+  const parent = matches
+    .slice()
+    .reverse()
+    .find((match) => match.pathname !== current)?.pathname;
+  void router.navigate({ to: fallback ?? parent ?? "/", replace: true });
 };
+
+/**
+ * Generates a timestamp-suffixed alternate identifier, e.g. for grouping
+ * resources (prescriptions, dispense orders) created in a single submission.
+ *
+ * @example generateAlternateIdentifier(encounterId) // "<id>-2025-01-01T10-00-00-000Z"
+ */
+export const generateAlternateIdentifier = (prefix?: string) =>
+  `${prefix}-${new Date().toISOString().replace(/[:.]/g, "-")}`;

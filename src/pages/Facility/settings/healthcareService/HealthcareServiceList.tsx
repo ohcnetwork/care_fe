@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -14,6 +13,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 import { ServiceCard } from "./ServiceCard";
@@ -57,9 +57,10 @@ export default function HealthcareServiceList({
           </div>
           <Button
             onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/healthcare_services/new`,
-              )
+              navigate({
+                to: "/facility/$facilityId/settings/healthcare_services/new",
+                params: { facilityId },
+              })
             }
             className="w-full md:w-auto mt-2 md:mt-0"
           >
