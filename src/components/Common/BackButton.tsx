@@ -1,6 +1,6 @@
-import { useMatches, useRouter } from "@tanstack/react-router";
-
 import { Button, ButtonSize, ButtonVariant } from "@/components/ui/button";
+
+import { goBack } from "@/Utils/utils";
 
 type BackButtonProps = {
   children: React.ReactNode;
@@ -15,11 +15,7 @@ type BackButtonProps = {
   fallback?: string;
 } & Omit<React.ComponentProps<"button">, "onClick">;
 
-/**
- * Goes back in the browser history when the previous entry belongs to this
- * app. Otherwise it replaces the current entry with `fallback` or the
- * nearest parent route, so the user never leaves the app.
- */
+/** A button that runs `goBack()`: it never leaves the app. */
 export default function BackButton({
   children,
   variant = "outline",
@@ -29,28 +25,12 @@ export default function BackButton({
   fallback,
   ...props
 }: BackButtonProps) {
-  const router = useRouter();
-  const matches = useMatches();
-
-  const handleClick = () => {
-    if (router.history.canGoBack()) {
-      router.history.back();
-      return;
-    }
-    const current = matches.at(-1)?.pathname;
-    const parent = matches
-      .slice()
-      .reverse()
-      .find((match) => match.pathname !== current)?.pathname;
-    void router.navigate({ to: fallback ?? parent ?? "/", replace: true });
-  };
-
   return (
     <Button
       {...props}
       type="button"
       variant={variant}
-      onClick={handleClick}
+      onClick={() => goBack(fallback)}
       className={className}
       size={size}
       disabled={disabled}
