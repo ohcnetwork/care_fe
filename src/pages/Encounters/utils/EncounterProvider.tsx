@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { createContext, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import { getPermissions, Permissions } from "@/common/Permissions";
 
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
+import { navigate } from "@/lib/router/navigate";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
 import {
@@ -204,9 +205,15 @@ export function EncounterProvider({
         queryKey: ["encounter", selectedEncounter?.id],
       });
       if (selectedEncounter) {
-        navigate(
-          `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/updates`,
-        );
+        navigate({
+          to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
+          params: {
+            facilityId: selectedEncounter.facility.id,
+            patientId: selectedEncounter.patient.id,
+            encounterId: selectedEncounter.id,
+            tab: "updates",
+          },
+        });
       }
     },
     onError: () => {
@@ -246,9 +253,16 @@ export function EncounterProvider({
               return;
             }
             if (encounterRequiresDischarge(selectedEncounter)) {
-              navigate(
-                `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/questionnaire/encounter?toDischarge=true`,
-              );
+              navigate({
+                to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId",
+                params: {
+                  facilityId: selectedEncounter.facility.id,
+                  patientId: selectedEncounter.patient.id,
+                  encounterId: selectedEncounter.id,
+                  questionnaireId: "encounter",
+                },
+                search: { toDischarge: "true" },
+              });
               return;
             }
             setCompleteEverything(completeEverythingToMark);

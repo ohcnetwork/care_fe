@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { navigate } from "@/lib/router/navigate";
 import {
   ServiceRequestReadSpec,
   Status,
@@ -15,7 +16,6 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Ban, CircleAlert, MoreVertical } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -63,9 +63,14 @@ export function ServiceRequestActions({
               variant="primary"
               className="font-semibold"
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/patient/${request.encounter.patient.id}/service_request/${serviceRequestId}/diagnostic_reports/print`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print",
+                  params: {
+                    facilityId,
+                    patientId: request.encounter.patient.id,
+                    serviceRequestId,
+                  },
+                })
               }
             >
               {t("view_full_report")}

@@ -1,7 +1,6 @@
 import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -36,6 +35,7 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
+import { navigate } from "@/lib/router/navigate";
 import { OTP_LENGTH } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
 
@@ -99,7 +99,7 @@ export function ForgotPasswordPhone({
       localStorage.removeItem(LocalStorageKeys.refreshToken);
       toast.success(t("password_reset_success"));
       onSuccess();
-      navigate("/login");
+      navigate({ to: "/login" });
     },
     onError: (error) => {
       if (!(error instanceof HTTPError)) {

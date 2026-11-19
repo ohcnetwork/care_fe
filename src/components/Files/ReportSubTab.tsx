@@ -34,6 +34,7 @@ import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
 
 import queryClient from "@/Utils/request/queryClient";
+import { navigate } from "@/lib/router/navigate";
 import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateReportSheet";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -41,7 +42,6 @@ import {
   ReportReadList,
   ReportType,
 } from "@/types/emr/report/report";
-import { navigate } from "raviger";
 import { toast } from "sonner";
 
 interface ReportTabProps {
@@ -102,9 +102,10 @@ export function ReportSubTab({
 
   const handleView = (report: ReportReadList) => {
     if (canNavigateToPreview) {
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/report/${report.id}`,
-      );
+      navigate({
+        to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId",
+        params: { facilityId, patientId, encounterId, reportId: report.id },
+      });
     } else {
       viewFile(report);
     }

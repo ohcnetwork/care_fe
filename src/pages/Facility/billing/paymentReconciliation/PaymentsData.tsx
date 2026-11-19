@@ -1,8 +1,8 @@
 import { CheckedState } from "@/components/ui/checkbox";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { ArrowRightLeft, EyeIcon } from "lucide-react";
-import { Link } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -399,7 +399,11 @@ export default function PaymentsData({
                     <TableCell>
                       <Button variant="link" asChild>
                         <Link
-                          href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}
+                          to="/facility/$facilityId/billing/account/$accountId"
+                          params={{
+                            facilityId,
+                            accountId: payment.account?.id,
+                          }}
                           className="hover:text-primary "
                           target="_blank"
                           rel="noopener noreferrer"
@@ -434,7 +438,11 @@ export default function PaymentsData({
                     {payment.target_invoice && (
                       <Button variant="link" asChild>
                         <Link
-                          href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice?.id}`}
+                          to="/facility/$facilityId/billing/invoices/$invoiceId"
+                          params={{
+                            facilityId,
+                            invoiceId: payment.target_invoice?.id,
+                          }}
                           className="hover:text-primary underline underline-offset-2"
                           target="_blank"
                           rel="noopener noreferrer"
@@ -480,7 +488,11 @@ export default function PaymentsData({
                   <TableCell>
                     <Button variant="outline" className="font-semibold" asChild>
                       <Link
-                        href={`/facility/${facilityId}/billing/payments/${payment.id}`}
+                        to="/facility/$facilityId/billing/payments/$paymentReconciliationId"
+                        params={{
+                          facilityId,
+                          paymentReconciliationId: payment.id,
+                        }}
                       >
                         <EyeIcon />
                         {t("view")}

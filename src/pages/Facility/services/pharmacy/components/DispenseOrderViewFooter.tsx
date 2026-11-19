@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import {
   ArrowLeftRight,
   BadgeCheck,
@@ -8,7 +9,7 @@ import {
   RotateCcw,
   WrenchIcon,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { navigate as ravigerNavigate } from "raviger";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -52,6 +53,7 @@ import {
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
 
+import { navigate } from "@/lib/router/navigate";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface Props {
@@ -142,9 +144,10 @@ export function DispenseOrderViewFooter({
       {
         onSuccess: () => {
           setPutOnHoldDialogOpen(false);
-          navigate(
-            `/facility/${facilityId}/locations/${locationId}/medication_requests`,
-          );
+          navigate({
+            to: "/facility/$facilityId/locations/$locationId/medication_requests",
+            params: { facilityId, locationId },
+          });
         },
       },
     );
@@ -274,7 +277,7 @@ export function DispenseOrderViewFooter({
                 locationId={locationId}
                 patient={dispenseOrder.patient}
                 onSuccess={(deliveryOrder) => {
-                  navigate(
+                  ravigerNavigate(
                     `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}/?dispenseOrderIds=${dispenseOrder.id}`,
                   );
                 }}
@@ -289,9 +292,14 @@ export function DispenseOrderViewFooter({
             <Button
               variant="outline"
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}/print`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/print",
+                  params: {
+                    facilityId,
+                    locationId,
+                    dispenseOrderId: dispenseOrder.id,
+                  },
+                })
               }
             >
               <PrinterIcon className="size-4" />
@@ -301,8 +309,8 @@ export function DispenseOrderViewFooter({
             <ButtonGroup>
               <Button variant="primary" asChild>
                 <Link
-                  href={`/facility/${facilityId}/locations/${locationId}/medication_requests`}
-                  basePath="/"
+                  to="/facility/$facilityId/locations/$locationId/medication_requests"
+                  params={{ facilityId, locationId }}
                 >
                   {t("prescription_queue")}
                   <ShortcutBadge actionId="cancel-action" />
@@ -322,16 +330,16 @@ export function DispenseOrderViewFooter({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
                     <Link
-                      href={`/facility/${facilityId}/locations/${locationId}/medication_dispense`}
-                      basePath="/"
+                      to="/facility/$facilityId/locations/$locationId/medication_dispense"
+                      params={{ facilityId, locationId }}
                     >
                       {t("go_to_dispenses")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
-                      href={`/facility/${facilityId}/locations/${locationId}/medication_return`}
-                      basePath="/"
+                      to="/facility/$facilityId/locations/$locationId/medication_return"
+                      params={{ facilityId, locationId }}
                     >
                       {t("medicine_returns")}
                     </Link>

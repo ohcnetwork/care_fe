@@ -352,16 +352,21 @@ export default function DeviceShow({
                 </h3>
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                   {device.current_encounter ? (
-                    <RavigerLink
-                      basePath="/"
-                      href={`/facility/${device.current_encounter.facility.id}/patient/${device.current_encounter.patient.id}/encounter/${device.current_encounter.id}/updates`}
+                    <Link
+                      to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
+                      params={{
+                        facilityId: device.current_encounter.facility.id,
+                        patientId: device.current_encounter.patient.id,
+                        encounterId: device.current_encounter.id,
+                        tab: "updates",
+                      }}
                       className={linkClassName}
                     >
                       <span className="break-words">
                         {device.current_encounter.patient.name}
                       </span>
                       <ExternalLink className="size-3.5 shrink-0" />
-                    </RavigerLink>
+                    </Link>
                   ) : (
                     <span className="text-sm text-neutral-600">
                       {t("no_encounter_associated")}

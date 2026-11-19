@@ -5,6 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { t as i18nT } from "i18next";
 import {
   CheckIcon,
@@ -14,7 +15,7 @@ import {
   SquareArrowOutUpRight,
   XIcon,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { navigate } from "raviger";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -442,7 +443,8 @@ export function CreateInvoicePage({
                     {t("account")}
                   </span>
                   <Link
-                    href={`/facility/${facilityId}/billing/account/${accountId}`}
+                    to="/facility/$facilityId/billing/account/$accountId"
+                    params={{ facilityId, accountId }}
                   >
                     <div className="font-semibold text-gray-950 underline">
                       {account.name}

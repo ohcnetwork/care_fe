@@ -1,7 +1,7 @@
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import duoToneIcons from "@/CAREUI/icons/DuoTonePaths.json";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -207,8 +207,8 @@ export default function SettingsHealthcareServiceShow({
                   {healthcareService.locations.map((location) => (
                     <Link
                       key={location.id}
-                      href={`/facility/${facilityId}/locations/${location.id}/medication_requests`}
-                      basePath="/"
+                      to="/facility/$facilityId/locations/$locationId/medication_requests"
+                      params={{ facilityId, locationId: location.id }}
                     >
                       <div className="flex items-center justify-between rounded-lg border p-3">
                         <div>
