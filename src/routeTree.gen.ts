@@ -16,6 +16,7 @@ import { Route as PublicRouteImport } from "./routes/_public";
 import { Route as LicensesRouteImport } from "./routes/licenses";
 import { Route as SessionExpiredRouteImport } from "./routes/session-expired";
 import { Route as AppLegacyRouteImport } from "./routes/_app/_legacy";
+import { Route as AppAdminRouteImport } from "./routes/_app/admin";
 import { Route as PatientNearby_facilitiesRouteImport } from "./routes/_patient/nearby_facilities";
 import { Route as Public2faRouteImport } from "./routes/_public/2fa";
 import { Route as PublicFacilitiesRouteImport } from "./routes/_public/facilities";
@@ -24,7 +25,7 @@ import { Route as PublicInvalidResetRouteImport } from "./routes/_public/invalid
 import { Route as PublicLoginRouteImport } from "./routes/_public/login";
 import { Route as PatientHomeRouteImport } from "./routes/patient.home";
 import { Route as AppLegacySplatRouteImport } from "./routes/_app/_legacy/$";
-import { Route as AppLegacyAdminRouteImport } from "./routes/_app/_legacy/admin";
+import { Route as AppAdminSplatRouteImport } from "./routes/_app/admin.$";
 import { Route as AppOrganizationIndexRouteImport } from "./routes/_app/organization.index";
 import { Route as AppUserIndexRouteImport } from "./routes/_app/user.index";
 import { Route as AppUserTabRouteImport } from "./routes/_app/user.$tab";
@@ -34,7 +35,26 @@ import { Route as PatientIdIndexRouteImport } from "./routes/patient.$id.index";
 import { Route as PatientIdTabRouteImport } from "./routes/patient.$id.$tab";
 import { Route as ReferralsReferralIdIndexRouteImport } from "./routes/referrals.$referralId.index";
 import { Route as ReferralsReferralIdRespondRouteImport } from "./routes/referrals.$referralId.respond";
-import { Route as AppLegacyAdminSplatRouteImport } from "./routes/_app/_legacy/admin.$";
+import { Route as AppAdminActionsIndexRouteImport } from "./routes/_app/admin.actions.index";
+import { Route as AppAdminActionsIdRouteImport } from "./routes/_app/admin.actions.$id";
+import { Route as AppAdminActionsNewRouteImport } from "./routes/_app/admin.actions.new";
+import { Route as AppAdminAppsIndexRouteImport } from "./routes/_app/admin.apps.index";
+import { Route as AppAdminAppsSlugRouteImport } from "./routes/_app/admin.apps.$slug";
+import { Route as AppAdminImmunizationPoliciesIndexRouteImport } from "./routes/_app/admin.immunization-policies.index";
+import { Route as AppAdminImmunizationPoliciesIdRouteImport } from "./routes/_app/admin.immunization-policies.$id";
+import { Route as AppAdminImmunizationPoliciesNewRouteImport } from "./routes/_app/admin.immunization-policies.new";
+import { Route as AppAdminPatient_identifier_configIndexRouteImport } from "./routes/_app/admin.patient_identifier_config.index";
+import { Route as AppAdminPatient_identifier_configNewRouteImport } from "./routes/_app/admin.patient_identifier_config.new";
+import { Route as AppAdminQuestionnairesIndexRouteImport } from "./routes/_app/admin.questionnaires.index";
+import { Route as AppAdminQuestionnairesNewRouteImport } from "./routes/_app/admin.questionnaires.new";
+import { Route as AppAdminRbacPermissionsRouteImport } from "./routes/_app/admin.rbac.permissions";
+import { Route as AppAdminRbacRolesRouteImport } from "./routes/_app/admin.rbac.roles";
+import { Route as AppAdminTag_configIndexRouteImport } from "./routes/_app/admin.tag_config.index";
+import { Route as AppAdminTag_configIdRouteImport } from "./routes/_app/admin.tag_config.$id";
+import { Route as AppAdminValuesetsIndexRouteImport } from "./routes/_app/admin.valuesets.index";
+import { Route as AppAdminValuesetsCreateRouteImport } from "./routes/_app/admin.valuesets.create";
+import { Route as AppAdminWorkspacesIndexRouteImport } from "./routes/_app/admin.workspaces.index";
+import { Route as AppAdminWorkspacesCreateRouteImport } from "./routes/_app/admin.workspaces.create";
 import { Route as AppFacilityFacilityIdQueuesRouteImport } from "./routes/_app/facility.$facilityId.queues";
 import { Route as AppFacilityFacilityIdSettingsRouteRouteImport } from "./routes/_app/facility.$facilityId.settings/route";
 import { Route as AppOrganizationIdIndexRouteImport } from "./routes/_app/organization.$id.index";
@@ -51,6 +71,18 @@ import { Route as AppUsersUsernameIndexRouteImport } from "./routes/_app/users.$
 import { Route as AppUsersUsernameTabRouteImport } from "./routes/_app/users.$username.$tab";
 import { Route as AppLegacyFacilityFacilityIdTemplateRouteImport } from "./routes/_app/_legacy/facility.$facilityId.template";
 import { Route as AppLegacyPatientPatientIdQuestionnaireRouteImport } from "./routes/_app/_legacy/patient.$patientId.questionnaire";
+import { Route as AppAdminOrganizationsGovtIndexRouteImport } from "./routes/_app/admin.organizations.govt.index";
+import { Route as AppAdminOrganizationsGovtIdRouteImport } from "./routes/_app/admin.organizations.govt.$id";
+import { Route as AppAdminOrganizationsProduct_supplierIndexRouteImport } from "./routes/_app/admin.organizations.product_supplier.index";
+import { Route as AppAdminOrganizationsProduct_supplierIdRouteImport } from "./routes/_app/admin.organizations.product_supplier.$id";
+import { Route as AppAdminOrganizationsRoleIndexRouteImport } from "./routes/_app/admin.organizations.role.index";
+import { Route as AppAdminOrganizationsRoleIdRouteImport } from "./routes/_app/admin.organizations.role.$id";
+import { Route as AppAdminPatient_identifier_configIdIndexRouteImport } from "./routes/_app/admin.patient_identifier_config.$id.index";
+import { Route as AppAdminPatient_identifier_configIdEditRouteImport } from "./routes/_app/admin.patient_identifier_config.$id.edit";
+import { Route as AppAdminQuestionnairesIdIndexRouteImport } from "./routes/_app/admin.questionnaires.$id.index";
+import { Route as AppAdminQuestionnairesIdEditRouteImport } from "./routes/_app/admin.questionnaires.$id.edit";
+import { Route as AppAdminValuesetsIdEditRouteImport } from "./routes/_app/admin.valuesets.$id.edit";
+import { Route as AppAdminWorkspacesIdEditRouteImport } from "./routes/_app/admin.workspaces.$id.edit";
 import { Route as AppFacilityFacilityIdAppointmentsIndexRouteImport } from "./routes/_app/facility.$facilityId.appointments.index";
 import { Route as AppFacilityFacilityIdAppointmentsPrintRouteImport } from "./routes/_app/facility.$facilityId.appointments.print";
 import { Route as AppFacilityFacilityIdLocationsLocationIdRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId";
@@ -83,9 +115,9 @@ import { Route as AppFacilityFacilityIdSettingsWorkspacesRouteImport } from "./r
 import { Route as AppFacilityFacilityIdUsersIndexRouteImport } from "./routes/_app/facility.$facilityId.users.index";
 import { Route as AppOrganizationIdSettingsReferralsRouteImport } from "./routes/_app/organization.$id.settings.referrals";
 import { Route as AppResponsibilitiesIdSettingsReferralsRouteImport } from "./routes/_app/responsibilities.$id.settings.referrals";
-import { Route as AppLegacyAdminQuestionnairesIdEditRouteImport } from "./routes/_app/_legacy/admin.questionnaires.$id.edit";
 import { Route as AppLegacyFacilityFacilityIdTemplateSplatRouteImport } from "./routes/_app/_legacy/facility.$facilityId.template.$";
 import { Route as AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRouteImport } from "./routes/_app/_legacy/patient.$patientId.questionnaire.$questionnaireId";
+import { Route as AppAdminQuestionnairesIdVersionsRevisionIdRouteImport } from "./routes/_app/admin.questionnaires.$id.versions.$revisionId";
 import { Route as AppFacilityFacilityIdBillingAccountIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.account.index";
 import { Route as AppFacilityFacilityIdBillingInvoicesIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.invoices.index";
 import { Route as AppFacilityFacilityIdBillingPaymentsIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.payments.index";
@@ -300,6 +332,11 @@ const AppLegacyRoute = AppLegacyRouteImport.update({
   id: "/_legacy",
   getParentRoute: () => AppRoute,
 } as any);
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: "/admin",
+  path: "/admin",
+  getParentRoute: () => AppRoute,
+} as any);
 const PatientNearby_facilitiesRoute =
   PatientNearby_facilitiesRouteImport.update({
     id: "/nearby_facilities",
@@ -341,10 +378,10 @@ const AppLegacySplatRoute = AppLegacySplatRouteImport.update({
   path: "/$",
   getParentRoute: () => AppLegacyRoute,
 } as any);
-const AppLegacyAdminRoute = AppLegacyAdminRouteImport.update({
-  id: "/admin",
-  path: "/admin",
-  getParentRoute: () => AppLegacyRoute,
+const AppAdminSplatRoute = AppAdminSplatRouteImport.update({
+  id: "/$",
+  path: "/$",
+  getParentRoute: () => AppAdminRoute,
 } as any);
 const AppOrganizationIndexRoute = AppOrganizationIndexRouteImport.update({
   id: "/organization/",
@@ -394,11 +431,114 @@ const ReferralsReferralIdRespondRoute =
     path: "/referrals/$referralId/respond",
     getParentRoute: () => rootRouteImport,
   } as any);
-const AppLegacyAdminSplatRoute = AppLegacyAdminSplatRouteImport.update({
-  id: "/$",
-  path: "/$",
-  getParentRoute: () => AppLegacyAdminRoute,
+const AppAdminActionsIndexRoute = AppAdminActionsIndexRouteImport.update({
+  id: "/actions/",
+  path: "/actions/",
+  getParentRoute: () => AppAdminRoute,
 } as any);
+const AppAdminActionsIdRoute = AppAdminActionsIdRouteImport.update({
+  id: "/actions/$id",
+  path: "/actions/$id",
+  getParentRoute: () => AppAdminRoute,
+} as any);
+const AppAdminActionsNewRoute = AppAdminActionsNewRouteImport.update({
+  id: "/actions/new",
+  path: "/actions/new",
+  getParentRoute: () => AppAdminRoute,
+} as any);
+const AppAdminAppsIndexRoute = AppAdminAppsIndexRouteImport.update({
+  id: "/apps/",
+  path: "/apps/",
+  getParentRoute: () => AppAdminRoute,
+} as any);
+const AppAdminAppsSlugRoute = AppAdminAppsSlugRouteImport.update({
+  id: "/apps/$slug",
+  path: "/apps/$slug",
+  getParentRoute: () => AppAdminRoute,
+} as any);
+const AppAdminImmunizationPoliciesIndexRoute =
+  AppAdminImmunizationPoliciesIndexRouteImport.update({
+    id: "/immunization-policies/",
+    path: "/immunization-policies/",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminImmunizationPoliciesIdRoute =
+  AppAdminImmunizationPoliciesIdRouteImport.update({
+    id: "/immunization-policies/$id",
+    path: "/immunization-policies/$id",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminImmunizationPoliciesNewRoute =
+  AppAdminImmunizationPoliciesNewRouteImport.update({
+    id: "/immunization-policies/new",
+    path: "/immunization-policies/new",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminPatient_identifier_configIndexRoute =
+  AppAdminPatient_identifier_configIndexRouteImport.update({
+    id: "/patient_identifier_config/",
+    path: "/patient_identifier_config/",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminPatient_identifier_configNewRoute =
+  AppAdminPatient_identifier_configNewRouteImport.update({
+    id: "/patient_identifier_config/new",
+    path: "/patient_identifier_config/new",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminQuestionnairesIndexRoute =
+  AppAdminQuestionnairesIndexRouteImport.update({
+    id: "/questionnaires/",
+    path: "/questionnaires/",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminQuestionnairesNewRoute =
+  AppAdminQuestionnairesNewRouteImport.update({
+    id: "/questionnaires/new",
+    path: "/questionnaires/new",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminRbacPermissionsRoute = AppAdminRbacPermissionsRouteImport.update({
+  id: "/rbac/permissions",
+  path: "/rbac/permissions",
+  getParentRoute: () => AppAdminRoute,
+} as any);
+const AppAdminRbacRolesRoute = AppAdminRbacRolesRouteImport.update({
+  id: "/rbac/roles",
+  path: "/rbac/roles",
+  getParentRoute: () => AppAdminRoute,
+} as any);
+const AppAdminTag_configIndexRoute = AppAdminTag_configIndexRouteImport.update({
+  id: "/tag_config/",
+  path: "/tag_config/",
+  getParentRoute: () => AppAdminRoute,
+} as any);
+const AppAdminTag_configIdRoute = AppAdminTag_configIdRouteImport.update({
+  id: "/tag_config/$id",
+  path: "/tag_config/$id",
+  getParentRoute: () => AppAdminRoute,
+} as any);
+const AppAdminValuesetsIndexRoute = AppAdminValuesetsIndexRouteImport.update({
+  id: "/valuesets/",
+  path: "/valuesets/",
+  getParentRoute: () => AppAdminRoute,
+} as any);
+const AppAdminValuesetsCreateRoute = AppAdminValuesetsCreateRouteImport.update({
+  id: "/valuesets/create",
+  path: "/valuesets/create",
+  getParentRoute: () => AppAdminRoute,
+} as any);
+const AppAdminWorkspacesIndexRoute = AppAdminWorkspacesIndexRouteImport.update({
+  id: "/workspaces/",
+  path: "/workspaces/",
+  getParentRoute: () => AppAdminRoute,
+} as any);
+const AppAdminWorkspacesCreateRoute =
+  AppAdminWorkspacesCreateRouteImport.update({
+    id: "/workspaces/create",
+    path: "/workspaces/create",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
 const AppFacilityFacilityIdQueuesRoute =
   AppFacilityFacilityIdQueuesRouteImport.update({
     id: "/facility/$facilityId/queues",
@@ -490,6 +630,77 @@ const AppLegacyPatientPatientIdQuestionnaireRoute =
     id: "/patient/$patientId/questionnaire",
     path: "/patient/$patientId/questionnaire",
     getParentRoute: () => AppLegacyRoute,
+  } as any);
+const AppAdminOrganizationsGovtIndexRoute =
+  AppAdminOrganizationsGovtIndexRouteImport.update({
+    id: "/organizations/govt/",
+    path: "/organizations/govt/",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminOrganizationsGovtIdRoute =
+  AppAdminOrganizationsGovtIdRouteImport.update({
+    id: "/organizations/govt/$id",
+    path: "/organizations/govt/$id",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminOrganizationsProduct_supplierIndexRoute =
+  AppAdminOrganizationsProduct_supplierIndexRouteImport.update({
+    id: "/organizations/product_supplier/",
+    path: "/organizations/product_supplier/",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminOrganizationsProduct_supplierIdRoute =
+  AppAdminOrganizationsProduct_supplierIdRouteImport.update({
+    id: "/organizations/product_supplier/$id",
+    path: "/organizations/product_supplier/$id",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminOrganizationsRoleIndexRoute =
+  AppAdminOrganizationsRoleIndexRouteImport.update({
+    id: "/organizations/role/",
+    path: "/organizations/role/",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminOrganizationsRoleIdRoute =
+  AppAdminOrganizationsRoleIdRouteImport.update({
+    id: "/organizations/role/$id",
+    path: "/organizations/role/$id",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminPatient_identifier_configIdIndexRoute =
+  AppAdminPatient_identifier_configIdIndexRouteImport.update({
+    id: "/patient_identifier_config/$id/",
+    path: "/patient_identifier_config/$id/",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminPatient_identifier_configIdEditRoute =
+  AppAdminPatient_identifier_configIdEditRouteImport.update({
+    id: "/patient_identifier_config/$id/edit",
+    path: "/patient_identifier_config/$id/edit",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminQuestionnairesIdIndexRoute =
+  AppAdminQuestionnairesIdIndexRouteImport.update({
+    id: "/questionnaires/$id/",
+    path: "/questionnaires/$id/",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminQuestionnairesIdEditRoute =
+  AppAdminQuestionnairesIdEditRouteImport.update({
+    id: "/questionnaires/$id/edit",
+    path: "/questionnaires/$id/edit",
+    getParentRoute: () => AppAdminRoute,
+  } as any);
+const AppAdminValuesetsIdEditRoute = AppAdminValuesetsIdEditRouteImport.update({
+  id: "/valuesets/$id/edit",
+  path: "/valuesets/$id/edit",
+  getParentRoute: () => AppAdminRoute,
+} as any);
+const AppAdminWorkspacesIdEditRoute =
+  AppAdminWorkspacesIdEditRouteImport.update({
+    id: "/workspaces/$id/edit",
+    path: "/workspaces/$id/edit",
+    getParentRoute: () => AppAdminRoute,
   } as any);
 const AppFacilityFacilityIdAppointmentsIndexRoute =
   AppFacilityFacilityIdAppointmentsIndexRouteImport.update({
@@ -683,12 +894,6 @@ const AppResponsibilitiesIdSettingsReferralsRoute =
     path: "/responsibilities/$id/settings/referrals",
     getParentRoute: () => AppRoute,
   } as any);
-const AppLegacyAdminQuestionnairesIdEditRoute =
-  AppLegacyAdminQuestionnairesIdEditRouteImport.update({
-    id: "/questionnaires/$id/edit",
-    path: "/questionnaires/$id/edit",
-    getParentRoute: () => AppLegacyAdminRoute,
-  } as any);
 const AppLegacyFacilityFacilityIdTemplateSplatRoute =
   AppLegacyFacilityFacilityIdTemplateSplatRouteImport.update({
     id: "/$",
@@ -700,6 +905,12 @@ const AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute =
     id: "/$questionnaireId",
     path: "/$questionnaireId",
     getParentRoute: () => AppLegacyPatientPatientIdQuestionnaireRoute,
+  } as any);
+const AppAdminQuestionnairesIdVersionsRevisionIdRoute =
+  AppAdminQuestionnairesIdVersionsRevisionIdRouteImport.update({
+    id: "/questionnaires/$id/versions/$revisionId",
+    path: "/questionnaires/$id/versions/$revisionId",
+    getParentRoute: () => AppAdminRoute,
   } as any);
 const AppFacilityFacilityIdBillingAccountIndexRoute =
   AppFacilityFacilityIdBillingAccountIndexRouteImport.update({
@@ -1985,6 +2196,7 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/licenses": typeof LicensesRoute;
   "/session-expired": typeof SessionExpiredRoute;
+  "/admin": typeof AppAdminRouteWithChildren;
   "/nearby_facilities": typeof PatientNearby_facilitiesRoute;
   "/2fa": typeof Public2faRoute;
   "/facilities": typeof PublicFacilitiesRoute;
@@ -1993,7 +2205,7 @@ export interface FileRoutesByFullPath {
   "/login": typeof PublicLoginRoute;
   "/patient/home": typeof PatientHomeRoute;
   "/$": typeof AppLegacySplatRoute;
-  "/admin": typeof AppLegacyAdminRouteWithChildren;
+  "/admin/$": typeof AppAdminSplatRoute;
   "/user/$tab": typeof AppUserTabRoute;
   "/facility/$id": typeof PublicFacilityIdRoute;
   "/password_reset/$token": typeof PublicPassword_resetTokenRoute;
@@ -2004,7 +2216,18 @@ export interface FileRoutesByFullPath {
   "/patient/$id/": typeof PatientIdIndexRoute;
   "/referrals/$referralId/": typeof ReferralsReferralIdIndexRoute;
   "/facility/$facilityId/settings": typeof AppFacilityFacilityIdSettingsRouteRouteWithChildren;
-  "/admin/$": typeof AppLegacyAdminSplatRoute;
+  "/admin/actions/$id": typeof AppAdminActionsIdRoute;
+  "/admin/actions/new": typeof AppAdminActionsNewRoute;
+  "/admin/apps/$slug": typeof AppAdminAppsSlugRoute;
+  "/admin/immunization-policies/$id": typeof AppAdminImmunizationPoliciesIdRoute;
+  "/admin/immunization-policies/new": typeof AppAdminImmunizationPoliciesNewRoute;
+  "/admin/patient_identifier_config/new": typeof AppAdminPatient_identifier_configNewRoute;
+  "/admin/questionnaires/new": typeof AppAdminQuestionnairesNewRoute;
+  "/admin/rbac/permissions": typeof AppAdminRbacPermissionsRoute;
+  "/admin/rbac/roles": typeof AppAdminRbacRolesRoute;
+  "/admin/tag_config/$id": typeof AppAdminTag_configIdRoute;
+  "/admin/valuesets/create": typeof AppAdminValuesetsCreateRoute;
+  "/admin/workspaces/create": typeof AppAdminWorkspacesCreateRoute;
   "/facility/$facilityId/queues": typeof AppFacilityFacilityIdQueuesRoute;
   "/organization/$id/facilities": typeof AppOrganizationIdFacilitiesRoute;
   "/organization/$id/patients": typeof AppOrganizationIdPatientsRoute;
@@ -2015,12 +2238,27 @@ export interface FileRoutesByFullPath {
   "/responsibilities/$id/referrals": typeof AppResponsibilitiesIdReferralsRoute;
   "/responsibilities/$id/users": typeof AppResponsibilitiesIdUsersRoute;
   "/users/$username/$tab": typeof AppUsersUsernameTabRoute;
+  "/admin/actions/": typeof AppAdminActionsIndexRoute;
+  "/admin/apps/": typeof AppAdminAppsIndexRoute;
+  "/admin/immunization-policies/": typeof AppAdminImmunizationPoliciesIndexRoute;
+  "/admin/patient_identifier_config/": typeof AppAdminPatient_identifier_configIndexRoute;
+  "/admin/questionnaires/": typeof AppAdminQuestionnairesIndexRoute;
+  "/admin/tag_config/": typeof AppAdminTag_configIndexRoute;
+  "/admin/valuesets/": typeof AppAdminValuesetsIndexRoute;
+  "/admin/workspaces/": typeof AppAdminWorkspacesIndexRoute;
   "/organization/$id/": typeof AppOrganizationIdIndexRoute;
   "/responsibilities/$id/": typeof AppResponsibilitiesIdIndexRoute;
   "/users/$username/": typeof AppUsersUsernameIndexRoute;
   "/facility/$facilityId/services/$serviceId": typeof AppFacilityFacilityIdServicesServiceIdRouteRouteWithChildren;
   "/facility/$facilityId/template": typeof AppLegacyFacilityFacilityIdTemplateRouteWithChildren;
   "/patient/$patientId/questionnaire": typeof AppLegacyPatientPatientIdQuestionnaireRouteWithChildren;
+  "/admin/organizations/govt/$id": typeof AppAdminOrganizationsGovtIdRoute;
+  "/admin/organizations/product_supplier/$id": typeof AppAdminOrganizationsProduct_supplierIdRoute;
+  "/admin/organizations/role/$id": typeof AppAdminOrganizationsRoleIdRoute;
+  "/admin/patient_identifier_config/$id/edit": typeof AppAdminPatient_identifier_configIdEditRoute;
+  "/admin/questionnaires/$id/edit": typeof AppAdminQuestionnairesIdEditRoute;
+  "/admin/valuesets/$id/edit": typeof AppAdminValuesetsIdEditRoute;
+  "/admin/workspaces/$id/edit": typeof AppAdminWorkspacesIdEditRoute;
   "/facility/$facilityId/appointments/print": typeof AppFacilityFacilityIdAppointmentsPrintRoute;
   "/facility/$facilityId/locations/$locationId": typeof AppFacilityFacilityIdLocationsLocationIdRouteWithChildren;
   "/facility/$facilityId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdService_requestsServiceRequestIdRoute;
@@ -2048,13 +2286,18 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/settings/workspaces": typeof AppFacilityFacilityIdSettingsWorkspacesRouteWithChildren;
   "/organization/$id/settings/referrals": typeof AppOrganizationIdSettingsReferralsRoute;
   "/responsibilities/$id/settings/referrals": typeof AppResponsibilitiesIdSettingsReferralsRoute;
+  "/admin/organizations/govt/": typeof AppAdminOrganizationsGovtIndexRoute;
+  "/admin/organizations/product_supplier/": typeof AppAdminOrganizationsProduct_supplierIndexRoute;
+  "/admin/organizations/role/": typeof AppAdminOrganizationsRoleIndexRoute;
+  "/admin/patient_identifier_config/$id/": typeof AppAdminPatient_identifier_configIdIndexRoute;
+  "/admin/questionnaires/$id/": typeof AppAdminQuestionnairesIdIndexRoute;
   "/facility/$facilityId/appointments/": typeof AppFacilityFacilityIdAppointmentsIndexRoute;
   "/facility/$facilityId/services/": typeof AppFacilityFacilityIdServicesIndexRoute;
   "/facility/$facilityId/settings/": typeof AppFacilityFacilityIdSettingsIndexRoute;
   "/facility/$facilityId/users/": typeof AppFacilityFacilityIdUsersIndexRoute;
-  "/admin/questionnaires/$id/edit": typeof AppLegacyAdminQuestionnairesIdEditRoute;
   "/facility/$facilityId/template/$": typeof AppLegacyFacilityFacilityIdTemplateSplatRoute;
   "/patient/$patientId/questionnaire/$questionnaireId": typeof AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute;
+  "/admin/questionnaires/$id/versions/$revisionId": typeof AppAdminQuestionnairesIdVersionsRevisionIdRoute;
   "/facility/$facilityId/locations/$locationId/$": typeof AppFacilityFacilityIdLocationsLocationIdSplatRoute;
   "/facility/$facilityId/locations/$locationId/beds": typeof AppFacilityFacilityIdLocationsLocationIdBedsRoute;
   "/facility/$facilityId/locations/$locationId/forms": typeof AppFacilityFacilityIdLocationsLocationIdFormsRoute;
@@ -2242,6 +2485,7 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/licenses": typeof LicensesRoute;
   "/session-expired": typeof SessionExpiredRoute;
+  "/admin": typeof AppAdminRouteWithChildren;
   "/nearby_facilities": typeof PatientNearby_facilitiesRoute;
   "/2fa": typeof Public2faRoute;
   "/facilities": typeof PublicFacilitiesRoute;
@@ -2250,7 +2494,7 @@ export interface FileRoutesByTo {
   "/login": typeof PublicLoginRoute;
   "/patient/home": typeof PatientHomeRoute;
   "/$": typeof AppLegacySplatRoute;
-  "/admin": typeof AppLegacyAdminRouteWithChildren;
+  "/admin/$": typeof AppAdminSplatRoute;
   "/user/$tab": typeof AppUserTabRoute;
   "/facility/$id": typeof PublicFacilityIdRoute;
   "/password_reset/$token": typeof PublicPassword_resetTokenRoute;
@@ -2260,7 +2504,18 @@ export interface FileRoutesByTo {
   "/user": typeof AppUserIndexRoute;
   "/patient/$id": typeof PatientIdIndexRoute;
   "/referrals/$referralId": typeof ReferralsReferralIdIndexRoute;
-  "/admin/$": typeof AppLegacyAdminSplatRoute;
+  "/admin/actions/$id": typeof AppAdminActionsIdRoute;
+  "/admin/actions/new": typeof AppAdminActionsNewRoute;
+  "/admin/apps/$slug": typeof AppAdminAppsSlugRoute;
+  "/admin/immunization-policies/$id": typeof AppAdminImmunizationPoliciesIdRoute;
+  "/admin/immunization-policies/new": typeof AppAdminImmunizationPoliciesNewRoute;
+  "/admin/patient_identifier_config/new": typeof AppAdminPatient_identifier_configNewRoute;
+  "/admin/questionnaires/new": typeof AppAdminQuestionnairesNewRoute;
+  "/admin/rbac/permissions": typeof AppAdminRbacPermissionsRoute;
+  "/admin/rbac/roles": typeof AppAdminRbacRolesRoute;
+  "/admin/tag_config/$id": typeof AppAdminTag_configIdRoute;
+  "/admin/valuesets/create": typeof AppAdminValuesetsCreateRoute;
+  "/admin/workspaces/create": typeof AppAdminWorkspacesCreateRoute;
   "/facility/$facilityId/queues": typeof AppFacilityFacilityIdQueuesRoute;
   "/organization/$id/facilities": typeof AppOrganizationIdFacilitiesRoute;
   "/organization/$id/patients": typeof AppOrganizationIdPatientsRoute;
@@ -2271,11 +2526,26 @@ export interface FileRoutesByTo {
   "/responsibilities/$id/referrals": typeof AppResponsibilitiesIdReferralsRoute;
   "/responsibilities/$id/users": typeof AppResponsibilitiesIdUsersRoute;
   "/users/$username/$tab": typeof AppUsersUsernameTabRoute;
+  "/admin/actions": typeof AppAdminActionsIndexRoute;
+  "/admin/apps": typeof AppAdminAppsIndexRoute;
+  "/admin/immunization-policies": typeof AppAdminImmunizationPoliciesIndexRoute;
+  "/admin/patient_identifier_config": typeof AppAdminPatient_identifier_configIndexRoute;
+  "/admin/questionnaires": typeof AppAdminQuestionnairesIndexRoute;
+  "/admin/tag_config": typeof AppAdminTag_configIndexRoute;
+  "/admin/valuesets": typeof AppAdminValuesetsIndexRoute;
+  "/admin/workspaces": typeof AppAdminWorkspacesIndexRoute;
   "/organization/$id": typeof AppOrganizationIdIndexRoute;
   "/responsibilities/$id": typeof AppResponsibilitiesIdIndexRoute;
   "/users/$username": typeof AppUsersUsernameIndexRoute;
   "/facility/$facilityId/template": typeof AppLegacyFacilityFacilityIdTemplateRouteWithChildren;
   "/patient/$patientId/questionnaire": typeof AppLegacyPatientPatientIdQuestionnaireRouteWithChildren;
+  "/admin/organizations/govt/$id": typeof AppAdminOrganizationsGovtIdRoute;
+  "/admin/organizations/product_supplier/$id": typeof AppAdminOrganizationsProduct_supplierIdRoute;
+  "/admin/organizations/role/$id": typeof AppAdminOrganizationsRoleIdRoute;
+  "/admin/patient_identifier_config/$id/edit": typeof AppAdminPatient_identifier_configIdEditRoute;
+  "/admin/questionnaires/$id/edit": typeof AppAdminQuestionnairesIdEditRoute;
+  "/admin/valuesets/$id/edit": typeof AppAdminValuesetsIdEditRoute;
+  "/admin/workspaces/$id/edit": typeof AppAdminWorkspacesIdEditRoute;
   "/facility/$facilityId/appointments/print": typeof AppFacilityFacilityIdAppointmentsPrintRoute;
   "/facility/$facilityId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdService_requestsServiceRequestIdRoute;
   "/facility/$facilityId/settings/$": typeof AppFacilityFacilityIdSettingsSplatRoute;
@@ -2285,13 +2555,18 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/settings/token_category": typeof AppFacilityFacilityIdSettingsToken_categoryRoute;
   "/organization/$id/settings/referrals": typeof AppOrganizationIdSettingsReferralsRoute;
   "/responsibilities/$id/settings/referrals": typeof AppResponsibilitiesIdSettingsReferralsRoute;
+  "/admin/organizations/govt": typeof AppAdminOrganizationsGovtIndexRoute;
+  "/admin/organizations/product_supplier": typeof AppAdminOrganizationsProduct_supplierIndexRoute;
+  "/admin/organizations/role": typeof AppAdminOrganizationsRoleIndexRoute;
+  "/admin/patient_identifier_config/$id": typeof AppAdminPatient_identifier_configIdIndexRoute;
+  "/admin/questionnaires/$id": typeof AppAdminQuestionnairesIdIndexRoute;
   "/facility/$facilityId/appointments": typeof AppFacilityFacilityIdAppointmentsIndexRoute;
   "/facility/$facilityId/services": typeof AppFacilityFacilityIdServicesIndexRoute;
   "/facility/$facilityId/settings": typeof AppFacilityFacilityIdSettingsIndexRoute;
   "/facility/$facilityId/users": typeof AppFacilityFacilityIdUsersIndexRoute;
-  "/admin/questionnaires/$id/edit": typeof AppLegacyAdminQuestionnairesIdEditRoute;
   "/facility/$facilityId/template/$": typeof AppLegacyFacilityFacilityIdTemplateSplatRoute;
   "/patient/$patientId/questionnaire/$questionnaireId": typeof AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute;
+  "/admin/questionnaires/$id/versions/$revisionId": typeof AppAdminQuestionnairesIdVersionsRevisionIdRoute;
   "/facility/$facilityId/locations/$locationId/$": typeof AppFacilityFacilityIdLocationsLocationIdSplatRoute;
   "/facility/$facilityId/locations/$locationId/beds": typeof AppFacilityFacilityIdLocationsLocationIdBedsRoute;
   "/facility/$facilityId/locations/$locationId/forms": typeof AppFacilityFacilityIdLocationsLocationIdFormsRoute;
@@ -2483,6 +2758,7 @@ export interface FileRoutesById {
   "/licenses": typeof LicensesRoute;
   "/session-expired": typeof SessionExpiredRoute;
   "/_app/_legacy": typeof AppLegacyRouteWithChildren;
+  "/_app/admin": typeof AppAdminRouteWithChildren;
   "/_patient/nearby_facilities": typeof PatientNearby_facilitiesRoute;
   "/_public/2fa": typeof Public2faRoute;
   "/_public/facilities": typeof PublicFacilitiesRoute;
@@ -2491,7 +2767,7 @@ export interface FileRoutesById {
   "/_public/login": typeof PublicLoginRoute;
   "/patient/home": typeof PatientHomeRoute;
   "/_app/_legacy/$": typeof AppLegacySplatRoute;
-  "/_app/_legacy/admin": typeof AppLegacyAdminRouteWithChildren;
+  "/_app/admin/$": typeof AppAdminSplatRoute;
   "/_app/user/$tab": typeof AppUserTabRoute;
   "/_public/facility/$id": typeof PublicFacilityIdRoute;
   "/_public/password_reset/$token": typeof PublicPassword_resetTokenRoute;
@@ -2502,7 +2778,18 @@ export interface FileRoutesById {
   "/patient/$id/": typeof PatientIdIndexRoute;
   "/referrals/$referralId/": typeof ReferralsReferralIdIndexRoute;
   "/_app/facility/$facilityId/settings": typeof AppFacilityFacilityIdSettingsRouteRouteWithChildren;
-  "/_app/_legacy/admin/$": typeof AppLegacyAdminSplatRoute;
+  "/_app/admin/actions/$id": typeof AppAdminActionsIdRoute;
+  "/_app/admin/actions/new": typeof AppAdminActionsNewRoute;
+  "/_app/admin/apps/$slug": typeof AppAdminAppsSlugRoute;
+  "/_app/admin/immunization-policies/$id": typeof AppAdminImmunizationPoliciesIdRoute;
+  "/_app/admin/immunization-policies/new": typeof AppAdminImmunizationPoliciesNewRoute;
+  "/_app/admin/patient_identifier_config/new": typeof AppAdminPatient_identifier_configNewRoute;
+  "/_app/admin/questionnaires/new": typeof AppAdminQuestionnairesNewRoute;
+  "/_app/admin/rbac/permissions": typeof AppAdminRbacPermissionsRoute;
+  "/_app/admin/rbac/roles": typeof AppAdminRbacRolesRoute;
+  "/_app/admin/tag_config/$id": typeof AppAdminTag_configIdRoute;
+  "/_app/admin/valuesets/create": typeof AppAdminValuesetsCreateRoute;
+  "/_app/admin/workspaces/create": typeof AppAdminWorkspacesCreateRoute;
   "/_app/facility/$facilityId/queues": typeof AppFacilityFacilityIdQueuesRoute;
   "/_app/organization/$id/facilities": typeof AppOrganizationIdFacilitiesRoute;
   "/_app/organization/$id/patients": typeof AppOrganizationIdPatientsRoute;
@@ -2513,12 +2800,27 @@ export interface FileRoutesById {
   "/_app/responsibilities/$id/referrals": typeof AppResponsibilitiesIdReferralsRoute;
   "/_app/responsibilities/$id/users": typeof AppResponsibilitiesIdUsersRoute;
   "/_app/users/$username/$tab": typeof AppUsersUsernameTabRoute;
+  "/_app/admin/actions/": typeof AppAdminActionsIndexRoute;
+  "/_app/admin/apps/": typeof AppAdminAppsIndexRoute;
+  "/_app/admin/immunization-policies/": typeof AppAdminImmunizationPoliciesIndexRoute;
+  "/_app/admin/patient_identifier_config/": typeof AppAdminPatient_identifier_configIndexRoute;
+  "/_app/admin/questionnaires/": typeof AppAdminQuestionnairesIndexRoute;
+  "/_app/admin/tag_config/": typeof AppAdminTag_configIndexRoute;
+  "/_app/admin/valuesets/": typeof AppAdminValuesetsIndexRoute;
+  "/_app/admin/workspaces/": typeof AppAdminWorkspacesIndexRoute;
   "/_app/organization/$id/": typeof AppOrganizationIdIndexRoute;
   "/_app/responsibilities/$id/": typeof AppResponsibilitiesIdIndexRoute;
   "/_app/users/$username/": typeof AppUsersUsernameIndexRoute;
   "/_app/facility/$facilityId/services/$serviceId": typeof AppFacilityFacilityIdServicesServiceIdRouteRouteWithChildren;
   "/_app/_legacy/facility/$facilityId/template": typeof AppLegacyFacilityFacilityIdTemplateRouteWithChildren;
   "/_app/_legacy/patient/$patientId/questionnaire": typeof AppLegacyPatientPatientIdQuestionnaireRouteWithChildren;
+  "/_app/admin/organizations/govt/$id": typeof AppAdminOrganizationsGovtIdRoute;
+  "/_app/admin/organizations/product_supplier/$id": typeof AppAdminOrganizationsProduct_supplierIdRoute;
+  "/_app/admin/organizations/role/$id": typeof AppAdminOrganizationsRoleIdRoute;
+  "/_app/admin/patient_identifier_config/$id/edit": typeof AppAdminPatient_identifier_configIdEditRoute;
+  "/_app/admin/questionnaires/$id/edit": typeof AppAdminQuestionnairesIdEditRoute;
+  "/_app/admin/valuesets/$id/edit": typeof AppAdminValuesetsIdEditRoute;
+  "/_app/admin/workspaces/$id/edit": typeof AppAdminWorkspacesIdEditRoute;
   "/_app/facility/$facilityId/appointments/print": typeof AppFacilityFacilityIdAppointmentsPrintRoute;
   "/_app/facility/$facilityId/locations/$locationId": typeof AppFacilityFacilityIdLocationsLocationIdRouteWithChildren;
   "/_app/facility/$facilityId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdService_requestsServiceRequestIdRoute;
@@ -2546,13 +2848,18 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/settings/workspaces": typeof AppFacilityFacilityIdSettingsWorkspacesRouteWithChildren;
   "/_app/organization/$id/settings/referrals": typeof AppOrganizationIdSettingsReferralsRoute;
   "/_app/responsibilities/$id/settings/referrals": typeof AppResponsibilitiesIdSettingsReferralsRoute;
+  "/_app/admin/organizations/govt/": typeof AppAdminOrganizationsGovtIndexRoute;
+  "/_app/admin/organizations/product_supplier/": typeof AppAdminOrganizationsProduct_supplierIndexRoute;
+  "/_app/admin/organizations/role/": typeof AppAdminOrganizationsRoleIndexRoute;
+  "/_app/admin/patient_identifier_config/$id/": typeof AppAdminPatient_identifier_configIdIndexRoute;
+  "/_app/admin/questionnaires/$id/": typeof AppAdminQuestionnairesIdIndexRoute;
   "/_app/facility/$facilityId/appointments/": typeof AppFacilityFacilityIdAppointmentsIndexRoute;
   "/_app/facility/$facilityId/services/": typeof AppFacilityFacilityIdServicesIndexRoute;
   "/_app/facility/$facilityId/settings/": typeof AppFacilityFacilityIdSettingsIndexRoute;
   "/_app/facility/$facilityId/users/": typeof AppFacilityFacilityIdUsersIndexRoute;
-  "/_app/_legacy/admin/questionnaires/$id/edit": typeof AppLegacyAdminQuestionnairesIdEditRoute;
   "/_app/_legacy/facility/$facilityId/template/$": typeof AppLegacyFacilityFacilityIdTemplateSplatRoute;
   "/_app/_legacy/patient/$patientId/questionnaire/$questionnaireId": typeof AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRoute;
+  "/_app/admin/questionnaires/$id/versions/$revisionId": typeof AppAdminQuestionnairesIdVersionsRevisionIdRoute;
   "/_app/facility/$facilityId/locations/$locationId/$": typeof AppFacilityFacilityIdLocationsLocationIdSplatRoute;
   "/_app/facility/$facilityId/locations/$locationId/beds": typeof AppFacilityFacilityIdLocationsLocationIdBedsRoute;
   "/_app/facility/$facilityId/locations/$locationId/forms": typeof AppFacilityFacilityIdLocationsLocationIdFormsRoute;
@@ -2742,6 +3049,7 @@ export interface FileRouteTypes {
     | "/"
     | "/licenses"
     | "/session-expired"
+    | "/admin"
     | "/nearby_facilities"
     | "/2fa"
     | "/facilities"
@@ -2750,7 +3058,7 @@ export interface FileRouteTypes {
     | "/login"
     | "/patient/home"
     | "/$"
-    | "/admin"
+    | "/admin/$"
     | "/user/$tab"
     | "/facility/$id"
     | "/password_reset/$token"
@@ -2761,7 +3069,18 @@ export interface FileRouteTypes {
     | "/patient/$id/"
     | "/referrals/$referralId/"
     | "/facility/$facilityId/settings"
-    | "/admin/$"
+    | "/admin/actions/$id"
+    | "/admin/actions/new"
+    | "/admin/apps/$slug"
+    | "/admin/immunization-policies/$id"
+    | "/admin/immunization-policies/new"
+    | "/admin/patient_identifier_config/new"
+    | "/admin/questionnaires/new"
+    | "/admin/rbac/permissions"
+    | "/admin/rbac/roles"
+    | "/admin/tag_config/$id"
+    | "/admin/valuesets/create"
+    | "/admin/workspaces/create"
     | "/facility/$facilityId/queues"
     | "/organization/$id/facilities"
     | "/organization/$id/patients"
@@ -2772,12 +3091,27 @@ export interface FileRouteTypes {
     | "/responsibilities/$id/referrals"
     | "/responsibilities/$id/users"
     | "/users/$username/$tab"
+    | "/admin/actions/"
+    | "/admin/apps/"
+    | "/admin/immunization-policies/"
+    | "/admin/patient_identifier_config/"
+    | "/admin/questionnaires/"
+    | "/admin/tag_config/"
+    | "/admin/valuesets/"
+    | "/admin/workspaces/"
     | "/organization/$id/"
     | "/responsibilities/$id/"
     | "/users/$username/"
     | "/facility/$facilityId/services/$serviceId"
     | "/facility/$facilityId/template"
     | "/patient/$patientId/questionnaire"
+    | "/admin/organizations/govt/$id"
+    | "/admin/organizations/product_supplier/$id"
+    | "/admin/organizations/role/$id"
+    | "/admin/patient_identifier_config/$id/edit"
+    | "/admin/questionnaires/$id/edit"
+    | "/admin/valuesets/$id/edit"
+    | "/admin/workspaces/$id/edit"
     | "/facility/$facilityId/appointments/print"
     | "/facility/$facilityId/locations/$locationId"
     | "/facility/$facilityId/service_requests/$serviceRequestId"
@@ -2805,13 +3139,18 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/workspaces"
     | "/organization/$id/settings/referrals"
     | "/responsibilities/$id/settings/referrals"
+    | "/admin/organizations/govt/"
+    | "/admin/organizations/product_supplier/"
+    | "/admin/organizations/role/"
+    | "/admin/patient_identifier_config/$id/"
+    | "/admin/questionnaires/$id/"
     | "/facility/$facilityId/appointments/"
     | "/facility/$facilityId/services/"
     | "/facility/$facilityId/settings/"
     | "/facility/$facilityId/users/"
-    | "/admin/questionnaires/$id/edit"
     | "/facility/$facilityId/template/$"
     | "/patient/$patientId/questionnaire/$questionnaireId"
+    | "/admin/questionnaires/$id/versions/$revisionId"
     | "/facility/$facilityId/locations/$locationId/$"
     | "/facility/$facilityId/locations/$locationId/beds"
     | "/facility/$facilityId/locations/$locationId/forms"
@@ -2999,6 +3338,7 @@ export interface FileRouteTypes {
     | "/"
     | "/licenses"
     | "/session-expired"
+    | "/admin"
     | "/nearby_facilities"
     | "/2fa"
     | "/facilities"
@@ -3007,7 +3347,7 @@ export interface FileRouteTypes {
     | "/login"
     | "/patient/home"
     | "/$"
-    | "/admin"
+    | "/admin/$"
     | "/user/$tab"
     | "/facility/$id"
     | "/password_reset/$token"
@@ -3017,7 +3357,18 @@ export interface FileRouteTypes {
     | "/user"
     | "/patient/$id"
     | "/referrals/$referralId"
-    | "/admin/$"
+    | "/admin/actions/$id"
+    | "/admin/actions/new"
+    | "/admin/apps/$slug"
+    | "/admin/immunization-policies/$id"
+    | "/admin/immunization-policies/new"
+    | "/admin/patient_identifier_config/new"
+    | "/admin/questionnaires/new"
+    | "/admin/rbac/permissions"
+    | "/admin/rbac/roles"
+    | "/admin/tag_config/$id"
+    | "/admin/valuesets/create"
+    | "/admin/workspaces/create"
     | "/facility/$facilityId/queues"
     | "/organization/$id/facilities"
     | "/organization/$id/patients"
@@ -3028,11 +3379,26 @@ export interface FileRouteTypes {
     | "/responsibilities/$id/referrals"
     | "/responsibilities/$id/users"
     | "/users/$username/$tab"
+    | "/admin/actions"
+    | "/admin/apps"
+    | "/admin/immunization-policies"
+    | "/admin/patient_identifier_config"
+    | "/admin/questionnaires"
+    | "/admin/tag_config"
+    | "/admin/valuesets"
+    | "/admin/workspaces"
     | "/organization/$id"
     | "/responsibilities/$id"
     | "/users/$username"
     | "/facility/$facilityId/template"
     | "/patient/$patientId/questionnaire"
+    | "/admin/organizations/govt/$id"
+    | "/admin/organizations/product_supplier/$id"
+    | "/admin/organizations/role/$id"
+    | "/admin/patient_identifier_config/$id/edit"
+    | "/admin/questionnaires/$id/edit"
+    | "/admin/valuesets/$id/edit"
+    | "/admin/workspaces/$id/edit"
     | "/facility/$facilityId/appointments/print"
     | "/facility/$facilityId/service_requests/$serviceRequestId"
     | "/facility/$facilityId/settings/$"
@@ -3042,13 +3408,18 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/token_category"
     | "/organization/$id/settings/referrals"
     | "/responsibilities/$id/settings/referrals"
+    | "/admin/organizations/govt"
+    | "/admin/organizations/product_supplier"
+    | "/admin/organizations/role"
+    | "/admin/patient_identifier_config/$id"
+    | "/admin/questionnaires/$id"
     | "/facility/$facilityId/appointments"
     | "/facility/$facilityId/services"
     | "/facility/$facilityId/settings"
     | "/facility/$facilityId/users"
-    | "/admin/questionnaires/$id/edit"
     | "/facility/$facilityId/template/$"
     | "/patient/$patientId/questionnaire/$questionnaireId"
+    | "/admin/questionnaires/$id/versions/$revisionId"
     | "/facility/$facilityId/locations/$locationId/$"
     | "/facility/$facilityId/locations/$locationId/beds"
     | "/facility/$facilityId/locations/$locationId/forms"
@@ -3239,6 +3610,7 @@ export interface FileRouteTypes {
     | "/licenses"
     | "/session-expired"
     | "/_app/_legacy"
+    | "/_app/admin"
     | "/_patient/nearby_facilities"
     | "/_public/2fa"
     | "/_public/facilities"
@@ -3247,7 +3619,7 @@ export interface FileRouteTypes {
     | "/_public/login"
     | "/patient/home"
     | "/_app/_legacy/$"
-    | "/_app/_legacy/admin"
+    | "/_app/admin/$"
     | "/_app/user/$tab"
     | "/_public/facility/$id"
     | "/_public/password_reset/$token"
@@ -3258,7 +3630,18 @@ export interface FileRouteTypes {
     | "/patient/$id/"
     | "/referrals/$referralId/"
     | "/_app/facility/$facilityId/settings"
-    | "/_app/_legacy/admin/$"
+    | "/_app/admin/actions/$id"
+    | "/_app/admin/actions/new"
+    | "/_app/admin/apps/$slug"
+    | "/_app/admin/immunization-policies/$id"
+    | "/_app/admin/immunization-policies/new"
+    | "/_app/admin/patient_identifier_config/new"
+    | "/_app/admin/questionnaires/new"
+    | "/_app/admin/rbac/permissions"
+    | "/_app/admin/rbac/roles"
+    | "/_app/admin/tag_config/$id"
+    | "/_app/admin/valuesets/create"
+    | "/_app/admin/workspaces/create"
     | "/_app/facility/$facilityId/queues"
     | "/_app/organization/$id/facilities"
     | "/_app/organization/$id/patients"
@@ -3269,12 +3652,27 @@ export interface FileRouteTypes {
     | "/_app/responsibilities/$id/referrals"
     | "/_app/responsibilities/$id/users"
     | "/_app/users/$username/$tab"
+    | "/_app/admin/actions/"
+    | "/_app/admin/apps/"
+    | "/_app/admin/immunization-policies/"
+    | "/_app/admin/patient_identifier_config/"
+    | "/_app/admin/questionnaires/"
+    | "/_app/admin/tag_config/"
+    | "/_app/admin/valuesets/"
+    | "/_app/admin/workspaces/"
     | "/_app/organization/$id/"
     | "/_app/responsibilities/$id/"
     | "/_app/users/$username/"
     | "/_app/facility/$facilityId/services/$serviceId"
     | "/_app/_legacy/facility/$facilityId/template"
     | "/_app/_legacy/patient/$patientId/questionnaire"
+    | "/_app/admin/organizations/govt/$id"
+    | "/_app/admin/organizations/product_supplier/$id"
+    | "/_app/admin/organizations/role/$id"
+    | "/_app/admin/patient_identifier_config/$id/edit"
+    | "/_app/admin/questionnaires/$id/edit"
+    | "/_app/admin/valuesets/$id/edit"
+    | "/_app/admin/workspaces/$id/edit"
     | "/_app/facility/$facilityId/appointments/print"
     | "/_app/facility/$facilityId/locations/$locationId"
     | "/_app/facility/$facilityId/service_requests/$serviceRequestId"
@@ -3302,13 +3700,18 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/settings/workspaces"
     | "/_app/organization/$id/settings/referrals"
     | "/_app/responsibilities/$id/settings/referrals"
+    | "/_app/admin/organizations/govt/"
+    | "/_app/admin/organizations/product_supplier/"
+    | "/_app/admin/organizations/role/"
+    | "/_app/admin/patient_identifier_config/$id/"
+    | "/_app/admin/questionnaires/$id/"
     | "/_app/facility/$facilityId/appointments/"
     | "/_app/facility/$facilityId/services/"
     | "/_app/facility/$facilityId/settings/"
     | "/_app/facility/$facilityId/users/"
-    | "/_app/_legacy/admin/questionnaires/$id/edit"
     | "/_app/_legacy/facility/$facilityId/template/$"
     | "/_app/_legacy/patient/$patientId/questionnaire/$questionnaireId"
+    | "/_app/admin/questionnaires/$id/versions/$revisionId"
     | "/_app/facility/$facilityId/locations/$locationId/$"
     | "/_app/facility/$facilityId/locations/$locationId/beds"
     | "/_app/facility/$facilityId/locations/$locationId/forms"
@@ -3558,6 +3961,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppLegacyRouteImport;
       parentRoute: typeof AppRoute;
     };
+    "/_app/admin": {
+      id: "/_app/admin";
+      path: "/admin";
+      fullPath: "/admin";
+      preLoaderRoute: typeof AppAdminRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     "/_patient/nearby_facilities": {
       id: "/_patient/nearby_facilities";
       path: "/nearby_facilities";
@@ -3614,12 +4024,12 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppLegacySplatRouteImport;
       parentRoute: typeof AppLegacyRoute;
     };
-    "/_app/_legacy/admin": {
-      id: "/_app/_legacy/admin";
-      path: "/admin";
-      fullPath: "/admin";
-      preLoaderRoute: typeof AppLegacyAdminRouteImport;
-      parentRoute: typeof AppLegacyRoute;
+    "/_app/admin/$": {
+      id: "/_app/admin/$";
+      path: "/$";
+      fullPath: "/admin/$";
+      preLoaderRoute: typeof AppAdminSplatRouteImport;
+      parentRoute: typeof AppAdminRoute;
     };
     "/_app/organization/": {
       id: "/_app/organization/";
@@ -3684,12 +4094,145 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ReferralsReferralIdRespondRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/_app/_legacy/admin/$": {
-      id: "/_app/_legacy/admin/$";
-      path: "/$";
-      fullPath: "/admin/$";
-      preLoaderRoute: typeof AppLegacyAdminSplatRouteImport;
-      parentRoute: typeof AppLegacyAdminRoute;
+    "/_app/admin/actions/": {
+      id: "/_app/admin/actions/";
+      path: "/actions";
+      fullPath: "/admin/actions/";
+      preLoaderRoute: typeof AppAdminActionsIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/actions/$id": {
+      id: "/_app/admin/actions/$id";
+      path: "/actions/$id";
+      fullPath: "/admin/actions/$id";
+      preLoaderRoute: typeof AppAdminActionsIdRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/actions/new": {
+      id: "/_app/admin/actions/new";
+      path: "/actions/new";
+      fullPath: "/admin/actions/new";
+      preLoaderRoute: typeof AppAdminActionsNewRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/apps/": {
+      id: "/_app/admin/apps/";
+      path: "/apps";
+      fullPath: "/admin/apps/";
+      preLoaderRoute: typeof AppAdminAppsIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/apps/$slug": {
+      id: "/_app/admin/apps/$slug";
+      path: "/apps/$slug";
+      fullPath: "/admin/apps/$slug";
+      preLoaderRoute: typeof AppAdminAppsSlugRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/immunization-policies/": {
+      id: "/_app/admin/immunization-policies/";
+      path: "/immunization-policies";
+      fullPath: "/admin/immunization-policies/";
+      preLoaderRoute: typeof AppAdminImmunizationPoliciesIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/immunization-policies/$id": {
+      id: "/_app/admin/immunization-policies/$id";
+      path: "/immunization-policies/$id";
+      fullPath: "/admin/immunization-policies/$id";
+      preLoaderRoute: typeof AppAdminImmunizationPoliciesIdRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/immunization-policies/new": {
+      id: "/_app/admin/immunization-policies/new";
+      path: "/immunization-policies/new";
+      fullPath: "/admin/immunization-policies/new";
+      preLoaderRoute: typeof AppAdminImmunizationPoliciesNewRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/patient_identifier_config/": {
+      id: "/_app/admin/patient_identifier_config/";
+      path: "/patient_identifier_config";
+      fullPath: "/admin/patient_identifier_config/";
+      preLoaderRoute: typeof AppAdminPatient_identifier_configIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/patient_identifier_config/new": {
+      id: "/_app/admin/patient_identifier_config/new";
+      path: "/patient_identifier_config/new";
+      fullPath: "/admin/patient_identifier_config/new";
+      preLoaderRoute: typeof AppAdminPatient_identifier_configNewRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/questionnaires/": {
+      id: "/_app/admin/questionnaires/";
+      path: "/questionnaires";
+      fullPath: "/admin/questionnaires/";
+      preLoaderRoute: typeof AppAdminQuestionnairesIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/questionnaires/new": {
+      id: "/_app/admin/questionnaires/new";
+      path: "/questionnaires/new";
+      fullPath: "/admin/questionnaires/new";
+      preLoaderRoute: typeof AppAdminQuestionnairesNewRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/rbac/permissions": {
+      id: "/_app/admin/rbac/permissions";
+      path: "/rbac/permissions";
+      fullPath: "/admin/rbac/permissions";
+      preLoaderRoute: typeof AppAdminRbacPermissionsRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/rbac/roles": {
+      id: "/_app/admin/rbac/roles";
+      path: "/rbac/roles";
+      fullPath: "/admin/rbac/roles";
+      preLoaderRoute: typeof AppAdminRbacRolesRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/tag_config/": {
+      id: "/_app/admin/tag_config/";
+      path: "/tag_config";
+      fullPath: "/admin/tag_config/";
+      preLoaderRoute: typeof AppAdminTag_configIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/tag_config/$id": {
+      id: "/_app/admin/tag_config/$id";
+      path: "/tag_config/$id";
+      fullPath: "/admin/tag_config/$id";
+      preLoaderRoute: typeof AppAdminTag_configIdRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/valuesets/": {
+      id: "/_app/admin/valuesets/";
+      path: "/valuesets";
+      fullPath: "/admin/valuesets/";
+      preLoaderRoute: typeof AppAdminValuesetsIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/valuesets/create": {
+      id: "/_app/admin/valuesets/create";
+      path: "/valuesets/create";
+      fullPath: "/admin/valuesets/create";
+      preLoaderRoute: typeof AppAdminValuesetsCreateRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/workspaces/": {
+      id: "/_app/admin/workspaces/";
+      path: "/workspaces";
+      fullPath: "/admin/workspaces/";
+      preLoaderRoute: typeof AppAdminWorkspacesIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/workspaces/create": {
+      id: "/_app/admin/workspaces/create";
+      path: "/workspaces/create";
+      fullPath: "/admin/workspaces/create";
+      preLoaderRoute: typeof AppAdminWorkspacesCreateRouteImport;
+      parentRoute: typeof AppAdminRoute;
     };
     "/_app/facility/$facilityId/queues": {
       id: "/_app/facility/$facilityId/queues";
@@ -3802,6 +4345,90 @@ declare module "@tanstack/react-router" {
       fullPath: "/patient/$patientId/questionnaire";
       preLoaderRoute: typeof AppLegacyPatientPatientIdQuestionnaireRouteImport;
       parentRoute: typeof AppLegacyRoute;
+    };
+    "/_app/admin/organizations/govt/": {
+      id: "/_app/admin/organizations/govt/";
+      path: "/organizations/govt";
+      fullPath: "/admin/organizations/govt/";
+      preLoaderRoute: typeof AppAdminOrganizationsGovtIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/organizations/govt/$id": {
+      id: "/_app/admin/organizations/govt/$id";
+      path: "/organizations/govt/$id";
+      fullPath: "/admin/organizations/govt/$id";
+      preLoaderRoute: typeof AppAdminOrganizationsGovtIdRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/organizations/product_supplier/": {
+      id: "/_app/admin/organizations/product_supplier/";
+      path: "/organizations/product_supplier";
+      fullPath: "/admin/organizations/product_supplier/";
+      preLoaderRoute: typeof AppAdminOrganizationsProduct_supplierIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/organizations/product_supplier/$id": {
+      id: "/_app/admin/organizations/product_supplier/$id";
+      path: "/organizations/product_supplier/$id";
+      fullPath: "/admin/organizations/product_supplier/$id";
+      preLoaderRoute: typeof AppAdminOrganizationsProduct_supplierIdRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/organizations/role/": {
+      id: "/_app/admin/organizations/role/";
+      path: "/organizations/role";
+      fullPath: "/admin/organizations/role/";
+      preLoaderRoute: typeof AppAdminOrganizationsRoleIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/organizations/role/$id": {
+      id: "/_app/admin/organizations/role/$id";
+      path: "/organizations/role/$id";
+      fullPath: "/admin/organizations/role/$id";
+      preLoaderRoute: typeof AppAdminOrganizationsRoleIdRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/patient_identifier_config/$id/": {
+      id: "/_app/admin/patient_identifier_config/$id/";
+      path: "/patient_identifier_config/$id";
+      fullPath: "/admin/patient_identifier_config/$id/";
+      preLoaderRoute: typeof AppAdminPatient_identifier_configIdIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/patient_identifier_config/$id/edit": {
+      id: "/_app/admin/patient_identifier_config/$id/edit";
+      path: "/patient_identifier_config/$id/edit";
+      fullPath: "/admin/patient_identifier_config/$id/edit";
+      preLoaderRoute: typeof AppAdminPatient_identifier_configIdEditRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/questionnaires/$id/": {
+      id: "/_app/admin/questionnaires/$id/";
+      path: "/questionnaires/$id";
+      fullPath: "/admin/questionnaires/$id/";
+      preLoaderRoute: typeof AppAdminQuestionnairesIdIndexRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/questionnaires/$id/edit": {
+      id: "/_app/admin/questionnaires/$id/edit";
+      path: "/questionnaires/$id/edit";
+      fullPath: "/admin/questionnaires/$id/edit";
+      preLoaderRoute: typeof AppAdminQuestionnairesIdEditRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/valuesets/$id/edit": {
+      id: "/_app/admin/valuesets/$id/edit";
+      path: "/valuesets/$id/edit";
+      fullPath: "/admin/valuesets/$id/edit";
+      preLoaderRoute: typeof AppAdminValuesetsIdEditRouteImport;
+      parentRoute: typeof AppAdminRoute;
+    };
+    "/_app/admin/workspaces/$id/edit": {
+      id: "/_app/admin/workspaces/$id/edit";
+      path: "/workspaces/$id/edit";
+      fullPath: "/admin/workspaces/$id/edit";
+      preLoaderRoute: typeof AppAdminWorkspacesIdEditRouteImport;
+      parentRoute: typeof AppAdminRoute;
     };
     "/_app/facility/$facilityId/appointments/": {
       id: "/_app/facility/$facilityId/appointments/";
@@ -4027,13 +4654,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppResponsibilitiesIdSettingsReferralsRouteImport;
       parentRoute: typeof AppRoute;
     };
-    "/_app/_legacy/admin/questionnaires/$id/edit": {
-      id: "/_app/_legacy/admin/questionnaires/$id/edit";
-      path: "/questionnaires/$id/edit";
-      fullPath: "/admin/questionnaires/$id/edit";
-      preLoaderRoute: typeof AppLegacyAdminQuestionnairesIdEditRouteImport;
-      parentRoute: typeof AppLegacyAdminRoute;
-    };
     "/_app/_legacy/facility/$facilityId/template/$": {
       id: "/_app/_legacy/facility/$facilityId/template/$";
       path: "/$";
@@ -4047,6 +4667,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/patient/$patientId/questionnaire/$questionnaireId";
       preLoaderRoute: typeof AppLegacyPatientPatientIdQuestionnaireQuestionnaireIdRouteImport;
       parentRoute: typeof AppLegacyPatientPatientIdQuestionnaireRoute;
+    };
+    "/_app/admin/questionnaires/$id/versions/$revisionId": {
+      id: "/_app/admin/questionnaires/$id/versions/$revisionId";
+      path: "/questionnaires/$id/versions/$revisionId";
+      fullPath: "/admin/questionnaires/$id/versions/$revisionId";
+      preLoaderRoute: typeof AppAdminQuestionnairesIdVersionsRevisionIdRouteImport;
+      parentRoute: typeof AppAdminRoute;
     };
     "/_app/facility/$facilityId/billing/account/": {
       id: "/_app/facility/$facilityId/billing/account/";
@@ -5325,21 +5952,6 @@ declare module "@tanstack/react-router" {
   }
 }
 
-interface AppLegacyAdminRouteChildren {
-  AppLegacyAdminSplatRoute: typeof AppLegacyAdminSplatRoute;
-  AppLegacyAdminQuestionnairesIdEditRoute: typeof AppLegacyAdminQuestionnairesIdEditRoute;
-}
-
-const AppLegacyAdminRouteChildren: AppLegacyAdminRouteChildren = {
-  AppLegacyAdminSplatRoute: AppLegacyAdminSplatRoute,
-  AppLegacyAdminQuestionnairesIdEditRoute:
-    AppLegacyAdminQuestionnairesIdEditRoute,
-};
-
-const AppLegacyAdminRouteWithChildren = AppLegacyAdminRoute._addFileChildren(
-  AppLegacyAdminRouteChildren,
-);
-
 interface AppLegacyFacilityFacilityIdTemplateRouteChildren {
   AppLegacyFacilityFacilityIdTemplateSplatRoute: typeof AppLegacyFacilityFacilityIdTemplateSplatRoute;
 }
@@ -5402,7 +6014,6 @@ const AppLegacyFacilityFacilityIdPatientPatientIdEncounterEncounterIdQuestionnai
 
 interface AppLegacyRouteChildren {
   AppLegacySplatRoute: typeof AppLegacySplatRoute;
-  AppLegacyAdminRoute: typeof AppLegacyAdminRouteWithChildren;
   AppLegacyFacilityFacilityIdTemplateRoute: typeof AppLegacyFacilityFacilityIdTemplateRouteWithChildren;
   AppLegacyPatientPatientIdQuestionnaireRoute: typeof AppLegacyPatientPatientIdQuestionnaireRouteWithChildren;
   AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute: typeof AppLegacyFacilityFacilityIdPatientPatientIdConsultationRoute;
@@ -5414,7 +6025,6 @@ interface AppLegacyRouteChildren {
 
 const AppLegacyRouteChildren: AppLegacyRouteChildren = {
   AppLegacySplatRoute: AppLegacySplatRoute,
-  AppLegacyAdminRoute: AppLegacyAdminRouteWithChildren,
   AppLegacyFacilityFacilityIdTemplateRoute:
     AppLegacyFacilityFacilityIdTemplateRouteWithChildren,
   AppLegacyPatientPatientIdQuestionnaireRoute:
@@ -5433,6 +6043,92 @@ const AppLegacyRouteChildren: AppLegacyRouteChildren = {
 
 const AppLegacyRouteWithChildren = AppLegacyRoute._addFileChildren(
   AppLegacyRouteChildren,
+);
+
+interface AppAdminRouteChildren {
+  AppAdminSplatRoute: typeof AppAdminSplatRoute;
+  AppAdminActionsIdRoute: typeof AppAdminActionsIdRoute;
+  AppAdminActionsNewRoute: typeof AppAdminActionsNewRoute;
+  AppAdminAppsSlugRoute: typeof AppAdminAppsSlugRoute;
+  AppAdminImmunizationPoliciesIdRoute: typeof AppAdminImmunizationPoliciesIdRoute;
+  AppAdminImmunizationPoliciesNewRoute: typeof AppAdminImmunizationPoliciesNewRoute;
+  AppAdminPatient_identifier_configNewRoute: typeof AppAdminPatient_identifier_configNewRoute;
+  AppAdminQuestionnairesNewRoute: typeof AppAdminQuestionnairesNewRoute;
+  AppAdminRbacPermissionsRoute: typeof AppAdminRbacPermissionsRoute;
+  AppAdminRbacRolesRoute: typeof AppAdminRbacRolesRoute;
+  AppAdminTag_configIdRoute: typeof AppAdminTag_configIdRoute;
+  AppAdminValuesetsCreateRoute: typeof AppAdminValuesetsCreateRoute;
+  AppAdminWorkspacesCreateRoute: typeof AppAdminWorkspacesCreateRoute;
+  AppAdminActionsIndexRoute: typeof AppAdminActionsIndexRoute;
+  AppAdminAppsIndexRoute: typeof AppAdminAppsIndexRoute;
+  AppAdminImmunizationPoliciesIndexRoute: typeof AppAdminImmunizationPoliciesIndexRoute;
+  AppAdminPatient_identifier_configIndexRoute: typeof AppAdminPatient_identifier_configIndexRoute;
+  AppAdminQuestionnairesIndexRoute: typeof AppAdminQuestionnairesIndexRoute;
+  AppAdminTag_configIndexRoute: typeof AppAdminTag_configIndexRoute;
+  AppAdminValuesetsIndexRoute: typeof AppAdminValuesetsIndexRoute;
+  AppAdminWorkspacesIndexRoute: typeof AppAdminWorkspacesIndexRoute;
+  AppAdminOrganizationsGovtIdRoute: typeof AppAdminOrganizationsGovtIdRoute;
+  AppAdminOrganizationsProduct_supplierIdRoute: typeof AppAdminOrganizationsProduct_supplierIdRoute;
+  AppAdminOrganizationsRoleIdRoute: typeof AppAdminOrganizationsRoleIdRoute;
+  AppAdminPatient_identifier_configIdEditRoute: typeof AppAdminPatient_identifier_configIdEditRoute;
+  AppAdminQuestionnairesIdEditRoute: typeof AppAdminQuestionnairesIdEditRoute;
+  AppAdminValuesetsIdEditRoute: typeof AppAdminValuesetsIdEditRoute;
+  AppAdminWorkspacesIdEditRoute: typeof AppAdminWorkspacesIdEditRoute;
+  AppAdminOrganizationsGovtIndexRoute: typeof AppAdminOrganizationsGovtIndexRoute;
+  AppAdminOrganizationsProduct_supplierIndexRoute: typeof AppAdminOrganizationsProduct_supplierIndexRoute;
+  AppAdminOrganizationsRoleIndexRoute: typeof AppAdminOrganizationsRoleIndexRoute;
+  AppAdminPatient_identifier_configIdIndexRoute: typeof AppAdminPatient_identifier_configIdIndexRoute;
+  AppAdminQuestionnairesIdIndexRoute: typeof AppAdminQuestionnairesIdIndexRoute;
+  AppAdminQuestionnairesIdVersionsRevisionIdRoute: typeof AppAdminQuestionnairesIdVersionsRevisionIdRoute;
+}
+
+const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminSplatRoute: AppAdminSplatRoute,
+  AppAdminActionsIdRoute: AppAdminActionsIdRoute,
+  AppAdminActionsNewRoute: AppAdminActionsNewRoute,
+  AppAdminAppsSlugRoute: AppAdminAppsSlugRoute,
+  AppAdminImmunizationPoliciesIdRoute: AppAdminImmunizationPoliciesIdRoute,
+  AppAdminImmunizationPoliciesNewRoute: AppAdminImmunizationPoliciesNewRoute,
+  AppAdminPatient_identifier_configNewRoute:
+    AppAdminPatient_identifier_configNewRoute,
+  AppAdminQuestionnairesNewRoute: AppAdminQuestionnairesNewRoute,
+  AppAdminRbacPermissionsRoute: AppAdminRbacPermissionsRoute,
+  AppAdminRbacRolesRoute: AppAdminRbacRolesRoute,
+  AppAdminTag_configIdRoute: AppAdminTag_configIdRoute,
+  AppAdminValuesetsCreateRoute: AppAdminValuesetsCreateRoute,
+  AppAdminWorkspacesCreateRoute: AppAdminWorkspacesCreateRoute,
+  AppAdminActionsIndexRoute: AppAdminActionsIndexRoute,
+  AppAdminAppsIndexRoute: AppAdminAppsIndexRoute,
+  AppAdminImmunizationPoliciesIndexRoute:
+    AppAdminImmunizationPoliciesIndexRoute,
+  AppAdminPatient_identifier_configIndexRoute:
+    AppAdminPatient_identifier_configIndexRoute,
+  AppAdminQuestionnairesIndexRoute: AppAdminQuestionnairesIndexRoute,
+  AppAdminTag_configIndexRoute: AppAdminTag_configIndexRoute,
+  AppAdminValuesetsIndexRoute: AppAdminValuesetsIndexRoute,
+  AppAdminWorkspacesIndexRoute: AppAdminWorkspacesIndexRoute,
+  AppAdminOrganizationsGovtIdRoute: AppAdminOrganizationsGovtIdRoute,
+  AppAdminOrganizationsProduct_supplierIdRoute:
+    AppAdminOrganizationsProduct_supplierIdRoute,
+  AppAdminOrganizationsRoleIdRoute: AppAdminOrganizationsRoleIdRoute,
+  AppAdminPatient_identifier_configIdEditRoute:
+    AppAdminPatient_identifier_configIdEditRoute,
+  AppAdminQuestionnairesIdEditRoute: AppAdminQuestionnairesIdEditRoute,
+  AppAdminValuesetsIdEditRoute: AppAdminValuesetsIdEditRoute,
+  AppAdminWorkspacesIdEditRoute: AppAdminWorkspacesIdEditRoute,
+  AppAdminOrganizationsGovtIndexRoute: AppAdminOrganizationsGovtIndexRoute,
+  AppAdminOrganizationsProduct_supplierIndexRoute:
+    AppAdminOrganizationsProduct_supplierIndexRoute,
+  AppAdminOrganizationsRoleIndexRoute: AppAdminOrganizationsRoleIndexRoute,
+  AppAdminPatient_identifier_configIdIndexRoute:
+    AppAdminPatient_identifier_configIdIndexRoute,
+  AppAdminQuestionnairesIdIndexRoute: AppAdminQuestionnairesIdIndexRoute,
+  AppAdminQuestionnairesIdVersionsRevisionIdRoute:
+    AppAdminQuestionnairesIdVersionsRevisionIdRoute,
+};
+
+const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
+  AppAdminRouteChildren,
 );
 
 interface AppFacilityFacilityIdSettingsActivity_definitionsRouteChildren {
@@ -6178,6 +6874,7 @@ const AppFacilityFacilityIdLocationsLocationIdRouteWithChildren =
 
 interface AppRouteChildren {
   AppLegacyRoute: typeof AppLegacyRouteWithChildren;
+  AppAdminRoute: typeof AppAdminRouteWithChildren;
   AppUserTabRoute: typeof AppUserTabRoute;
   AppOrganizationIndexRoute: typeof AppOrganizationIndexRoute;
   AppUserIndexRoute: typeof AppUserIndexRoute;
@@ -6237,6 +6934,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppLegacyRoute: AppLegacyRouteWithChildren,
+  AppAdminRoute: AppAdminRouteWithChildren,
   AppUserTabRoute: AppUserTabRoute,
   AppOrganizationIndexRoute: AppOrganizationIndexRoute,
   AppUserIndexRoute: AppUserIndexRoute,
