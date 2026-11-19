@@ -7,6 +7,8 @@ export const Route = createFileRoute(
     throw redirect({
       to: "/facility/$facilityId/settings/billing/discount_codes",
       params,
+      search: true,
+      hash: true,
       replace: true,
     });
   },

@@ -29,6 +29,16 @@ test.describe("TanStack Router navigation", () => {
     facilityId = getFacilityId();
   });
 
+  test("billing settings redirect preserves search and hash", async ({
+    page,
+  }) => {
+    await page.goto(`/facility/${facilityId}/settings/billing?x=1#discounts`);
+
+    await expect(page).toHaveURL(
+      `/facility/${facilityId}/settings/billing/discount_codes?x=1#discounts`,
+    );
+  });
+
   test("back after a direct open falls back to the parent route", async ({
     page,
   }) => {
