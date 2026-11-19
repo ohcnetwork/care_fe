@@ -1,38 +1,22 @@
-import { Redirect, useRoutes } from "raviger";
+import { Outlet, useLocation } from "@tanstack/react-router";
+import { RouterProvider as RavigerBasePathProvider } from "raviger";
 
-import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-
-import { DiscountCodeSettings } from "@/pages/Facility/settings/billing/discount/discount-codes/DiscountCodeSettings";
-import { DiscountComponentSettings } from "@/pages/Facility/settings/billing/discount/discount-components/DiscountComponentSettings";
-import { DiscountConfigurationSettings } from "@/pages/Facility/settings/billing/discount/discount-configuration/DiscountConfigurationSettings";
-import { TaxCodeSettings } from "@/pages/Facility/settings/billing/tax/tax-codes/TaxCodeSettings";
-import { TaxComponentSettings } from "@/pages/Facility/settings/billing/tax/tax-components/TaxComponentSettings";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-
-import { InformationalCodeSettings } from "./informational/InformationalCodeSettings";
-import { BillingSettings } from "./settings/BillingSettings";
-
-export function BillingSettingsLayout() {
-  const { facilityId } = useCurrentFacility();
-
+/**
+ * Frame of the billing settings pages. These pages (and the components inside
+ * them) write links and `navigate()` calls relative to the billing base path,
+ * as the old nested `useRoutes` table did. This layout keeps that context.
+ */
+export function BillingSettingsLayout({ facilityId }: { facilityId: string }) {
+  const { pathname } = useLocation();
   const basePath = `/facility/${facilityId}/settings/billing`;
+  const relativePath =
+    pathname.replace(new RegExp(`^${basePath}`, "i"), "") || "/";
 
-  const routes = {
-    "/": () => <Redirect to={`${basePath}/discount_codes`} />,
-    "/discount_components": () => <DiscountComponentSettings />,
-    "/discount_codes": () => <DiscountCodeSettings />,
-    "/discount_configuration": () => <DiscountConfigurationSettings />,
-    "/tax_codes": () => <TaxCodeSettings />,
-    "/tax_components": () => <TaxComponentSettings />,
-    "/informational_codes": () => <InformationalCodeSettings />,
-    "/settings": () => <BillingSettings />,
-    "*": () => <ErrorPage />,
-  };
-
-  const route = useRoutes(routes, {
-    basePath,
-    routeProps: { facilityId },
-  });
-
-  return <div className="min-w-0">{route}</div>;
+  return (
+    <RavigerBasePathProvider basePath={basePath} path={relativePath}>
+      <div className="min-w-0">
+        <Outlet />
+      </div>
+    </RavigerBasePathProvider>
+  );
 }

@@ -989,7 +989,7 @@ export function SymptomQuestion({
         <EntitySelectionDrawer
           open={showSymptomSelection}
           onOpenChange={setShowSymptomSelection}
-          system="system-condition-code"
+          system="system-symptom-code"
           entityType="symptom"
           disabled={disabled}
           onEntitySelected={handleCodeSelect}
@@ -1008,7 +1008,7 @@ export function SymptomQuestion({
         </EntitySelectionDrawer>
       ) : (
         <ValueSetSelect
-          system="system-condition-code"
+          system="system-symptom-code"
           placeholder={addSymptomPlaceholder}
           onSelect={handleCodeSelect}
           disabled={disabled}

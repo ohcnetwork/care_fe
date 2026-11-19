@@ -1,7 +1,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
-import { navigate, useNavigationPrompt } from "raviger";
+import { navigate } from "raviger";
 import {
   type CSSProperties,
   useCallback,
@@ -51,6 +51,7 @@ import { useSubmitFillSession } from "./submit/useSubmitFillSession";
 import { useFillActions } from "./useFillActions";
 import { useFillSessionForms } from "./useFillSessionForms";
 
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { FillSessionNotices } from "./FillSessionNotices";
 import { FillSessionTabs } from "./FillSessionTabs";
 
@@ -203,7 +204,7 @@ export function FillPageBody({
     blockedFormLabels,
     onSuccess: () => {
       // Order matters: finishDraft flushes the pristine state before the
-      // redirect so useNavigationPrompt doesn't block it.
+      // redirect so useNavigationBlocker does not block it.
       autosave.finishDraft();
       navigate(exitTarget);
     },
@@ -335,7 +336,7 @@ export function FillPageBody({
     }
   };
 
-  useNavigationPrompt(
+  useNavigationBlocker(
     autosave.dirty && !import.meta.env.DEV,
     t("unsaved_changes"),
   );

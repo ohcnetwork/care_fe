@@ -48,11 +48,11 @@ import templateApi from "@/types/emr/template/templateApi";
 import queryClient from "@/Utils/request/queryClient";
 
 import { generateSlugValue } from "@/Utils/slug";
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import { slugValueSchema } from "@/types/base/slug/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DOMPurify from "dompurify";
-import { navigate } from "raviger";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -139,7 +139,10 @@ export default function TemplateBuilder({
     mutationFn: mutate(templateApi.createTemplate),
     onSuccess: (data: TemplateRead) => {
       toast.success(t("template_saved"));
-      navigate(`/facility/${facilityId}/template/builder/${data.slug}`);
+      navigate({
+        to: "/facility/$facilityId/template/builder/$slug",
+        params: { facilityId, slug: data.slug },
+      });
     },
     onError: (error) => {
       toast.error(error.message);

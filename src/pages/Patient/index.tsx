@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import dayjs from "dayjs";
-import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +15,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   APPOINTMENT_STATUS_COLORS,
@@ -37,7 +38,7 @@ function PatientPortalIndex() {
   const tokenData = patient?.tokenData;
 
   if (!tokenData) {
-    navigate("/login");
+    navigate({ to: "/login" });
   }
 
   const { data: appointmentsData, isLoading } = useQuery({
@@ -116,7 +117,10 @@ function PatientPortalIndex() {
               <div className="flex flex-col gap-0 items-start md:flex-grow md:mr-4">
                 <span className="text-xs font-medium">{t("location")}: </span>
                 <span className="text-sm">
-                  <Link href={`/facility/${appointment.facility.id}`}>
+                  <Link
+                    to="/facility/$id"
+                    params={{ id: appointment.facility.id }}
+                  >
                     <span className="text-sm underline underline-offset-2 hover:cursor-pointer">
                       {appointment.facility?.name}
                     </span>
@@ -183,7 +187,7 @@ function PatientPortalIndex() {
         <div className="flex justify-between w-full">
           <span className="text-xl font-bold">{t("appointments")}</span>
           <Button variant="primary_gradient" className="sticky right-0" asChild>
-            <Link href="/facilities">
+            <Link to="/facilities">
               <span>{t("book_appointment")}</span>
             </Link>
           </Button>

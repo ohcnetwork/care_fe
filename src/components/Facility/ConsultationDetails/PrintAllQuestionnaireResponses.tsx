@@ -1,33 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
 
-import { cn } from "@/lib/utils";
+import PrintLoading from "@/CAREUI/misc/PrintLoading";
+import TypstPrintPreview from "@/CAREUI/misc/TypstPrintPreview";
 
-import PrintPreview from "@/CAREUI/misc/PrintPreview";
-
-import { Separator } from "@/components/ui/separator";
-
-import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
-import { RegisteredGroupAnswerView } from "@/components/QuestionnaireV2/groups/RegisteredGroupAnswerView";
+import { buildQuestionnaireResponsePrintContent } from "@/components/Facility/ConsultationDetails/questionnaireResponsePrintData";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import {
-  getPatientIdentifiers,
-  PatientRead,
-} from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
-import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-import { ResponseValue } from "@/types/questionnaire/form";
-import { Question } from "@/types/questionnaire/question";
-import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 
 type PrintAllQuestionnaireResponsesProps = {
   questionnaireId: string;
@@ -45,7 +28,7 @@ export function PrintAllQuestionnaireResponses({
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
 
-  const { data: encounter } = useQuery({
+  const { data: encounter, isLoading: isLoadingEncounter } = useQuery({
     queryKey: ["encounter", encounterId, facilityId],
     queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId! },
@@ -54,7 +37,7 @@ export function PrintAllQuestionnaireResponses({
     enabled: !!encounterId && !!facilityId,
   });
 
-  const { data: patient } = useQuery({
+  const { data: patient, isLoading: isLoadingPatient } = useQuery({
     queryKey: ["patient", patientId],
     queryFn: query(patientApi.get, {
       pathParams: {
@@ -64,7 +47,7 @@ export function PrintAllQuestionnaireResponses({
     enabled: !(!!encounterId && !!facilityId),
   });
 
-  const { data: questionnaireResponses } = useQuery({
+  const { data: questionnaireResponses, isLoading } = useQuery({
     queryKey: [
       "questionnaire_responses",
       questionnaireId,
@@ -81,347 +64,23 @@ export function PrintAllQuestionnaireResponses({
     }),
   });
 
-  const questionnaire = useMemo(() => {
-    return questionnaireResponses?.results?.[0]?.questionnaire;
-  }, [questionnaireResponses]);
+  if (isLoading || isLoadingEncounter || isLoadingPatient) {
+    return <PrintLoading />;
+  }
 
   return (
-    <PrintPreview
+    <TypstPrintPreview
+      template="questionnaire-response"
       title={t("questionnaire_response_logs")}
-      disabled={!questionnaireResponses?.results?.length}
+      content={buildQuestionnaireResponsePrintContent({
+        encounter,
+        patient: encounter?.patient ?? patient,
+        questionnaire: questionnaireResponses?.results?.[0]?.questionnaire,
+        responses: questionnaireResponses?.results ?? [],
+        t,
+      })}
       facility={facility}
       templateSlug={PrintTemplateType.questionnaire_response_logs}
-    >
-      <div className="md:p-2 max-w-4xl mx-auto">
-        <div>
-          <div className="text-center sm:text-left sm:order-1 print:text-left mb-2 pb-2 border-b border-gray-200">
-            <h2 className="text-gray-500 uppercase text-sm tracking-wide mt-1 font-semibold">
-              {t("questionnaire_response_logs")}
-            </h2>
-          </div>
-
-          <PrintableEncounterDetails
-            encounter={encounter}
-            patient={encounter?.patient ?? patient}
-          />
-
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
-            <div className="text-center sm:text-left sm:order-1 print:text-left">
-              <h3 className="text-lg font-semibold">{questionnaire?.title}</h3>
-              <p className="text-gray-500 text-sm tracking-wide mt-1">
-                {questionnaire?.description}
-              </p>
-            </div>
-          </div>
-
-          {questionnaireResponses?.results?.map(
-            (item: QuestionnaireResponse) => (
-              <div key={item.id} className="w-full">
-                <PrintableResponseCard key={item.id} item={item} />
-              </div>
-            ),
-          )}
-        </div>
-      </div>
-    </PrintPreview>
-  );
-}
-
-const DetailRow = ({
-  label,
-  value,
-  isStrong = true,
-}: {
-  label: string;
-  value?: string | null;
-  isStrong?: boolean;
-}) => {
-  return (
-    <div className="flex">
-      <span className="text-gray-600 w-32">{label}</span>
-      <span className="text-gray-600">: </span>
-      <span
-        className={`ml-1 whitespace-pre-wrap ${isStrong ? "font-semibold" : ""}`}
-      >
-        {value || "-"}
-      </span>
-    </div>
-  );
-};
-
-interface EncounterDetailsProps {
-  encounter?: EncounterRead;
-  patient?: PatientRead;
-}
-
-export function PrintableEncounterDetails({
-  encounter,
-  patient,
-}: EncounterDetailsProps) {
-  const { t } = useTranslation();
-
-  if (!patient) return null;
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-6 mb-8">
-      <div className="space-y-2">
-        <DetailRow label={t("patient")} value={patient.name} isStrong />
-        <DetailRow
-          label={`${t("age")} / ${t("sex")}`}
-          value={
-            patient
-              ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
-              : undefined
-          }
-        />
-        {getPatientIdentifiers(patient, {
-          use: PatientIdentifierUse.official,
-        }).map((identifier) => (
-          <DetailRow
-            key={identifier.config.id}
-            label={identifier.config.config.display}
-            value={identifier.value}
-          />
-        ))}
-        {patient?.address && (
-          <DetailRow label={t("address")} value={patient.address} />
-        )}
-      </div>
-      <div className="space-y-2">
-        <DetailRow
-          label={t("encounter_date")}
-          value={
-            encounter?.period?.start
-              ? format(new Date(encounter.period.start), "dd MMM yyyy, EEEE")
-              : t("na")
-          }
-          isStrong
-        />
-        <DetailRow
-          label={t("mobile_number")}
-          value={formatPhoneNumberIntl(patient.phone_number)}
-        />
-        {encounter?.care_team?.[0] && (
-          <DetailRow
-            label={t("consultant")}
-            value={formatName(encounter.care_team[0].member)}
-          />
-        )}
-        {encounter?.current_location && (
-          <DetailRow
-            label={t("location")}
-            value={encounter.current_location.name}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-interface QuestionResponseProps {
-  question: Question;
-  response?: {
-    values: ResponseValue[];
-    note?: string;
-    question_id: string;
-  };
-}
-
-function QuestionResponseValue({ question, response }: QuestionResponseProps) {
-  if (!response) return null;
-
-  return (
-    <div>
-      <div className="font-medium text-base">{question.text}</div>
-      <div className="space-y-1">
-        {(response.values ?? []).map((valueObj, index) => {
-          const value = valueObj.value;
-          const coding = valueObj.coding;
-          const unit = valueObj.unit;
-
-          if ((value == null || value === "") && !coding) return null;
-
-          const precedentUnit = unit ? unit : question.unit;
-
-          return (
-            <div
-              key={index}
-              className="text-sm whitespace-pre-wrap flex items-center gap-2 text-secondary-800"
-            >
-              {formatValue(value, question.type)}
-              {precedentUnit && (
-                <span className="ml-1 text-xs">{precedentUnit.code}</span>
-              )}
-              {coding && (
-                <span className="ml-1 text-xs">
-                  {coding.display} ({coding.code})
-                </span>
-              )}
-              {index === (response.values?.length ?? 0) - 1 &&
-                response.note && (
-                  <span className="text-gray-500">({response.note})</span>
-                )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function QuestionGroup({
-  group,
-  responses,
-  level = 0,
-}: {
-  group: Question;
-  responses: QuestionnaireResponse["responses"];
-  level?: number;
-}) {
-  if (group.repeats) {
-    const rows =
-      responses.find((answer) => answer.question_id === group.id)
-        ?.sub_results ?? [];
-    if (!rows.length) return null;
-    return (
-      <div className="space-y-3">
-        <h4 className="text-lg font-semibold">{group.text}</h4>
-        <RegisteredGroupAnswerView
-          question={group}
-          responses={responses}
-          fallback={rows.map((row, index) => (
-            <QuestionGroup
-              key={index}
-              group={{
-                ...group,
-                repeats: false,
-                structured_type: undefined,
-                text: `${group.text} (${index + 1})`,
-              }}
-              responses={row}
-              level={level}
-            />
-          ))}
-        />
-      </div>
-    );
-  }
-  return (
-    <div className={cn("space-y-2", group.styling_metadata?.classes)}>
-      {group.text && (
-        <div className="flex flex-col space-y-1">
-          <h4 className="text-lg font-semibold text-black">
-            {group.text}
-            {group.code && (
-              <span className="ml-1 text-xs text-gray-500">
-                ({group.code.display})
-              </span>
-            )}
-          </h4>
-          {level === 0 && <Separator />}
-        </div>
-      )}
-      <RegisteredGroupAnswerView
-        question={group}
-        responses={responses}
-        fallback={
-          <div
-            className={cn(
-              "grid gap-2",
-              group.styling_metadata?.containerClasses,
-            )}
-          >
-            {group.questions?.map((question) => {
-              if (question.type === "group") {
-                return (
-                  <QuestionGroup
-                    key={question.id}
-                    group={question}
-                    responses={responses}
-                    level={level + 1}
-                  />
-                );
-              }
-
-              if (question.type === "structured") return null;
-
-              const response = responses.find(
-                (r) => r.question_id === question.id,
-              );
-              if (!response) return null;
-
-              return (
-                <QuestionResponseValue
-                  key={question.id}
-                  question={question}
-                  response={response}
-                />
-              );
-            })}
-          </div>
-        }
-      />
-    </div>
-  );
-}
-
-interface ResponseCardProps {
-  item?: QuestionnaireResponse;
-}
-
-export function PrintableResponseCard({ item }: ResponseCardProps) {
-  const { t } = useTranslation();
-
-  if (!item) return null;
-
-  const isStructured = !item.questionnaire;
-  const structuredType = Object.keys(item.structured_responses || {})[0];
-
-  if (isStructured && structuredType) return null;
-
-  return (
-    <div className="flex flex-col py-3 transition-colors">
-      <div className="text-sm m-1">
-        <p>
-          {t("created_by")}: {formatName(item.created_by)}
-        </p>
-        <p>{formatDateTime(item.created_date)}</p>
-      </div>
-
-      <div className="ml-4">
-        {item.questionnaire && (
-          <div className="mt-4 space-y-4">
-            {item.questionnaire?.questions.map((question: Question) => {
-              if (question.type === "structured") return null;
-
-              if (question.type === "group") {
-                return (
-                  <QuestionGroup
-                    key={question.id}
-                    group={question}
-                    responses={item.responses}
-                  />
-                );
-              }
-
-              const response = item.responses.find(
-                (r) => r.question_id === question.id,
-              );
-              if (!response) {
-                return null;
-              }
-
-              return (
-                <QuestionResponseValue
-                  key={question.id}
-                  question={question}
-                  response={response}
-                />
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
+    />
   );
 }

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { ArrowUpRightSquare, PrinterIcon } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -247,7 +247,11 @@ export default function InvoicesData({
                     <TableCell>
                       <Button variant="link" asChild>
                         <Link
-                          href={`/facility/${facilityId}/billing/account/${invoice.account?.id}`}
+                          to="/facility/$facilityId/billing/account/$accountId"
+                          params={{
+                            facilityId,
+                            accountId: invoice.account?.id,
+                          }}
                           className="hover:text-primary "
                           target="_blank"
                           rel="noopener noreferrer"
@@ -290,7 +294,8 @@ export default function InvoicesData({
                         asChild
                       >
                         <Link
-                          href={`/facility/${facilityId}/billing/invoice/${invoice.id}/print`}
+                          to="/facility/$facilityId/billing/invoice/$invoiceId/print"
+                          params={{ facilityId, invoiceId: invoice.id }}
                         >
                           <PrinterIcon strokeWidth={1.5} />
                           {t("print")}
@@ -302,7 +307,8 @@ export default function InvoicesData({
                         asChild
                       >
                         <Link
-                          href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
+                          to="/facility/$facilityId/billing/invoices/$invoiceId"
+                          params={{ facilityId, invoiceId: invoice.id }}
                         >
                           <ArrowUpRightSquare strokeWidth={1.5} />
                           {t("see_invoice")}

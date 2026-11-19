@@ -377,7 +377,7 @@ test("Continue restores an actual structured encounter edit over its server pref
   const identifier = "LOCAL-DRAFT-OVERVIEW-RESUME";
   page.on("dialog", (dialog) => dialog.accept());
   await page.goto(`${encounterUrl}/questionnaire/encounter`);
-  await page.getByPlaceholder("Ip/op/obs/emr number").fill(identifier);
+  await page.getByPlaceholder("IP/OP/OBS/EMR number").fill(identifier);
   await expect
     .poll(() => page.evaluate((key) => localStorage.getItem(key), draftKey))
     .toContain(identifier);
@@ -386,7 +386,7 @@ test("Continue restores an actual structured encounter edit over its server pref
   await draftRow(page, "local", draftKey)
     .getByRole("button", { name: /^Continue / })
     .click();
-  await expect(page.getByPlaceholder("Ip/op/obs/emr number")).toHaveValue(
+  await expect(page.getByPlaceholder("IP/OP/OBS/EMR number")).toHaveValue(
     identifier,
   );
   await expect(

@@ -1,10 +1,5 @@
 import { Spinner } from "@/components/ui/spinner";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building, ChevronDown, ChevronRight, Star, X } from "lucide-react";
 import {
   useCallback,
@@ -15,7 +10,6 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -47,6 +41,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -105,7 +100,6 @@ export default function FacilityOrganizationSelector(
   const [open, setOpen] = useState(false);
   const preferredSelectionApplied = useRef(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
-  const { ref: inViewRef, inView } = useInView();
 
   // Fetch preferred organizations
   const { data: preferredOrganizations, isLoading: isLoadingPreferred } =
@@ -129,77 +123,51 @@ export default function FacilityOrganizationSelector(
   const {
     data: rootOrganizationsData,
     isLoading: isLoadingRoot,
-    fetchNextPage: fetchNextPageRoot,
-    hasNextPage: hasNextPageRoot,
     isFetchingNextPage: isFetchingNextPageRoot,
-  } = useInfiniteQuery({
+    ref: rootLoadMoreRef,
+  } = useInfiniteList({
     queryKey: [
       "facilityOrganization",
       facilityId,
       facilityOrgSearch,
       showAllOrgs,
     ],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query.debounced(
-        showAllOrgs
-          ? facilityOrganizationApi.list
-          : facilityOrganizationApi.listMine,
-        {
-          pathParams: { facilityId },
-          queryParams: {
-            parent: "",
-            name: facilityOrgSearch,
-            limit: String(PAGE_LIMIT),
-            offset: String(pageParam),
-          },
+    ...query.infinite(
+      showAllOrgs
+        ? facilityOrganizationApi.list
+        : facilityOrganizationApi.listMine,
+      {
+        pathParams: { facilityId },
+        pageSize: PAGE_LIMIT,
+        debounceInterval: 500,
+        queryParams: {
+          parent: "",
+          name: facilityOrgSearch,
         },
-      )({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * PAGE_LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) => ({
-      results: data?.pages.flatMap((p) => p.results) || [],
-      count: data?.pages[0]?.count || 0,
-    }),
+      },
+    ),
   });
 
   const {
     data: childOrganizationsData,
     isLoading: isLoadingChild,
-    fetchNextPage: fetchNextPageChild,
-    hasNextPage: hasNextPageChild,
     isFetchingNextPage: isFetchingNextPageChild,
-  } = useInfiniteQuery({
+    ref: childLoadMoreRef,
+  } = useInfiniteList({
     queryKey: [
       "organizations",
       facilityId,
       navigationLevels[navigationLevels.length - 1]?.id,
       facilityOrgSearch,
     ],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query.debounced(facilityOrganizationApi.list, {
-        pathParams: { facilityId },
-        queryParams: {
-          parent: navigationLevels[navigationLevels.length - 1]?.id,
-          name: facilityOrgSearch,
-          limit: String(PAGE_LIMIT),
-          offset: String(pageParam),
-        },
-      })({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * PAGE_LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) => ({
-      results: data?.pages.flatMap((p) => p.results) || [],
-      count: data?.pages[0]?.count || 0,
+    ...query.infinite(facilityOrganizationApi.list, {
+      pathParams: { facilityId },
+      pageSize: PAGE_LIMIT,
+      debounceInterval: 500,
+      queryParams: {
+        parent: navigationLevels[navigationLevels.length - 1]?.id,
+        name: facilityOrgSearch,
+      },
     }),
     enabled: navigationLevels.length > 0,
   });
@@ -239,22 +207,10 @@ export default function FacilityOrganizationSelector(
     isFetchingNextPageChild,
   ]);
 
-  useEffect(() => {
-    if (inView) {
-      if (navigationLevels.length === 0 && hasNextPageRoot) {
-        fetchNextPageRoot();
-      } else if (navigationLevels.length > 0 && hasNextPageChild) {
-        fetchNextPageChild();
-      }
-    }
-  }, [
-    inView,
-    navigationLevels.length,
-    hasNextPageRoot,
-    hasNextPageChild,
-    fetchNextPageRoot,
-    fetchNextPageChild,
-  ]);
+  // The list shows one level at a time, so the sentinel loads more of the
+  // level on screen. Switching levels moves the sentinel to the other query.
+  const loadMoreRef =
+    navigationLevels.length === 0 ? rootLoadMoreRef : childLoadMoreRef;
 
   // Query results can supply the form's initial department. The parent owns
   // the selected IDs; notify it once when this external default becomes ready,
@@ -455,7 +411,7 @@ export default function FacilityOrganizationSelector(
                 );
               })}
             {getCurrentLevelOrganizations().length > 0 && (
-              <div ref={inViewRef} className="h-1" />
+              <div ref={loadMoreRef} className="h-1" />
             )}
             {getCurrentLevelFetchingNextPage() && (
               <div className="flex items-center justify-center py-2">

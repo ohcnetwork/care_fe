@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -25,6 +24,7 @@ import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
 
+import { navigate } from "@/lib/router/navigate";
 import {
   PRODUCT_KNOWLEDGE_STATUS_COLORS,
   PRODUCT_KNOWLEDGE_TYPE_COLORS,
@@ -113,9 +113,10 @@ function ProductKnowledgeTableRow({
       <TableCell
         className="font-medium cursor-pointer whitespace-normal"
         onClick={() =>
-          navigate(
-            `/facility/${facilityId}/settings/product_knowledge/${product.slug}`,
-          )
+          navigate({
+            to: "/facility/$facilityId/settings/product_knowledge/$slug",
+            params: { facilityId, slug: product.slug },
+          })
         }
       >
         <div className="flex items-center space-x-3">

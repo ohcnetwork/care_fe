@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -79,7 +79,7 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
+import { navigate as ravigerNavigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -105,6 +105,7 @@ import { Markdown } from "@/components/ui/markdown";
 import { Separator } from "@/components/ui/separator";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
@@ -459,7 +460,7 @@ export default function AppointmentDetail(props: Props) {
                       size="sm"
                       disabled={referralContextLoading}
                       onClick={() =>
-                        navigate(
+                        ravigerNavigate(
                           encounterUrl(appointment.associated_encounter!.id),
                         )
                       }
@@ -472,7 +473,7 @@ export default function AppointmentDetail(props: Props) {
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        navigate(
+                        ravigerNavigate(
                           `/facility/${facility.id}/patient/${appointment.patient.id}`,
                         )
                       }
@@ -507,7 +508,7 @@ export default function AppointmentDetail(props: Props) {
                               status: AppointmentStatus.IN_CONSULTATION,
                               note: appointment.note,
                             });
-                            navigate(
+                            ravigerNavigate(
                               encounterUrl(
                                 appointment.associated_encounter!.id,
                               ),
@@ -616,7 +617,6 @@ const AppointmentDetailsContent = ({
         sourceUrl={`/facility/${facility.id}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
         encounterId={appointment.associated_encounter?.id}
         viewOnly={true}
-        disableCreateChargeItems
       />
       <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
         <Card className="bg-white shadow-sm rounded-md p-1">
@@ -867,9 +867,14 @@ const AppointmentActions = ({
         setIsRescheduleOpen(false);
         setSelectedSlotId(undefined);
         setRescheduleReason("");
-        navigate(
-          `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
-        );
+        navigate({
+          to: "/facility/$facilityId/patient/$patientId/appointments/$appointmentId",
+          params: {
+            facilityId,
+            patientId: appointment.patient.id,
+            appointmentId: newAppointment.id,
+          },
+        });
       },
     });
 
@@ -1133,7 +1138,7 @@ const AppointmentActions = ({
                     note,
                   })
                 }
-                className={cn(buttonVariants({ variant: "destructive" }))}
+                variant="destructive"
                 disabled={!hasMarkdownContent(note)}
               >
                 {isUpdating ? (
@@ -1172,7 +1177,7 @@ const AppointmentActions = ({
               <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => cancelAppointment({ reason: "cancelled", note })}
-                className={cn(buttonVariants({ variant: "destructive" }))}
+                variant="destructive"
                 disabled={!hasMarkdownContent(note)}
               >
                 {isCancelling ? (
@@ -1206,7 +1211,7 @@ const AppointmentActions = ({
               onClick={() =>
                 cancelAppointment({ reason: "entered_in_error", note })
               }
-              className={cn(buttonVariants({ variant: "destructive" }))}
+              variant="destructive"
             >
               {isCancelling ? (
                 <Spinner className="size-4 animate-spin mr-2" />

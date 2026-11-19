@@ -2,15 +2,9 @@ import { faker } from "@faker-js/faker";
 import { setTimeout as delay } from "node:timers/promises";
 import { adminApiHeaders, apiBaseUrl } from "tests/helper/questionnaireV2";
 
-/**
- * Creates a throwaway patient through the API. Specs that create encounters
- * use one each: the backend caps a patient's active encounters per facility,
- * so creating them for a shared patient eventually rejects every new one.
- */
-export async function createTestPatient(
-  namePrefix = "E2E Patient",
+async function getGovtOrganizationId(
+  headers: Record<string, string>,
 ): Promise<string> {
-  const headers = adminApiHeaders();
   const organizationsResponse = await fetch(
     `${apiBaseUrl()}/api/v1/organization/?org_type=govt&limit=1`,
     { headers },
@@ -27,6 +21,22 @@ export async function createTestPatient(
   if (!geoOrganization) {
     throw new Error("No government organization for the test patient");
   }
+  return geoOrganization;
+}
+
+/**
+ * Creates a throwaway patient through the API. Specs that create encounters
+ * use one each: the backend caps a patient's active encounters per facility,
+ * so creating them for a shared patient eventually rejects every new one.
+ * Without a geo organization, the patient goes in the first government one.
+ */
+export async function createTestPatient(
+  namePrefix = "E2E Patient",
+  geoOrganizationId?: string,
+): Promise<string> {
+  const headers = adminApiHeaders();
+  const geoOrganization =
+    geoOrganizationId ?? (await getGovtOrganizationId(headers));
   const body = JSON.stringify({
     name: `${namePrefix} ${faker.string.alphanumeric(12)}`,
     gender: "male",
@@ -59,6 +69,9 @@ export async function createTestPatient(
     await delay(250 * (attempt + 1));
   }
 }
+
+/** Same as {@link createTestPatient}. */
+export const createPatient = createTestPatient;
 
 const GENDER_LABELS: Record<string, string> = {
   male: "Male",
