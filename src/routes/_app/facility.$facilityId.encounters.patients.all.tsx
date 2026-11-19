@@ -1,14 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import EncountersOverview from "@/pages/Encounters/EncountersOverview";
-
+// The encounters layout renders the page.
 export const Route = createFileRoute(
   "/_app/facility/$facilityId/encounters/patients/all",
-)({
-  component: RouteComponent,
-});
-
-function RouteComponent() {
-  const { facilityId } = Route.useParams();
-  return <EncountersOverview facilityId={facilityId} />;
-}
+)({});

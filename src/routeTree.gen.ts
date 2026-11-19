@@ -34,8 +34,7 @@ import { Route as AppUserIndexRouteImport } from "./routes/_app/user.index";
 import { Route as AppUserTabRouteImport } from "./routes/_app/user.$tab";
 import { Route as PublicFacilityIdRouteImport } from "./routes/_public/facility.$id";
 import { Route as PublicPassword_resetTokenRouteImport } from "./routes/_public/password_reset.$token";
-import { Route as PatientIdIndexRouteImport } from "./routes/patient.$id.index";
-import { Route as PatientIdTabRouteImport } from "./routes/patient.$id.$tab";
+import { Route as PatientIdChar123TabChar125RouteImport } from "./routes/patient.$id.{-$tab}";
 import { Route as ReferralsReferralIdIndexRouteImport } from "./routes/referrals.$referralId.index";
 import { Route as ReferralsReferralIdRespondRouteImport } from "./routes/referrals.$referralId.respond";
 import { Route as AppAdminActionsIndexRouteImport } from "./routes/_app/admin.actions.index";
@@ -59,6 +58,7 @@ import { Route as AppAdminValuesetsCreateRouteImport } from "./routes/_app/admin
 import { Route as AppAdminWorkspacesIndexRouteImport } from "./routes/_app/admin.workspaces.index";
 import { Route as AppAdminWorkspacesCreateRouteImport } from "./routes/_app/admin.workspaces.create";
 import { Route as AppFacilityFacilityIdBedAvailabilityRouteImport } from "./routes/_app/facility.$facilityId.bed-availability";
+import { Route as AppFacilityFacilityIdEncountersRouteImport } from "./routes/_app/facility.$facilityId.encounters";
 import { Route as AppFacilityFacilityIdOverviewRouteImport } from "./routes/_app/facility.$facilityId.overview";
 import { Route as AppFacilityFacilityIdQueuesRouteImport } from "./routes/_app/facility.$facilityId.queues";
 import { Route as AppFacilityFacilityIdReferralsRouteImport } from "./routes/_app/facility.$facilityId.referrals";
@@ -147,19 +147,9 @@ import { Route as AppFacilityFacilityIdLocationsLocationIdOverviewRouteImport } 
 import { Route as AppFacilityFacilityIdLocationsLocationIdResponsesRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.responses";
 import { Route as AppFacilityFacilityIdLocationsLocationIdScheduleRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.schedule";
 import { Route as AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRouteImport } from "./routes/_app/facility.$facilityId.medication_dispense.redirect.$medicationDispenseId";
-import { Route as AppFacilityFacilityIdPatientPatientIdIndexRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.index";
-import { Route as AppFacilityFacilityIdPatientPatientIdAccountsRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.accounts";
-import { Route as AppFacilityFacilityIdPatientPatientIdClinical_historyRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.clinical_history";
 import { Route as AppFacilityFacilityIdPatientPatientIdConsultationRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.consultation";
-import { Route as AppFacilityFacilityIdPatientPatientIdDemographyRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.demography";
-import { Route as AppFacilityFacilityIdPatientPatientIdEncountersRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.encounters";
-import { Route as AppFacilityFacilityIdPatientPatientIdFilesRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.files";
-import { Route as AppFacilityFacilityIdPatientPatientIdNotesRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.notes";
-import { Route as AppFacilityFacilityIdPatientPatientIdReferralsRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.referrals";
-import { Route as AppFacilityFacilityIdPatientPatientIdResource_requestsRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.resource_requests";
 import { Route as AppFacilityFacilityIdPatientPatientIdUpdateRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.update";
-import { Route as AppFacilityFacilityIdPatientPatientIdUpdatesRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.updates";
-import { Route as AppFacilityFacilityIdPatientPatientIdUsersRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.users";
+import { Route as AppFacilityFacilityIdPatientPatientIdChar123TabChar125RouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.{-$tab}";
 import { Route as AppFacilityFacilityIdResourceIdIndexRouteImport } from "./routes/_app/facility.$facilityId.resource.$id.index";
 import { Route as AppFacilityFacilityIdResourceIdPrintRouteImport } from "./routes/_app/facility.$facilityId.resource.$id.print";
 import { Route as AppFacilityFacilityIdResourceIdUpdateRouteImport } from "./routes/_app/facility.$facilityId.resource.$id.update";
@@ -245,7 +235,6 @@ import { Route as AppFacilityFacilityIdLocationsLocationIdQuestionnaireQuestionn
 import { Route as AppFacilityFacilityIdLocationsLocationIdQueuesIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.queues.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdService_requestsIndexRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.service_requests.index";
 import { Route as AppFacilityFacilityIdLocationsLocationIdService_requestsServiceRequestIdRouteImport } from "./routes/_app/facility.$facilityId.locations.$locationId.service_requests.$serviceRequestId";
-import { Route as AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.appointments.index";
 import { Route as AppFacilityFacilityIdPatientPatientIdHistoryTabRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.history.$tab";
 import { Route as AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRouteImport } from "./routes/_app/facility.$facilityId.patient.$patientId.questionnaire.index";
 import { Route as AppFacilityFacilityIdQueueQueueIdTokenTokenIdRouteImport } from "./routes/_app/facility.$facilityId.queue.$queueId.token.$tokenId";
@@ -491,16 +480,12 @@ const PublicPassword_resetTokenRoute =
     path: "/password_reset/$token",
     getParentRoute: () => PublicRoute,
   } as any);
-const PatientIdIndexRoute = PatientIdIndexRouteImport.update({
-  id: "/patient/$id/",
-  path: "/patient/$id/",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const PatientIdTabRoute = PatientIdTabRouteImport.update({
-  id: "/patient/$id/$tab",
-  path: "/patient/$id/$tab",
-  getParentRoute: () => rootRouteImport,
-} as any);
+const PatientIdChar123TabChar125Route =
+  PatientIdChar123TabChar125RouteImport.update({
+    id: "/patient/$id/{-$tab}",
+    path: "/patient/$id/{-$tab}",
+    getParentRoute: () => rootRouteImport,
+  } as any);
 const ReferralsReferralIdIndexRoute =
   ReferralsReferralIdIndexRouteImport.update({
     id: "/referrals/$referralId/",
@@ -625,6 +610,12 @@ const AppFacilityFacilityIdBedAvailabilityRoute =
   AppFacilityFacilityIdBedAvailabilityRouteImport.update({
     id: "/facility/$facilityId/bed-availability",
     path: "/facility/$facilityId/bed-availability",
+    getParentRoute: () => AppRoute,
+  } as any);
+const AppFacilityFacilityIdEncountersRoute =
+  AppFacilityFacilityIdEncountersRouteImport.update({
+    id: "/facility/$facilityId/encounters",
+    path: "/facility/$facilityId/encounters",
     getParentRoute: () => AppRoute,
   } as any);
 const AppFacilityFacilityIdOverviewRoute =
@@ -810,15 +801,15 @@ const AppFacilityFacilityIdAppointmentsPrintRoute =
   } as any);
 const AppFacilityFacilityIdEncountersIndexRoute =
   AppFacilityFacilityIdEncountersIndexRouteImport.update({
-    id: "/facility/$facilityId/encounters/",
-    path: "/facility/$facilityId/encounters/",
-    getParentRoute: () => AppRoute,
+    id: "/",
+    path: "/",
+    getParentRoute: () => AppFacilityFacilityIdEncountersRoute,
   } as any);
 const AppFacilityFacilityIdEncountersTabRoute =
   AppFacilityFacilityIdEncountersTabRouteImport.update({
-    id: "/facility/$facilityId/encounters/$tab",
-    path: "/facility/$facilityId/encounters/$tab",
-    getParentRoute: () => AppRoute,
+    id: "/$tab",
+    path: "/$tab",
+    getParentRoute: () => AppFacilityFacilityIdEncountersRoute,
   } as any);
 const AppFacilityFacilityIdLocationsLocationIdRoute =
   AppFacilityFacilityIdLocationsLocationIdRouteImport.update({
@@ -1080,27 +1071,27 @@ const AppFacilityFacilityIdBillingPaymentsIndexRoute =
   } as any);
 const AppFacilityFacilityIdEncountersLocationsLocationIdRoute =
   AppFacilityFacilityIdEncountersLocationsLocationIdRouteImport.update({
-    id: "/facility/$facilityId/encounters/locations/$locationId",
-    path: "/facility/$facilityId/encounters/locations/$locationId",
-    getParentRoute: () => AppRoute,
+    id: "/locations/$locationId",
+    path: "/locations/$locationId",
+    getParentRoute: () => AppFacilityFacilityIdEncountersRoute,
   } as any);
 const AppFacilityFacilityIdEncountersPatientsIndexRoute =
   AppFacilityFacilityIdEncountersPatientsIndexRouteImport.update({
-    id: "/facility/$facilityId/encounters/patients/",
-    path: "/facility/$facilityId/encounters/patients/",
-    getParentRoute: () => AppRoute,
+    id: "/patients/",
+    path: "/patients/",
+    getParentRoute: () => AppFacilityFacilityIdEncountersRoute,
   } as any);
 const AppFacilityFacilityIdEncountersPatientsEncounterClassRoute =
   AppFacilityFacilityIdEncountersPatientsEncounterClassRouteImport.update({
-    id: "/facility/$facilityId/encounters/patients/$encounterClass",
-    path: "/facility/$facilityId/encounters/patients/$encounterClass",
-    getParentRoute: () => AppRoute,
+    id: "/patients/$encounterClass",
+    path: "/patients/$encounterClass",
+    getParentRoute: () => AppFacilityFacilityIdEncountersRoute,
   } as any);
 const AppFacilityFacilityIdEncountersPatientsAllRoute =
   AppFacilityFacilityIdEncountersPatientsAllRouteImport.update({
-    id: "/facility/$facilityId/encounters/patients/all",
-    path: "/facility/$facilityId/encounters/patients/all",
-    getParentRoute: () => AppRoute,
+    id: "/patients/all",
+    path: "/patients/all",
+    getParentRoute: () => AppFacilityFacilityIdEncountersRoute,
   } as any);
 const AppFacilityFacilityIdLocationsLocationIdIndexRoute =
   AppFacilityFacilityIdLocationsLocationIdIndexRouteImport.update({
@@ -1152,64 +1143,10 @@ const AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute 
       getParentRoute: () => AppRoute,
     } as any,
   );
-const AppFacilityFacilityIdPatientPatientIdIndexRoute =
-  AppFacilityFacilityIdPatientPatientIdIndexRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/",
-    path: "/facility/$facilityId/patient/$patientId/",
-    getParentRoute: () => AppRoute,
-  } as any);
-const AppFacilityFacilityIdPatientPatientIdAccountsRoute =
-  AppFacilityFacilityIdPatientPatientIdAccountsRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/accounts",
-    path: "/facility/$facilityId/patient/$patientId/accounts",
-    getParentRoute: () => AppRoute,
-  } as any);
-const AppFacilityFacilityIdPatientPatientIdClinical_historyRoute =
-  AppFacilityFacilityIdPatientPatientIdClinical_historyRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/clinical_history",
-    path: "/facility/$facilityId/patient/$patientId/clinical_history",
-    getParentRoute: () => AppRoute,
-  } as any);
 const AppFacilityFacilityIdPatientPatientIdConsultationRoute =
   AppFacilityFacilityIdPatientPatientIdConsultationRouteImport.update({
     id: "/facility/$facilityId/patient/$patientId/consultation",
     path: "/facility/$facilityId/patient/$patientId/consultation",
-    getParentRoute: () => AppRoute,
-  } as any);
-const AppFacilityFacilityIdPatientPatientIdDemographyRoute =
-  AppFacilityFacilityIdPatientPatientIdDemographyRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/demography",
-    path: "/facility/$facilityId/patient/$patientId/demography",
-    getParentRoute: () => AppRoute,
-  } as any);
-const AppFacilityFacilityIdPatientPatientIdEncountersRoute =
-  AppFacilityFacilityIdPatientPatientIdEncountersRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/encounters",
-    path: "/facility/$facilityId/patient/$patientId/encounters",
-    getParentRoute: () => AppRoute,
-  } as any);
-const AppFacilityFacilityIdPatientPatientIdFilesRoute =
-  AppFacilityFacilityIdPatientPatientIdFilesRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/files",
-    path: "/facility/$facilityId/patient/$patientId/files",
-    getParentRoute: () => AppRoute,
-  } as any);
-const AppFacilityFacilityIdPatientPatientIdNotesRoute =
-  AppFacilityFacilityIdPatientPatientIdNotesRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/notes",
-    path: "/facility/$facilityId/patient/$patientId/notes",
-    getParentRoute: () => AppRoute,
-  } as any);
-const AppFacilityFacilityIdPatientPatientIdReferralsRoute =
-  AppFacilityFacilityIdPatientPatientIdReferralsRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/referrals",
-    path: "/facility/$facilityId/patient/$patientId/referrals",
-    getParentRoute: () => AppRoute,
-  } as any);
-const AppFacilityFacilityIdPatientPatientIdResource_requestsRoute =
-  AppFacilityFacilityIdPatientPatientIdResource_requestsRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/resource_requests",
-    path: "/facility/$facilityId/patient/$patientId/resource_requests",
     getParentRoute: () => AppRoute,
   } as any);
 const AppFacilityFacilityIdPatientPatientIdUpdateRoute =
@@ -1218,16 +1155,10 @@ const AppFacilityFacilityIdPatientPatientIdUpdateRoute =
     path: "/facility/$facilityId/patient/$patientId/update",
     getParentRoute: () => AppRoute,
   } as any);
-const AppFacilityFacilityIdPatientPatientIdUpdatesRoute =
-  AppFacilityFacilityIdPatientPatientIdUpdatesRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/updates",
-    path: "/facility/$facilityId/patient/$patientId/updates",
-    getParentRoute: () => AppRoute,
-  } as any);
-const AppFacilityFacilityIdPatientPatientIdUsersRoute =
-  AppFacilityFacilityIdPatientPatientIdUsersRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/users",
-    path: "/facility/$facilityId/patient/$patientId/users",
+const AppFacilityFacilityIdPatientPatientIdChar123TabChar125Route =
+  AppFacilityFacilityIdPatientPatientIdChar123TabChar125RouteImport.update({
+    id: "/facility/$facilityId/patient/$patientId/{-$tab}",
+    path: "/facility/$facilityId/patient/$patientId/{-$tab}",
     getParentRoute: () => AppRoute,
   } as any);
 const AppFacilityFacilityIdResourceIdIndexRoute =
@@ -1779,12 +1710,6 @@ const AppFacilityFacilityIdLocationsLocationIdService_requestsServiceRequestIdRo
       getParentRoute: () => AppFacilityFacilityIdLocationsLocationIdRoute,
     } as any,
   );
-const AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute =
-  AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRouteImport.update({
-    id: "/facility/$facilityId/patient/$patientId/appointments/",
-    path: "/facility/$facilityId/patient/$patientId/appointments/",
-    getParentRoute: () => AppRoute,
-  } as any);
 const AppFacilityFacilityIdPatientPatientIdHistoryTabRoute =
   AppFacilityFacilityIdPatientPatientIdHistoryTabRouteImport.update({
     id: "/facility/$facilityId/patient/$patientId/history/$tab",
@@ -2733,12 +2658,11 @@ export interface FileRoutesByFullPath {
   "/user/$tab": typeof AppUserTabRoute;
   "/facility/$id": typeof PublicFacilityIdRoute;
   "/password_reset/$token": typeof PublicPassword_resetTokenRoute;
-  "/patient/$id/$tab": typeof PatientIdTabRoute;
+  "/patient/$id/{-$tab}": typeof PatientIdChar123TabChar125Route;
   "/referrals/$referralId/respond": typeof ReferralsReferralIdRespondRoute;
   "/facility/": typeof AppFacilityIndexRoute;
   "/organization/": typeof AppOrganizationIndexRoute;
   "/user/": typeof AppUserIndexRoute;
-  "/patient/$id/": typeof PatientIdIndexRoute;
   "/referrals/$referralId/": typeof ReferralsReferralIdIndexRoute;
   "/facility/$facilityId/settings": typeof AppFacilityFacilityIdSettingsRouteRouteWithChildren;
   "/admin/actions/$id": typeof AppAdminActionsIdRoute;
@@ -2754,6 +2678,7 @@ export interface FileRoutesByFullPath {
   "/admin/valuesets/create": typeof AppAdminValuesetsCreateRoute;
   "/admin/workspaces/create": typeof AppAdminWorkspacesCreateRoute;
   "/facility/$facilityId/bed-availability": typeof AppFacilityFacilityIdBedAvailabilityRoute;
+  "/facility/$facilityId/encounters": typeof AppFacilityFacilityIdEncountersRouteWithChildren;
   "/facility/$facilityId/overview": typeof AppFacilityFacilityIdOverviewRoute;
   "/facility/$facilityId/queues": typeof AppFacilityFacilityIdQueuesRoute;
   "/facility/$facilityId/referrals": typeof AppFacilityFacilityIdReferralsRoute;
@@ -2844,18 +2769,9 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/locations/$locationId/responses": typeof AppFacilityFacilityIdLocationsLocationIdResponsesRoute;
   "/facility/$facilityId/locations/$locationId/schedule": typeof AppFacilityFacilityIdLocationsLocationIdScheduleRoute;
   "/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId": typeof AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute;
-  "/facility/$facilityId/patient/$patientId/accounts": typeof AppFacilityFacilityIdPatientPatientIdAccountsRoute;
-  "/facility/$facilityId/patient/$patientId/clinical_history": typeof AppFacilityFacilityIdPatientPatientIdClinical_historyRoute;
   "/facility/$facilityId/patient/$patientId/consultation": typeof AppFacilityFacilityIdPatientPatientIdConsultationRoute;
-  "/facility/$facilityId/patient/$patientId/demography": typeof AppFacilityFacilityIdPatientPatientIdDemographyRoute;
-  "/facility/$facilityId/patient/$patientId/encounters": typeof AppFacilityFacilityIdPatientPatientIdEncountersRoute;
-  "/facility/$facilityId/patient/$patientId/files": typeof AppFacilityFacilityIdPatientPatientIdFilesRoute;
-  "/facility/$facilityId/patient/$patientId/notes": typeof AppFacilityFacilityIdPatientPatientIdNotesRoute;
-  "/facility/$facilityId/patient/$patientId/referrals": typeof AppFacilityFacilityIdPatientPatientIdReferralsRoute;
-  "/facility/$facilityId/patient/$patientId/resource_requests": typeof AppFacilityFacilityIdPatientPatientIdResource_requestsRoute;
   "/facility/$facilityId/patient/$patientId/update": typeof AppFacilityFacilityIdPatientPatientIdUpdateRoute;
-  "/facility/$facilityId/patient/$patientId/updates": typeof AppFacilityFacilityIdPatientPatientIdUpdatesRoute;
-  "/facility/$facilityId/patient/$patientId/users": typeof AppFacilityFacilityIdPatientPatientIdUsersRoute;
+  "/facility/$facilityId/patient/$patientId/{-$tab}": typeof AppFacilityFacilityIdPatientPatientIdChar123TabChar125Route;
   "/facility/$facilityId/resource/$id/print": typeof AppFacilityFacilityIdResourceIdPrintRoute;
   "/facility/$facilityId/resource/$id/update": typeof AppFacilityFacilityIdResourceIdUpdateRoute;
   "/facility/$facilityId/services/$serviceId/$": typeof AppFacilityFacilityIdServicesServiceIdSplatRoute;
@@ -2903,7 +2819,6 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/billing/payments/": typeof AppFacilityFacilityIdBillingPaymentsIndexRoute;
   "/facility/$facilityId/encounters/patients/": typeof AppFacilityFacilityIdEncountersPatientsIndexRoute;
   "/facility/$facilityId/locations/$locationId/": typeof AppFacilityFacilityIdLocationsLocationIdIndexRoute;
-  "/facility/$facilityId/patient/$patientId/": typeof AppFacilityFacilityIdPatientPatientIdIndexRoute;
   "/facility/$facilityId/resource/$id/": typeof AppFacilityFacilityIdResourceIdIndexRoute;
   "/facility/$facilityId/services/$serviceId/": typeof AppFacilityFacilityIdServicesServiceIdIndexRoute;
   "/facility/$facilityId/settings/activity_definitions/": typeof AppFacilityFacilityIdSettingsActivity_definitionsIndexRoute;
@@ -2970,7 +2885,6 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/locations/$locationId/questionnaire/": typeof AppFacilityFacilityIdLocationsLocationIdQuestionnaireIndexRoute;
   "/facility/$facilityId/locations/$locationId/queues/": typeof AppFacilityFacilityIdLocationsLocationIdQueuesIndexRoute;
   "/facility/$facilityId/locations/$locationId/service_requests/": typeof AppFacilityFacilityIdLocationsLocationIdService_requestsIndexRoute;
-  "/facility/$facilityId/patient/$patientId/appointments/": typeof AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute;
   "/facility/$facilityId/patient/$patientId/questionnaire/": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute;
   "/facility/$facilityId/services/$serviceId/appointments/": typeof AppFacilityFacilityIdServicesServiceIdAppointmentsIndexRoute;
   "/facility/$facilityId/services/$serviceId/queues/": typeof AppFacilityFacilityIdServicesServiceIdQueuesIndexRoute;
@@ -3089,12 +3003,11 @@ export interface FileRoutesByTo {
   "/user/$tab": typeof AppUserTabRoute;
   "/facility/$id": typeof PublicFacilityIdRoute;
   "/password_reset/$token": typeof PublicPassword_resetTokenRoute;
-  "/patient/$id/$tab": typeof PatientIdTabRoute;
+  "/patient/$id/{-$tab}": typeof PatientIdChar123TabChar125Route;
   "/referrals/$referralId/respond": typeof ReferralsReferralIdRespondRoute;
   "/facility": typeof AppFacilityIndexRoute;
   "/organization": typeof AppOrganizationIndexRoute;
   "/user": typeof AppUserIndexRoute;
-  "/patient/$id": typeof PatientIdIndexRoute;
   "/referrals/$referralId": typeof ReferralsReferralIdIndexRoute;
   "/admin/actions/$id": typeof AppAdminActionsIdRoute;
   "/admin/actions/new": typeof AppAdminActionsNewRoute;
@@ -3179,18 +3092,9 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/locations/$locationId/responses": typeof AppFacilityFacilityIdLocationsLocationIdResponsesRoute;
   "/facility/$facilityId/locations/$locationId/schedule": typeof AppFacilityFacilityIdLocationsLocationIdScheduleRoute;
   "/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId": typeof AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute;
-  "/facility/$facilityId/patient/$patientId/accounts": typeof AppFacilityFacilityIdPatientPatientIdAccountsRoute;
-  "/facility/$facilityId/patient/$patientId/clinical_history": typeof AppFacilityFacilityIdPatientPatientIdClinical_historyRoute;
   "/facility/$facilityId/patient/$patientId/consultation": typeof AppFacilityFacilityIdPatientPatientIdConsultationRoute;
-  "/facility/$facilityId/patient/$patientId/demography": typeof AppFacilityFacilityIdPatientPatientIdDemographyRoute;
-  "/facility/$facilityId/patient/$patientId/encounters": typeof AppFacilityFacilityIdPatientPatientIdEncountersRoute;
-  "/facility/$facilityId/patient/$patientId/files": typeof AppFacilityFacilityIdPatientPatientIdFilesRoute;
-  "/facility/$facilityId/patient/$patientId/notes": typeof AppFacilityFacilityIdPatientPatientIdNotesRoute;
-  "/facility/$facilityId/patient/$patientId/referrals": typeof AppFacilityFacilityIdPatientPatientIdReferralsRoute;
-  "/facility/$facilityId/patient/$patientId/resource_requests": typeof AppFacilityFacilityIdPatientPatientIdResource_requestsRoute;
   "/facility/$facilityId/patient/$patientId/update": typeof AppFacilityFacilityIdPatientPatientIdUpdateRoute;
-  "/facility/$facilityId/patient/$patientId/updates": typeof AppFacilityFacilityIdPatientPatientIdUpdatesRoute;
-  "/facility/$facilityId/patient/$patientId/users": typeof AppFacilityFacilityIdPatientPatientIdUsersRoute;
+  "/facility/$facilityId/patient/$patientId/{-$tab}": typeof AppFacilityFacilityIdPatientPatientIdChar123TabChar125Route;
   "/facility/$facilityId/resource/$id/print": typeof AppFacilityFacilityIdResourceIdPrintRoute;
   "/facility/$facilityId/resource/$id/update": typeof AppFacilityFacilityIdResourceIdUpdateRoute;
   "/facility/$facilityId/services/$serviceId/$": typeof AppFacilityFacilityIdServicesServiceIdSplatRoute;
@@ -3237,7 +3141,6 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/billing/payments": typeof AppFacilityFacilityIdBillingPaymentsIndexRoute;
   "/facility/$facilityId/encounters/patients": typeof AppFacilityFacilityIdEncountersPatientsIndexRoute;
   "/facility/$facilityId/locations/$locationId": typeof AppFacilityFacilityIdLocationsLocationIdIndexRoute;
-  "/facility/$facilityId/patient/$patientId": typeof AppFacilityFacilityIdPatientPatientIdIndexRoute;
   "/facility/$facilityId/resource/$id": typeof AppFacilityFacilityIdResourceIdIndexRoute;
   "/facility/$facilityId/services/$serviceId": typeof AppFacilityFacilityIdServicesServiceIdIndexRoute;
   "/facility/$facilityId/settings/activity_definitions": typeof AppFacilityFacilityIdSettingsActivity_definitionsIndexRoute;
@@ -3304,7 +3207,6 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/locations/$locationId/questionnaire": typeof AppFacilityFacilityIdLocationsLocationIdQuestionnaireIndexRoute;
   "/facility/$facilityId/locations/$locationId/queues": typeof AppFacilityFacilityIdLocationsLocationIdQueuesIndexRoute;
   "/facility/$facilityId/locations/$locationId/service_requests": typeof AppFacilityFacilityIdLocationsLocationIdService_requestsIndexRoute;
-  "/facility/$facilityId/patient/$patientId/appointments": typeof AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute;
   "/facility/$facilityId/patient/$patientId/questionnaire": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute;
   "/facility/$facilityId/services/$serviceId/appointments": typeof AppFacilityFacilityIdServicesServiceIdAppointmentsIndexRoute;
   "/facility/$facilityId/services/$serviceId/queues": typeof AppFacilityFacilityIdServicesServiceIdQueuesIndexRoute;
@@ -3428,12 +3330,11 @@ export interface FileRoutesById {
   "/_app/user/$tab": typeof AppUserTabRoute;
   "/_public/facility/$id": typeof PublicFacilityIdRoute;
   "/_public/password_reset/$token": typeof PublicPassword_resetTokenRoute;
-  "/patient/$id/$tab": typeof PatientIdTabRoute;
+  "/patient/$id/{-$tab}": typeof PatientIdChar123TabChar125Route;
   "/referrals/$referralId/respond": typeof ReferralsReferralIdRespondRoute;
   "/_app/facility/": typeof AppFacilityIndexRoute;
   "/_app/organization/": typeof AppOrganizationIndexRoute;
   "/_app/user/": typeof AppUserIndexRoute;
-  "/patient/$id/": typeof PatientIdIndexRoute;
   "/referrals/$referralId/": typeof ReferralsReferralIdIndexRoute;
   "/_app/facility/$facilityId/settings": typeof AppFacilityFacilityIdSettingsRouteRouteWithChildren;
   "/_app/admin/actions/$id": typeof AppAdminActionsIdRoute;
@@ -3449,6 +3350,7 @@ export interface FileRoutesById {
   "/_app/admin/valuesets/create": typeof AppAdminValuesetsCreateRoute;
   "/_app/admin/workspaces/create": typeof AppAdminWorkspacesCreateRoute;
   "/_app/facility/$facilityId/bed-availability": typeof AppFacilityFacilityIdBedAvailabilityRoute;
+  "/_app/facility/$facilityId/encounters": typeof AppFacilityFacilityIdEncountersRouteWithChildren;
   "/_app/facility/$facilityId/overview": typeof AppFacilityFacilityIdOverviewRoute;
   "/_app/facility/$facilityId/queues": typeof AppFacilityFacilityIdQueuesRoute;
   "/_app/facility/$facilityId/referrals": typeof AppFacilityFacilityIdReferralsRoute;
@@ -3539,18 +3441,9 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/locations/$locationId/responses": typeof AppFacilityFacilityIdLocationsLocationIdResponsesRoute;
   "/_app/facility/$facilityId/locations/$locationId/schedule": typeof AppFacilityFacilityIdLocationsLocationIdScheduleRoute;
   "/_app/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId": typeof AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute;
-  "/_app/facility/$facilityId/patient/$patientId/accounts": typeof AppFacilityFacilityIdPatientPatientIdAccountsRoute;
-  "/_app/facility/$facilityId/patient/$patientId/clinical_history": typeof AppFacilityFacilityIdPatientPatientIdClinical_historyRoute;
   "/_app/facility/$facilityId/patient/$patientId/consultation": typeof AppFacilityFacilityIdPatientPatientIdConsultationRoute;
-  "/_app/facility/$facilityId/patient/$patientId/demography": typeof AppFacilityFacilityIdPatientPatientIdDemographyRoute;
-  "/_app/facility/$facilityId/patient/$patientId/encounters": typeof AppFacilityFacilityIdPatientPatientIdEncountersRoute;
-  "/_app/facility/$facilityId/patient/$patientId/files": typeof AppFacilityFacilityIdPatientPatientIdFilesRoute;
-  "/_app/facility/$facilityId/patient/$patientId/notes": typeof AppFacilityFacilityIdPatientPatientIdNotesRoute;
-  "/_app/facility/$facilityId/patient/$patientId/referrals": typeof AppFacilityFacilityIdPatientPatientIdReferralsRoute;
-  "/_app/facility/$facilityId/patient/$patientId/resource_requests": typeof AppFacilityFacilityIdPatientPatientIdResource_requestsRoute;
   "/_app/facility/$facilityId/patient/$patientId/update": typeof AppFacilityFacilityIdPatientPatientIdUpdateRoute;
-  "/_app/facility/$facilityId/patient/$patientId/updates": typeof AppFacilityFacilityIdPatientPatientIdUpdatesRoute;
-  "/_app/facility/$facilityId/patient/$patientId/users": typeof AppFacilityFacilityIdPatientPatientIdUsersRoute;
+  "/_app/facility/$facilityId/patient/$patientId/{-$tab}": typeof AppFacilityFacilityIdPatientPatientIdChar123TabChar125Route;
   "/_app/facility/$facilityId/resource/$id/print": typeof AppFacilityFacilityIdResourceIdPrintRoute;
   "/_app/facility/$facilityId/resource/$id/update": typeof AppFacilityFacilityIdResourceIdUpdateRoute;
   "/_app/facility/$facilityId/services/$serviceId/$": typeof AppFacilityFacilityIdServicesServiceIdSplatRoute;
@@ -3598,7 +3491,6 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/billing/payments/": typeof AppFacilityFacilityIdBillingPaymentsIndexRoute;
   "/_app/facility/$facilityId/encounters/patients/": typeof AppFacilityFacilityIdEncountersPatientsIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/": typeof AppFacilityFacilityIdLocationsLocationIdIndexRoute;
-  "/_app/facility/$facilityId/patient/$patientId/": typeof AppFacilityFacilityIdPatientPatientIdIndexRoute;
   "/_app/facility/$facilityId/resource/$id/": typeof AppFacilityFacilityIdResourceIdIndexRoute;
   "/_app/facility/$facilityId/services/$serviceId/": typeof AppFacilityFacilityIdServicesServiceIdIndexRoute;
   "/_app/facility/$facilityId/settings/activity_definitions/": typeof AppFacilityFacilityIdSettingsActivity_definitionsIndexRoute;
@@ -3665,7 +3557,6 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/locations/$locationId/questionnaire/": typeof AppFacilityFacilityIdLocationsLocationIdQuestionnaireIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/queues/": typeof AppFacilityFacilityIdLocationsLocationIdQueuesIndexRoute;
   "/_app/facility/$facilityId/locations/$locationId/service_requests/": typeof AppFacilityFacilityIdLocationsLocationIdService_requestsIndexRoute;
-  "/_app/facility/$facilityId/patient/$patientId/appointments/": typeof AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute;
   "/_app/facility/$facilityId/patient/$patientId/questionnaire/": typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute;
   "/_app/facility/$facilityId/services/$serviceId/appointments/": typeof AppFacilityFacilityIdServicesServiceIdAppointmentsIndexRoute;
   "/_app/facility/$facilityId/services/$serviceId/queues/": typeof AppFacilityFacilityIdServicesServiceIdQueuesIndexRoute;
@@ -3786,12 +3677,11 @@ export interface FileRouteTypes {
     | "/user/$tab"
     | "/facility/$id"
     | "/password_reset/$token"
-    | "/patient/$id/$tab"
+    | "/patient/$id/{-$tab}"
     | "/referrals/$referralId/respond"
     | "/facility/"
     | "/organization/"
     | "/user/"
-    | "/patient/$id/"
     | "/referrals/$referralId/"
     | "/facility/$facilityId/settings"
     | "/admin/actions/$id"
@@ -3807,6 +3697,7 @@ export interface FileRouteTypes {
     | "/admin/valuesets/create"
     | "/admin/workspaces/create"
     | "/facility/$facilityId/bed-availability"
+    | "/facility/$facilityId/encounters"
     | "/facility/$facilityId/overview"
     | "/facility/$facilityId/queues"
     | "/facility/$facilityId/referrals"
@@ -3897,18 +3788,9 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/locations/$locationId/responses"
     | "/facility/$facilityId/locations/$locationId/schedule"
     | "/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId"
-    | "/facility/$facilityId/patient/$patientId/accounts"
-    | "/facility/$facilityId/patient/$patientId/clinical_history"
     | "/facility/$facilityId/patient/$patientId/consultation"
-    | "/facility/$facilityId/patient/$patientId/demography"
-    | "/facility/$facilityId/patient/$patientId/encounters"
-    | "/facility/$facilityId/patient/$patientId/files"
-    | "/facility/$facilityId/patient/$patientId/notes"
-    | "/facility/$facilityId/patient/$patientId/referrals"
-    | "/facility/$facilityId/patient/$patientId/resource_requests"
     | "/facility/$facilityId/patient/$patientId/update"
-    | "/facility/$facilityId/patient/$patientId/updates"
-    | "/facility/$facilityId/patient/$patientId/users"
+    | "/facility/$facilityId/patient/$patientId/{-$tab}"
     | "/facility/$facilityId/resource/$id/print"
     | "/facility/$facilityId/resource/$id/update"
     | "/facility/$facilityId/services/$serviceId/$"
@@ -3956,7 +3838,6 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/billing/payments/"
     | "/facility/$facilityId/encounters/patients/"
     | "/facility/$facilityId/locations/$locationId/"
-    | "/facility/$facilityId/patient/$patientId/"
     | "/facility/$facilityId/resource/$id/"
     | "/facility/$facilityId/services/$serviceId/"
     | "/facility/$facilityId/settings/activity_definitions/"
@@ -4023,7 +3904,6 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/locations/$locationId/questionnaire/"
     | "/facility/$facilityId/locations/$locationId/queues/"
     | "/facility/$facilityId/locations/$locationId/service_requests/"
-    | "/facility/$facilityId/patient/$patientId/appointments/"
     | "/facility/$facilityId/patient/$patientId/questionnaire/"
     | "/facility/$facilityId/services/$serviceId/appointments/"
     | "/facility/$facilityId/services/$serviceId/queues/"
@@ -4142,12 +4022,11 @@ export interface FileRouteTypes {
     | "/user/$tab"
     | "/facility/$id"
     | "/password_reset/$token"
-    | "/patient/$id/$tab"
+    | "/patient/$id/{-$tab}"
     | "/referrals/$referralId/respond"
     | "/facility"
     | "/organization"
     | "/user"
-    | "/patient/$id"
     | "/referrals/$referralId"
     | "/admin/actions/$id"
     | "/admin/actions/new"
@@ -4232,18 +4111,9 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/locations/$locationId/responses"
     | "/facility/$facilityId/locations/$locationId/schedule"
     | "/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId"
-    | "/facility/$facilityId/patient/$patientId/accounts"
-    | "/facility/$facilityId/patient/$patientId/clinical_history"
     | "/facility/$facilityId/patient/$patientId/consultation"
-    | "/facility/$facilityId/patient/$patientId/demography"
-    | "/facility/$facilityId/patient/$patientId/encounters"
-    | "/facility/$facilityId/patient/$patientId/files"
-    | "/facility/$facilityId/patient/$patientId/notes"
-    | "/facility/$facilityId/patient/$patientId/referrals"
-    | "/facility/$facilityId/patient/$patientId/resource_requests"
     | "/facility/$facilityId/patient/$patientId/update"
-    | "/facility/$facilityId/patient/$patientId/updates"
-    | "/facility/$facilityId/patient/$patientId/users"
+    | "/facility/$facilityId/patient/$patientId/{-$tab}"
     | "/facility/$facilityId/resource/$id/print"
     | "/facility/$facilityId/resource/$id/update"
     | "/facility/$facilityId/services/$serviceId/$"
@@ -4290,7 +4160,6 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/billing/payments"
     | "/facility/$facilityId/encounters/patients"
     | "/facility/$facilityId/locations/$locationId"
-    | "/facility/$facilityId/patient/$patientId"
     | "/facility/$facilityId/resource/$id"
     | "/facility/$facilityId/services/$serviceId"
     | "/facility/$facilityId/settings/activity_definitions"
@@ -4357,7 +4226,6 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/locations/$locationId/questionnaire"
     | "/facility/$facilityId/locations/$locationId/queues"
     | "/facility/$facilityId/locations/$locationId/service_requests"
-    | "/facility/$facilityId/patient/$patientId/appointments"
     | "/facility/$facilityId/patient/$patientId/questionnaire"
     | "/facility/$facilityId/services/$serviceId/appointments"
     | "/facility/$facilityId/services/$serviceId/queues"
@@ -4480,12 +4348,11 @@ export interface FileRouteTypes {
     | "/_app/user/$tab"
     | "/_public/facility/$id"
     | "/_public/password_reset/$token"
-    | "/patient/$id/$tab"
+    | "/patient/$id/{-$tab}"
     | "/referrals/$referralId/respond"
     | "/_app/facility/"
     | "/_app/organization/"
     | "/_app/user/"
-    | "/patient/$id/"
     | "/referrals/$referralId/"
     | "/_app/facility/$facilityId/settings"
     | "/_app/admin/actions/$id"
@@ -4501,6 +4368,7 @@ export interface FileRouteTypes {
     | "/_app/admin/valuesets/create"
     | "/_app/admin/workspaces/create"
     | "/_app/facility/$facilityId/bed-availability"
+    | "/_app/facility/$facilityId/encounters"
     | "/_app/facility/$facilityId/overview"
     | "/_app/facility/$facilityId/queues"
     | "/_app/facility/$facilityId/referrals"
@@ -4591,18 +4459,9 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/locations/$locationId/responses"
     | "/_app/facility/$facilityId/locations/$locationId/schedule"
     | "/_app/facility/$facilityId/medication_dispense/redirect/$medicationDispenseId"
-    | "/_app/facility/$facilityId/patient/$patientId/accounts"
-    | "/_app/facility/$facilityId/patient/$patientId/clinical_history"
     | "/_app/facility/$facilityId/patient/$patientId/consultation"
-    | "/_app/facility/$facilityId/patient/$patientId/demography"
-    | "/_app/facility/$facilityId/patient/$patientId/encounters"
-    | "/_app/facility/$facilityId/patient/$patientId/files"
-    | "/_app/facility/$facilityId/patient/$patientId/notes"
-    | "/_app/facility/$facilityId/patient/$patientId/referrals"
-    | "/_app/facility/$facilityId/patient/$patientId/resource_requests"
     | "/_app/facility/$facilityId/patient/$patientId/update"
-    | "/_app/facility/$facilityId/patient/$patientId/updates"
-    | "/_app/facility/$facilityId/patient/$patientId/users"
+    | "/_app/facility/$facilityId/patient/$patientId/{-$tab}"
     | "/_app/facility/$facilityId/resource/$id/print"
     | "/_app/facility/$facilityId/resource/$id/update"
     | "/_app/facility/$facilityId/services/$serviceId/$"
@@ -4650,7 +4509,6 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/billing/payments/"
     | "/_app/facility/$facilityId/encounters/patients/"
     | "/_app/facility/$facilityId/locations/$locationId/"
-    | "/_app/facility/$facilityId/patient/$patientId/"
     | "/_app/facility/$facilityId/resource/$id/"
     | "/_app/facility/$facilityId/services/$serviceId/"
     | "/_app/facility/$facilityId/settings/activity_definitions/"
@@ -4717,7 +4575,6 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/locations/$locationId/questionnaire/"
     | "/_app/facility/$facilityId/locations/$locationId/queues/"
     | "/_app/facility/$facilityId/locations/$locationId/service_requests/"
-    | "/_app/facility/$facilityId/patient/$patientId/appointments/"
     | "/_app/facility/$facilityId/patient/$patientId/questionnaire/"
     | "/_app/facility/$facilityId/services/$serviceId/appointments/"
     | "/_app/facility/$facilityId/services/$serviceId/queues/"
@@ -4826,9 +4683,8 @@ export interface RootRouteChildren {
   LicensesRoute: typeof LicensesRoute;
   SessionExpiredRoute: typeof SessionExpiredRoute;
   PatientHomeRoute: typeof PatientHomeRoute;
-  PatientIdTabRoute: typeof PatientIdTabRoute;
+  PatientIdChar123TabChar125Route: typeof PatientIdChar123TabChar125Route;
   ReferralsReferralIdRespondRoute: typeof ReferralsReferralIdRespondRoute;
-  PatientIdIndexRoute: typeof PatientIdIndexRoute;
   ReferralsReferralIdIndexRoute: typeof ReferralsReferralIdIndexRoute;
 }
 
@@ -5009,18 +4865,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PublicPassword_resetTokenRouteImport;
       parentRoute: typeof PublicRoute;
     };
-    "/patient/$id/": {
-      id: "/patient/$id/";
-      path: "/patient/$id";
-      fullPath: "/patient/$id/";
-      preLoaderRoute: typeof PatientIdIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/patient/$id/$tab": {
-      id: "/patient/$id/$tab";
-      path: "/patient/$id/$tab";
-      fullPath: "/patient/$id/$tab";
-      preLoaderRoute: typeof PatientIdTabRouteImport;
+    "/patient/$id/{-$tab}": {
+      id: "/patient/$id/{-$tab}";
+      path: "/patient/$id/{-$tab}";
+      fullPath: "/patient/$id/{-$tab}";
+      preLoaderRoute: typeof PatientIdChar123TabChar125RouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/referrals/$referralId/": {
@@ -5182,6 +5031,13 @@ declare module "@tanstack/react-router" {
       path: "/facility/$facilityId/bed-availability";
       fullPath: "/facility/$facilityId/bed-availability";
       preLoaderRoute: typeof AppFacilityFacilityIdBedAvailabilityRouteImport;
+      parentRoute: typeof AppRoute;
+    };
+    "/_app/facility/$facilityId/encounters": {
+      id: "/_app/facility/$facilityId/encounters";
+      path: "/facility/$facilityId/encounters";
+      fullPath: "/facility/$facilityId/encounters";
+      preLoaderRoute: typeof AppFacilityFacilityIdEncountersRouteImport;
       parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/overview": {
@@ -5403,17 +5259,17 @@ declare module "@tanstack/react-router" {
     };
     "/_app/facility/$facilityId/encounters/": {
       id: "/_app/facility/$facilityId/encounters/";
-      path: "/facility/$facilityId/encounters";
+      path: "/";
       fullPath: "/facility/$facilityId/encounters/";
       preLoaderRoute: typeof AppFacilityFacilityIdEncountersIndexRouteImport;
-      parentRoute: typeof AppRoute;
+      parentRoute: typeof AppFacilityFacilityIdEncountersRoute;
     };
     "/_app/facility/$facilityId/encounters/$tab": {
       id: "/_app/facility/$facilityId/encounters/$tab";
-      path: "/facility/$facilityId/encounters/$tab";
+      path: "/$tab";
       fullPath: "/facility/$facilityId/encounters/$tab";
       preLoaderRoute: typeof AppFacilityFacilityIdEncountersTabRouteImport;
-      parentRoute: typeof AppRoute;
+      parentRoute: typeof AppFacilityFacilityIdEncountersRoute;
     };
     "/_app/facility/$facilityId/locations/$locationId": {
       id: "/_app/facility/$facilityId/locations/$locationId";
@@ -5718,31 +5574,31 @@ declare module "@tanstack/react-router" {
     };
     "/_app/facility/$facilityId/encounters/locations/$locationId": {
       id: "/_app/facility/$facilityId/encounters/locations/$locationId";
-      path: "/facility/$facilityId/encounters/locations/$locationId";
+      path: "/locations/$locationId";
       fullPath: "/facility/$facilityId/encounters/locations/$locationId";
       preLoaderRoute: typeof AppFacilityFacilityIdEncountersLocationsLocationIdRouteImport;
-      parentRoute: typeof AppRoute;
+      parentRoute: typeof AppFacilityFacilityIdEncountersRoute;
     };
     "/_app/facility/$facilityId/encounters/patients/": {
       id: "/_app/facility/$facilityId/encounters/patients/";
-      path: "/facility/$facilityId/encounters/patients";
+      path: "/patients";
       fullPath: "/facility/$facilityId/encounters/patients/";
       preLoaderRoute: typeof AppFacilityFacilityIdEncountersPatientsIndexRouteImport;
-      parentRoute: typeof AppRoute;
+      parentRoute: typeof AppFacilityFacilityIdEncountersRoute;
     };
     "/_app/facility/$facilityId/encounters/patients/$encounterClass": {
       id: "/_app/facility/$facilityId/encounters/patients/$encounterClass";
-      path: "/facility/$facilityId/encounters/patients/$encounterClass";
+      path: "/patients/$encounterClass";
       fullPath: "/facility/$facilityId/encounters/patients/$encounterClass";
       preLoaderRoute: typeof AppFacilityFacilityIdEncountersPatientsEncounterClassRouteImport;
-      parentRoute: typeof AppRoute;
+      parentRoute: typeof AppFacilityFacilityIdEncountersRoute;
     };
     "/_app/facility/$facilityId/encounters/patients/all": {
       id: "/_app/facility/$facilityId/encounters/patients/all";
-      path: "/facility/$facilityId/encounters/patients/all";
+      path: "/patients/all";
       fullPath: "/facility/$facilityId/encounters/patients/all";
       preLoaderRoute: typeof AppFacilityFacilityIdEncountersPatientsAllRouteImport;
-      parentRoute: typeof AppRoute;
+      parentRoute: typeof AppFacilityFacilityIdEncountersRoute;
     };
     "/_app/facility/$facilityId/locations/$locationId/": {
       id: "/_app/facility/$facilityId/locations/$locationId/";
@@ -5800,74 +5656,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRouteImport;
       parentRoute: typeof AppRoute;
     };
-    "/_app/facility/$facilityId/patient/$patientId/": {
-      id: "/_app/facility/$facilityId/patient/$patientId/";
-      path: "/facility/$facilityId/patient/$patientId";
-      fullPath: "/facility/$facilityId/patient/$patientId/";
-      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdIndexRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/facility/$facilityId/patient/$patientId/accounts": {
-      id: "/_app/facility/$facilityId/patient/$patientId/accounts";
-      path: "/facility/$facilityId/patient/$patientId/accounts";
-      fullPath: "/facility/$facilityId/patient/$patientId/accounts";
-      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdAccountsRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/facility/$facilityId/patient/$patientId/clinical_history": {
-      id: "/_app/facility/$facilityId/patient/$patientId/clinical_history";
-      path: "/facility/$facilityId/patient/$patientId/clinical_history";
-      fullPath: "/facility/$facilityId/patient/$patientId/clinical_history";
-      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdClinical_historyRouteImport;
-      parentRoute: typeof AppRoute;
-    };
     "/_app/facility/$facilityId/patient/$patientId/consultation": {
       id: "/_app/facility/$facilityId/patient/$patientId/consultation";
       path: "/facility/$facilityId/patient/$patientId/consultation";
       fullPath: "/facility/$facilityId/patient/$patientId/consultation";
       preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdConsultationRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/facility/$facilityId/patient/$patientId/demography": {
-      id: "/_app/facility/$facilityId/patient/$patientId/demography";
-      path: "/facility/$facilityId/patient/$patientId/demography";
-      fullPath: "/facility/$facilityId/patient/$patientId/demography";
-      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdDemographyRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/facility/$facilityId/patient/$patientId/encounters": {
-      id: "/_app/facility/$facilityId/patient/$patientId/encounters";
-      path: "/facility/$facilityId/patient/$patientId/encounters";
-      fullPath: "/facility/$facilityId/patient/$patientId/encounters";
-      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdEncountersRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/facility/$facilityId/patient/$patientId/files": {
-      id: "/_app/facility/$facilityId/patient/$patientId/files";
-      path: "/facility/$facilityId/patient/$patientId/files";
-      fullPath: "/facility/$facilityId/patient/$patientId/files";
-      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdFilesRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/facility/$facilityId/patient/$patientId/notes": {
-      id: "/_app/facility/$facilityId/patient/$patientId/notes";
-      path: "/facility/$facilityId/patient/$patientId/notes";
-      fullPath: "/facility/$facilityId/patient/$patientId/notes";
-      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdNotesRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/facility/$facilityId/patient/$patientId/referrals": {
-      id: "/_app/facility/$facilityId/patient/$patientId/referrals";
-      path: "/facility/$facilityId/patient/$patientId/referrals";
-      fullPath: "/facility/$facilityId/patient/$patientId/referrals";
-      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdReferralsRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/facility/$facilityId/patient/$patientId/resource_requests": {
-      id: "/_app/facility/$facilityId/patient/$patientId/resource_requests";
-      path: "/facility/$facilityId/patient/$patientId/resource_requests";
-      fullPath: "/facility/$facilityId/patient/$patientId/resource_requests";
-      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdResource_requestsRouteImport;
       parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/patient/$patientId/update": {
@@ -5877,18 +5670,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdUpdateRouteImport;
       parentRoute: typeof AppRoute;
     };
-    "/_app/facility/$facilityId/patient/$patientId/updates": {
-      id: "/_app/facility/$facilityId/patient/$patientId/updates";
-      path: "/facility/$facilityId/patient/$patientId/updates";
-      fullPath: "/facility/$facilityId/patient/$patientId/updates";
-      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdUpdatesRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/facility/$facilityId/patient/$patientId/users": {
-      id: "/_app/facility/$facilityId/patient/$patientId/users";
-      path: "/facility/$facilityId/patient/$patientId/users";
-      fullPath: "/facility/$facilityId/patient/$patientId/users";
-      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdUsersRouteImport;
+    "/_app/facility/$facilityId/patient/$patientId/{-$tab}": {
+      id: "/_app/facility/$facilityId/patient/$patientId/{-$tab}";
+      path: "/facility/$facilityId/patient/$patientId/{-$tab}";
+      fullPath: "/facility/$facilityId/patient/$patientId/{-$tab}";
+      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdChar123TabChar125RouteImport;
       parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/resource/$id/": {
@@ -6485,13 +6271,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId";
       preLoaderRoute: typeof AppFacilityFacilityIdLocationsLocationIdService_requestsServiceRequestIdRouteImport;
       parentRoute: typeof AppFacilityFacilityIdLocationsLocationIdRoute;
-    };
-    "/_app/facility/$facilityId/patient/$patientId/appointments/": {
-      id: "/_app/facility/$facilityId/patient/$patientId/appointments/";
-      path: "/facility/$facilityId/patient/$patientId/appointments";
-      fullPath: "/facility/$facilityId/patient/$patientId/appointments/";
-      preLoaderRoute: typeof AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRouteImport;
-      parentRoute: typeof AppRoute;
     };
     "/_app/facility/$facilityId/patient/$patientId/history/$tab": {
       id: "/_app/facility/$facilityId/patient/$patientId/history/$tab";
@@ -7966,6 +7745,36 @@ const AppFacilityFacilityIdSettingsRouteRouteWithChildren =
     AppFacilityFacilityIdSettingsRouteRouteChildren,
   );
 
+interface AppFacilityFacilityIdEncountersRouteChildren {
+  AppFacilityFacilityIdEncountersTabRoute: typeof AppFacilityFacilityIdEncountersTabRoute;
+  AppFacilityFacilityIdEncountersIndexRoute: typeof AppFacilityFacilityIdEncountersIndexRoute;
+  AppFacilityFacilityIdEncountersLocationsLocationIdRoute: typeof AppFacilityFacilityIdEncountersLocationsLocationIdRoute;
+  AppFacilityFacilityIdEncountersPatientsEncounterClassRoute: typeof AppFacilityFacilityIdEncountersPatientsEncounterClassRoute;
+  AppFacilityFacilityIdEncountersPatientsAllRoute: typeof AppFacilityFacilityIdEncountersPatientsAllRoute;
+  AppFacilityFacilityIdEncountersPatientsIndexRoute: typeof AppFacilityFacilityIdEncountersPatientsIndexRoute;
+}
+
+const AppFacilityFacilityIdEncountersRouteChildren: AppFacilityFacilityIdEncountersRouteChildren =
+  {
+    AppFacilityFacilityIdEncountersTabRoute:
+      AppFacilityFacilityIdEncountersTabRoute,
+    AppFacilityFacilityIdEncountersIndexRoute:
+      AppFacilityFacilityIdEncountersIndexRoute,
+    AppFacilityFacilityIdEncountersLocationsLocationIdRoute:
+      AppFacilityFacilityIdEncountersLocationsLocationIdRoute,
+    AppFacilityFacilityIdEncountersPatientsEncounterClassRoute:
+      AppFacilityFacilityIdEncountersPatientsEncounterClassRoute,
+    AppFacilityFacilityIdEncountersPatientsAllRoute:
+      AppFacilityFacilityIdEncountersPatientsAllRoute,
+    AppFacilityFacilityIdEncountersPatientsIndexRoute:
+      AppFacilityFacilityIdEncountersPatientsIndexRoute,
+  };
+
+const AppFacilityFacilityIdEncountersRouteWithChildren =
+  AppFacilityFacilityIdEncountersRoute._addFileChildren(
+    AppFacilityFacilityIdEncountersRouteChildren,
+  );
+
 interface AppFacilityFacilityIdTemplateRouteChildren {
   AppFacilityFacilityIdTemplateSplatRoute: typeof AppFacilityFacilityIdTemplateSplatRoute;
   AppFacilityFacilityIdTemplateIndexRoute: typeof AppFacilityFacilityIdTemplateIndexRoute;
@@ -8217,6 +8026,7 @@ interface AppRouteChildren {
   AppUserIndexRoute: typeof AppUserIndexRoute;
   AppFacilityFacilityIdSettingsRouteRoute: typeof AppFacilityFacilityIdSettingsRouteRouteWithChildren;
   AppFacilityFacilityIdBedAvailabilityRoute: typeof AppFacilityFacilityIdBedAvailabilityRoute;
+  AppFacilityFacilityIdEncountersRoute: typeof AppFacilityFacilityIdEncountersRouteWithChildren;
   AppFacilityFacilityIdOverviewRoute: typeof AppFacilityFacilityIdOverviewRoute;
   AppFacilityFacilityIdQueuesRoute: typeof AppFacilityFacilityIdQueuesRoute;
   AppFacilityFacilityIdReferralsRoute: typeof AppFacilityFacilityIdReferralsRoute;
@@ -8235,7 +8045,6 @@ interface AppRouteChildren {
   AppUsersUsernameIndexRoute: typeof AppUsersUsernameIndexRoute;
   AppFacilityFacilityIdServicesServiceIdRouteRoute: typeof AppFacilityFacilityIdServicesServiceIdRouteRouteWithChildren;
   AppFacilityFacilityIdAppointmentsPrintRoute: typeof AppFacilityFacilityIdAppointmentsPrintRoute;
-  AppFacilityFacilityIdEncountersTabRoute: typeof AppFacilityFacilityIdEncountersTabRoute;
   AppFacilityFacilityIdLocationsLocationIdRoute: typeof AppFacilityFacilityIdLocationsLocationIdRouteWithChildren;
   AppFacilityFacilityIdPatientCreateRoute: typeof AppFacilityFacilityIdPatientCreateRoute;
   AppFacilityFacilityIdPatientsHomeRoute: typeof AppFacilityFacilityIdPatientsHomeRoute;
@@ -8245,28 +8054,15 @@ interface AppRouteChildren {
   AppPatientPatientIdHistoryTabRoute: typeof AppPatientPatientIdHistoryTabRoute;
   AppResponsibilitiesIdSettingsReferralsRoute: typeof AppResponsibilitiesIdSettingsReferralsRoute;
   AppFacilityFacilityIdAppointmentsIndexRoute: typeof AppFacilityFacilityIdAppointmentsIndexRoute;
-  AppFacilityFacilityIdEncountersIndexRoute: typeof AppFacilityFacilityIdEncountersIndexRoute;
   AppFacilityFacilityIdPatientsIndexRoute: typeof AppFacilityFacilityIdPatientsIndexRoute;
   AppFacilityFacilityIdResourceIndexRoute: typeof AppFacilityFacilityIdResourceIndexRoute;
   AppFacilityFacilityIdServicesIndexRoute: typeof AppFacilityFacilityIdServicesIndexRoute;
   AppFacilityFacilityIdUsersIndexRoute: typeof AppFacilityFacilityIdUsersIndexRoute;
   AppPatientPatientIdQuestionnaireIndexRoute: typeof AppPatientPatientIdQuestionnaireIndexRoute;
-  AppFacilityFacilityIdEncountersLocationsLocationIdRoute: typeof AppFacilityFacilityIdEncountersLocationsLocationIdRoute;
-  AppFacilityFacilityIdEncountersPatientsEncounterClassRoute: typeof AppFacilityFacilityIdEncountersPatientsEncounterClassRoute;
-  AppFacilityFacilityIdEncountersPatientsAllRoute: typeof AppFacilityFacilityIdEncountersPatientsAllRoute;
   AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute: typeof AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute;
-  AppFacilityFacilityIdPatientPatientIdAccountsRoute: typeof AppFacilityFacilityIdPatientPatientIdAccountsRoute;
-  AppFacilityFacilityIdPatientPatientIdClinical_historyRoute: typeof AppFacilityFacilityIdPatientPatientIdClinical_historyRoute;
   AppFacilityFacilityIdPatientPatientIdConsultationRoute: typeof AppFacilityFacilityIdPatientPatientIdConsultationRoute;
-  AppFacilityFacilityIdPatientPatientIdDemographyRoute: typeof AppFacilityFacilityIdPatientPatientIdDemographyRoute;
-  AppFacilityFacilityIdPatientPatientIdEncountersRoute: typeof AppFacilityFacilityIdPatientPatientIdEncountersRoute;
-  AppFacilityFacilityIdPatientPatientIdFilesRoute: typeof AppFacilityFacilityIdPatientPatientIdFilesRoute;
-  AppFacilityFacilityIdPatientPatientIdNotesRoute: typeof AppFacilityFacilityIdPatientPatientIdNotesRoute;
-  AppFacilityFacilityIdPatientPatientIdReferralsRoute: typeof AppFacilityFacilityIdPatientPatientIdReferralsRoute;
-  AppFacilityFacilityIdPatientPatientIdResource_requestsRoute: typeof AppFacilityFacilityIdPatientPatientIdResource_requestsRoute;
   AppFacilityFacilityIdPatientPatientIdUpdateRoute: typeof AppFacilityFacilityIdPatientPatientIdUpdateRoute;
-  AppFacilityFacilityIdPatientPatientIdUpdatesRoute: typeof AppFacilityFacilityIdPatientPatientIdUpdatesRoute;
-  AppFacilityFacilityIdPatientPatientIdUsersRoute: typeof AppFacilityFacilityIdPatientPatientIdUsersRoute;
+  AppFacilityFacilityIdPatientPatientIdChar123TabChar125Route: typeof AppFacilityFacilityIdPatientPatientIdChar123TabChar125Route;
   AppFacilityFacilityIdResourceIdPrintRoute: typeof AppFacilityFacilityIdResourceIdPrintRoute;
   AppFacilityFacilityIdResourceIdUpdateRoute: typeof AppFacilityFacilityIdResourceIdUpdateRoute;
   AppFacilityFacilityIdUsersUsernameTabRoute: typeof AppFacilityFacilityIdUsersUsernameTabRoute;
@@ -8279,8 +8075,6 @@ interface AppRouteChildren {
   AppFacilityFacilityIdBillingAccountIndexRoute: typeof AppFacilityFacilityIdBillingAccountIndexRoute;
   AppFacilityFacilityIdBillingInvoicesIndexRoute: typeof AppFacilityFacilityIdBillingInvoicesIndexRoute;
   AppFacilityFacilityIdBillingPaymentsIndexRoute: typeof AppFacilityFacilityIdBillingPaymentsIndexRoute;
-  AppFacilityFacilityIdEncountersPatientsIndexRoute: typeof AppFacilityFacilityIdEncountersPatientsIndexRoute;
-  AppFacilityFacilityIdPatientPatientIdIndexRoute: typeof AppFacilityFacilityIdPatientPatientIdIndexRoute;
   AppFacilityFacilityIdResourceIdIndexRoute: typeof AppFacilityFacilityIdResourceIdIndexRoute;
   AppFacilityFacilityIdUsersUsernameIndexRoute: typeof AppFacilityFacilityIdUsersUsernameIndexRoute;
   AppOrganizationNavOrganizationIdChildrenIdIndexRoute: typeof AppOrganizationNavOrganizationIdChildrenIdIndexRoute;
@@ -8297,7 +8091,6 @@ interface AppRouteChildren {
   AppFacilityFacilityIdBillingAccountAccountIdIndexRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdIndexRoute;
   AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute: typeof AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute;
   AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute: typeof AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute;
-  AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute: typeof AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute;
   AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute: typeof AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute;
   AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute;
   AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute: typeof AppFacilityFacilityIdBillingAccountAccountIdInvoicesCreateRoute;
@@ -8353,6 +8146,8 @@ const AppRouteChildren: AppRouteChildren = {
     AppFacilityFacilityIdSettingsRouteRouteWithChildren,
   AppFacilityFacilityIdBedAvailabilityRoute:
     AppFacilityFacilityIdBedAvailabilityRoute,
+  AppFacilityFacilityIdEncountersRoute:
+    AppFacilityFacilityIdEncountersRouteWithChildren,
   AppFacilityFacilityIdOverviewRoute: AppFacilityFacilityIdOverviewRoute,
   AppFacilityFacilityIdQueuesRoute: AppFacilityFacilityIdQueuesRoute,
   AppFacilityFacilityIdReferralsRoute: AppFacilityFacilityIdReferralsRoute,
@@ -8375,8 +8170,6 @@ const AppRouteChildren: AppRouteChildren = {
     AppFacilityFacilityIdServicesServiceIdRouteRouteWithChildren,
   AppFacilityFacilityIdAppointmentsPrintRoute:
     AppFacilityFacilityIdAppointmentsPrintRoute,
-  AppFacilityFacilityIdEncountersTabRoute:
-    AppFacilityFacilityIdEncountersTabRoute,
   AppFacilityFacilityIdLocationsLocationIdRoute:
     AppFacilityFacilityIdLocationsLocationIdRouteWithChildren,
   AppFacilityFacilityIdPatientCreateRoute:
@@ -8393,8 +8186,6 @@ const AppRouteChildren: AppRouteChildren = {
     AppResponsibilitiesIdSettingsReferralsRoute,
   AppFacilityFacilityIdAppointmentsIndexRoute:
     AppFacilityFacilityIdAppointmentsIndexRoute,
-  AppFacilityFacilityIdEncountersIndexRoute:
-    AppFacilityFacilityIdEncountersIndexRoute,
   AppFacilityFacilityIdPatientsIndexRoute:
     AppFacilityFacilityIdPatientsIndexRoute,
   AppFacilityFacilityIdResourceIndexRoute:
@@ -8404,38 +8195,14 @@ const AppRouteChildren: AppRouteChildren = {
   AppFacilityFacilityIdUsersIndexRoute: AppFacilityFacilityIdUsersIndexRoute,
   AppPatientPatientIdQuestionnaireIndexRoute:
     AppPatientPatientIdQuestionnaireIndexRoute,
-  AppFacilityFacilityIdEncountersLocationsLocationIdRoute:
-    AppFacilityFacilityIdEncountersLocationsLocationIdRoute,
-  AppFacilityFacilityIdEncountersPatientsEncounterClassRoute:
-    AppFacilityFacilityIdEncountersPatientsEncounterClassRoute,
-  AppFacilityFacilityIdEncountersPatientsAllRoute:
-    AppFacilityFacilityIdEncountersPatientsAllRoute,
   AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute:
     AppFacilityFacilityIdMedication_dispenseRedirectMedicationDispenseIdRoute,
-  AppFacilityFacilityIdPatientPatientIdAccountsRoute:
-    AppFacilityFacilityIdPatientPatientIdAccountsRoute,
-  AppFacilityFacilityIdPatientPatientIdClinical_historyRoute:
-    AppFacilityFacilityIdPatientPatientIdClinical_historyRoute,
   AppFacilityFacilityIdPatientPatientIdConsultationRoute:
     AppFacilityFacilityIdPatientPatientIdConsultationRoute,
-  AppFacilityFacilityIdPatientPatientIdDemographyRoute:
-    AppFacilityFacilityIdPatientPatientIdDemographyRoute,
-  AppFacilityFacilityIdPatientPatientIdEncountersRoute:
-    AppFacilityFacilityIdPatientPatientIdEncountersRoute,
-  AppFacilityFacilityIdPatientPatientIdFilesRoute:
-    AppFacilityFacilityIdPatientPatientIdFilesRoute,
-  AppFacilityFacilityIdPatientPatientIdNotesRoute:
-    AppFacilityFacilityIdPatientPatientIdNotesRoute,
-  AppFacilityFacilityIdPatientPatientIdReferralsRoute:
-    AppFacilityFacilityIdPatientPatientIdReferralsRoute,
-  AppFacilityFacilityIdPatientPatientIdResource_requestsRoute:
-    AppFacilityFacilityIdPatientPatientIdResource_requestsRoute,
   AppFacilityFacilityIdPatientPatientIdUpdateRoute:
     AppFacilityFacilityIdPatientPatientIdUpdateRoute,
-  AppFacilityFacilityIdPatientPatientIdUpdatesRoute:
-    AppFacilityFacilityIdPatientPatientIdUpdatesRoute,
-  AppFacilityFacilityIdPatientPatientIdUsersRoute:
-    AppFacilityFacilityIdPatientPatientIdUsersRoute,
+  AppFacilityFacilityIdPatientPatientIdChar123TabChar125Route:
+    AppFacilityFacilityIdPatientPatientIdChar123TabChar125Route,
   AppFacilityFacilityIdResourceIdPrintRoute:
     AppFacilityFacilityIdResourceIdPrintRoute,
   AppFacilityFacilityIdResourceIdUpdateRoute:
@@ -8460,10 +8227,6 @@ const AppRouteChildren: AppRouteChildren = {
     AppFacilityFacilityIdBillingInvoicesIndexRoute,
   AppFacilityFacilityIdBillingPaymentsIndexRoute:
     AppFacilityFacilityIdBillingPaymentsIndexRoute,
-  AppFacilityFacilityIdEncountersPatientsIndexRoute:
-    AppFacilityFacilityIdEncountersPatientsIndexRoute,
-  AppFacilityFacilityIdPatientPatientIdIndexRoute:
-    AppFacilityFacilityIdPatientPatientIdIndexRoute,
   AppFacilityFacilityIdResourceIdIndexRoute:
     AppFacilityFacilityIdResourceIdIndexRoute,
   AppFacilityFacilityIdUsersUsernameIndexRoute:
@@ -8496,8 +8259,6 @@ const AppRouteChildren: AppRouteChildren = {
     AppFacilityFacilityIdBillingInvoicesInvoiceIdIndexRoute,
   AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute:
     AppFacilityFacilityIdBillingPaymentsPaymentReconciliationIdIndexRoute,
-  AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute:
-    AppFacilityFacilityIdPatientPatientIdAppointmentsIndexRoute,
   AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute:
     AppFacilityFacilityIdPatientPatientIdQuestionnaireIndexRoute,
   AppFacilityFacilityIdBillingAccountAccountIdCharge_itemsPrintRoute:
@@ -8642,9 +8403,8 @@ const rootRouteChildren: RootRouteChildren = {
   LicensesRoute: LicensesRoute,
   SessionExpiredRoute: SessionExpiredRoute,
   PatientHomeRoute: PatientHomeRoute,
-  PatientIdTabRoute: PatientIdTabRoute,
+  PatientIdChar123TabChar125Route: PatientIdChar123TabChar125Route,
   ReferralsReferralIdRespondRoute: ReferralsReferralIdRespondRoute,
-  PatientIdIndexRoute: PatientIdIndexRoute,
   ReferralsReferralIdIndexRoute: ReferralsReferralIdIndexRoute,
 };
 export const routeTree = rootRouteImport
