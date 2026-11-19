@@ -25,7 +25,6 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
 import { AppIcon } from "@/pages/Apps/AppIcon";
@@ -165,12 +164,16 @@ function useQuickInstall() {
       if (error instanceof ManualSetupRequiredError) {
         toast.info(t("app_requires_manual_setup"));
         navigate({
-          href: `/admin/apps/new?appId=${encodeURIComponent(plugin.id)}`,
+          to: "/admin/apps/$slug",
+          params: { slug: "new" },
+          search: { appId: plugin.id },
         });
       } else if (error instanceof HealthCheckError) {
         toast.error(t("health_check_unreachable_message"));
         navigate({
-          href: `/admin/apps/new?appId=${encodeURIComponent(plugin.id)}`,
+          to: "/admin/apps/$slug",
+          params: { slug: "new" },
+          search: { appId: plugin.id },
         });
       }
     },
@@ -368,17 +371,15 @@ export function PlugConfigList() {
                     }
                     actions={
                       <Button className="w-full" asChild>
-                        <HrefLink
-                          href={
-                            matchingApp
-                              ? `/admin/apps/${config.slug}?appId=${encodeURIComponent(matchingApp.id)}`
-                              : `/admin/apps/${config.slug}`
-                          }
+                        <Link
+                          to="/admin/apps/$slug"
+                          params={{ slug: config.slug }}
+                          search={matchingApp ? { appId: matchingApp.id } : {}}
                         >
                           {config.isReadOnly
                             ? t("view_config")
                             : t("edit_config")}
-                        </HrefLink>
+                        </Link>
                       </Button>
                     }
                   />
@@ -468,13 +469,15 @@ export function PlugConfigList() {
                         actions={
                           installedConfig ? (
                             <Button className="w-full" asChild>
-                              <HrefLink
-                                href={`/admin/apps/${app.id}?appId=${encodeURIComponent(app.id)}`}
+                              <Link
+                                to="/admin/apps/$slug"
+                                params={{ slug: app.id }}
+                                search={{ appId: app.id }}
                               >
                                 {installedConfig.isReadOnly
                                   ? t("view_config")
                                   : t("edit_config")}
-                              </HrefLink>
+                              </Link>
                             </Button>
                           ) : (
                             <div className="flex gap-2">
@@ -483,11 +486,13 @@ export function PlugConfigList() {
                                 className="flex-1"
                                 asChild
                               >
-                                <HrefLink
-                                  href={`/admin/apps/new?appId=${encodeURIComponent(app.id)}`}
+                                <Link
+                                  to="/admin/apps/$slug"
+                                  params={{ slug: "new" }}
+                                  search={{ appId: app.id }}
                                 >
                                   {t("configure")}
-                                </HrefLink>
+                                </Link>
                               </Button>
                               <Button
                                 className="flex-1"

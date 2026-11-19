@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Bot, ChevronRight } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,7 +30,6 @@ import { getPermissions } from "@/common/Permissions";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -311,14 +311,17 @@ export default function OrganizationUsers({
                       ) : (
                         users.results.map((userRole) => {
                           const { user } = userRole;
-                          const userUrl = `/users/${user.username}`;
                           const isViewable = !user.deleted;
                           return (
                             <TableRow
                               key={user.id}
                               onClick={
                                 isViewable
-                                  ? () => navigate({ href: userUrl })
+                                  ? () =>
+                                      navigate({
+                                        to: "/users/$username",
+                                        params: { username: user.username },
+                                      })
                                   : undefined
                               }
                               className={
@@ -384,14 +387,15 @@ export default function OrganizationUsers({
                                   )}
                                   {isViewable && (
                                     <Button variant="tertiary" asChild>
-                                      <HrefLink
-                                        href={userUrl}
+                                      <Link
+                                        to="/users/$username"
+                                        params={{ username: user.username }}
                                         aria-label={`${t("view")} ${formatName(user)}`}
                                         onClick={(e) => e.stopPropagation()}
                                       >
                                         {t("view")}
                                         <ChevronRight data-icon="inline-end" />
-                                      </HrefLink>
+                                      </Link>
                                     </Button>
                                   )}
                                 </div>

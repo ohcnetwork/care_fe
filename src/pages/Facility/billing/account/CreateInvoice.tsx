@@ -971,11 +971,13 @@ export function CreateInvoicePage({
                   type="button"
                   variant="outline_primary"
                   disabled={!locationId}
-                  onClick={() =>
+                  onClick={() => {
+                    if (!locationId) return;
                     navigate({
-                      href: `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}`,
-                    })
-                  }
+                      to: "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId",
+                      params: { facilityId, locationId, dispenseOrderId },
+                    });
+                  }}
                 >
                   {t("dispense_now")}
                   <ShortcutBadge actionId="view-prescriptions" />

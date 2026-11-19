@@ -81,7 +81,9 @@ export default function NoActiveAccountWarningDialog({
           <AlertDialogAction
             onClick={() =>
               navigate({
-                href: `/facility/${facilityId}/billing/account?patient_filter=${patientId}`,
+                to: "/facility/$facilityId/billing/account",
+                params: { facilityId },
+                search: { patient_filter: patientId },
               })
             }
           >

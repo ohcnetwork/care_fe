@@ -359,7 +359,10 @@ function ChargeItemsTable({
           <Button
             variant="outline"
             onClick={() =>
-              navigate({ href: `../${accountId}/charge_items/print` })
+              navigate({
+                to: "/facility/$facilityId/billing/account/$accountId/charge_items/print",
+                params: { facilityId, accountId },
+              })
             }
             className="w-full sm:w-auto sm:max-w-full"
           >

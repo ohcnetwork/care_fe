@@ -72,11 +72,10 @@ export function LandingPage() {
     : "unknown";
 
   const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (selectedOrganization) {
-      params.append("organization", selectedOrganization.id.toString());
-    }
-    navigate({ href: `/facilities?${params.toString()}` });
+    navigate({
+      to: "/facilities",
+      search: { organization: selectedOrganization?.id.toString() },
+    });
   };
 
   return (

@@ -153,7 +153,7 @@ function PlugConfigForm({
           ? t("app_installed_successfully")
           : t("config_updated_successfully"),
       );
-      navigate({ href: "/admin/apps" });
+      navigate({ to: "/admin/apps" });
     },
   });
 
@@ -167,7 +167,7 @@ function PlugConfigForm({
       });
       await queryClient.invalidateQueries({ queryKey: ["enabled-plugins"] });
       toast.success(t("config_deleted_successfully"));
-      navigate({ href: "/admin/apps" });
+      navigate({ to: "/admin/apps" });
     },
   });
 
@@ -421,7 +421,7 @@ function PlugConfigForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate({ href: "/admin/apps" })}
+            onClick={() => navigate({ to: "/admin/apps" })}
           >
             {t("cancel")}
           </Button>

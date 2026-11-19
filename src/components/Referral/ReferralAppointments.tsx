@@ -1,5 +1,6 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { CalendarDays, CalendarPlus, Stethoscope } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -240,12 +241,12 @@ export function ReferralAppointments({
         }).toString(),
       )
     : undefined;
-  const bookingParams = new URLSearchParams({
+  const bookingSearch: Record<string, string> = {
     open_schedule: "true",
     referralId: referral.id,
-  });
+  };
   if (typeof sourceUrl === "string")
-    bookingParams.set("referralSourceUrl", sourceUrl);
+    bookingSearch.referralSourceUrl = sourceUrl;
   const records = useQuery({
     queryKey: ["referrals", referral.id, "appointments"],
     queryFn: query.paginated(referralResourceApi.list, {
@@ -325,13 +326,19 @@ export function ReferralAppointments({
             />
           )}
           {canOfferNewVisit && canBook && destinationFacility && (
-            <HrefLink
-              href={`/facility/${destinationFacility.id}/patient/${referral.patient}/appointments?${bookingParams}`}
+            <Link
+              to="/facility/$facilityId/patient/$patientId/{-$tab}"
+              params={{
+                facilityId: destinationFacility.id,
+                patientId: referral.patient,
+                tab: "appointments",
+              }}
+              search={bookingSearch}
               className={buttonVariants({ size: "sm", variant: "outline" })}
             >
               <CalendarPlus aria-hidden="true" className="size-4" />
               {t("referral_book_appointment")}
-            </HrefLink>
+            </Link>
           )}
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -44,7 +45,6 @@ import query from "@/Utils/request/query";
 import { formatName, mergeAutocompleteOptions, valuesOf } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import BackButton from "@/components/Common/BackButton";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -251,8 +251,13 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           {patientData && (
             <Alert>
               <div className="flex items-center gap-2">
-                <HrefLink
-                  href={`/facility/${facilityId}/patient/${related_patient}/resource_requests`}
+                <Link
+                  to="/facility/$facilityId/patient/$patientId/{-$tab}"
+                  params={{
+                    facilityId,
+                    patientId: String(related_patient),
+                    tab: "resource_requests",
+                  }}
                   className="flex items-center gap-2"
                 >
                   <CareIcon icon="l-user" className="size-5 text-blue-700" />
@@ -264,7 +269,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                       </strong>
                     </span>
                   </AlertDescription>
-                </HrefLink>
+                </Link>
               </div>
             </Alert>
           )}

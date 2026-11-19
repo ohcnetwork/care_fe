@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Building2, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -21,7 +22,6 @@ import { SectionHeader } from "@/components/Common/SectionHeader";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -61,9 +61,7 @@ export default function OrganizationView({
   });
 
   // Hack for the sidebar to work
-  const baseUrl = navOrganizationId
-    ? `/organization/${navOrganizationId}`
-    : `/organization/${id}`;
+  const childNavOrganizationId = navOrganizationId || id;
 
   return (
     <OrganizationLayout
@@ -147,7 +145,11 @@ export default function OrganizationView({
                               key={orgChild.id}
                               onClick={() =>
                                 navigate({
-                                  href: `${baseUrl}/children/${orgChild.id}`,
+                                  to: "/organization/$navOrganizationId/children/$id",
+                                  params: {
+                                    navOrganizationId: childNavOrganizationId,
+                                    id: orgChild.id,
+                                  },
                                 })
                               }
                               className="cursor-pointer hover:bg-muted/50"
@@ -186,13 +188,17 @@ export default function OrganizationView({
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <Button variant="tertiary" asChild>
-                                  <HrefLink
-                                    href={`${baseUrl}/children/${orgChild.id}`}
+                                  <Link
+                                    to="/organization/$navOrganizationId/children/$id"
+                                    params={{
+                                      navOrganizationId: childNavOrganizationId,
+                                      id: orgChild.id,
+                                    }}
                                     aria-label={`${t("open")} ${orgChild.name}`}
                                   >
                                     {t("open")}
                                     <ChevronRight data-icon="inline-end" />
-                                  </HrefLink>
+                                  </Link>
                                 </Button>
                               </TableCell>
                             </TableRow>

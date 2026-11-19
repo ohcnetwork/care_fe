@@ -69,7 +69,6 @@ import BackButton from "@/components/Common/BackButton";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import {
   isAccountActiveAndBillable,
@@ -545,11 +544,16 @@ function AccountShow({
           </div>
           <div className="flex items-center gap-2">
             <Button variant="link" asChild className="text-gray-950 underline">
-              <HrefLink
-                href={`/facility/${facilityId}/patient/${account.patient.id}/accounts`}
+              <Link
+                to="/facility/$facilityId/patient/$patientId/{-$tab}"
+                params={{
+                  facilityId,
+                  patientId: account.patient.id,
+                  tab: "accounts",
+                }}
               >
                 {t("past_accounts")}
-              </HrefLink>
+              </Link>
             </Button>
             {canUpdateAccount && (
               <Button

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Plus, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -19,7 +20,6 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
-import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { isSupportedActionConfigurationContext } from "@/types/actions/actionConfiguration";
 import actionConfigurationApi from "@/types/actions/actionConfigurationApi";
@@ -27,8 +27,6 @@ import query from "@/Utils/request/query";
 
 import { actionContextLabel } from "./labels";
 import { actionConfigurationKeys } from "./queryKeys";
-
-export const ADMIN_ACTIONS_PATH = "/admin/actions";
 
 /**
  * Instance-level action configurations: what runs when an appointment is
@@ -70,9 +68,7 @@ export function ActionConfigurationList() {
               {t("action_configurations_description")}
             </p>
           </div>
-          <Button
-            onClick={() => navigate({ href: `${ADMIN_ACTIONS_PATH}/new` })}
-          >
+          <Button onClick={() => navigate({ to: "/admin/actions/new" })}>
             <Plus className="size-4" />
             {t("action_configuration_new")}
           </Button>
@@ -112,13 +108,15 @@ export function ActionConfigurationList() {
                     className="cursor-pointer"
                     onClick={() =>
                       navigate({
-                        href: `${ADMIN_ACTIONS_PATH}/${configuration.id}`,
+                        to: "/admin/actions/$id",
+                        params: { id: configuration.id },
                       })
                     }
                   >
                     <TableCell className="py-2.5">
-                      <HrefLink
-                        href={`${ADMIN_ACTIONS_PATH}/${configuration.id}`}
+                      <Link
+                        to="/admin/actions/$id"
+                        params={{ id: configuration.id }}
                         onClick={(event) => event.stopPropagation()}
                         onKeyDown={(event) => {
                           // Preserve native link activation before the global
@@ -128,7 +126,7 @@ export function ActionConfigurationList() {
                         className="block truncate text-sm font-medium text-gray-900 focus-visible:outline-hidden focus-visible:ring-1"
                       >
                         {configuration.name}
-                      </HrefLink>
+                      </Link>
                       {configuration.description && (
                         <span className="block truncate text-xs text-gray-500">
                           {configuration.description}

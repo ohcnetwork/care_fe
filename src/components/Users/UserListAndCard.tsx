@@ -132,9 +132,17 @@ export function UserCard(props: UserCardProps) {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  navigate({
-                    href: `${facility ? `/facility/${facility}/users/${user.username}` : `/users/${user.username}`}`,
-                  });
+                  if (facility) {
+                    navigate({
+                      to: "/facility/$facilityId/users/$username",
+                      params: { facilityId: facility, username: user.username },
+                    });
+                  } else {
+                    navigate({
+                      to: "/users/$username",
+                      params: { username: user.username },
+                    });
+                  }
                 }}
               >
                 <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
