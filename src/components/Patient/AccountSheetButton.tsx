@@ -76,7 +76,9 @@ export function AccountSheetButton({
   const handleViewAccount = (account: AccountRead, e: React.MouseEvent) => {
     e.stopPropagation();
     navigate({
-      href: `/facility/${encounter.facility.id}/billing/account/${account.id}/?encounterId=${encounter.id}`,
+      to: "/facility/$facilityId/billing/account/$accountId",
+      params: { facilityId: encounter.facility.id, accountId: account.id },
+      search: { encounterId: encounter.id },
     });
   };
 

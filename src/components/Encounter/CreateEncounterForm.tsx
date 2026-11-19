@@ -188,13 +188,15 @@ export default function CreateEncounterForm({
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.(data);
       if (!disableRedirectOnSuccess) {
-        const params = new URLSearchParams(
-          Object.entries(redirectQueryParams ?? {}).filter(
-            (entry): entry is [string, string] => entry[1] !== undefined,
-          ),
-        );
         navigate({
-          href: `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates${params.size ? `?${params}` : ""}`,
+          to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
+          params: {
+            facilityId,
+            patientId,
+            encounterId: data.id,
+            tab: "updates",
+          },
+          search: redirectQueryParams,
         });
       }
     },

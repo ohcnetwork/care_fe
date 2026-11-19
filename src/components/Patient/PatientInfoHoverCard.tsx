@@ -11,6 +11,7 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
+import { Link } from "@tanstack/react-router";
 import { Phone } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -61,17 +62,17 @@ export const PatientInfoHoverCard = ({
       <div className="flex items-center gap-2">
         {!isPatientHomePage && facilityId && (
           <Button variant="outline" className="text-gray-950" asChild>
-            <HrefLink
-              href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
-                {
-                  phone_number: patient.phone_number,
-                  year_of_birth: patient.year_of_birth?.toString() ?? "",
-                  partial_id: patient.id.slice(0, 5),
-                },
-              ).toString()}`}
+            <Link
+              to="/facility/$facilityId/patients/home"
+              params={{ facilityId }}
+              search={{
+                phone_number: patient.phone_number,
+                year_of_birth: patient.year_of_birth?.toString() ?? "",
+                partial_id: patient.id.slice(0, 5),
+              }}
             >
               {t("patient_home")}
-            </HrefLink>
+            </Link>
           </Button>
         )}
 

@@ -17,7 +17,6 @@ import {
 
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
-import { HrefLink } from "@/lib/router/HrefLink";
 import {
   getResourceRequestCategoryEnum,
   RESOURCE_REQUEST_STATUS_COLORS,
@@ -50,12 +49,14 @@ export const ResourceRequests = (props: PatientProps) => {
         </h2>
         {facilityId && (
           <Button variant="outline_primary" asChild>
-            <HrefLink
-              href={`/facility/${facilityId}/resource/new?related_patient=${patientData.id}`}
+            <Link
+              to="/facility/$facilityId/resource/new"
+              params={{ facilityId }}
+              search={{ related_patient: patientData.id }}
             >
               <CareIcon icon="l-plus" className="mr-2" />
               {t("create_resource_request")}
-            </HrefLink>
+            </Link>
           </Button>
         )}
       </div>

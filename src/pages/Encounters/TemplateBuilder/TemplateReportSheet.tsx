@@ -64,7 +64,8 @@ export default function TemplateReportSheet({
                 size="sm"
                 onClick={() =>
                   navigate({
-                    href: `/facility/${facilityId}/template/builder/`,
+                    to: "/facility/$facilityId/template/builder",
+                    params: { facilityId },
                   })
                 }
               >

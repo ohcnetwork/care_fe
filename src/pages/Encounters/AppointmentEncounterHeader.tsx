@@ -129,11 +129,13 @@ const PatientScanButton = ({
       } else {
         toast.info(t("no_appointments_found_for_today"));
         navigate({
-          href: `/facility/${facilityId}/patients/home?${new URLSearchParams({
+          to: "/facility/$facilityId/patients/home",
+          params: { facilityId },
+          search: {
             phone_number: patient.phone_number,
             year_of_birth: patient.year_of_birth?.toString() ?? "",
             partial_id: patientId.slice(0, 5),
-          }).toString()}`,
+          },
         });
       }
     },

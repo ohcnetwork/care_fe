@@ -17,7 +17,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 
 import { PatientAge } from "@/components/Patient/PatientAge";
@@ -184,16 +183,18 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
 
       <CardFooter className="flex flex-wrap justify-end items-center px-2 py-2 gap-x-1 gap-y-2 mt-auto">
         <Button variant="link" aria-label={t("patient_home")} asChild>
-          <HrefLink
-            href={`/facility/${facilityId}/patients/home?${new URLSearchParams({
+          <Link
+            to="/facility/$facilityId/patients/home"
+            params={{ facilityId }}
+            search={{
               phone_number: encounter.patient.phone_number,
               year_of_birth: encounter.patient.year_of_birth?.toString() || "",
               partial_id: encounter.patient.id.slice(0, 5),
-            }).toString()}`}
+            }}
             className="text-gray-700 underline hover:text-gray-900 text-sm font-medium"
           >
             {t("patient_home")}
-          </HrefLink>
+          </Link>
         </Button>
         <Button variant="outline" aria-label={t("view_encounter")} asChild>
           <Link

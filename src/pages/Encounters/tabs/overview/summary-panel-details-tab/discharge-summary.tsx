@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { NotepadText, SquarePen } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -18,7 +19,6 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
-import { HrefLink } from "@/lib/router/HrefLink";
 import { usePathname } from "@/lib/router/location";
 
 interface DischargeDetailsProps {
@@ -49,15 +49,22 @@ export const DischargeDetails = ({ title }: DischargeDetailsProps = {}) => {
         </span>
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" className="shrink-0" asChild>
-            <HrefLink
-              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?${new URLSearchParams({ return_page: returnPage })}`}
+            <Link
+              to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId"
+              params={{
+                facilityId: encounter.facility.id,
+                patientId: encounter.patient.id,
+                encounterId: encounter.id,
+                questionnaireId: "encounter",
+              }}
+              search={{ return_page: returnPage }}
               aria-label={t("edit")}
             >
               <SquarePen
                 className="size-4 text-gray-950 cursor-pointer"
                 strokeWidth={1.5}
               />
-            </HrefLink>
+            </Link>
           </Button>
         )}
       </div>

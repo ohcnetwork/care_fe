@@ -204,9 +204,13 @@ export function EncounterCommandDialog({
           navigate({ href: buildEncounterUrl("/diagnostic_reports") }),
         "clinical-history": () =>
           navigate({
-            href: `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/history/responses?sourceUrl=${encodeURIComponent(
-              buildEncounterUrl("/updates"),
-            )}`,
+            to: "/facility/$facilityId/patient/$patientId/history/$tab",
+            params: {
+              facilityId: encounter.facility.id,
+              patientId: encounter.patient.id,
+              tab: "responses",
+            },
+            search: { sourceUrl: buildEncounterUrl("/updates") },
           }),
         "encounter-overview": () =>
           navigate({ href: buildEncounterUrl("/updates") }),

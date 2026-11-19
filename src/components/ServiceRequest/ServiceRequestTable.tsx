@@ -46,10 +46,17 @@ export default function ServiceRequestTable({
   const queryClient = useQueryClient();
 
   const handleViewDetails = (request: ServiceRequestReadSpec) => {
-    const baseUrl = locationId
-      ? `/facility/${facilityId}/locations/${locationId}/service_requests`
-      : `/facility/${facilityId}/service_requests`;
-    navigate({ href: `${baseUrl}/${request.id}` });
+    if (locationId) {
+      navigate({
+        to: "/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId",
+        params: { facilityId, locationId, serviceRequestId: request.id },
+      });
+    } else {
+      navigate({
+        to: "/facility/$facilityId/service_requests/$serviceRequestId",
+        params: { facilityId, serviceRequestId: request.id },
+      });
+    }
   };
 
   return (
