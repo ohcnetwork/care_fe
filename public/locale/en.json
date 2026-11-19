@@ -2426,6 +2426,8 @@
   "invalid_value": "Invalid value",
   "inventory": "Inventory",
   "inventory_item": "Inventory Item",
+  "inventory_needs_usage": "Inventory and pharmacy are only available at locations whose inventory usage isn't None.",
+  "inventory_unavailable": "Inventory and pharmacy aren't available here",
   "inventory_usage": "Inventory Usage",
   "inventory_usage__adjustment": "Adjustment",
   "inventory_usage__consumption": "Consumption",
