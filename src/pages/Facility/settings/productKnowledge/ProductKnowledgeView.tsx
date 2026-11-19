@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { navigate as ravigerNavigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading"
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import BackButton from "@/components/Common/BackButton";
+import { navigate } from "@/lib/router/navigate";
 import { Code, isCodePresent } from "@/types/base/code/code";
 import {
   PRODUCT_KNOWLEDGE_STATUS_COLORS,
@@ -77,7 +78,7 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
       onSuccess: () => {
         toast.success(t("product_knowledge_deleted_successfully"));
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
-        navigate(
+        ravigerNavigate(
           `/facility/${facilityId}/settings/product_knowledge/categories/${product?.category.slug}`,
         );
       },
@@ -172,9 +173,10 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
             <Button
               variant="outline"
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/product_knowledge/${product.slug}/edit`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/settings/product_knowledge/$slug/edit",
+                  params: { facilityId, slug: product.slug },
+                })
               }
             >
               <CareIcon icon="l-pen" className="mr-2 size-4" />

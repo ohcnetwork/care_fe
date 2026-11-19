@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { Check, FileText, Printer } from "lucide-react";
-import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -135,8 +135,12 @@ export function DiagnosticReportReviewContent({
           <div className="flex flex-col sm:flex-row gap-2 justify-end">
             <Button variant="outline" className="gap-2" asChild>
               <Link
-                basePath="/"
-                href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${report.id}/print`}
+                to="/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId/print"
+                params={{
+                  facilityId,
+                  patientId,
+                  diagnosticReportId: report.id,
+                }}
                 className="flex items-center gap-2"
               >
                 <Printer className="size-4" />
@@ -145,8 +149,12 @@ export function DiagnosticReportReviewContent({
             </Button>
             <Button variant="outline" asChild>
               <Link
-                basePath="/"
-                href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${report.id}`}
+                to="/facility/$facilityId/patient/$patientId/diagnostic_reports/$diagnosticReportId"
+                params={{
+                  facilityId,
+                  patientId,
+                  diagnosticReportId: report.id,
+                }}
                 className="flex items-center gap-2"
               >
                 <FileText className="size-4" />

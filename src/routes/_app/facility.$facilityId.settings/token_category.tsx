@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import TokenCategoryList from "@/pages/Facility/settings/tokenCategory/TokenCategoryList";
 
@@ -10,6 +10,8 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId } = Route.useParams();
+  const { facilityId } = useParams({
+    from: "/_app/facility/$facilityId/settings/token_category",
+  });
   return <TokenCategoryList facilityId={facilityId} />;
 }

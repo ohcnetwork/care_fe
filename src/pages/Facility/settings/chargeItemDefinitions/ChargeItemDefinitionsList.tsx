@@ -1,4 +1,4 @@
-import { navigate } from "raviger";
+import { navigate as ravigerNavigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,6 +6,7 @@ import Page from "@/components/Common/Page";
 import { ResourceCategoryList } from "@/components/Common/ResourceCategoryList";
 import { ChargeItemList } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionListComponent";
 
+import { navigate } from "@/lib/router/navigate";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ChargeItemDefinitionStatus } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
@@ -23,13 +24,14 @@ export function ChargeItemDefinitionsList({
   const [allowCategoryCreate, setAllowCategoryCreate] = useState(false);
 
   const onNavigate = (slug: string) => {
-    navigate(
-      `/facility/${facilityId}/settings/charge_item_definitions/categories/${slug}`,
-    );
+    navigate({
+      to: "/facility/$facilityId/settings/charge_item_definitions/categories/$slug",
+      params: { facilityId, slug },
+    });
   };
 
   const onCreateItem = () => {
-    navigate(
+    ravigerNavigate(
       `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}/new`,
     );
   };

@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { PatientProfile } from "@/components/Patient/PatientProfile";
+
 import { staffOrPatient } from "@/lib/router/auth";
 import PatientIndex from "@/pages/Patient/index";
-import AppRouter from "@/Routers/AppRouter";
 import { useArea } from "@/Routers/AreaChrome";
 
 /**
- * Shared URL: the patient portal home. For staff it is `/patient/:id` of
- * the legacy tables (with `home` as the id), as before.
+ * Shared URL: the patient portal home. Staff users get the staff patient
+ * page, with `home` as the patient id, as before.
  */
 export const Route = createFileRoute("/patient/home")({
   beforeLoad: staffOrPatient,
@@ -15,5 +16,9 @@ export const Route = createFileRoute("/patient/home")({
 });
 
 function RouteComponent() {
-  return useArea() === "patient" ? <PatientIndex /> : <AppRouter />;
+  return useArea() === "patient" ? (
+    <PatientIndex />
+  ) : (
+    <PatientProfile id="home" page="demography" />
+  );
 }

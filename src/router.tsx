@@ -23,6 +23,10 @@ export const router = createRouter({
   scrollRestoration: true,
   parseSearch,
   stringifySearch,
+  // Some params hold comma-separated ids (`$prescriptionIds`, `$invoiceIds`).
+  // Keep the comma as is when a link is built, as raviger did, so typed links
+  // and legacy links give the same URL. A `%2C` in a URL still matches.
+  pathParamsAllowedCharacters: [","],
   defaultNotFoundComponent: () => <ErrorPage />,
 });
 

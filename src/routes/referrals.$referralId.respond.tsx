@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { staffOrPatient } from "@/lib/router/auth";
 import { ReferralResponsePage } from "@/pages/Referrals/ReferralResponsePage";
@@ -11,6 +11,6 @@ export const Route = createFileRoute("/referrals/$referralId/respond")({
 });
 
 function RouteComponent() {
-  const { referralId } = Route.useParams();
+  const { referralId } = useParams({ from: "/referrals/$referralId/respond" });
   return <ReferralResponsePage key={referralId} referralId={referralId} />;
 }

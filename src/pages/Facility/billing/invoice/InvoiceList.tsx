@@ -1,5 +1,4 @@
 import { QrCode } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -9,6 +8,7 @@ import GenericQRScanDialog from "@/components/Scan/GenericQRScanDialog";
 import { Button } from "@/components/ui/button";
 
 import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
+import { navigate } from "@/lib/router/navigate";
 import InvoicesData from "./InvoicesData";
 
 function InvoiceList({
@@ -26,7 +26,10 @@ function InvoiceList({
       const parsed = JSON.parse(scannedData);
       if (parsed.inv) {
         setScanDialogOpen(false);
-        navigate(`/facility/${facilityId}/billing/invoices/${parsed.inv}`);
+        navigate({
+          to: "/facility/$facilityId/billing/invoices/$invoiceId",
+          params: { facilityId, invoiceId: parsed.inv },
+        });
         return;
       } else {
         toast.error(t("invalid_qr_code"));

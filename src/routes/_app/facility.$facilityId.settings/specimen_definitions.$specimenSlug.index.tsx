@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { SpecimenDefinitionDetail } from "@/pages/Facility/settings/specimen-definitions/SpecimenDefinitionDetail";
 
@@ -9,7 +9,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, specimenSlug } = Route.useParams();
+  const { facilityId, specimenSlug } = useParams({
+    from: "/_app/facility/$facilityId/settings/specimen_definitions/$specimenSlug/",
+  });
   return (
     <SpecimenDefinitionDetail
       facilityId={facilityId}

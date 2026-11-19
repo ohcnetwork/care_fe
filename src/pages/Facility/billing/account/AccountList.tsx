@@ -1,6 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowUpRightSquare, PlusIcon } from "lucide-react";
-import { navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -56,6 +55,7 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
 import { dateTimeQueryString } from "@/Utils/utils";
 
+import { navigate } from "@/lib/router/navigate";
 import { isPositive, roundWhole } from "@/Utils/decimal";
 import AccountSheet from "./AccountSheet";
 
@@ -351,9 +351,10 @@ export function AccountList({
                         size="sm"
                         className="font-semibold"
                         onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/billing/account/${account.id}`,
-                          )
+                          navigate({
+                            to: "/facility/$facilityId/billing/account/$accountId",
+                            params: { facilityId, accountId: account.id },
+                          })
                         }
                       >
                         <ArrowUpRightSquare strokeWidth={1.5} />
