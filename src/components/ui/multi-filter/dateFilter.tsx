@@ -57,7 +57,7 @@ function DateRangeOptions({
   return (
     <>
       {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
-      <div className="flex flex-col gap-1 p-2 max-h-[30vh] overflow-y-auto">
+      <div className="flex flex-col gap-1 p-2">
         {options.map((option, index) => (
           <DropdownMenuItem
             key={index}
