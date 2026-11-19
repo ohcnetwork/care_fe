@@ -633,7 +633,13 @@ const NewAvailabilityCard = ({
         Time | undefined,
         Time | undefined
       >,
-      slot_size_in_minutes: z.number().nullable(),
+      slot_size_in_minutes: z
+        .number()
+        .min(1, t("number_min_error", { min: 1 }))
+        .nullable()
+        .refine((val) => val !== null, {
+          message: t("field_required"),
+        }),
       tokens_per_slot: z.number().nullable(),
       reason: z.string().trim(),
       weekdays: z
@@ -787,9 +793,12 @@ const NewAvailabilityCard = ({
       const start = form.watch("start_time");
       const end = form.watch("end_time");
       const numOfSlots = form.watch("num_of_slots");
-      if (!start || !end || !numOfSlots) return;
+      if (!start || !end || !numOfSlots) {
+        form.setValue("slot_size_in_minutes", null);
+        return;
+      }
       const duration = calculateSlotDuration(start, end, numOfSlots);
-      form.setValue("slot_size_in_minutes", duration);
+      form.setValue("slot_size_in_minutes", duration, { shouldValidate: true });
     }
   };
 
@@ -972,9 +981,10 @@ const NewAvailabilityCard = ({
                           placeholder="e.g. 10"
                           {...field}
                           value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(e.target.valueAsNumber)
-                          }
+                          onChange={(e) => {
+                            const value = e.target.valueAsNumber;
+                            field.onChange(isNaN(value) ? null : value);
+                          }}
                           disabled={form.watch("is_auto_fill")}
                         />
                       </FormControl>

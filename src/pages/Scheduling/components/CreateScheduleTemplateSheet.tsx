@@ -323,9 +323,17 @@ export default function CreateScheduleTemplateSheet({
       const start = form.watch(`availabilities.${index}.start_time`);
       const end = form.watch(`availabilities.${index}.end_time`);
       const numOfSlots = form.watch(`availabilities.${index}.num_of_slots`);
-      if (!start || !end || !numOfSlots) return;
+      if (!start || !end || !numOfSlots) {
+        form.setValue(
+          `availabilities.${index}.slot_size_in_minutes`,
+          undefined,
+        );
+        return;
+      }
       const duration = calculateSlotDuration(start, end, numOfSlots);
-      form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
+      form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration, {
+        shouldValidate: true,
+      });
     }
   };
 
