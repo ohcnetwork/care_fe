@@ -32,9 +32,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { useInView } from "react-intersection-observer";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 interface BookingsListProps {
   patientId: string;
@@ -305,46 +303,28 @@ export const BookingListContent = ({
   appointmentQuery?: string;
 }) => {
   const { t } = useTranslation();
-  const { ref, inView } = useInView();
-
   const {
     data: appointmentsData,
-    hasNextPage,
     isFetchingNextPage,
-    fetchNextPage,
+    hasNextPage,
     isLoading,
-  } = useInfiniteQuery({
+    ref,
+  } = useInfiniteList({
     queryKey: ["infinite-appointments", patientId, facilityId, statuses],
 
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(scheduleApi.appointments.getAppointments, {
-        pathParams: { patientId },
-        queryParams: {
-          offset: pageParam,
-          limit: 15,
-          facility: facilityId,
-          ...(date_after && { date_after: dateQueryString(date_after) }),
-          ...(date_before && { date_before: dateQueryString(date_before) }),
-          status: statuses?.join(","),
-        },
-      })({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * 15;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+    ...query.infinite(scheduleApi.appointments.getAppointments, {
+      pathParams: { patientId },
+      queryParams: {
+        facility: facilityId,
+        ...(date_after && { date_after: dateQueryString(date_after) }),
+        ...(date_before && { date_before: dateQueryString(date_before) }),
+        status: statuses?.join(","),
+      },
+      pageSize: 15,
+    }),
   });
 
-  const appointments =
-    appointmentsData?.pages.flatMap((page) => page.results) ?? [];
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
+  const appointments = appointmentsData?.results ?? [];
 
   if (isLoading) {
     return <CardListSkeleton count={15} />;

@@ -28,6 +28,7 @@ import {
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
+import { QueryParams } from "@/Utils/request/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
@@ -469,7 +470,7 @@ export function OngoingQueueTokenCardsList({
 }: {
   facilityId: string;
   queueId: string;
-  qParams: Record<string, unknown>;
+  qParams: QueryParams;
   emptyState?: React.ReactNode;
   header?: React.ReactNode;
 }) {

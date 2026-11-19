@@ -1,16 +1,12 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import {
-  ChargeItemRead,
   ChargeItemServiceResource,
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-
-const ITEMS_PER_PAGE = 200;
 
 /**
  * Which of the account's charge items an invoice is being created from.
@@ -44,7 +40,7 @@ export function useInvoiceChargeItems({
         }
       : {};
 
-  const list = useInfiniteQuery({
+  const list = useInfiniteList({
     queryKey: [
       "infinite-chargeItems",
       accountId,
@@ -52,35 +48,20 @@ export function useInvoiceChargeItems({
       scope.kind,
       scopeParams,
     ],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(chargeItemApi.listChargeItem, {
-        pathParams: { facilityId },
-        queryParams: {
-          ...scopeParams,
-          limit: String(ITEMS_PER_PAGE),
-          offset: String(pageParam),
-          status: ChargeItemStatus.billable,
-          account: accountId,
-          ordering: "created_date",
-        },
-      })({ signal });
-      return response as PaginatedResponse<ChargeItemRead>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (
-      lastPage: PaginatedResponse<ChargeItemRead>,
-      allPages: PaginatedResponse<ChargeItemRead>[],
-    ) => {
-      const currentOffset = allPages.length * ITEMS_PER_PAGE;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+    ...query.infinite(chargeItemApi.listChargeItem, {
+      pathParams: { facilityId },
+      pageSize: 200,
+      queryParams: {
+        ...scopeParams,
+        status: ChargeItemStatus.billable,
+        account: accountId,
+        ordering: "created_date",
+      },
+    }),
     enabled: !!facilityId && !!accountId,
   });
 
-  const chargeItems = useMemo(
-    () => list.data?.pages.flatMap((page) => page.results) ?? [],
-    [list.data],
-  );
+  const chargeItems = useMemo(() => list.data?.results ?? [], [list.data]);
 
   return {
     chargeItems,
