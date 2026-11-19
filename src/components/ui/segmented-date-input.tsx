@@ -7,18 +7,16 @@ import {
   parse,
   startOfDay,
 } from "date-fns";
-import { CalendarIcon, X } from "lucide-react";
-import { useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { X } from "lucide-react";
+import { useLayoutEffect, useRef, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Calendar } from "@/components/ui/calendar";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 interface SegmentedDateInputProps {
@@ -26,7 +24,6 @@ interface SegmentedDateInputProps {
   edge: "from" | "to";
   inputRef: RefObject<HTMLInputElement | null>;
   value: string;
-  date?: Date;
   minDate?: Date;
   maxDate?: Date;
   active: boolean;
@@ -53,7 +50,6 @@ export function SegmentedDateInput({
   edge,
   inputRef,
   value,
-  date,
   minDate,
   maxDate,
   active,
@@ -66,18 +62,16 @@ export function SegmentedDateInput({
   onEnter,
 }: SegmentedDateInputProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
   const selection = useRef<number | null>(null);
   const digits = useRef("");
   const canonical = /^\d{2}\/\d{2}\/\d{4}$/.test(value);
   const today = startOfDay(new Date());
-  const initialMonth =
-    date ??
-    (minDate && today < minDate
+  const initialDate =
+    minDate && today < minDate
       ? minDate
       : maxDate && today > maxDate
         ? maxDate
-        : today);
+        : today;
   const selectSegment = (index: number) => {
     const [start, end] = segments[index];
     inputRef.current?.setSelectionRange(start, end);
@@ -161,7 +155,7 @@ export function SegmentedDateInput({
             digits.current = "";
             const current = canonical
               ? parse(value, "dd/MM/yyyy", new Date())
-              : initialMonth;
+              : initialDate;
             if (!isValid(current)) return;
             const next = [addDays, addMonths, addYears][index](
               current,
@@ -200,42 +194,6 @@ export function SegmentedDateInput({
             <X aria-hidden="true" />
           </InputGroupButton>
         )}
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <InputGroupButton
-              size="icon-xs"
-              aria-label={`${t("select_date")} ${label}`}
-              onClick={onFocus}
-            >
-              <CalendarIcon aria-hidden="true" />
-            </InputGroupButton>
-          </PopoverTrigger>
-          <PopoverContent
-            align="end"
-            className="w-auto max-w-[calc(100vw-1rem)] p-0"
-            onKeyDown={(event) => {
-              if (event.key !== "Escape") event.stopPropagation();
-            }}
-          >
-            <Calendar
-              mode="single"
-              selected={date}
-              defaultMonth={initialMonth}
-              startMonth={minDate}
-              endMonth={maxDate}
-              disabled={[
-                { before: minDate ?? new Date(1900, 0, 1) },
-                ...(maxDate ? [{ after: maxDate }] : []),
-              ]}
-              fixedWeeks
-              showYearSwitcher={false}
-              onSelect={(next) => {
-                if (!next) return;
-                if (onCommit(format(next, "dd/MM/yyyy"))) setOpen(false);
-              }}
-            />
-          </PopoverContent>
-        </Popover>
       </InputGroupAddon>
     </InputGroup>
   );

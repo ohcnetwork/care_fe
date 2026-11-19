@@ -336,7 +336,7 @@ function RangePanel({
       ) : title ? (
         <div className="border-b px-3 py-2 text-sm font-medium">{title}</div>
       ) : null}
-      <div className="grid gap-3 px-3 pt-3">
+      <div className="grid gap-2 px-3 pt-3 md:grid-cols-[repeat(auto-fit,minmax(min(100%,8.5rem),1fr))]">
         {(["from", "to"] as const).map((edge) => (
           <div key={edge} className="min-w-0">
             <label
@@ -351,7 +351,6 @@ function RangePanel({
               edge={edge}
               label={t(edge === "from" ? "start_date" : "end_date")}
               value={text[edge]}
-              date={range[edge]}
               minDate={bounds.min}
               maxDate={bounds.max}
               active={activeEdge === edge}
@@ -390,7 +389,7 @@ function RangePanel({
           ref={captionRef}
           type="button"
           variant="ghost"
-          size="sm"
+          size="default"
           className="min-w-0 shrink"
           aria-expanded={monthView}
           aria-controls={`${id}-calendar`}
@@ -412,7 +411,7 @@ function RangePanel({
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              size="default"
               className="underline underline-offset-4"
               onClick={() => closeMonths(clampMonth(today))}
             >
@@ -427,7 +426,7 @@ function RangePanel({
                   key={direction}
                   type="button"
                   variant="ghost"
-                  size="icon-sm"
+                  size="icon"
                   aria-label={t(
                     direction === -1 ? "previous_month" : "next_month",
                   )}
@@ -456,7 +455,7 @@ function RangePanel({
               <Button
                 type="button"
                 variant="ghost"
-                size="icon-sm"
+                size="icon"
                 aria-label={t("previous_year")}
                 disabled={year <= firstMonth.getFullYear()}
                 onClick={() => setYear(year - 1)}
@@ -467,7 +466,7 @@ function RangePanel({
               <Button
                 type="button"
                 variant="ghost"
-                size="icon-sm"
+                size="icon"
                 aria-label={t("next_year")}
                 disabled={!!lastMonth && year >= lastMonth.getFullYear()}
                 onClick={() => setYear(year + 1)}
@@ -488,7 +487,7 @@ function RangePanel({
                     key={index}
                     type="button"
                     variant={shown ? "primary" : current ? "outline" : "ghost"}
-                    size="sm"
+                    size="default"
                     className="relative min-w-0"
                     aria-pressed={shown}
                     disabled={

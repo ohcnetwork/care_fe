@@ -357,33 +357,6 @@ test("T commits today immediately and Escape clears only the focused edge withou
   await expect(apply(page)).toBeVisible();
 });
 
-test("embedded calendars share the field value and honor bounds inside the parent menu", async ({ page }) => {
-  await open(page, "menu&min&max");
-  await page.getByRole("button", { name: /select date.*start date/i }).click();
-  const popup = page.locator('[data-slot="popover-content"]');
-  await expect(popup).toBeVisible();
-  await expect(popup.locator('[data-day="2026-11-21"] button')).toBeDisabled();
-  await popup.locator('[data-day="2026-11-03"] button').click();
-  await expect(popup).toHaveCount(0);
-  await expect(from(page)).toHaveValue("03/11/2026");
-  await page.getByRole("button", { name: /select date.*end date/i }).click();
-  await popup.locator('[data-day="2026-11-16"] button').click();
-  await expect(to(page)).toHaveValue("16/11/2026");
-  await expect(page.getByText("14 days", { exact: true })).toBeVisible();
-  await expect(page.getByTestId("applied")).toContainText('"count":0');
-});
-
-test("Escape dismisses only the embedded calendar and returns focus to its button", async ({ page }) => {
-  await open(page, "popover&value");
-  await page.getByRole("button", { name: "9 Nov – 19 Nov 2026", exact: true }).click();
-  const calendarButton = page.getByRole("button", { name: /select date.*end date/i });
-  await calendarButton.click();
-  await page.keyboard.press("Escape");
-  await expect(page.locator('[data-slot="popover-content"]')).toHaveCount(1);
-  await expect(calendarButton).toBeFocused();
-  await expect(to(page)).toHaveValue("19/11/2026");
-});
-
 test("shared CARE input and button sizes are retained at mobile and desktop widths", async ({ page }) => {
   for (const [width, height] of [[320, 48], [1280, 40]]) {
     await page.setViewportSize({ width, height: 1000 });
@@ -392,10 +365,16 @@ test("shared CARE input and button sizes are retained at mobile and desktop widt
     await expect(apply(page)).toHaveCSS("height", "36px");
     const caption = page.getByRole("button", { name: "November 2026", exact: true });
     await expect(caption).toHaveAttribute("data-variant", "ghost");
-    await expect(caption).toHaveCSS("height", "36px");
+    await expect(caption).toHaveCSS("height", `${height}px`);
     const next = page.getByRole("button", { name: "Next month", exact: true });
-    await expect(next).toHaveAttribute("data-size", "icon-sm");
-    await expect(next).toHaveCSS("width", "36px");
+    await expect(next).toHaveAttribute("data-size", "icon");
+    await expect(next).toHaveCSS("width", `${height}px`);
+    await expect(next).toHaveCSS("height", `${height}px`);
+    await caption.click();
+    const nextYear = page.getByRole("button", { name: "Next year", exact: true });
+    await expect(nextYear).toHaveCSS("width", `${height}px`);
+    await expect(nextYear).toHaveCSS("height", `${height}px`);
+    await expect(page.getByRole("button", { name: "Nov", exact: true })).toHaveCSS("height", `${height}px`);
   }
 });
 
@@ -412,18 +391,50 @@ test("segment stepping validates bounds and an empty field can start with the ar
   await expect(apply(page)).toBeDisabled();
 });
 
-test("populated fields and their embedded calendar fit a 320px surface", async ({ page }) => {
-  await page.setViewportSize({ width: 320, height: 680 });
-  await open(page, "menu&integration&value");
-  await page.getByRole("menuitem", { name: /custom date range/i }).click();
-  await page.getByTestId("outside").evaluate((element) => { element.style.display = "none"; });
-  await page.getByTestId("applied").evaluate((element) => { element.style.display = "none"; });
-  await expect(apply(page)).toBeInViewport({ ratio: 1 });
-  await page.screenshot({ path: test.info().outputPath("after-320.png"), animations: "disabled" });
-  await page.getByRole("button", { name: /select date.*end date/i }).click();
-  const popup = page.locator('[data-slot="popover-content"]');
-  await expect(popup).toBeInViewport({ ratio: 1 });
-  const overflows = await popup.evaluate((element) => element.scrollWidth > element.clientWidth);
-  expect(overflows).toBe(false);
-  await page.screenshot({ path: test.info().outputPath("embedded-320.png"), animations: "disabled" });
+test("populated date fields fit, with side-by-side desktop fields and only clear buttons", async ({ page }) => {
+  for (const width of [320, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await open(page, "menu&integration&value");
+    await page.getByRole("menuitem", { name: /custom date range/i }).click();
+    const first = await from(page).boundingBox();
+    const second = await to(page).boundingBox();
+    expect(first).not.toBeNull();
+    expect(second).not.toBeNull();
+    if (width >= 768) {
+      expect(first!.y).toBeCloseTo(second!.y, 0);
+      expect(first!.x + first!.width).toBeLessThanOrEqual(second!.x);
+    } else {
+      expect(second!.y).toBeGreaterThan(first!.y);
+    }
+    for (const input of [from(page), to(page)]) {
+      const fits = await input.evaluate((element: HTMLInputElement) => {
+        const style = getComputedStyle(element);
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d")!;
+        context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        return context.measureText(element.value).width <=
+          element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      });
+      expect(fits).toBe(true);
+    }
+    await expect(page.getByRole("button", { name: /select date.*(start|end) date/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^clear start date$/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^clear end date$/i })).toBeVisible();
+    await page.getByTestId("outside").evaluate((element) => { element.style.display = "none"; });
+    await page.getByTestId("applied").evaluate((element) => { element.style.display = "none"; });
+    await expect(apply(page)).toBeInViewport({ ratio: 1 });
+    await page.mouse.move(width - 1, 850);
+    await page.locator('[data-slot="dropdown-menu-content"]').screenshot({
+      path: test.info().outputPath(`after-${width}.png`),
+      animations: "disabled",
+    });
+    if (width === 1280) {
+      await page.locator('[data-slot="date-range-picker"]').evaluate((element) => {
+        (element as HTMLElement).style.width = "220px";
+      });
+      const narrowFrom = await from(page).boundingBox();
+      const narrowTo = await to(page).boundingBox();
+      expect(narrowTo!.y).toBeGreaterThan(narrowFrom!.y);
+    }
+  }
 });
