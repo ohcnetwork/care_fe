@@ -1,1 +1,0 @@
-5 link converted /facility/$facilityId/settings/devices/create

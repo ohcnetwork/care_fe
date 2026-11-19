@@ -1,9 +1,0 @@
-import { Link as RavigerLink, navigate as go } from "raviger";
-
-export function Aliased({ facilityId }: { facilityId: string }) {
-  return (
-    <RavigerLink href={`/facility/${facilityId}/settings`} onClick={() => go("/licenses", { replace: true })}>
-      Settings
-    </RavigerLink>
-  );
-}

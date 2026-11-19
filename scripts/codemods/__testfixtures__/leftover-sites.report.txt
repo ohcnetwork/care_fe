@@ -1,4 +1,0 @@
-8 link converted /facility/$facilityId/settings
-9 link skipped relative-url
-10 navigate converted /login
-11 navigate skipped non-literal-url

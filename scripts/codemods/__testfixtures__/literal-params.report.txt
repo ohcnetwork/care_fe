@@ -1,4 +1,0 @@
-4 navigate converted /patient/$id/$tab [literal params: tab]
-7 link converted /patient/$id/$tab [literal params: tab]
-8 link converted /facility/$facilityId/settings [literal params: facilityId]
-9 link skipped no-matching-route (matches only: splat) /patient/*/up dates

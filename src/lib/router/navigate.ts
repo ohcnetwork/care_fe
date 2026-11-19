@@ -5,8 +5,7 @@ import { getRouter } from "@/compat/routerRef";
 /**
  * Typed `navigate` for code that runs outside a component, such as an event
  * handler or a mutation callback. The `to` and `params` options are checked
- * against the route tree. The codemod `scripts/codemods/raviger-to-tanstack.js`
- * writes calls to this function.
+ * against the route tree.
  *
  * It keeps the behavior of the raviger shim `navigate()`:
  * - It returns at once, and the new URL is in `window.location` when it

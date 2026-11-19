@@ -1,2 +1,0 @@
-5 link converted /facility/$facilityId/settings
-5 navigate converted /licenses

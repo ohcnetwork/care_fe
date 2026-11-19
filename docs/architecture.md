@@ -33,7 +33,7 @@ The shim keeps raviger's timing where legacy code depends on it:
 
 Some pages were written for a nested raviger table and still write links relative to its base path (settings, billing settings, locations, services). Their layout route keeps that context with the shim's `RouterProvider` (see `src/routes/_app/facility.$facilityId.settings/route.tsx`) until the links are rewritten.
 
-In new code, use `<Link to params>` from `@tanstack/react-router` and `navigate({ to, params })` from `src/lib/router/navigate.ts`; both are type-checked against the route tree. `scripts/codemods/raviger-to-tanstack.js` converts raviger `<Link href>` and literal `navigate()` calls whose target is a route, and lists the sites it cannot convert.
+In new code, use `<Link to params>` from `@tanstack/react-router` and `navigate({ to, params })` from `src/lib/router/navigate.ts`; both are type-checked against the route tree.
 
 ## API Layer (TanStack Query + custom wrappers)
 

@@ -1,2 +1,0 @@
-3 link skipped file-uses-nested-router
-6 navigate skipped file-uses-nested-router

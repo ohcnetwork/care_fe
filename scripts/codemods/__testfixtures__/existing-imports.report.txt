@@ -1,2 +1,0 @@
-9 link converted /facility/$facilityId/settings
-9 navigate converted /login
