@@ -24,9 +24,9 @@ export interface PluginRouteDefinition {
   render: PluginRouteRender;
 }
 
-/** Converts a raviger pattern (`/a/:id`, `/a*`) to a TanStack path. */
-export function toRouterPath(ravigerPath: string): string {
-  let path = ravigerPath.replace(/:([a-zA-Z_]+)/g, "$$$1");
+/** Converts a manifest path pattern (`/a/:id`, `/a*`) to a TanStack path. */
+export function toRouterPath(pattern: string): string {
+  let path = pattern.replace(/:([a-zA-Z_]+)/g, "$$$1");
   if (path.endsWith("*")) {
     path = path.replace(/\*$/, "").replace(/\/$/, "") + "/$";
   }

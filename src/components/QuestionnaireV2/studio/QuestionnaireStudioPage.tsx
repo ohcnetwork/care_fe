@@ -234,8 +234,8 @@ export function QuestionnaireStudioPage({
       revealHidden={editing}
       inert={editing}
     >
-      {/* Fullscreen shell (the route opts out of the app sidebar in
-          AppRouter's PATHS_WITHOUT_SIDEBAR): the reference design's
+      {/* Fullscreen shell (the route opts out of the app sidebar with a
+          layout flag): the reference design's
           viewport-filling frame — fixed top bar, three independently
           scrolling columns, from md up. z-40 keeps portals (dialogs, popovers, toasts
           at z-50) above it. */}
