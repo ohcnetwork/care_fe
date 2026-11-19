@@ -95,7 +95,9 @@ jobs:
 
       - name: Set backend branch
         id: backend-branch
-        run: echo "branch=develop" >> "$GITHUB_OUTPUT"
+        # Temporarily pinned to ohcnetwork/care#3758 (ENG-1020) which fixes the
+        # MinIO docker-compose image URL. Revert to `develop` once it is merged.
+        run: echo "branch=ENG-1020-update-minio-docker-compose-image-url" >> "$GITHUB_OUTPUT"
 
       - name: Checkout care
         uses: actions/checkout@v4
