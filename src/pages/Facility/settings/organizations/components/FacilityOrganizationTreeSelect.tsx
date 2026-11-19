@@ -1,6 +1,5 @@
 import {
   keepPreviousData,
-  useInfiniteQuery,
   useMutation,
   useQueries,
   useQuery,
@@ -15,6 +14,8 @@ import {
   type TreeSelectNode,
   type TreeSelectPagination,
 } from "@/components/ui/tree-select";
+
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -100,31 +101,13 @@ function buildTree(organizations: FacilityOrganizationRead[]) {
 
 // Top-level organizations, or name matches at any depth while searching.
 function useRootOrganizations(facilityId: string, search: string) {
-  return useInfiniteQuery({
+  return useInfiniteList({
     queryKey: ["facilityOrganization", facilityId, "tree", search],
-    queryFn: ({ pageParam, signal }) => {
-      const options = {
-        pathParams: { facilityId },
-        queryParams: {
-          ...(search ? { name: search } : { parent: "" }),
-          limit: String(PAGE_LIMIT),
-          offset: String(pageParam),
-        },
-      };
-      return (
-        search
-          ? query.debounced(facilityOrganizationApi.list, options)
-          : query(facilityOrganizationApi.list, options)
-      )({ signal });
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const offset = allPages.length * PAGE_LIMIT;
-      return offset < lastPage.count ? offset : null;
-    },
-    select: (data) => ({
-      results: data.pages.flatMap((page) => page.results),
-      count: data.pages[0]?.count ?? 0,
+    ...query.infinite(facilityOrganizationApi.list, {
+      pathParams: { facilityId },
+      pageSize: PAGE_LIMIT,
+      debounceInterval: search ? 500 : undefined,
+      queryParams: search ? { name: search } : { parent: "" },
     }),
     placeholderData: keepPreviousData,
   });

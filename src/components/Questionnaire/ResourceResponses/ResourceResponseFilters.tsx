@@ -1,5 +1,4 @@
 import { Spinner } from "@/components/ui/spinner";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { Check, ChevronDown, X } from "lucide-react";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,6 +31,8 @@ import {
 import UserSelector from "@/components/Common/UserSelector";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -55,8 +56,6 @@ interface ResourceResponseFiltersProps {
   disabled?: boolean;
 }
 
-const QUESTIONNAIRES_PER_PAGE = 30;
-
 export default function ResourceResponseFilters({
   facilityId,
   subjectType,
@@ -69,7 +68,7 @@ export default function ResourceResponseFilters({
   const [formsOpen, setFormsOpen] = useState(false);
   const [formSearch, setFormSearch] = useState("");
 
-  const questionnairesQuery = useInfiniteQuery({
+  const questionnairesQuery = useInfiniteList({
     queryKey: [
       ...questionnaireKeys.all,
       "resource-response-filter",
@@ -77,26 +76,19 @@ export default function ResourceResponseFilters({
       facilityId,
       formSearch,
     ],
-    queryFn: ({ pageParam, signal }) =>
-      query.debounced(questionnaireApi.list, {
-        queryParams: {
-          subject_type: subjectType,
-          facility_or_instance: facilityId,
-          title: formSearch || undefined,
-          limit: QUESTIONNAIRES_PER_PAGE,
-          offset: pageParam,
-        },
-      })({ signal }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, pages) => {
-      const offset = pages.length * QUESTIONNAIRES_PER_PAGE;
-      return offset < lastPage.count ? offset : undefined;
-    },
+    ...query.infinite(questionnaireApi.list, {
+      queryParams: {
+        subject_type: subjectType,
+        facility_or_instance: facilityId,
+        title: formSearch || undefined,
+      },
+      pageSize: 30,
+      debounceInterval: 500,
+    }),
     enabled: formsOpen && !disabled,
   });
 
-  const questionnaires =
-    questionnairesQuery.data?.pages.flatMap((page) => page.results) ?? [];
+  const questionnaires = questionnairesQuery.data?.results ?? [];
   const hasFilters = !!(value.questionnaire || value.createdBy || value.status);
 
   return (

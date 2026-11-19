@@ -1,8 +1,7 @@
 import { format, isToday } from "date-fns";
 import { Pin } from "lucide-react";
-import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import {
   Table,
@@ -28,30 +27,19 @@ export const ObservationHistoryMatrix = ({
   entriesByCode,
   totalCount,
   hasNextPage,
-  isFetchingNextPage,
-  fetchNextPage,
+  loadMoreRef,
 }: {
   codes: Code[];
   entriesByCode: Record<string, ResolvedObservationEntry[]>;
   totalCount: number;
   hasNextPage?: boolean;
-  isFetchingNextPage?: boolean;
-  fetchNextPage?: () => void;
+  /** Sentinel ref that loads the next page when it scrolls into view. */
+  loadMoreRef?: (node?: Element | null) => void;
 }) => {
   const { t } = useTranslation();
 
   const firstColRef = useRef<HTMLTableCellElement>(null);
   const [pinnedOffset, setPinnedOffset] = useState(0);
-
-  const { ref: loadMoreRef, inView } = useInView();
-
-  const loadMore = useEffectEvent(() => {
-    if (hasNextPage && !isFetchingNextPage) fetchNextPage?.();
-  });
-
-  useEffect(() => {
-    if (inView) loadMore();
-  }, [inView, isFetchingNextPage]);
 
   const { columns, rows } = useMemo(() => {
     // One column per reading. Readings can share an effective time (several
