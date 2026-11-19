@@ -49,7 +49,7 @@ import { t } from "i18next";
 import {
   BanIcon,
   ChevronDown,
-  EyeIcon,
+  InfoIcon,
   MoreVertical,
   Printer,
 } from "lucide-react";
@@ -105,17 +105,26 @@ export function formatValue(
 
 function CodingValue({ coding }: { coding: Code }) {
   const { t } = useTranslation();
+
   return (
     <span className="ml-1 inline-flex items-center gap-1 text-gray-600">
       {coding.display}
       <Tooltip>
         <TooltipTrigger asChild>
-          <EyeIcon
-            className="size-3.5 shrink-0 cursor-help text-gray-400 hover:text-gray-600"
-            aria-label={t("code")}
-          />
+          <button
+            type="button"
+            className="inline-flex shrink-0 rounded-full text-gray-400 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+            aria-label={`${t("system")}: ${coding.system}, ${t("code")}: ${coding.code}`}
+          >
+            <InfoIcon className="size-3.5" />
+          </button>
         </TooltipTrigger>
-        <TooltipContent>{coding.code}</TooltipContent>
+        <TooltipContent className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">
+          <span className="opacity-70">{t("system")}</span>
+          <span className="font-mono break-all">{coding.system}</span>
+          <span className="opacity-70">{t("code")}</span>
+          <span className="font-mono">{coding.code}</span>
+        </TooltipContent>
       </Tooltip>
     </span>
   );
