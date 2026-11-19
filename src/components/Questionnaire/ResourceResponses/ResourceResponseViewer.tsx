@@ -18,15 +18,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-
-import { useIsMobile } from "@/hooks/use-mobile";
 
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { QuestionnaireResponseStatus } from "@/types/questionnaire/questionnaireResponse";
@@ -68,7 +68,6 @@ export default function ResourceResponseViewer({
   onCopyLink,
 }: ResourceResponseViewerProps) {
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
   const SubjectIcon = {
     location: MapPin,
     device: Monitor,
@@ -118,14 +117,13 @@ export default function ResourceResponseViewer({
   return (
     <Sheet
       open={open}
-      modal={isMobile}
       onOpenChange={(nextOpen) => {
         if (!nextOpen) onClose();
       }}
     >
       <SheetContent
-        side="right"
-        className="flex h-dvh w-full flex-col gap-0 border-neutral-200 p-0 shadow-lg sm:max-w-none md:w-[min(720px,70vw)] [&>button]:hidden"
+        size="xl"
+        className="overflow-hidden"
         onOpenAutoFocus={() => {
           openerRef.current =
             document.activeElement instanceof HTMLElement
@@ -136,11 +134,8 @@ export default function ResourceResponseViewer({
           event.preventDefault();
           if (openerRef.current?.isConnected) openerRef.current.focus();
         }}
-        onInteractOutside={(event) => {
-          if (!isMobile) event.preventDefault();
-        }}
       >
-        <SheetHeader className="shrink-0 space-y-0 border-b border-neutral-200 bg-white px-4 pb-4 pt-2 text-left">
+        <SheetHeader showCloseButton={false} className="[&>div]:w-full">
           <div className="mb-3 flex items-center justify-between gap-3">
             <p className="text-sm font-medium text-neutral-700">
               {t("response_details")}
@@ -168,7 +163,7 @@ export default function ResourceResponseViewer({
               </SheetClose>
             </div>
           </div>
-          <SheetTitle className="break-words text-lg leading-7 font-semibold text-neutral-950">
+          <SheetTitle className="break-words">
             {visibleResponse?.questionnaire.title || t("view_response")}
           </SheetTitle>
           <SheetDescription className="sr-only">
@@ -209,9 +204,8 @@ export default function ResourceResponseViewer({
           )}
         </SheetHeader>
 
-        <div
+        <SheetBody
           key={visibleResponse?.id}
-          className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4"
           data-cy={`${subjectType}-response-content`}
           aria-busy={showLoading}
         >
@@ -284,12 +278,12 @@ export default function ResourceResponseViewer({
               />
             </div>
           ) : null}
-        </div>
+        </SheetBody>
 
         {showNavigation && (
-          <div className="shrink-0 border-t border-neutral-200 bg-neutral-50 p-4">
+          <SheetFooter className="flex gap-0 sm:flex-col">
             <p
-              className="mb-3 text-center text-xs text-neutral-500"
+              className="text-center text-xs text-neutral-500"
               aria-live="polite"
             >
               {t("response_position", {
@@ -337,7 +331,7 @@ export default function ResourceResponseViewer({
                 <ArrowRight className="size-4" />
               </Button>
             </div>
-          </div>
+          </SheetFooter>
         )}
       </SheetContent>
     </Sheet>

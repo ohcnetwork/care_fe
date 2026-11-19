@@ -4,11 +4,21 @@ import { expectToast } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-/** The facility overview shows its type on the line under the name heading. */
+/** The facility settings header shows the type as a badge on the line under the name heading. */
 function facilityTypeLine(page: Page, facilityName: string) {
   return page
     .getByRole("heading", { name: facilityName, exact: true })
-    .locator("xpath=following-sibling::p[1]");
+    .locator("xpath=following-sibling::div[1]")
+    .locator('[data-slot="badge"]');
+}
+
+/** The value of a row in the Facility details list, found by its label. */
+function facilityDetail(page: Page, label: string) {
+  return page
+    .getByRole("region", { name: "Facility details", exact: true })
+    .locator("dt")
+    .filter({ hasText: new RegExp(`^${label}$`) })
+    .locator("xpath=following-sibling::dd[1]");
 }
 
 test.describe("Facility Creation", () => {
@@ -116,7 +126,7 @@ test.describe("Facility Creation", () => {
       .getByRole("link", { name: /Government$/ })
       .first()
       .click();
-    await page.getByRole("menuitem", { name: "Facilities" }).click();
+    await page.getByRole("tab", { name: "Facilities" }).click();
   });
 
   test("Create a new facility with all fields", async ({ page }) => {
@@ -260,10 +270,13 @@ test.describe("Facility Creation", () => {
       page.getByRole("link", { name: "Show on Map" }),
     ).not.toBeVisible();
 
-    // Verify optional fields are NOT visible (description and features)
-    // Description should not be displayed if it was not provided
-    const descriptionSection = page.locator("text=Description").first();
-    await expect(descriptionSection).not.toBeVisible();
+    // Optional fields that were not provided show their empty state: the
+    // details list keeps the Description row and says there is none.
+    await expect(
+      facilityDetail(page, "Description").getByText("No Description", {
+        exact: true,
+      }),
+    ).toBeVisible();
 
     // Open edit form
     await page.getByRole("button", { name: "Edit Facility Details" }).click();
@@ -422,9 +435,10 @@ test.describe("Facility Creation", () => {
     // Verify the phone link is visible
     await expect(phoneLink).toBeVisible();
 
-    // Verify the href attribute contains tel: link with phone number format
+    // The href uses the raw E.164 number; the formatted number is display-only
     const href = await phoneLink.getAttribute("href");
-    expect(href).toMatch(/^tel:\+91\s\d{5}\s\d{5}$/);
+    expect(href).toMatch(/^tel:\+91\d{10}$/);
+    await expect(phoneLink).toHaveText(/^\+91 \d{5} \d{5}$/);
   });
 
   test("Add location to an existing facility and verify Show on Map link redirection", async ({
@@ -491,8 +505,13 @@ test.describe("Facility Creation", () => {
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
 
-    // Click Delete Facility button
-    await page.getByRole("button", { name: "Delete Facility" }).click();
+    // Expand the delete section, then click Delete Facility button
+    await page
+      .getByRole("button", { name: "Delete facility", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Delete Facility", exact: true })
+      .click();
 
     // Type the confirmation text
     await page

@@ -55,8 +55,8 @@ export function ForgotPassword({
   return (
     <AuthCard
       back={{ label: t("back_to_login"), onClick: onBack }}
-      title={t("forget_password")}
-      description={t("forget_password_instruction")}
+      title={t("forgot_password")}
+      description={t("forgot_password_instruction")}
     >
       <form noValidate className="grid gap-6" onSubmit={handleSubmit}>
         <Field data-invalid={!!error}>

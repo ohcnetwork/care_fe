@@ -182,7 +182,7 @@ export function CollectedSpecimenHeader({
                 </DropdownMenuItem>
               </AlertDialogTrigger>
               <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                <AlertDialogHeader>
+                <AlertDialogHeader className="pb-0 md:pb-0">
                   <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
                   <AlertDialogDescription>
                     {t("specimen_discard_dialog_description")}
@@ -194,7 +194,7 @@ export function CollectedSpecimenHeader({
                   onValueChange={(value: SpecimenStatus) =>
                     setSelectedDiscardReason(value)
                   }
-                  className="space-y-3 justify-center items-center"
+                  className="space-y-3 items-center px-4 md:px-6"
                 >
                   {SPECIMEN_DISCARD_REASONS.map((reason) => (
                     <div

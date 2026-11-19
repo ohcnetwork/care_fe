@@ -54,13 +54,17 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
 
-  if (!staffId) {
-    toast.error(t("staff_username_not_found"));
-    navigate(`/facility/${facilityId}`);
-  } else if (!tokenData) {
-    toast.error(t("phone_number_not_found"));
-    navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
-  }
+  // Side effects stay out of render: a toast during the router's transition
+  // render interrupts it, so the render would restart without end.
+  useEffect(() => {
+    if (!staffId) {
+      toast.error(t("staff_username_not_found"));
+      navigate(`/facility/${facilityId}`);
+    } else if (!tokenData) {
+      toast.error(t("phone_number_not_found"));
+      navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
+    }
+  }, [facilityId, staffId, tokenData, t]);
 
   const { data: appointmentData } = useQuery({
     queryKey: ["appointment", tokenData?.phoneNumber],

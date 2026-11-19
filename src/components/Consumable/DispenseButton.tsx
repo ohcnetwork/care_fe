@@ -62,7 +62,6 @@ export const DispenseButton = ({
   const resetInvoiceState = () => {
     setIsInvoiceSheetOpen(false);
     setAccountId(undefined);
-    setLocation(undefined);
     setExtractedChargeItems([]);
   };
 
@@ -96,6 +95,7 @@ export const DispenseButton = ({
           }}
           onDispenseComplete={async (chargeItems: ChargeItemRead[]) => {
             setShowDrawer(false);
+            setLocation(undefined);
 
             queryClient.invalidateQueries({
               queryKey: [

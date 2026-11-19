@@ -2,9 +2,15 @@ import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 import { navigate, usePath } from "raviger";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-import Loading from "@/components/Common/Loading";
 import {
   clearOtherUsersFillDrafts,
   clearQuestionnaireFillDrafts,
@@ -15,6 +21,9 @@ import { AppearanceUserSync } from "@/context/AppearanceContext";
 import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
+
+import { getRouter } from "@/compat/routerRef";
+import { type AuthStatus, setAuthStatusResolver } from "@/lib/router/auth";
 
 import mutate from "@/Utils/request/mutate";
 import query, { callApi } from "@/Utils/request/query";
@@ -30,8 +39,6 @@ import userApi from "@/types/user/userApi";
 
 interface Props {
   children: React.ReactNode;
-  unauthorized: React.ReactNode;
-  otpAuthorized: React.ReactNode;
 }
 
 const isMFAResponse = (data: LoginResponse): data is MfaAuthenticationToken => {
@@ -44,19 +51,61 @@ const isJwtTokenResponse = (
   return "access" in data && "refresh" in data;
 };
 
-export default function AuthUserProvider({
-  children,
-  unauthorized,
-  otpAuthorized,
-}: Props) {
+/**
+ * The session status from the provider's token state and the query cache.
+ * It matches what the provider renders, but it is read synchronously, so a
+ * route guard sees a sign-in or sign-out before React re-renders.
+ */
+function readAuthStatus(
+  queryClient: ReturnType<typeof useQueryClient>,
+  accessToken: string | null,
+  patientToken: TokenData | null,
+): AuthStatus {
+  if (accessToken) {
+    const state = queryClient.getQueryState(["currentUser", accessToken]);
+    if (state?.data) return "user";
+    const enabled = !!localStorage.getItem(LocalStorageKeys.accessToken);
+    if (enabled && (!state || state.status === "pending")) return "loading";
+  }
+  return patientToken?.token ? "patient" : "anonymous";
+}
+
+/**
+ * Owns the staff and patient sessions. The router reads the session status
+ * for its route guards (see `src/lib/router/auth.ts`); the root route shows
+ * the loading screen and selects the chrome.
+ */
+export default function AuthUserProvider({ children }: Props) {
   const queryClient = useQueryClient();
-  const [accessToken, setAccessToken] = useState(
+  const [accessToken, setAccessTokenState] = useState(
     localStorage.getItem(LocalStorageKeys.accessToken),
   );
   const path = usePath();
-  const [patientToken, setPatientToken] = useState<TokenData | null>(
+  const [patientToken, setPatientTokenState] = useState<TokenData | null>(
     JSON.parse(
       localStorage.getItem(LocalStorageKeys.patientTokenKey) || "null",
+    ),
+  );
+
+  // Mirrors of the token state, updated in the same call as the state, so
+  // `readAuthStatus` is current before the next render.
+  const accessTokenRef = useRef(accessToken);
+  const patientTokenRef = useRef(patientToken);
+  const setAccessToken = useCallback((token: string | null) => {
+    accessTokenRef.current = token;
+    setAccessTokenState(token);
+  }, []);
+  const setPatientToken = useCallback((token: TokenData | null) => {
+    patientTokenRef.current = token;
+    setPatientTokenState(token);
+  }, []);
+  useState(() =>
+    setAuthStatusResolver(() =>
+      readAuthStatus(
+        queryClient,
+        accessTokenRef.current,
+        patientTokenRef.current,
+      ),
     ),
   );
 
@@ -66,6 +115,25 @@ export default function AuthUserProvider({
     retry: false,
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
+
+  // Same precedence the app used to select a router: staff, patient, public.
+  const status: AuthStatus = isLoading
+    ? "loading"
+    : user
+      ? "user"
+      : patientToken?.token
+        ? "patient"
+        : "anonymous";
+
+  // Run the route guards again when the session changes without a
+  // navigation (sign-in finished loading, sign-out, a token removed in
+  // another tab).
+  const lastStatus = useRef(status);
+  useLayoutEffect(() => {
+    if (lastStatus.current === status) return;
+    lastStatus.current = status;
+    void getRouter().invalidate();
+  }, [status]);
 
   const setUser = useSetAtom(userAtom);
   useEffect(() => {
@@ -193,7 +261,7 @@ export default function AuthUserProvider({
       );
       navigate(redirectUrl);
     },
-    [],
+    [setPatientToken],
   );
 
   /**
@@ -237,7 +305,7 @@ export default function AuthUserProvider({
       const redirectURL = getRedirectURL();
       navigate(redirectURL ? `/login?redirect=${redirectURL}` : "/login");
     },
-    [queryClient],
+    [queryClient, setAccessToken, setPatientToken],
   );
 
   const signOut = useCallback(() => endSession(true), [endSession]);
@@ -284,6 +352,7 @@ export default function AuthUserProvider({
       user,
       patientLogin,
       patientToken,
+      isUserLoading: isLoading,
     }),
     [
       signIn,
@@ -295,21 +364,14 @@ export default function AuthUserProvider({
       user,
       patientLogin,
       patientToken,
+      isLoading,
     ],
   );
 
   return (
     <AuthUserContext.Provider value={contextValue}>
       <AppearanceUserSync user={accessToken ? user : undefined} />
-      {isLoading ? (
-        <Loading />
-      ) : user ? (
-        children
-      ) : patientToken?.token ? (
-        otpAuthorized
-      ) : (
-        unauthorized
-      )}
+      {children}
     </AuthUserContext.Provider>
   );
 }

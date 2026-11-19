@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -304,52 +306,54 @@ export function AppointmentQuestion({
                 </Button>
               )}
             </SheetTrigger>
-            <SheetContent side="right" className="sm:max-w-xl overflow-auto">
+            <SheetContent size="lg" className="overflow-hidden">
               <SheetHeader>
                 <SheetTitle>{t("select_appointment_slot")}</SheetTitle>
               </SheetHeader>
-              <div className="space-y-4">
-                <AppointmentDateSelection
-                  facilityId={facilityId}
-                  resourceId={selectedResource.resource?.id || undefined}
-                  resourceType={selectedResource.resource_type}
-                  setSelectedDate={(date) => {
-                    setSelectedDate(date);
-                    setSelectedSlotId(undefined);
-                    setSelectedSlot(undefined);
-                  }}
-                  selectedDate={selectedDate}
-                />
-                <AppointmentSlotPicker
-                  selectedDate={selectedDate}
-                  facilityId={facilityId}
-                  resourceId={selectedResource.resource?.id || undefined}
-                  resourceType={selectedResource.resource_type}
-                  selectedSlotId={selectedSlotId}
-                  onSlotDetailsChange={setSelectedSlot}
-                  onSlotSelect={setSelectedSlotId}
-                />
-                <div className="flex justify-end gap-2 mt-6">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setOpen(false);
+              <SheetBody>
+                <div className="space-y-4">
+                  <AppointmentDateSelection
+                    facilityId={facilityId}
+                    resourceId={selectedResource.resource?.id || undefined}
+                    resourceType={selectedResource.resource_type}
+                    setSelectedDate={(date) => {
+                      setSelectedDate(date);
+                      setSelectedSlotId(undefined);
                       setSelectedSlot(undefined);
                     }}
-                  >
-                    {t("cancel")}
-                  </Button>
-                  <Button
-                    variant="default"
-                    disabled={disabled || !selectedSlotId || !selectedSlot}
-                    onClick={() => {
-                      handleSlotSelect(selectedSlotId);
-                    }}
-                  >
-                    {t("submit")}
-                  </Button>
+                    selectedDate={selectedDate}
+                  />
+                  <AppointmentSlotPicker
+                    selectedDate={selectedDate}
+                    facilityId={facilityId}
+                    resourceId={selectedResource.resource?.id || undefined}
+                    resourceType={selectedResource.resource_type}
+                    selectedSlotId={selectedSlotId}
+                    onSlotDetailsChange={setSelectedSlot}
+                    onSlotSelect={setSelectedSlotId}
+                  />
                 </div>
-              </div>
+              </SheetBody>
+              <SheetFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setOpen(false);
+                    setSelectedSlot(undefined);
+                  }}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  variant="default"
+                  disabled={disabled || !selectedSlotId || !selectedSlot}
+                  onClick={() => {
+                    handleSlotSelect(selectedSlotId);
+                  }}
+                >
+                  {t("submit")}
+                </Button>
+              </SheetFooter>
             </SheetContent>
           </Sheet>
         </div>

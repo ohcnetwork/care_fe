@@ -394,7 +394,7 @@ function findTsxFiles(root: string): string[] {
 
 function collectRegisteredComponentTargets(
   srcRoot: string,
-  overrideRoot: string,
+  excludedRoots: string[],
 ): { targets: ComponentTarget[]; unsupported: ComponentTarget[] } {
   const targets: ComponentTarget[] = [];
   const unsupported: ComponentTarget[] = [];
@@ -402,7 +402,7 @@ function collectRegisteredComponentTargets(
   for (const filePath of findTsxFiles(srcRoot)) {
     const normalizedPath = normalizePath(filePath);
 
-    if (normalizedPath.startsWith(overrideRoot)) {
+    if (excludedRoots.some((root) => normalizedPath.startsWith(root))) {
       continue;
     }
 
@@ -638,21 +638,23 @@ export function autoRegisterComponents({
   include = null,
 }: AutoRegisterComponentsOptions = {}): Plugin {
   let srcRoot = "";
-  let overrideRoot = "";
+  // Not scanned: the override framework itself, and TanStack route files,
+  // whose `Route` export is a route object rather than a component.
+  let excludedRoots: string[] = [];
 
   return {
     name: "auto-register-components",
     enforce: "pre",
     configResolved(config) {
       srcRoot = `${normalizePath(path.resolve(config.root, "src"))}/`;
-      overrideRoot = `${normalizePath(
-        path.resolve(config.root, "src/lib/override"),
-      )}/`;
+      excludedRoots = ["src/lib/override", "src/routes"].map(
+        (dir) => `${normalizePath(path.resolve(config.root, dir))}/`,
+      );
     },
     buildStart() {
       const { targets, unsupported } = collectRegisteredComponentTargets(
         srcRoot,
-        overrideRoot,
+        excludedRoots,
       );
       assertUniqueComponentNames(targets);
       assertAllowlistFormsSupported(unsupported, include);
@@ -664,7 +666,7 @@ export function autoRegisterComponents({
       if (
         !normalizedId.endsWith(".tsx") ||
         !normalizedId.startsWith(srcRoot) ||
-        normalizedId.startsWith(overrideRoot)
+        excludedRoots.some((root) => normalizedId.startsWith(root))
       ) {
         return null;
       }

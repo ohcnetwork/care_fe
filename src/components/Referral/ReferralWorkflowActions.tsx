@@ -290,9 +290,14 @@ export function ReferralWorkflowActions({
             </AlertDialogDescription>
           </AlertDialogHeader>
           {update.error && (
-            <FieldError role="alert">
-              {referralResourceError(update.error, t("referral_update_failed"))}
-            </FieldError>
+            <div className="px-4 md:px-6">
+              <FieldError role="alert">
+                {referralResourceError(
+                  update.error,
+                  t("referral_update_failed"),
+                )}
+              </FieldError>
+            </div>
           )}
           <AlertDialogFooter>
             <AlertDialogCancel disabled={update.isPending}>
