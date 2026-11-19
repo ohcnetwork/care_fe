@@ -12,13 +12,13 @@ applyTo: "src/components/**/*.{ts,tsx}"
 
 ## Component Architecture Patterns
 - Healthcare domain: Feature-based organization - Components grouped by Patient/, Facility/, Medication/, etc.
-- React 19.1.1 hooks: Functional components only - Use React 19.1.1 hooks pattern
+- React 19.2.7 hooks: Functional components only - Use React 19.2.7 hooks pattern
 - TypeScript interfaces: Props interfaces - Always define PatientInfoCardProps, etc.
 - Handle prefix: Event handlers - handleSubmit, handleTagsUpdate, handlePatientSelect
 
 ## UI Component System
 - shadcn/ui components: Primary UI - Button, Card, Badge, etc. from `@/components/ui/`
-- Healthcare-specific: CAREUI custom - Calendar, WeekdayCheckbox, Zoom from `@/CAREUI/`
+- Healthcare-specific: CAREUI custom - Calendar, WeekdayCheckbox from `@/CAREUI/`
 - Button variants: Use `buttonVariants` from `@/components/ui/button` with CVA patterns
 - Card structure: Follow `<Card><CardHeader>` pattern for consistent layouts
 
@@ -28,7 +28,7 @@ applyTo: "src/components/**/*.{ts,tsx}"
 - Hover cards: Use `PatientHoverCard` for patient info overlays
 - Badge usage: Display patient status, facility capacity, medication dosage with color variants
 
-## Styling with Tailwind CSS 4.1.3
+## Styling with Tailwind CSS 4.3.2
 - Class variance authority: Use `cva()` for variant-based component styling
 - Utility function: Use `cn()` from `@/lib/utils` for conditional classes
 - Color system: Follow primary-700, gray-900, red-500 pattern with dark mode variants

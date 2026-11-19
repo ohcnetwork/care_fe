@@ -6,15 +6,12 @@ CARE is a Digital Public Good enabling TeleICU & Decentralised Administration of
 
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here. This repository has custom setup requirements and workflows that must be followed exactly.
 
-Do not run lint or prettier. For missing i18n keys, simply add the key to the end of the `public/locale/en.json` file. Do not read the i18n files, directly append items to the end of the JSON when there is an error regarding a missing key.
+For missing i18n keys, simply add the key to the end of the `public/locale/en.json` file. Do not read the i18n files, directly append items to the end of the JSON when there is an error regarding a missing key.
 
 ## Architecture Overview
 
 ### Technology Stack
 
-- Frontend Framework: React 19.1.1 with TypeScript
-- Build Tool: Vite 6.3.5 for fast development and optimized builds
-- Styling: Tailwind CSS 4.1.3 with custom healthcare-specific design system
 - UI Components: shadcn/ui as primary system, CAREUI for healthcare-specific components
 - State Management: @tanstack/react-query for server state, React hooks for client state
 - Routing: raviger for application routing
@@ -103,7 +100,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ### Bootstrap, Build, and Test the Repository
 
 - `npm install --ignore-scripts` -- installs dependencies without platform-specific binaries (takes ~16 seconds)
-- `npm run postinstall` -- installs platform-specific dependencies and generates headers (takes ~3 seconds)
+- `npm run postinstall` -- installs platform-specific dependencies (takes ~3 seconds)
 - `npm run build` -- production build. NEVER CANCEL: Takes 2+ minutes. Set timeout to 180+ seconds.
 - `npm run dev` -- starts development server on http://localhost:4000 (takes ~5 seconds)
 - `npm run preview` -- starts production preview server (requires build first)
@@ -162,14 +159,12 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ### Development Tools
 
-- ESLint 9.18.0 with TypeScript plugin
-- Prettier 3.3.3 with Tailwind plugin
 - Playwright for E2E testing
 - Vite PWA plugin for service worker
 
 ## Configuration Files & Environment
 
-- `.env` -- environment variables (not committed)
+- `.env` -- environment variables
 - `.env.docker` -- Docker environment template
 - `REACT_CARE_API_URL` -- backend API URL (required for full functionality)
 - `care.config.ts` -- application configuration
@@ -187,7 +182,6 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ### Environment Variables
 
 - `REACT_CARE_API_URL` -- backend API endpoint (default: staging API)
-- `REACT_ENABLE_HCX` -- enable HCX features
 - `NODE_OPTIONS="--max-old-space-size=4096"` -- required for Docker builds
 
 ### Build Process Details

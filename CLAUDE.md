@@ -136,16 +136,6 @@ npm run playwright:test           # Tests run against clean DB, auto-restores on
 - Don't rely on cleanup — the DB snapshot system handles state reset
 - Use `getFacilityId()`, `getPatientId()`, `getEncounterId()` from `tests/support/` for fixture IDs
 
-## Code Style Guidelines
-
-- **TypeScript**: Strict mode, ES2022 target, path aliases (`@/*` → `src/*`, `@careConfig` → `care.config.ts`)
-- **Formatting**: Double quotes, 2-space indent, semicolons required
-- **Imports**: Order by 3rd-party → library → CAREUI → UI → components → hooks → utils → relative. Prettier plugin auto-sorts on format.
-- **Types**: Use `interface` for objects, avoid `any`, prefer maps over enums
-- **Naming**: PascalCase for component files (`AuthWizard.tsx`), camelCase for hooks/utils (`useAuth.ts`), kebab-case for directories
-- **Components**: Functional components only, named exports preferred, one component per file
-- **i18n**: All user-facing strings must use i18next. English translations go in `public/locale/en.json`. Non-English managed via Crowdin — do not edit directly.
-
 ## Architecture
 
 ### Routing (Raviger)
@@ -229,30 +219,12 @@ JWT tokens in localStorage. `AuthUserProvider` handles login/logout, token refre
 - `src/types/` — Domain type definitions with corresponding `*Api.ts` route files
 - `src/Utils/request/` — API request infrastructure (query, mutate, error handling)
 - `src/hooks/` — Custom React hooks (auth, file management, plugins, etc.)
-- `src/Providers/` — Auth, history, patient user providers
+- `src/Providers/` — Auth, patient user providers
 - `src/Routers/` — App routing and route definitions
 
 ### Configuration
 
 `care.config.ts` centralizes runtime config (API URLs, feature flags, locale settings, plugin config). Environment variables prefixed with `REACT_`.
-
-## Git Workflow
-
-- Branch naming: `issues/{issue#}/{short-name}`
-- Default branch: `develop` (staging auto-deploys)
-- Pre-commit hooks via husky run Prettier and ESLint on staged files
-
-## Autonomous AI Workflow
-
-When working autonomously on this codebase, follow this sequence:
-
-1. **Before coding:** Read relevant source files and understand existing patterns
-2. **After changes:** Run `npm run lint-fix` and `npm run format` on changed files (pre-commit hooks also run these automatically)
-3. **Verify:** Run relevant Playwright tests against the local backend to validate changes
-4. **For API changes:** Check corresponding backend endpoint in the care backend repo and update both repos if needed
-5. **For new features:** Add Playwright tests in `tests/` following `tests/PLAYWRIGHT_GUIDE.md`
-6. **For i18n:** Add English strings to `public/locale/en.json`
-7. **For writing tests:** Read `tests/PLAYWRIGHT_GUIDE.md` — it contains complete patterns for all form interactions, selectors, assertions, and helpers
 
 ### Quick verification cycle
 
