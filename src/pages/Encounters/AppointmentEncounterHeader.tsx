@@ -22,6 +22,7 @@ import {
 
 import { PatientIDScanDialog } from "@/components/Scan/PatientIDScanDialog";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { navigate } from "@/lib/router/navigate";
 import {
   encounterRequiresDischarge,
   useEncounterProgressController,
@@ -35,6 +36,7 @@ import { dateQueryString } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { EllipsisVertical as DotsVerticalIcon } from "lucide-react";
 
+import { Link } from "@tanstack/react-router";
 import {
   CalendarCheck,
   CalendarRange,
@@ -45,7 +47,7 @@ import {
   ScanLine,
   SquareArrowUpRight,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link as RavigerLink, navigate as ravigerNavigate } from "raviger";
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -116,12 +118,17 @@ const PatientScanButton = ({
     },
     onSuccess: ({ appointments, patient, patientId }) => {
       if (appointments.results?.length) {
-        navigate(
-          `/facility/${facilityId}/patient/${patientId}/appointments/${appointments.results[0].id}`,
-        );
+        navigate({
+          to: "/facility/$facilityId/patient/$patientId/appointments/$appointmentId",
+          params: {
+            facilityId,
+            patientId,
+            appointmentId: appointments.results[0].id,
+          },
+        });
       } else {
         toast.info(t("no_appointments_found_for_today"));
-        navigate(
+        ravigerNavigate(
           `/facility/${facilityId}/patients/home?${new URLSearchParams({
             phone_number: patient.phone_number,
             year_of_birth: patient.year_of_birth?.toString() ?? "",
@@ -502,18 +509,18 @@ const TokenActions = ({
     <>
       {appointment.id && (
         <TokenAction asMenuItem={asMenuItems}>
-          <Link href={getQueueLink(appointment)} basePath="/">
+          <RavigerLink href={getQueueLink(appointment)} basePath="/">
             {asMenuItems && (
               <CalendarRange className="size-4" aria-hidden="true" />
             )}
             <span className={labelClassName}>{t("appointments_board")}</span>
             {boardIcon}
-          </Link>
+          </RavigerLink>
         </TokenAction>
       )}
       {token && (
         <TokenAction asMenuItem={asMenuItems}>
-          <Link
+          <RavigerLink
             basePath="/"
             href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
           >
@@ -522,14 +529,14 @@ const TokenActions = ({
             )}
             <span className={labelClassName}>{t("queue_board")}</span>
             {boardIcon}
-          </Link>
+          </RavigerLink>
         </TokenAction>
       )}
       {appointment.id && (
         <TokenAction asMenuItem={asMenuItems}>
           <Link
-            basePath="/"
-            href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
+            to="/facility/$facilityId/patient/$patientId/appointments/$appointmentId"
+            params={{ facilityId, patientId, appointmentId: appointment.id }}
           >
             {asMenuItems ? (
               <>

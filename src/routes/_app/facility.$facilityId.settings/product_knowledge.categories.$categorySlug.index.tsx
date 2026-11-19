@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import ProductKnowledgeList from "@/pages/Facility/settings/productKnowledge/ProductKnowledgeList";
 
@@ -9,7 +9,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, categorySlug } = Route.useParams();
+  const { facilityId, categorySlug } = useParams({
+    from: "/_app/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/",
+  });
   return (
     <ProductKnowledgeList facilityId={facilityId} categorySlug={categorySlug} />
   );

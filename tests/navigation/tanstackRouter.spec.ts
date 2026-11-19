@@ -29,6 +29,16 @@ test.describe("TanStack Router navigation", () => {
     facilityId = getFacilityId();
   });
 
+  test("billing settings redirect preserves search and hash", async ({
+    page,
+  }) => {
+    await page.goto(`/facility/${facilityId}/settings/billing?x=1#discounts`);
+
+    await expect(page).toHaveURL(
+      `/facility/${facilityId}/settings/billing/discount_codes?x=1#discounts`,
+    );
+  });
+
   test("back after a direct open falls back to the parent route", async ({
     page,
   }) => {
@@ -173,6 +183,42 @@ test.describe("TanStack Router navigation", () => {
 
     await page.goBack();
     await expect(routerPage).toHaveText("/test-plugin/router");
+  });
+
+  test("typed links keep commas in comma-separated id params", async ({
+    page,
+  }) => {
+    await page.goto(`/facility/${facilityId}/settings/general`);
+    await page.waitForFunction(() => "__TSR_ROUTER__" in window);
+
+    const hrefs = await page.evaluate(() => {
+      const router = (
+        window as unknown as {
+          __TSR_ROUTER__: {
+            buildLocation: (options: {
+              to: string;
+              params: Record<string, string>;
+            }) => { href: string };
+          };
+        }
+      ).__TSR_ROUTER__;
+      return [
+        router.buildLocation({
+          to: "/facility/$facilityId/billing/invoices/$invoiceIds/print",
+          params: { facilityId: "f", invoiceIds: "a,b" },
+        }).href,
+        router.buildLocation({
+          to: "/users/$username",
+          params: { username: "a/b" },
+        }).href,
+      ];
+    });
+
+    // Legacy links write raw commas; typed links must give the same URL.
+    expect(hrefs).toEqual([
+      "/facility/f/billing/invoices/a,b/print",
+      "/users/a%2Fb",
+    ]);
   });
 
   test("a plugin that fails to load shows not found for its routes", async ({

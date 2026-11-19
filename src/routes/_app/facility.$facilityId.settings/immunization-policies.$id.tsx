@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import ImmunizationPolicyForm from "@/pages/ImmunizationPolicies/ImmunizationPolicyForm";
 import { immunizationPolicyScope } from "@/types/emr/immunizationPolicy/immunizationPolicy";
@@ -10,7 +10,9 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { facilityId, id } = Route.useParams();
+  const { facilityId, id } = useParams({
+    from: "/_app/facility/$facilityId/settings/immunization-policies/$id",
+  });
   return (
     <ImmunizationPolicyForm
       scope={immunizationPolicyScope(facilityId)}

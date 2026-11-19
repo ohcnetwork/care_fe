@@ -1,4 +1,4 @@
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 
 import { cn } from "@/lib/utils";
 
@@ -63,7 +63,7 @@ export function FacilityCard({ facility, className }: Props) {
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
           <div className="flex justify-end">
             <Button variant="outline" asChild>
-              <Link href={`/facility/${facility.id}`}>
+              <Link to="/facility/$id" params={{ id: facility.id }}>
                 {t("view_facility")}
               </Link>
             </Button>

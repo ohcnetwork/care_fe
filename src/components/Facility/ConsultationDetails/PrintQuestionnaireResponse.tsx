@@ -18,9 +18,9 @@ import questionnaireResponseApi from "@/types/questionnaire/questionnaireRespons
 
 type PrintQuestionnaireResponseProps = {
   questionnaireResponseId: string;
-  encounterId: string;
+  encounterId?: string;
   patientId: string;
-  facilityId: string;
+  facilityId?: string;
 };
 
 export function PrintQuestionnaireResponse({
