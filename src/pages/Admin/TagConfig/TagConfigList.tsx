@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -13,6 +12,7 @@ import Page from "@/components/Common/Page";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import {
   TagCategory,
   TagResource,
@@ -57,9 +57,12 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
 
   const handleView = (configId: string) => {
     if (facilityId) {
-      navigate(`/facility/${facilityId}/settings/tag_config/${configId}`);
+      navigate({
+        to: "/facility/$facilityId/settings/tag_config/$tagId",
+        params: { facilityId, tagId: configId },
+      });
     } else {
-      navigate(`/admin/tag_config/${configId}`);
+      navigate({ to: "/admin/tag_config/$id", params: { id: configId } });
     }
   };
 

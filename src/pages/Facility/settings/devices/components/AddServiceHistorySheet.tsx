@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -38,12 +39,12 @@ export default function AddServiceHistorySheet({
           {t("service_record_add")}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("service_record_add")}</SheetTitle>
           <SheetDescription>{t("service_record_description")}</SheetDescription>
         </SheetHeader>
-        <div className="mt-6">
+        <SheetBody>
           <ServiceHistoryForm
             facilityId={facilityId}
             deviceId={deviceId}
@@ -52,7 +53,7 @@ export default function AddServiceHistorySheet({
               setOpen(false);
             }}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

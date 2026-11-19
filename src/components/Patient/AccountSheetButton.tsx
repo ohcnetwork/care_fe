@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -88,8 +89,8 @@ export function AccountSheetButton({
     <>
       <Sheet open={sheetOpen} onOpenChange={handleSheetOpenChange}>
         <SheetTrigger asChild>{trigger}</SheetTrigger>
-        <SheetContent className="sm:max-w-md md:max-w-lg">
-          <SheetHeader className="mb-6">
+        <SheetContent size="md" className="overflow-hidden">
+          <SheetHeader>
             <SheetTitle className="text-xl flex items-center justify-start gap-2">
               {t("account")}
               {!!accounts.length && (
@@ -107,150 +108,158 @@ export function AccountSheetButton({
               )}
             </SheetTitle>
           </SheetHeader>
-          {isLoading ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full size-8 border-b-2 border-primary"></div>
-            </div>
-          ) : (
-            <div className="space-y-5 pr-2 max-h-[calc(100vh-120px)] overflow-y-auto">
-              {accounts.length === 0 ? (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500 mb-4">
-                    {t("no_active_account_found")}
-                  </p>
-                  {canCreateAccount && (
-                    <Button
-                      onClick={handleCreateAccountClick}
-                      variant="outline"
-                    >
-                      {t("create_account")}
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h2 className="text-xl font-semibold">
-                        {accounts[0].name}
-                      </h2>
-                      {accounts[0].description && (
-                        <div className="text-sm text-gray-500 max-w-lg">
-                          {accounts[0].description}
-                        </div>
-                      )}
-                    </div>
+          <SheetBody>
+            {isLoading ? (
+              <div className="flex justify-center items-center h-40">
+                <div className="animate-spin rounded-full size-8 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {accounts.length === 0 ? (
+                  <div className="text-center py-8 bg-gray-50 rounded-lg">
+                    <p className="text-gray-500 mb-4">
+                      {t("no_active_account_found")}
+                    </p>
+                    {canCreateAccount && (
+                      <Button
+                        onClick={handleCreateAccountClick}
+                        variant="outline"
+                      >
+                        {t("create_account")}
+                      </Button>
+                    )}
                   </div>
-
+                ) : (
                   <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-medium border-b pb-2 mb-4">
-                        {t("account_details")}
-                      </h3>
-
-                      <div className="grid grid-cols-2 gap-y-2 text-sm">
-                        <span className="text-gray-500">{t("status")}</span>
-                        <span className="font-medium">
-                          {t(accounts[0].status)}
-                        </span>
-
-                        <span className="text-gray-500">
-                          {t("billing_status")}
-                        </span>
-                        <span className="font-medium">
-                          {t(accounts[0].billing_status)}
-                        </span>
-
-                        <span className="text-gray-500">{t("start_date")}</span>
-                        <span className="font-medium">
-                          {accounts[0].service_period &&
-                          accounts[0].service_period.start
-                            ? new Date(
-                                accounts[0].service_period.start,
-                              ).toLocaleDateString(undefined, {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              })
-                            : "-"}
-                        </span>
-
-                        <span className="text-gray-500">{t("end_date")}</span>
-                        <span className="font-medium">
-                          {accounts[0].service_period &&
-                          accounts[0].service_period.end
-                            ? new Date(
-                                accounts[0].service_period.end,
-                              ).toLocaleDateString(undefined, {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              })
-                            : "-"}
-                        </span>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h2 className="text-xl font-semibold">
+                          {accounts[0].name}
+                        </h2>
+                        {accounts[0].description && (
+                          <div className="text-sm text-gray-500 max-w-lg">
+                            {accounts[0].description}
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <div>
-                      <h3 className="text-lg font-medium border-b pb-2 mb-4">
-                        {t("account_summary")}
-                      </h3>
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-lg font-medium border-b pb-2 mb-4">
+                          {t("account_details")}
+                        </h3>
 
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
-                            {t("total_balance")}
+                        <div className="grid grid-cols-2 gap-y-2 text-sm">
+                          <span className="text-gray-500">{t("status")}</span>
+                          <span className="font-medium">
+                            {t(accounts[0].status)}
                           </span>
-                          <span className="text-lg font-semibold text-red-600">
-                            <MonetaryDisplay
-                              amount={accounts[0].total_balance}
-                            />
-                          </span>
-                        </div>
 
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
-                            {t("total_gross")}
+                          <span className="text-gray-500">
+                            {t("billing_status")}
                           </span>
                           <span className="font-medium">
-                            <MonetaryDisplay amount={accounts[0].total_gross} />
+                            {t(accounts[0].billing_status)}
                           </span>
-                        </div>
 
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
-                            {t("total_net")}
+                          <span className="text-gray-500">
+                            {t("start_date")}
                           </span>
                           <span className="font-medium">
-                            <MonetaryDisplay amount={accounts[0].total_net} />
+                            {accounts[0].service_period &&
+                            accounts[0].service_period.start
+                              ? new Date(
+                                  accounts[0].service_period.start,
+                                ).toLocaleDateString(undefined, {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                })
+                              : "-"}
                           </span>
-                        </div>
 
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
-                            {t("total_paid")}
-                          </span>
-                          <span className="font-medium text-green-600">
-                            <MonetaryDisplay amount={accounts[0].total_paid} />
+                          <span className="text-gray-500">{t("end_date")}</span>
+                          <span className="font-medium">
+                            {accounts[0].service_period &&
+                            accounts[0].service_period.end
+                              ? new Date(
+                                  accounts[0].service_period.end,
+                                ).toLocaleDateString(undefined, {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                })
+                              : "-"}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
-                            {t("total_billable")}
-                          </span>
-                          <span className="font-medium">
-                            <MonetaryDisplay
-                              amount={accounts[0].total_billable_charge_items}
-                            />
-                          </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-medium border-b pb-2 mb-4">
+                          {t("account_summary")}
+                        </h3>
+
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">
+                              {t("total_balance")}
+                            </span>
+                            <span className="text-lg font-semibold text-red-600">
+                              <MonetaryDisplay
+                                amount={accounts[0].total_balance}
+                              />
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">
+                              {t("total_gross")}
+                            </span>
+                            <span className="font-medium">
+                              <MonetaryDisplay
+                                amount={accounts[0].total_gross}
+                              />
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">
+                              {t("total_net")}
+                            </span>
+                            <span className="font-medium">
+                              <MonetaryDisplay amount={accounts[0].total_net} />
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">
+                              {t("total_paid")}
+                            </span>
+                            <span className="font-medium text-green-600">
+                              <MonetaryDisplay
+                                amount={accounts[0].total_paid}
+                              />
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">
+                              {t("total_billable")}
+                            </span>
+                            <span className="font-medium">
+                              <MonetaryDisplay
+                                amount={accounts[0].total_billable_charge_items}
+                              />
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </SheetBody>
         </SheetContent>
       </Sheet>
 

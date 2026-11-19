@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { SectionHeader } from "@/components/Common/SectionHeader";
 import { ReferralList } from "@/components/Referral/ReferralList";
 import {
   Empty,
@@ -7,8 +8,6 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Muted, SubsectionTitle } from "@/components/ui/typography";
-
 import { usePermissions } from "@/context/PermissionContext";
 
 import OrganizationLayout, {
@@ -29,13 +28,11 @@ export default function OrganizationReferrals(
   return (
     <OrganizationLayout {...props}>
       {({ orgPermissions }) => (
-        <div className="space-y-5 text-foreground">
-          <header className="space-y-2">
-            <SubsectionTitle>
-              {t("referral_organization_incoming")}
-            </SubsectionTitle>
-            <Muted>{t("referral_organization_incoming_description")}</Muted>
-          </header>
+        <div className="space-y-4 text-foreground">
+          <SectionHeader
+            title={t("referral_organization_incoming")}
+            description={t("referral_organization_incoming_description")}
+          />
           {hasPermission("can_read_referral", orgPermissions) ? (
             <ReferralList
               scope={{

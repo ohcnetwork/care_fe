@@ -255,7 +255,7 @@ export default function RolesIndex() {
                 {t("add_role")}
               </Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent size="lg" className="overflow-hidden">
               <SheetHeader>
                 <SheetTitle>
                   {isEditMode ? t("edit_role") : t("add_role")}
@@ -266,9 +266,7 @@ export default function RolesIndex() {
                     : t("add_role_description")}
                 </SheetDescription>
               </SheetHeader>
-              <div className="mt-4 overflow-auto pr-2">
-                <RoleForm role={selectedRole} onSuccess={handleSheetClose} />
-              </div>
+              <RoleForm role={selectedRole} onSuccess={handleSheetClose} />
             </SheetContent>
           </Sheet>
         </div>

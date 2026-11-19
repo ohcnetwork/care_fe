@@ -22,8 +22,10 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
 import { TooltipComponent } from "@/components/ui/tooltip";
@@ -421,61 +423,55 @@ function PatientNoteManager({
 
       {/* Mobile Sheet */}
       <Sheet open={isThreadsExpanded} onOpenChange={setIsThreadsExpanded}>
-        <SheetContent side="left" className="w-[100%] sm:w-[380px] p-0">
-          <SheetDescription className="sr-only">
-            {t("notes__all_discussions_description")}
-          </SheetDescription>
-          <SheetTitle className="sr-only">{t("encounter")}</SheetTitle>
-          <div className="flex flex-col h-full">
-            <div className="p-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="size-4 text-primary" />
-                  <h3 className="text-sm font-medium">
-                    {t("notes__all_discussions")}
-                  </h3>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setShowNewThreadDialog(true);
-                    setIsThreadsExpanded(false);
-                  }}
-                  className="h-8 hidden lg:block"
-                  disabled={!canWrite}
-                >
-                  <MessageSquarePlus className="size-4 mr-2" />
-                  {t("notes__new")}
-                </Button>
-              </div>
+        <SheetContent side="left" size="sm" className="overflow-hidden">
+          <SheetHeader>
+            <div className="flex items-center justify-between gap-2">
+              <SheetTitle className="flex items-center gap-2 text-sm font-medium">
+                <MessageCircle className="size-4 text-primary" />
+                {t("notes__all_discussions")}
+              </SheetTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setShowNewThreadDialog(true);
+                  setIsThreadsExpanded(false);
+                }}
+                className="h-8 hidden lg:block"
+                disabled={!canWrite}
+              >
+                <MessageSquarePlus className="size-4 mr-2" />
+                {t("notes__new")}
+              </Button>
             </div>
-
-            <ScrollArea className="flex-1">
-              <div className="space-y-2 p-4">
-                {threadsData?.results.length === 0 ? (
-                  <div className="text-center py-6">
-                    <MessageSquarePlus className="size-8 text-primary mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">
-                      {t("notes__no_discussions")}
-                    </p>
-                  </div>
-                ) : (
-                  threadsData?.results.map((thread) => (
-                    <ThreadItem
-                      key={thread.id}
-                      thread={thread}
-                      isSelected={selectedThread === thread.id}
-                      onClick={() => {
-                        setSelectedThread(thread.id);
-                        setIsThreadsExpanded(false);
-                      }}
-                    />
-                  ))
-                )}
-              </div>
-            </ScrollArea>
-          </div>
+            <SheetDescription className="sr-only">
+              {t("notes__all_discussions_description")}
+            </SheetDescription>
+          </SheetHeader>
+          <SheetBody>
+            <div className="space-y-2">
+              {threadsData?.results.length === 0 ? (
+                <div className="text-center py-6">
+                  <MessageSquarePlus className="size-8 text-primary mx-auto mb-3" />
+                  <p className="text-sm text-gray-500">
+                    {t("notes__no_discussions")}
+                  </p>
+                </div>
+              ) : (
+                threadsData?.results.map((thread) => (
+                  <ThreadItem
+                    key={thread.id}
+                    thread={thread}
+                    isSelected={selectedThread === thread.id}
+                    onClick={() => {
+                      setSelectedThread(thread.id);
+                      setIsThreadsExpanded(false);
+                    }}
+                  />
+                ))
+              )}
+            </div>
+          </SheetBody>
         </SheetContent>
       </Sheet>
 

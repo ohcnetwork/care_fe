@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -29,6 +28,7 @@ import { otpErrorMessages } from "@/components/Auth/otpErrorMessages";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
+import { navigate } from "@/lib/router/navigate";
 import { MfaMethod, MfaOption } from "@/types/auth/auth";
 
 export const Authenticate = () => {
@@ -71,7 +71,7 @@ export const Authenticate = () => {
 
   useEffect(() => {
     if (!temp_token) {
-      navigate("/login");
+      navigate({ to: "/login" });
     }
   }, [temp_token]);
 
@@ -79,7 +79,7 @@ export const Authenticate = () => {
   const handleSubmit = form.handleSubmit(async (values) => {
     if (!temp_token) {
       setError(t("session_expired"));
-      navigate("/login");
+      navigate({ to: "/login" });
       return;
     }
 

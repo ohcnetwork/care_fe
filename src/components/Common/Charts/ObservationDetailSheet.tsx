@@ -1,9 +1,9 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -15,6 +15,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { cn } from "@/lib/utils";
 import { useEncounterSilently } from "@/pages/Encounters/utils/EncounterProvider";
 import { Code } from "@/types/base/code/code";
@@ -78,7 +79,8 @@ export function ObservationDetailSheet({
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery({
+    ref: loadMoreRef,
+  } = useInfiniteList({
     queryKey: [
       "observation-history",
       patientId,
@@ -86,34 +88,25 @@ export function ObservationDetailSheet({
       codesParam,
       encounterScoped,
     ],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(observationApi.list, {
-        pathParams: { patientId },
-        queryParams: {
-          codes: codesParam,
-          status: RESULT_STATUSES,
-          limit: String(RESULTS_PER_PAGE_LIMIT),
-          offset: String(pageParam),
-          ...(encounterScoped ? { encounter: encounterId } : {}),
-        },
-      })({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+    ...query.infinite(observationApi.list, {
+      pathParams: { patientId },
+      queryParams: {
+        codes: codesParam,
+        status: RESULT_STATUSES,
+        ...(encounterScoped ? { encounter: encounterId } : {}),
+      },
+      pageSize: RESULTS_PER_PAGE_LIMIT,
+    }),
     enabled: open && validCodes.length > 0,
   });
 
-  const allResults = historyData?.pages.flatMap((page) => page.results) ?? [];
+  const allResults = historyData?.results ?? [];
 
   const entriesByCode = resolveObservationEntries(allResults, validCodes);
 
   const codeList = Object.values(entriesByCode).map((list) => list[0].code);
 
-  const totalCount = historyData?.pages?.[0]?.count ?? 0;
+  const totalCount = historyData?.count ?? 0;
 
   // The list filter matches code values across systems, so loaded pages can
   // hold no readings for the requested systems while later pages still might.
@@ -128,11 +121,9 @@ export function ObservationDetailSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-4xl flex flex-col p-0 gap-0 overflow-hidden h-dvh">
-        <SheetHeader className="border-b border-border bg-card p-6 pb-4">
-          <SheetTitle className="pr-8 text-xl font-bold text-foreground">
-            {title}{" "}
-          </SheetTitle>
+      <SheetContent size="xl" className="overflow-hidden">
+        <SheetHeader>
+          <SheetTitle>{title}</SheetTitle>
 
           <div
             className={cn(
@@ -152,94 +143,91 @@ export function ObservationDetailSheet({
           </div>
         </SheetHeader>
 
-        {encounterId && !historyLocked && (
-          <div className="flex items-center gap-2 text-sm ml-auto pt-2 pr-3">
-            <Checkbox
-              id="current-encounter-only"
-              checked={currentEncounterOnly}
-              onCheckedChange={(checked) =>
-                setCurrentEncounterOnly(checked === true)
-              }
-            />
-            <label htmlFor="current-encounter-only" className="cursor-pointer">
-              {t("show_current_encounter_recordings")}
-            </label>
-          </div>
-        )}
-
-        {isHistoryLoading || awaitingMatches ? (
-          <div className="flex flex-col gap-4 overflow-hidden p-4 flex-1 min-h-0">
-            <TableSkeleton count={3} />
-          </div>
-        ) : isError ? (
-          <div className="p-4">
-            <ClinicalListError isFetching={isFetching} onRetry={refetch} />
-          </div>
-        ) : totalCount === 0 || codeList.length === 0 ? (
-          <EmptyState
-            title={t("no_data_available")}
-            className="m-3"
-            icon={
-              <FileExclamationPointIcon className="size-6 text-placeholder-foreground" />
-            }
-          />
-        ) : (
-          <Tabs
-            defaultValue="plot"
-            className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
-          >
-            <TabsList className="mx-4 mt-3 w-fit shrink-0">
-              <TabsTrigger value="plot">{t("plots")}</TabsTrigger>
-              <TabsTrigger value="table">{t("table")}</TabsTrigger>
-            </TabsList>
-            <TabsContent
-              value="plot"
-              className="min-h-0 flex-1 overflow-y-auto p-4"
-            >
-              <div className="flex flex-col gap-4">
-                {codeList.flatMap((code) => {
-                  const unitGroups = groupEntriesByUnit(
-                    entriesByCode[codeKey(code)] ?? [],
-                  );
-                  return unitGroups.map((group) => (
-                    <section
-                      key={`${codeKey(code)}|${group.key}`}
-                      className="min-w-0"
-                    >
-                      <h3 className="mb-1 text-sm font-semibold text-foreground">
-                        {code.display || code.code}
-                        {unitGroups.length > 1 && group.unit && (
-                          <span className="ml-1 font-normal text-muted-foreground">
-                            ({group.unit})
-                          </span>
-                        )}
-                      </h3>
-                      <ObservationDetailContent
-                        entries={group.entries}
-                        hasNextPage={hasNextPage}
-                        isFetchingNextPage={isFetchingNextPage}
-                        fetchNextPage={fetchNextPage}
-                      />
-                    </section>
-                  ));
-                })}
+        <SheetBody>
+          <div className="space-y-4">
+            {encounterId && !historyLocked && (
+              <div className="flex items-center justify-end gap-2 text-sm">
+                <Checkbox
+                  id="current-encounter-only"
+                  checked={currentEncounterOnly}
+                  onCheckedChange={(checked) =>
+                    setCurrentEncounterOnly(checked === true)
+                  }
+                />
+                <label
+                  htmlFor="current-encounter-only"
+                  className="cursor-pointer"
+                >
+                  {t("show_current_encounter_recordings")}
+                </label>
               </div>
-            </TabsContent>
-            <TabsContent
-              value="table"
-              className="min-h-0 flex-1 overflow-y-auto p-4"
-            >
-              <ObservationHistoryMatrix
-                codes={codeList}
-                entriesByCode={entriesByCode}
-                totalCount={totalCount}
-                hasNextPage={hasNextPage}
-                isFetchingNextPage={isFetchingNextPage}
-                fetchNextPage={fetchNextPage}
+            )}
+
+            {isHistoryLoading || awaitingMatches ? (
+              <div className="flex flex-col gap-4">
+                <TableSkeleton count={3} />
+              </div>
+            ) : isError ? (
+              <div>
+                <ClinicalListError isFetching={isFetching} onRetry={refetch} />
+              </div>
+            ) : totalCount === 0 || codeList.length === 0 ? (
+              <EmptyState
+                title={t("no_data_available")}
+                className="m-3"
+                icon={
+                  <FileExclamationPointIcon className="size-6 text-placeholder-foreground" />
+                }
               />
-            </TabsContent>
-          </Tabs>
-        )}
+            ) : (
+              <Tabs defaultValue="plot" className="min-w-0">
+                <TabsList className="w-fit">
+                  <TabsTrigger value="plot">{t("plots")}</TabsTrigger>
+                  <TabsTrigger value="table">{t("table")}</TabsTrigger>
+                </TabsList>
+                <TabsContent value="plot" className="pt-4">
+                  <div className="flex flex-col gap-4">
+                    {codeList.flatMap((code) => {
+                      const unitGroups = groupEntriesByUnit(
+                        entriesByCode[codeKey(code)] ?? [],
+                      );
+                      return unitGroups.map((group) => (
+                        <section
+                          key={`${codeKey(code)}|${group.key}`}
+                          className="min-w-0"
+                        >
+                          <h3 className="mb-1 text-sm font-semibold text-foreground">
+                            {code.display || code.code}
+                            {unitGroups.length > 1 && group.unit && (
+                              <span className="ml-1 font-normal text-muted-foreground">
+                                ({group.unit})
+                              </span>
+                            )}
+                          </h3>
+                          <ObservationDetailContent
+                            entries={group.entries}
+                            hasNextPage={hasNextPage}
+                            isFetchingNextPage={isFetchingNextPage}
+                            fetchNextPage={fetchNextPage}
+                          />
+                        </section>
+                      ));
+                    })}
+                  </div>
+                </TabsContent>
+                <TabsContent value="table" className="pt-4">
+                  <ObservationHistoryMatrix
+                    codes={codeList}
+                    entriesByCode={entriesByCode}
+                    totalCount={totalCount}
+                    hasNextPage={hasNextPage}
+                    loadMoreRef={loadMoreRef}
+                  />
+                </TabsContent>
+              </Tabs>
+            )}
+          </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

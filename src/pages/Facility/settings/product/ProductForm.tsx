@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { navigate } from "raviger";
 import { useImperativeHandle, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -29,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -40,6 +40,7 @@ import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { MonetaryAmountInput } from "@/components/ui/monetary-display";
+import { navigate } from "@/lib/router/navigate";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
@@ -149,7 +150,9 @@ export function ProductFormContent({
   slug,
   containerClassName,
   onSuccess = (product: ProductRead) =>
-    navigate(`/facility/${facilityId}/settings/product/${product.id}`, {
+    navigate({
+      to: "/facility/$facilityId/settings/product/$id",
+      params: { facilityId, id: product.id },
       replace: true,
     }),
   onCancel = () => {
@@ -514,7 +517,7 @@ export function ProductFormContent({
                           {t("create_new")}
                         </Button>
                       </SheetTrigger>
-                      <SheetContent className="w-[90%] sm:max-w-2xl flex min-w-full flex-col bg-gray-100 sm:min-w-fit overflow-y-auto">
+                      <SheetContent size="lg" className="overflow-hidden">
                         <SheetHeader>
                           <SheetTitle>
                             {t("create_charge_item_definition")}
@@ -523,7 +526,7 @@ export function ProductFormContent({
                             {t("create_charge_item_definition_description")}
                           </SheetDescription>
                         </SheetHeader>
-                        <div className="mt-6">
+                        <SheetBody>
                           <ChargeItemDefinitionForm
                             facilityId={facilityId}
                             minimal={true}
@@ -541,7 +544,7 @@ export function ProductFormContent({
                             }}
                             onCancel={() => setCreateCidOpen(false)}
                           />
-                        </div>
+                        </SheetBody>
                       </SheetContent>
                     </Sheet>
                   </div>

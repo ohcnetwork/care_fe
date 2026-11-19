@@ -1,5 +1,5 @@
-import { faker } from "@faker-js/faker";
 import { type Browser, expect, test } from "@playwright/test";
+import { createPatient } from "tests/helper/patient";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -95,24 +95,6 @@ async function assignOrganizationRole(
   }
 }
 
-/** Create a patient that has no encounter, so the empty state renders. */
-async function createPatientWithoutEncounter(
-  geoOrganizationId: string,
-): Promise<string> {
-  const patient = await api<{ id: string }>("/api/v1/patient/", {
-    method: "POST",
-    body: {
-      name: `Encounter Permission ${faker.string.alphanumeric(6)}`,
-      gender: "male",
-      phone_number: `+91${faker.helpers.fromRegExp(/[6-9][0-9]{9}/)}`,
-      date_of_birth: "1990-01-15",
-      geo_organization: geoOrganizationId,
-      identifiers: [],
-    },
-  });
-  return patient.id;
-}
-
 test.describe("Encounter history create button permission", () => {
   // Serial mode keeps both tests in one worker, so the shared setup runs once.
   test.describe.configure({ mode: "serial" });
@@ -124,7 +106,8 @@ test.describe("Encounter history create button permission", () => {
     const geoOrganizationId = await getGeoOrganizationId();
     await assignOrganizationRole(geoOrganizationId, "care-nurse", "Nurse");
     await assignOrganizationRole(geoOrganizationId, "care-staff", "Staff");
-    patientId = await createPatientWithoutEncounter(geoOrganizationId);
+    // A new patient has no encounter, so the empty state renders.
+    patientId = await createPatient("Encounter Permission", geoOrganizationId);
   });
 
   /** Open the patient encounters tab as the given user. */

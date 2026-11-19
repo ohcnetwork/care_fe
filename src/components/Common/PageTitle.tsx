@@ -27,7 +27,7 @@ export default function PageTitle({
     <div className={cn(!isInsidePage && "mb-2 md:mb-4", className)}>
       {changePageMetadata && <PageHeadTitle title={title} />}
 
-      <div className="mt-1 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div className="flex min-w-0 flex-wrap items-center gap-2 *:min-w-0">
           {!hideTitleOnPage && (
             <h2 className="text-2xl leading-tight">{title}</h2>

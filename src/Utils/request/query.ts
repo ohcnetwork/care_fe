@@ -197,3 +197,93 @@ const paginatedQuery = <
   };
 };
 query.paginated = paginatedQuery;
+
+/**
+ * Default page size for {@link query.infinite}.
+ */
+export const DEFAULT_INFINITE_PAGE_SIZE = 20;
+
+/**
+ * Computes the offset of the next page for limit-offset pagination.
+ *
+ * The next offset is the last offset plus the number of items that the
+ * server actually returned, so it stays correct even if the server returns
+ * fewer items than the requested `limit`. An empty page stops the pagination,
+ * so an inconsistent `count` cannot cause an endless loop of requests.
+ */
+function getNextOffset(
+  lastPage: PaginatedResponse<unknown>,
+  _allPages: unknown,
+  lastOffset: number,
+) {
+  const nextOffset = lastOffset + lastPage.results.length;
+  return lastPage.results.length > 0 && nextOffset < lastPage.count
+    ? nextOffset
+    : undefined;
+}
+
+/**
+ * Creates the TanStack Query infinite query options (`queryFn`,
+ * `initialPageParam` and `getNextPageParam`) for a limit-offset paginated
+ * route. Spread the result into `useInfiniteQuery` or
+ * {@link import("@/hooks/useInfiniteList").useInfiniteList}.
+ *
+ * The `limit` and `offset` query params are set for each page. Do not pass
+ * them in `queryParams`.
+ *
+ * Set `debounceInterval` to debounce the first page (for example, for search
+ * inputs). The next pages are fetched without delay.
+ *
+ * Example:
+ * ```tsx
+ * const { data, ref } = useInfiniteList({
+ *   queryKey: ["users", search],
+ *   ...query.infinite(userApi.list, {
+ *     queryParams: { search_text: search },
+ *     pageSize: 15,
+ *     debounceInterval: 500,
+ *   }),
+ * });
+ * ```
+ */
+const infiniteQuery = <
+  Route extends ApiRoute<PaginatedResponse<unknown>, unknown>,
+>(
+  route: Route,
+  options?: ApiCallOptions<Route> & {
+    pageSize?: number;
+    debounceInterval?: number;
+  },
+) => {
+  const {
+    pageSize = DEFAULT_INFINITE_PAGE_SIZE,
+    debounceInterval,
+    ...apiOptions
+  } = options ?? {};
+
+  return {
+    initialPageParam: 0,
+    queryFn: async ({
+      pageParam,
+      signal,
+    }: {
+      pageParam: number;
+      signal: AbortSignal;
+    }): Promise<Route["TRes"]> => {
+      if (debounceInterval && pageParam === 0) {
+        await sleep(debounceInterval);
+      }
+      return callApi(route, {
+        ...apiOptions,
+        signal,
+        queryParams: {
+          ...apiOptions.queryParams,
+          limit: pageSize,
+          offset: pageParam,
+        },
+      } as ApiCallOptions<Route>);
+    },
+    getNextPageParam: getNextOffset,
+  };
+};
+query.infinite = infiniteQuery;
