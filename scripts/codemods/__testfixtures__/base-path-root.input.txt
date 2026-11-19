@@ -1,0 +1,9 @@
+import { Link } from "raviger";
+
+export function BasePath({ facilityId }: { facilityId: string }) {
+  return (
+    <Link basePath="/" href={`/facility/${facilityId}/settings/devices/create`} className="x">
+      New
+    </Link>
+  );
+}

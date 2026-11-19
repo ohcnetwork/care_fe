@@ -1,0 +1,17 @@
+import { Link, navigate } from "raviger";
+
+interface Props {
+  facilityId: string;
+  slug?: string;
+  count: number;
+  tab: "updates" | "notes";
+}
+
+export function Typed({ facilityId, slug, count, tab }: Props) {
+  navigate(`/facility/${facilityId}/settings/devices/${slug}`);
+  navigate(`/facility/${facilityId}/settings/devices/${count}`);
+  navigate(`/facility/${facilityId}/settings/devices/${slug ?? ""}`);
+  if (slug) navigate(`/facility/${facilityId}/settings/devices/${slug}`);
+  navigate(`/patient/${facilityId}/${tab}`);
+  return <Link href={`/facility/${facilityId}/settings/devices/${slug}`}>Device</Link>;
+}

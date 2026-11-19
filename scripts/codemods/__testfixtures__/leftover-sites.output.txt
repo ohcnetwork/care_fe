@@ -1,0 +1,17 @@
+import { Link } from "@tanstack/react-router";
+import { navigate } from "@/lib/router/navigate";
+import { Link as RavigerLink, navigate as ravigerNavigate, useNavigate } from "raviger";
+
+export function Leftover({ facilityId, back }: { facilityId: string; back: string }) {
+  const handlers = { navigate: ravigerNavigate };
+  const run = (go: typeof ravigerNavigate) => go("/licenses");
+  return (
+    <div>
+      <Link to="/facility/$facilityId/settings" params={{ facilityId }}>Settings</Link>
+      <RavigerLink href="devices/create">Relative</RavigerLink>
+      <button onClick={() => navigate({ to: "/login" })}>Login</button>
+      <button onClick={() => ravigerNavigate(back)}>Back</button>
+      <button onClick={handlers.navigate as never} onBlur={() => run(ravigerNavigate)} />
+    </div>
+  );
+}

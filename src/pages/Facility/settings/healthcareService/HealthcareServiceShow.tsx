@@ -1,7 +1,7 @@
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import duoToneIcons from "@/CAREUI/icons/DuoTonePaths.json";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { usePermissions } from "@/context/PermissionContext";
+import { navigate } from "@/lib/router/navigate";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 import mutate from "@/Utils/request/mutate";
@@ -67,7 +68,10 @@ export default function SettingsHealthcareServiceShow({
     onSuccess: () => {
       queryClient.clear();
       toast.success(t("healthcare_service_deleted_successfully"));
-      navigate(`/facility/${facilityId}/settings/healthcare_services`);
+      navigate({
+        to: "/facility/$facilityId/settings/healthcare_services",
+        params: { facilityId },
+      });
     },
   });
 
@@ -137,9 +141,10 @@ export default function SettingsHealthcareServiceShow({
             )}
             <Button
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/healthcare_services/${healthcareServiceId}/edit`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/settings/healthcare_services/$id/edit",
+                  params: { facilityId, id: healthcareServiceId },
+                })
               }
             >
               {t("edit")}

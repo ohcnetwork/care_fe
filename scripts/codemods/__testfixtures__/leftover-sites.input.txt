@@ -1,0 +1,15 @@
+import { Link, navigate, useNavigate } from "raviger";
+
+export function Leftover({ facilityId, back }: { facilityId: string; back: string }) {
+  const handlers = { navigate };
+  const run = (go: typeof navigate) => go("/licenses");
+  return (
+    <div>
+      <Link href={`/facility/${facilityId}/settings`}>Settings</Link>
+      <Link href="devices/create">Relative</Link>
+      <button onClick={() => navigate("/login")}>Login</button>
+      <button onClick={() => navigate(back)}>Back</button>
+      <button onClick={handlers.navigate as never} onBlur={() => run(navigate)} />
+    </div>
+  );
+}

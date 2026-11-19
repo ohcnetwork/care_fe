@@ -1,0 +1,18 @@
+import { navigate } from "@/lib/router/navigate";
+import { Link, navigate as ravigerNavigate } from "raviger";
+
+interface Props {
+  facilityId: string;
+  slug?: string;
+  count: number;
+  tab: "updates" | "notes";
+}
+
+export function Typed({ facilityId, slug, count, tab }: Props) {
+  ravigerNavigate(`/facility/${facilityId}/settings/devices/${slug}`);
+  ravigerNavigate(`/facility/${facilityId}/settings/devices/${count}`);
+  navigate({ to: "/facility/$facilityId/settings/devices/$id", params: { facilityId, id: slug ?? "" } });
+  if (slug) navigate({ to: "/facility/$facilityId/settings/devices/$id", params: { facilityId, id: slug } });
+  navigate({ to: "/patient/$id/$tab", params: { id: facilityId, tab } });
+  return <Link href={`/facility/${facilityId}/settings/devices/${slug}`}>Device</Link>;
+}

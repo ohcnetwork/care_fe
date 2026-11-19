@@ -1,0 +1,11 @@
+import { Link, navigate, useQueryParams, usePath } from "raviger";
+
+export function Mixed({ facilityId }: { facilityId: string }) {
+  const [{ tab }] = useQueryParams();
+  const path = usePath();
+  return (
+    <Link href={`/facility/${facilityId}/settings`} onClick={() => navigate("/login")}>
+      {tab} {path}
+    </Link>
+  );
+}

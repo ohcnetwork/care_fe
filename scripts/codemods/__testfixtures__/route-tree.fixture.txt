@@ -1,0 +1,36 @@
+// A small copy of the generated route tree format. The codemod reads only
+// the `FileRoutesByTo` and `FileRoutesById` interfaces.
+export interface FileRoutesByTo {
+  "/": typeof IndexRoute;
+  "/licenses": typeof LicensesRoute;
+  "/login": typeof PublicLoginRoute;
+  "/patient/$id/$tab": typeof PatientIdTabRoute;
+  "/$": typeof AppLegacySplatRoute;
+  "/admin": typeof AppLegacyAdminRouteWithChildren;
+  "/facility/$facilityId/template": typeof AppLegacyFacilityFacilityIdTemplateRoute;
+  "/facility/$facilityId/settings": typeof AppFacilityFacilityIdSettingsIndexRoute;
+  "/facility/$facilityId/settings/$": typeof AppFacilityFacilityIdSettingsSplatRoute;
+  "/facility/$facilityId/settings/devices": typeof AppFacilityFacilityIdSettingsDevicesIndexRoute;
+  "/facility/$facilityId/settings/devices/$id": typeof AppFacilityFacilityIdSettingsDevicesIdIndexRoute;
+  "/facility/$facilityId/settings/devices/create": typeof AppFacilityFacilityIdSettingsDevicesCreateRoute;
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport;
+  "/": typeof IndexRoute;
+  "/_app": typeof AppRouteWithChildren;
+  "/_public": typeof PublicRouteWithChildren;
+  "/licenses": typeof LicensesRoute;
+  "/_app/_legacy": typeof AppLegacyRouteWithChildren;
+  "/_public/login": typeof PublicLoginRoute;
+  "/patient/$id/$tab": typeof PatientIdTabRoute;
+  "/_app/_legacy/$": typeof AppLegacySplatRoute;
+  "/_app/_legacy/admin": typeof AppLegacyAdminRouteWithChildren;
+  "/_app/_legacy/facility/$facilityId/template": typeof AppLegacyFacilityFacilityIdTemplateRoute;
+  "/_app/facility/$facilityId/settings": typeof AppFacilityFacilityIdSettingsRouteRouteWithChildren;
+  "/_app/facility/$facilityId/settings/$": typeof AppFacilityFacilityIdSettingsSplatRoute;
+  "/_app/facility/$facilityId/settings/": typeof AppFacilityFacilityIdSettingsIndexRoute;
+  "/_app/facility/$facilityId/settings/devices": typeof AppFacilityFacilityIdSettingsDevicesRouteWithChildren;
+  "/_app/facility/$facilityId/settings/devices/": typeof AppFacilityFacilityIdSettingsDevicesIndexRoute;
+  "/_app/facility/$facilityId/settings/devices/$id": typeof AppFacilityFacilityIdSettingsDevicesIdIndexRoute;
+  "/_app/facility/$facilityId/settings/devices/create": typeof AppFacilityFacilityIdSettingsDevicesCreateRoute;
+}

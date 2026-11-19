@@ -1,0 +1,8 @@
+import { Link, navigate, useRoutes } from "raviger";
+
+const routes = { "/": () => <Link href="/login">Login</Link> };
+
+export function Nested() {
+  navigate("/licenses");
+  return useRoutes(routes, { basePath: "/facility/1" });
+}

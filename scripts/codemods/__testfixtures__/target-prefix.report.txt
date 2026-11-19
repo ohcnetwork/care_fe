@@ -1,0 +1,3 @@
+4 navigate skipped outside-target-scope (/login)
+7 link skipped outside-target-scope (/licenses)
+8 link converted /facility/$facilityId/settings/devices/create

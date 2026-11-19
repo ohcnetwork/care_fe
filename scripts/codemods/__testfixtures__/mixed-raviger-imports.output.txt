@@ -1,0 +1,16 @@
+import { Link } from "@tanstack/react-router";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams, usePath } from "raviger";
+
+export function Mixed({ facilityId }: { facilityId: string }) {
+  const [{ tab }] = useQueryParams();
+  const path = usePath();
+  return (
+    <Link
+      to="/facility/$facilityId/settings"
+      params={{ facilityId }}
+      onClick={() => navigate({ to: "/login" })}>
+      {tab} {path}
+    </Link>
+  );
+}

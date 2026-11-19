@@ -1,0 +1,12 @@
+import { Link as RouterLink } from "@tanstack/react-router";
+import { Link } from "@/components/ui/link";
+import { navigate } from "@/lib/router/navigate";
+
+export function Conflict({ facilityId }: { facilityId: string }) {
+  return (
+    <Link href="/x">
+      <RouterLink to="/facility/$facilityId/settings" params={{ facilityId }}>Settings</RouterLink>
+      <button onClick={() => navigate({ to: "/login" })} />
+    </Link>
+  );
+}

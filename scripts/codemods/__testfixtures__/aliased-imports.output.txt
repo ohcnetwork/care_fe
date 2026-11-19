@@ -1,0 +1,12 @@
+import { Link } from "@tanstack/react-router";
+import { navigate } from "@/lib/router/navigate";
+
+export function Aliased({ facilityId }: { facilityId: string }) {
+  return (
+    <Link
+      to="/facility/$facilityId/settings"
+      params={{ facilityId }}
+      onClick={() => navigate({ to: "/licenses", replace: true })}>Settings
+          </Link>
+  );
+}

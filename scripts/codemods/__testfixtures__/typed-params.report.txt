@@ -1,0 +1,6 @@
+11 navigate skipped param-type-not-string (id: string | undefined)
+12 navigate skipped param-type-not-string (id: number)
+13 navigate converted /facility/$facilityId/settings/devices/$id
+14 navigate converted /facility/$facilityId/settings/devices/$id
+15 navigate converted /patient/$id/$tab
+16 link skipped param-type-not-string (id: string | undefined)

@@ -1,0 +1,11 @@
+import { Link as RavigerLink, navigate } from "raviger";
+import { Link } from "@/components/ui/link";
+
+export function Conflict({ facilityId }: { facilityId: string }) {
+  return (
+    <Link href="/x">
+      <RavigerLink href={`/facility/${facilityId}/settings`}>Settings</RavigerLink>
+      <button onClick={() => navigate("/login")} />
+    </Link>
+  );
+}

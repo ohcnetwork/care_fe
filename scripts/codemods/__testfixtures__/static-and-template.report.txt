@@ -1,0 +1,2 @@
+6 link converted /licenses
+9 link converted /facility/$facilityId/settings/devices/$id

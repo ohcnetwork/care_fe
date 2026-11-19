@@ -1,0 +1,12 @@
+import { Link, navigate } from "raviger";
+
+export function Literal({ id }: { id: string }) {
+  navigate(`/patient/${id}/updates`);
+  return (
+    <div>
+      <Link href={`/patient/${id}/updates`}>Updates</Link>
+      <Link href="/facility/abc/settings">Fixed facility</Link>
+      <Link href={`/patient/${id}/up dates`}>Not plain</Link>
+    </div>
+  );
+}
