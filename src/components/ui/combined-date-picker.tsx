@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { useState } from "react";
-import "react-day-picker/style.css";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";

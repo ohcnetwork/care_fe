@@ -1,0 +1,611 @@
+import {
+  addMonths,
+  differenceInCalendarDays,
+  format,
+  isSameMonth,
+  isValid,
+  parse,
+  startOfDay,
+  startOfMonth,
+  subDays,
+} from "date-fns";
+import {
+  CalendarIcon,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from "lucide-react";
+import { useId, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import FilterHeader from "@/components/ui/multi-filter/filterHeader";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+
+export interface DateRangeValue {
+  from?: Date;
+  to?: Date;
+}
+
+export interface DateRangePickerProps {
+  variant?: "panel" | "popover";
+  value?: DateRangeValue;
+  onApply: (range: DateRangeValue) => void;
+  minDate?: Date;
+  maxDate?: Date;
+  allowOpenEnded?: boolean;
+  title?: string;
+  onBack?: () => void;
+  placeholder?: string;
+  className?: string;
+}
+
+type Edge = "from" | "to";
+type FieldText = Record<Edge, string>;
+
+const fieldDate = (date?: Date) => (date ? format(date, "dd/MM/yyyy") : "");
+const localDate = (date?: Date) =>
+  date && isValid(date) ? startOfDay(date) : undefined;
+
+function parseDate(text: string): Date | undefined {
+  const value = text.trim().toLowerCase();
+  if (value === "t" || value === "today") return startOfDay(new Date());
+  if (value === "y" || value === "yesterday") {
+    return startOfDay(subDays(new Date(), 1));
+  }
+  const patterns = [
+    { expression: /^\d{1,2}\/\d{1,2}\/\d{4}$/, pattern: "d/M/yyyy" },
+    { expression: /^\d{1,2}-\d{1,2}-\d{4}$/, pattern: "d-M-yyyy" },
+    { expression: /^\d{1,2}\.\d{1,2}\.\d{4}$/, pattern: "d.M.yyyy" },
+    { expression: /^\d{8}$/, pattern: "ddMMyyyy" },
+    { expression: /^\d{1,2}\/\d{1,2}\/\d{2}$/, pattern: "d/M/yy" },
+    { expression: /^\d{1,2}-\d{1,2}-\d{2}$/, pattern: "d-M-yy" },
+    { expression: /^\d{1,2}\.\d{1,2}\.\d{2}$/, pattern: "d.M.yy" },
+    { expression: /^\d{6}$/, pattern: "ddMMyy" },
+  ];
+  for (const { expression, pattern } of patterns) {
+    if (!expression.test(value)) continue;
+    const date = parse(value, pattern, new Date());
+    if (isValid(date) && date.getFullYear() >= 1900) return startOfDay(date);
+  }
+  return undefined;
+}
+
+function maskDate(next: string, previous: string) {
+  if (previous.endsWith("/") && next === `${previous}/`) return previous;
+  if (next.length <= previous.length) return next;
+  if (/^\d{2}$/.test(next) || /^\d{2}\/\d{2}$/.test(next)) {
+    return `${next}/`;
+  }
+  if (/^\d{8}$/.test(next)) {
+    return `${next.slice(0, 2)}/${next.slice(2, 4)}/${next.slice(4)}`;
+  }
+  return next;
+}
+
+function hasFullYear(text: string) {
+  return (
+    /^\d{1,2}[/.-]\d{1,2}[/.-]\d{4}$/.test(text) || /^\d{8}$/.test(text)
+  );
+}
+
+function rangeText(
+  range: DateRangeValue,
+  dateLabel: (date: Date, year?: boolean) => string,
+) {
+  if (!range.from || !range.to) return "";
+  return `${dateLabel(range.from, range.from.getFullYear() !== range.to.getFullYear())} – ${dateLabel(range.to)}`;
+}
+
+/** A local-date range editor. Drafts are applied explicitly, never on dismissal. */
+export function DateRangePicker({
+  variant = "popover",
+  className,
+  ...props
+}: DateRangePickerProps) {
+  const { t, i18n } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const dateLabel = (date: Date, year = true) =>
+    new Intl.DateTimeFormat(i18n.language, {
+      day: "numeric",
+      month: "short",
+      ...(year ? { year: "numeric" } : {}),
+    }).format(date);
+  const { from, to } = props.value ?? {};
+  const label =
+    from && to
+      ? rangeText({ from, to }, dateLabel)
+      : from
+        ? t("date_range_on_or_after", { date: dateLabel(from) })
+        : to
+          ? t("date_range_on_or_before", { date: dateLabel(to) })
+          : (props.placeholder ?? t("select_date_range"));
+  const panel = (
+    <RangePanel
+      key={`${from?.getTime() ?? ""}:${to?.getTime() ?? ""}:${props.minDate?.getTime() ?? ""}:${props.maxDate?.getTime() ?? ""}`}
+      {...props}
+      className={variant === "panel" ? className : undefined}
+      onApply={(range) => {
+        props.onApply(range);
+        setOpen(false);
+      }}
+    />
+  );
+  if (variant === "panel") return panel;
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className={cn(
+            "max-w-full justify-start font-normal",
+            !from && !to && "text-muted-foreground",
+            className,
+          )}
+        >
+          <CalendarIcon aria-hidden="true" className="size-4 shrink-0" />
+          <span className="truncate">{label}</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        ref={contentRef}
+        align="start"
+        initialFocus={() =>
+          contentRef.current?.querySelector<HTMLInputElement>(
+            `input[data-range-edge="${from || to ? "to" : "from"}"]`,
+          ) ?? false
+        }
+        className="max-h-(--available-height) w-80 max-w-[calc(100vw-1rem)] gap-0 overflow-y-auto p-0"
+      >
+        {open && panel}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function RangePanel({
+  value,
+  onApply,
+  minDate,
+  maxDate,
+  allowOpenEnded = true,
+  title,
+  onBack,
+  className,
+}: Omit<DateRangePickerProps, "variant" | "placeholder">) {
+  const { t, i18n } = useTranslation();
+  const id = useId();
+  const fromRef = useRef<HTMLInputElement>(null);
+  const toRef = useRef<HTMLInputElement>(null);
+  const applyRef = useRef<HTMLButtonElement>(null);
+  const captionRef = useRef<HTMLButtonElement>(null);
+  const initial = { from: localDate(value?.from), to: localDate(value?.to) };
+  const [range, setRange] = useState<DateRangeValue>(initial);
+  const [text, setText] = useState<FieldText>({
+    from: fieldDate(initial.from),
+    to: fieldDate(initial.to),
+  });
+  const [errors, setErrors] = useState<FieldText>({ from: "", to: "" });
+  const [activeEdge, setActiveEdge] = useState<Edge>(
+    initial.from || initial.to ? "to" : "from",
+  );
+  const [hovered, setHovered] = useState<Date>();
+  const minimum = minDate?.getTime();
+  const maximum = maxDate?.getTime();
+  const bounds = useMemo(
+    () => ({
+      min: localDate(minimum === undefined ? undefined : new Date(minimum)),
+      max: localDate(maximum === undefined ? undefined : new Date(maximum)),
+    }),
+    [minimum, maximum],
+  );
+  const today = startOfDay(new Date());
+  const firstMonth = startOfMonth(bounds.min ?? new Date(1900, 0, 1));
+  const lastMonth = bounds.max && startOfMonth(bounds.max);
+  const clampMonth = (date: Date) => {
+    const month = startOfMonth(date);
+    if (month < firstMonth) return firstMonth;
+    if (lastMonth && month > lastMonth) return lastMonth;
+    return month;
+  };
+  const [month, setMonth] = useState(() =>
+    clampMonth(initial.from ?? initial.to ?? today),
+  );
+  const [monthView, setMonthView] = useState(false);
+  const [year, setYear] = useState(month.getFullYear());
+
+  const dateLabel = (date: Date, includeYear = true) =>
+    new Intl.DateTimeFormat(i18n.language, {
+      day: "numeric",
+      month: "short",
+      ...(includeYear ? { year: "numeric" } : {}),
+    }).format(date);
+  const validate = (input: string) => {
+    if (!input.trim()) return "";
+    const date = parseDate(input);
+    if (!date) return t("date_format_hint_dd_mm_yyyy");
+    if (bounds.min && date < bounds.min) {
+      return t("date_range_before_min", { date: dateLabel(bounds.min) });
+    }
+    if (bounds.max && date > bounds.max) {
+      return t("date_range_after_max", { date: dateLabel(bounds.max) });
+    }
+    return "";
+  };
+  const updateRange = (next: DateRangeValue) => {
+    setRange(next);
+    setText({ from: fieldDate(next.from), to: fieldDate(next.to) });
+    setErrors({ from: "", to: "" });
+    setHovered(undefined);
+  };
+  const commit = (edge: Edge, input: string) => {
+    const error = validate(input);
+    setErrors((previous) => ({ ...previous, [edge]: error }));
+    if (error) return false;
+    const date = parseDate(input);
+    let next = { ...range, [edge]: date };
+    if (next.from && next.to && next.to < next.from) {
+      next = { from: next.to, to: next.from };
+    }
+    setRange(next);
+    setText((previous) => ({
+      ...previous,
+      [edge]: fieldDate(next[edge]),
+      ...(next.from !== range.from && edge === "to"
+        ? { from: fieldDate(next.from) }
+        : {}),
+      ...(next.to !== range.to && edge === "from"
+        ? { to: fieldDate(next.to) }
+        : {}),
+    }));
+    if (date) setMonth(clampMonth(date));
+    return true;
+  };
+  const handleDay = (day: Date) => {
+    const date = startOfDay(day);
+    if (activeEdge === "from") {
+      updateRange({
+        from: date,
+        to: range.to && range.to >= date ? range.to : undefined,
+      });
+      setActiveEdge("to");
+      toRef.current?.focus({ preventScroll: true });
+    } else if (range.from && date < range.from) {
+      updateRange({ from: date, to: range.to });
+    } else {
+      updateRange({ ...range, to: date });
+      applyRef.current?.focus({ preventScroll: true });
+    }
+  };
+  const parsedRange = {
+    from: parseDate(text.from),
+    to: parseDate(text.to),
+  };
+  const canApply =
+    !errors.from &&
+    !errors.to &&
+    !validate(text.from) &&
+    !validate(text.to) &&
+    (allowOpenEnded
+      ? !!(parsedRange.from || parsedRange.to)
+      : !!(parsedRange.from && parsedRange.to));
+  const summary =
+    range.from && range.to
+      ? rangeText(range, dateLabel)
+      : range.from
+        ? t("date_range_on_or_after", { date: dateLabel(range.from) })
+        : range.to
+          ? t("date_range_on_or_before", { date: dateLabel(range.to) })
+          : t("pick_start_date");
+  const preview =
+    activeEdge === "to" && range.from && hovered
+      ? {
+          from: range.from < hovered ? range.from : hovered,
+          to: range.from < hovered ? hovered : range.from,
+        }
+      : undefined;
+  const disabled = [
+    { before: bounds.min ?? new Date(1900, 0, 1) },
+    ...(bounds.max ? [{ after: bounds.max }] : []),
+  ];
+  const closeMonths = (date: Date) => {
+    setMonth(date);
+    setMonthView(false);
+    captionRef.current?.focus({ preventScroll: true });
+  };
+
+  return (
+    <div
+      data-slot="date-range-picker"
+      className={cn(
+        "flex w-80 max-w-full flex-col bg-background text-foreground",
+        className,
+      )}
+      onKeyDown={(event) => {
+        if (event.key !== "Escape") event.stopPropagation();
+      }}
+    >
+      {onBack ? (
+        <FilterHeader label={title ?? t("custom_date_range")} onBack={onBack} />
+      ) : title ? (
+        <div className="border-b px-3 py-2 text-sm font-medium">{title}</div>
+      ) : null}
+      <div className="grid grid-cols-2 gap-2 px-3 pt-3">
+        {(["from", "to"] as const).map((edge) => (
+          <div key={edge} className="min-w-0">
+            <label
+              htmlFor={`${id}-${edge}`}
+              className="mb-1 block text-xs font-medium text-muted-foreground"
+            >
+              {t(edge === "from" ? "start_date" : "end_date")}
+            </label>
+            <div className="relative">
+              <input
+                ref={edge === "from" ? fromRef : toRef}
+                id={`${id}-${edge}`}
+                type="text"
+                data-range-edge={edge}
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder={t("date_placeholder_dd_mm_yyyy")}
+                aria-invalid={!!errors[edge]}
+                aria-describedby={errors[edge] ? `${id}-${edge}-error` : undefined}
+                value={text[edge]}
+                className={cn(
+                  "h-10 w-full min-w-0 rounded-md border border-input bg-background ps-2 pe-7 text-sm tabular-nums outline-none focus:border-primary focus:ring-2 focus:ring-primary/20",
+                  activeEdge === edge && "border-primary ring-2 ring-primary/20",
+                  errors[edge] && "border-destructive",
+                )}
+                onFocus={() => setActiveEdge(edge)}
+                onChange={(event) => {
+                  const next = maskDate(event.target.value, text[edge]);
+                  setText((previous) => ({ ...previous, [edge]: next }));
+                  setErrors((previous) => ({ ...previous, [edge]: "" }));
+                  if (hasFullYear(next) || !next) commit(edge, next);
+                }}
+                onBlur={(event) => commit(edge, event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter") return;
+                  event.preventDefault();
+                  if (!commit(edge, event.currentTarget.value)) return;
+                  if (edge === "from") {
+                    setActiveEdge("to");
+                    toRef.current?.focus();
+                  } else {
+                    applyRef.current?.focus();
+                  }
+                }}
+              />
+              {text[edge] && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute inset-y-1 end-0.5 h-8 w-6 p-0"
+                  aria-label={`${t("clear")} ${t(edge === "from" ? "start_date" : "end_date")}`}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => {
+                    commit(edge, "");
+                    setHovered(undefined);
+                    setActiveEdge(edge);
+                    (edge === "from" ? fromRef : toRef).current?.focus();
+                  }}
+                >
+                  <X aria-hidden="true" className="size-3.5" />
+                </Button>
+              )}
+            </div>
+            {errors[edge] && (
+              <p
+                id={`${id}-${edge}-error`}
+                className="mt-1 text-xs text-destructive"
+              >
+                {errors[edge]}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-1 px-3 pt-2">
+        <Button
+          ref={captionRef}
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="min-w-0 gap-1 px-1 text-sm font-medium"
+          aria-expanded={monthView}
+          aria-controls={`${id}-calendar`}
+          onClick={() => {
+            setYear(month.getFullYear());
+            setMonthView(!monthView);
+          }}
+        >
+          <span className="truncate">
+            {new Intl.DateTimeFormat(i18n.language, {
+              month: "long",
+              year: "numeric",
+            }).format(month)}
+          </span>
+          <ChevronDown aria-hidden="true" className="size-3.5" />
+        </Button>
+        <div className="ms-auto flex shrink-0 items-center">
+          {!isSameMonth(month, today) && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 px-1 text-xs underline underline-offset-4"
+              onClick={() => closeMonths(clampMonth(today))}
+            >
+              {t("today")}
+            </Button>
+          )}
+          {!monthView &&
+            ([-1, 1] as const).map((direction) => {
+              const next = addMonths(month, direction);
+              return (
+                <Button
+                  key={direction}
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-7 p-0"
+                  aria-label={t(
+                    direction === -1 ? "previous_month" : "next_month",
+                  )}
+                  disabled={
+                    next < firstMonth || !!(lastMonth && next > lastMonth)
+                  }
+                  onClick={() => {
+                    setMonth(next);
+                    setHovered(undefined);
+                  }}
+                >
+                  {direction === -1 ? (
+                    <ChevronLeft aria-hidden="true" />
+                  ) : (
+                    <ChevronRight aria-hidden="true" />
+                  )}
+                </Button>
+              );
+            })}
+        </div>
+      </div>
+      <div id={`${id}-calendar`} onMouseLeave={() => setHovered(undefined)}>
+        {monthView ? (
+          <div className="flex h-[17.5rem] flex-col gap-2 px-3 pb-2">
+            <div className="flex items-center justify-between">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-label={t("previous_year")}
+                disabled={year <= firstMonth.getFullYear()}
+                onClick={() => setYear(year - 1)}
+              >
+                <ChevronLeft aria-hidden="true" />
+              </Button>
+              <span className="text-sm font-medium tabular-nums">{year}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-label={t("next_year")}
+                disabled={!!lastMonth && year >= lastMonth.getFullYear()}
+                onClick={() => setYear(year + 1)}
+              >
+                <ChevronRight aria-hidden="true" />
+              </Button>
+            </div>
+            <div className="grid flex-1 grid-cols-3 grid-rows-4 gap-2">
+              {Array.from({ length: 12 }, (_, index) => {
+                const date = new Date(year, index, 1);
+                const shown = isSameMonth(date, month);
+                const current = isSameMonth(date, today);
+                const containsEdge = [range.from, range.to].some(
+                  (edge) => edge && isSameMonth(edge, date),
+                );
+                return (
+                  <Button
+                    key={index}
+                    type="button"
+                    variant={shown ? "primary" : current ? "outline" : "ghost"}
+                    size="sm"
+                    className="relative h-full min-w-0 px-1 font-normal"
+                    aria-pressed={shown}
+                    disabled={
+                      date < firstMonth || !!(lastMonth && date > lastMonth)
+                    }
+                    onClick={() => closeMonths(date)}
+                  >
+                    {new Intl.DateTimeFormat(i18n.language, {
+                      month: "short",
+                    }).format(date)}
+                    {containsEdge && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute bottom-1 size-1 rounded-full bg-current"
+                      />
+                    )}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <Calendar
+            mode="range"
+            month={month}
+            onMonthChange={setMonth}
+            selected={{ from: range.from, to: range.to }}
+            onDayClick={(day, modifiers) => {
+              if (!modifiers.disabled) handleDay(day);
+            }}
+            onDayMouseEnter={(day, modifiers) => {
+              if (!modifiers.disabled) setHovered(startOfDay(day));
+            }}
+            disabled={disabled}
+            startMonth={bounds.min}
+            endMonth={bounds.max}
+            numberOfMonths={1}
+            fixedWeeks
+            hideNavigation
+            showYearSwitcher={false}
+            monthCaptionClassName="hidden"
+            monthGridClassName="mt-0"
+            weekClassName="mt-0"
+            weekdaysClassName="h-8 items-center"
+            className="w-full px-3 pt-0 pb-2 [--cell-size:--spacing(10)]"
+            modifiers={{
+              preview: (day) =>
+                !!preview && day >= preview.from && day <= preview.to,
+            }}
+            modifiersClassNames={{ preview: "bg-primary/10" }}
+          />
+        )}
+      </div>
+      <div className="sticky bottom-0 z-10 flex shrink-0 items-center gap-2 border-t bg-background p-3">
+        <div aria-live="polite" className="min-w-0 flex-1 text-xs">
+          <div>{summary}</div>
+          {range.from && range.to ? (
+            <div className="mt-0.5 text-muted-foreground">
+              {t("count_days", {
+                count: differenceInCalendarDays(range.to, range.from) + 1,
+              })}
+            </div>
+          ) : range.from ? (
+            <div className="mt-0.5 text-muted-foreground">{t("pick_end_date")}</div>
+          ) : null}
+        </div>
+        <Button
+          ref={applyRef}
+          type="button"
+          variant="primary"
+          size="sm"
+          disabled={!canApply}
+          onClick={() => {
+            const fromError = validate(text.from);
+            const toError = validate(text.to);
+            setErrors({ from: fromError, to: toError });
+            if (fromError || toError || !canApply) return;
+            onApply(
+              parsedRange.from &&
+                parsedRange.to &&
+                parsedRange.from > parsedRange.to
+                ? { from: parsedRange.to, to: parsedRange.from }
+                : parsedRange,
+            );
+          }}
+        >
+          {t("apply")}
+        </Button>
+      </div>
+    </div>
+  );
+}

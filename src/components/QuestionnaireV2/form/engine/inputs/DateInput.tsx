@@ -1,5 +1,3 @@
-import "react-day-picker/style.css";
-
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";

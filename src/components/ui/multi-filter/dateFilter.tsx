@@ -1,16 +1,12 @@
-import { format, isBefore, isSameDay, isValid } from "date-fns";
+import { format, isSameDay, isValid } from "date-fns";
 import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
-import { parseLocalDate } from "@/Utils/utils";
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,130 +25,6 @@ import {
   isSameDateRange,
   longDateRangeOptions,
 } from "./utils/Utils";
-
-function CustomDateRange({
-  dateFrom,
-  dateTo,
-  setDateFrom,
-  setDateTo,
-  handleDateChange,
-  onFilterChange,
-  filter,
-  setView,
-}: {
-  dateFrom: Date | undefined;
-  dateTo: Date | undefined;
-  setDateFrom: (date: Date | undefined) => void;
-  setDateTo: (date: Date | undefined) => void;
-  handleDateChange: (date: { from?: Date; to?: Date }) => void;
-  onFilterChange: (filterKey: string, values: FilterValues) => void;
-  filter: FilterConfig;
-  setView: (view: "options" | "custom") => void;
-}) {
-  const { t } = useTranslation();
-  return (
-    <>
-      <FilterHeader
-        label={t("custom_date_range")}
-        onBack={() => setView("options")}
-      />
-      <div className="w-full flex flex-col max-h-[30vh] overflow-y-auto">
-        <Calendar
-          mode="range"
-          selected={{ from: dateFrom, to: dateTo }}
-          onSelect={(range, triggerDate) =>
-            handleDateChange(range ?? { from: triggerDate, to: undefined })
-          }
-          styles={{
-            day: {
-              width: "40px",
-            },
-            weekdays: {
-              width: "100%",
-              justifyContent: "space-between",
-            },
-            nav: {
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              padding: "0.5rem",
-            },
-          }}
-          className="w-full"
-          captionLayout="dropdown"
-          endMonth={new Date(2100, 11, 31)}
-          monthCaptionClassName="self-center"
-          rangeMiddleClassName="bg-primary/10 [&>button]:rounded-md"
-        />
-        <div className="my-2">
-          <Separator orientation="horizontal" className="bg-gray-200 h-px" />
-        </div>
-        <div className="flex flex-col gap-2 p-3 pt-0">
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block capitalize">
-              {t("from")}
-            </label>
-            <Input
-              type="date"
-              value={dateFrom ? format(dateFrom, "yyyy-MM-dd") : ""}
-              onChange={(e) => {
-                if (e.target.value) {
-                  setDateFrom(parseLocalDate(e.target.value));
-                } else {
-                  setDateFrom(undefined);
-                }
-              }}
-              placeholder={t("start_date")}
-              className="flex flex-col justify-between text-sm"
-            />
-          </div>
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block capitalize">
-              {t("to")}
-            </label>
-            <Input
-              type="date"
-              value={dateTo ? format(dateTo, "yyyy-MM-dd") : ""}
-              onChange={(e) => {
-                if (e.target.value) {
-                  setDateTo(parseLocalDate(e.target.value));
-                } else {
-                  setDateTo(undefined);
-                }
-              }}
-              placeholder={t("end_date")}
-              className="flex flex-col justify-between text-sm"
-            />
-          </div>
-        </div>
-      </div>
-      <div className="px-3 p-2">
-        <Button
-          variant="primary"
-          className="w-full justify-center"
-          onClick={() => {
-            if (dateFrom && dateTo) {
-              onFilterChange(filter.key, { from: dateFrom, to: dateTo });
-              setView("options");
-            } else if (dateFrom) {
-              onFilterChange(filter.key, { from: dateFrom, to: undefined });
-              setView("options");
-            } else if (dateTo) {
-              onFilterChange(filter.key, { from: undefined, to: dateTo });
-              setView("options");
-            }
-          }}
-          disabled={
-            (!dateFrom && !dateTo) ||
-            (dateFrom && dateTo && isBefore(dateTo, dateFrom))
-          }
-        >
-          {t("confirm")}
-        </Button>
-      </div>
-    </>
-  );
-}
 
 function DateRangeOptions({
   options,
@@ -239,58 +111,38 @@ export default function RenderDateFilter({
   handleBack?: () => void;
   defaultView?: "options" | "custom";
 }) {
-  const [dateFrom, setDateFrom] = useState<Date | undefined>(selected?.from);
-  const [dateTo, setDateTo] = useState<Date | undefined>(selected?.to);
-  const [view, setView] = useState<"options" | "custom">(
-    defaultView || "options",
-  );
-  const options =
-    (filter.meta as DateFilterMeta)?.presetOptions || longDateRangeOptions;
+  const { t } = useTranslation();
+  const [view, setView] = useState<"options" | "custom">(defaultView || "options");
+  const meta = filter.meta as DateFilterMeta;
+  const options = meta?.presetOptions || longDateRangeOptions;
 
   const handleDateRangeSelect = (option: DateRangeOption) => {
     const { from, to } = option.getDateRange();
-    setDateFrom(from);
-    setDateTo(to);
     onFilterChange(filter.key, { from, to });
   };
 
-  const handleDateChange = (date: { from?: Date; to?: Date }) => {
-    setDateFrom(date?.from);
-    setDateTo(date?.to);
-  };
-
   const isSameRange = (option: DateRangeOption) =>
-    isSameDateRange({ from: dateFrom, to: dateTo }, option.getDateRange());
+    isSameDateRange(selected, option.getDateRange());
 
   const isCustomDateRangeSelected =
     selected.from || selected.to
       ? !options.some((option) => isSameRange(option))
       : false;
 
-  // Sync from the applied filter by date value, not object identity: the
-  // parent hands over a new `selected` object on every render, which would
-  // otherwise wipe a custom range the user is still typing.
-  const selectedFrom = selected.from?.getTime();
-  const selectedTo = selected.to?.getTime();
-  useEffect(() => {
-    setDateFrom(
-      selectedFrom === undefined ? undefined : new Date(selectedFrom),
-    );
-    setDateTo(selectedTo === undefined ? undefined : new Date(selectedTo));
-  }, [selectedFrom, selectedTo]);
-
   return (
     <div className="pt-0">
       {view == "custom" ? (
-        <CustomDateRange
-          dateFrom={dateFrom}
-          dateTo={dateTo}
-          setDateFrom={setDateFrom}
-          setDateTo={setDateTo}
-          handleDateChange={handleDateChange}
-          onFilterChange={onFilterChange}
-          filter={filter}
-          setView={setView}
+        <DateRangePicker
+          variant="panel"
+          title={t("custom_date_range")}
+          onBack={() => setView("options")}
+          value={selected}
+          minDate={meta?.minDate}
+          maxDate={meta?.maxDate}
+          onApply={(range) => {
+            onFilterChange(filter.key, range);
+            setView("options");
+          }}
         />
       ) : (
         <DateRangeOptions
