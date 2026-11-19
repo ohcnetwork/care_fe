@@ -16,16 +16,12 @@ interface SpecimenCollectCardProps {
   hasDraft: boolean;
   onToggle: () => void;
   collapsed?: boolean;
-  /** Shown when the card sits among other tests' cards. */
   testName?: string;
-  /** With onCheckedChange, adds a checkbox beside the header. */
   checked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
-  /** The collection form. */
   children: ReactNode;
 }
 
-/** A pending specimen with its collection form, as on the request page. */
 export function SpecimenCollectCard({
   requirement,
   hasDraft,
@@ -64,7 +60,7 @@ export function SpecimenCollectCard({
         >
           <div className="min-w-0 m-0">
             {testName && (
-              <div className="text-sm font-semibold text-foreground">
+              <div className="text-sm font-semibold text-foreground break-words whitespace-normal">
                 {testName}
               </div>
             )}

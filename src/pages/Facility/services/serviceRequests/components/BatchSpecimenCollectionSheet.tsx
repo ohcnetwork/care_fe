@@ -33,11 +33,9 @@ interface BatchSpecimenCollectionSheetProps {
   requests: ServiceRequestReadSpec[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Called after a save, as the sheet closes. */
   onSaved?: () => void;
 }
 
-/** Collects several requests' specimens with the request page's own cards. */
 export function BatchSpecimenCollectionSheet({
   facilityId,
   requests,
@@ -71,16 +69,11 @@ function BatchSpecimenCollectionForm({
   onSaved?: () => void;
 }) {
   const { t } = useTranslation();
-  const { pending, isPreparing, isSaving, save } = useBatchSpecimenCollection(
-    facilityId,
-    requests,
-    () => {
+  const { pending, isError, isPreparing, isSaving, save } =
+    useBatchSpecimenCollection(facilityId, requests, () => {
       onSaved?.();
       onClose();
-    },
-  );
-  // Unticked cards are left for later. Unticking also collapses a card, but
-  // either can be opened or closed on its own.
+    });
   const [skipped, setSkipped] = useState<string[]>([]);
   const [collapsed, setCollapsed] = useState<string[]>([]);
   const forms = useRef(new Map<string, SpecimenFormHandle>());
@@ -106,7 +99,6 @@ function BatchSpecimenCollectionForm({
     );
     const invalid = toCollect.filter((_, index) => !specimens[index]);
     if (invalid.length) {
-      // Open every invalid card so its error shows, and go to the first.
       setCollapsed((keys) =>
         keys.filter((key) => !invalid.some((item) => item.key === key)),
       );
@@ -128,7 +120,11 @@ function BatchSpecimenCollectionForm({
       </SheetHeader>
 
       <SheetBody>
-        {isPreparing ? (
+        {isError ? (
+          <p role="alert" className="text-sm text-muted-foreground">
+            {t("error_loading_sq_or_ad")}
+          </p>
+        ) : isPreparing ? (
           <CardGridSkeleton count={2} />
         ) : !pending.length ? (
           <p className="text-sm text-muted-foreground">
@@ -189,12 +185,15 @@ function BatchSpecimenCollectionForm({
       </SheetBody>
 
       <SheetFooter>
-        {/* Passed only once ready: the print sheet ticks what it first gets. */}
+        {/* The print sheet ticks only the specimens it first gets. */}
         <MultiQRCodePrintSheet
           specimens={isPreparing ? [] : drafts}
           getLabelText={(specimen) => labels.get(specimen.id) ?? ""}
         >
-          <Button variant="outline" disabled={isPreparing || !drafts.length}>
+          <Button
+            variant="outline"
+            disabled={isError || isPreparing || !drafts.length}
+          >
             <PrinterIcon className="size-4" />
             {t("print_qr_codes")}
           </Button>
@@ -202,7 +201,7 @@ function BatchSpecimenCollectionForm({
         <Button
           variant="primary"
           onClick={handleSave}
-          disabled={isPreparing || isSaving || !toCollect.length}
+          disabled={isError || isPreparing || isSaving || !toCollect.length}
         >
           <CheckIcon className="size-4" />
           {t("mark_as_collected")}

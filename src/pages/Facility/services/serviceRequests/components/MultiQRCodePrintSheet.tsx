@@ -35,7 +35,6 @@ interface MultiQRCodePrintSheetProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   isLoading?: boolean;
-  /** The patient and the test, printed under the specimen ID. */
   getLabelText?: (specimen: SpecimenRead) => string;
 }
 

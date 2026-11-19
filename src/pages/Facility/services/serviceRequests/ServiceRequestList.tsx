@@ -348,8 +348,7 @@ export default function ServiceRequestList({
   });
 
   const serviceRequests = response?.results || [];
-  // Like the prescription queue, tests can be ticked once the list shows one
-  // patient's active requests.
+  // Specimens are collected one patient at a time.
   const selection = useServiceRequestSelection(serviceRequests, {
     enabled:
       !!qParams.patient &&

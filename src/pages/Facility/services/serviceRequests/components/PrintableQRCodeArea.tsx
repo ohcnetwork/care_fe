@@ -11,7 +11,6 @@ interface PrintableQRCodeAreaProps {
   logoSize: number;
   printSize: number;
   showDetails?: boolean;
-  /** The patient and the test, printed under the specimen ID. */
   getLabelText?: (specimen: SpecimenRead) => string;
 }
 

@@ -49,7 +49,7 @@ import { isNegative, round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 
 export interface SpecimenFormHandle {
-  /** Validates the form, showing its errors, and returns the update or null. */
+  /** Shows any errors and returns the update, or null if it's invalid. */
   collect: () => SpecimenRead | null;
 }
 
@@ -60,7 +60,6 @@ interface SpecimenFormProps {
   draftSpecimen: SpecimenRead | undefined;
   serviceRequestId: string;
   disableEdit: boolean;
-  /** For forms a parent saves together: hides Cancel and Mark as collected. */
   hideActions?: boolean;
   ref?: Ref<SpecimenFormHandle>;
 }

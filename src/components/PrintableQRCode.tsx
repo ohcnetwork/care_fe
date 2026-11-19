@@ -27,8 +27,7 @@ export function PrintableQRCode({
   // Calculate logo size as 25% of QR code size
   const logoSize = Math.floor(size * 0.25);
 
-  // Only the code being printed carries the print id, so other codes on the
-  // page don't print on top of it.
+  // Only the code being printed gets the print id, so others don't print too.
   const [isPrinting, setIsPrinting] = useState(false);
   const handlePrint = () => {
     flushSync(() => setIsPrinting(true));

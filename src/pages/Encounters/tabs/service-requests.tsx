@@ -61,7 +61,6 @@ export const EncounterServiceRequestTab = () => {
     enabled: !!facilityId,
   });
 
-  // Active requests can be ticked on the All and Active tabs.
   const selection = useServiceRequestSelection(data?.results ?? [], {
     enabled:
       canWriteClinicalData &&

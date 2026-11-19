@@ -8,7 +8,6 @@ import {
 export interface ServiceRequestSelection {
   /** True when selection is allowed and the page has an active request. */
   enabled: boolean;
-  /** Only active requests can be ticked. */
   canSelect: (request: ServiceRequestReadSpec) => boolean;
   selected: ServiceRequestReadSpec[];
   isSelected: (request: ServiceRequestReadSpec) => boolean;
@@ -17,10 +16,7 @@ export interface ServiceRequestSelection {
   setAllSelected: (selected: boolean) => void;
 }
 
-/**
- * Ticks for the active rows on one page. Rows start unticked, and the ticks
- * clear when `resetKey` (the page and filters) changes.
- */
+/** Ticks for one page's active rows, cleared when `resetKey` changes. */
 export function useServiceRequestSelection(
   requests: ServiceRequestReadSpec[],
   { enabled, resetKey }: { enabled: boolean; resetKey: string },

@@ -28,11 +28,7 @@ export interface PendingSpecimen {
 // The backend takes at most 20 requests in one batch.
 const BATCH_SIZE = 20;
 
-/**
- * Sends the requests 20 at a time, one batch after another, and returns how
- * many went through. A batch saves all or nothing, so after a failed batch
- * the earlier ones stay saved.
- */
+/** Sends the requests 20 at a time and returns how many went through. */
 async function sendInBatches(
   send: (requests: BatchRequestObject[]) => Promise<unknown>,
   requests: BatchRequestObject[],
@@ -50,10 +46,6 @@ async function sendInBatches(
   return sent;
 }
 
-/**
- * Loads requests and their activity definitions in batch requests, creates
- * missing drafts as Print All QR Codes does, and saves them, 20 to a batch.
- */
 export function useBatchSpecimenCollection(
   facilityId: string,
   requests: ServiceRequestReadSpec[],
@@ -62,7 +54,7 @@ export function useBatchSpecimenCollection(
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  // Ticks cover one page of at most 20 requests, so one batch loads them.
+  // A page has at most 20 requests, so one batch loads them.
   const ids = requests.map(({ id }) => id);
   const requestBatch = useQuery({
     queryKey: ["service_request_batch", facilityId, ids],
@@ -72,9 +64,10 @@ export function useBatchSpecimenCollection(
         pathParams: { facilityId, serviceRequestId: id },
         referenceId: id,
       })),
+      { silent: true },
     ),
     enabled: ids.length > 0,
-    // Each opening loads afresh, so collected specimens never show as pending.
+    // Load afresh on each open, so collected specimens don't show as pending.
     gcTime: 0,
   });
   const loaded = (requestBatch.data?.results ?? []).flatMap(
@@ -96,6 +89,7 @@ export function useBatchSpecimenCollection(
         pathParams: { facilityId, activityDefinitionSlug: slug },
         referenceId: slug,
       })),
+      { silent: true },
     ),
     enabled: slugs.length > 0,
     gcTime: 0,
@@ -109,9 +103,9 @@ export function useBatchSpecimenCollection(
 
   const isLoading = requestBatch.isLoading || definitionBatch.isLoading;
   const isFetching = requestBatch.isFetching || definitionBatch.isFetching;
+  const isError = requestBatch.isError || definitionBatch.isError;
 
-  // As on the request page, a requirement is pending until a specimen for it
-  // is available, and each specimen fills one requirement.
+  // A requirement is pending until it has its own available specimen.
   const pending: PendingSpecimen[] = loaded.flatMap((request) => {
     const definition = definitions.get(request.activity_definition?.slug ?? "");
     const used = new Set<string>();
@@ -146,11 +140,10 @@ export function useBatchSpecimenCollection(
     isPending: isCreatingDrafts,
     isError: draftsFailed,
   } = useBatchRequest({
-    // After each batch, so drafts made before a failed batch still show.
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["service_request_batch"] }),
   });
-  // Waits for fresh data, so drafts are made once and only for what's missing.
+  // Once, after fresh data loads, so only missing drafts are made.
   const draftsRequested = useRef(false);
   useEffect(() => {
     if (isFetching || !missing.length || draftsRequested.current) return;
@@ -190,7 +183,7 @@ export function useBatchSpecimenCollection(
       if (collected === specimens.length) {
         onSaved();
       } else {
-        // A later batch failed: stay open, and reload so only the rest show.
+        // A later batch failed: reload so only the unsaved cards remain.
         queryClient.invalidateQueries({ queryKey: ["service_request_batch"] });
       }
     },
@@ -198,6 +191,7 @@ export function useBatchSpecimenCollection(
 
   return {
     pending,
+    isError,
     isPreparing:
       isLoading || isCreatingDrafts || (missing.length > 0 && !draftsFailed),
     isSaving,

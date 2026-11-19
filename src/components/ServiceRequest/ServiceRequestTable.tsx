@@ -34,7 +34,6 @@ interface ServiceRequestTableProps {
   showPatientInfo?: boolean;
   readOnly?: boolean;
   onPatientClick?: (request: ServiceRequestReadSpec) => void;
-  /** Adds a checkbox to each row for collecting specimens. */
   selection?: ServiceRequestSelection;
 }
 

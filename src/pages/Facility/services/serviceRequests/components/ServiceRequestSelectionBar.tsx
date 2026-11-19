@@ -10,7 +10,6 @@ import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceReques
 import { BatchSpecimenCollectionSheet } from "./BatchSpecimenCollectionSheet";
 import { type ServiceRequestSelection } from "./useServiceRequestSelection";
 
-/** Select All and Collect Specimen, like the prescription queue's bar. */
 export function ServiceRequestSelectionBar({
   facilityId,
   selection,
