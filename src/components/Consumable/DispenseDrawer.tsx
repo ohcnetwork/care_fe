@@ -290,6 +290,7 @@ export default function DispenseDrawer({
         queryKey: ["inventory", currentLocation.id],
       });
       queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
+      queryClient.invalidateQueries({ queryKey: ["infinite-dispenseOrders"] });
 
       const chargeItems = extractChargeItemsFromBatchResponse(
         response as ChargeItemBatchResponse,
