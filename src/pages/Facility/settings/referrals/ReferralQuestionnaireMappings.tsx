@@ -21,17 +21,11 @@ import {
 } from "@/components/ui/select";
 
 import query from "@/Utils/request/query";
+import {
+  QuestionnaireMappingDraft,
+  ReferralQuestionnaireType,
+} from "@/types/emr/referral/referral";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-
-export type ReferralQuestionnaireType = "request" | "response";
-
-/** A form row while it is being edited: the form itself may not be picked yet. */
-export interface QuestionnaireMappingDraft {
-  id?: string;
-  title?: string;
-  status?: string;
-  questionnaire_type: ReferralQuestionnaireType;
-}
 
 interface Props {
   facilityId?: string;
@@ -44,8 +38,6 @@ interface Props {
   disabled?: boolean;
 }
 
-// Same row pattern as the default care team: every row lives in `value`, so
-// the parent's Save sees it, and rows without a form are flagged, not dropped.
 export function ReferralQuestionnaireMappings({
   facilityId,
   value,
@@ -58,25 +50,27 @@ export function ReferralQuestionnaireMappings({
 
   return (
     <FieldSet className="gap-3">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 flex-1 space-y-1">
-          <FieldLegend>{t("referral_configuration_forms")}</FieldLegend>
-          <FieldDescription>
-            {t("referral_configuration_forms_help")}
-          </FieldDescription>
+      <div className="space-y-1">
+        <div className="flex items-center justify-between gap-3">
+          <FieldLegend variant="label" className="mb-0">
+            {t("referral_configuration_forms")}
+          </FieldLegend>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              onChange([...value, { questionnaire_type: "request" }])
+            }
+            disabled={disabled}
+          >
+            <Plus className="size-4" />
+            {t("add_form")}
+          </Button>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            onChange([...value, { questionnaire_type: "request" }])
-          }
-          disabled={disabled}
-        >
-          <Plus className="size-4" />
-          {t("add_form")}
-        </Button>
+        <FieldDescription>
+          {t("referral_configuration_forms_help")}
+        </FieldDescription>
       </div>
 
       {value.length === 0 ? (
@@ -86,7 +80,7 @@ export function ReferralQuestionnaireMappings({
           <EmptyDescription>{t("referral_no_forms_added")}</EmptyDescription>
         </Empty>
       ) : (
-        <div role="list" className="space-y-2">
+        <div role="list" className="space-y-4 sm:space-y-2">
           {value.map((row, index) => (
             <QuestionnaireMappingRow
               key={row.id ?? `new-${index}`}

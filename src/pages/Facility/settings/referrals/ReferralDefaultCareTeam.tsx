@@ -2,6 +2,8 @@ import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription } from "@/components/ui/empty";
 import {
@@ -50,23 +52,25 @@ export function ReferralDefaultCareTeam({
 
   return (
     <FieldSet className="gap-3">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 flex-1 space-y-1">
-          <FieldLegend>{title ?? t("referral_default_care_team")}</FieldLegend>
-          <FieldDescription>
-            {description ?? t("referral_default_care_team_help")}
-          </FieldDescription>
+      <div className="space-y-1">
+        <div className="flex items-center justify-between gap-3">
+          <FieldLegend variant="label" className="mb-0">
+            {title ?? t("referral_default_care_team")}
+          </FieldLegend>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onChange([...value, {}])}
+            disabled={disabled}
+          >
+            <Plus className="size-4" />
+            {t("add_member")}
+          </Button>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => onChange([...value, {}])}
-          disabled={disabled}
-        >
-          <Plus className="size-4" />
-          {t("add_member")}
-        </Button>
+        <FieldDescription>
+          {description ?? t("referral_default_care_team_help")}
+        </FieldDescription>
       </div>
 
       {value.length === 0 ? (
@@ -74,11 +78,9 @@ export function ReferralDefaultCareTeam({
           <EmptyDescription>{t("no_care_team_members")}</EmptyDescription>
         </Empty>
       ) : (
-        <div role="list" className="space-y-2">
+        <div role="list" className="space-y-4 sm:space-y-2">
           {value.map((row, index) => (
             <div
-              // Rows are fully controlled, so a remount when a member is
-              // picked (key changes from new-N to the user id) is harmless.
               key={row.member?.id ?? `new-${index}`}
               role="listitem"
               className="flex items-start gap-2"
@@ -108,17 +110,22 @@ export function ReferralDefaultCareTeam({
                         type="button"
                         role="combobox"
                         variant="outline"
-                        className="w-full justify-between"
+                        className="w-full justify-between font-normal"
                         aria-label={t("select_member")}
                         aria-invalid={showErrors && !row.member}
                         disabled={disabled}
                       >
-                        <span className="min-w-0 truncate">
+                        <span
+                          className={cn(
+                            "min-w-0 truncate",
+                            !row.member && "text-muted-foreground",
+                          )}
+                        >
                           {row.member
                             ? formatName(row.member)
                             : t("select_member")}
                         </span>
-                        <ChevronDown className="size-4 shrink-0" />
+                        <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
                       </Button>
                     }
                   />

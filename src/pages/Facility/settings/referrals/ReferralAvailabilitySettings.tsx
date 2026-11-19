@@ -58,6 +58,7 @@ import { ReferralFilters } from "@/components/Referral/ReferralFilters";
 import { usePermissions } from "@/context/PermissionContext";
 import EntityBadge from "@/pages/Organization/components/EntityBadge";
 import {
+  REFERRAL_AVAILABILITY_STATUSES,
   ReferralAvailabilityRead,
   ReferralAvailabilityStatus,
 } from "@/types/emr/referral/referral";
@@ -73,11 +74,12 @@ import {
 } from "./ReferralAvailabilityForm";
 
 const PAGE_SIZE = 15;
+// Adding an availability status fails the build until it has a badge variant.
 const STATUS_VARIANTS = {
   draft: "warning",
   active: "success",
   inactive: "neutral",
-} as const;
+} as const satisfies Record<ReferralAvailabilityStatus, string>;
 
 export default function ReferralAvailabilitySettings({
   facilityId,
@@ -245,9 +247,10 @@ export default function ReferralAvailabilitySettings({
                     : undefined
                 }
                 status={status === "all" ? null : status}
-                statusOptions={(["draft", "active", "inactive"] as const).map(
-                  (value) => ({ value, label: t(value) }),
-                )}
+                statusOptions={REFERRAL_AVAILABILITY_STATUSES.map((value) => ({
+                  value,
+                  label: t(value),
+                }))}
                 onChange={(updates) => {
                   if ("department" in updates) {
                     setDepartmentId(updates.department?.id ?? "");
@@ -367,11 +370,9 @@ export default function ReferralAvailabilitySettings({
                           )}
                           <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                             <span>
-                              {t(
-                                availability.referral_type === "consultation"
-                                  ? "referral_type_consultation"
-                                  : "referral_type_lab",
-                              )}
+                              {availability.referral_type === "consultation"
+                                ? t("referral_type_consultation")
+                                : t("referral_type_lab")}
                             </span>
                             <span className="inline-flex items-center gap-1">
                               {availability.is_public ? (

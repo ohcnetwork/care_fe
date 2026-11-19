@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SheetBody, SheetFooter } from "@/components/ui/sheet";
+import { SheetBody } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -27,6 +27,9 @@ import {
   isCareTeamComplete,
 } from "@/types/careTeam/careTeam";
 import {
+  QuestionnaireMappingDraft,
+  REFERRAL_AVAILABILITY_STATUSES,
+  REFERRAL_TYPES,
   ReferralAvailabilityCreate,
   ReferralAvailabilityRetrieve,
   ReferralAvailabilityUpdate,
@@ -35,10 +38,7 @@ import { referralAvailabilityApi } from "@/types/emr/referral/referralApi";
 
 import { ReferralAvailabilityField } from "./ReferralAvailabilityField";
 import { ReferralDefaultCareTeam } from "./ReferralDefaultCareTeam";
-import {
-  QuestionnaireMappingDraft,
-  ReferralQuestionnaireMappings,
-} from "./ReferralQuestionnaireMappings";
+import { ReferralQuestionnaireMappings } from "./ReferralQuestionnaireMappings";
 
 export interface ReferralAvailabilityScope {
   facilityId?: string;
@@ -82,8 +82,8 @@ export function ReferralAvailabilityForm({
     .object({
       name: z.string().trim().min(1, t("field_required")).max(255),
       description: z.string(),
-      status: z.enum(["draft", "active", "inactive"]),
-      referral_type: z.enum(["consultation", "lab"]),
+      status: z.enum(REFERRAL_AVAILABILITY_STATUSES),
+      referral_type: z.enum(REFERRAL_TYPES),
       is_public: z.boolean(),
       questionnaires: z.array(z.custom<QuestionnaireMappingDraft>()),
       care_team: z
@@ -91,8 +91,6 @@ export function ReferralAvailabilityForm({
         .refine((rows) => isCareTeamComplete(rows)),
     })
     .superRefine((data, ctx) => {
-      // Rows without a form: flag each row (the row shows its own error), so
-      // no section-level message is produced for them.
       data.questionnaires.forEach((row, index) => {
         if (!row.id) {
           ctx.addIssue({
@@ -258,12 +256,13 @@ export function ReferralAvailabilityForm({
                           </SelectTrigger>
                         </ReferralAvailabilityField>
                         <SelectContent>
-                          <SelectItem value="consultation">
-                            {t("referral_type_consultation")}
-                          </SelectItem>
-                          <SelectItem value="lab">
-                            {t("referral_type_lab")}
-                          </SelectItem>
+                          {REFERRAL_TYPES.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type === "consultation"
+                                ? t("referral_type_consultation")
+                                : t("referral_type_lab")}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormItem>
@@ -285,13 +284,11 @@ export function ReferralAvailabilityForm({
                           </SelectTrigger>
                         </ReferralAvailabilityField>
                         <SelectContent>
-                          {(["draft", "active", "inactive"] as const).map(
-                            (status) => (
-                              <SelectItem key={status} value={status}>
-                                {t(status)}
-                              </SelectItem>
-                            ),
-                          )}
+                          {REFERRAL_AVAILABILITY_STATUSES.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {t(status)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormItem>
@@ -355,24 +352,26 @@ export function ReferralAvailabilityForm({
               )}
             />
           </FieldSet>
-        </SheetBody>
 
-        {/* Only Cancel and Save, as in other CARE sheets; deleting happens from
-            the availability list, which confirms in its own dialog. */}
-        <SheetFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isPending}
-          >
-            {t("cancel")}
-          </Button>
-          <Button type="submit" disabled={isPending}>
-            {isPending && <Spinner className="size-4 animate-spin" />}
-            {t(availability ? "save_changes" : "referral_create_availability")}
-          </Button>
-        </SheetFooter>
+          <div className="mt-6 flex justify-end gap-3 border-t pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isPending}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="flex-1 sm:flex-none"
+            >
+              {isPending && <Spinner className="size-4 animate-spin" />}
+              {t(availability ? "save" : "referral_create_availability")}
+            </Button>
+          </div>
+        </SheetBody>
       </form>
     </Form>
   );
