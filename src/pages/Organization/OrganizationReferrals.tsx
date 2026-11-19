@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { SectionHeader } from "@/components/Common/SectionHeader";
 import { ReferralList } from "@/components/Referral/ReferralList";
 import {
   Empty,
@@ -9,7 +10,6 @@ import {
 } from "@/components/ui/empty";
 import { usePermissions } from "@/context/PermissionContext";
 
-import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout, {
   RouteContext,
 } from "./components/OrganizationLayout";
@@ -29,11 +29,9 @@ export default function OrganizationReferrals(
     <OrganizationLayout {...props}>
       {({ orgPermissions }) => (
         <div className="space-y-4 text-foreground">
-          <EntityBadge
+          <SectionHeader
             title={t("referral_organization_incoming")}
             description={t("referral_organization_incoming_description")}
-            isFetching={false}
-            showCount={false}
           />
           {hasPermission("can_read_referral", orgPermissions) ? (
             <ReferralList

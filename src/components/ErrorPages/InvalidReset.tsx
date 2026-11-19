@@ -1,4 +1,4 @@
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -22,7 +22,7 @@ export default function InvalidReset() {
           <br />
           <br />
           <Link
-            href="/forgot-password"
+            to="/forgot-password"
             className="hover:bg-primary- inline-block cursor-pointer rounded-lg bg-primary-600 px-4 py-2 text-white hover:text-white"
           >
             {t("return_to_password_reset")}

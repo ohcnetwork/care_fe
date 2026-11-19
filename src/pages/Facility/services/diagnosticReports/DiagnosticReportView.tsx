@@ -34,7 +34,7 @@ export default function DiagnosticReportView({
   patientId,
   diagnosticReportId,
 }: {
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
   diagnosticReportId: string;
 }) {

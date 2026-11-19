@@ -1,5 +1,4 @@
 import { ArrowLeft } from "lucide-react";
-import { useNavigationPrompt } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import type { FieldErrors, FieldPath } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -13,6 +12,7 @@ import type { ValueSetRead, ValueSetScope } from "@/types/valueSet/valueSet";
 
 import { goBack } from "@/Utils/utils";
 
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { collectFormIssues, type FormIssue } from "./collectValueSetFormIssues";
 import type { ScopedValueSet } from "./useScopedValueSets";
 import { useValueSetEditorForm } from "./useValueSetEditorForm";
@@ -97,7 +97,7 @@ export function ValueSetForm({
   useEffect(() => {
     onStateChange?.({ isDirty, isSubmitting: !!isSubmitting });
   }, [isDirty, isSubmitting, onStateChange]);
-  useNavigationPrompt(
+  useNavigationBlocker(
     isDirty && !isSubmitting && !isReadOnly,
     t("unsaved_changes_warning"),
   );

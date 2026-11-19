@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -295,7 +295,11 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <CardFooter className="flex flex-col p-0">
                       <Separator className="my-2" />
                       <Link
-                        href={`/facility/${resource.origin_facility.id}/resource/${resource.id}`}
+                        to="/facility/$facilityId/resource/$id"
+                        params={{
+                          facilityId: resource.origin_facility.id,
+                          id: resource.id,
+                        }}
                         className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
                       >
                         {t("view_details")}

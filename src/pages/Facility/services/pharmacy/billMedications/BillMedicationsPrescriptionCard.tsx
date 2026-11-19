@@ -62,6 +62,7 @@ import {
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import {
   BadgeInfo,
@@ -76,7 +77,6 @@ import {
   RefreshCcwIcon,
   XCircleIcon,
 } from "lucide-react";
-import { Link } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -363,8 +363,12 @@ const PrescriptionSummary = ({
         />
         <Button variant="outline" asChild>
           <Link
-            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
-            basePath="/"
+            to="/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print"
+            params={{
+              facilityId: encounter.facility.id,
+              patientId: encounter.patient.id,
+              prescriptionId: prescription.id,
+            }}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -381,8 +385,13 @@ const PrescriptionSummary = ({
           <DropdownMenuContent align="end">
             <DropdownMenuItem disabled={isPending} asChild>
               <Link
-                href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${encounter.patient.id}/prescriptions/${prescription.id}`}
-                basePath="/"
+                to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds"
+                params={{
+                  facilityId,
+                  locationId,
+                  patientId: encounter.patient.id,
+                  prescriptionIds: prescription.id,
+                }}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -392,8 +401,12 @@ const PrescriptionSummary = ({
             </DropdownMenuItem>
             <DropdownMenuItem disabled={isPending} asChild>
               <Link
-                href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
-                basePath="/"
+                to="/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print"
+                params={{
+                  facilityId: encounter.facility.id,
+                  patientId: encounter.patient.id,
+                  prescriptionId: prescription.id,
+                }}
                 target="_blank"
                 rel="noopener noreferrer"
               >
