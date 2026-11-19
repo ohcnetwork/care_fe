@@ -6,7 +6,6 @@ import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { isStoreLocation, usesInventory } from "@/types/location/location";
 import { CalendarIcon, Logs } from "lucide-react";
 
 export function LocationNav() {
@@ -14,6 +13,8 @@ export function LocationNav() {
 
   const { facilityId } = useCurrentFacility();
   const { locationId, location } = useCurrentLocation();
+  const usesInventory = (location?.inventory_usage ?? "none") !== "none";
+  const isStore = location?.inventory_usage === "store";
 
   const baseUrl = `/facility/${facilityId}/locations/${locationId}`;
 
@@ -40,7 +41,7 @@ export function LocationNav() {
           name: t("pharmacy"),
           url: `${baseUrl}/pharmacy`,
           icon: <CareIcon icon="l-medical-drip" />,
-          visibility: usesInventory(location),
+          visibility: usesInventory,
           children: [
             {
               name: t("prescription_queue"),
@@ -60,7 +61,7 @@ export function LocationNav() {
           name: t("inventory"),
           url: `${baseUrl}/inventory/summary`,
           icon: <CareIcon icon="l-shop" />,
-          visibility: usesInventory(location),
+          visibility: usesInventory,
           children: [
             {
               name: t("items"),
@@ -75,7 +76,7 @@ export function LocationNav() {
               name: t("to_dispatch"),
               url: `${baseUrl}/inventory/internal/dispatch/`,
             },
-            ...(isStoreLocation(location)
+            ...(isStore
               ? [
                   {
                     header: t("external_supply"),
