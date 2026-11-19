@@ -12,6 +12,7 @@ import {
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
+import type { PluginNavLink } from "@/types/nav/customNavLink";
 import { PlugConfigMeta } from "@/types/plugConfig";
 import { UserRead, UserReadMinimal } from "@/types/user/user";
 import { ComponentType, LazyExoticComponent, ReactNode } from "react";
@@ -223,6 +224,7 @@ export type PluginManifest = {
   billingNavItems?: NavigationLink[];
   userNavItems?: NavigationLink[];
   adminNavItems?: NavigationLink[];
+  customNavItems?: PluginNavLink[];
   organizationTabs?: PluginOrganizationTab[];
   components?: PluginComponentMap;
   encounterTabs?: Record<
