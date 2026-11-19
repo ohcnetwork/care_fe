@@ -293,4 +293,73 @@ test.describe("Diagnostic report printing", () => {
       releasePdf();
     }
   });
+
+  test("shows the report but blocks printing when one attachment fails", async ({
+    page,
+  }) => {
+    const report = createReport(patientId, serviceRequestId);
+    const pdfFileId = faker.string.uuid();
+    const brokenFileId = faker.string.uuid();
+    const brokenFileName = `broken-scan-${faker.string.alphanumeric(6)}`;
+    const pdfUrl = `/print-test-${pdfFileId}.pdf`;
+    const brokenUrl = `/print-test-${brokenFileId}.png`;
+    const pdf = new jsPDF();
+    pdf.text("Attached diagnostic report page", 20, 20);
+
+    await page.route(
+      `**/api/v1/patient/${patientId}/diagnostic_report/?*`,
+      (route) => route.fulfill({ json: { count: 1, results: [report] } }),
+    );
+    await mockReport(page, patientId, report);
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({
+        json: {
+          count: 2,
+          results: [
+            {
+              id: pdfFileId,
+              name: "lab-result",
+              extension: "pdf",
+              is_archived: false,
+              upload_completed: true,
+            },
+            {
+              id: brokenFileId,
+              name: brokenFileName,
+              extension: "png",
+              is_archived: false,
+              upload_completed: true,
+            },
+          ],
+        },
+      }),
+    );
+    for (const [fileId, url] of [
+      [pdfFileId, pdfUrl],
+      [brokenFileId, brokenUrl],
+    ]) {
+      await page.route(`**/api/v1/files/${fileId}/?*`, (route) =>
+        route.fulfill({ json: { id: fileId, read_signed_url: url } }),
+      );
+    }
+    await page.route(`**${pdfUrl}`, (route) =>
+      route.fulfill({
+        contentType: "application/pdf",
+        body: Buffer.from(pdf.output("arraybuffer")),
+      }),
+    );
+    await page.route(`**${brokenUrl}`, (route) =>
+      route.fulfill({ status: 404, body: "" }),
+    );
+
+    await page.goto(printUrl);
+
+    const alert = page.getByRole("alert").filter({ hasText: LOAD_ERROR });
+    await expect(alert).toBeVisible();
+    await expect(alert).toContainText(brokenFileName);
+    // The report page and the attachment that did load are still shown.
+    await expect(page.locator(".react-pdf__Page__canvas")).toHaveCount(2);
+    expect(await readPrintedText(page)).toContain(report.code.display);
+    await expect(page.getByRole("button", { name: /^print/i })).toBeDisabled();
+  });
 });

@@ -5912,5 +5912,6 @@
   "you_cannot_change_once_submitted": "You cannot change once submitted.",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞"
+  "℞": "℞",
+  "diagnostic_report_print_failed_attachments": "Couldn't load: {{files}}. Printing is disabled until every attachment loads."
 }

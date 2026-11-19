@@ -1,5 +1,8 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
+import { TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import TypstPrintPreview from "@/CAREUI/misc/TypstPrintPreview";
 
@@ -88,12 +91,12 @@ export const DiagnosticReportPrintPreview = ({
   const rendered = useQuery({
     queryKey: ["diagnostic_report_attachments", attachments.map((a) => a.url)],
     queryFn: () => renderReportAttachments(attachments),
-    enabled: !isFetchingFileUrls && !isFileUrlsError,
+    enabled: !isFetchingFileUrls,
     staleTime: Infinity,
     retry: false,
   });
 
-  if (isFileUrlsError || rendered.isError) {
+  if (rendered.isError) {
     return (
       <div role="alert" className="text-red-600">
         {t("diagnostic_report_print_load_error")}
@@ -102,6 +105,19 @@ export const DiagnosticReportPrintPreview = ({
   }
 
   const isReady = !isLoading && !isFetchingFileUrls && !!rendered.data;
+
+  // Show the report without attachments that couldn't be loaded, but don't let
+  // an incomplete report be printed.
+  const failedFileIds = new Set(rendered.data?.failedFileIds);
+  const failedFiles = isReady
+    ? printableFiles.filter(
+        ({ file }) => !fileUrls[file.id] || failedFileIds.has(file.id),
+      )
+    : [];
+  const hasAttachmentError = isFileUrlsError || failedFiles.length > 0;
+  const failedFileNames = failedFiles
+    .map(({ file }) => file.name)
+    .filter(Boolean);
 
   return (
     <TypstPrintPreview
@@ -120,6 +136,22 @@ export const DiagnosticReportPrintPreview = ({
       facility={facility}
       templateSlug={PrintTemplateType.diagnostic_report}
       files={rendered.data?.files}
+      printDisabled={hasAttachmentError}
+      toolbar={
+        hasAttachmentError && (
+          <Alert variant="destructive">
+            <TriangleAlert />
+            <AlertTitle>{t("diagnostic_report_print_load_error")}</AlertTitle>
+            {failedFileNames.length > 0 && (
+              <AlertDescription>
+                {t("diagnostic_report_print_failed_attachments", {
+                  files: failedFileNames.join(", "),
+                })}
+              </AlertDescription>
+            )}
+          </Alert>
+        )
+      }
     />
   );
 };

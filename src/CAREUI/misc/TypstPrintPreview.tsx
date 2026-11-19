@@ -38,11 +38,14 @@ interface Props<TContent> extends TypstPdfOptions<TContent> {
   showBackButton?: boolean;
   /** Shown above the pages, e.g. options that change the document. */
   toolbar?: ReactNode;
+  /** Shows the preview but blocks printing, e.g. when the document is incomplete. */
+  printDisabled?: boolean;
 }
 
 export default function TypstPrintPreview<TContent>({
   showBackButton,
   toolbar,
+  printDisabled,
   ...options
 }: Props<TContent>) {
   const { t } = useTranslation();
@@ -70,7 +73,7 @@ export default function TypstPrintPreview<TContent>({
   const iframeLoaded = !!url && loadedUrl === url;
 
   const print = useCallback(() => {
-    if (!url) return;
+    if (!url || printDisabled) return;
     if (method === "share") {
       if (pdf) void sharePdf(pdf, options.title);
       return;
@@ -82,7 +85,7 @@ export default function TypstPrintPreview<TContent>({
       return;
     }
     window.open(url, "_blank", "noopener");
-  }, [url, pdf, options.title, method, iframeLoaded]);
+  }, [url, pdf, options.title, method, iframeLoaded, printDisabled]);
 
   // The print dialog can only open by itself from the hidden iframe; other
   // methods need a click.
@@ -90,6 +93,7 @@ export default function TypstPrintPreview<TContent>({
   useEffect(() => {
     if (
       autoPrint &&
+      !printDisabled &&
       method === "iframe" &&
       iframeLoaded &&
       !autoPrinted.current
@@ -100,7 +104,7 @@ export default function TypstPrintPreview<TContent>({
         if (!isTouchDevice && window.history.length > 1) window.history.go(-1);
       });
     }
-  }, [autoPrint, method, iframeLoaded, print]);
+  }, [autoPrint, printDisabled, method, iframeLoaded, print]);
 
   return (
     <div className="min-w-0">
@@ -119,7 +123,7 @@ export default function TypstPrintPreview<TContent>({
               )}
               <Button
                 variant="primary"
-                disabled={!url}
+                disabled={!url || printDisabled}
                 onClick={print}
                 data-shortcut-id="print-button"
               >

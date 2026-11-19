@@ -57,17 +57,29 @@ export interface ReportAttachment {
   isPdf: boolean;
 }
 
-/** Renders attachments (PDFs and images) to one JPEG per page. */
+/**
+ * Renders attachments (PDFs and images) to one JPEG per page. An attachment
+ * that can't be read is reported in `failedFileIds` instead of failing the rest.
+ */
 export async function renderReportAttachments(attachments: ReportAttachment[]) {
   const files: Record<string, Uint8Array> = {};
   const paths: Record<string, string[]> = {};
+  const failedFileIds: string[] = [];
+  // One at a time: each page is rasterised on a large canvas.
   for (const { reportId, fileId, url, isPdf } of attachments) {
-    const pages = isPdf ? await pdfToJpegs(url) : await imageToJpeg(url);
+    let pages: Uint8Array[];
+    try {
+      pages = isPdf ? await pdfToJpegs(url) : await imageToJpeg(url);
+    } catch (error) {
+      console.warn(`Print: couldn't render attachment ${fileId}`, error);
+      failedFileIds.push(fileId);
+      continue;
+    }
     pages.forEach((bytes, index) => {
       const path = `/assets/attachment-${fileId}-${index}.jpg`;
       files[path] = bytes;
       (paths[reportId] ??= []).push(path);
     });
   }
-  return { files, paths };
+  return { files, paths, failedFileIds };
 }
