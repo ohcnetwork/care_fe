@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { CircleCheck, Plus, Search, ShoppingBag, Store } from "lucide-react";
-import { Link as RavigerLink, useNavigate, useQueryParams } from "raviger";
 import { type ReactNode, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -26,6 +25,9 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { AppIcon } from "@/pages/Apps/AppIcon";
 import { AppStorePlugin } from "@/types/appStore/appStore";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
@@ -132,7 +134,6 @@ function hasBlankConfigValues(plugin: AppStorePlugin) {
 
 function useQuickInstall() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -163,10 +164,14 @@ function useQuickInstall() {
     onError: (error, plugin) => {
       if (error instanceof ManualSetupRequiredError) {
         toast.info(t("app_requires_manual_setup"));
-        navigate(`/admin/apps/new?appId=${encodeURIComponent(plugin.id)}`);
+        navigate({
+          href: `/admin/apps/new?appId=${encodeURIComponent(plugin.id)}`,
+        });
       } else if (error instanceof HealthCheckError) {
         toast.error(t("health_check_unreachable_message"));
-        navigate(`/admin/apps/new?appId=${encodeURIComponent(plugin.id)}`);
+        navigate({
+          href: `/admin/apps/new?appId=${encodeURIComponent(plugin.id)}`,
+        });
       }
     },
   });
@@ -363,7 +368,7 @@ export function PlugConfigList() {
                     }
                     actions={
                       <Button className="w-full" asChild>
-                        <RavigerLink
+                        <HrefLink
                           href={
                             matchingApp
                               ? `/admin/apps/${config.slug}?appId=${encodeURIComponent(matchingApp.id)}`
@@ -373,7 +378,7 @@ export function PlugConfigList() {
                           {config.isReadOnly
                             ? t("view_config")
                             : t("edit_config")}
-                        </RavigerLink>
+                        </HrefLink>
                       </Button>
                     }
                   />
@@ -463,13 +468,13 @@ export function PlugConfigList() {
                         actions={
                           installedConfig ? (
                             <Button className="w-full" asChild>
-                              <RavigerLink
+                              <HrefLink
                                 href={`/admin/apps/${app.id}?appId=${encodeURIComponent(app.id)}`}
                               >
                                 {installedConfig.isReadOnly
                                   ? t("view_config")
                                   : t("edit_config")}
-                              </RavigerLink>
+                              </HrefLink>
                             </Button>
                           ) : (
                             <div className="flex gap-2">
@@ -478,11 +483,11 @@ export function PlugConfigList() {
                                 className="flex-1"
                                 asChild
                               >
-                                <RavigerLink
+                                <HrefLink
                                   href={`/admin/apps/new?appId=${encodeURIComponent(app.id)}`}
                                 >
                                   {t("configure")}
-                                </RavigerLink>
+                                </HrefLink>
                               </Button>
                               <Button
                                 className="flex-1"

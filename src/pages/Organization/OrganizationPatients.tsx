@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -25,6 +24,8 @@ import { SectionHeader } from "@/components/Common/SectionHeader";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -186,7 +187,7 @@ export default function OrganizationPatients({
                         return (
                           <TableRow
                             key={patient.id}
-                            onClick={() => navigate(patientUrl)}
+                            onClick={() => navigate({ href: patientUrl })}
                             className="cursor-pointer hover:bg-muted/50"
                           >
                             <TableCell className="px-4 py-3">
@@ -217,13 +218,13 @@ export default function OrganizationPatients({
                               onClick={(e) => e.stopPropagation()}
                             >
                               <Button variant="tertiary" asChild>
-                                <Link
+                                <HrefLink
                                   href={patientUrl}
                                   aria-label={`${t("open")} ${patient.name}`}
                                 >
                                   {t("open")}
                                   <ChevronRight data-icon="inline-end" />
-                                </Link>
+                                </HrefLink>
                               </Button>
                             </TableCell>
                           </TableRow>

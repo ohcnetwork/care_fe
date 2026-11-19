@@ -41,8 +41,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
-import { Link } from "raviger";
 
 type RequirementItem = {
   value: string;
@@ -87,9 +87,9 @@ function SelectedItemCard({
         <div className="flex items-center gap-1">
           <p className="my-px font-medium text-sm text-gray-900">{title}</p>
           {link && (
-            <Link href={link} basePath="/" className="text-gray-900">
+            <HrefLink href={link} className="text-gray-900">
               <ExternalLinkIcon className="size-3" />
-            </Link>
+            </HrefLink>
           )}
         </div>
         {details.length > 0 && (

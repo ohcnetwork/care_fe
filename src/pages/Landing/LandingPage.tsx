@@ -2,7 +2,6 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Search } from "lucide-react";
-import { navigate as ravigerNavigate } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -77,7 +76,7 @@ export function LandingPage() {
     if (selectedOrganization) {
       params.append("organization", selectedOrganization.id.toString());
     }
-    ravigerNavigate(`/facilities?${params.toString()}`);
+    navigate({ href: `/facilities?${params.toString()}` });
   };
 
   return (

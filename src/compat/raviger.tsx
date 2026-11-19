@@ -55,9 +55,9 @@ import type {
   Routes,
 } from "raviger/dist/router";
 
-import { getRouter } from "@/compat/routerRef";
 import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { isShowingPreviousPage } from "@/lib/router/previousPage";
+import { getRouter } from "@/lib/router/routerRef";
 
 export type {
   ActiveLinkProps,
@@ -457,11 +457,7 @@ export function navigate(url: string, options?: NavigateOptions): void {
   if (target === router.latestLocation.href && target !== rendered.href) {
     return;
   }
-  void router.navigate({
-    href: url,
-    replace: !!options?.replace,
-    state,
-  });
+  void router.navigate({ href: url, replace: !!options?.replace, state });
   // raviger changed `window.location` before `navigate()` returned, and some
   // code reads it right after a write. The browser history queues the write
   // to a microtask; flush it now.

@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Bot, ChevronRight } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -30,6 +29,8 @@ import { getPermissions } from "@/common/Permissions";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 import { UserReadMinimal } from "@/types/user/user";
@@ -316,7 +317,9 @@ export default function OrganizationUsers({
                             <TableRow
                               key={user.id}
                               onClick={
-                                isViewable ? () => navigate(userUrl) : undefined
+                                isViewable
+                                  ? () => navigate({ href: userUrl })
+                                  : undefined
                               }
                               className={
                                 isViewable
@@ -381,14 +384,14 @@ export default function OrganizationUsers({
                                   )}
                                   {isViewable && (
                                     <Button variant="tertiary" asChild>
-                                      <Link
+                                      <HrefLink
                                         href={userUrl}
                                         aria-label={`${t("view")} ${formatName(user)}`}
                                         onClick={(e) => e.stopPropagation()}
                                       >
                                         {t("view")}
                                         <ChevronRight data-icon="inline-end" />
-                                      </Link>
+                                      </HrefLink>
                                     </Button>
                                   )}
                                 </div>

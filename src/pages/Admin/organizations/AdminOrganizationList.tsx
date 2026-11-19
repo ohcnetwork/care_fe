@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
-import { navigate } from "raviger";
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import {
@@ -73,11 +73,11 @@ export default function AdminOrganizationList({
 
   const handleOrganizationSelect = useCallback(
     (organization?: Organization) => {
-      navigate(
-        organization
+      navigate({
+        href: organization
           ? `/admin/organizations/${organizationType}/${organization.id}`
           : `/admin/organizations/${organizationType}`,
-      );
+      });
     },
     [organizationType],
   );
@@ -110,7 +110,9 @@ export default function AdminOrganizationList({
 
   const handleParentClick = useCallback(
     (parentId: string) => {
-      navigate(`/admin/organizations/${organizationType}/${parentId}`);
+      navigate({
+        href: `/admin/organizations/${organizationType}/${parentId}`,
+      });
     },
     [organizationType],
   );
@@ -266,7 +268,9 @@ export default function AdminOrganizationList({
                           asChild
                           className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
                           onClick={() =>
-                            navigate(`/admin/organizations/${organizationType}`)
+                            navigate({
+                              href: `/admin/organizations/${organizationType}`,
+                            })
                           }
                         >
                           <Button

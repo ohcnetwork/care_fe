@@ -26,6 +26,8 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { RegisteredGroupAnswerView } from "@/components/QuestionnaireV2/groups/RegisteredGroupAnswerView";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { usePathname } from "@/lib/router/location";
 import { cn } from "@/lib/utils";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -43,7 +45,6 @@ import {
 } from "@tanstack/react-query";
 import { t } from "i18next";
 import { BanIcon, ChevronDown, MoreVertical, Printer } from "lucide-react";
-import { Link, useFullPath } from "raviger";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
@@ -414,7 +415,7 @@ function ResponseActionsMenu({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const fullPath = useFullPath();
+  const fullPath = usePathname();
   const routeScope = fullPath.match(/^\/(facility|organization)\/[^/]+/)?.[0];
   const scope = facilityId ? `/facility/${facilityId}` : routeScope;
   const printEncounterId =
@@ -457,7 +458,7 @@ function ResponseActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <Link
+          <HrefLink
             href={`${printBase}/questionnaire_response/${item.id}/print`}
             target={embedded ? "_blank" : undefined}
             rel={embedded ? "noopener noreferrer" : undefined}
@@ -466,9 +467,9 @@ function ResponseActionsMenu({
               <Printer className="size-4" />
               {t("print_this_response")}
             </DropdownMenuItem>
-          </Link>
+          </HrefLink>
           {item.questionnaire && (
-            <Link
+            <HrefLink
               href={`${printBase}/questionnaire/${item.questionnaire.id}/responses/print`}
               target={embedded ? "_blank" : undefined}
               rel={embedded ? "noopener noreferrer" : undefined}
@@ -479,7 +480,7 @@ function ResponseActionsMenu({
                   title: item.questionnaire.title,
                 })}
               </DropdownMenuItem>
-            </Link>
+            </HrefLink>
           )}
           {isUnstructured && !readOnly && (
             <>

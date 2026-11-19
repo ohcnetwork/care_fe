@@ -1,4 +1,3 @@
-import { useLocationChange, usePath } from "raviger";
 import {
   ComponentProps,
   createContext,
@@ -13,6 +12,7 @@ import {
   useState,
 } from "react";
 
+import { useLocationChange, usePathname } from "@/lib/router/location";
 import { cn } from "@/lib/utils";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -60,7 +60,7 @@ export function AppSidebarProvider({
   ...props
 }: AppSidebarProviderProps) {
   const isMobile = useIsMobile();
-  const path = usePath();
+  const path = usePathname();
   const [pinned, setPinned] = useState(defaultOpen);
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [overlayReady, setOverlayReady] = useState(!defaultOpen);

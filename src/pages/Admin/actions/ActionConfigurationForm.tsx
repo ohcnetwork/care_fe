@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Trash2 } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { useForm, useWatch } from "react-hook-form";
@@ -31,6 +30,8 @@ import { useActionRegistry } from "@/components/QuestionnaireV2/builder/actions/
 import { findActionIssues } from "@/components/QuestionnaireV2/builder/actionValidation";
 import { reachableContextPaths } from "@/components/QuestionnaireV2/builder/actionVariables";
 
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import {
   ACTION_CONFIGURATION_CONTEXT_TYPES,
   ActionConfigurationRead,
@@ -100,7 +101,7 @@ export function ActionConfigurationForm({ id }: ActionConfigurationFormProps) {
           </Alert>
           <Button
             variant="outline"
-            onClick={() => navigate(ADMIN_ACTIONS_PATH)}
+            onClick={() => navigate({ href: ADMIN_ACTIONS_PATH })}
           >
             <ArrowLeft className="size-4" />
             {t("back")}
@@ -120,10 +121,10 @@ export function ActionConfigurationForm({ id }: ActionConfigurationFormProps) {
               </AlertDescription>
             </Alert>
             <Button asChild variant="outline">
-              <Link href={ADMIN_ACTIONS_PATH}>
+              <HrefLink href={ADMIN_ACTIONS_PATH}>
                 <ArrowLeft className="size-4" />
                 {t("back")}
-              </Link>
+              </HrefLink>
             </Button>
           </div>
         </Page>
@@ -227,7 +228,7 @@ function ActionConfigurationEditor({
       setActionsDirty(false);
       form.reset(form.getValues());
     });
-    navigate(ADMIN_ACTIONS_PATH);
+    navigate({ href: ADMIN_ACTIONS_PATH });
   };
 
   const { mutate: create, isPending: isCreating } = useMutation({
@@ -313,10 +314,10 @@ function ActionConfigurationEditor({
                 navigate(), so a dirty form gets the app's unsaved-changes
                 prompt and a clean one a client-side transition. */}
             <Button asChild variant="outline" size="xs">
-              <Link href={ADMIN_ACTIONS_PATH}>
+              <HrefLink href={ADMIN_ACTIONS_PATH}>
                 <ArrowLeft className="size-4" />
                 {t("back")}
-              </Link>
+              </HrefLink>
             </Button>
             <h1 className="min-w-0 flex-1 truncate text-xl font-bold text-gray-900">
               {title}

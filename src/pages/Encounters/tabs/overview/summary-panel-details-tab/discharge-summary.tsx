@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { NotepadText, SquarePen } from "lucide-react";
-import { Link, useFullPath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -19,13 +18,16 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
+import { HrefLink } from "@/lib/router/HrefLink";
+import { usePathname } from "@/lib/router/location";
+
 interface DischargeDetailsProps {
   title?: string;
 }
 
 export const DischargeDetails = ({ title }: DischargeDetailsProps = {}) => {
   const { t } = useTranslation();
-  const returnPage = useFullPath().split("/").pop() ?? "updates";
+  const returnPage = usePathname().split("/").pop() ?? "updates";
   const { selectedEncounter: encounter, canWriteSelectedEncounter } =
     useEncounter();
 
@@ -47,7 +49,7 @@ export const DischargeDetails = ({ title }: DischargeDetailsProps = {}) => {
         </span>
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" className="shrink-0" asChild>
-            <Link
+            <HrefLink
               href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?${new URLSearchParams({ return_page: returnPage })}`}
               aria-label={t("edit")}
             >
@@ -55,7 +57,7 @@ export const DischargeDetails = ({ title }: DischargeDetailsProps = {}) => {
                 className="size-4 text-gray-950 cursor-pointer"
                 strokeWidth={1.5}
               />
-            </Link>
+            </HrefLink>
           </Button>
         )}
       </div>

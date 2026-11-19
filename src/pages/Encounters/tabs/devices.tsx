@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, Unlink } from "lucide-react";
-import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,6 +29,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HrefLink } from "@/lib/router/HrefLink";
 import AssociateDeviceSheet from "@/pages/Encounters/AssociateDeviceSheet";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import deviceApi from "@/types/device/deviceApi";
@@ -98,9 +98,8 @@ export const EncounterDevicesTab = () => {
                           className="hover:bg-gray-50/50"
                         >
                           <TableCell className="font-medium">
-                            <Link
-                              href={`/devices/${device.id}`}
-                              basePath={`/facility/${facilityId}/settings`}
+                            <HrefLink
+                              href={`/facility/${facilityId}/settings/devices/${device.id}`}
                               className="group flex items-start gap-1"
                             >
                               <div>
@@ -114,7 +113,7 @@ export const EncounterDevicesTab = () => {
                                   </div>
                                 )}
                               </div>
-                            </Link>
+                            </HrefLink>
                           </TableCell>
                           <TableCell>
                             <span>{device.care_type || "-"}</span>

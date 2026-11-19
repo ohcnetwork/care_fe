@@ -22,6 +22,7 @@ import {
 
 import { PatientIDScanDialog } from "@/components/Scan/PatientIDScanDialog";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import {
   encounterRequiresDischarge,
@@ -34,20 +35,19 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { EllipsisVertical as DotsVerticalIcon } from "lucide-react";
-
-import { Link } from "@tanstack/react-router";
 import {
   CalendarCheck,
   CalendarRange,
   CalendarX2,
   CheckCircle,
+  EllipsisVertical as DotsVerticalIcon,
   ListOrdered,
   Play,
   ScanLine,
   SquareArrowUpRight,
 } from "lucide-react";
-import { Link as RavigerLink, navigate as ravigerNavigate } from "raviger";
+
+import { Link } from "@tanstack/react-router";
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -128,13 +128,13 @@ const PatientScanButton = ({
         });
       } else {
         toast.info(t("no_appointments_found_for_today"));
-        ravigerNavigate(
-          `/facility/${facilityId}/patients/home?${new URLSearchParams({
+        navigate({
+          href: `/facility/${facilityId}/patients/home?${new URLSearchParams({
             phone_number: patient.phone_number,
             year_of_birth: patient.year_of_birth?.toString() ?? "",
             partial_id: patientId.slice(0, 5),
           }).toString()}`,
-        );
+        });
       }
     },
     onError: () => {
@@ -509,19 +509,18 @@ const TokenActions = ({
     <>
       {appointment.id && (
         <TokenAction asMenuItem={asMenuItems}>
-          <RavigerLink href={getQueueLink(appointment)} basePath="/">
+          <HrefLink href={getQueueLink(appointment)}>
             {asMenuItems && (
               <CalendarRange className="size-4" aria-hidden="true" />
             )}
             <span className={labelClassName}>{t("appointments_board")}</span>
             {boardIcon}
-          </RavigerLink>
+          </HrefLink>
         </TokenAction>
       )}
       {token && (
         <TokenAction asMenuItem={asMenuItems}>
-          <RavigerLink
-            basePath="/"
+          <HrefLink
             href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
           >
             {asMenuItems && (
@@ -529,7 +528,7 @@ const TokenActions = ({
             )}
             <span className={labelClassName}>{t("queue_board")}</span>
             {boardIcon}
-          </RavigerLink>
+          </HrefLink>
         </TokenAction>
       )}
       {appointment.id && (

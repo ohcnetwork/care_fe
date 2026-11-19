@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Link as RavigerLink } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -18,6 +17,7 @@ import {
 
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import { HrefLink } from "@/lib/router/HrefLink";
 import {
   getResourceRequestCategoryEnum,
   RESOURCE_REQUEST_STATUS_COLORS,
@@ -50,12 +50,12 @@ export const ResourceRequests = (props: PatientProps) => {
         </h2>
         {facilityId && (
           <Button variant="outline_primary" asChild>
-            <RavigerLink
+            <HrefLink
               href={`/facility/${facilityId}/resource/new?related_patient=${patientData.id}`}
             >
               <CareIcon icon="l-plus" className="mr-2" />
               {t("create_resource_request")}
-            </RavigerLink>
+            </HrefLink>
           </Button>
         )}
       </div>

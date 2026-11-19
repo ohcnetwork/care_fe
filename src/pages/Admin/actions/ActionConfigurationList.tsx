@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Zap } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -20,6 +19,8 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import { isSupportedActionConfigurationContext } from "@/types/actions/actionConfiguration";
 import actionConfigurationApi from "@/types/actions/actionConfigurationApi";
 import query from "@/Utils/request/query";
@@ -69,7 +70,9 @@ export function ActionConfigurationList() {
               {t("action_configurations_description")}
             </p>
           </div>
-          <Button onClick={() => navigate(`${ADMIN_ACTIONS_PATH}/new`)}>
+          <Button
+            onClick={() => navigate({ href: `${ADMIN_ACTIONS_PATH}/new` })}
+          >
             <Plus className="size-4" />
             {t("action_configuration_new")}
           </Button>
@@ -108,11 +111,13 @@ export function ActionConfigurationList() {
                     key={configuration.id}
                     className="cursor-pointer"
                     onClick={() =>
-                      navigate(`${ADMIN_ACTIONS_PATH}/${configuration.id}`)
+                      navigate({
+                        href: `${ADMIN_ACTIONS_PATH}/${configuration.id}`,
+                      })
                     }
                   >
                     <TableCell className="py-2.5">
-                      <Link
+                      <HrefLink
                         href={`${ADMIN_ACTIONS_PATH}/${configuration.id}`}
                         onClick={(event) => event.stopPropagation()}
                         onKeyDown={(event) => {
@@ -123,7 +128,7 @@ export function ActionConfigurationList() {
                         className="block truncate text-sm font-medium text-gray-900 focus-visible:outline-hidden focus-visible:ring-1"
                       >
                         {configuration.name}
-                      </Link>
+                      </HrefLink>
                       {configuration.description && (
                         <span className="block truncate text-xs text-gray-500">
                           {configuration.description}

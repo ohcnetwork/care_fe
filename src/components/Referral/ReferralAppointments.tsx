@@ -1,7 +1,6 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, CalendarPlus, Stethoscope } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { getPermissions } from "@/common/Permissions";
@@ -16,6 +15,9 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { usePermissions } from "@/context/PermissionContext";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { EncounterStatus } from "@/types/emr/encounter/encounter";
 import { ReferralRetrieve } from "@/types/emr/referral/referral";
 import { ReferralResource } from "@/types/emr/referral/referralResource";
@@ -111,17 +113,17 @@ function AppointmentSummary({
         </div>
         <div className="flex flex-wrap gap-2">
           {encounterUrl && (
-            <Link
+            <HrefLink
               href={encounterUrl}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
               {t("view_encounter")}
-            </Link>
+            </HrefLink>
           )}
           {visit.encounter &&
             canWrite &&
             ["pending", "in_progress"].includes(referral.status) && (
-              <Link
+              <HrefLink
                 href={getReferralResponseUrl(referral.id, sourceUrl, {
                   appointmentId: attachment.resource_id,
                   facilityId,
@@ -129,15 +131,15 @@ function AppointmentSummary({
                 className={buttonVariants({ size: "sm" })}
               >
                 {t("referral_respond")}
-              </Link>
+              </HrefLink>
             )}
           {link.data && !link.isError && (
-            <Link
+            <HrefLink
               href={link.data}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
               {t("referral_manage_appointment")}
-            </Link>
+            </HrefLink>
           )}
         </div>
       </div>
@@ -307,8 +309,8 @@ export function ReferralAppointments({
                 </Button>
               }
               onSuccess={(encounter) => {
-                navigate(
-                  appendReferralNativeContext(
+                navigate({
+                  href: appendReferralNativeContext(
                     `/facility/${encounter.facility.id}/patient/${referral.patient}/encounter/${encounter.id}/updates`,
                     new URLSearchParams({
                       referralId: referral.id,
@@ -318,18 +320,18 @@ export function ReferralAppointments({
                         : {}),
                     }).toString(),
                   ),
-                );
+                });
               }}
             />
           )}
           {canOfferNewVisit && canBook && destinationFacility && (
-            <Link
+            <HrefLink
               href={`/facility/${destinationFacility.id}/patient/${referral.patient}/appointments?${bookingParams}`}
               className={buttonVariants({ size: "sm", variant: "outline" })}
             >
               <CalendarPlus aria-hidden="true" className="size-4" />
               {t("referral_book_appointment")}
-            </Link>
+            </HrefLink>
           )}
         </div>
       </div>
@@ -376,15 +378,15 @@ export function ReferralAppointments({
             </ItemDescription>
           </ItemContent>
           <ItemActions className="flex-wrap">
-            <Link
+            <HrefLink
               href={directEncounterUrl}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
               {t("view_encounter")}
-            </Link>
+            </HrefLink>
             {canWrite &&
               ["pending", "in_progress"].includes(referral.status) && (
-                <Link
+                <HrefLink
                   href={getReferralResponseUrl(referral.id, sourceUrl, {
                     encounterId: directEncounter.id,
                     facilityId: directEncounter.facility.id,
@@ -392,7 +394,7 @@ export function ReferralAppointments({
                   className={buttonVariants({ size: "sm" })}
                 >
                   {t("referral_respond")}
-                </Link>
+                </HrefLink>
               )}
           </ItemActions>
         </Item>

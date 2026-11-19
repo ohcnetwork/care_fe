@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Building2, ChevronRight } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +21,8 @@ import { SectionHeader } from "@/components/Common/SectionHeader";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -145,7 +146,9 @@ export default function OrganizationView({
                             <TableRow
                               key={orgChild.id}
                               onClick={() =>
-                                navigate(`${baseUrl}/children/${orgChild.id}`)
+                                navigate({
+                                  href: `${baseUrl}/children/${orgChild.id}`,
+                                })
                               }
                               className="cursor-pointer hover:bg-muted/50"
                             >
@@ -183,13 +186,13 @@ export default function OrganizationView({
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <Button variant="tertiary" asChild>
-                                  <Link
+                                  <HrefLink
                                     href={`${baseUrl}/children/${orgChild.id}`}
                                     aria-label={`${t("open")} ${orgChild.name}`}
                                   >
                                     {t("open")}
                                     <ChevronRight data-icon="inline-end" />
-                                  </Link>
+                                  </HrefLink>
                                 </Button>
                               </TableCell>
                             </TableRow>

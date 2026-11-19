@@ -1,6 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
-import { navigate } from "raviger";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +17,7 @@ import {
 import query from "@/Utils/request/query";
 import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
+import { navigate } from "@/lib/router/navigate";
 import AccountSheet from "@/pages/Facility/billing/account/AccountSheet";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -75,9 +75,9 @@ export function AccountSheetButton({
 
   const handleViewAccount = (account: AccountRead, e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(
-      `/facility/${encounter.facility.id}/billing/account/${account.id}/?encounterId=${encounter.id}`,
-    );
+    navigate({
+      href: `/facility/${encounter.facility.id}/billing/account/${account.id}/?encounterId=${encounter.id}`,
+    });
   };
 
   const handleSheetOpenChange = (open: boolean) => {
