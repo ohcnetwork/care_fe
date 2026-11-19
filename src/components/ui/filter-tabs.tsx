@@ -79,25 +79,39 @@ export function FilterTabs({
     }
   };
 
+  const activeIsInDropdown =
+    showMoreDropdown && value !== "" && dropdownOptions.includes(value);
+  const tabsToShow = !showMoreDropdown
+    ? options
+    : activeIsInDropdown && visibleOptions.length > 0
+      ? [...visibleOptions.slice(0, -1), value]
+      : visibleOptions;
+  const remainingOptions = activeIsInDropdown && visibleOptions.length > 0
+    ? [
+        ...dropdownOptions.filter((option) => option !== value),
+        visibleOptions[visibleOptions.length - 1],
+      ]
+    : dropdownOptions;
+
   const handleDropdownSelect = (selectedOption: string) => {
     if (!showMoreDropdown) return;
 
     // Safety check: ensure we have visible options to swap
-    if (visibleOptions.length === 0) {
+    if (tabsToShow.length === 0) {
       // If no visible options, just add the selected option to visible
       setVisibleOptions([selectedOption]);
       setDropdownOptions(
-        dropdownOptions.filter((option) => option !== selectedOption),
+        remainingOptions.filter((option) => option !== selectedOption),
       );
       onValueChange(selectedOption);
       return;
     }
 
     // Swap the last visible tab with the selected dropdown option
-    const lastVisibleOption = visibleOptions[visibleOptions.length - 1];
-    const newVisibleOptions = [...visibleOptions.slice(0, -1), selectedOption];
+    const lastVisibleOption = tabsToShow[tabsToShow.length - 1];
+    const newVisibleOptions = [...tabsToShow.slice(0, -1), selectedOption];
     const newDropdownOptions = [
-      ...dropdownOptions.filter((option) => option !== selectedOption),
+      ...remainingOptions.filter((option) => option !== selectedOption),
       lastVisibleOption,
     ];
 
@@ -105,8 +119,6 @@ export function FilterTabs({
     setDropdownOptions(newDropdownOptions);
     onValueChange(selectedOption);
   };
-
-  const tabsToShow = showMoreDropdown ? visibleOptions : options;
 
   return (
     <div className={cn("flex items-center gap-4", className)}>
@@ -139,7 +151,7 @@ export function FilterTabs({
                 {t(option)}
               </TabsTrigger>
             ))}
-            {showMoreDropdown && dropdownOptions.length > 0 && (
+            {showMoreDropdown && remainingOptions.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-full">
@@ -148,7 +160,7 @@ export function FilterTabs({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {dropdownOptions.map((option) => (
+                  {remainingOptions.map((option) => (
                     <DropdownMenuItem
                       key={option}
                       onSelect={() => handleDropdownSelect(option)}
