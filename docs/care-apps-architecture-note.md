@@ -15,9 +15,10 @@ Build-time plugin identity:
 
 `REACT_ENABLED_APPS` format:
 
-- Each entry is expected in the form `org/repo` or `org/repo@host/path/to/remoteEntry.js`.
+- Each entry is expected in the form `org/repo`, `org/repo@host/path/to/remoteEntry.js`, or `org/repo@/path/to/remoteEntry.js`.
 - If `@host/path` is omitted, CARE defaults to GitHub Pages: `https://{org}.github.io/{repo}`.
 - If the host contains `localhost`, CARE prefixes it with `http://`; otherwise it prefixes it with `https://`.
+- If the URL starts with `/` (e.g. `ohcnetwork/care_scribe_fe@/plugs/care_scribe_fe/assets/remoteEntry.js`), it is kept relative and resolved against the current page origin at load time.
 - In host dev mode, CARE auto-discovers valid local plugin apps from `apps/*/src/manifest.*` (any TS/JS extension) and loads them directly through the host Vite graph.
 - Example remote entry for non-hosted local testing or preview flows: `ohcnetwork/care_hello_fe@localhost:4173/assets/remoteEntry.js`.
 
@@ -31,8 +32,8 @@ Merge behavior:
 
 For each resolved plugin config, `PluginEngine`:
 
-1. Validates `config.meta.url`.
-2. Registers the remote with Vite federation using the plugin `slug`.
+1. Checks that `config.meta.url` is set.
+2. Registers the remote with Vite federation using the plugin `slug`, resolving `config.meta.url` against the current page (`new URL(url, window.location.href)`). Both absolute and relative URLs (e.g. `/plugs/<slug>/assets/remoteEntry.js`) are supported.
 3. Loads `./manifest` from the remote.
 4. Combines the manifest with `config.meta` and exposes the frozen metadata on `window.__CARE_PLUGIN_RUNTIME__.meta`.
 5. Registers plugin overrides through `addOverride(...)`.
@@ -43,6 +44,11 @@ Failure behavior:
 - If `config.meta.url` is missing or invalid, the plugin is logged and skipped.
 - If the remote manifest cannot be loaded, the plugin is logged and skipped.
 - These failures do not prevent the rest of the app or other plugins from loading.
+
+Same-origin (relative URL) deployments:
+
+- Relative URLs let a single reverse proxy serve CARE and its plugs (e.g. `/api` → backend, `/plugs/<slug>/` → plug assets, fallback → CARE's `index.html`) and work under any origin it is reached through (LAN IP, mDNS, Tailscale, tunnels), similar to an empty `REACT_CARE_API_URL`.
+- Plugin translations are fetched from `{origin of meta.url}/locale/{lng}.json`, which is not resolved for relative URLs. Set `meta.localPath` (e.g. `/plugs/<slug>`) to load them from `{localPath}/locale/{lng}.json`.
 
 `PLUGIN_Component` renders plugin-provided React components by looking them up in each loaded manifest's `components` map.
 

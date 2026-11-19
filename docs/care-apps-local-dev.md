@@ -1,7 +1,7 @@
 ## Plugin Discovery & Setup
 
 - Build-time plugins configured via REACT_ENABLED_APPS env var
-- format: org/repo or org/repo@host/path/to/remoteEntry.js
+- format: org/repo, org/repo@host/path/to/remoteEntry.js, or org/repo@/path/to/remoteEntry.js (relative, same origin)
 
 ## Build-time vs. Runtime
 
@@ -13,7 +13,7 @@
 
 - Main app (vite.config.mts): federation with name "core", dummy remote, shared: react/react-dom/i18next/react-query/raviger/sonner/decimal.js
 - Per-app (apps/care_hello_fe/vite.config.ts): exposes ./manifest pointing to src/manifest.tsx, builds remoteEntry.js to dist/assets/
-- RemoteEntry URL resolving: GitHub Pages if no @ suffix, otherwise http:// for localhost, https:// elsewhere
+- RemoteEntry URL resolving: GitHub Pages if no @ suffix, kept relative if it starts with /, otherwise http:// for localhost, https:// elsewhere. PluginEngine resolves all URLs against the current page at load time.
 - Runtime: PluginEngine.tsx uses setFederationRemote() to register each plugin slug dynamically, then getFederationRemote() to load manifest
 
 ## Local Dev Workflow
