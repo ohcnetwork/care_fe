@@ -14,7 +14,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  X,
 } from "lucide-react";
 import { useId, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import FilterHeader from "@/components/ui/multi-filter/filterHeader";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { SegmentedDateInput } from "@/components/ui/segmented-date-input";
 import { cn } from "@/lib/utils";
 
 export interface DateRangeValue {
@@ -336,7 +336,7 @@ function RangePanel({
       ) : title ? (
         <div className="border-b px-3 py-2 text-sm font-medium">{title}</div>
       ) : null}
-      <div className="grid grid-cols-2 gap-2 px-3 pt-3">
+      <div className="grid gap-3 px-3 pt-3">
         {(["from", "to"] as const).map((edge) => (
           <div key={edge} className="min-w-0">
             <label
@@ -345,62 +345,35 @@ function RangePanel({
             >
               {t(edge === "from" ? "start_date" : "end_date")}
             </label>
-            <div className="relative">
-              <input
-                ref={edge === "from" ? fromRef : toRef}
-                id={`${id}-${edge}`}
-                type="text"
-                data-range-edge={edge}
-                inputMode="numeric"
-                autoComplete="off"
-                placeholder={t("date_placeholder_dd_mm_yyyy")}
-                aria-invalid={!!errors[edge]}
-                aria-describedby={errors[edge] ? `${id}-${edge}-error` : undefined}
-                value={text[edge]}
-                className={cn(
-                  "h-10 w-full min-w-0 rounded-md border border-input bg-background ps-2 pe-7 text-sm tabular-nums outline-none focus:border-primary focus:ring-2 focus:ring-primary/20",
-                  activeEdge === edge && "border-primary ring-2 ring-primary/20",
-                  errors[edge] && "border-destructive",
-                )}
-                onFocus={() => setActiveEdge(edge)}
-                onChange={(event) => {
-                  const next = maskDate(event.target.value, text[edge]);
-                  setText((previous) => ({ ...previous, [edge]: next }));
-                  setErrors((previous) => ({ ...previous, [edge]: "" }));
-                  if (hasFullYear(next) || !next) commit(edge, next);
-                }}
-                onBlur={(event) => commit(edge, event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key !== "Enter") return;
-                  event.preventDefault();
-                  if (!commit(edge, event.currentTarget.value)) return;
-                  if (edge === "from") {
-                    setActiveEdge("to");
-                    toRef.current?.focus();
-                  } else {
-                    applyRef.current?.focus();
-                  }
-                }}
-              />
-              {text[edge] && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute inset-y-1 end-0.5 h-8 w-6 p-0"
-                  aria-label={`${t("clear")} ${t(edge === "from" ? "start_date" : "end_date")}`}
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => {
-                    commit(edge, "");
-                    setHovered(undefined);
-                    setActiveEdge(edge);
-                    (edge === "from" ? fromRef : toRef).current?.focus();
-                  }}
-                >
-                  <X aria-hidden="true" className="size-3.5" />
-                </Button>
-              )}
-            </div>
+            <SegmentedDateInput
+              inputRef={edge === "from" ? fromRef : toRef}
+              id={`${id}-${edge}`}
+              edge={edge}
+              label={t(edge === "from" ? "start_date" : "end_date")}
+              value={text[edge]}
+              date={range[edge]}
+              minDate={bounds.min}
+              maxDate={bounds.max}
+              active={activeEdge === edge}
+              invalid={!!errors[edge]}
+              describedBy={errors[edge] ? `${id}-${edge}-error` : undefined}
+              onFocus={() => setActiveEdge(edge)}
+              onChange={(value) => {
+                const next = maskDate(value, text[edge]);
+                setText((previous) => ({ ...previous, [edge]: next }));
+                setErrors((previous) => ({ ...previous, [edge]: "" }));
+                if (hasFullYear(next) || !next) commit(edge, next);
+              }}
+              onCommit={(value) => commit(edge, value)}
+              onEnter={() => {
+                if (edge === "from") {
+                  setActiveEdge("to");
+                  toRef.current?.focus();
+                } else {
+                  applyRef.current?.focus();
+                }
+              }}
+            />
             {errors[edge] && (
               <p
                 id={`${id}-${edge}-error`}
@@ -418,7 +391,7 @@ function RangePanel({
           type="button"
           variant="ghost"
           size="sm"
-          className="min-w-0 gap-1 px-1 text-sm font-medium"
+          className="min-w-0 shrink"
           aria-expanded={monthView}
           aria-controls={`${id}-calendar`}
           onClick={() => {
@@ -440,7 +413,7 @@ function RangePanel({
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 px-1 text-xs underline underline-offset-4"
+              className="underline underline-offset-4"
               onClick={() => closeMonths(clampMonth(today))}
             >
               {t("today")}
@@ -454,8 +427,7 @@ function RangePanel({
                   key={direction}
                   type="button"
                   variant="ghost"
-                  size="sm"
-                  className="h-8 w-7 p-0"
+                  size="icon-sm"
                   aria-label={t(
                     direction === -1 ? "previous_month" : "next_month",
                   )}
@@ -484,7 +456,7 @@ function RangePanel({
               <Button
                 type="button"
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 aria-label={t("previous_year")}
                 disabled={year <= firstMonth.getFullYear()}
                 onClick={() => setYear(year - 1)}
@@ -495,7 +467,7 @@ function RangePanel({
               <Button
                 type="button"
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 aria-label={t("next_year")}
                 disabled={!!lastMonth && year >= lastMonth.getFullYear()}
                 onClick={() => setYear(year + 1)}
@@ -517,7 +489,7 @@ function RangePanel({
                     type="button"
                     variant={shown ? "primary" : current ? "outline" : "ghost"}
                     size="sm"
-                    className="relative h-full min-w-0 px-1 font-normal"
+                    className="relative min-w-0"
                     aria-pressed={shown}
                     disabled={
                       date < firstMonth || !!(lastMonth && date > lastMonth)
