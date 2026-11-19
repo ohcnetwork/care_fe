@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, PlusCircle, X } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link, navigate as ravigerNavigate } from "raviger";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -36,6 +36,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
+import { navigate } from "@/lib/router/navigate";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { slugValueSchema } from "@/types/base/slug/schema";
@@ -162,7 +163,7 @@ function ProductKnowledgeFormContent({
   existingData,
   categorySlug,
   onSuccess = () =>
-    navigate(
+    ravigerNavigate(
       `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
     ),
 }: {
@@ -255,7 +256,7 @@ function ProductKnowledgeFormContent({
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
-        navigate(
+        ravigerNavigate(
           `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
         );
       },
@@ -278,9 +279,10 @@ function ProductKnowledgeFormContent({
           queryKey: ["productKnowledge", slug],
         });
         toast.success(t("product_knowledge_updated_successfully"));
-        navigate(
-          `/facility/${facilityId}/settings/product_knowledge/${productKnowledge.slug}`,
-        );
+        navigate({
+          to: "/facility/$facilityId/settings/product_knowledge/$slug",
+          params: { facilityId, slug: productKnowledge.slug },
+        });
       },
     },
   );
@@ -575,7 +577,7 @@ function ProductKnowledgeFormContent({
                       {t("alternative_names")}
                     </h2>
                     <p className="mt-0.5 text-sm text-gray-500">
-                      {t("add_product_alternative name")}
+                      {t("add_product_alternative_name")}
                     </p>
                   </div>
                   <Button

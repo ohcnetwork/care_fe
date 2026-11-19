@@ -8,17 +8,15 @@ import Integrations from "@/Integrations";
 import { OverrideProvider } from "@/lib/override";
 import PluginEngine from "@/PluginEngine";
 import AuthUserProvider from "@/Providers/AuthUserProvider";
-import PublicRouter from "@/Routers/PublicRouter";
+import { router } from "@/router";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
 import careConfig from "@careConfig";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { RouterProvider } from "@tanstack/react-router";
 import { useLocationChange } from "raviger";
-import { lazy, Suspense, useEffect } from "react";
-
-const PatientRouter = lazy(() => import("@/Routers/PatientRouter"));
-const AppRouter = lazy(() => import("@/Routers/AppRouter"));
+import { Suspense, useEffect } from "react";
 
 const ScrollToTop = () => {
   useLocationChange(() => {
@@ -44,17 +42,10 @@ const App = () => {
             <ShortcutProvider>
               <PluginEngine>
                 <OverrideProvider>
-                  <AuthUserProvider
-                    unauthorized={<PublicRouter />}
-                    otpAuthorized={
-                      <Suspense fallback={<Loading />}>
-                        <PatientRouter />
-                      </Suspense>
-                    }
-                  >
-                    <Suspense fallback={<Loading />}>
-                      <AppRouter />
-                    </Suspense>
+                  {/* Route tree: src/routes/. Route guards read the session
+                      from AuthUserProvider through the router context. */}
+                  <AuthUserProvider>
+                    <RouterProvider router={router} />
                   </AuthUserProvider>
                 </OverrideProvider>
                 <Toaster

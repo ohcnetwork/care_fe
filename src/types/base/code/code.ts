@@ -31,6 +31,7 @@ export const CodeSchema = z.object({
 export type ValueSetSystem =
   | "system-allergy-code"
   | "system-condition-code"
+  | "system-symptom-code"
   | "system-medication"
   | "system-additional-instruction"
   | "system-administration-method"

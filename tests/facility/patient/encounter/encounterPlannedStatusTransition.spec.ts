@@ -5,6 +5,7 @@ import {
   openCreateEncounterDialog,
   selectStatusInCreateDialog,
 } from "tests/facility/patient/encounter/encounterFormHelpers";
+import { createPatient } from "tests/helper/patient";
 import { expectToast } from "tests/helper/ui";
 
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
@@ -19,7 +20,7 @@ async function createPlannedEncounter(
   start: "past" | "future",
   encounterClass: "Ambulatory" | "Inpatient" = "Ambulatory",
 ) {
-  await openCreateEncounterDialog(page);
+  await openCreateEncounterDialog(page, await createPatient("Encounter Test"));
   const dialog = getEncounterCreateDialog(page);
   await dialog
     .getByRole("button", { name: new RegExp(`^${encounterClass}`) })
@@ -131,7 +132,7 @@ async function expectPersistedPeriod(
 }
 
 test.describe("Planned Encounter Status Transition", () => {
-  // Tests share a patient with a limit of five live encounters.
+  // Encounter creation takes a facility-wide lock, so run these one at a time.
   test.describe.configure({ mode: "serial" });
 
   test.afterEach(async ({ page }, testInfo) => {

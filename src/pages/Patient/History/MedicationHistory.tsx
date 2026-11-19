@@ -1,4 +1,3 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -13,8 +12,9 @@ import { MedicationRequestEmptyState as EmptyState } from "@/components/Medicine
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
@@ -82,28 +82,19 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
   const { t } = useTranslation();
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
+    useInfiniteList({
       queryKey: ["infinite-activeMedicationRequests", patientId],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(medicationRequestApi.list, {
-          pathParams: { patientId: patientId },
-          queryParams: {
-            limit: 100,
-            status: "active",
-            medications_only: true,
-            offset: String(pageParam),
-          },
-        })({ signal });
-        return response as PaginatedResponse<MedicationRequestRead>;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * 100;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
+      ...query.infinite(medicationRequestApi.list, {
+        pathParams: { patientId: patientId },
+        queryParams: {
+          status: "active",
+          medications_only: true,
+        },
+        pageSize: 100,
+      }),
     });
 
-  const medications = data?.pages.flatMap((page) => page.results) ?? [];
+  const medications = data?.results ?? [];
 
   if (isLoading) {
     return <TableSkeleton count={10} />;

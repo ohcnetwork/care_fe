@@ -1,5 +1,4 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -20,6 +19,7 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import authApi from "@/types/auth/authApi";
 
 interface ResetPasswordProps {
@@ -53,7 +53,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
       localStorage.removeItem(LocalStorageKeys.accessToken);
       localStorage.removeItem(LocalStorageKeys.refreshToken);
       toast.success(t("password_reset_success"));
-      navigate("/login");
+      navigate({ to: "/login" });
     },
     onError: (error) => {
       if (error.cause) {
@@ -79,12 +79,15 @@ const ResetPassword = (props: ResetPasswordProps) => {
     enabled: !!props.token,
   });
 
-  if (isError) navigate("/invalid-reset");
+  if (isError) navigate({ to: "/invalid-reset" });
 
   return (
     <AuthLayout>
       <AuthCard
-        back={{ label: t("back_to_login"), onClick: () => navigate("/login") }}
+        back={{
+          label: t("back_to_login"),
+          onClick: () => navigate({ to: "/login" }),
+        }}
         title={t("reset_password")}
       >
         <form noValidate className="grid gap-6" onSubmit={handleSubmit}>

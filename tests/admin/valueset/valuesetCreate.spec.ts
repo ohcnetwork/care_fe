@@ -200,7 +200,7 @@ test.describe("ValueSet Create", () => {
     );
     await expect(errorMessage).toBeVisible();
     await expect(errorMessage).toHaveText(
-      new RegExp(`atleast \\d+.*atmost ${MAX_SLUG_LENGTH}`, "i"),
+      new RegExp(`at least \\d+.*at most ${MAX_SLUG_LENGTH}`, "i"),
     );
 
     // Test: Slug too long (more than 50 characters)
@@ -212,7 +212,7 @@ test.describe("ValueSet Create", () => {
 
     await expect(errorMessage).toBeVisible();
     await expect(errorMessage).toHaveText(
-      new RegExp(`atleast \\d+.*atmost ${MAX_SLUG_LENGTH}`, "i"),
+      new RegExp(`at least \\d+.*at most ${MAX_SLUG_LENGTH}`, "i"),
     );
 
     const validSlug = faker.string.alphanumeric(

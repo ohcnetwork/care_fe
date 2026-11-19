@@ -1,4 +1,5 @@
-import { Link, navigate, usePathParams } from "raviger";
+import { Link } from "@tanstack/react-router";
+import { navigate, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -256,7 +257,10 @@ const UserListRow = ({ user }: { user: UserReadMinimal }) => {
           variant="outline"
           size="sm"
         >
-          <Link href={`/facility/${facilityId}/users/${user.username}`}>
+          <Link
+            to="/facility/$facilityId/users/$username"
+            params={{ facilityId, username: user.username }}
+          >
             <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
             <span>{t("see_details")}</span>
           </Link>

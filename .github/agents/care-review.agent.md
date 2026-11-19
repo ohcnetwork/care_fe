@@ -27,11 +27,12 @@ same _judgment_ here, but as a bot commenting on a pull request:
 - **You cannot ask a question and wait.** Where a lens says to ask before rewriting something you
   don't understand, say plainly in the comment what you'd need to know and frame the finding as a
   question rather than an assertion.
-- **You CAN read the repository**, and should — but the working tree is the **base branch, which
-  does not contain this PR's changes.** That is the right tree for the approach lens ("does this
-  already exist?" is a question about pre-existing code): verify a reuse claim against it before
-  making it. To see the PR's own content, use the GitHub API — don't assume a file on disk reflects
-  the change under review.
+- **You CAN read the repository**, and should — but any working tree you have is the **default
+  branch (`develop`), whatever the PR's base, and does not contain this PR's changes.** That is the
+  right tree for the approach lens ("does this already exist?" is a question about pre-existing
+  code): verify a reuse claim against it before making it — for a PR into another base, check that
+  base through the API instead. To see the PR's own content, use the GitHub API — don't assume a file
+  on disk reflects the change under review.
 
 The severity labels the lenses use — `Broken` / `Convention` / `Polish`, and Lens 1's legibility
 tiers — decide what is worth reporting and in what order. Lens 2 has no severity vocabulary; judge

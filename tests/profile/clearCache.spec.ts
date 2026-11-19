@@ -47,14 +47,19 @@ test.describe("Clear Cache in profile successfully", () => {
         ),
       ),
     ).toContain(testScope);
+    // The worker precaches the whole build, one file at a time, into its own
+    // scope's cache before it activates. Route code splitting makes that 600+
+    // files, which takes longer than the default 10s on CI.
     await expect
-      .poll(() =>
-        page.evaluate(async (scope) => {
-          const registrations =
-            await navigator.serviceWorker.getRegistrations();
-          return registrations.find((reg) => reg.scope === scope)?.active
-            ?.state;
-        }, testScope),
+      .poll(
+        () =>
+          page.evaluate(async (scope) => {
+            const registrations =
+              await navigator.serviceWorker.getRegistrations();
+            return registrations.find((reg) => reg.scope === scope)?.active
+              ?.state;
+          }, testScope),
+        { timeout: 30_000 },
       )
       .toBe("activated");
 
@@ -154,7 +159,8 @@ for (const action of ["Clear Cache", "Update Now"]) {
         page.getByRole("button", { name: action, exact: true }),
       ).toBeVisible();
     }
-    const reloaded = page.waitForEvent("domcontentloaded");
+    // Cache maintenance can wait for the split build's initial precache on CI.
+    const reloaded = page.waitForEvent("domcontentloaded", { timeout: 30_000 });
     await page.getByRole("button", { name: action, exact: true }).click();
     await reloaded;
     await expect(
@@ -216,7 +222,8 @@ test("software Update flushes the last form edit before reloading", async ({
   const update = page.getByRole("button", { name: "Update", exact: true });
   await expect(update).toBeVisible();
   await input.fill("Last keystroke immediately before software update");
-  const reloaded = page.waitForEvent("domcontentloaded");
+  // Cache maintenance can wait for the split build's initial precache on CI.
+  const reloaded = page.waitForEvent("domcontentloaded", { timeout: 30_000 });
   await update.click();
   await reloaded;
   await expect(

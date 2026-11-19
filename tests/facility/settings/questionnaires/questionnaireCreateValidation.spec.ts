@@ -67,7 +67,7 @@ test.describe("Questionnaire v2 create form validation", () => {
         await page.getByRole("button", { name: "Save Questionnaire" }).click();
         await expect(
           page.getByText(
-            "Must be atleast 5 characters and atmost 50 characters",
+            "Must be at least 5 characters and at most 50 characters",
           ),
         ).toBeVisible();
         expect(posts).toHaveLength(0);

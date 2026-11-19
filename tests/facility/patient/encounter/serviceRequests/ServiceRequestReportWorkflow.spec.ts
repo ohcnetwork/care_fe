@@ -4,6 +4,8 @@ import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
+import { reportTypeCombobox } from "./serviceRequest";
+
 test.use({ storageState: "tests/.auth/user.json" });
 
 interface ReportWorkflowOptions {
@@ -147,12 +149,7 @@ test.describe("Service request report workflow", () => {
     await expect(
       page.getByRole("button", { name: "Test Results Entry", exact: true }),
     ).toBeVisible();
-    await page
-      .getByRole("combobox", {
-        name: "Select Diagnostic Report Type",
-        exact: true,
-      })
-      .click();
+    await reportTypeCombobox(page).click();
     await page
       .getByRole("option", {
         name: `${fixture.report.code.display} (${fixture.report.code.code})`,

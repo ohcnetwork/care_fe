@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -39,6 +39,7 @@ import {
 } from "@/types/billing/invoice/invoice";
 import { PaymentReconciliationStatus } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   BadgeCheck,
   ChevronDown,
@@ -49,7 +50,11 @@ import {
   ReceiptText,
   SquareArrowOutUpRight,
 } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
+import {
+  Link as RavigerLink,
+  navigate as ravigerNavigate,
+  useQueryParams,
+} from "raviger";
 import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -65,6 +70,7 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareApps } from "@/hooks/useCareApps";
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import { isAccountActiveAndBillable } from "@/pages/Facility/billing/account/utils";
 import {
@@ -113,13 +119,16 @@ function InvoiceShow({
     relatedInvoices?: string;
   }>();
   const openPaymentSheet = () => {
-    navigate(`/facility/${facilityId}/billing/invoices/${invoiceId}/pay`, {
-      replace: true,
-      query: qParams,
-    });
+    ravigerNavigate(
+      `/facility/${facilityId}/billing/invoices/${invoiceId}/pay`,
+      {
+        replace: true,
+        query: qParams,
+      },
+    );
   };
   const closePaymentSheet = () => {
-    navigate(`/facility/${facilityId}/billing/invoices/${invoiceId}`, {
+    ravigerNavigate(`/facility/${facilityId}/billing/invoices/${invoiceId}`, {
       replace: true,
       query: qParams,
     });
@@ -342,7 +351,8 @@ function InvoiceShow({
           <p className="mt-2 text-gray-600">{t("invoice_may_not_exist")}</p>
           <Button asChild className="mt-4">
             <Link
-              href={`/facility/${facilityId}/billing/invoices`}
+              to="/facility/$facilityId/billing/invoices"
+              params={{ facilityId }}
               data-shortcut-id="go-back"
             >
               {t("back_to_invoices")}
@@ -370,7 +380,7 @@ function InvoiceShow({
               <label className="text-gray-700 text-sm font-medium">
                 {t("patient_name")}
               </label>
-              <Link
+              <RavigerLink
                 href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                   {
                     phone_number: invoice.account.patient.phone_number,
@@ -384,7 +394,7 @@ function InvoiceShow({
                   {invoice.account.patient.name}
                   <SquareArrowOutUpRight className="ml-1 size-4 inline" />
                 </div>
-              </Link>
+              </RavigerLink>
             </div>
 
             <div>
@@ -392,7 +402,8 @@ function InvoiceShow({
                 {t("account")}
               </label>
               <Link
-                href={`/facility/${facilityId}/billing/account/${invoice.account.id}`}
+                to="/facility/$facilityId/billing/account/$accountId"
+                params={{ facilityId, accountId: invoice.account.id }}
               >
                 <div className="font-semibold text-gray-950 underline">
                   {invoice.account.name}
@@ -629,14 +640,16 @@ function InvoiceShow({
                         ...relatedInvoices.split(","),
                         invoiceId,
                       ].join(",");
-                      navigate(
-                        `/facility/${facilityId}/billing/invoices/${allInvoiceIds}/print`,
-                      );
+                      navigate({
+                        to: "/facility/$facilityId/billing/invoices/$invoiceIds/print",
+                        params: { facilityId, invoiceIds: allInvoiceIds },
+                      });
                     } else {
                       // Navigate to single invoice print
-                      navigate(
-                        `/facility/${facilityId}/billing/invoice/${invoiceId}/print`,
-                      );
+                      navigate({
+                        to: "/facility/$facilityId/billing/invoice/$invoiceId/print",
+                        params: { facilityId, invoiceId },
+                      });
                     }
                   }}
                 >
@@ -1237,9 +1250,14 @@ function InvoiceShow({
                                         size="sm"
                                         className="text-gray-800 font-semibold text-xs p-2"
                                         onClick={() => {
-                                          navigate(
-                                            `/facility/${facilityId}/billing/payments/${payment.id}`,
-                                          );
+                                          navigate({
+                                            to: "/facility/$facilityId/billing/payments/$paymentReconciliationId",
+                                            params: {
+                                              facilityId,
+                                              paymentReconciliationId:
+                                                payment.id,
+                                            },
+                                          });
                                         }}
                                       >
                                         <>
@@ -1252,9 +1270,14 @@ function InvoiceShow({
                                         size="sm"
                                         className="text-gray-800 font-semibold text-xs p-2"
                                         onClick={() => {
-                                          navigate(
-                                            `/facility/${facilityId}/billing/payments/${payment.id}/print`,
-                                          );
+                                          navigate({
+                                            to: "/facility/$facilityId/billing/payments/$paymentReconciliationId/print",
+                                            params: {
+                                              facilityId,
+                                              paymentReconciliationId:
+                                                payment.id,
+                                            },
+                                          });
                                         }}
                                       >
                                         <>
@@ -1385,9 +1408,14 @@ function InvoiceShow({
                                       size="sm"
                                       className="text-gray-800 font-semibold text-xs p-2"
                                       onClick={() => {
-                                        navigate(
-                                          `/facility/${facilityId}/billing/payments/${creditNote.id}`,
-                                        );
+                                        navigate({
+                                          to: "/facility/$facilityId/billing/payments/$paymentReconciliationId",
+                                          params: {
+                                            facilityId,
+                                            paymentReconciliationId:
+                                              creditNote.id,
+                                          },
+                                        });
                                       }}
                                     >
                                       <>
@@ -1400,9 +1428,14 @@ function InvoiceShow({
                                       size="sm"
                                       className="text-gray-800 font-semibold text-xs p-2"
                                       onClick={() => {
-                                        navigate(
-                                          `/facility/${facilityId}/billing/payments/${creditNote.id}/print`,
-                                        );
+                                        navigate({
+                                          to: "/facility/$facilityId/billing/payments/$paymentReconciliationId/print",
+                                          params: {
+                                            facilityId,
+                                            paymentReconciliationId:
+                                              creditNote.id,
+                                          },
+                                        });
                                       }}
                                     >
                                       <>
@@ -1492,7 +1525,7 @@ function InvoiceShow({
                 <ShortcutBadge actionId="cancel-action" />
               </AlertDialogCancel>
               <AlertDialogAction
-                className={cn(buttonVariants({ variant: "destructive" }))}
+                variant="destructive"
                 onClick={handleRemoveChargeItem}
                 disabled={isRemoving}
               >
@@ -1589,7 +1622,7 @@ function InvoiceShow({
               <div className="flex items-center bg-white rounded-r-lg p-2 pl-0">
                 <Button
                   variant="primary"
-                  onClick={() => navigate(sourceUrl)}
+                  onClick={() => ravigerNavigate(sourceUrl)}
                   className="shadow ml-2"
                 >
                   <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
