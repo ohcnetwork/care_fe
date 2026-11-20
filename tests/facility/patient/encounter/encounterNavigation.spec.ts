@@ -743,7 +743,7 @@ test.describe("Encounter navigation", () => {
           ).toBeVisible();
         });
 
-        await test.step("Return to the appointments board with the back button", async () => {
+        await test.step("Return to the encounter, then leave the chart with the back button", async () => {
           // Leaving mid-request would cancel the mocked encounter refetch.
           const refetched = page.waitForResponse(
             (response) => new URL(response.url()).pathname === encounterPath,
@@ -751,11 +751,14 @@ test.describe("Encounter navigation", () => {
           await page.goBack();
           await refetched;
           await expect(bar).toBeVisible();
+          // Back is a real browser back (navigateBackFrom). The board is now
+          // a forward entry and the encounter was opened directly, so no
+          // page outside the chart lies behind it: Back falls back to the
+          // patient instead of jumping forward to the board.
           await page.getByRole("button", { name: "Back", exact: true }).click();
           await expect(page).toHaveURL(
             (url) =>
-              url.pathname === `/facility/${facilityId}/appointments` &&
-              url.searchParams.get("practitioners") === resourceId,
+              url.pathname === `/facility/${facilityId}/patient/${patientId}`,
           );
         });
       });

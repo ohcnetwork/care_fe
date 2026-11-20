@@ -137,8 +137,12 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
   await page.getByRole("option", { name: "Option 1", exact: true }).click();
   await page.getByRole("option", { name: "Option 2", exact: true }).click();
   await page.getByRole("button", { name: "Done", exact: true }).click();
-  await expect(multiSelect.getByText("Option 1", { exact: true })).toBeVisible();
-  await expect(multiSelect.getByText("Option 2", { exact: true })).toBeVisible();
+  await expect(
+    multiSelect.getByText("Option 1", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    multiSelect.getByText("Option 2", { exact: true }),
+  ).toBeVisible();
 
   await expect
     .poll(async () => {
@@ -148,23 +152,38 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
     .toEqual(variants.map(() => coding));
 
   // A reload round-trips the same coded entries, rather than rebuilding
-  // them from display strings when the controls mount again.
+  // them from display strings when the controls mount again. Resuming
+  // drops a fixed-choice answer whose option was removed from the form
+  // meanwhile (draftMerge), names it in the restore bar, and keeps the
+  // rest of that question's selections.
   removeFirstOption = true;
   await page.reload();
+  await expect(
+    page.getByText(
+      "multiple_dropdown — the selected option is no longer available",
+      { exact: true },
+    ),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Resume", exact: true }).click();
-  await expect(multiSelect.getByText("Option 1", { exact: true })).toBeVisible();
+  await expect(
+    multiSelect.getByText("Option 2", { exact: true }),
+  ).toBeVisible();
+  await expect(multiSelect.getByText("Option 1", { exact: true })).toHaveCount(
+    0,
+  );
   await expect(
     questionBlock(page, "single_chips").getByRole("radio", {
       name: "Option 1",
       exact: true,
     }),
   ).toHaveAttribute("aria-checked", "true");
+  const retained = variants.filter(({ id }) => id !== "multiple_dropdown");
   await expect
     .poll(async () => {
       const values = await draftValues(page, questionnaireId);
-      return variants.map(({ id }) => values?.[id]?.[0]?.coding);
+      return retained.map(({ id }) => values?.[id]?.[0]?.coding);
     })
-    .toEqual(variants.map(() => coding));
+    .toEqual(retained.map(() => coding));
 });
 
 test("decimal answers remain browser-valid and optional dates can be cleared", async ({

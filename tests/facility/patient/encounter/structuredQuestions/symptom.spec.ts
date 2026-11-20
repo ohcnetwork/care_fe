@@ -26,19 +26,21 @@ const SYMPTOM_VERIFICATION_STATUS = [
   "Refuted",
 ] as const;
 
+// `system-symptom-code` is clinical findings minus disorders
+// (`< 404684003 MINUS << 64572001`), so every option here must be a
+// non-disorder finding; disorders belong in diagnosis.spec.ts.
 const symptomOptions = [
   "Chronic pain",
-  "Chronic respiratory failure due to obstructive sleep apnoea",
-  "Chronic nontraumatic intracranial subdural haematoma",
-  "Adenosine deaminase 2 deficiency",
-  "Malignant melanoma of skin of left wrist",
   "Small bowel enteroscopy normal",
-  "Renal scarring due to vesicoureteral reflux",
-  "Venous ulcer of toe of left foot",
-  "Acquired arteriovenous malformation of vascular structure of gastrointestinal tract",
-  "Venous ulcer of left ankle",
-  "Acute left-sided ulcerative colitis",
-  "Allergy to hydrogen peroxide",
+  "Feeling angry",
+  "Difficulty controlling anger",
+  "Lack of trust",
+  "Fetal heart sounds quiet",
+  "Ear smelly",
+  "Headache",
+  "Cough",
+  "Nausea",
+  "Fatigue",
 ];
 const usedSymptoms = new Set<string>(); // To track used symptoms across tests so we don't add duplicate symptoms
 

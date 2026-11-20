@@ -17,22 +17,20 @@ let verification: string;
 let severity: string;
 const usedDiagnoses = new Set<string>(); // To track used diagnoses across tests so we don't add duplicate diagnoses
 
+// `system-condition-code` is disorders only (is-a 64572001), so every
+// option here must be a disorder; findings belong in symptom.spec.ts.
 const diagnosisOptions = [
   "Chronic nontraumatic intracranial subdural haematoma",
   "Malignant melanoma of skin of left wrist",
-  "Born in Nauru",
   "Chronic respiratory failure due to obstructive sleep apnoea",
-  "Difficulty controlling anger",
-  "Lack of trust",
   "Acquired arteriovenous malformation of vascular structure of gastrointestinal tract",
   "Venous ulcer of left ankle",
-  "Feeling angry",
-  "Fetal heart sounds quiet",
-  "Small bowel enteroscopy normal",
-  "Ear smelly",
+  "Venous ulcer of toe of left foot",
+  "Adenosine deaminase 2 deficiency",
+  "Renal scarring due to vesicoureteral reflux",
+  "Acute left-sided ulcerative colitis",
   "Cholera",
   "Osteonecrosis",
-  "Chronic pain",
 ];
 
 const DIAGNOSIS_CLINICAL_STATUS = [
