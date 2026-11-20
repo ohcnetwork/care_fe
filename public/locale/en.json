@@ -1362,6 +1362,7 @@
   "diagnostic_report_not_found": "Diagnostic Report Not Found",
   "diagnostic_report_one": "Diagnostic Report",
   "diagnostic_report_other": "Diagnostic Reports",
+  "diagnostic_report_print_failed_attachments": "Couldn't load: {{files}}. Printing is disabled until every attachment loads.",
   "diagnostic_report_print_load_error": "Unable to load all reports and attachments. Please reload the page and try again.",
   "diagnostic_report_saved_successfully": "Diagnostic report saved successfully",
   "didnt_receive_a_message": "Didn't receive a message?",
@@ -4343,6 +4344,7 @@
   "retrieve_with_year_of_birth": "Retrieve with year of birth",
   "retrieve_with_year_of_birth_help": "Allow searching for a patient using this identifier and their year of birth.",
   "retry": "Retry",
+  "return_date": "Return Date",
   "return_medicines": "Return Medicines",
   "return_to": "Return To",
   "return_to_care": "Return to Care",
@@ -5925,6 +5927,5 @@
   "you_cannot_change_once_submitted": "You cannot change once submitted.",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞",
-  "diagnostic_report_print_failed_attachments": "Couldn't load: {{files}}. Printing is disabled until every attachment loads."
+  "℞": "℞"
 }

@@ -89,6 +89,14 @@ Built on **CareUI** + **Base UI primitives** + **Tailwind CSS v4**, distributed 
 - `src/style/careui.css` — Global CareUI semantic tokens, light/dark themes, accessibility themes, and utilities. Use semantic colors such as `bg-background`, `text-foreground`, and `border-border`; no scoped `.careui` theme or `cui-*` aliases are needed.
 - `components.json` — The `@careui` registry points to `https://careui.ohc.network/registry/care-ui/{name}/{name}.json`. Use the locally pinned shadcn CLI when importing registry source.
 
+Use the shared `FilterSelect` for single-value toolbar filters. It composes CareUI's radio dropdown, displays the selected value beside the label, and clears through `onClear` when "All" is selected. Browser tests should target its button and `menuitemradio` options rather than a combobox or a separate clear button.
+
+Use `DropdownMenuTrigger` directly for a native Base UI trigger with its own styling: the default `field` appearance uses the input's `shadow-2xs`, and `appearance="icon"` is flat for overflow menus. Give icon-only triggers an accessible name. Use `render` or `asChild` only when supplying a custom trigger that owns its styling, such as a CareUI Button. The menu popup styles are independent of the trigger.
+
+Select, standalone Combobox, and DropdownMenu field triggers share the same field surface without sharing behavior. Autocomplete and MultiSelect use that surface on both their desktop and mobile triggers. Inside a Combobox input, the input group owns the shadow and the chevron uses the flat `addon` appearance.
+
+Use `PopoverTrigger appearance="field"` for field-like controls such as DatePicker. Plain Popover triggers remain unstyled, and custom `render` or `asChild` triggers keep their own styling.
+
 The shared components and theme are based on [CareUI commit 4e143863](https://github.com/ohcnetwork/careui/tree/4e143863698da01881d522361ff68b626d4e7db1). CareUI is consumed as registry source. `@base-ui/react` is its required primitive dependency. Keep the `shadcn/tailwind.css` import: it provides CareUI's state and orientation variants, including `data-horizontal` and `data-vertical`.
 
 The setup also imports CareUI's variable Figtree and Geist Mono fonts and typeset styles. Semantic colors and the primary scale come from the upstream theme. Existing numbered `secondary-*` classes are compatibility aliases for CareUI's neutral palette, rather than a separate brand palette. Keep Tailwind configuration from overriding these font and color tokens.

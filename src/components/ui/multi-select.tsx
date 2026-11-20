@@ -24,12 +24,18 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  fieldTriggerLayout,
+  fieldTriggerSurface,
+  invalidTriggerOutline,
+  triggerFocus,
+} from "@/components/ui/field-trigger-styles";
 import { Label } from "@/components/ui/label";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
 
-type ButtonProps = Omit<
-  React.ComponentProps<typeof Button>,
+type TriggerProps = Omit<
+  React.ComponentProps<"button">,
   keyof MultiSelectProps
 >;
 interface MultiSelectProps {
@@ -52,7 +58,7 @@ export function MultiSelect({
   selectionSummary,
   translationBasekey,
   ...props
-}: ButtonProps & MultiSelectProps) {
+}: TriggerProps & MultiSelectProps) {
   const { t } = useTranslation();
   const [selectedValues, setSelectedValues] = React.useState<string[]>(value);
   const [open, setOpen] = React.useState(false);
@@ -92,12 +98,19 @@ export function MultiSelect({
     options.every((option) => selectedValues.includes(option.value));
 
   const trigger = (
-    <Button
-      variant="outline"
+    <button
+      type="button"
       ref={ref}
       role="combobox"
       aria-expanded={open}
-      className={cn("w-full min-w-0 justify-between font-normal", className)}
+      className={cn(
+        fieldTriggerLayout,
+        fieldTriggerSurface,
+        triggerFocus,
+        invalidTriggerOutline,
+        "w-full min-w-0 justify-between font-normal",
+        className,
+      )}
       {...props}
     >
       {value.length === 0 ? (
@@ -107,8 +120,11 @@ export function MultiSelect({
           {selectionSummary || t("options_selected", { count: value.length })}
         </Badge>
       )}
-      <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
-    </Button>
+      <ChevronDown
+        aria-hidden="true"
+        className="size-4 shrink-0 text-muted-foreground"
+      />
+    </button>
   );
 
   const content = (

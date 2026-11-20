@@ -108,7 +108,7 @@ function LeftPanel({
             <Button
               variant="outline"
               role="combobox"
-              className="w-full border border-primary-600 justify-between h-auto min-h-[2.5rem] py-2"
+              className="w-full border shadow-xs border-primary-600 justify-between h-auto min-h-[2.5rem] py-2"
             >
               <div className="flex justify-start items-center gap-2 text-primary-800 flex-1">
                 <span className="text-left whitespace-normal break-words">
