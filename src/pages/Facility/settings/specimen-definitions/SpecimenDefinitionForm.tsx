@@ -183,7 +183,23 @@ function SpecimenDefinitionFormContent({
     derived_from_uri: z.url({ message: t("field_required") }).optional(),
     type_collected: CodeSchema,
     patient_preparation: z.array(CodeSchema).min(0),
-    collection: CodeSchema.optional(),
+    collection: z
+      .object({
+        code: CodeSchema.nullish(),
+        quantity: z
+          .object({
+            // The backend takes whole numbers only.
+            value: zodDecimal({ min: 1 }).refine(
+              (value) => Number.isInteger(Number(value)),
+              t("invalid_quantity"),
+            ),
+            unit: CodeSchema,
+          })
+          .nullish(),
+        method: CodeSchema.nullish(),
+        body_site: CodeSchema.nullish(),
+      })
+      .nullish(),
     type_tested: typeTestedSchema.optional(),
   });
 
@@ -239,8 +255,8 @@ function SpecimenDefinitionFormContent({
     form.setValue("type_collected", code);
   };
 
-  const handleCollectionMethodSelect = (code: Code) => {
-    form.setValue("collection", code);
+  const handleCollectionCodeSelect = (code: Code) => {
+    form.setValue("collection.code", code);
   };
 
   const handleCapTypeSelect = (code: Code) => {
@@ -317,6 +333,10 @@ function SpecimenDefinitionFormContent({
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
     const payload: SpecimenDefinitionCreate = {
       ...data,
+      collection:
+        data.collection && Object.values(data.collection).some(Boolean)
+          ? data.collection
+          : null,
       patient_preparation:
         data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested
@@ -500,7 +520,7 @@ function SpecimenDefinitionFormContent({
 
                     <FormField
                       control={form.control}
-                      name="collection"
+                      name="collection.code"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
                           <FormLabel>{t("collection")}</FormLabel>
@@ -509,7 +529,82 @@ function SpecimenDefinitionFormContent({
                               {...field}
                               system="system-specimen_collection_code"
                               placeholder={t("select_collection")}
-                              onSelect={handleCollectionMethodSelect}
+                              onSelect={handleCollectionCodeSelect}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="collection.quantity"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>{t("expected_quantity")}</FormLabel>
+                            <FormControl>
+                              <ComboboxQuantityInput
+                                quantity={
+                                  field.value
+                                    ? {
+                                        value: field.value.value,
+                                        unit: field.value.unit,
+                                      }
+                                    : undefined
+                                }
+                                onChange={field.onChange}
+                                placeholder={t("quantity")}
+                                units={SPECIMEN_DEFINITION_UNITS_CODES}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormMessage>
+                        {
+                          form.formState.errors.collection?.quantity?.value
+                            ?.message
+                        }
+                      </FormMessage>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="collection.method"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>{t("collection_method")}</FormLabel>
+                          <FormControl>
+                            <ValueSetSelect
+                              {...field}
+                              system="system-collection-method-code"
+                              placeholder={t("select_method")}
+                              onSelect={(code) =>
+                                form.setValue("collection.method", code)
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="collection.body_site"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>{t("body_site")}</FormLabel>
+                          <FormControl>
+                            <ValueSetSelect
+                              {...field}
+                              system="system-body-site"
+                              placeholder={t("select_body_site")}
+                              onSelect={(code) =>
+                                form.setValue("collection.body_site", code)
+                              }
                             />
                           </FormControl>
                           <FormMessage />

@@ -27,7 +27,7 @@ function createDraftPayload(
       accession_identifier: "",
       received_time: null,
       collection: {
-        method: requirement.collection || null,
+        method: requirement.collection?.method ?? null,
         body_site: null,
         collector: null,
         collected_date_time: null,
