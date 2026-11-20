@@ -17,7 +17,7 @@ import { encounterPageKeySchema } from "@/types/workspace/encounterWorkspace";
 import { FillPageBody } from "./FillPageBody";
 import { FillShell } from "./FillShell";
 import type { FillSubject } from "./subject";
-import { exitTargetOf, isPatientBound } from "./subject";
+import { exitFillSession, exitTargetOf, isPatientBound } from "./subject";
 
 import { useFillPageDrafts } from "./useFillPageDrafts";
 import { useFillPageQueries } from "./useFillPageQueries";
@@ -112,7 +112,7 @@ export function QuestionnaireFillPage({
 
   if (!questionnaireId) {
     return (
-      <FillShell onClose={() => navigate({ href: exitTarget })}>
+      <FillShell onClose={() => exitFillSession(exitTarget)}>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
           <h2 className="text-lg font-semibold text-gray-900">
             {t("select_questionnaire_to_fill")}
@@ -168,7 +168,7 @@ export function QuestionnaireFillPage({
     // jump shells when data lands — and the close affordance exists even
     // while loading.
     return (
-      <FillShell onClose={() => navigate({ href: exitTarget })}>
+      <FillShell onClose={() => exitFillSession(exitTarget)}>
         <div className="min-h-0 flex-1 overflow-hidden px-6 py-4">
           <FormSkeleton rows={10} />
         </div>
@@ -335,7 +335,7 @@ function FillErrorPage({
         <AlertTitle>{t("error")}</AlertTitle>
         <AlertDescription>{message}</AlertDescription>
       </Alert>
-      <Button variant="outline" onClick={() => navigate({ href: exitTarget })}>
+      <Button variant="outline" onClick={() => exitFillSession(exitTarget)}>
         <ArrowLeft className="size-4" />
         {t("back")}
       </Button>

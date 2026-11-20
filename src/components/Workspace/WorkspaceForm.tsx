@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import BackButton from "@/components/Common/BackButton";
 import Page from "@/components/Common/Page";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -55,7 +56,6 @@ import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 
 import mutate from "@/Utils/request/mutate";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import {
   createEncounterWorkspaceSchema,
@@ -278,7 +278,9 @@ export function WorkspaceForm({
         ),
       );
       toast.success(t(existing ? "workspace_updated" : "workspace_created"));
-      if (!existing) navigate({ href: `${scope.basePath}/${data.id}/edit` });
+      // Replace the create form, so going back from the editor skips it.
+      if (!existing)
+        navigate({ href: `${scope.basePath}/${data.id}/edit`, replace: true });
     },
   });
 
@@ -309,23 +311,16 @@ export function WorkspaceForm({
     <Page title={title} hideTitleOnPage className="px-0 md:px-0">
       <div className="mx-auto w-full max-w-[1600px] space-y-6 pb-8">
         <header className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white/95 px-1 py-4 backdrop-blur-sm sm:gap-4">
-          <Button
-            asChild
+          <BackButton
             variant="outline"
             size="icon"
             className="shrink-0 rounded-lg border-gray-200 shadow-none"
             disabled={busy}
+            fallback={returnPath}
           >
-            <HrefLink
-              href={returnPath}
-              onClick={(event) => {
-                if (busy) event.preventDefault();
-              }}
-            >
-              <ArrowLeft className="size-4" aria-hidden="true" />
-              <span className="sr-only">{t("back")}</span>
-            </HrefLink>
-          </Button>
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            <span className="sr-only">{t("back")}</span>
+          </BackButton>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <h1 className="w-full min-w-0 text-lg font-semibold tracking-tight text-gray-950 sm:w-auto sm:text-xl">

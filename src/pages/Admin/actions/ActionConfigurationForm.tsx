@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { flushSync } from "react-dom";
@@ -8,6 +7,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import BackButton from "@/components/Common/BackButton";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -98,13 +98,10 @@ export function ActionConfigurationForm({ id }: ActionConfigurationFormProps) {
             <AlertTitle>{t("error")}</AlertTitle>
             <AlertDescription>{t("no_data_found")}</AlertDescription>
           </Alert>
-          <Button
-            variant="outline"
-            onClick={() => navigate({ to: "/admin/actions" })}
-          >
+          <BackButton fallback="/admin/actions">
             <ArrowLeft className="size-4" />
             {t("back")}
-          </Button>
+          </BackButton>
         </div>
       </Page>
     );
@@ -119,12 +116,10 @@ export function ActionConfigurationForm({ id }: ActionConfigurationFormProps) {
                 {t("action_configuration_context_unsupported")}
               </AlertDescription>
             </Alert>
-            <Button asChild variant="outline">
-              <Link to="/admin/actions">
-                <ArrowLeft className="size-4" />
-                {t("back")}
-              </Link>
-            </Button>
+            <BackButton fallback="/admin/actions">
+              <ArrowLeft className="size-4" />
+              {t("back")}
+            </BackButton>
           </div>
         </Page>
       );
@@ -309,15 +304,11 @@ function ActionConfigurationEditor({
           noValidate
         >
           <div className="flex flex-wrap items-center gap-3">
-            {/* A router Link (not a bare anchor): the click goes through the
-                router, so a dirty form gets the app's unsaved-changes prompt
-                and a clean one a client-side transition. */}
-            <Button asChild variant="outline" size="xs">
-              <Link to="/admin/actions">
-                <ArrowLeft className="size-4" />
-                {t("back")}
-              </Link>
-            </Button>
+            {/* Going back also gets the unsaved-changes prompt. */}
+            <BackButton size="xs" fallback="/admin/actions">
+              <ArrowLeft className="size-4" />
+              {t("back")}
+            </BackButton>
             <h1 className="min-w-0 flex-1 truncate text-xl font-bold text-gray-900">
               {title}
             </h1>

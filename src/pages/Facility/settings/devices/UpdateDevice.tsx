@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -57,12 +56,14 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
       ) : (
         <div className="flex flex-col items-center justify-center gap-4 py-16">
           <p className="text-gray-500">{t("device_not_found")}</p>
-          <Link
-            to="/facility/$facilityId/settings/devices/$id"
-            params={{ facilityId, id: deviceId }}
+          <Button
+            variant="outline"
+            onClick={() =>
+              goBack(`/facility/${facilityId}/settings/devices/${deviceId}`)
+            }
           >
-            <Button variant="outline">{t("back")}</Button>
-          </Link>
+            {t("back")}
+          </Button>
         </div>
       )}
     </div>

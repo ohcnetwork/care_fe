@@ -42,6 +42,7 @@ import {
 } from "@/Utils/plugConfig";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
 
 interface Props {
@@ -153,7 +154,7 @@ function PlugConfigForm({
           ? t("app_installed_successfully")
           : t("config_updated_successfully"),
       );
-      navigate({ to: "/admin/apps" });
+      navigate({ to: "/admin/apps", replace: true });
     },
   });
 
@@ -167,7 +168,7 @@ function PlugConfigForm({
       });
       await queryClient.invalidateQueries({ queryKey: ["enabled-plugins"] });
       toast.success(t("config_deleted_successfully"));
-      navigate({ to: "/admin/apps" });
+      navigate({ to: "/admin/apps", replace: true });
     },
   });
 
@@ -421,7 +422,7 @@ function PlugConfigForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate({ to: "/admin/apps" })}
+            onClick={() => goBack("/admin/apps")}
           >
             {t("cancel")}
           </Button>

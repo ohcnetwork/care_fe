@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -9,6 +8,7 @@ import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import { navigate } from "@/lib/router/navigate";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
@@ -60,13 +60,15 @@ export function UpdateChargeItemDefinition({
             </AlertDescription>
           </Alert>
           <div className="flex justify-end">
-            <Button variant="link" asChild>
-              <Link
-                to="/facility/$facilityId/settings/charge_item_definitions"
-                params={{ facilityId }}
-              >
-                {t("return_to_list")}
-              </Link>
+            <Button
+              variant="link"
+              onClick={() =>
+                goBack(
+                  `/facility/${facilityId}/settings/charge_item_definitions`,
+                )
+              }
+            >
+              {t("return_to_list")}
             </Button>
           </div>
         </div>
@@ -79,6 +81,7 @@ export function UpdateChargeItemDefinition({
     navigate({
       to: "/facility/$facilityId/settings/charge_item_definitions",
       params: { facilityId },
+      replace: true,
     });
     return null;
   }

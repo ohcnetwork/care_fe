@@ -33,6 +33,7 @@ import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizati
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import { navigate } from "@/lib/router/navigate";
 import {
   type HealthcareServiceCreateSpec,
@@ -471,10 +472,7 @@ function HealthcareServiceFormContent({
               <Button
                 variant="outline"
                 onClick={() =>
-                  navigate({
-                    to: "/facility/$facilityId/settings/healthcare_services",
-                    params: { facilityId },
-                  })
+                  goBack(`/facility/${facilityId}/settings/healthcare_services`)
                 }
               >
                 {t("cancel")}

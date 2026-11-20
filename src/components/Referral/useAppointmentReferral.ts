@@ -5,6 +5,7 @@ import { useQueryParams } from "@/lib/router/queryParams";
 import referralApi from "@/types/emr/referral/referralApi";
 import { ReferralResource } from "@/types/emr/referral/referralResource";
 import referralResourceApi from "@/types/emr/referral/referralResourceApi";
+import { navigateBackFrom } from "@/Utils/navigationTrail";
 import query, { callApi } from "@/Utils/request/query";
 
 import { getReferralDetailUrl } from "./referralNavigation";
@@ -99,8 +100,15 @@ export function useAppointmentReferral(patientId: string) {
 
   const referral = !error && !isLoading ? referralQuery.data : undefined;
   const sourceUrl = localSourceUrl(params.referralSourceUrl);
-  const returnUrl = readableReferral
-    ? getReferralDetailUrl(readableReferral.id, sourceUrl)
+  // Back to the referral the booking flow started from, else open it.
+  const returnToReferral = readableReferral
+    ? () => {
+        const referralPath = getReferralDetailUrl(readableReferral.id);
+        navigateBackFrom(
+          (pathname) => pathname === referralPath,
+          getReferralDetailUrl(readableReferral.id, sourceUrl),
+        );
+      }
     : undefined;
   const successQueryParams: {
     referralId?: string;
@@ -153,7 +161,7 @@ export function useAppointmentReferral(patientId: string) {
     referral,
     isLoading,
     error,
-    returnUrl,
+    returnToReferral,
     successQueryParams,
     attachAppointment,
     refetch: referralQuery.refetch,

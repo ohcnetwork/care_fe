@@ -110,13 +110,11 @@ function PaymentReconciliationShow({
         <div className="text-center">
           <h2 className="text-2xl font-bold">{t("payment_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("payment_may_not_exist")}</p>
-          <Button asChild className="mt-4">
-            <Link
-              to="/facility/$facilityId/billing/payments"
-              params={{ facilityId }}
-            >
-              {t("back_to_payments")}
-            </Link>
+          <Button
+            className="mt-4"
+            onClick={() => goBack(`/facility/${facilityId}/billing/payments`)}
+          >
+            {t("back_to_payments")}
           </Button>
         </div>
       </div>

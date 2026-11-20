@@ -10,7 +10,7 @@ import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -23,6 +23,7 @@ import { Frame, FramePanel } from "@/components/ui/frame";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Muted, SubsectionTitle } from "@/components/ui/typography";
 
+import BackButton from "@/components/Common/BackButton";
 import Page from "@/components/Common/Page";
 import { ReferralAppointments } from "@/components/Referral/ReferralAppointments";
 import { ReferralAssignmentDialog } from "@/components/Referral/ReferralAssignmentDialog";
@@ -46,7 +47,6 @@ import { useReferralPermissions } from "@/components/Referral/useReferralPermiss
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { useQueryParams } from "@/lib/router/queryParams";
 import referralApi from "@/types/emr/referral/referralApi";
 
@@ -122,13 +122,10 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
           className="flex items-center justify-between gap-3"
           aria-label={t("referral_navigation")}
         >
-          <HrefLink
-            href={backUrl}
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
+          <BackButton variant="ghost" size="sm" fallback={backUrl}>
             <ArrowLeft className="size-4" />
             {t("back")}
-          </HrefLink>
+          </BackButton>
         </nav>
         {isLoading && (
           <div className="space-y-5" role="status" aria-label={t("loading")}>

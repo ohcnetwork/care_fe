@@ -9,6 +9,7 @@ import Page from "@/components/Common/Page";
 
 import { ClinicalHistoryWorkspace } from "@/components/Workspace/ClinicalHistoryWorkspace";
 
+import { navigateBackFrom } from "@/Utils/navigationTrail";
 import query from "@/Utils/request/query";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
@@ -22,7 +23,7 @@ function ClinicalHistoryPage({
   tab = "symptoms",
   fallBackUrl,
 }: {
-  fallBackUrl?: string;
+  fallBackUrl: string;
   facilityId?: string;
   patientId: string;
   tab: string;
@@ -38,8 +39,12 @@ function ClinicalHistoryPage({
     }),
   });
 
+  // Tab changes add history entries; leave to the page this was opened from.
   const handleClose = () => {
-    navigate({ href: sourceUrl || fallBackUrl });
+    navigateBackFrom(
+      (pathname) => !pathname.includes(`/patient/${patientId}/history/`),
+      sourceUrl || fallBackUrl,
+    );
   };
 
   const handleTabChange = (value: string) => {

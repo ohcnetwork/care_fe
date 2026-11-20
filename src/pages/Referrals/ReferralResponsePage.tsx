@@ -18,11 +18,11 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
-import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
 import referralApi from "@/types/emr/referral/referralApi";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
+import { goBack } from "@/Utils/utils";
 
 export function ReferralResponsePage({ referralId }: { referralId: string }) {
   const { t } = useTranslation();
@@ -78,7 +78,7 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
     canShowCached ? data : undefined,
   );
   const readOnly = canShowCached && !permissionsLoading && !canWrite;
-  const close = () => navigate({ href: detailUrl });
+  const close = () => goBack(detailUrl);
 
   return (
     <Page title={t("referral_respond")} hideTitleOnPage>

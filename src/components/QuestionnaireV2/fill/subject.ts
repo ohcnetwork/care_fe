@@ -1,4 +1,5 @@
 import type { RendererSubject } from "@/components/QuestionnaireV2/form/types";
+import { navigateBackFrom } from "@/Utils/navigationTrail";
 
 /**
  * What a fill session is being filled for. Each subject carries exactly the
@@ -73,7 +74,19 @@ export function rendererSubjectOf(subject: FillSubject): RendererSubject {
   return { facilityId: subject.facilityId, resourceId };
 }
 
-/** Where Close/Cancel and a completed submission land. */
+/**
+ * Leaves the fill session: goes back to the page it was opened from, past
+ * the session's own pages (the form picker, other forms). Lands on
+ * `exitTarget` when there is no such page.
+ */
+export function exitFillSession(exitTarget: string) {
+  navigateBackFrom(
+    (pathname) => !/\/questionnaire(\/|$)/.test(pathname),
+    exitTarget,
+  );
+}
+
+/** Where Close/Cancel and a completed submission land without history. */
 export function exitTargetOf(subject: FillSubject): string {
   switch (subject.type) {
     case "encounter":

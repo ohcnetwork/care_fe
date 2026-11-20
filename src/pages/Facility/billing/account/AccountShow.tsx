@@ -285,14 +285,13 @@ function AccountShow({
         <div className="text-center">
           <h2 className="text-2xl font-bold">{t("account_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("account_may_not_exist")}</p>
-          <Button asChild className="mt-4">
-            <Link
-              to="/facility/$facilityId/billing/account"
-              params={{ facilityId }}
-            >
-              {t("back_to_accounts")}
-            </Link>
-          </Button>
+          <BackButton
+            variant="default"
+            className="mt-4"
+            fallback={`/facility/${facilityId}/billing/account`}
+          >
+            {t("back_to_accounts")}
+          </BackButton>
         </div>
       </div>
     );

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import BackButton from "@/components/Common/BackButton";
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -9,7 +10,6 @@ import { Button } from "@/components/ui/button";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { HrefLink } from "@/lib/router/HrefLink";
 import {
   WorkspaceAuthContext,
   WorkspaceScope,
@@ -51,12 +51,10 @@ export function WorkspaceEditor({ scope, id }: WorkspaceEditorProps) {
             <AlertDescription>{t("workspace_load_error")}</AlertDescription>
           </Alert>
           <div className="flex gap-2">
-            <Button asChild variant="outline">
-              <HrefLink href={scope.basePath}>
-                <ArrowLeft className="size-4" />
-                {t("back")}
-              </HrefLink>
-            </Button>
+            <BackButton fallback={scope.basePath}>
+              <ArrowLeft className="size-4" />
+              {t("back")}
+            </BackButton>
             <Button variant="outline" onClick={() => refetch()}>
               {t("try_again")}
             </Button>

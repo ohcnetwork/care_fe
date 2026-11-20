@@ -21,7 +21,6 @@ import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { formatKeyboardShortcut } from "@/Utils/keyboardShortcutUtils";
 import mutate from "@/Utils/request/mutate";
-import { navigate } from "@/lib/router/navigate";
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 import type { PatientRead } from "@/types/emr/patient/patient";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -46,7 +45,7 @@ import type { FillDraftScope, LoadedFillDraft } from "./draft/fillDraftStore";
 import { useFillSessionAutosave } from "./draft/useFillAutosave";
 import { useSaveServerDraft } from "./draft/useSaveServerDraft";
 import type { FillSubject } from "./subject";
-import { rendererSubjectOf } from "./subject";
+import { exitFillSession, rendererSubjectOf } from "./subject";
 import { useSubmitFillSession } from "./submit/useSubmitFillSession";
 import { useFillActions } from "./useFillActions";
 import { useFillSessionForms } from "./useFillSessionForms";
@@ -206,7 +205,7 @@ export function FillPageBody({
       // Order matters: finishDraft flushes the pristine state before the
       // redirect so useNavigationBlocker does not block it.
       autosave.finishDraft();
-      navigate({ href: exitTarget });
+      exitFillSession(exitTarget);
     },
   });
 
@@ -220,7 +219,7 @@ export function FillPageBody({
     continueDraftId,
     onSaved: () => {
       autosave.finishDraft();
-      navigate({ href: exitTarget });
+      exitFillSession(exitTarget);
     },
   });
 
@@ -244,7 +243,7 @@ export function FillPageBody({
         discarded,
       );
       queryClient.invalidateQueries({ queryKey: formSubmissionKeys.lists() });
-      navigate({ href: exitTarget });
+      exitFillSession(exitTarget);
     },
     onError: () => toast.error(t("form_submission_discard_failed")),
   });
@@ -316,7 +315,7 @@ export function FillPageBody({
     if (serverDraft) {
       discardServerDraft.mutate(serverDraft);
     } else if (autosave.discardDraft()) {
-      navigate({ href: exitTarget });
+      exitFillSession(exitTarget);
     }
   };
   const requestClose = () => {
@@ -332,7 +331,7 @@ export function FillPageBody({
     if (continueDraftId) {
       if (!contextRefreshFailed) serverDraftSave.saveDraft();
     } else if (autosave.minimizeDraft()) {
-      navigate({ href: exitTarget });
+      exitFillSession(exitTarget);
     }
   };
 

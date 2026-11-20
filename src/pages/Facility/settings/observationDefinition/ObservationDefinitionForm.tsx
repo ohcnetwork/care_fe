@@ -66,7 +66,7 @@ import query from "@/Utils/request/query";
 
 import { navigate } from "@/lib/router/navigate";
 import { generateSlugValue } from "@/Utils/slug";
-import { valuesOf } from "@/Utils/utils";
+import { goBack, valuesOf } from "@/Utils/utils";
 import { ObservationInterpretation } from "./components/ObservationInterpretation";
 
 export default function ObservationDefinitionForm({
@@ -131,12 +131,10 @@ function ObservationDefinitionFormContent({
     navigate({
       to: "/facility/$facilityId/settings/observation_definitions",
       params: { facilityId },
+      replace: true,
     }),
   onCancel = () =>
-    navigate({
-      to: "/facility/$facilityId/settings/observation_definitions",
-      params: { facilityId },
-    }),
+    goBack(`/facility/${facilityId}/settings/observation_definitions`),
 }: {
   facilityId: string;
   observationSlug?: string;
@@ -320,6 +318,7 @@ function ObservationDefinitionFormContent({
         navigate({
           to: "/facility/$facilityId/settings/observation_definitions/$observationSlug",
           params: { facilityId, observationSlug: observationDefinition.slug },
+          replace: true,
         });
       },
     });
