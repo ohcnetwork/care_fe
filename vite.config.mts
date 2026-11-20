@@ -438,8 +438,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         ),
       }),
       tailwindcss(),
-      // Generates src/routeTree.gen.ts from src/routes/** and splits each
-      // route component into its own chunk. Must run before react().
+      // Generates src/routeTree.gen.ts from src/routes/**. Must run before
+      // react().
       tanstackRouter({
         target: "react",
         autoCodeSplitting: false,
