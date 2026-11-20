@@ -6,22 +6,25 @@ import {
   searchInt,
   searchString,
 } from "@/lib/router/search/fields";
-import { ChargeItemDefinitionStatus } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import { ChargeItemDefinitionStatus } from "@/types/billing/chargeItemDefinition/chargeItemDefinitionEnums";
 import {
   Classification,
   Status,
-} from "@/types/emr/activityDefinition/activityDefinition";
+} from "@/types/emr/activityDefinition/activityDefinitionEnums";
 import {
   ObservationDefinitionCategory,
   ObservationDefinitionStatus,
-} from "@/types/emr/observationDefinition/observationDefinition";
-import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
-import { TemplateStatuses, TemplateTypes } from "@/types/emr/template/template";
-import { ProductStatusOptions } from "@/types/inventory/product/product";
+} from "@/types/emr/observationDefinition/observationDefinitionEnums";
+import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinitionEnums";
+import {
+  TemplateStatuses,
+  TemplateTypes,
+} from "@/types/emr/template/templateEnums";
+import { ProductStatusOptions } from "@/types/inventory/product/productEnums";
 import {
   ProductKnowledgeStatus,
   ProductKnowledgeType,
-} from "@/types/inventory/productKnowledge/productKnowledge";
+} from "@/types/inventory/productKnowledge/productKnowledgeEnums";
 
 /**
  * The categories of a resource (`ResourceCategoryList`), on the activity

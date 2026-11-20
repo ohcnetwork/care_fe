@@ -1,5 +1,8 @@
 import { SlugConfig } from "@/types/base/slug/slugConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
+import { TemplateStatuses, TemplateTypes } from "./templateEnums";
+
+export { TemplateStatuses, TemplateTypes };
 
 export interface TemplateSchemaRead {
   contexts: Record<string, ContextSchema>;
@@ -58,17 +61,11 @@ export interface ReportTypeConfig {
   supported_contexts: string[];
 }
 
-export const TemplateStatuses = ["draft", "active", "retired"] as const;
 export type TemplateStatus = (typeof TemplateStatuses)[number];
 
 export const TemplateFormats = ["html", "pdf"] as const;
 export type TemplateFormat = (typeof TemplateFormats)[number];
 
-export const TemplateTypes = [
-  "discharge_summary",
-  "patient_summary",
-  "account_report",
-] as const;
 export type TemplateType = (typeof TemplateTypes)[number];
 export interface TemplateBase {
   id: string;

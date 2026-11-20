@@ -3,23 +3,11 @@ import { UserReadMinimal } from "@/types/user/user";
 
 import { QuestionnaireAction } from "./actions";
 import { Question } from "./question";
+import { QUESTIONNAIRE_STATUSES, SUBJECT_TYPES } from "./questionnaireEnums";
 
-/** Runtime source of truth for `SubjectType` — option lists and zod enums
- *  derive from this array so a new subject type cannot silently miss them. */
-export const SUBJECT_TYPES = [
-  "patient",
-  "encounter",
-  "referral",
-  "location",
-  "device",
-  "facility",
-] as const;
+export { QUESTIONNAIRE_STATUSES, SUBJECT_TYPES };
 
 export type SubjectType = (typeof SUBJECT_TYPES)[number];
-
-/** Runtime source of truth for `QuestionStatus` — status option lists, zod
- *  enums and the list page's tabs all derive from this array. */
-export const QUESTIONNAIRE_STATUSES = ["active", "draft", "retired"] as const;
 
 export type QuestionStatus = (typeof QUESTIONNAIRE_STATUSES)[number];
 

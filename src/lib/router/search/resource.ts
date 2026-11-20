@@ -7,7 +7,7 @@ import {
   searchInt,
   searchString,
 } from "@/lib/router/search/fields";
-import { ResourceRequestStatus } from "@/types/resourceRequest/resourceRequest";
+import { ResourceRequestStatus } from "@/types/resourceRequest/resourceRequestEnums";
 
 /** The resource requests of a facility: `ResourceList`. */
 export const resourceListSearch = z.object({

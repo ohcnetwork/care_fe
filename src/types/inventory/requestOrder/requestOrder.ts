@@ -3,14 +3,9 @@ import { TagConfig, TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 import { LocationDetail } from "@/types/location/location";
 import { Organization } from "@/types/organization/organization";
 import { UserReadMinimal } from "@/types/user/user";
+import { RequestOrderPriority, RequestOrderStatus } from "./requestOrderEnums";
 
-export enum RequestOrderStatus {
-  draft = "draft",
-  pending = "pending",
-  completed = "completed",
-  abandoned = "abandoned",
-  entered_in_error = "entered_in_error",
-}
+export { RequestOrderPriority, RequestOrderStatus };
 
 export enum RequestOrderIntent {
   proposal = "proposal",
@@ -37,13 +32,6 @@ export const REQUEST_ORDER_STATUS_COLORS = {
 export enum RequestOrderCategory {
   central = "central",
   nonstock = "nonstock",
-}
-
-export enum RequestOrderPriority {
-  routine = "routine",
-  urgent = "urgent",
-  asap = "asap",
-  stat = "stat",
 }
 
 export const REQUEST_ORDER_PRIORITY_COLORS = {

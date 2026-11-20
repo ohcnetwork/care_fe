@@ -2,6 +2,12 @@ import { Code } from "@/types/base/code/code";
 import { QualifiedRange } from "@/types/base/qualifiedRange/qualifiedRange";
 import { SlugConfig } from "@/types/base/slug/slugConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
+import {
+  ObservationDefinitionCategory,
+  ObservationDefinitionStatus,
+} from "./observationDefinitionEnums";
+
+export { ObservationDefinitionCategory, ObservationDefinitionStatus };
 
 export enum QuestionType {
   boolean = "boolean",
@@ -18,18 +24,6 @@ export interface ObservationDefinitionComponent {
   permitted_data_type: QuestionType;
   permitted_unit?: Code;
   qualified_ranges: QualifiedRange[];
-}
-
-export enum ObservationDefinitionCategory {
-  SOCIAL_HISTORY = "social_history",
-  VITAL_SIGNS = "vital_signs",
-  IMAGING = "imaging",
-  LABORATORY = "laboratory",
-  PROCEDURE = "procedure",
-  SURVEY = "survey",
-  EXAM = "exam",
-  THERAPY = "therapy",
-  ACTIVITY = "activity",
 }
 
 export interface BaseObservationDefinition {
@@ -66,13 +60,6 @@ export interface ObservationDefinitionCreate extends BaseObservationDefinition {
 
 export interface ObservationDefinitionUpdate extends BaseObservationDefinition {
   slug_value: string;
-}
-
-export enum ObservationDefinitionStatus {
-  DRAFT = "draft",
-  ACTIVE = "active",
-  RETIRED = "retired",
-  UNKNOWN = "unknown",
 }
 
 export const OBSERVATION_DEFINITION_STATUS_COLORS = {

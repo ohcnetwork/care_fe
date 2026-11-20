@@ -3,14 +3,9 @@ import { AccountRead } from "@/types/billing/account/Account";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { PaymentReconciliationRead } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { UserReadMinimal } from "@/types/user/user";
+import { InvoiceStatus } from "./invoiceEnums";
 
-export enum InvoiceStatus {
-  draft = "draft",
-  issued = "issued",
-  balanced = "balanced",
-  cancelled = "cancelled",
-  entered_in_error = "entered_in_error",
-}
+export { InvoiceStatus };
 
 export const INVOICE_STATUS_COLORS = {
   draft: "secondary",

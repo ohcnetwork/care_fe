@@ -8,6 +8,9 @@ import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/product
 import { UserReadMinimal } from "@/types/user/user";
 import { add, divide, isZero, multiply } from "@/Utils/decimal";
 import Decimal from "decimal.js";
+import { MedicationRequestDispenseStatus } from "./medicationRequestEnums";
+
+export { MedicationRequestDispenseStatus };
 
 export const MEDICATION_REQUEST_STATUS_COLORS = {
   active: "primary",
@@ -390,12 +393,6 @@ export interface MedicationRequestDosageInstruction {
     dose_range?: DoseRange;
   };
   max_dose_per_period?: DoseRange;
-}
-
-export enum MedicationRequestDispenseStatus {
-  complete = "complete",
-  partial = "partial",
-  incomplete = "incomplete",
 }
 
 export interface MedicationRequest {

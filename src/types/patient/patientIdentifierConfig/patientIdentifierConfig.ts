@@ -1,3 +1,7 @@
+import { PatientIdentifierConfigStatus } from "./patientIdentifierConfigEnums";
+
+export { PatientIdentifierConfigStatus };
+
 // [ usual, official, temp, secondary, old ]
 export enum PatientIdentifierUse {
   usual = "usual",
@@ -5,12 +9,6 @@ export enum PatientIdentifierUse {
   temp = "temp",
   secondary = "secondary",
   old = "old",
-}
-
-export enum PatientIdentifierConfigStatus {
-  draft = "draft",
-  active = "active",
-  inactive = "inactive",
 }
 
 export const PATIENT_IDENTIFIER_CONFIG_STATUS_COLORS = {

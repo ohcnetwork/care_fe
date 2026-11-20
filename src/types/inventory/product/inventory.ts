@@ -1,11 +1,8 @@
 import { ProductRead } from "@/types/inventory/product/product";
 import { LocationRead } from "@/types/location/location";
+import { InventoryStatusOptions } from "./inventoryEnums";
 
-export const InventoryStatusOptions = [
-  "active",
-  "inactive",
-  "entered_in_error",
-] as const;
+export { InventoryStatusOptions };
 
 export type InventoryStatus = (typeof InventoryStatusOptions)[number];
 

@@ -1,5 +1,8 @@
 import { Organization } from "@/types/organization/organization";
 import { UserReadMinimal } from "@/types/user/user";
+import { WORKSPACE_STATUSES } from "./workspaceEnums";
+
+export { WORKSPACE_STATUSES };
 
 export const WORKSPACE_AUTH_CONTEXTS = [
   "instance",
@@ -9,8 +12,6 @@ export const WORKSPACE_AUTH_CONTEXTS = [
 ] as const;
 
 export type WorkspaceAuthContext = (typeof WORKSPACE_AUTH_CONTEXTS)[number];
-
-export const WORKSPACE_STATUSES = ["active", "draft", "archived"] as const;
 
 /** Only active workspaces are offered on encounters. */
 export type WorkspaceStatus = (typeof WORKSPACE_STATUSES)[number];

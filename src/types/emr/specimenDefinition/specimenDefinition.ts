@@ -1,12 +1,9 @@
 import { Code } from "@/types/base/code/code";
 import { SlugConfig } from "@/types/base/slug/slugConfig";
 import { UserReadMinimal } from "@/types/user/user";
+import { SpecimenDefinitionStatus } from "./specimenDefinitionEnums";
 
-export enum SpecimenDefinitionStatus {
-  draft = "draft",
-  active = "active",
-  retired = "retired",
-}
+export { SpecimenDefinitionStatus };
 
 export const SPECIMEN_DEFINITION_STATUS_COLORS = {
   draft: "secondary",

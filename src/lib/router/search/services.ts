@@ -6,7 +6,10 @@ import {
   searchEnum,
   searchString,
 } from "@/lib/router/search/fields";
-import { Priority, Status } from "@/types/emr/serviceRequest/serviceRequest";
+import {
+  Priority,
+  Status,
+} from "@/types/emr/serviceRequest/serviceRequestEnums";
 
 /** The healthcare services of a facility (`FacilityServices`). */
 export const facilityServicesSearch = z.object({

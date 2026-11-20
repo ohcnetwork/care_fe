@@ -2,12 +2,12 @@ import { Code } from "@/types/base/code/code";
 import { Duration } from "@/types/base/duration/duration";
 import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
 import { SlugConfig } from "@/types/base/slug/slugConfig";
+import {
+  ProductKnowledgeStatus,
+  ProductKnowledgeType,
+} from "./productKnowledgeEnums";
 
-export enum ProductKnowledgeType {
-  medication = "medication",
-  nutritional_product = "nutritional_product",
-  consumable = "consumable",
-}
+export { ProductKnowledgeStatus, ProductKnowledgeType };
 
 export type AdministrableProductType =
   ProductKnowledgeType.medication | ProductKnowledgeType.nutritional_product;
@@ -17,12 +17,6 @@ export const PRODUCT_KNOWLEDGE_TYPE_COLORS = {
   nutritional_product: "green",
   consumable: "yellow",
 } as const satisfies Record<ProductKnowledgeType, string>;
-
-export enum ProductKnowledgeStatus {
-  draft = "draft",
-  active = "active",
-  retired = "retired",
-}
 
 export const PRODUCT_KNOWLEDGE_STATUS_COLORS = {
   draft: "secondary",

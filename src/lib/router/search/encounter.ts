@@ -5,8 +5,11 @@ import {
   searchEnum,
   searchString,
 } from "@/lib/router/search/fields";
-import { Priority, Status } from "@/types/emr/serviceRequest/serviceRequest";
-import { WORKSPACE_STATUSES } from "@/types/workspace/workspace";
+import {
+  Priority,
+  Status,
+} from "@/types/emr/serviceRequest/serviceRequestEnums";
+import { WORKSPACE_STATUSES } from "@/types/workspace/workspaceEnums";
 
 /** The encounter list of the encounters overview (`EncounterList`). */
 export const encounterListSearch = z.object({

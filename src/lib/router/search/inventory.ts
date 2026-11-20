@@ -6,12 +6,12 @@ import {
   searchEnum,
   searchString,
 } from "@/lib/router/search/fields";
-import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
-import { InventoryStatusOptions } from "@/types/inventory/product/inventory";
+import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrderEnums";
+import { InventoryStatusOptions } from "@/types/inventory/product/inventoryEnums";
 import {
   RequestOrderPriority,
   RequestOrderStatus,
-} from "@/types/inventory/requestOrder/requestOrder";
+} from "@/types/inventory/requestOrder/requestOrderEnums";
 
 /** The stock of a location (`InventoryList`). */
 export const inventoryListSearch = z.object({

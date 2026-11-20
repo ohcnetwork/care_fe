@@ -9,14 +9,14 @@ import {
 import {
   AccountBillingStatus,
   AccountStatus,
-} from "@/types/billing/account/Account";
-import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
-import { InvoiceStatus } from "@/types/billing/invoice/invoice";
+} from "@/types/billing/account/AccountEnums";
+import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItemEnums";
+import { InvoiceStatus } from "@/types/billing/invoice/invoiceEnums";
 import {
   PaymentReconciliationPaymentMethod,
   PaymentReconciliationStatus,
   PaymentReconciliationType,
-} from "@/types/billing/paymentReconciliation/paymentReconciliation";
+} from "@/types/billing/paymentReconciliation/paymentReconciliationEnums";
 
 /** The invoice list: `InvoicesData`, on its own page and in an account. */
 export const invoiceListSearch = z.object({

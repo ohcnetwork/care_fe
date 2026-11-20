@@ -7,13 +7,9 @@ import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenD
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import { LocationRead } from "@/types/location/location";
+import { Classification, Status } from "./activityDefinitionEnums";
 
-export enum Status {
-  draft = "draft",
-  active = "active",
-  retired = "retired",
-  unknown = "unknown",
-}
+export { Classification, Status };
 
 export const ACTIVITY_DEFINITION_STATUS_COLORS = {
   draft: "secondary",
@@ -21,14 +17,6 @@ export const ACTIVITY_DEFINITION_STATUS_COLORS = {
   retired: "destructive",
   unknown: "outline",
 } as const satisfies Record<Status, string>;
-
-export enum Classification {
-  laboratory = "laboratory",
-  imaging = "imaging",
-  surgical_procedure = "surgical_procedure",
-  counselling = "counselling",
-  education = "education",
-}
 
 export enum Kind {
   service_request = "service_request",

@@ -7,9 +7,9 @@ import {
   searchEnum,
   searchString,
 } from "@/lib/router/search/fields";
-import { MedicationRequestDispenseStatus } from "@/types/emr/medicationRequest/medicationRequest";
-import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
-import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
+import { MedicationRequestDispenseStatus } from "@/types/emr/medicationRequest/medicationRequestEnums";
+import { PrescriptionStatus } from "@/types/emr/prescription/prescriptionEnums";
+import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrderEnums";
 
 /** The prescription queue of a pharmacy (`PrescriptionQueue`). */
 export const prescriptionQueueSearch = z.object({

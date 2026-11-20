@@ -4,14 +4,9 @@ import { TagConfig, TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 import { LocationDetail } from "@/types/location/location";
 import { Organization } from "@/types/organization/organization";
 import { UserReadMinimal } from "@/types/user/user";
+import { DeliveryOrderStatus } from "./deliveryOrderEnums";
 
-export enum DeliveryOrderStatus {
-  draft = "draft",
-  pending = "pending",
-  completed = "completed",
-  abandoned = "abandoned",
-  entered_in_error = "entered_in_error",
-}
+export { DeliveryOrderStatus };
 
 export const DELIVERY_ORDER_STATUS_COLORS = {
   draft: "secondary",

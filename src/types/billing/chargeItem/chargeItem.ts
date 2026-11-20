@@ -7,16 +7,9 @@ import {
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { InvoiceList } from "@/types/billing/invoice/invoice";
 import { UserReadMinimal } from "@/types/user/user";
+import { ChargeItemStatus } from "./chargeItemEnums";
 
-export enum ChargeItemStatus {
-  // planned = "planned",
-  billable = "billable",
-  not_billable = "not_billable",
-  aborted = "aborted",
-  billed = "billed",
-  paid = "paid",
-  entered_in_error = "entered_in_error",
-}
+export { ChargeItemStatus };
 
 export const EXCLUDED_CHARGE_ITEM_STATUSES = [
   ChargeItemStatus.not_billable,

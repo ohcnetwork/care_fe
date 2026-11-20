@@ -3,23 +3,9 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { Period } from "@/types/questionnaire/base";
+import { AccountBillingStatus, AccountStatus } from "./AccountEnums";
 
-export enum AccountStatus {
-  active = "active",
-  inactive = "inactive",
-  entered_in_error = "entered_in_error",
-  on_hold = "on_hold",
-}
-
-export enum AccountBillingStatus {
-  open = "open",
-  carecomplete_notbilled = "carecomplete_notbilled",
-  billing = "billing",
-  closed_baddebt = "closed_baddebt",
-  closed_voided = "closed_voided",
-  closed_completed = "closed_completed",
-  closed_combined = "closed_combined",
-}
+export { AccountBillingStatus, AccountStatus };
 
 export enum AccountAggregate {
   patient = "patient",

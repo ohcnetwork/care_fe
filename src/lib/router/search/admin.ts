@@ -9,13 +9,13 @@ import {
   TagCategory,
   TagResource,
   TagStatus,
-} from "@/types/emr/tagConfig/tagConfig";
-import { PatientIdentifierConfigStatus } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+} from "@/types/emr/tagConfig/tagConfigEnums";
+import { PatientIdentifierConfigStatus } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfigEnums";
 import {
   QUESTIONNAIRE_STATUSES,
   SUBJECT_TYPES,
-} from "@/types/questionnaire/questionnaire";
-import { ValueSetStatus } from "@/types/valueSet/valueSet";
+} from "@/types/questionnaire/questionnaireEnums";
+import { ValueSetStatus } from "@/types/valueSet/valueSetEnums";
 
 /**
  * Pages of the admin area. Some of them also render in the facility

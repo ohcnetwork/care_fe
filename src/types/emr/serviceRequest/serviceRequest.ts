@@ -10,17 +10,9 @@ import { SpecimenRead } from "@/types/emr/specimen/specimen";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { LocationRead } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
+import { Priority, Status } from "./serviceRequestEnums";
 
-export enum Status {
-  draft = "draft",
-  active = "active",
-  on_hold = "on_hold",
-  entered_in_error = "entered_in_error",
-  ended = "ended",
-  completed = "completed",
-  revoked = "revoked",
-  unknown = "unknown",
-}
+export { Priority, Status };
 
 export const SERVICE_REQUEST_STATUS_COLORS = {
   draft: "secondary",
@@ -45,13 +37,6 @@ export enum Intent {
   proposal = "proposal",
   plan = "plan",
   directive = "directive",
-}
-
-export enum Priority {
-  routine = "routine",
-  urgent = "urgent",
-  asap = "asap",
-  stat = "stat",
 }
 
 export interface BaseServiceRequestSpec {

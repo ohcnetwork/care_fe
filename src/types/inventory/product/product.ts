@@ -1,11 +1,8 @@
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { ProductStatusOptions } from "./productEnums";
 
-export enum ProductStatusOptions {
-  active = "active",
-  inactive = "inactive",
-  entered_in_error = "entered_in_error",
-}
+export { ProductStatusOptions };
 
 export const PRODUCT_STATUS_COLORS = {
   active: "primary",

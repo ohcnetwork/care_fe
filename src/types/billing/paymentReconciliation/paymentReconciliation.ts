@@ -2,19 +2,17 @@ import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceList } from "@/types/billing/invoice/invoice";
 import { LocationRead } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
+import {
+  PaymentReconciliationPaymentMethod,
+  PaymentReconciliationStatus,
+  PaymentReconciliationType,
+} from "./paymentReconciliationEnums";
 
-export enum PaymentReconciliationType {
-  payment = "payment",
-  adjustment = "adjustment",
-  advance = "advance",
-}
-
-export enum PaymentReconciliationStatus {
-  active = "active",
-  cancelled = "cancelled",
-  draft = "draft",
-  entered_in_error = "entered_in_error",
-}
+export {
+  PaymentReconciliationPaymentMethod,
+  PaymentReconciliationStatus,
+  PaymentReconciliationType,
+};
 
 export const PAYMENT_RECONCILIATION_STATUS_COLORS = {
   active: "primary",
@@ -48,16 +46,6 @@ export const PAYMENT_RECONCILIATION_OUTCOME_COLORS = {
   error: "destructive",
   partial: "outline",
 } as const satisfies Record<PaymentReconciliationOutcome, string>;
-
-export enum PaymentReconciliationPaymentMethod {
-  cash = "cash",
-  ccca = "ccca",
-  cchk = "cchk",
-  cdac = "cdac",
-  chck = "chck",
-  ddpo = "ddpo",
-  debc = "debc",
-}
 
 export const PAYMENT_RECONCILIATION_METHOD_MAP: Record<
   PaymentReconciliationPaymentMethod,

@@ -5,13 +5,9 @@ import {
   HelpCircle,
   NotepadTextDashedIcon,
 } from "lucide-react";
+import { ValueSetStatus } from "./valueSetEnums";
 
-export enum ValueSetStatus {
-  ACTIVE = "active",
-  DRAFT = "draft",
-  RETIRED = "retired",
-  UNKNOWN = "unknown",
-}
+export { ValueSetStatus };
 
 export const VALUESET_STATUS_COLORS = {
   [ValueSetStatus.ACTIVE]: "primary",

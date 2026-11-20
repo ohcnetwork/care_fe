@@ -2,21 +2,15 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { UserReadMinimal } from "@/types/user/user";
+import { PrescriptionStatus } from "./prescriptionEnums";
+
+export { PrescriptionStatus };
 
 export interface Prescription {
   id: string;
   name?: string;
   note?: string;
   status: PrescriptionStatus;
-}
-
-export enum PrescriptionStatus {
-  // Prescription awaiting dispense
-  active = "active",
-  // The order moved to dispense state
-  completed = "completed",
-  // The order was cancelled
-  cancelled = "cancelled",
 }
 
 export interface PrescriptionCreate extends Omit<Prescription, "id"> {

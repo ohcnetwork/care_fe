@@ -5,12 +5,9 @@ import {
 import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
 import { SlugConfig } from "@/types/base/slug/slugConfig";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { ChargeItemDefinitionStatus } from "./chargeItemDefinitionEnums";
 
-export enum ChargeItemDefinitionStatus {
-  draft = "draft",
-  active = "active",
-  retired = "retired",
-}
+export { ChargeItemDefinitionStatus };
 
 export const CHARGE_ITEM_DEFINITION_STATUS_COLORS = {
   draft: "secondary",
