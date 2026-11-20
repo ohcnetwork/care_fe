@@ -1,4 +1,3 @@
-import { navigate as ravigerNavigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -31,9 +30,11 @@ export function ChargeItemDefinitionsList({
   };
 
   const onCreateItem = () => {
-    ravigerNavigate(
-      `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}/new`,
-    );
+    if (!categorySlug) return;
+    navigate({
+      to: "/facility/$facilityId/settings/charge_item_definitions/categories/$slug/new",
+      params: { facilityId, slug: categorySlug },
+    });
   };
 
   return (

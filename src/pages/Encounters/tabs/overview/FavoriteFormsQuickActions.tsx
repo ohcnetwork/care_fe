@@ -1,10 +1,10 @@
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { useQuery } from "@tanstack/react-query";
 import { FileText } from "lucide-react";
-import { Link } from "raviger";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 
 import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
@@ -77,7 +77,7 @@ export const FavoriteFormsQuickActions = ({
       ) : favorites.length ? (
         <div className="flex flex-wrap gap-2">
           {favorites.map((form) => (
-            <Link
+            <HrefLink
               key={form.id}
               href={appendReferralNativeContext(
                 `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${form.id}${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`,
@@ -87,7 +87,7 @@ export const FavoriteFormsQuickActions = ({
             >
               <FileText className="size-3.5 shrink-0 text-gray-500" />
               <span className="min-w-0 break-words">{form.title}</span>
-            </Link>
+            </HrefLink>
           ))}
         </div>
       ) : !isError ? (

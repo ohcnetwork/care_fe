@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -25,6 +25,7 @@ import { SectionHeader } from "@/components/Common/SectionHeader";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -182,11 +183,15 @@ export default function OrganizationPatients({
                       </TableRow>
                     ) : (
                       patients.results.map((patient) => {
-                        const patientUrl = `/patient/${patient.id}`;
                         return (
                           <TableRow
                             key={patient.id}
-                            onClick={() => navigate(patientUrl)}
+                            onClick={() =>
+                              navigate({
+                                to: "/patient/$id/{-$tab}",
+                                params: { id: patient.id },
+                              })
+                            }
                             className="cursor-pointer hover:bg-muted/50"
                           >
                             <TableCell className="px-4 py-3">
@@ -218,7 +223,8 @@ export default function OrganizationPatients({
                             >
                               <Button variant="tertiary" asChild>
                                 <Link
-                                  href={patientUrl}
+                                  to="/patient/$id/{-$tab}"
+                                  params={{ id: patient.id }}
                                   aria-label={`${t("open")} ${patient.name}`}
                                 >
                                   {t("open")}

@@ -7,7 +7,6 @@ import {
   Stethoscope,
   type LucideIcon,
 } from "lucide-react";
-import { navigate } from "raviger";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -26,6 +25,8 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { EncounterWorkspacePage } from "./EncounterWorkspacePage";
 import { parseEncounterWorkspace } from "./parseEncounterWorkspace";
 import { useEncounterWorkspaces } from "./useEncounterWorkspaces";
+
+import { navigate } from "@/lib/router/navigate";
 
 const customPageIcons: Record<string, LucideIcon> = {
   stethoscope: Stethoscope,
@@ -140,13 +141,14 @@ export function EncounterWorkspaceContent({
     }
     target.searchParams.delete("workspace");
     if (target.href !== window.location.href)
-      navigate(
-        appendReferralNativeContext(
+      navigate({
+        href: appendReferralNativeContext(
           `${target.pathname}${target.search}`,
           window.location.search,
         ),
-        { replace },
-      );
+
+        replace,
+      });
   };
 
   useEffect(() => {

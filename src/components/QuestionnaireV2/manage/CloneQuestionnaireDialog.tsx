@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -29,6 +28,7 @@ import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { remapActionLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
 import { regenerateQuestionIdsWithMap } from "@/components/QuestionnaireV2/shared/questionTree";
 
+import { navigate } from "@/lib/router/navigate";
 import { SLUG_VALUE_MAX_LENGTH } from "@/types/base/slug/schema";
 import {
   QuestionnaireRead,
@@ -108,7 +108,7 @@ export function CloneQuestionnaireDialog({
       queryClient.invalidateQueries({ queryKey: questionnaireKeys.all });
       toast.success(t("questionnaire_cloned_successfully"));
       onOpenChange(false);
-      navigate(`${scope.basePath}/${created.id}`);
+      navigate({ href: `${scope.basePath}/${created.id}` });
     },
   });
 

@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Check, Copy, Download, Eye, SquarePen } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -26,6 +25,8 @@ import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { LabeledActionButton } from "@/components/QuestionnaireV2/shared/LabeledActionButton";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import {
   QUESTIONNAIRE_STATUS_COLORS,
   QuestionnaireScope,
@@ -162,7 +163,10 @@ export function QuestionnaireDetailPage({
           <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{t("no_data_found")}</AlertDescription>
         </Alert>
-        <Button variant="outline" onClick={() => navigate(scope.basePath)}>
+        <Button
+          variant="outline"
+          onClick={() => navigate({ href: scope.basePath })}
+        >
           <ArrowLeft className="mr-2 size-4" />
           {t("back")}
         </Button>
@@ -184,7 +188,7 @@ export function QuestionnaireDetailPage({
                   type="button"
                   variant="outline"
                   size="xs"
-                  onClick={() => navigate(scope.basePath)}
+                  onClick={() => navigate({ href: scope.basePath })}
                 >
                   <ArrowLeft className="size-4" />
                   {t("back")}
@@ -194,7 +198,7 @@ export function QuestionnaireDetailPage({
                   <BreadcrumbList>
                     <BreadcrumbItem>
                       <BreadcrumbLink
-                        onClick={() => navigate(scope.basePath)}
+                        onClick={() => navigate({ href: scope.basePath })}
                         className="cursor-pointer"
                       >
                         {t("questionnaire_other")}
@@ -235,7 +239,7 @@ export function QuestionnaireDetailPage({
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate(scope.basePath)}
+                    onClick={() => navigate({ href: scope.basePath })}
                   >
                     {t("cancel")}
                   </Button>
@@ -248,7 +252,7 @@ export function QuestionnaireDetailPage({
                 </div>
               </div>
 
-              <div className="max-w-full overflow-x-auto border-b border-border pb-px">
+              <div className="max-w-full overflow-x-auto">
                 <TabsList variant="line">
                   <TabsTrigger value="questions">{t("questions")}</TabsTrigger>
                   <TabsTrigger value="versions">{t("versions")}</TabsTrigger>
@@ -275,14 +279,16 @@ export function QuestionnaireDetailPage({
                       )
                     }
                     onEditQuestions={(questionId) =>
-                      navigate(
-                        questionId
+                      navigate({
+                        href: questionId
                           ? `${scope.basePath}/${id}/edit?question=${encodeURIComponent(questionId)}`
                           : `${scope.basePath}/${id}/edit`,
-                      )
+                      })
                     }
                     onImportQuestions={() =>
-                      navigate(`${scope.basePath}/${id}/edit?import=1`)
+                      navigate({
+                        href: `${scope.basePath}/${id}/edit?import=1`,
+                      })
                     }
                   />
                 </div>
@@ -305,7 +311,9 @@ export function QuestionnaireDetailPage({
                   {canWrite && (
                     <LabeledActionButton
                       label={t("edit_questions")}
-                      onClick={() => navigate(`${scope.basePath}/${id}/edit`)}
+                      onClick={() =>
+                        navigate({ href: `${scope.basePath}/${id}/edit` })
+                      }
                     >
                       <SquarePen className="size-4" />
                       {t("edit_questions")}
@@ -314,7 +322,9 @@ export function QuestionnaireDetailPage({
                   <LabeledActionButton
                     label={t("check_how_form_looks")}
                     onClick={() =>
-                      navigate(`${scope.basePath}/${id}/edit?mode=preview`)
+                      navigate({
+                        href: `${scope.basePath}/${id}/edit?mode=preview`,
+                      })
                     }
                   >
                     <Eye className="size-4" />

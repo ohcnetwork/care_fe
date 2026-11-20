@@ -129,23 +129,7 @@ test.describe("Facility settings navigation", () => {
       ).toHaveAttribute("aria-current", "page");
     });
 
-    await test.step("General provides quick links and a Responses entry point", async () => {
-      const quickLinks = page.getByRole("region", {
-        name: "Quick links",
-        exact: true,
-      });
-      for (const [name, path] of [
-        ["Departments", "departments"],
-        ["Locations", "locations"],
-        ["Devices", "devices"],
-        ["Healthcare Services", "healthcare_services"],
-        ["Product", "product"],
-        ["Questionnaires", "questionnaires"],
-      ]) {
-        await expect(
-          quickLinks.getByRole("link", { name, exact: true }),
-        ).toHaveAttribute("href", `${facilityPath}/settings/${path}`);
-      }
+    await test.step("General provides a Responses entry point", async () => {
       const forms = page.locator('[data-cy="facility-forms"]');
       await expect(
         forms.getByRole("button", { name: /^Submit forms/ }),
@@ -305,11 +289,11 @@ test.describe("Facility settings navigation", () => {
     request,
   }) => {
     await page.goto(`${facilityPath}/settings/general`);
-    const edit = page.getByRole("button", {
-      name: "Edit Facility Details",
+    const configurations = page.getByRole("button", {
+      name: "Configurations",
       exact: true,
     });
-    await expect(edit).toBeVisible();
+    await expect(configurations).toBeVisible();
     const endpoint = `/api/v1${facilityPath}/`;
     let releaseFailure = () => {};
     const failureGate = new Promise<void>((resolve) => {
@@ -334,7 +318,10 @@ test.describe("Facility settings navigation", () => {
           new URL(response.url()).pathname === endpoint &&
           response.status() === 503,
       );
-      await edit.click();
+      await configurations.click();
+      await page
+        .getByRole("menuitem", { name: "Edit Facility Details", exact: true })
+        .click();
       const editor = page.getByRole("dialog", {
         name: "Edit Facility",
         exact: true,

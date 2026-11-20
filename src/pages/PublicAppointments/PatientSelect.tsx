@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { ArrowLeft } from "lucide-react";
-import { navigate as ravigerNavigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -18,6 +17,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
@@ -225,15 +225,14 @@ export default function PatientSelect({
           variant="primary_gradient"
           className="w-full sm:w-auto"
           onClick={() =>
-            ravigerNavigate(
-              `/facility/${facilityId}/appointments/${staffId}/patient-registration`,
-              {
-                query: {
-                  slotId,
-                  reason,
-                },
+            navigate({
+              to: "/facility/$facilityId/appointments/$staffId/patient-registration",
+              params: { facilityId, staffId },
+              search: {
+                slotId,
+                reason,
               },
-            )
+            })
           }
         >
           <span className="bg-linear-to-b from-white/15 to-transparent"></span>

@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -13,6 +12,8 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import query from "@/Utils/request/query";
 
 import DeliveryOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/DeliveryOrderTable";
@@ -146,8 +147,8 @@ export function DeliveryOrderList({
               <Button
                 variant="primary"
                 onClick={() =>
-                  navigate(
-                    getInventoryBasePath(
+                  navigate({
+                    href: getInventoryBasePath(
                       facilityId,
                       locationId,
                       internal,
@@ -155,7 +156,7 @@ export function DeliveryOrderList({
                       isRequester,
                       "new",
                     ),
-                  )
+                  })
                 }
               >
                 <CareIcon icon="l-plus" />
@@ -167,10 +168,10 @@ export function DeliveryOrderList({
         </div>
 
         <Tabs value={currentTab} onValueChange={handleTabChange}>
-          <div className="w-full overflow-x-auto pb-1">
+          <div className="w-full overflow-x-auto">
             <TabsList
               variant="line"
-              className="w-full justify-evenly border-b border-border sm:justify-start"
+              className="justify-evenly sm:justify-start"
             >
               {TABS_CONFIG.map((tab) => (
                 <TabsTrigger key={tab.value} value={tab.value}>

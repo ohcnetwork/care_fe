@@ -3,6 +3,7 @@ import { usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -20,6 +21,8 @@ import { formatName, isUserOnline } from "@/Utils/utils";
 import { navigate } from "@/lib/router/navigate";
 import { UserReadMinimal } from "@/types/user/user";
 import { Bot } from "lucide-react";
+
+import { useRouteParams } from "@/hooks/useRouteParams";
 
 interface UserCardProps {
   user: UserReadMinimal;
@@ -189,7 +192,7 @@ export function UserCard(props: UserCardProps) {
   );
 }
 export const UserGrid = ({ users }: { users?: UserReadMinimal[] }) => {
-  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+  const facilityId = useRouteParams("/facility/:facilityId").facilityId!;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -221,7 +224,7 @@ const UserListHeader = () => {
 };
 
 const UserListRow = ({ user }: { user: UserReadMinimal }) => {
-  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+  const facilityId = useRouteParams("/facility/:facilityId").facilityId!;
   const { t } = useTranslation();
 
   return (

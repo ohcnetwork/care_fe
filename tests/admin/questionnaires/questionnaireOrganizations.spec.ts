@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 import {
+  departmentCards,
+  departmentTrigger,
+  selectDepartment,
+} from "tests/helper/departmentSelect";
+import {
   adminApiHeaders,
   apiBaseUrl,
   createQuestionnaire,
@@ -99,24 +104,14 @@ test.describe("Questionnaire v2 organizations field", () => {
           .getByRole("tabpanel", { name: "Questions", exact: true })
           .getByText("Organizations", { exact: true }),
       ).toBeVisible();
-      // The label and the combobox placeholder share the same text.
-      await expect(
-        page.locator("label").filter({ hasText: "Select Department" }),
-      ).toBeVisible();
+      await expect(departmentTrigger(page)).toBeVisible();
     });
 
-    await test.step("Pick a department from the All Organizations tab", async () => {
-      await page.getByRole("tab", { name: "All Organizations" }).click();
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Select Department" })
-        .click();
-      await page.getByRole("option", { name: "Pulmonology" }).click();
-      await page.keyboard.press("Escape");
+    await test.step("Pick a department", async () => {
+      await selectDepartment(page, page, "Pulmonology", { multiple: true });
       await expect(
         page.getByRole("button", { name: /Save (Questionnaire|Form)/ }),
       ).toBeEnabled();
-      await page.keyboard.press("Escape");
       await page
         .getByRole("button", { name: /Save (Questionnaire|Form)/ })
         .click();
@@ -125,7 +120,9 @@ test.describe("Questionnaire v2 organizations field", () => {
 
     await test.step("The department persists across a reload", async () => {
       await page.goto(detailUrl);
-      await expect(page.getByText("Pulmonology")).toBeVisible();
+      await expect(
+        departmentCards(page).filter({ hasText: "Pulmonology" }),
+      ).toBeVisible();
     });
   });
 
@@ -155,15 +152,11 @@ test.describe("Questionnaire v2 organizations field", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `Staged organizations ${stamp}`,
     });
+    const cardFor = (name: string) =>
+      departmentCards(page).filter({ hasText: name });
     const selectOrganization = async (name: string) => {
-      await page.getByRole("tab", { name: "All Organizations" }).click();
-      await page.locator("fieldset").getByRole("combobox").click();
-      await page.locator('[data-slot="command-input"]').fill(name);
-      await page.getByRole("option", { name }).click();
-      await page.keyboard.press("Escape");
-      await expect(
-        page.locator("fieldset p").filter({ hasText: name }),
-      ).toBeVisible();
+      await selectDepartment(page, page, name, { multiple: true });
+      await expect(cardFor(name)).toBeVisible();
     };
     await test.step("Persist the first selection", async () => {
       await selectOrganization(names[0]);
@@ -175,26 +168,14 @@ test.describe("Questionnaire v2 organizations field", () => {
     });
     await test.step("Keep both pending selections when one was already saved", async () => {
       await selectOrganization(names[1]);
-      await expect(
-        page.locator("fieldset p").filter({ hasText: names[0] }),
-      ).toBeVisible();
-      await expect(
-        page.locator("fieldset p").filter({ hasText: names[1] }),
-      ).toBeVisible();
-      await page
-        .locator("fieldset p")
-        .filter({ hasText: names[0] })
-        .locator("..")
-        .locator("..")
-        .getByRole("button", { name: "Remove organization" })
+      await expect(cardFor(names[0])).toBeVisible();
+      await expect(cardFor(names[1])).toBeVisible();
+      await cardFor(names[0])
+        .getByRole("button", { name: `Remove ${names[0]}`, exact: true })
         .click();
-      await expect(
-        page.locator("fieldset p").filter({ hasText: names[0] }),
-      ).not.toBeVisible();
+      await expect(cardFor(names[0])).not.toBeVisible();
       await selectOrganization(names[0]);
-      await expect(
-        page.locator("fieldset p").filter({ hasText: names[1] }),
-      ).toBeVisible();
+      await expect(cardFor(names[1])).toBeVisible();
     });
     await test.step("Save the complete selection once and reload", async () => {
       let releaseSave = () => {};
@@ -213,19 +194,15 @@ test.describe("Questionnaire v2 organizations field", () => {
         .getByRole("button", { name: /Save (Questionnaire|Form)/ })
         .click();
       await expect(
-        page
-          .locator("fieldset")
-          .getByRole("button", { name: "Remove organization" })
+        departmentCards(page)
+          .getByRole("button", { name: /^Remove / })
           .first(),
       ).toBeDisabled();
       await expect(page.getByRole("textbox", { name: "Title" })).toBeEnabled();
       releaseSave();
       await expectToast(page, "Questionnaire updated successfully");
       await page.goto(detailUrl);
-      for (const name of names)
-        await expect(
-          page.locator("fieldset p").filter({ hasText: name }),
-        ).toBeVisible();
+      for (const name of names) await expect(cardFor(name)).toBeVisible();
     });
   });
 });

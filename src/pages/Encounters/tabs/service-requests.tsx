@@ -73,7 +73,7 @@ export const EncounterServiceRequestTab = () => {
 
   return (
     <div className="@container min-w-0 space-y-4">
-      <div className="hidden border-b @min-[30rem]:block">
+      <div className="hidden @min-[30rem]:block">
         <FilterTabs
           value={qParams.status || ""}
           onValueChange={(value) => updateQuery({ status: value })}

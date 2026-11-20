@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Coins, EllipsisVertical, FileIcon, Pencil } from "lucide-react";
-import { navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -33,6 +32,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { ResourceCategoryForm } from "@/components/Common/ResourceCategoryForm";
 import useFilters from "@/hooks/useFilters";
+import { navigate } from "@/lib/router/navigate";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ResourceCategoryParent,
@@ -225,7 +225,7 @@ function ResourceCategoryBreadcrumb({
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink
-            onClick={() => navigate(basePath)}
+            onClick={() => navigate({ href: basePath })}
             className="cursor-pointer hover:underline hover:underline-offset-2"
           >
             {baseTitle}
@@ -515,7 +515,9 @@ export function ResourceCategoryList<
                   <ItemCard
                     key={item.id}
                     item={item}
-                    onItemClick={() => navigate(`${basePath}/${item.slug}`)}
+                    onItemClick={() =>
+                      navigate({ href: `${basePath}/${item.slug}` })
+                    }
                   />
                 ))}
               </>

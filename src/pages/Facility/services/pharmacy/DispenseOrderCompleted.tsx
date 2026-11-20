@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button";
 import { DottedDivider } from "@/components/ui/dotted-divider";
 import { extractInvoicesFromDispenses } from "@/pages/Facility/services/pharmacy/utils/extractInvoicesFromDispenses";
 import { Link } from "@tanstack/react-router";
-import { Link as RavigerLink } from "raviger";
 
 interface Props {
   facilityId: string;
@@ -119,9 +118,12 @@ export default function DispenseOrderCompleted({
                 type="button"
                 asChild
               >
-                <RavigerLink href="/medication_requests">
+                <Link
+                  to="/facility/$facilityId/locations/$locationId/medication_requests"
+                  params={{ facilityId, locationId }}
+                >
                   {t("prescription_queue")}
-                </RavigerLink>
+                </Link>
               </Button>
               <Button
                 variant="outline"
@@ -130,9 +132,12 @@ export default function DispenseOrderCompleted({
                 type="button"
                 asChild
               >
-                <RavigerLink href="/medication_dispense">
+                <Link
+                  to="/facility/$facilityId/locations/$locationId/medication_dispense"
+                  params={{ facilityId, locationId }}
+                >
                   {t("go_to_dispenses")}
-                </RavigerLink>
+                </Link>
               </Button>
               <Button
                 variant="link"
@@ -141,9 +146,12 @@ export default function DispenseOrderCompleted({
                 type="button"
                 asChild
               >
-                <RavigerLink href="/medication_return">
+                <Link
+                  to="/facility/$facilityId/locations/$locationId/medication_return"
+                  params={{ facilityId, locationId }}
+                >
                   {t("medicine_returns")}
-                </RavigerLink>
+                </Link>
               </Button>
             </div>
           </div>

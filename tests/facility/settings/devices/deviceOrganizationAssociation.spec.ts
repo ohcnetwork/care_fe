@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import { selectFromCommand } from "tests/helper/ui";
+import {
+  departmentCards,
+  selectDepartment,
+} from "tests/helper/departmentSelect";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -123,46 +126,27 @@ test.describe("Device Organization Association", () => {
     await managingOrgSection.getByRole("button", { name: "Change" }).click();
     manageOrgSheet = await getManageOrganizationSheet(page);
 
-    // Administration appears in both selected (blue card) and current organization sections.
-    const administrationInstances = await manageOrgSheet
-      .getByText("Administration")
-      .count();
-    expect(administrationInstances).toBeGreaterThanOrEqual(2);
-
-    await manageOrgSheet
-      .getByRole("tab", { name: "All Organizations" })
-      .click();
+    // Administration is already linked, so it is listed as current and is
+    // not offered as a selection.
+    await expect(
+      manageOrgSheet.locator("span", { hasText: /^Administration$/ }).first(),
+    ).toBeVisible();
+    await expect(
+      departmentCards(manageOrgSheet).filter({ hasText: "Administration" }),
+    ).toHaveCount(0);
 
     const selectedDepartment = faker.helpers.arrayElement([
       "Urology",
       "Endocrinology",
       "ENT",
     ]);
-    const organizationPickerTrigger = manageOrgSheet
-      .locator('[data-slot="popover-trigger"]')
-      .first();
-    await selectFromCommand(page, organizationPickerTrigger, {
-      search: selectedDepartment,
-      itemIndex: 0,
-    });
+    await selectDepartment(page, manageOrgSheet, selectedDepartment);
 
-    const departmentItems = page.locator('[data-slot="command-item"]');
-
-    // Verify the blue selected card is replaced with the newly selected department.
-    const updatedSelectedOrganizationChip =
-      manageOrgSheet.locator("p.truncate");
-    await expect(updatedSelectedOrganizationChip).toContainText(
-      selectedDepartment,
-    );
-    await expect(updatedSelectedOrganizationChip).not.toContainText(
-      "Administration",
-    );
-
-    // Ensure popover is closed before submission to prevent click interception.
-    if (await departmentItems.first().isVisible()) {
-      await page.keyboard.press("Escape");
-      await expect(departmentItems.first()).toBeHidden();
-    }
+    // The newly selected department is the only selection.
+    const selectedCards = departmentCards(manageOrgSheet);
+    await expect(selectedCards).toHaveCount(1);
+    await expect(selectedCards).toContainText(selectedDepartment);
+    await expect(selectedCards).not.toContainText("Administration");
 
     await submitAddOrganization(manageOrgSheet);
     await expect(manageOrgSheet).not.toBeVisible();

@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -33,6 +32,7 @@ import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import { Organization } from "@/types/organization/organization";

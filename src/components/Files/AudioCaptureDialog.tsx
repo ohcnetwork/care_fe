@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -10,6 +9,7 @@ import { useMediaStream } from "@/hooks/useMediaStream";
 import { useTimer } from "@/hooks/useTimer";
 
 import useVoiceRecorder from "@/Utils/useVoiceRecorder";
+import { HrefLink } from "@/lib/router/HrefLink";
 
 export interface AudioCaptureDialogProps {
   show: boolean;
@@ -125,13 +125,13 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
           <div className="text-secondary-200">
             {t("audio__allow_permission_helper")}{" "}
             {/* TODO: find a better link that supports all browsers */}
-            <Link
+            <HrefLink
               href="https://support.google.com/chrome/answer/2693767?hl=en&co=GENIE.Platform%3DAndroid"
               target="_blank"
               className="text-blue-400 underline"
             >
               {t("audio__allow_permission_button")}
-            </Link>
+            </HrefLink>
           </div>
         </div>
       )}

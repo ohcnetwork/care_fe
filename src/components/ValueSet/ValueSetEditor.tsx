@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import {
   ValueSetBase,
   ValueSetCreate,
@@ -98,11 +99,12 @@ export function ValueSetEditor({
       }
       // Set department access on the edit page so readers can use the new
       // facility value set.
-      navigate(
-        scope.authContext === "facility"
-          ? `${scope.basePath}/${data.id}/edit`
-          : scope.basePath,
-      );
+      navigate({
+        href:
+          scope.authContext === "facility"
+            ? `${scope.basePath}/${data.id}/edit`
+            : scope.basePath,
+      });
     },
   });
 
@@ -119,7 +121,7 @@ export function ValueSetEditor({
         onSuccess(data);
         return;
       }
-      navigate(scope.basePath);
+      navigate({ href: scope.basePath });
     },
   });
 

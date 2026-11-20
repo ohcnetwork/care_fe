@@ -1,5 +1,4 @@
 import { Copy, Eye, Pencil } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import type { ValueSetRead, ValueSetScope } from "@/types/valueSet/valueSet";
 
 import { ValueSetPreview } from "./ValueSetPreview";
+
+import { navigate } from "@/lib/router/navigate";
 
 interface ValueSetListActionsProps {
   valueset: ValueSetRead;
@@ -41,7 +42,9 @@ export function ValueSetListActions({
             variant="outline"
             size="sm"
             onClick={() =>
-              navigate(`${scope.basePath}/create?parent=${valueset.id}`)
+              navigate({
+                href: `${scope.basePath}/create?parent=${valueset.id}`,
+              })
             }
           >
             <Copy className="size-4 mr-0" />
@@ -56,7 +59,9 @@ export function ValueSetListActions({
     <Button
       variant="outline"
       size="sm"
-      onClick={() => navigate(`${scope.basePath}/${valueset.id}/edit`)}
+      onClick={() =>
+        navigate({ href: `${scope.basePath}/${valueset.id}/edit` })
+      }
       className="hover:bg-primary-50"
     >
       {readOnly ? (
