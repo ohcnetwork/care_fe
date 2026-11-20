@@ -165,28 +165,58 @@ test("future days/months and bound navigation are disabled; month grid is single
   ).toBeVisible();
 });
 
-test("popover discards drafts on Escape and outside click, and closes on Apply", async ({
+test("popover: Escape discards drafts, dismissing keeps applicable drafts", async ({
   page,
 }) => {
-  await open(page, "popover");
+  await open(page, "popover&required");
   const trigger = page.getByRole("button", {
     name: "Select date range",
     exact: true,
   });
   await trigger.click();
   await day(page, "2026-11-03").click();
+  await day(page, "2026-11-16").click();
   await page.getByRole("button", { name: "Nov 2026", exact: true }).focus();
   await page.keyboard.press("Escape");
   await trigger.click();
   await expect(from(page)).toHaveValue("");
+
+  // A draft Apply would reject (missing End) is discarded silently.
   await day(page, "2026-11-03").click();
   await page.getByTestId("outside").click();
+  await expect(from(page)).toBeHidden();
   await trigger.click();
   await expect(from(page)).toHaveValue("");
+  await expect(page.getByTestId("applied")).toContainText('"count":0');
+
+  await day(page, "2026-11-16").click();
   await day(page, "2026-11-03").click();
+  // Apply is enabled by this click, so focus moves after it renders.
+  await expect(apply(page)).toBeFocused();
+  await page.getByTestId("outside").click();
+  await expect(from(page)).toBeHidden();
+  await expect(page.getByTestId("applied")).toContainText(
+    '{"from":"2026-11-03","to":"2026-11-16","count":1}',
+  );
+
+  // Reopening and dismissing without edits applies nothing.
+  const filled = page.getByRole("button", {
+    name: "3 Nov – 16 Nov 2026",
+    exact: true,
+  });
+  await filled.click();
+  await expect(from(page)).toHaveValue("03/11/2026");
+  await filled.click();
+  await expect(from(page)).toBeHidden();
+  await expect(page.getByTestId("applied")).toContainText('"count":1');
+
+  await filled.click();
+  await to(page).fill("20/11/2026");
   await apply(page).click();
   await expect(page.locator('[data-slot="date-range-picker"]')).toHaveCount(0);
-  await expect(page.getByTestId("applied")).toContainText('"count":1');
+  await expect(page.getByTestId("applied")).toContainText(
+    '{"from":"2026-11-03","to":"2026-11-20","count":2}',
+  );
 });
 
 test("open-ended rules, clear controls and To-only summary", async ({
@@ -366,6 +396,23 @@ test("clearing End on a reopened range keeps the calendar in sync and picks a ne
     '"from":"2026-11-10"',
   );
   await expect(page.getByTestId("applied")).toContainText('"to":"2026-11-12"');
+});
+
+test("re-picking a range in another month keeps that month in view", async ({
+  page,
+}) => {
+  await open(page, "value");
+  await page
+    .getByRole("button", { name: "Previous month", exact: true })
+    .click();
+  await day(page, "2026-10-20").click();
+  await expect(to(page)).toBeFocused();
+  await expect(to(page)).toHaveValue("19/11/2026");
+  // Blurring the unchanged End must not jump the calendar back to November.
+  await day(page, "2026-10-25").click();
+  await expect(from(page)).toHaveValue("20/10/2026");
+  await expect(to(page)).toHaveValue("25/10/2026");
+  await expect(apply(page)).toBeFocused();
 });
 
 test("the real multi-filter passes bounds through and returns to presets after Apply", async ({

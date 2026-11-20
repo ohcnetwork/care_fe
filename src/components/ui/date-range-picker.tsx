@@ -17,8 +17,11 @@ import {
 } from "lucide-react";
 import {
   type AriaAttributes,
+  type Ref,
   useEffect,
   useId,
+  useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -65,9 +68,16 @@ export interface DateRangePickerProps {
 type Edge = "from" | "to";
 type FieldText = Record<Edge, string>;
 
+interface RangePanelHandle {
+  /** The range Apply would commit now, or undefined while Apply is disabled. */
+  pendingRange?: DateRangeValue;
+}
+
 const fieldDate = (date?: Date) => (date ? format(date, "dd/MM/yyyy") : "");
 const localDate = (date?: Date) =>
   date && isValid(date) ? startOfDay(date) : undefined;
+const sameDay = (a?: Date, b?: Date) =>
+  localDate(a)?.getTime() === localDate(b)?.getTime();
 
 function parseDate(text: string): Date | undefined {
   const value = text.trim().toLowerCase();
@@ -117,7 +127,11 @@ function rangeText(
   return `${dateLabel(range.from, range.from.getFullYear() !== range.to.getFullYear())} – ${dateLabel(range.to)}`;
 }
 
-/** A local-date range editor. Drafts are applied explicitly, never on dismissal. */
+/**
+ * A local-date range editor. Panels apply drafts only through Apply. Popovers
+ * also apply a draft that Apply would accept when dismissed by an outside
+ * press, the trigger or focus leaving; Escape discards the draft.
+ */
 export function DateRangePicker({
   variant = "popover",
   className,
@@ -130,6 +144,7 @@ export function DateRangePicker({
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<RangePanelHandle>(null);
   const valueId = useId();
   const dateLabel = (date: Date, year = true) =>
     new Intl.DateTimeFormat(i18n.language, {
@@ -150,6 +165,7 @@ export function DateRangePicker({
     <RangePanel
       key={`${from?.getTime() ?? ""}:${to?.getTime() ?? ""}:${props.minDate?.getTime() ?? ""}:${props.maxDate?.getTime() ?? ""}`}
       {...props}
+      ref={panelRef}
       className={variant === "panel" ? className : undefined}
       onApply={(range) => {
         props.onApply(range);
@@ -159,7 +175,18 @@ export function DateRangePicker({
   );
   if (variant === "panel") return panel;
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(next, details) => {
+        if (!next && details.reason !== "escape-key") {
+          const range = panelRef.current?.pendingRange;
+          if (range && !(sameDay(range.from, from) && sameDay(range.to, to))) {
+            props.onApply(range);
+          }
+        }
+        setOpen(next);
+      }}
+    >
       <PopoverTrigger
         appearance="field"
         id={id}
@@ -203,7 +230,10 @@ function RangePanel({
   onBack,
   autoFocus,
   className,
-}: Omit<DateRangePickerProps, "variant" | "placeholder">) {
+  ref,
+}: Omit<DateRangePickerProps, "variant" | "placeholder"> & {
+  ref?: Ref<RangePanelHandle>;
+}) {
   const { t, i18n } = useTranslation();
   const id = useId();
   const fromRef = useRef<HTMLInputElement>(null);
@@ -230,6 +260,13 @@ function RangePanel({
   useEffect(() => {
     if (autoFocus) fromRef.current?.focus();
   }, [autoFocus]);
+  // Apply may only become enabled once the completed range renders.
+  const focusApply = useRef(false);
+  useLayoutEffect(() => {
+    if (!focusApply.current) return;
+    focusApply.current = false;
+    applyRef.current?.focus({ preventScroll: true });
+  });
   const minimum = minDate?.getTime();
   const maximum = maxDate?.getTime();
   const bounds = useMemo(
@@ -299,7 +336,8 @@ function RangePanel({
         ? { to: fieldDate(next.to) }
         : {}),
     }));
-    if (date) setMonth(clampMonth(date));
+    // Blur re-commits unchanged text; moving the month then would swallow a day click.
+    if (date && !sameDay(date, current[edge])) setMonth(clampMonth(date));
     return true;
   };
   const handleDay = (day: Date) => {
@@ -321,7 +359,7 @@ function RangePanel({
           ? { from: date, to: current.from }
           : { ...current, to: date },
       );
-      applyRef.current?.focus({ preventScroll: true });
+      focusApply.current = true;
     }
   };
   const parsedRange = {
@@ -336,6 +374,12 @@ function RangePanel({
     (allowOpenEnded
       ? !!(parsedRange.from || parsedRange.to)
       : !!(parsedRange.from && parsedRange.to));
+  const pendingRange = !canApply
+    ? undefined
+    : parsedRange.from && parsedRange.to && parsedRange.from > parsedRange.to
+      ? { from: parsedRange.to, to: parsedRange.from }
+      : parsedRange;
+  useImperativeHandle(ref, () => ({ pendingRange }));
   const summary =
     range.from && range.to
       ? rangeText(range, dateLabel)
@@ -617,17 +661,7 @@ function RangePanel({
           size="default"
           disabled={!canApply}
           onClick={() => {
-            const fromError = validate(text.from);
-            const toError = validate(text.to);
-            setErrors({ from: fromError, to: toError });
-            if (fromError || toError || !canApply) return;
-            onApply(
-              parsedRange.from &&
-                parsedRange.to &&
-                parsedRange.from > parsedRange.to
-                ? { from: parsedRange.to, to: parsedRange.from }
-                : parsedRange,
-            );
+            if (pendingRange) onApply(pendingRange);
           }}
         >
           {t("apply")}
