@@ -380,6 +380,8 @@ test.describe("Shared workspace navigation", () => {
       await page.keyboard.press("Control+b");
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
       await expect(navigation).not.toBeVisible();
+      // Shortcuts debounce for 300ms, so an immediate second press is ignored
+      await page.waitForTimeout(350);
       await page.keyboard.press("Control+b");
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "true");
       await expect(navigation).toBeInViewport({ ratio: 1 });
@@ -511,6 +513,8 @@ test.describe("Shared workspace navigation", () => {
       await expect(page.locator('[data-slot="tooltip-content"]')).toHaveCount(
         0,
       );
+      // Shortcuts debounce for 300ms, so an immediate second press is ignored
+      await page.waitForTimeout(350);
       await page.keyboard.press("Meta+b");
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "true");
       await expect(navigation).toBeInViewport({ ratio: 1 });
