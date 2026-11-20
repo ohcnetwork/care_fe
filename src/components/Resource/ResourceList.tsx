@@ -220,7 +220,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
               <Tabs value={currentStatus} className="hidden sm:block w-full">
                 <TabsList
                   variant="line"
-                  className="h-auto max-w-full flex-wrap justify-start gap-y-2"
+                  className="h-auto w-full max-w-full flex-wrap gap-y-2"
                 >
                   {currentStatuses.map((statusOption) => (
                     <TabsTrigger

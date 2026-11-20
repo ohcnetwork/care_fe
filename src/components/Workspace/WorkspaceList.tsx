@@ -14,6 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -105,29 +112,45 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
         </Button>
       </div>
 
-      <Tabs
-        value={status}
-        onValueChange={(value) => updateQuery({ status: value, page: 1 })}
-      >
-        <TabsList
-          aria-label={t("status")}
-          className="flex w-full sm:w-auto sm:self-start"
+      <div>
+        <Tabs
+          value={status}
+          onValueChange={(value) => updateQuery({ status: value, page: 1 })}
+          className="max-sm:hidden"
         >
-          {WORKSPACE_STATUSES.map((value) => {
-            const Icon = WORKSPACE_STATUS_ICONS[value];
-            return (
-              <TabsTrigger
-                key={value}
-                value={value}
-                className="flex-1 sm:flex-none sm:px-4"
-              >
-                <Icon className="size-4" aria-hidden="true" />
+          <TabsList aria-label={t("status")}>
+            {WORKSPACE_STATUSES.map((value) => {
+              const Icon = WORKSPACE_STATUS_ICONS[value];
+              return (
+                <TabsTrigger
+                  key={value}
+                  value={value}
+                  className="flex-none px-4"
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                  {t(value)}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </Tabs>
+        {/* Translated status labels do not fit as tabs on phones. */}
+        <Select
+          value={status}
+          onValueChange={(value) => updateQuery({ status: value, page: 1 })}
+        >
+          <SelectTrigger aria-label={t("status")} className="w-full sm:hidden">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {WORKSPACE_STATUSES.map((value) => (
+              <SelectItem key={value} value={value}>
                 {t(value)}
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-      </Tabs>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       <div className="w-full space-y-1.5 sm:max-w-md">
         <Label htmlFor={searchId}>{t("search")}</Label>
