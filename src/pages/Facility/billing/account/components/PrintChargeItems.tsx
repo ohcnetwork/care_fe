@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import PatientPrintPageHeader from "@/components/Common/PatientPrintPageHeader";
 
 import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
@@ -418,6 +419,11 @@ export const PrintChargeItems = (props: {
         facility={facility}
         templateSlug={PrintTemplateType.charge_items}
         hideFacilityHeader={hideHeader}
+        pageHeader={
+          account?.patient && (
+            <PatientPrintPageHeader patient={account.patient} />
+          )
+        }
       >
         <DisablingCover
           disabled={isLoading || isLoadingPayments || isLoadingAccount}

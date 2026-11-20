@@ -25,7 +25,7 @@ export default function useCurrentLocation() {
   const path = useFullPath();
   const [facilityId, locationId] = extractFacilityLocationId(path);
 
-  const { data: location } = useQuery({
+  const { data: location, isLoading } = useQuery({
     queryKey: ["location", facilityId, locationId],
     queryFn: query(locationApi.get, {
       pathParams: { facility_id: facilityId, id: locationId },
@@ -33,5 +33,5 @@ export default function useCurrentLocation() {
     staleTime: 1000 * 60 * 30, // cache for 30 minutes
   });
 
-  return { facilityId, locationId, location };
+  return { facilityId, locationId, location, isLoading };
 }

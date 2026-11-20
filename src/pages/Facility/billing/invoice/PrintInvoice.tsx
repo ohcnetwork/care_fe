@@ -4,6 +4,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import PatientPrintPageHeader from "@/components/Common/PatientPrintPageHeader";
 
 import { DisablingCover } from "@/components/Common/DisablingCover";
 import Loading from "@/components/Common/Loading";
@@ -144,6 +145,11 @@ export function PrintInvoiceBase({ facilityId, invoiceId }: PrintInvoiceProps) {
       disabled={isLoadingDispenses}
       facility={facility}
       templateSlug={PrintTemplateType.invoice}
+      pageHeader={
+        patient && (
+          <PatientPrintPageHeader patient={verifiedPatient ?? patient} />
+        )
+      }
     >
       <DisablingCover
         disabled={isLoadingDispenses}

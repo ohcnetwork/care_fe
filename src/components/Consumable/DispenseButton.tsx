@@ -1,6 +1,9 @@
+import { navigate } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import careConfig from "@careConfig";
 
@@ -8,16 +11,12 @@ import { LocationSelectorDialog } from "@/components/ui/sidebar/facility/locatio
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { buildEncounterUrl } from "@/pages/Encounters/utils/utils";
-import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
-import {
-  AccountBillingStatus,
-  AccountStatus,
-} from "@/types/billing/account/Account";
-import accountApi from "@/types/billing/account/accountApi";
+import { createAndIssueInvoice } from "@/pages/Facility/services/pharmacy/utils/createAndIssueInvoice";
+import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDefaultBillingAccount";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
+import { InvoiceCreate } from "@/types/billing/invoice/invoice";
 import { LocationRead } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
-import query from "@/Utils/request/query";
 
 import DispenseDrawer from "./DispenseDrawer";
 
@@ -30,40 +29,40 @@ export const DispenseButton = ({
   setOpen: (open: boolean) => void;
   facilityId: string;
 }) => {
+  const { t } = useTranslation();
   const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [showDrawer, setShowDrawer] = useState(false);
-  const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
-  const [extractedChargeItems, setExtractedChargeItems] = useState<
-    ChargeItemRead[]
-  >([]);
-  const [accountId, setAccountId] = useState<string | undefined>(undefined);
   const { selectedEncounter } = useEncounter();
   const queryClient = useQueryClient();
 
-  const { refetch: refetchAccount } = useQuery({
-    queryKey: ["accounts", selectedEncounter?.patient.id],
-    queryFn: query(accountApi.listAccount, {
-      pathParams: { facilityId },
-      queryParams: {
-        patient: selectedEncounter?.patient.id,
-        status: AccountStatus.active,
-        billing_status: AccountBillingStatus.open,
-      },
-    }),
-    enabled: !!facilityId && !!selectedEncounter?.patient.id,
+  const { data: account, refetch: refetchAccount } =
+    usePatientDefaultBillingAccount({
+      patientId: selectedEncounter?.patient.id,
+      facilityId,
+    });
+
+  const { mutate: issueInvoice } = useMutation({
+    mutationFn: (data: Pick<InvoiceCreate, "account" | "charge_items">) =>
+      createAndIssueInvoice(facilityId, data),
+    onSuccess: (invoice) => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success(t("invoice_issued_successfully"));
+      if (!selectedEncounter) return;
+      const sourceUrl = buildEncounterUrl(
+        selectedEncounter.patient.id,
+        `/encounter/${selectedEncounter.id}/updates`,
+        facilityId,
+      );
+      navigate(
+        `/facility/${facilityId}/billing/invoices/${invoice.id}?sourceUrl=${sourceUrl}`,
+      );
+    },
   });
 
   const handleLocationSelect = (selectedLocation: LocationRead) => {
     setLocation(selectedLocation);
     setOpen(false);
     setShowDrawer(true);
-  };
-
-  const resetInvoiceState = () => {
-    setIsInvoiceSheetOpen(false);
-    setAccountId(undefined);
-    setLocation(undefined);
-    setExtractedChargeItems([]);
   };
 
   return (
@@ -98,44 +97,20 @@ export const DispenseButton = ({
           onDispenseComplete={async (chargeItems: ChargeItemRead[]) => {
             setShowDrawer(false);
 
-            queryClient.invalidateQueries({
-              queryKey: [
-                "dispenseOrders",
-                selectedEncounter.patient.id,
-                facilityId,
-              ],
-            });
-
             if (
               careConfig.enableAutoInvoiceAfterDispense &&
               chargeItems.length > 0
             ) {
-              setExtractedChargeItems(chargeItems);
-              const result = await refetchAccount();
-              const fetchedAccountId = result.data?.results?.[0]?.id;
-
-              if (fetchedAccountId) {
-                setAccountId(fetchedAccountId);
-                setIsInvoiceSheetOpen(true);
+              const accountId =
+                account?.id ?? (await refetchAccount()).data?.id;
+              if (accountId) {
+                issueInvoice({
+                  account: accountId,
+                  charge_items: chargeItems.map((item) => item.id),
+                });
               }
             }
           }}
-        />
-      )}
-
-      {selectedEncounter && accountId && (
-        <CreateInvoiceSheet
-          facilityId={facilityId}
-          accountId={accountId}
-          open={isInvoiceSheetOpen}
-          onOpenChange={(open) => !open && resetInvoiceState()}
-          preSelectedChargeItems={extractedChargeItems}
-          onSuccess={resetInvoiceState}
-          sourceUrl={buildEncounterUrl(
-            selectedEncounter.patient.id,
-            `/encounter/${selectedEncounter.id}/updates`,
-            facilityId,
-          )}
         />
       )}
     </>

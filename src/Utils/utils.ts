@@ -457,3 +457,12 @@ export const goBack = (fallback?: string) => {
   }
   history.back();
 };
+
+/**
+ * Generates a timestamp-suffixed alternate identifier, e.g. for grouping
+ * resources (prescriptions, dispense orders) created in a single submission.
+ *
+ * @example generateAlternateIdentifier(encounterId) // "<id>-2025-01-01T10-00-00-000Z"
+ */
+export const generateAlternateIdentifier = (prefix?: string) =>
+  `${prefix}-${new Date().toISOString().replace(/[:.]/g, "-")}`;

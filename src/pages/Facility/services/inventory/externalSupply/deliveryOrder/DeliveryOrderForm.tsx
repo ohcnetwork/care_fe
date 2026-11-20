@@ -1,8 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -10,23 +9,8 @@ import { z } from "zod";
 
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
-import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 
-import BackButton from "@/components/Common/BackButton";
-import Autocomplete from "@/components/ui/autocomplete";
-import { Badge } from "@/components/ui/badge";
 import {
   ExtensionEntityType,
   getCombinedExtensionProps,
@@ -35,22 +19,17 @@ import {
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
-import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import {
-  DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderRetrieve,
   DeliveryOrderStatus,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
-import { LocationRead } from "@/types/location/location";
-import locationApi from "@/types/location/locationApi";
-import organizationApi from "@/types/organization/organizationApi";
-import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { ExtensionContexts } from "@/Utils/schema/types";
+
+import { DeliveryOrderFormContent } from "./DeliveryOrderFormContent";
 
 const createBaseSchema = (t: (key: string) => string, internal: boolean) =>
   z.object({
@@ -105,47 +84,11 @@ export default function DeliveryOrderForm({
     },
   );
 
-  const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
-  const [searchDeliveryFrom, setSearchDeliveryFrom] = useState("");
-
-  const { data: availableSuppliers } = useQuery({
-    queryKey: ["organizations", supplierSearchQuery],
-    queryFn: query.debounced(organizationApi.list, {
-      queryParams: {
-        org_type: "product_supplier",
-        name: supplierSearchQuery || undefined,
-      },
-    }),
-  });
-
-  const {
-    data: deliveryFromLocations,
-    isLoading: isLoadingDeliveryFromLocations,
-  } = useQuery({
-    queryKey: ["locations", facilityId, searchDeliveryFrom],
-    queryFn: query.debounced(locationApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        name: searchDeliveryFrom,
-        limit: 100,
-        mode: "kind",
-        ordering: "sort_index",
-      },
-    }),
-    select: (data: PaginatedResponse<LocationRead>) =>
-      data.results.filter((location) => location.id !== locationId),
-  });
-
-  const vendorOptions =
-    availableSuppliers?.results.map((s) => ({ label: s.name, value: s.id })) ||
-    [];
-  const deliveryFromOptions =
-    deliveryFromLocations?.map((l) => ({ label: l.name, value: l.id })) || [];
-
   const ext = useMemo(
     () =>
       getCombinedExtensionProps(
         getExtensions(ExtensionEntityType.supply_delivery_order, "write"),
+        ExtensionContexts.supply_delivery_order_form,
       ),
     [getExtensions],
   );
@@ -175,6 +118,7 @@ export default function DeliveryOrderForm({
   const extensions = useEntityExtensions({
     entityType: ExtensionEntityType.supply_delivery_order,
     schemaType: "write",
+    context: ExtensionContexts.supply_delivery_order_form,
     form,
     existingData: existingData?.extensions as
       Record<string, Record<string, unknown>> | undefined,
@@ -211,11 +155,6 @@ export default function DeliveryOrderForm({
     }
     form.setValue(internal ? "origin" : "destination", locationId);
   }, [locationId, internal, isEditMode, supplyOrderId, form]);
-
-  const tagIds = form.watch("tags");
-  const selectedTags = useTagConfigs({ ids: tagIds, facilityId })
-    .map(({ data }) => data)
-    .filter(Boolean) as TagConfig[];
 
   const { mutate: createDeliveryOrder, isPending: isCreating } = useMutation({
     mutationFn: mutate(deliveryOrderApi.createDeliveryOrder, {
@@ -283,13 +222,6 @@ export default function DeliveryOrderForm({
   }
 
   const title = isEditMode ? t("edit_delivery") : t("create_delivery");
-  const returnPath = getInventoryBasePath(
-    facilityId,
-    locationId,
-    internal,
-    false,
-    !internal,
-  );
   const isPending = isCreating || isUpdating;
 
   if (
@@ -310,170 +242,20 @@ export default function DeliveryOrderForm({
   }
 
   return (
-    <Page
-      title={title}
-      hideTitleOnPage
-      shortCutContext="facility:inventory:delivery"
-    >
-      <div className="container mx-auto max-w-5xl">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            {title}
-            <Badge
-              variant={
-                DELIVERY_ORDER_STATUS_COLORS[
-                  existingData?.status || DeliveryOrderStatus.draft
-                ]
-              }
-            >
-              {t(existingData?.status || DeliveryOrderStatus.draft)}
-            </Badge>
-          </h1>
-          <BackButton variant="outline" size="icon">
-            <X className="size-5" />
-            <span className="sr-only">{t("close")}</span>
-          </BackButton>
-        </div>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <input type="submit" hidden />
-            <Card className="p-0 bg-gray-50">
-              <CardContent className="space-y-4 p-4 rounded-md">
-                <div className="grid sm:grid-cols-2 gap-4 items-start">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("name")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            className="h-9"
-                            placeholder={t("enter_order_name")}
-                            {...field}
-                            autoFocus
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name={internal ? "destination" : "supplier"}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {internal ? t("deliver_to") : t("vendor")}
-                        </FormLabel>
-                        <FormControl>
-                          <Autocomplete
-                            disabled={internal && !!supplyOrderId}
-                            options={
-                              internal ? deliveryFromOptions : vendorOptions
-                            }
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            isLoading={
-                              internal ? isLoadingDeliveryFromLocations : false
-                            }
-                            onSearch={
-                              internal
-                                ? setSearchDeliveryFrom
-                                : setSupplierSearchQuery
-                            }
-                            placeholder={
-                              internal
-                                ? t("select_location")
-                                : t("select_vendor")
-                            }
-                            inputPlaceholder={
-                              internal
-                                ? t("search_location")
-                                : t("search_vendor")
-                            }
-                            noOptionsMessage={
-                              internal
-                                ? t("no_location_found")
-                                : t("no_vendor_found")
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="note"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        {t("note")}
-                        <span className="text-gray-500 text-sm italic">
-                          {" "}
-                          ({t("optional")})
-                        </span>
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea rows={3} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {!isEditMode && (
-                  <FormField
-                    control={form.control}
-                    name="tags"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("tags_proper")}</FormLabel>
-                        <FormControl>
-                          <TagSelectorPopover
-                            selected={selectedTags}
-                            onChange={(tags) =>
-                              field.onChange(tags.map((tag) => tag.id))
-                            }
-                            resource={TagResource.DELIVERY_ORDER}
-                            facilityId={facilityId}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-                {extensions.fields}
-              </CardContent>
-            </Card>
-
-            <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate(returnPath)}
-              >
-                {t("cancel")}
-                <ShortcutBadge actionId="cancel-action" />
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending
-                  ? isEditMode
-                    ? t("saving")
-                    : t("creating")
-                  : isEditMode
-                    ? t("save")
-                    : t("create")}
-                <ShortcutBadge actionId="enter-action" />
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </div>
-    </Page>
+    <Form {...form}>
+      <DeliveryOrderFormContent
+        facilityId={facilityId}
+        locationId={locationId}
+        internal={internal}
+        supplyOrderId={supplyOrderId}
+        title={title}
+        status={existingData?.status || DeliveryOrderStatus.draft}
+        isEditMode={isEditMode}
+        isPending={isPending}
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
+        {extensions.fields}
+      </DeliveryOrderFormContent>
+    </Form>
   );
 }

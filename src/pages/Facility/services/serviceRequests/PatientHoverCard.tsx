@@ -33,7 +33,7 @@ export function PatientHoverCard({
       <Drawer>
         <DrawerTrigger
           disabled={disabled}
-          className="lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="min-w-0 max-w-full lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <PatientHoverCardTrigger patient={patient} disabled={disabled} />
         </DrawerTrigger>
@@ -49,7 +49,7 @@ export function PatientHoverCard({
       <Popover>
         <PopoverTrigger
           disabled={disabled}
-          className="hidden lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background"
+          className="hidden min-w-0 max-w-full lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background"
         >
           <PatientHoverCardTrigger patient={patient} disabled={disabled} />
         </PopoverTrigger>
@@ -83,25 +83,25 @@ function PatientHoverCardTrigger({
     <div
       data-slot="patient-info-hover-card-trigger"
       className={cn(
-        "flex w-fit gap-3 items-center rounded-md",
+        "flex w-fit max-w-full gap-3 items-center rounded-md text-left",
         !disabled && "hover:bg-gray-50 active:bg-gray-50 cursor-pointer",
       )}
     >
-      <div className="size-12">
+      <div className="size-12 shrink-0">
         <Avatar name={patient.name} />
       </div>
 
-      <div className="flex flex-col">
+      <div className="flex min-w-0 flex-col">
         <div className="flex flex-row gap-2 items-center">
           <h5
             className={cn(
-              "text-lg font-semibold whitespace-nowrap",
+              "min-w-0 text-lg font-semibold wrap-break-word",
               !disabled && "underline",
             )}
           >
             {patient.name}
           </h5>
-          {!disabled && <ChevronDown size={16} />}
+          {!disabled && <ChevronDown size={16} className="shrink-0" />}
         </div>
         <span className="flex flex-start text-gray-700">
           <PatientAge patient={patient} />, {t(`GENDER__${patient.gender}`)}
