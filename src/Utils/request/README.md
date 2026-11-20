@@ -144,7 +144,9 @@ function RoleList({ search }: { search: string }) {
 
   return (
     <ul>
-      {data?.results.map((role) => <li key={role.id}>{role.name}</li>)}
+      {data?.results.map((role) => (
+        <li key={role.id}>{role.name}</li>
+      ))}
       <li ref={ref}>{isFetchingNextPage && <Loading />}</li>
     </ul>
   );
@@ -234,7 +236,9 @@ function CloseEncounter({ encounterId }: { encounterId: string }) {
   const { mutate: batchRequest, isPending } = useBatchRequest({
     onSuccess: ({ results }) => {
       // Use the reference ID to find the result of each request.
-      if (results.some((result) => result.reference_id === "encounter-closed")) {
+      if (
+        results.some((result) => result.reference_id === "encounter-closed")
+      ) {
         toast.success("Encounter closed");
       }
     },
