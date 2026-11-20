@@ -415,15 +415,17 @@ test.describe("Encounter navigation", () => {
         // The failed load raises an error toast. On a phone it spans the top
         // of the screen over Back, and hovering it pauses its auto-dismiss,
         // so close it the way a user would whenever it is in the way.
+        // Registered on the first toast so the handler's visibility check
+        // matches one element; Playwright re-runs the handler while a toast
+        // is still in the way, so one click per run handles stacked toasts.
         await page.addLocatorHandler(
-          page.locator(
-            "li[data-sonner-toast][data-type='error'][data-removed='false']",
-          ),
-          async (toasts) => {
-            // Playwright re-runs this handler while a toast is still in the
-            // way, so one click per run handles stacked toasts.
-            await toasts
-              .first()
+          page
+            .locator(
+              "li[data-sonner-toast][data-type='error'][data-removed='false']",
+            )
+            .first(),
+          async (toast) => {
+            await toast
               .getByRole("button", { name: "Close toast", exact: true })
               .click();
           },
