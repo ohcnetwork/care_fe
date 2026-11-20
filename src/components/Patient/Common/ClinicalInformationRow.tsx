@@ -78,13 +78,19 @@ export default function ClinicalInformationRow({
             index !== 0 && "border-l",
             index === columns.length - 1 && "border-r",
             col.className,
+            compact && "rounded-none border-t-0",
           )}
         >
           {col.render()}
         </div>
       ))}
 
-      <div className="flex items-center justify-center border border-gray-200 border-l-0 rounded-r-sm">
+      <div
+        className={cn(
+          "flex items-center justify-center border border-gray-200 border-l-0 rounded-r-sm",
+          compact && "rounded-none border-t-0",
+        )}
+      >
         <DropdownMenu>
           <BadgeButtonDropdownTrigger note={note} />
           <DropdownMenuContent>
@@ -135,7 +141,7 @@ export default function ClinicalInformationRow({
         <div
           className={cn(
             "col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded rounded-t-none",
-            compact ? "-mt-1.5" : "-mt-2.5",
+            compact ? "-mt-px" : "-mt-2.5",
           )}
         >
           <div className="text-sm font-semibold text-gray-800">
