@@ -270,6 +270,25 @@ test("date presets fit without scrolling on a desktop and still apply", async ({
   await expect(page.getByTestId("applied")).toContainText('"count":1');
 });
 
+test("the applied preset is marked with a check and footer hints use Kbd", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await open(page, "menu&integration&value");
+  const menu = page.locator('[data-slot="dropdown-menu-content"]');
+  const custom = page.getByRole("menuitem", { name: /custom date range/i });
+  await expect(menu.locator("[aria-current]")).toHaveCount(1);
+  await expect(custom).toHaveAttribute("aria-current", "true");
+  await expect(custom.locator("svg.lucide-check")).toHaveCount(1);
+  await expect(custom).toHaveCSS("border-top-width", "0px");
+  await expect(menu.locator('kbd[data-slot="kbd"]')).toHaveCount(4);
+  await page.getByRole("menuitem", { name: "Today", exact: true }).click();
+  const today = page.getByRole("menuitem", { name: "Today", exact: true });
+  await expect(today).toHaveAttribute("aria-current", "true");
+  await expect(custom).not.toHaveAttribute("aria-current");
+  await expect(menu.locator("svg.lucide-check")).toHaveCount(1);
+});
+
 test("short screens use one menu scroller and keyboard navigation reaches custom range", async ({
   page,
 }) => {

@@ -1,5 +1,5 @@
 import { format, isSameDay, isValid } from "date-fns";
-import { ChevronRight } from "lucide-react";
+import { Check, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -67,22 +67,21 @@ function DateRangeOptions({
               e.preventDefault();
               handleDateRangeSelect(option);
             }}
-            className={cn(
-              "w-full justify-start px-3 font-medium text-sm text-gray-950",
-              isSameRange(option) && "bg-gray-100 border-green-500 border",
-            )}
+            aria-current={isSameRange(option) || undefined}
+            className="w-full justify-start px-3 font-medium text-sm text-gray-950"
           >
             {option.count
               ? t(option.label, { count: option.count })
               : t(option.label)}
+            {isSameRange(option) && (
+              <Check aria-hidden="true" className="ms-auto" />
+            )}
           </DropdownMenuItem>
         ))}
         <DropdownMenuItem
           ref={options.length === focusItemIndex ? setFocusItemRef : null}
-          className={cn(
-            "w-full justify-between px-3 font-medium text-sm text-gray-950",
-            isCustomDateRangeSelected && "bg-gray-100 border-green-500 border",
-          )}
+          aria-current={isCustomDateRangeSelected || undefined}
+          className="w-full justify-start px-3 font-medium text-sm text-gray-950"
           onSelect={(e) => {
             e.preventDefault();
             setView("custom");
@@ -90,7 +89,13 @@ function DateRangeOptions({
           onFocus={() => setFocusItemIndex(options.length)}
         >
           {t("custom_date_range")}
-          <ChevronRight className="h-4 w-4" />
+          {isCustomDateRangeSelected && (
+            <Check aria-hidden="true" className="ms-auto" />
+          )}
+          <ChevronRight
+            aria-hidden="true"
+            className={cn(!isCustomDateRangeSelected && "ms-auto")}
+          />
         </DropdownMenuItem>
       </div>
       <NavigationHelper isActiveFilter={true} />
