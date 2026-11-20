@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
-import { navigate, usePathParams } from "raviger";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -85,6 +85,7 @@ export function UserCard(props: UserCardProps) {
   const additionalResponsibilities =
     responsibilities.length - visibleResponsibilities.length;
   const userDetailsPath = `${facility ? `/facility/${facility}/users/${user.username}` : `/users/${user.username}`}`;
+  const navigate = useNavigate();
 
   return (
     <Card key={user.id} className={cn("h-full", user.deleted && "opacity-60")}>
@@ -148,7 +149,7 @@ export function UserCard(props: UserCardProps) {
                     aria-label={t("see_count_more_responsibilities", {
                       count: additionalResponsibilities,
                     })}
-                    onClick={() => navigate(userDetailsPath)}
+                    onClick={() => navigate({ to: userDetailsPath })}
                   >
                     +{t("count_more", { count: additionalResponsibilities })}
                   </Button>
@@ -159,7 +160,7 @@ export function UserCard(props: UserCardProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate(userDetailsPath)}
+                  onClick={() => navigate({ to: userDetailsPath })}
                 >
                   <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
                   <span>{t("see_details")}</span>
