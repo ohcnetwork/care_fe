@@ -1,4 +1,5 @@
 import { TriangleAlert } from "lucide-react";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -13,7 +14,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import { navigate } from "@/lib/router/navigate";
 import {
   AccountBase,
   AccountBillingStatus,
@@ -80,11 +80,9 @@ export default function NoActiveAccountWarningDialog({
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={() =>
-              navigate({
-                to: "/facility/$facilityId/billing/account",
-                params: { facilityId },
-                search: { patient_filter: patientId },
-              })
+              navigate(
+                `/facility/${facilityId}/billing/account?patient_filter=${patientId}`,
+              )
             }
           >
             <ShortcutBadge actionId="submit-action" />

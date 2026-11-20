@@ -1,3 +1,4 @@
+import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -5,7 +6,6 @@ import { Separator } from "@/components/ui/separator";
 
 import DeviceForm from "@/pages/Facility/settings/devices/components/DeviceForm";
 
-import { useQueryParams } from "@/lib/router/queryParams";
 import { goBack } from "@/Utils/utils";
 import DeviceTypeIcon from "./components/DeviceTypeIcon";
 

@@ -1,8 +1,8 @@
 import { formatRelative } from "date-fns";
+import { Link, usePathParams } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,6 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { NoteRead } from "@/types/notes/messages";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
-import { useRouteParams } from "@/hooks/useRouteParams";
-
 interface NoteMessageProps {
   message: NoteRead;
   onEdit?: () => void;
@@ -28,7 +26,7 @@ interface NoteMessageProps {
 export function NoteMessage({ message, onEdit, children }: NoteMessageProps) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const { facilityId } = useRouteParams("/facility/:facilityId");
+  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
   const isCurrentUser = authUser.id === message.created_by?.id;
   const author = message.created_by;
   const history = message.message_history.history ?? [];
@@ -48,7 +46,7 @@ export function NoteMessage({ message, onEdit, children }: NoteMessageProps) {
       >
         {author && (
           <TooltipComponent content={author.username}>
-            <HrefLink
+            <Link
               href={
                 facilityId
                   ? `/facility/${facilityId}/users/${author.username}`
@@ -61,7 +59,7 @@ export function NoteMessage({ message, onEdit, children }: NoteMessageProps) {
                 imageUrl={author.profile_picture_url}
                 className="flex size-full overflow-hidden rounded-full object-cover"
               />
-            </HrefLink>
+            </Link>
           </TooltipComponent>
         )}
         <div

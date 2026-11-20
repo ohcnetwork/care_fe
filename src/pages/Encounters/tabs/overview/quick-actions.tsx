@@ -6,13 +6,13 @@ import {
   Scissors,
   Stethoscope,
 } from "lucide-react";
+import { Link } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { CreateReferralDialog } from "@/components/Referral/CreateReferralDialog";
 import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import { Button } from "@/components/ui/button";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 
 import { AllergyIcon, MedicineIcon } from "@/CAREUI/icons/CustomIcons";
@@ -175,6 +175,7 @@ export function QuickAction({
   title,
   actionId,
   href,
+  basePath,
   onClick,
   hidden,
   compact = false,
@@ -185,6 +186,7 @@ export function QuickAction({
   title: string;
   actionId?: string;
   href?: string;
+  basePath?: string;
   onClick?: () => void;
   hidden?: boolean;
   compact?: boolean;
@@ -229,7 +231,13 @@ export function QuickAction({
       onClick={onClick}
       aria-label={props["aria-label"] ?? (compact ? title : undefined)}
     >
-      {href ? <HrefLink href={href}>{content}</HrefLink> : content}
+      {href ? (
+        <Link basePath={basePath} href={href}>
+          {content}
+        </Link>
+      ) : (
+        content
+      )}
     </Button>
   );
 }

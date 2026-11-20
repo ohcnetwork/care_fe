@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link, usePath } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { HrefLink } from "@/lib/router/HrefLink";
-import { usePathname } from "@/lib/router/location";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -64,7 +63,7 @@ export default function OrganizationLayout({
   setOrganization,
   routeContext,
 }: Props) {
-  const path = usePathname() || "";
+  const path = usePath() || "";
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -216,7 +215,7 @@ export default function OrganizationLayout({
               <React.Fragment key={parent.id}>
                 <BreadcrumbItem className="min-w-0">
                   <BreadcrumbLink asChild>
-                    <HrefLink
+                    <Link
                       href={currentPath.replace(
                         `${baseUrl}/${id}`,
                         `${baseUrl}/${parent.id}`,
@@ -224,7 +223,7 @@ export default function OrganizationLayout({
                       className={breadcrumbLinkClass}
                     >
                       {parent.name}
-                    </HrefLink>
+                    </Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
@@ -253,7 +252,7 @@ export default function OrganizationLayout({
             >
               {visibleNavItems.map((item) => (
                 <TabsTrigger key={item.url} value={item.url} asChild>
-                  <HrefLink href={item.url}>{item.name}</HrefLink>
+                  <Link href={item.url}>{item.name}</Link>
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -304,7 +303,7 @@ export default function OrganizationLayout({
                     )}
                     asChild
                   >
-                    <HrefLink
+                    <Link
                       href={item.url}
                       className="flex items-center w-full"
                       onClick={() => setIsMobileMenuOpen(false)}
@@ -319,7 +318,7 @@ export default function OrganizationLayout({
                           className="pointer-events-none pr-1"
                         />
                       )}
-                    </HrefLink>
+                    </Link>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>

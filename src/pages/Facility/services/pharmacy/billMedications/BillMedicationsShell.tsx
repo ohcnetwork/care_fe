@@ -59,7 +59,6 @@ export default function BillMedicationsShell({ facilityId, mode }: Props) {
             included={unbilledPrescriptionsFor.excludePrescriptionIds}
             patientId={unbilledPrescriptionsFor.patientId}
             facilityId={unbilledPrescriptionsFor.facilityId}
-            locationId={unbilledPrescriptionsFor.locationId}
             encounterId={unbilledPrescriptionsFor.encounterId}
           />
         )}

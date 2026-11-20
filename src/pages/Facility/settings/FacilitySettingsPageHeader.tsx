@@ -1,3 +1,4 @@
+import { usePath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { getFacilitySettingsPageTitle } from "@/components/ui/sidebar/facility/settings/facility-settings-nav";
@@ -11,12 +12,10 @@ import { InnerPageHeader } from "@/components/Common/InnerPageHeader";
 import { DevicePageHeader } from "@/pages/Facility/settings/devices/DevicePageHeader";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
-import { usePathname } from "@/lib/router/location";
-
 export function FacilitySettingsPageHeader() {
   const { t } = useTranslation();
   const { facilityId, facility } = useCurrentFacility();
-  const path = usePathname();
+  const path = usePath() ?? "";
   const baseUrl = `/facility/${facilityId}`;
   const hasRouteCrumbs = useHasRouteCrumbs();
 
@@ -35,7 +34,7 @@ export function FacilitySettingsPageHeader() {
     );
   }
 
-  // Fallback for paths that have no route crumbs (templates, plugin settings
+  // Legacy fallback for paths still served by raviger tables (templates,
   // plugin settings routes).
   const deviceId = path.match(
     /^\/facility\/[^/]+\/settings\/devices\/([^/]+)(?:\/responses)?\/?$/,

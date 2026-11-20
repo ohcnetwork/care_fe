@@ -9,6 +9,7 @@ import {
   RotateCcw,
   WrenchIcon,
 } from "lucide-react";
+import { navigate as ravigerNavigate } from "raviger";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -276,15 +277,9 @@ export function DispenseOrderViewFooter({
                 locationId={locationId}
                 patient={dispenseOrder.patient}
                 onSuccess={(deliveryOrder) => {
-                  navigate({
-                    to: "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId",
-                    params: {
-                      facilityId,
-                      locationId,
-                      deliveryOrderId: deliveryOrder.id,
-                    },
-                    search: { dispenseOrderIds: dispenseOrder.id },
-                  });
+                  ravigerNavigate(
+                    `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}/?dispenseOrderIds=${dispenseOrder.id}`,
+                  );
                 }}
                 trigger={
                   <Button variant="outline">

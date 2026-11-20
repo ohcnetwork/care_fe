@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -11,7 +12,6 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireFormRenderer } from "@/components/QuestionnaireV2/form/FormCanvas";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
-import { navigate } from "@/lib/router/navigate";
 import {
   QuestionnaireScope,
   formatRevision,
@@ -72,10 +72,7 @@ export function QuestionnaireRevisionPage({
           <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{t("no_data_found")}</AlertDescription>
         </Alert>
-        <Button
-          variant="outline"
-          onClick={() => navigate({ href: versionsPath })}
-        >
+        <Button variant="outline" onClick={() => navigate(versionsPath)}>
           <ArrowLeft className="mr-2 size-4" />
           {t("back")}
         </Button>
@@ -101,7 +98,7 @@ export function QuestionnaireRevisionPage({
           type="button"
           variant="outline"
           size="xs"
-          onClick={() => navigate({ href: versionsPath })}
+          onClick={() => navigate(versionsPath)}
         >
           <ArrowLeft className="size-4" />
           {t("back")}

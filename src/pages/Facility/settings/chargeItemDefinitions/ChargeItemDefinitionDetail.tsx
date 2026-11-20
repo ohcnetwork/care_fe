@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { navigate as ravigerNavigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -62,12 +63,12 @@ export function ChargeItemDefinitionDetail({
       onSuccess: () => {
         toast.success(t("definition_deleted_successfully"));
         queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
-        if (!chargeItemDefinition) return;
-        navigate({
-          to: "/facility/$facilityId/settings/charge_item_definitions/categories/$slug",
-          params: { facilityId, slug: chargeItemDefinition.category.slug },
-          replace: true,
-        });
+        ravigerNavigate(
+          `/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition?.category.slug}`,
+          {
+            replace: true,
+          },
+        );
       },
     });
 

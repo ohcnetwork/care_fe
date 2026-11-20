@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { PencilIcon, PlusIcon } from "lucide-react";
+import { Link } from "raviger";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -10,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { Markdown } from "@/components/ui/markdown";
-import { HrefLink } from "@/lib/router/HrefLink";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
@@ -92,7 +92,7 @@ export default function PrescriptionView({
               size="sm"
               className="text-gray-950 hover:text-gray-700 h-9"
             >
-              <HrefLink
+              <Link
                 href={
                   prescriptionId
                     ? `questionnaire/medication_request?prescription=${prescriptionId}`
@@ -110,7 +110,7 @@ export default function PrescriptionView({
                     {t("create")}
                   </>
                 )}
-              </HrefLink>
+              </Link>
             </Button>
           )}
           {!!facilityId && prescription && prescriptionId && (
@@ -120,10 +120,10 @@ export default function PrescriptionView({
               size="sm"
               className="text-gray-950 hover:text-gray-700 h-9"
             >
-              <HrefLink href={`../../prescription/${prescriptionId}/print`}>
+              <Link href={`../../prescription/${prescriptionId}/print`}>
                 <CareIcon icon="l-print" className="mr-2" />
                 {t("print")}
-              </HrefLink>
+              </Link>
             </Button>
           )}
           {!!facilityId && (
@@ -133,10 +133,10 @@ export default function PrescriptionView({
               size="sm"
               className="text-gray-950 hover:text-gray-700 h-9"
             >
-              <HrefLink href={`../${encounterId}/prescriptions/print`}>
+              <Link href={`../${encounterId}/prescriptions/print`}>
                 <CareIcon icon="l-print" className="mr-2" />
                 {t("print_all_prescriptions")}
-              </HrefLink>
+              </Link>
             </Button>
           )}
         </div>

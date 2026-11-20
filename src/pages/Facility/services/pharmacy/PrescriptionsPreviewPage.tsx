@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import { useQueryParams } from "@/lib/router/queryParams";
 import UnbilledPrescriptionsCard from "@/pages/Facility/services/pharmacy/billMedications/UnbilledPrescriptionsCard";
 import PrescriptionsPreviewTable from "@/pages/Facility/services/pharmacy/components/PrescriptionsPreviewTable";
 import { MedicationRequestDispenseStatus } from "@/types/emr/medicationRequest/medicationRequest";
@@ -17,8 +16,8 @@ import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { useQueries } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { ArrowRightIcon, ListPlus, PrinterIcon } from "lucide-react";
+import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -35,7 +34,6 @@ interface QParams {
 
 export default function PrescriptionsPreviewPage({
   facilityId,
-  locationId,
   patientId,
   prescriptionIds,
 }: Props) {
@@ -114,13 +112,7 @@ export default function PrescriptionsPreviewPage({
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="lg" asChild>
               <Link
-                to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds/print"
-                params={{
-                  facilityId,
-                  locationId,
-                  patientId,
-                  prescriptionIds: prescriptionIds.join(","),
-                }}
+                href={`/medication_requests/patient/${patientId}/prescriptions/${prescriptionIds.join(",")}/print`}
               >
                 <PrinterIcon className="size-4" />
                 {prescriptionIds.length > 1
@@ -131,13 +123,7 @@ export default function PrescriptionsPreviewPage({
             {activePrescriptionIds.length > 0 && (
               <Button size="lg" asChild>
                 <Link
-                  to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds"
-                  params={{
-                    facilityId,
-                    locationId,
-                    patientId,
-                    prescriptionIds: activePrescriptionIds.join(","),
-                  }}
+                  href={`/medication_requests/patient/${patientId}/bill/prescriptions/${activePrescriptionIds.join(",")}`}
                 >
                   {t("start_billing")}
                   <ShortcutBadge actionId="billing-action" />
@@ -152,17 +138,10 @@ export default function PrescriptionsPreviewPage({
           included={prescriptionIds}
           patientId={patientId}
           facilityId={facilityId}
-          locationId={locationId}
           allButton={({ prescriptionIds }) => (
             <Button variant="outline" size="sm" asChild>
               <Link
-                to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds"
-                params={{
-                  facilityId,
-                  locationId,
-                  patientId,
-                  prescriptionIds: prescriptionIds.join(","),
-                }}
+                href={`/medication_requests/patient/${patientId}/prescriptions/${prescriptionIds.join(",")}`}
               >
                 <ListPlus className="size-4" />
                 {t("show_all")}

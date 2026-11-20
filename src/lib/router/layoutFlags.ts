@@ -60,11 +60,11 @@ function trimTrailingSlash(path: string) {
 }
 
 /**
- * Layout flags of the page on screen. While the router moves to a new path
- * in the same route (for example another `$tab`), the page shows the new
- * location at once (see `useCurrentLocation`), so its flags come from the
- * routes of the new location. While the previous page stays on screen, and
- * after the change commits, they come from the committed matches.
+ * Layout flags of the page on screen. While the router moves between two
+ * legacy pages, the raviger shim shows the new page at once, so its flags
+ * come from the routes of the new location. While the previous page stays
+ * on screen, and after the change commits, they come from the committed
+ * matches.
  */
 export function useLayoutFlags(): LayoutFlags {
   const router = useRouter();

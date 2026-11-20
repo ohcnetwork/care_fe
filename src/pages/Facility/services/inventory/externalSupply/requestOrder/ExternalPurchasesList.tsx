@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -11,8 +12,6 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
-import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { RequestOrderPriority } from "@/types/inventory/requestOrder/requestOrder";
 import query from "@/Utils/request/query";
 
@@ -112,8 +111,8 @@ export function ExternalPurchasesList({
               <Button
                 variant="primary"
                 onClick={() =>
-                  navigate({
-                    href: getInventoryBasePath(
+                  navigate(
+                    getInventoryBasePath(
                       facilityId,
                       locationId,
                       false,
@@ -121,7 +120,7 @@ export function ExternalPurchasesList({
                       isRequester,
                       "new",
                     ),
-                  })
+                  )
                 }
               >
                 <CareIcon icon="l-plus" />

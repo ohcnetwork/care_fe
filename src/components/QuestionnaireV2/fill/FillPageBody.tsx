@@ -1,6 +1,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
+import { navigate } from "raviger";
 import {
   type CSSProperties,
   useCallback,
@@ -21,7 +22,6 @@ import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { formatKeyboardShortcut } from "@/Utils/keyboardShortcutUtils";
 import mutate from "@/Utils/request/mutate";
-import { navigate } from "@/lib/router/navigate";
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 import type { PatientRead } from "@/types/emr/patient/patient";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -206,7 +206,7 @@ export function FillPageBody({
       // Order matters: finishDraft flushes the pristine state before the
       // redirect so useNavigationBlocker does not block it.
       autosave.finishDraft();
-      navigate({ href: exitTarget });
+      navigate(exitTarget);
     },
   });
 
@@ -220,7 +220,7 @@ export function FillPageBody({
     continueDraftId,
     onSaved: () => {
       autosave.finishDraft();
-      navigate({ href: exitTarget });
+      navigate(exitTarget);
     },
   });
 
@@ -244,7 +244,7 @@ export function FillPageBody({
         discarded,
       );
       queryClient.invalidateQueries({ queryKey: formSubmissionKeys.lists() });
-      navigate({ href: exitTarget });
+      navigate(exitTarget);
     },
     onError: () => toast.error(t("form_submission_discard_failed")),
   });
@@ -316,7 +316,7 @@ export function FillPageBody({
     if (serverDraft) {
       discardServerDraft.mutate(serverDraft);
     } else if (autosave.discardDraft()) {
-      navigate({ href: exitTarget });
+      navigate(exitTarget);
     }
   };
   const requestClose = () => {
@@ -332,7 +332,7 @@ export function FillPageBody({
     if (continueDraftId) {
       if (!contextRefreshFailed) serverDraftSave.saveDraft();
     } else if (autosave.minimizeDraft()) {
-      navigate({ href: exitTarget });
+      navigate(exitTarget);
     }
   };
 

@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { PlusIcon, Search } from "lucide-react";
+// `basePath="/"` keeps absolute links independent of the nested facility router.
+import { Link } from "raviger";
 import { ReactNode, useId } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -39,7 +41,6 @@ import {
 
 import useFilters from "@/hooks/useFilters";
 
-import { HrefLink } from "@/lib/router/HrefLink";
 import {
   VALUESET_STATUS_COLORS,
   VALUESET_STATUS_ICONS,
@@ -280,10 +281,10 @@ export function ValueSetList({ scope }: { scope: ValueSetScope }) {
         {/* The shared catalogue only offers customization, not instance creation. */}
         {canWrite && (!isFacility || source === "facility") && (
           <Button asChild className="h-10 shrink-0 sm:h-9">
-            <HrefLink href={`${scope.basePath}/create`}>
+            <Link href={`${scope.basePath}/create`} basePath="/">
               <PlusIcon className="size-4" aria-hidden="true" />
               {t("create_valueset")}
-            </HrefLink>
+            </Link>
           </Button>
         )}
       </div>

@@ -1,3 +1,4 @@
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -10,7 +11,6 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getPermissions } from "@/common/Permissions";
 import { formatDateTime } from "@/common/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 import {
   ENCOUNTER_PRIORITY_COLORS,
@@ -142,7 +142,7 @@ export function TimelineEncounterCard({
         <CardFooter className="p-1">
           <div className="flex justify-between bg-gray-100 p-2 rounded-b-lg w-full">
             <Button asChild variant="outline" disabled={!canAccess}>
-              <HrefLink
+              <Link
                 href={
                   facilityId
                     ? `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
@@ -150,7 +150,7 @@ export function TimelineEncounterCard({
                 }
               >
                 {t("view_encounter")}
-              </HrefLink>
+              </Link>
             </Button>
             {actions}
           </div>

@@ -1,9 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { AlertCircle, Edit, Wrench } from "lucide-react";
+import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { useQueryParams } from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";

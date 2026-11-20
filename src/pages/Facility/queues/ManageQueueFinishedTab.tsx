@@ -31,6 +31,7 @@ import {
   MoreHorizontal,
   RotateCcw,
 } from "lucide-react";
+import { Link as RavigerLink } from "raviger";
 import { forwardRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -92,22 +93,23 @@ export function ManageQueueFinishedTab({
                     </TableCell>
                     <TableCell>
                       {token.patient ? (
-                        <Link
-                          to="/facility/$facilityId/patients/home"
-                          params={{ facilityId }}
-                          search={{
-                            phone_number: token.patient.phone_number,
-                            year_of_birth:
-                              token.patient.year_of_birth?.toString() ?? "",
-                            partial_id: token.patient.id.slice(0, 5),
-                            queue_id: token.queue.id,
-                            token_id: token.id,
-                          }}
+                        <RavigerLink
+                          basePath="/"
+                          href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
+                            {
+                              phone_number: token.patient.phone_number,
+                              year_of_birth:
+                                token.patient.year_of_birth?.toString() ?? "",
+                              partial_id: token.patient.id.slice(0, 5),
+                              queue_id: token.queue.id,
+                              token_id: token.id,
+                            },
+                          ).toString()}`}
                           className="hover:underline transition-colors flex items-center gap-1"
                         >
                           {token.patient.name}
                           <ExternalLink className="size-3" />
-                        </Link>
+                        </RavigerLink>
                       ) : (
                         <span className="text-gray-500">-</span>
                       )}
@@ -213,21 +215,22 @@ const FinishedTokenCard = forwardRef<
             {renderTokenNumber(token)}
           </span>
           {token.patient ? (
-            <Link
-              to="/facility/$facilityId/patients/home"
-              params={{ facilityId }}
-              search={{
-                phone_number: token.patient.phone_number,
-                year_of_birth: token.patient.year_of_birth?.toString() ?? "",
-                partial_id: token.patient.id.slice(0, 5),
-                queue_id: token.queue.id,
-                token_id: token.id,
-              }}
+            <RavigerLink
+              basePath="/"
+              href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
+                {
+                  phone_number: token.patient.phone_number,
+                  year_of_birth: token.patient.year_of_birth?.toString() ?? "",
+                  partial_id: token.patient.id.slice(0, 5),
+                  queue_id: token.queue.id,
+                  token_id: token.id,
+                },
+              ).toString()}`}
               className="text-sm font-medium hover:underline flex items-center gap-1 min-w-0"
             >
               <span className="truncate">{token.patient.name}</span>
               <ExternalLink className="size-3 shrink-0" />
-            </Link>
+            </RavigerLink>
           ) : (
             <span className="text-sm text-gray-500">-</span>
           )}

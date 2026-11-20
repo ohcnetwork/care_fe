@@ -54,7 +54,6 @@ export default function useNewDispenseMode({
       unbilledPrescriptionsFor: {
         patientId,
         facilityId,
-        locationId,
         encounterId,
         excludePrescriptionIds: [],
       },

@@ -1,3 +1,4 @@
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
@@ -7,8 +8,6 @@ import duoToneIcons from "@/CAREUI/icons/DuoTonePaths.json";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { type HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
-
-import { HrefLink } from "@/lib/router/HrefLink";
 
 type DuoToneIconName = keyof typeof duoToneIcons;
 
@@ -23,7 +22,7 @@ export function ServiceCard({ service, link }: Props) {
     `d-${name}` as DuoToneIconName;
 
   return (
-    <HrefLink href={link} className="block">
+    <Link href={link} basePath="/" className="block">
       <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
         <CardContent className="py-3 px-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
@@ -58,6 +57,6 @@ export function ServiceCard({ service, link }: Props) {
           </div>
         </CardContent>
       </Card>
-    </HrefLink>
+    </Link>
   );
 }

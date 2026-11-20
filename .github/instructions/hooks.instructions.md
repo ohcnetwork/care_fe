@@ -9,6 +9,7 @@ applyTo: "src/hooks/**/*.{ts,tsx}"
 ### Authentication & User Management
 - useAuthUser: Current user state and permissions
 - usePatientUser: Patient authentication for public appointments
+- usePatientSignOut: Secure patient session termination
 
 ### Medical Data Management
 - useFilters: Medical record filtering and search

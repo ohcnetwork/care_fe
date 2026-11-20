@@ -1,4 +1,5 @@
 import { ArrowLeft, Plus } from "lucide-react";
+import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -21,9 +22,6 @@ import { exitTargetOf, isPatientBound } from "./subject";
 
 import { useFillPageDrafts } from "./useFillPageDrafts";
 import { useFillPageQueries } from "./useFillPageQueries";
-
-import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 
 interface FillPageProps {
   /** What this fill is FOR — the union carries exactly the ids the
@@ -112,7 +110,7 @@ export function QuestionnaireFillPage({
 
   if (!questionnaireId) {
     return (
-      <FillShell onClose={() => navigate({ href: exitTarget })}>
+      <FillShell onClose={() => navigate(exitTarget)}>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
           <h2 className="text-lg font-semibold text-gray-900">
             {t("select_questionnaire_to_fill")}
@@ -132,12 +130,12 @@ export function QuestionnaireFillPage({
               subject.type === "encounter" &&
               referralNativeQueryParams(window.location.search).referralId
                 ? (selected) =>
-                    navigate({
-                      href: appendReferralNativeContext(
+                    navigate(
+                      appendReferralNativeContext(
                         `/facility/${subject.facilityId}/patient/${subject.patientId}/encounter/${subject.encounterId}/questionnaire/${selected.id}?return_page=${encodeURIComponent(returnPage)}`,
                         window.location.search,
                       ),
-                    })
+                    )
                 : undefined
             }
             trigger={
@@ -168,7 +166,7 @@ export function QuestionnaireFillPage({
     // jump shells when data lands — and the close affordance exists even
     // while loading.
     return (
-      <FillShell onClose={() => navigate({ href: exitTarget })}>
+      <FillShell onClose={() => navigate(exitTarget)}>
         <div className="min-h-0 flex-1 overflow-hidden px-6 py-4">
           <FormSkeleton rows={10} />
         </div>
@@ -280,7 +278,7 @@ export function QuestionnaireFillPage({
   }
 
   return (
-    // Keyed by session identity: the router re-renders this route element in
+    // Keyed by session identity: raviger re-renders this route element in
     // place, and `useFillSessionForms` deliberately captures the primary
     // questionnaire once at creation. Without the key, navigating from one
     // fill session straight into another (overview → A → back → B →
@@ -335,7 +333,7 @@ function FillErrorPage({
         <AlertTitle>{t("error")}</AlertTitle>
         <AlertDescription>{message}</AlertDescription>
       </Alert>
-      <Button variant="outline" onClick={() => navigate({ href: exitTarget })}>
+      <Button variant="outline" onClick={() => navigate(exitTarget)}>
         <ArrowLeft className="size-4" />
         {t("back")}
       </Button>

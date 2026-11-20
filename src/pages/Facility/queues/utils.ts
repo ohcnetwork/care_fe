@@ -1,4 +1,3 @@
-import { useQueryParams } from "@/lib/router/queryParams";
 import { TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import { TokenQueueSummary } from "@/types/tokens/tokenQueue/tokenQueue";
@@ -6,31 +5,7 @@ import query from "@/Utils/request/query";
 import { QueryParams } from "@/Utils/request/types";
 import careConfig from "@careConfig";
 import { useInfiniteQuery } from "@tanstack/react-query";
-
-import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
-
-import { SchedulableResourceType } from "@/types/scheduling/schedule";
-
-/**
- * The queue board URL of a queue. The same pages render under a practitioner,
- * a location and a healthcare service, so the prefix comes from the resource.
- */
-export function getQueueBoardPath({
-  facilityId,
-  resourceType,
-  resourceId,
-  queueId,
-  tab,
-}: {
-  facilityId: string;
-  resourceType: SchedulableResourceType;
-  resourceId: string;
-  queueId: string;
-  tab: "ongoing" | "completed";
-}) {
-  return `/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${queueId}/${tab}`;
-}
-
+import { useQueryParams } from "raviger";
 export function getTokenQueueStatusCount(
   summary: TokenQueueSummary,
   ...statuses: TokenStatus[]

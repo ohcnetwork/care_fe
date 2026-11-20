@@ -1,4 +1,4 @@
-import { Checkbox, CheckedState } from "@/components/ui/checkbox";
+import { CheckedState } from "@/components/ui/checkbox";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
@@ -10,6 +10,7 @@ import {
   PrinterIcon,
   Zap,
 } from "lucide-react";
+import { Link as RavigerLink, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +18,7 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
@@ -43,8 +45,6 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import useFilters from "@/hooks/useFilters";
 import { useInfiniteList } from "@/hooks/useInfiniteList";
 
-import { HrefLink } from "@/lib/router/HrefLink";
-import { navigate } from "@/lib/router/navigate";
 import {
   MonetaryComponent,
   MonetaryComponentType,
@@ -342,12 +342,7 @@ function ChargeItemsTable({
           </div>
           <Button
             variant="outline"
-            onClick={() =>
-              navigate({
-                to: "/facility/$facilityId/billing/account/$accountId/charge_items/print",
-                params: { facilityId, accountId },
-              })
-            }
+            onClick={() => navigate(`../${accountId}/charge_items/print`)}
             className="w-full sm:w-auto sm:max-w-full"
           >
             <PrinterIcon className="size-4 mr-2" />
@@ -526,13 +521,13 @@ function ChargeItemsTable({
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
                       {linkedResource !== "" ? (
-                        <HrefLink
+                        <RavigerLink
                           href={linkedResource}
                           className="flex items-center gap-0.5 underline text-gray-600"
                         >
                           {t(item.service_resource)}
                           <ExternalLinkIcon className="size-3" />
-                        </HrefLink>
+                        </RavigerLink>
                       ) : (
                         <span className="text-gray-500">
                           {t(item.service_resource)}

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
@@ -17,7 +17,6 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import query from "@/Utils/request/query";
 import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
 import BackButton from "@/components/Common/BackButton";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { InternalType } from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 import { useAtom } from "jotai";
@@ -77,7 +76,7 @@ function LocationCard({
   );
 
   return (
-    <HrefLink href={link} className="block" onClick={onClick}>
+    <Link href={link} basePath="/" className="block" onClick={onClick}>
       <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
         <CardContent className="flex items-start gap-3 py-3 px-4">
           <div className="shrink-0 relative size-10 rounded-sm flex p-4 items-center justify-center">
@@ -104,7 +103,7 @@ function LocationCard({
           </div>
         </CardContent>
       </Card>
-    </HrefLink>
+    </Link>
   );
 }
 
@@ -141,25 +140,24 @@ export default function HealthcareServiceShow({
               title: t("schedule"),
               description: t("schedule_information"),
               icon: Calendar,
-              to: "/facility/$facilityId/services/$serviceId/schedule",
+              href: `/schedule`,
             },
             {
               title: t("appointments"),
               description: t("view_appointments"),
               icon: CalendarDays,
-              to: "/facility/$facilityId/services/$serviceId/appointments",
+              href: `/appointments`,
             },
             {
               title: t("queues"),
               description: t("manage_token_queues_for_facility"),
               icon: Logs,
-              to: "/facility/$facilityId/services/$serviceId/queues",
+              href: `/queues`,
             },
           ].map((shortcut) => (
             <Link
-              key={shortcut.to}
-              to={shortcut.to}
-              params={{ facilityId, serviceId }}
+              key={shortcut.href}
+              href={shortcut.href}
               className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-lg ring-offset-2"
             >
               <Card className="h-full border-0 shadow rounded-lg p-3">

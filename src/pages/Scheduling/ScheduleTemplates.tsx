@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Edit3Icon, Lock } from "lucide-react";
+import { useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -14,7 +15,6 @@ import ScheduleChargeItemDefinitionSelector from "@/pages/Scheduling/components/
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { useQueryParams } from "@/lib/router/queryParams";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
 import { getPermissions } from "@/common/Permissions";

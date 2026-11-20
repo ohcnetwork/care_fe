@@ -4,7 +4,7 @@ import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
-import { getRouter } from "@/lib/router/routerRef";
+import { getRouter } from "@/compat/routerRef";
 import {
   PatientListRead,
   PatientRead,

@@ -10,6 +10,7 @@ import {
   SquareArrowOutUpRight,
   XIcon,
 } from "lucide-react";
+import { navigate } from "raviger";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -53,7 +54,6 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import UserSelector from "@/components/Common/UserSelector";
 
-import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
@@ -270,7 +270,7 @@ export function CreateInvoicePage({
         onSuccess?.();
       } else {
         onSuccess?.();
-        navigate({ href: invoiceUrl, replace: true });
+        navigate(invoiceUrl, { replace: true });
       }
     },
   });
@@ -871,13 +871,11 @@ export function CreateInvoicePage({
                   type="button"
                   variant="outline_primary"
                   disabled={!locationId}
-                  onClick={() => {
-                    if (!locationId) return;
-                    navigate({
-                      to: "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId",
-                      params: { facilityId, locationId, dispenseOrderId },
-                    });
-                  }}
+                  onClick={() =>
+                    navigate(
+                      `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}`,
+                    )
+                  }
                 >
                   {t("dispense_now")}
                   <ShortcutBadge actionId="view-prescriptions" />

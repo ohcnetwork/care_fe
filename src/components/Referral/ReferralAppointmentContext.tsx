@@ -1,6 +1,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle2, GitPullRequestArrow } from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -20,8 +21,6 @@ import {
   ReferralAppointment,
   useAppointmentReferral,
 } from "./useAppointmentReferral";
-
-import { HrefLink } from "@/lib/router/HrefLink";
 
 export function ReferralAppointmentContext({
   appointment,
@@ -119,13 +118,13 @@ export function ReferralAppointmentContext({
             </Button>
           )}
           {context.returnUrl && (
-            <HrefLink
+            <Link
               href={context.returnUrl}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
               <ArrowLeft className="size-4" />
               {t("referral_return_to_referral")}
-            </HrefLink>
+            </Link>
           )}
         </ItemActions>
       </Item>

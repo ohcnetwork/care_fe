@@ -1,3 +1,4 @@
+import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -5,9 +6,6 @@ import { Button } from "@/components/ui/button";
 import Page from "@/components/Common/Page";
 
 import PaymentsData from "./PaymentsData";
-
-import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 
 function PaymentReconciliationList({
   facilityId,
@@ -41,9 +39,9 @@ function PaymentReconciliationList({
           {accountId && (
             <Button
               onClick={() =>
-                navigate({
-                  href: `/facility/${facilityId}/billing/account/${accountId}/payments/create`,
-                })
+                navigate(
+                  `/facility/${facilityId}/billing/account/${accountId}/payments/create`,
+                )
               }
             >
               {t("create_payment")}

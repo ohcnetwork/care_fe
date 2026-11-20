@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import { useQueryParams } from "raviger";
 
 import { callApi } from "@/Utils/request/query";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { ReferralResource } from "@/types/emr/referral/referralResource";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 

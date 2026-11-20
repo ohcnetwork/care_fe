@@ -31,8 +31,6 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { RegisteredGroupAnswerView } from "@/components/QuestionnaireV2/groups/RegisteredGroupAnswerView";
-import { HrefLink } from "@/lib/router/HrefLink";
-import { usePathname } from "@/lib/router/location";
 import { cn } from "@/lib/utils";
 import { Code } from "@/types/base/code/code";
 import { ResponseValue } from "@/types/questionnaire/form";
@@ -57,6 +55,7 @@ import {
   MoreVertical,
   Printer,
 } from "lucide-react";
+import { Link, useFullPath } from "raviger";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
@@ -442,7 +441,7 @@ function ResponseActionsMenu({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const fullPath = usePathname();
+  const fullPath = useFullPath();
   const routeScope = fullPath.match(/^\/(facility|organization)\/[^/]+/)?.[0];
   const scope = facilityId ? `/facility/${facilityId}` : routeScope;
   const printEncounterId =
@@ -485,7 +484,7 @@ function ResponseActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <HrefLink
+          <Link
             href={`${printBase}/questionnaire_response/${item.id}/print`}
             target={embedded ? "_blank" : undefined}
             rel={embedded ? "noopener noreferrer" : undefined}
@@ -494,9 +493,9 @@ function ResponseActionsMenu({
               <Printer className="size-4" />
               {t("print_this_response")}
             </DropdownMenuItem>
-          </HrefLink>
+          </Link>
           {item.questionnaire && (
-            <HrefLink
+            <Link
               href={`${printBase}/questionnaire/${item.questionnaire.id}/responses/print`}
               target={embedded ? "_blank" : undefined}
               rel={embedded ? "noopener noreferrer" : undefined}
@@ -507,7 +506,7 @@ function ResponseActionsMenu({
                   title: item.questionnaire.title,
                 })}
               </DropdownMenuItem>
-            </HrefLink>
+            </Link>
           )}
           {isUnstructured && !readOnly && (
             <>

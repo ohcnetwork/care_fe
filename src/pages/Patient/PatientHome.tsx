@@ -25,7 +25,6 @@ import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { UpcomingAppointmentCard } from "@/pages/Appointments/components/UpcomingAppointmentCard";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
@@ -38,6 +37,7 @@ import { goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
 import { Link } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
+import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 interface QParams {

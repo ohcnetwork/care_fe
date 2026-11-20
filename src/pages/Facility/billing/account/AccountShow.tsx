@@ -1,14 +1,9 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { DialogDescription } from "@/components/ui/dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { Hash, Info, MoreVertical } from "lucide-react";
+import { Link as RavigerLink } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -20,6 +15,12 @@ import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -544,16 +545,11 @@ function AccountShow({
           </div>
           <div className="flex items-center gap-2">
             <Button variant="link" asChild className="text-gray-950 underline">
-              <Link
-                to="/facility/$facilityId/patient/$patientId/{-$tab}"
-                params={{
-                  facilityId,
-                  patientId: account.patient.id,
-                  tab: "accounts",
-                }}
+              <RavigerLink
+                href={`/facility/${facilityId}/patient/${account.patient.id}/accounts`}
               >
                 {t("past_accounts")}
-              </Link>
+              </RavigerLink>
             </Button>
             {canUpdateAccount && (
               <Button

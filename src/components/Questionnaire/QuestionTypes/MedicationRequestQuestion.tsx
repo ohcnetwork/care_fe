@@ -12,11 +12,11 @@ import {
   SlidersHorizontal,
   Trash2,
 } from "lucide-react";
+import { useQueryParams } from "raviger";
 import React, { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { useQueryParams } from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";

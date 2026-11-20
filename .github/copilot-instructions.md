@@ -17,7 +17,7 @@ Do not run lint or prettier. For missing i18n keys, simply add the key to the en
 - Styling: Tailwind CSS 4.1.3 with custom healthcare-specific design system
 - UI Components: shadcn/ui as primary system, CAREUI for healthcare-specific components
 - State Management: @tanstack/react-query for server state, React hooks for client state
-- Routing: TanStack Router (file routes in `src/routes/`) for application routing
+- Routing: raviger for application routing
 - Forms: react-hook-form with zod validation for medical data integrity
 - Internationalization: i18next for multi-language healthcare interfaces
 - Testing: Playwright for E2E testing of critical healthcare workflows
@@ -154,7 +154,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 - @tanstack/react-query for API state management
 - react-query is
-- @tanstack/react-router for routing
+- raviger for routing
 - i18next for internationalization
 - date-fns for date handling
 - zod for schema validation

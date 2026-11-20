@@ -1,6 +1,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronsUpDown, HeartPulse, X } from "lucide-react";
+import { navigate, usePath } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -31,8 +32,6 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { TooltipComponent } from "@/components/ui/tooltip";
-import { usePathname } from "@/lib/router/location";
-import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import useCurrentService from "@/pages/Facility/services/utils/useCurrentService";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
@@ -77,7 +76,7 @@ export function ServiceSwitcher() {
             size={isCollapsed ? "icon-sm" : "sm"}
             onClick={() => {
               if (isMobile) setOpenMobile(false);
-              navigate({ href: fallbackUrl });
+              navigate(fallbackUrl);
             }}
             className={cn(
               "gap-1.5 text-muted-foreground",
@@ -164,7 +163,7 @@ export function ServiceSelectorDialog({
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const resultsPerPage = RESULTS_PER_PAGE_LIMIT;
-  const path = usePathname();
+  const path = usePath();
   const subPath =
     path?.match(/\/facility\/[^/]+\/services\/[^/]+\/(.*)/)?.[1] || "";
 
@@ -189,11 +188,11 @@ export function ServiceSelectorDialog({
     setCurrentPage(1);
     if (newService.id !== oldServiceId) {
       if (navigateUrl) {
-        navigate({ href: navigateUrl(newService) });
+        navigate(navigateUrl(newService));
       } else {
-        navigate({
-          href: `/facility/${facilityId}/services/${newService.id}/${subPath}`,
-        });
+        navigate(
+          `/facility/${facilityId}/services/${newService.id}/${subPath}`,
+        );
       }
     }
   };

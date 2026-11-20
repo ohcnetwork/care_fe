@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import {
   ArrowRightIcon,
   CheckCircle,
   MoreVertical,
   PrinterIcon,
 } from "lucide-react";
+import { Link } from "raviger";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -360,26 +360,14 @@ export default function PrescriptionQueue({
             >
               <Button variant="link" className="underline" asChild>
                 <Link
-                  to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds"
-                  params={{
-                    facilityId,
-                    locationId,
-                    patientId: qParams.patient_external_id,
-                    prescriptionIds: selectedPrescriptionIds.join(","),
-                  }}
+                  href={`/medication_requests/patient/${qParams.patient_external_id}/prescriptions/${selectedPrescriptionIds.join(",")}`}
                 >
                   {t("preview_selected_rx")}
                 </Link>
               </Button>
               <Button variant="link" asChild>
                 <Link
-                  to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds/print"
-                  params={{
-                    facilityId,
-                    locationId,
-                    patientId: qParams.patient_external_id,
-                    prescriptionIds: selectedPrescriptionIds.join(","),
-                  }}
+                  href={`/medication_requests/patient/${qParams.patient_external_id}/prescriptions/${selectedPrescriptionIds.join(",")}/print`}
                   className="underline"
                 >
                   <PrinterIcon />
@@ -388,13 +376,7 @@ export default function PrescriptionQueue({
               </Button>
               <Button variant="outline_primary" asChild>
                 <Link
-                  to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds"
-                  params={{
-                    facilityId,
-                    locationId,
-                    patientId: qParams.patient_external_id,
-                    prescriptionIds: selectedPrescriptionIds.join(","),
-                  }}
+                  href={`/medication_requests/patient/${qParams.patient_external_id}/bill/prescriptions/${selectedPrescriptionIds.join(",")}`}
                 >
                   {t("bill_selected_prescriptions")}
                   <ArrowRightIcon />
@@ -541,13 +523,7 @@ export default function PrescriptionQueue({
                       <span className="font-semibold underline">
                         <Button variant="link" className="underline">
                           <Link
-                            to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds"
-                            params={{
-                              facilityId,
-                              locationId,
-                              patientId: item.encounter.patient.id,
-                              prescriptionIds: item.id,
-                            }}
+                            href={`/medication_requests/patient/${item.encounter.patient.id}/prescriptions/${item.id}`}
                           >
                             {t("view_rx")}
                           </Link>
@@ -561,13 +537,7 @@ export default function PrescriptionQueue({
                             asChild
                           >
                             <Link
-                              to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds"
-                              params={{
-                                facilityId,
-                                locationId,
-                                patientId: item.encounter.patient.id,
-                                prescriptionIds: item.id,
-                              }}
+                              href={`/medication_requests/patient/${item.encounter.patient.id}/bill/prescriptions/${item.id}`}
                             >
                               {t("bill_now")}
                             </Link>

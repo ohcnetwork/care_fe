@@ -1,5 +1,6 @@
 import { Spinner } from "@/components/ui/spinner";
 import { GitPullRequestArrow } from "lucide-react";
+import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -21,9 +22,6 @@ import {
 } from "./referralNavigation";
 import { useReferralPermissions } from "./useReferralPermissions";
 import { useReferralReceivingEncounter } from "./useReferralReceivingEncounter";
-
-import { HrefLink } from "@/lib/router/HrefLink";
-import { useQueryParams } from "@/lib/router/queryParams";
 
 export function ReferralEncounterContext({
   encounter,
@@ -101,7 +99,7 @@ export function ReferralEncounterContext({
           )}
           {verified && (
             <>
-              <HrefLink
+              <Link
                 href={getReferralDetailUrl(
                   verified.id,
                   params.referralSourceUrl,
@@ -110,10 +108,10 @@ export function ReferralEncounterContext({
                 className={buttonVariants({ variant: "outline", size: "sm" })}
               >
                 {t("referral_view")}
-              </HrefLink>
+              </Link>
               {canWrite &&
                 ["pending", "in_progress"].includes(verified.status) && (
-                  <HrefLink
+                  <Link
                     href={getReferralResponseUrl(
                       verified.id,
                       params.referralSourceUrl,
@@ -122,7 +120,7 @@ export function ReferralEncounterContext({
                     className={buttonVariants({ size: "sm" })}
                   >
                     {t("referral_respond")}
-                  </HrefLink>
+                  </Link>
                 )}
             </>
           )}

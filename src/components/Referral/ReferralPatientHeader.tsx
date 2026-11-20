@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight } from "lucide-react";
+import { Link, useQueryParams } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -9,8 +10,6 @@ import {
 } from "@/components/Patient/PatientHeader";
 import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { HrefLink } from "@/lib/router/HrefLink";
-import { useQueryParams } from "@/lib/router/queryParams";
 import EncounterDetailsHeader from "@/pages/Encounters/EncounterDetailsHeader";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -174,7 +173,7 @@ export function ReferralPatientHeader({
               isHistorical={false}
               actions={
                 encounter && (
-                  <HrefLink
+                  <Link
                     href={encounterUrl}
                     className={buttonVariants({
                       variant: "outline",
@@ -183,7 +182,7 @@ export function ReferralPatientHeader({
                   >
                     {t("view_encounter")}
                     <ArrowUpRight className="size-4" />
-                  </HrefLink>
+                  </Link>
                 )
               }
             />

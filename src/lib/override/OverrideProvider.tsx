@@ -1,3 +1,4 @@
+import { usePath } from "raviger";
 import React, { useMemo, useSyncExternalStore } from "react";
 
 import { OverrideContext, ResolutionContext, StackContext } from "./contexts";
@@ -7,8 +8,6 @@ import {
   subscribeToRegistry,
 } from "./registry";
 import type { OverrideContextType, OverrideProviderProps } from "./types";
-
-import { usePathname } from "@/lib/router/location";
 
 /**
  * OverrideProvider - Provides global context for the override system
@@ -32,7 +31,7 @@ export function OverrideProvider({
   context: externalContext = {},
 }: OverrideProviderProps) {
   // Get current route/page info
-  const path = usePathname();
+  const path = usePath() ?? "/";
   const registryVersion = useSyncExternalStore(
     subscribeToRegistry,
     getRegistryVersion,

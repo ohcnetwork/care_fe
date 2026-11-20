@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -12,8 +13,6 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
-import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import query from "@/Utils/request/query";
 
 import DeliveryOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/DeliveryOrderTable";
@@ -147,8 +146,8 @@ export function DeliveryOrderList({
               <Button
                 variant="primary"
                 onClick={() =>
-                  navigate({
-                    href: getInventoryBasePath(
+                  navigate(
+                    getInventoryBasePath(
                       facilityId,
                       locationId,
                       internal,
@@ -156,7 +155,7 @@ export function DeliveryOrderList({
                       isRequester,
                       "new",
                     ),
-                  })
+                  )
                 }
               >
                 <CareIcon icon="l-plus" />

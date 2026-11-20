@@ -1,4 +1,5 @@
 import { FilePlus2 } from "lucide-react";
+import { navigate } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,8 +7,6 @@ import { Button } from "@/components/ui/button";
 
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 import { ResourceResponseSubjectType } from "@/components/Questionnaire/ResourceResponses/types";
-
-import { navigate } from "@/lib/router/navigate";
 
 interface ResourceFormPickerProps {
   facilityId: string;
@@ -38,7 +37,7 @@ export function ResourceFormPicker({
       subjectType={subjectType}
       disabled={disabled}
       onSelect={(questionnaire) =>
-        navigate({ href: `${baseUrl}/questionnaire/${questionnaire.id}` })
+        navigate(`${baseUrl}/questionnaire/${questionnaire.id}`)
       }
       trigger={
         trigger ?? (

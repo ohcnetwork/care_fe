@@ -1,3 +1,4 @@
+import { useQueryParams, type QueryParam } from "raviger";
 import {
   createContext,
   useCallback,
@@ -7,9 +8,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { useQueryParams, type QueryParams } from "@/lib/router/queryParams";
-
-type QueryState<T extends QueryParams = QueryParams> = ReturnType<
+type QueryState<T extends QueryParam = QueryParam> = ReturnType<
   typeof useQueryParams<T>
 >;
 
@@ -21,7 +20,7 @@ export function ScopedQueryParamsProvider({
 }: {
   children: ReactNode;
 }) {
-  const [params, setParams] = useState<QueryParams>({});
+  const [params, setParams] = useState<QueryParam>({});
   const update = useCallback<QueryState[1]>((next, options) => {
     setParams((previous) =>
       Object.fromEntries(
@@ -41,7 +40,7 @@ export function ScopedQueryParamsProvider({
 }
 
 export function useScopedQueryParams<
-  T extends QueryParams = QueryParams,
+  T extends QueryParam = QueryParam,
 >(): QueryState<T> {
   const routed = useQueryParams<T>();
   const scoped = useContext(QueryParamsContext);

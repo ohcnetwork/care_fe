@@ -9,7 +9,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -17,6 +16,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
+import { navigate } from "raviger";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -162,12 +162,12 @@ export const FormDialog = ({
                     value={`${questionnaire.slug} - ${questionnaire.title}`}
                     className="flex justify-between rounded-md cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100 [&>svg:last-child]:hidden"
                     onSelect={() => {
-                      navigate({
-                        href: appendReferralNativeContext(
+                      navigate(
+                        appendReferralNativeContext(
                           `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`,
                           window.location.search,
                         ),
-                      });
+                      );
                       setOpen(false);
                     }}
                   >

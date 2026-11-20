@@ -1,3 +1,4 @@
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -9,8 +10,6 @@ import { parseEncounterWorkspace } from "@/pages/Encounters/workspace/parseEncou
 import { useEncounterWorkspaces } from "@/pages/Encounters/workspace/useEncounterWorkspaces";
 import { SYSTEM_PAGE_KEYS } from "@/types/workspace/encounterWorkspace";
 import { referralsConfigSchema } from "@/types/workspace/widgetConfigSchemas";
-
-import { navigate } from "@/lib/router/navigate";
 
 interface EncounterReferralsWidgetProps {
   title?: string;
@@ -75,12 +74,11 @@ export function EncounterReferralsWidget({
       onViewAll={
         canViewAll
           ? () =>
-              navigate({
-                // Relative: the referrals tab of the encounter on screen.
-                href:
+              navigate("referrals", {
+                query:
                   selectedEncounterId !== primaryEncounterId
-                    ? `referrals?${new URLSearchParams({ selectedEncounter: selectedEncounterId })}`
-                    : "referrals",
+                    ? { selectedEncounter: selectedEncounterId }
+                    : undefined,
               })
           : undefined
       }

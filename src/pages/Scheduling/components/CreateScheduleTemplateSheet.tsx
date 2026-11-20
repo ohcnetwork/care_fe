@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -44,7 +45,6 @@ import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { ScheduleEncounterDefaultsFields } from "@/pages/Scheduling/components/ScheduleEncounterDefaultsFields";
 import {
   calculateSlotDuration,
@@ -265,7 +265,6 @@ export default function CreateScheduleTemplateSheet({
             slot_size_in_minutes: availability.slot_size_in_minutes,
             tokens_per_slot: availability.tokens_per_slot,
             reason: availability.reason,
-
             availability: values.weekdays.map((day) => ({
               day_of_week: day,
               start_time: availability.start_time,

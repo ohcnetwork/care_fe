@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { useLayoutEffect, useMemo } from "react";
 
-import { getOrganizationTabRoutes, useCareApps } from "@/hooks/useCareApps";
+import { useCareApps } from "@/hooks/useCareApps";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 
@@ -24,9 +24,9 @@ export interface PluginRouteDefinition {
   render: PluginRouteRender;
 }
 
-/** Converts a manifest path pattern (`/a/:id`, `/a*`) to a TanStack path. */
-export function toRouterPath(pattern: string): string {
-  let path = pattern.replace(/:([a-zA-Z_]+)/g, "$$$1");
+/** Converts a raviger pattern (`/a/:id`, `/a*`) to a TanStack path. */
+export function toRouterPath(ravigerPath: string): string {
+  let path = ravigerPath.replace(/:([a-zA-Z_]+)/g, "$$$1");
   if (path.endsWith("*")) {
     path = path.replace(/\*$/, "").replace(/\/$/, "") + "/$";
   }
@@ -167,9 +167,7 @@ export function attachPluginRoutes(
 
 /**
  * Mount once inside the router. Each time the set of loaded plugin manifests
- * changes, their `routes` and `organizationTabs` pages are attached to the
- * TanStack tree. Until then, the `_app/$` splat shows a spinner for an
- * unknown path.
+ * changes, their `routes` are attached to the TanStack tree.
  */
 export function PluginRouteAttacher() {
   const careApps = useCareApps();
@@ -180,10 +178,7 @@ export function PluginRouteAttacher() {
       careApps.flatMap((app) =>
         app.isLoading
           ? []
-          : Object.entries({
-              ...app.routes,
-              ...getOrganizationTabRoutes(app),
-            }).map(([path, render]) => ({
+          : Object.entries(app.routes ?? {}).map(([path, render]) => ({
               plugin: app.slug,
               path,
               render: render as PluginRouteRender,

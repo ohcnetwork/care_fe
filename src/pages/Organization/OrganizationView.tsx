@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { Building2, ChevronRight } from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,6 @@ import { SectionHeader } from "@/components/Common/SectionHeader";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -61,7 +60,9 @@ export default function OrganizationView({
   });
 
   // Hack for the sidebar to work
-  const childNavOrganizationId = navOrganizationId || id;
+  const baseUrl = navOrganizationId
+    ? `/organization/${navOrganizationId}`
+    : `/organization/${id}`;
 
   return (
     <OrganizationLayout
@@ -144,13 +145,7 @@ export default function OrganizationView({
                             <TableRow
                               key={orgChild.id}
                               onClick={() =>
-                                navigate({
-                                  to: "/organization/$navOrganizationId/children/$id",
-                                  params: {
-                                    navOrganizationId: childNavOrganizationId,
-                                    id: orgChild.id,
-                                  },
-                                })
+                                navigate(`${baseUrl}/children/${orgChild.id}`)
                               }
                               className="cursor-pointer hover:bg-muted/50"
                             >
@@ -189,11 +184,7 @@ export default function OrganizationView({
                               >
                                 <Button variant="tertiary" asChild>
                                   <Link
-                                    to="/organization/$navOrganizationId/children/$id"
-                                    params={{
-                                      navOrganizationId: childNavOrganizationId,
-                                      id: orgChild.id,
-                                    }}
+                                    href={`${baseUrl}/children/${orgChild.id}`}
                                     aria-label={`${t("open")} ${orgChild.name}`}
                                   >
                                     {t("open")}

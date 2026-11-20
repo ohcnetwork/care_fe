@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import { useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { useQueryParams } from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";

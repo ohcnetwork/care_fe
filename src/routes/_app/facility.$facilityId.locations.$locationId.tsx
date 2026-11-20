@@ -4,6 +4,7 @@ import {
   useLocation,
   useParams,
 } from "@tanstack/react-router";
+import { RouterProvider as RavigerBasePathProvider } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
@@ -45,11 +46,14 @@ function RouteComponent() {
   const { t } = useTranslation();
   const { location, isLoading } = useCurrentLocation();
   const basePath = `/facility/${facilityId}/locations/${locationId}`;
+  // Location pages still write links and `navigate()` calls relative to this
+  // base, as raviger's nested `useRoutes` did. Keep that context until the
+  // links use absolute routes.
+  const relativePath =
+    pathname.replace(new RegExp(`^${basePath}`, "i"), "") || "/";
   // The path below the location, read the way the router matches it: the
   // router has already decoded it, and matching ignores case
-  const path = (
-    pathname.replace(new RegExp(`^${basePath}`, "i"), "") || "/"
-  ).toLowerCase();
+  const path = relativePath.toLowerCase();
 
   // External supply is only for Store locations
   if (path.startsWith("/inventory/external")) {
@@ -80,8 +84,10 @@ function RouteComponent() {
   }
 
   return (
-    <div>
-      <Outlet />
-    </div>
+    <RavigerBasePathProvider basePath={basePath} path={relativePath}>
+      <div>
+        <Outlet />
+      </div>
+    </RavigerBasePathProvider>
   );
 }

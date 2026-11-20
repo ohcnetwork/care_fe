@@ -18,6 +18,7 @@ import {
   SendIcon,
   TriangleAlertIcon,
 } from "lucide-react";
+import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -60,7 +61,6 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { DottedDivider } from "@/components/ui/dotted-divider";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 

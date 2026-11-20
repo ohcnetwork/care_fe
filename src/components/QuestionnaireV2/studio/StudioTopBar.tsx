@@ -1,4 +1,5 @@
 import { ArrowLeft, Check, CircleCheck, TriangleAlert } from "lucide-react";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -20,8 +21,6 @@ import {
   formatRevision,
   revisionOf,
 } from "@/types/questionnaire/questionnaire";
-
-import { HrefLink } from "@/lib/router/HrefLink";
 
 export interface StudioTopBarProps {
   questionnaire: QuestionnaireRead;
@@ -133,13 +132,15 @@ export function StudioTopBar({
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white px-4 py-2.5">
       {/* A real anchor (not navigate()) so middle-click and open-in-new-tab
-          work. HrefLink still routes client-side, and useNavigationBlocker
-          keeps guarding unsaved changes. */}
+          work; raviger's Link still routes client-side, and
+          useNavigationBlocker keeps guarding unsaved changes. basePath="/"
+          opts out of the nested settings router's basePath, which Link
+          would otherwise prepend to this already-absolute href. */}
       <Button asChild variant="outline" size="xs">
-        <HrefLink href={backPath}>
+        <Link href={backPath} basePath="/">
           <ArrowLeft className="size-4" />
           {t("back")}
-        </HrefLink>
+        </Link>
       </Button>
 
       <span aria-hidden className="hidden h-5 w-px bg-gray-200 sm:block" />

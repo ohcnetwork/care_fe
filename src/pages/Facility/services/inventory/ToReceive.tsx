@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { navigate, useQueryParams } from "raviger";
 import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -11,8 +12,6 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
-import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import query from "@/Utils/request/query";
 import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
 
@@ -80,8 +79,8 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
               <Button
                 variant="primary"
                 onClick={() =>
-                  navigate({
-                    href: getInventoryBasePath(
+                  navigate(
+                    getInventoryBasePath(
                       facilityId,
                       locationId,
                       internal,
@@ -89,7 +88,7 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
                       true,
                       "new",
                     ),
-                  })
+                  )
                 }
               >
                 <CareIcon icon="l-plus" />
@@ -126,15 +125,15 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
           }}
           currentTab={currentTab}
           onTabChange={(value) =>
-            navigate({
-              href: getInventoryBasePath(
+            navigate(
+              getInventoryBasePath(
                 facilityId,
                 locationId,
                 internal,
                 value === "orders",
                 true,
               ),
-            })
+            )
           }
         />
       </div>

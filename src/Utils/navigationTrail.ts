@@ -1,7 +1,7 @@
 import { type ParsedLocation, useRouter } from "@tanstack/react-router";
 import { useLayoutEffect } from "react";
 
-import { getRouter } from "@/lib/router/routerRef";
+import { getRouter } from "@/compat/routerRef";
 
 /**
  * In-app locations of this session by history index (`__TSR_index`, kept by

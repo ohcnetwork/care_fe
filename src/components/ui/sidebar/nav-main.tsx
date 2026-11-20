@@ -1,5 +1,6 @@
 import { useAtom } from "jotai";
 import { ChevronRight } from "lucide-react";
+import { Link, usePath } from "raviger";
 import {
   ComponentProps,
   Fragment,
@@ -9,8 +10,6 @@ import {
 } from "react";
 
 import { navExpansionAtom } from "@/atoms/navExpansionAtom";
-import { HrefLink } from "@/lib/router/HrefLink";
-import { usePathname } from "@/lib/router/location";
 import { cn } from "@/lib/utils";
 
 import {
@@ -62,7 +61,7 @@ export interface NavigationLink {
   element?: ReactNode;
 }
 
-interface NavLinkProps extends ComponentProps<typeof HrefLink> {
+interface NavLinkProps extends ComponentProps<typeof Link> {
   href: string;
   ariaLabel: string;
   isActive: boolean;
@@ -81,9 +80,10 @@ export function NavLink({
   const { isMobile, setOpenMobile } = useSidebar();
 
   return (
-    <HrefLink
+    <Link
       {...props}
       href={href}
+      basePath="/"
       aria-label={ariaLabel}
       aria-current={isActive ? "page" : undefined}
       data-active={isActive}
@@ -117,7 +117,7 @@ export function NavLink({
       }}
     >
       {children}
-    </HrefLink>
+    </Link>
   );
 }
 
@@ -157,7 +157,7 @@ function groupNavigationLinks(links: NavigationLink[], label?: string) {
 export function NavMain({ links, label }: NavMainProps) {
   const { state, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed" && !isMobile;
-  const path = usePathname();
+  const path = usePath();
   const sections = groupNavigationLinks(links, label);
 
   return (

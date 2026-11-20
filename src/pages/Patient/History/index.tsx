@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon, X } from "lucide-react";
+import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -10,8 +11,6 @@ import Page from "@/components/Common/Page";
 import { ClinicalHistoryWorkspace } from "@/components/Workspace/ClinicalHistoryWorkspace";
 
 import query from "@/Utils/request/query";
-import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import patientApi from "@/types/emr/patient/patientApi";
 
 import { Separator } from "@/components/ui/separator";
@@ -39,14 +38,12 @@ function ClinicalHistoryPage({
   });
 
   const handleClose = () => {
-    navigate({ href: sourceUrl || fallBackUrl });
+    navigate(sourceUrl || fallBackUrl);
   };
 
   const handleTabChange = (value: string) => {
-    navigate({
-      href: sourceUrl
-        ? `${value}?${new URLSearchParams({ sourceUrl })}`
-        : value,
+    navigate(value, {
+      ...(sourceUrl ? { query: { sourceUrl } } : {}),
     });
   };
 

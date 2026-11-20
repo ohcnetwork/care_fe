@@ -1,3 +1,4 @@
+import { Link } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -12,7 +13,6 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 
-import { HrefLink } from "@/lib/router/HrefLink";
 import { goBack } from "@/Utils/utils";
 import { PatientProps } from ".";
 
@@ -44,7 +44,7 @@ export const Updates = (props: PatientProps) => {
         <h2 className="text-2xl font-semibold leading-tight">{t("updates")}</h2>
         {canSubmitPatientQuestionnaireResponses && (
           <Button asChild variant="outline_primary">
-            <HrefLink
+            <Link
               href={
                 facilityId
                   ? `/facility/${facilityId}/patient/${patientId}/questionnaire`
@@ -53,7 +53,7 @@ export const Updates = (props: PatientProps) => {
             >
               <CareIcon icon="l-plus" className="mr-2" />
               {t("add_patient_updates")}
-            </HrefLink>
+            </Link>
           </Button>
         )}
       </div>

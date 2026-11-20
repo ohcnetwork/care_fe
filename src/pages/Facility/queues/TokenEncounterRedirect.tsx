@@ -2,7 +2,7 @@ import Loading from "@/components/Common/Loading";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
-import { Navigate } from "@tanstack/react-router";
+import { Redirect } from "raviger";
 
 const TokenEncounterRedirect = ({
   facilityId,
@@ -30,58 +30,35 @@ const TokenEncounterRedirect = ({
 
   if (token.encounter?.id && token?.patient?.id) {
     return (
-      <Navigate
-        to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
-        params={{
-          facilityId,
-          patientId: token.patient.id,
-          encounterId: token.encounter.id,
-          tab: "updates",
-        }}
-        replace
+      <Redirect
+        to={`/facility/${facilityId}/patient/${token.patient.id}/encounter/${token.encounter.id}/updates`}
       />
     );
   }
 
   if (token.booking && token?.patient?.id) {
     return (
-      <Navigate
-        to="/facility/$facilityId/patient/$patientId/appointments/$appointmentId"
-        params={{
-          facilityId,
-          patientId: token.patient.id,
-          appointmentId: token.booking.id,
-        }}
-        search={{ from_queue: "true" }}
-        replace
+      <Redirect
+        to={`/facility/${facilityId}/patient/${token?.patient?.id}/appointments/${token.booking.id}?from_queue=true`}
       />
     );
   }
 
   if (!token.booking && token?.patient?.id) {
     return (
-      <Navigate
-        to="/facility/$facilityId/patients/home"
-        params={{ facilityId }}
-        search={{
+      <Redirect
+        to={`/facility/${facilityId}/patients/home?${new URLSearchParams({
           phone_number: token.patient.phone_number,
           flow: "queue",
           year_of_birth: token.patient.year_of_birth?.toString() || "",
           partial_id: token.patient.id.slice(0, 5),
-        }}
-        replace
+        }).toString()}`}
       />
     );
   }
 
   if (!token?.patient?.id) {
-    return (
-      <Navigate
-        to="/facility/$facilityId/patient/create"
-        params={{ facilityId }}
-        replace
-      />
-    );
+    return <Redirect to={`/facility/${facilityId}/patient/create`} />;
   }
 
   return <Loading />;

@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { ArrowUpRightSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -40,7 +39,6 @@ import {
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useAuthUser from "@/hooks/useAuthUser";
-import { navigate } from "@/lib/router/navigate";
 import {
   DISPENSE_ORDER_STATUS_STYLES,
   DispenseOrderRead,
@@ -48,6 +46,7 @@ import {
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { UserReadMinimal } from "@/types/user/user";
+import { Link, navigate } from "raviger";
 
 export default function MedicationDispenseHistory({
   facilityId,
@@ -205,15 +204,9 @@ export default function MedicationDispenseHistory({
                 locationId={locationId}
                 patient={selectedPatient}
                 onSuccess={(deliveryOrder) => {
-                  navigate({
-                    to: "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId",
-                    params: {
-                      facilityId,
-                      locationId,
-                      deliveryOrderId: deliveryOrder.id,
-                    },
-                    search: { dispenseOrderIds: selectedDispenses.join(",") },
-                  });
+                  navigate(
+                    `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}?dispenseOrderIds=${selectedDispenses.join(",")}`,
+                  );
                 }}
                 trigger={
                   <Button>
@@ -370,14 +363,7 @@ export default function MedicationDispenseHistory({
 
                     <TableCell>
                       <Button variant="outline" asChild>
-                        <Link
-                          to="/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId"
-                          params={{
-                            facilityId,
-                            locationId,
-                            dispenseOrderId: item.id,
-                          }}
-                        >
+                        <Link href={`/medication_dispense/order/${item.id}`}>
                           <ArrowUpRightSquare
                             strokeWidth={1.5}
                             className="size-4"

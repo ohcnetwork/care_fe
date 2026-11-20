@@ -1,6 +1,6 @@
+import { Link } from "raviger";
 import { Fragment } from "react";
 
-import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 
 import {
@@ -43,12 +43,13 @@ export function InnerPageHeader({ breadcrumbs, dataCy }: InnerPageHeaderProps) {
               >
                 {item.href ? (
                   <BreadcrumbLink asChild>
-                    <HrefLink
+                    <Link
+                      basePath="/"
                       href={item.href}
                       className="truncate rounded-sm underline underline-offset-4 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                     >
                       {item.label}
-                    </HrefLink>
+                    </Link>
                   </BreadcrumbLink>
                 ) : (
                   <BreadcrumbPage className="truncate text-foreground">

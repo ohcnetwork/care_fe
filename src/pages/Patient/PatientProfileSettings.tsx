@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import careConfig from "@careConfig";
 import { Languages, LogOut, Plus } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -34,12 +33,6 @@ export default function PatientProfileSettings() {
       (patient) => patient.phone_number === tokenData?.phoneNumber,
     ) ?? patients?.[0];
 
-  const footerNote = [
-    versionInfo?.version && `v${versionInfo.version.slice(0, 8)}`,
-    careConfig.customDescription,
-  ]
-    .filter(Boolean)
-    .join(" · ");
   const handleSignOut = async () => {
     await signOut();
     navigate("/", { replace: true });
@@ -134,8 +127,16 @@ export default function PatientProfileSettings() {
             {t("sign_out")}
           </button>
 
-          {footerNote && (
-            <span className="text-[11px] text-gray-400">{footerNote}</span>
+          {versionInfo?.version && (
+            <span className="text-[11px] text-gray-400">
+              v{versionInfo.version.slice(0, 8)}
+            </span>
+          )}
+          {__CUSTOM_DESCRIPTION_HTML__ && (
+            <div
+              className="text-[11px] text-gray-400"
+              dangerouslySetInnerHTML={{ __html: __CUSTOM_DESCRIPTION_HTML__ }}
+            />
           )}
         </div>
       </div>

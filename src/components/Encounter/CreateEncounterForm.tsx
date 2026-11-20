@@ -2,13 +2,13 @@ import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Stethoscope } from "lucide-react";
+import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -188,16 +188,14 @@ export default function CreateEncounterForm({
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.(data);
       if (!disableRedirectOnSuccess) {
-        navigate({
-          to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
-          params: {
-            facilityId,
-            patientId,
-            encounterId: data.id,
-            tab: "updates",
-          },
-          search: redirectQueryParams,
-        });
+        const params = new URLSearchParams(
+          Object.entries(redirectQueryParams ?? {}).filter(
+            (entry): entry is [string, string] => entry[1] !== undefined,
+          ),
+        );
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates${params.size ? `?${params}` : ""}`,
+        );
       }
     },
   });

@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,19 +21,20 @@ import {
   DEVICE_AVAILABILITY_STATUS_COLORS,
   DeviceList,
 } from "@/types/device/device";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 
 interface Props {
   device: DeviceList;
-  facilityId: string;
+  encounter?: EncounterRead;
 }
 
-export default function DeviceCard({ device, facilityId }: Props) {
+export default function DeviceCard({ device, encounter }: Props) {
   const { t } = useTranslation();
 
   return (
     <Link
-      to="/facility/$facilityId/settings/devices/$id"
-      params={{ facilityId, id: device.id }}
+      href={`/devices/${device.id}`}
+      basePath={encounter ? `/facility/${encounter.facility.id}/settings` : ""}
       className="block h-[160px]"
     >
       <Card className="hover:shadow-md transition-shadow h-full">

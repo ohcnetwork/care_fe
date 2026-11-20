@@ -3,7 +3,7 @@ import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { useQuery } from "@tanstack/react-query";
-import { Navigate } from "@tanstack/react-router";
+import { Redirect } from "raviger";
 
 interface MedicationDispenseRedirectProps {
   facilityId: string;
@@ -28,10 +28,8 @@ const MedicationDispenseRedirect = ({
   const dispenseOrderId = data?.order?.id;
   if (facilityId && locationId && dispenseOrderId) {
     return (
-      <Navigate
-        to="/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId"
-        params={{ facilityId, locationId, dispenseOrderId }}
-        replace
+      <Redirect
+        to={`/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}`}
       />
     );
   }

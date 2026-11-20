@@ -1,13 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -229,7 +229,9 @@ export default function RequestOrderForm({
     onSuccess: (requestOrder: RequestOrderRetrieve) => {
       queryClient.invalidateQueries({ queryKey: ["requestOrders"] });
       toast.success(t("order_created"));
-      navigate({ href: returnPath + requestOrder.id, replace: true });
+      navigate(returnPath + requestOrder.id, {
+        replace: true,
+      });
     },
   });
 
@@ -243,7 +245,9 @@ export default function RequestOrderForm({
     onSuccess: (requestOrder: RequestOrderRetrieve) => {
       queryClient.invalidateQueries({ queryKey: ["requestOrders"] });
       toast.success(t("order_updated"));
-      navigate({ href: returnPath + requestOrder.id, replace: true });
+      navigate(returnPath + requestOrder.id, {
+        replace: true,
+      });
     },
   });
 

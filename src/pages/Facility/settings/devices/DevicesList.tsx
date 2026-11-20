@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import {
   ChevronsUpDown as CaretSortIcon,
   Box as CubeIcon,
   PlusIcon,
   SearchIcon,
 } from "lucide-react";
+import { Link } from "raviger";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -115,11 +115,7 @@ export default function DevicesList({ facilityId }: Props) {
                     className="capitalize"
                     asChild
                   >
-                    <Link
-                      to="/facility/$facilityId/settings/devices/create"
-                      params={{ facilityId }}
-                      search={{ type: pluginDevice.type }}
-                    >
+                    <Link href={`/devices/create?type=${pluginDevice.type}`}>
                       <DeviceIcon className="size-4 mr-1" />
                       {pluginDevice.type}
                     </Link>
@@ -127,10 +123,7 @@ export default function DevicesList({ facilityId }: Props) {
                 );
               })}
               <DropdownMenuItem asChild>
-                <Link
-                  to="/facility/$facilityId/settings/devices/create"
-                  params={{ facilityId }}
-                >
+                <Link href="/devices/create">
                   <CubeIcon className="size-4 mr-1" />
                   {t("other")}
                 </Link>
@@ -139,10 +132,7 @@ export default function DevicesList({ facilityId }: Props) {
           </DropdownMenu>
         ) : (
           <Button variant="white" asChild>
-            <Link
-              to="/facility/$facilityId/settings/devices/create"
-              params={{ facilityId }}
-            >
+            <Link href="/devices/create">
               <PlusIcon className="size-4" />
               {t("add_device")}
             </Link>
@@ -217,11 +207,7 @@ export default function DevicesList({ facilityId }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {devices?.results?.length ? (
               devices.results.map((device) => (
-                <DeviceCard
-                  key={device.id}
-                  device={device}
-                  facilityId={facilityId}
-                />
+                <DeviceCard key={device.id} device={device} />
               ))
             ) : (
               <Card className="col-span-full">

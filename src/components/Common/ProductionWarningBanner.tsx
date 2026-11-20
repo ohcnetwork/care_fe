@@ -4,8 +4,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { developerModeAtom } from "@/atoms/developerMode";
-
-import { useQueryParams } from "@/lib/router/queryParams";
+import { useQueryParams } from "raviger";
 
 export default function ProductionWarningBanner() {
   const { t } = useTranslation();

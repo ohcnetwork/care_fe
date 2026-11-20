@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { navigate } from "raviger";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -35,7 +36,6 @@ import {
 } from "@/components/QuestionnaireV2/shared/questionnaireImport";
 import { regenerateQuestionIdsWithMap } from "@/components/QuestionnaireV2/shared/questionTree";
 
-import { navigate } from "@/lib/router/navigate";
 import {
   QuestionnaireRead,
   QuestionnaireScope,
@@ -83,7 +83,7 @@ export function ImportQuestionnaireDialog({
       queryClient.invalidateQueries({ queryKey: questionnaireKeys.all });
       toast.success(t("questionnaire_imported_successfully"));
       onOpenChange(false);
-      navigate({ href: `${scope.basePath}/${created.id}` });
+      navigate(`${scope.basePath}/${created.id}`);
     },
   });
 

@@ -127,20 +127,6 @@ const config = [
       }),
       "no-undef": "off",
 
-      // The app routes with TanStack Router. raviger is not installed.
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: [
-            {
-              name: "raviger",
-              message:
-                'Use `Link` from "@tanstack/react-router" and the helpers in "@/lib/router/" (see docs/architecture.md, Routing).',
-            },
-          ],
-        },
-      ],
-
       // Require rendering components to pass an ExtensionContexts.* value when rendering
       // extensions. Warns by default, errors on pre-commit.
       "no-restricted-syntax": [

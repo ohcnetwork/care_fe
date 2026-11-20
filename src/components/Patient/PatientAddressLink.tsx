@@ -1,7 +1,6 @@
 import { ExternalLink } from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-
-import { HrefLink } from "@/lib/router/HrefLink";
 
 export const PatientAddressLink = ({ address }: { address?: string }) => {
   const { t } = useTranslation();
@@ -13,7 +12,7 @@ export const PatientAddressLink = ({ address }: { address?: string }) => {
   return (
     <div className="flex flex-col">
       {links.map((link) => (
-        <HrefLink
+        <Link
           href={link}
           key={link}
           target="_blank"
@@ -22,7 +21,7 @@ export const PatientAddressLink = ({ address }: { address?: string }) => {
         >
           <ExternalLink size={14} />
           {t("view_on_map")}
-        </HrefLink>
+        </Link>
       ))}
     </div>
   );

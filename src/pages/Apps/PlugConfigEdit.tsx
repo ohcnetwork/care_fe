@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
+import { useNavigate, useQueryParams } from "raviger";
 import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -23,8 +24,6 @@ import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Loading from "@/components/Common/Loading";
 
-import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { AppIcon } from "@/pages/Apps/AppIcon";
 import { AppStorePlugin } from "@/types/appStore/appStore";
 import { PlugConfig } from "@/types/plugConfig";
@@ -115,6 +114,7 @@ function PlugConfigForm({
   buildTimeConfig?: ResolvedPlugConfig;
   existingConfig?: PlugConfig;
 }) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -153,7 +153,7 @@ function PlugConfigForm({
           ? t("app_installed_successfully")
           : t("config_updated_successfully"),
       );
-      navigate({ to: "/admin/apps" });
+      navigate("/admin/apps");
     },
   });
 
@@ -167,7 +167,7 @@ function PlugConfigForm({
       });
       await queryClient.invalidateQueries({ queryKey: ["enabled-plugins"] });
       toast.success(t("config_deleted_successfully"));
-      navigate({ to: "/admin/apps" });
+      navigate("/admin/apps");
     },
   });
 
@@ -421,7 +421,7 @@ function PlugConfigForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate({ to: "/admin/apps" })}
+            onClick={() => navigate("/admin/apps")}
           >
             {t("cancel")}
           </Button>

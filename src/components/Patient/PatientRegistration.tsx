@@ -45,8 +45,6 @@ import {
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
 import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
-import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { tzAwareDateTime } from "@/lib/validators";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -75,6 +73,7 @@ import { format, isBefore, subYears } from "date-fns";
 import { TFunction } from "i18next";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { ArrowLeft, CheckIcon } from "lucide-react";
+import { navigate, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -274,10 +273,8 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     onSuccess: (resp: PatientRead) => {
       toast.success(t("patient_registration_success"));
       // Navigate the user to the patients home page to access the newly created patient
-      navigate({
-        to: "/facility/$facilityId/patients/home",
-        params: { facilityId },
-        search: {
+      navigate(`/facility/${facilityId}/patients/home`, {
+        query: {
           phone_number: resp.phone_number,
           year_of_birth: resp.year_of_birth,
           partial_id: resp?.id?.slice(0, 5),
@@ -286,7 +283,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
             open_schedule: "true",
           }),
         },
-
         replace: true,
       });
     },
@@ -482,10 +478,8 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
           open={showDuplicate}
           patientList={duplicatePatients}
           onTransfer={() =>
-            navigate({
-              to: "/facility/$facilityId/patients",
-              params: { facilityId },
-              search: { phone_number: form.getValues("phone_number") },
+            navigate(`/facility/${facilityId}/patients`, {
+              query: { phone_number: form.getValues("phone_number") },
             })
           }
           onOpenChange={(open) => {

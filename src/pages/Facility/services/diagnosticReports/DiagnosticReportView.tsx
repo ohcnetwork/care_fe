@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, MoreVertical, Printer } from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,6 @@ import { FileListTable } from "@/components/Files/FileListTable";
 
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import { DiagnosticReportSummary } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportSummary";
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
@@ -87,14 +87,14 @@ export default function DiagnosticReportView({
           <span>{t("back")}</span>
         </BackButton>
         <Button variant="outline" asChild>
-          <HrefLink
+          <Link
             href={`/facility/${facilityId}/patient/${report.encounter.patient.id}/diagnostic_reports/${diagnosticReportId}/print`}
             className="flex items-center gap-2"
           >
             <Printer className="size-4 mr-2" />
             {t("print")}
             <ShortcutBadge actionId="print-report" />
-          </HrefLink>
+          </Link>
         </Button>
       </div>
 

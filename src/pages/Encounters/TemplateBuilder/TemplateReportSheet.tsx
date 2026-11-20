@@ -16,9 +16,8 @@ import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 
 import { TemplateType } from "@/types/emr/template/template";
+import { navigate } from "raviger";
 import TemplateList from "./TemplateList";
-
-import { navigate } from "@/lib/router/navigate";
 
 interface TemplateReportSheetProps {
   facilityId: string;
@@ -63,10 +62,7 @@ export default function TemplateReportSheet({
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  navigate({
-                    to: "/facility/$facilityId/template/builder",
-                    params: { facilityId },
-                  })
+                  navigate(`/facility/${facilityId}/template/builder/`)
                 }
               >
                 {t("create_template")}

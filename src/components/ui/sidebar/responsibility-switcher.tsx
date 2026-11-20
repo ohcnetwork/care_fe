@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
 import { Check, ChevronsUpDown, LayoutDashboard } from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,7 @@ export function ResponsibilitySwitcher({ selectedResponsibilityId }: Props) {
         <DropdownMenuItem asChild>
           <Link
             className="gap-2"
-            to="/"
+            href="/"
             onClick={() => isMobile && setOpenMobile(false)}
           >
             <LayoutDashboard className="size-4" />
@@ -85,8 +85,7 @@ export function ResponsibilitySwitcher({ selectedResponsibilityId }: Props) {
             className="gap-2"
           >
             <Link
-              to="/responsibilities/$id"
-              params={{ id: item.organization.id }}
+              href={`/responsibilities/${item.organization.id}`}
               aria-current={
                 item.organization.id === selectedResponsibilityId
                   ? "true"

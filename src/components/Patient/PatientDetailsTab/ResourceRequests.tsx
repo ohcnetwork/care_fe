@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { Link as RavigerLink } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -49,14 +50,12 @@ export const ResourceRequests = (props: PatientProps) => {
         </h2>
         {facilityId && (
           <Button variant="outline_primary" asChild>
-            <Link
-              to="/facility/$facilityId/resource/new"
-              params={{ facilityId }}
-              search={{ related_patient: patientData.id }}
+            <RavigerLink
+              href={`/facility/${facilityId}/resource/new?related_patient=${patientData.id}`}
             >
               <CareIcon icon="l-plus" className="mr-2" />
               {t("create_resource_request")}
-            </Link>
+            </RavigerLink>
           </Button>
         )}
       </div>

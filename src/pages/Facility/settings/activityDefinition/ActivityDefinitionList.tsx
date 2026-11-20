@@ -1,3 +1,4 @@
+import { navigate as ravigerNavigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -29,11 +30,9 @@ export default function ActivityDefinitionList({
   };
 
   const onCreateItem = () => {
-    if (!categorySlug) return;
-    navigate({
-      to: "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug/new",
-      params: { facilityId, categorySlug },
-    });
+    ravigerNavigate(
+      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}/new`,
+    );
   };
 
   return (

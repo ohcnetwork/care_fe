@@ -31,8 +31,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { ManageQueueFinishedTab } from "@/pages/Facility/queues/ManageQueueFinishedTab";
 import { ManageQueueOngoingTab } from "@/pages/Facility/queues/ManageQueueOngoingTab";
 import QueueFormSheet from "@/pages/Facility/queues/QueueFormSheet";
@@ -48,8 +46,9 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { ChevronLeft, Edit3, InfoIcon, SettingsIcon } from "lucide-react";
+import { useNavigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
-import { getQueueBoardPath, getTokenQueueStatusCount } from "./utils";
+import { getTokenQueueStatusCount } from "./utils";
 
 interface ManageQueuePageProps {
   facilityId: string;
@@ -67,6 +66,7 @@ export function ManageQueuePage({
   tab,
 }: ManageQueuePageProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const resource = useScheduleResource();
   const [qParams, setQueryParams] = useQueryParams<{
     autoRefresh?: string;
@@ -273,17 +273,10 @@ export function ManageQueuePage({
           }}
           currentTab={tab}
           onTabChange={(tab) => {
-            const searchParams = new URLSearchParams({
-              autoRefresh: shouldAutoRefresh.toString(),
-            });
-            navigate({
-              href: `${getQueueBoardPath({
-                facilityId,
-                resourceType,
-                resourceId,
-                queueId,
-                tab,
-              })}?${searchParams.toString()}`,
+            navigate(tab, {
+              query: {
+                autoRefresh: shouldAutoRefresh.toString(),
+              },
             });
           }}
           setPageTitle={false}

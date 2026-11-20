@@ -13,7 +13,6 @@ import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPr
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
-import { navigate } from "@/lib/router/navigate";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   CHARGE_ITEM_STATUS_COLORS,
@@ -21,7 +20,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import { isGreaterThan, round } from "@/Utils/decimal";
-
+import { navigate } from "raviger";
 interface ChargeItemCardProps {
   chargeItem: ChargeItemRead;
   sourceUrl?: string;
@@ -71,7 +70,7 @@ export function ChargeItemCard({ chargeItem, sourceUrl }: ChargeItemCardProps) {
           <Button
             variant="outline"
             size="xs"
-            onClick={() => navigate({ href: invoiceUrl })}
+            onClick={() => navigate(invoiceUrl)}
           >
             {t("invoice")}
             <CareIcon icon="l-external-link-alt" className="size-6" />

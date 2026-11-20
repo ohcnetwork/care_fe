@@ -9,6 +9,7 @@ import {
   Search,
   Upload,
 } from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,8 +35,6 @@ import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWri
 
 import useFilters from "@/hooks/useFilters";
 
-import { HrefLink } from "@/lib/router/HrefLink";
-import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import {
   QUESTIONNAIRE_STATUSES,
@@ -154,7 +153,7 @@ export function QuestionnaireListPage({
               <Upload className="size-4" />
               {t("import_questionnaire")}
             </Button>
-            <Button onClick={() => navigate({ href: `${scope.basePath}/new` })}>
+            <Button onClick={() => navigate(`${scope.basePath}/new`)}>
               <Plus className="mr-2 size-4" />
               {t("create_questionnaire")}
             </Button>
@@ -171,9 +170,7 @@ export function QuestionnaireListPage({
           description={t("adjust_questionnaire_filters")}
           action={
             canWriteQuestionnaire ? (
-              <Button
-                onClick={() => navigate({ href: `${scope.basePath}/new` })}
-              >
+              <Button onClick={() => navigate(`${scope.basePath}/new`)}>
                 <Plus className="mr-2 size-4" />
                 {t("create_questionnaire")}
               </Button>
@@ -204,15 +201,13 @@ export function QuestionnaireListPage({
                   tabIndex={0}
                   className="group cursor-pointer focus-visible:bg-gray-100/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-500"
                   onClick={() =>
-                    navigate({ href: `${scope.basePath}/${questionnaire.id}` })
+                    navigate(`${scope.basePath}/${questionnaire.id}`)
                   }
                   onKeyDown={(e) => {
                     if (e.target !== e.currentTarget) return;
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      navigate({
-                        href: `${scope.basePath}/${questionnaire.id}`,
-                      });
+                      navigate(`${scope.basePath}/${questionnaire.id}`);
                     }
                   }}
                 >
@@ -235,9 +230,7 @@ export function QuestionnaireListPage({
                         className="invisible shrink-0 group-hover:visible"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate({
-                            href: `${scope.basePath}/${questionnaire.id}`,
-                          });
+                          navigate(`${scope.basePath}/${questionnaire.id}`);
                         }}
                       >
                         <Eye className="mr-1 size-4" />
@@ -261,7 +254,7 @@ export function QuestionnaireListPage({
               asChild
               className="h-auto block rounded-lg p-4 text-left whitespace-normal"
             >
-              <HrefLink href={`${scope.basePath}/${questionnaire.id}`}>
+              <Link href={`${scope.basePath}/${questionnaire.id}`} basePath="/">
                 <p className="font-medium">{questionnaire.title}</p>
                 <p className="mt-1 line-clamp-2 text-sm text-gray-500">
                   {questionnaire.description}
@@ -269,7 +262,7 @@ export function QuestionnaireListPage({
                 <Badge variant="secondary" className="mt-2 font-normal">
                   {t(questionnaire.subject_type)}
                 </Badge>
-              </HrefLink>
+              </Link>
             </Button>
           ))}
         </div>

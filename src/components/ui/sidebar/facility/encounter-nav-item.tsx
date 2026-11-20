@@ -1,4 +1,5 @@
 import { ArrowRight, MoreHorizontal } from "lucide-react";
+import { Link, navigate, usePath } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -29,9 +30,6 @@ import {
   EncounterListClass,
   useDefaultEncounterClass,
 } from "@/hooks/useDefaultEncounterClass";
-import { HrefLink } from "@/lib/router/HrefLink";
-import { usePathname } from "@/lib/router/location";
-import { navigate } from "@/lib/router/navigate";
 
 import careConfig from "@careConfig";
 
@@ -47,7 +45,7 @@ const ROUTABLE_LIST_CLASSES: EncounterListClass[] = [
  */
 export function EncounterNavItem({ facilityId }: { facilityId: string }) {
   const { t } = useTranslation();
-  const path = usePathname();
+  const path = usePath();
   const { isMobile, setOpenMobile } = useSidebar();
   const { handleMenuOpenChange } = useAppSidebar();
   const { defaultClass, setDefaultClass, isSaving } =
@@ -73,7 +71,7 @@ export function EncounterNavItem({ facilityId }: { facilityId: string }) {
   // Runs per item, not on value change, so the current default opens too.
   const chooseDefault = (encounterClass: EncounterListClass) => {
     if (encounterClass !== defaultClass) setDefaultClass(encounterClass);
-    navigate({ href: listUrl(encounterClass) });
+    navigate(listUrl(encounterClass));
     closeMobileSidebar();
   };
 
@@ -140,12 +138,12 @@ export function EncounterNavItem({ facilityId }: { facilityId: string }) {
                   <DropdownMenuLabel>{t("encounter_types")}</DropdownMenuLabel>
                   {ENCOUNTER_LIST_CLASSES.map((encounterClass) => (
                     <DropdownMenuItem key={encounterClass} asChild>
-                      <HrefLink
+                      <Link
                         href={listUrl(encounterClass)}
                         onClick={closeMobileSidebar}
                       >
                         {listName(encounterClass)}
-                      </HrefLink>
+                      </Link>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuGroup>

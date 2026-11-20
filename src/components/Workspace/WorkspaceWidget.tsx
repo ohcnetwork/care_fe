@@ -1,4 +1,5 @@
 import { Blocks, ShieldAlert } from "lucide-react";
+import { useFullPath } from "raviger";
 import { Suspense, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,7 +19,6 @@ import {
 } from "@/hooks/useCareAppEncounterWidgets";
 import { useCareApps } from "@/hooks/useCareApps";
 import { ScopedQueryParamsProvider } from "@/hooks/useScopedQueryParams";
-import { usePathname } from "@/lib/router/location";
 import { FavoriteFormsQuickActions } from "@/pages/Encounters/tabs/overview/FavoriteFormsQuickActions";
 import { FormSubmissionDrafts } from "@/pages/Encounters/tabs/overview/FormSubmissionDrafts";
 import { QuickActions } from "@/pages/Encounters/tabs/overview/quick-actions";
@@ -84,7 +84,7 @@ function WorkspaceWidgetContent({
   context,
 }: WorkspaceWidgetProps) {
   const { t } = useTranslation();
-  const fullPath = usePathname();
+  const fullPath = useFullPath();
   const returnPage =
     encounterPageKeySchema.safeParse(fullPath.split("/").pop()).data ??
     "updates";

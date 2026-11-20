@@ -8,15 +8,14 @@ import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { ListPlus } from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 interface Props {
   included: string[];
   patientId: string;
   facilityId: string;
-  locationId: string;
   encounterId?: string;
   allButton?: (props: { prescriptionIds: string[] }) => React.ReactNode;
 }
@@ -24,7 +23,6 @@ interface Props {
 export default function UnbilledPrescriptionsCard({
   included,
   facilityId,
-  locationId,
   patientId,
   encounterId,
   allButton,
@@ -71,14 +69,7 @@ export default function UnbilledPrescriptionsCard({
           ) : (
             <Button variant="outline" size="sm" asChild>
               <Link
-                to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds"
-                params={{
-                  facilityId,
-                  locationId,
-                  patientId,
-                  prescriptionIds: allPrescriptionIds.join(","),
-                }}
-                search={{ encounterId }}
+                href={`/medication_requests/patient/${patientId}/bill/prescriptions/${allPrescriptionIds.join(",")}?encounterId=${encounterId}`}
                 replace
               >
                 <ListPlus className="size-4" />

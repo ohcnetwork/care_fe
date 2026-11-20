@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { useQueryParams } from "@/lib/router/queryParams";
 import referralApi from "@/types/emr/referral/referralApi";
 import { ReferralResource } from "@/types/emr/referral/referralResource";
 import referralResourceApi from "@/types/emr/referral/referralResourceApi";

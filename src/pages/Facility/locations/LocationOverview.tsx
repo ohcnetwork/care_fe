@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   Bed,
@@ -10,6 +9,7 @@ import {
   Package,
   Pill,
 } from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +19,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TagBadges } from "@/components/Tags/TagBadges";
 
 import query from "@/Utils/request/query";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -212,8 +211,8 @@ export function LocationOverview({
               }
             />
             <Link
-              to="/facility/$facilityId/locations/$locationId/responses"
-              params={{ facilityId, locationId }}
+              basePath="/"
+              href={`${baseUrl}/responses`}
               className="group flex items-center gap-4 rounded-[10px] border border-neutral-200 bg-white p-4 shadow-xs transition-colors hover:bg-neutral-100/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
             >
               <ClipboardList
@@ -264,7 +263,8 @@ export function LocationOverview({
                 <ul className="p-2">
                   {links.map(({ label, path }) => (
                     <li key={path}>
-                      <HrefLink
+                      <Link
+                        basePath="/"
                         href={`${baseUrl}${path}`}
                         className="group flex min-h-12 md:min-h-10 items-center justify-between gap-3 rounded-md px-2 py-2 text-sm text-neutral-700 hover:bg-neutral-100/50 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                       >
@@ -273,7 +273,7 @@ export function LocationOverview({
                           className="size-4 shrink-0 text-neutral-400 group-hover:text-neutral-700"
                           aria-hidden="true"
                         />
-                      </HrefLink>
+                      </Link>
                     </li>
                   ))}
                 </ul>

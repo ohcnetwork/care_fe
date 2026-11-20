@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, Edit, Hash, Printer } from "lucide-react";
+import { Link } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -33,8 +34,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
-import { HrefLink } from "@/lib/router/HrefLink";
-import { usePathname } from "@/lib/router/location";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import {
   REQUEST_ORDER_PRIORITY_COLORS,
@@ -65,8 +64,6 @@ export function RequestOrderShow({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  // The print and edit pages are below the order page, in the same tab.
-  const pathname = usePathname();
   const { data: requestOrder, isLoading } = useQuery({
     queryKey: ["requestOrders", requestOrderId],
     queryFn: query(requestOrderApi.retrieveRequestOrder, {
@@ -184,17 +181,17 @@ export function RequestOrderShow({
           </div>
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" asChild>
-              <HrefLink href={`${pathname}/print`}>
+              <Link href={`${requestOrderId}/print`}>
                 <Printer className="size-4" /> {t("print")}
                 <ShortcutBadge actionId="print-button" />
-              </HrefLink>
+              </Link>
             </Button>
             {isRequester && (
               <Button variant="outline" asChild>
-                <HrefLink href={`${pathname}/edit`}>
+                <Link href={`${requestOrderId}/edit`}>
                   <Edit /> {t("edit")}
                   <ShortcutBadge actionId="edit-order" />
-                </HrefLink>
+                </Link>
               </Button>
             )}
 
@@ -202,7 +199,8 @@ export function RequestOrderShow({
               (!internal &&
                 requestOrder.status === RequestOrderStatus.pending)) && (
               <Button variant="primary" asChild>
-                <HrefLink
+                <Link
+                  basePath="/"
                   href={getInventoryBasePath(
                     facilityId,
                     locationId,
@@ -214,7 +212,7 @@ export function RequestOrderShow({
                 >
                   {t("create_delivery_order")}
                   <ShortcutBadge actionId="create-order" />
-                </HrefLink>
+                </Link>
               </Button>
             )}
 

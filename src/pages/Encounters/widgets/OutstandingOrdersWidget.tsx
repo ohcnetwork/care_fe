@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { CircleAlert, CircleCheck, CirclePause } from "lucide-react";
+import { Link as RavigerLink } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,7 +13,6 @@ import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import { useInfiniteList } from "@/hooks/useInfiniteList";
-import { HrefLink } from "@/lib/router/HrefLink";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
@@ -271,12 +271,12 @@ export function OutstandingOrdersWidget({
                         {t(style.labelKey)}
                       </span>
                       {report ? (
-                        <HrefLink
+                        <RavigerLink
                           href={`${reportBase}/${report.id}`}
                           className="text-xs font-medium text-primary-700 underline-offset-2 hover:underline"
                         >
                           {t("view_report")}
-                        </HrefLink>
+                        </RavigerLink>
                       ) : sameFacility ? (
                         <Link
                           to="/facility/$facilityId/service_requests/$serviceRequestId"

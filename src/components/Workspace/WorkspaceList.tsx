@@ -7,6 +7,7 @@ import {
   Plus,
   Search,
 } from "lucide-react";
+import { Link } from "raviger";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -28,7 +29,6 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
 
-import { HrefLink } from "@/lib/router/HrefLink";
 import {
   isWorkspaceStatus,
   WORKSPACE_STATUSES,
@@ -98,10 +98,10 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
           </p>
         </div>
         <Button asChild className="h-10 shrink-0 sm:h-9">
-          <HrefLink href={`${scope.basePath}/create`}>
+          <Link href={`${scope.basePath}/create`} basePath="/">
             <Plus className="size-4" aria-hidden="true" />
             {t("create_workspace")}
-          </HrefLink>
+          </Link>
         </Button>
       </div>
 
@@ -199,12 +199,13 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
               {workspaces.map((workspace) => (
                 <TableRow key={workspace.id}>
                   <TableCell className="max-w-xs px-4 py-3 whitespace-normal">
-                    <HrefLink
+                    <Link
                       href={`${scope.basePath}/${workspace.id}/edit`}
+                      basePath="/"
                       className="break-words font-medium text-gray-950 underline-offset-4 hover:underline focus-visible:underline"
                     >
                       {workspace.name}
-                    </HrefLink>
+                    </Link>
                     <p className="mt-1 line-clamp-3 text-sm text-gray-600 sm:hidden">
                       {workspace.description || t("no_description")}
                     </p>
@@ -216,12 +217,13 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
                   </TableCell>
                   <TableCell className="px-4 py-3 text-right">
                     <Button asChild variant="outline" size="sm">
-                      <HrefLink
+                      <Link
                         href={`${scope.basePath}/${workspace.id}/edit`}
+                        basePath="/"
                         aria-label={`${t("edit")}: ${workspace.name}`}
                       >
                         {t("edit")}
-                      </HrefLink>
+                      </Link>
                     </Button>
                   </TableCell>
                 </TableRow>

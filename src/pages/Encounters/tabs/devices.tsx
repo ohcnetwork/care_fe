@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { ExternalLink, Unlink } from "lucide-react";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -99,11 +99,8 @@ export const EncounterDevicesTab = () => {
                         >
                           <TableCell className="font-medium">
                             <Link
-                              to="/facility/$facilityId/settings/devices/$id"
-                              params={{
-                                facilityId: facilityId!,
-                                id: device.id,
-                              }}
+                              href={`/devices/${device.id}`}
+                              basePath={`/facility/${facilityId}/settings`}
                               className="group flex items-start gap-1"
                             >
                               <div>

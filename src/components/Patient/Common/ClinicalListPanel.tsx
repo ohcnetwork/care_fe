@@ -1,10 +1,8 @@
 import { History } from "lucide-react";
+import { Link, useFullPath, useQueryParams } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-import { HrefLink } from "@/lib/router/HrefLink";
-import { usePathname } from "@/lib/router/location";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -61,7 +59,7 @@ export function ClinicalListPanel({
   children,
 }: ClinicalListPanelProps) {
   const { t } = useTranslation();
-  const fullPath = usePathname();
+  const fullPath = useFullPath();
   const [queryParams] = useQueryParams<Record<string, string>>();
   const search = new URLSearchParams(queryParams).toString();
   const sourceUrl = search ? `${fullPath}?${search}` : fullPath;
@@ -101,7 +99,7 @@ export function ClinicalListPanel({
                 : "hover:bg-transparent text-soft-foreground hover:text-soft-foreground"
             }
           >
-            <HrefLink
+            <Link
               href={`${patientPath}/history/${history}?sourceUrl=${encodeURIComponent(sourceUrl)}`}
               aria-label={t("view_history")}
             >
@@ -111,7 +109,7 @@ export function ClinicalListPanel({
                   {t("history")}
                 </span>
               )}
-            </HrefLink>
+            </Link>
           </Button>
         }
       >

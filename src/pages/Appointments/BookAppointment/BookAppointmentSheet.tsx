@@ -11,11 +11,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQueryParams } from "raviger";
 
 import { BookAppointmentDetails } from "./BookAppointmentDetails";
 import { BookingsList } from "./BookingsList";
-
-import { useQueryParams } from "@/lib/router/queryParams";
 
 interface Props {
   patientId: string;

@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { NotepadText, SquarePen } from "lucide-react";
+import { Link, useFullPath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -19,15 +19,13 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
-import { usePathname } from "@/lib/router/location";
-
 interface DischargeDetailsProps {
   title?: string;
 }
 
 export const DischargeDetails = ({ title }: DischargeDetailsProps = {}) => {
   const { t } = useTranslation();
-  const returnPage = usePathname().split("/").pop() ?? "updates";
+  const returnPage = useFullPath().split("/").pop() ?? "updates";
   const { selectedEncounter: encounter, canWriteSelectedEncounter } =
     useEncounter();
 
@@ -50,14 +48,7 @@ export const DischargeDetails = ({ title }: DischargeDetailsProps = {}) => {
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" className="shrink-0" asChild>
             <Link
-              to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId"
-              params={{
-                facilityId: encounter.facility.id,
-                patientId: encounter.patient.id,
-                encounterId: encounter.id,
-                questionnaireId: "encounter",
-              }}
-              search={{ return_page: returnPage }}
+              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?${new URLSearchParams({ return_page: returnPage })}`}
               aria-label={t("edit")}
             >
               <SquarePen
