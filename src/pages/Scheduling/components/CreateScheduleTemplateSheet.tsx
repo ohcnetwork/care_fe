@@ -52,6 +52,7 @@ import {
   getTokenDuration,
 } from "@/pages/Scheduling/utils";
 import { CareTeamResponse, toCareTeamMembers } from "@/types/careTeam/careTeam";
+import { EncounterClass } from "@/types/emr/encounter/encounter";
 import {
   SchedulableResourceType,
   ScheduleAvailabilityCreateRequest,
@@ -98,6 +99,7 @@ export default function CreateScheduleTemplateSheet({
         }),
       valid_to: z.date({ error: t("field_required") }),
       is_public: z.boolean(),
+      encounter_type: z.custom<EncounterClass>().nullable(),
       organizations: z.array(z.string()),
       care_team: z.array(z.custom<CareTeamResponse>()),
 
@@ -215,6 +217,7 @@ export default function CreateScheduleTemplateSheet({
       valid_to: undefined,
       weekdays: [],
       is_public: false,
+      encounter_type: null,
       organizations: [],
       care_team: [],
       availabilities: [
@@ -255,6 +258,7 @@ export default function CreateScheduleTemplateSheet({
       resource_type: resourceType,
       resource_id: resourceId,
       is_public: values.is_public,
+      encounter_type: values.encounter_type,
       organizations: values.organizations,
       care_team: toCareTeamMembers(values.care_team),
       availabilities: values.availabilities.map(
@@ -475,6 +479,12 @@ export default function CreateScheduleTemplateSheet({
                 />
                 <ScheduleEncounterDefaultsFields
                   facilityId={facilityId}
+                  encounterType={form.watch("encounter_type")}
+                  onEncounterTypeChange={(value) =>
+                    form.setValue("encounter_type", value, {
+                      shouldDirty: true,
+                    })
+                  }
                   organizations={form.watch("organizations")}
                   onOrganizationsChange={(value) =>
                     form.setValue("organizations", value, { shouldDirty: true })

@@ -54,6 +54,7 @@ import {
   getTokenDuration,
 } from "@/pages/Scheduling/utils";
 import { CareTeamResponse, toCareTeamMembers } from "@/types/careTeam/careTeam";
+import { EncounterClass } from "@/types/emr/encounter/encounter";
 import {
   AvailabilityDateTime,
   SchedulableResourceType,
@@ -166,6 +167,8 @@ const ScheduleTemplateEditor = ({
   });
   const savedOrganizations = templateDetail?.organizations ?? [];
   const savedCareTeam = templateDetail?.care_team ?? [];
+  const savedEncounterType =
+    (templateDetail ?? template).encounter_type ?? null;
 
   const templateFormSchema = z
     .object({
@@ -177,6 +180,7 @@ const ScheduleTemplateEditor = ({
         error: t("field_required"),
       }),
       is_public: z.boolean(),
+      encounter_type: z.custom<EncounterClass>().nullable(),
       organizations: z.array(z.string()),
       care_team: z.array(z.custom<CareTeamResponse>()),
     })
@@ -195,6 +199,7 @@ const ScheduleTemplateEditor = ({
       valid_from: new Date(template.valid_from),
       valid_to: new Date(template.valid_to),
       is_public: template.is_public,
+      encounter_type: template.encounter_type ?? null,
       organizations: [],
       care_team: [],
     },
@@ -203,14 +208,15 @@ const ScheduleTemplateEditor = ({
       valid_from: new Date(templateDetail.valid_from),
       valid_to: new Date(templateDetail.valid_to),
       is_public: templateDetail.is_public,
+      encounter_type: savedEncounterType,
       organizations: savedOrganizations.map(({ id }) => id),
       care_team: savedCareTeam,
     },
     resetOptions: { keepDirtyValues: true },
   });
-  const [organizations, careTeam] = useWatch({
+  const [encounterType, organizations, careTeam] = useWatch({
     control: form.control,
-    name: ["organizations", "care_team"],
+    name: ["encounter_type", "organizations", "care_team"],
   });
 
   const { mutate: updateTemplate, isPending: isUpdating } = useMutation({
@@ -249,11 +255,15 @@ const ScheduleTemplateEditor = ({
     const careTeamChanged =
       JSON.stringify(careTeamMembers) !==
       JSON.stringify(toCareTeamMembers(savedCareTeam));
+    const encounterTypeChanged = values.encounter_type !== savedEncounterType;
     updateTemplate({
       name: values.name,
       valid_from: dateQueryString(values.valid_from),
       valid_to: dateQueryString(values.valid_to),
       is_public: values.is_public,
+      ...(encounterTypeChanged && {
+        encounter_type: values.encounter_type,
+      }),
       ...(organizationsChanged && { organizations: values.organizations }),
       ...(careTeamChanged && { care_team: careTeamMembers }),
     });
@@ -352,6 +362,10 @@ const ScheduleTemplateEditor = ({
 
           <ScheduleEncounterDefaultsFields
             facilityId={facilityId}
+            encounterType={encounterType}
+            onEncounterTypeChange={(value) =>
+              form.setValue("encounter_type", value, { shouldDirty: true })
+            }
             organizations={organizations}
             onOrganizationsChange={(value) =>
               form.setValue("organizations", value, { shouldDirty: true })

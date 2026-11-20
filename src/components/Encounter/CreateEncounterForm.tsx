@@ -74,8 +74,8 @@ interface Props {
   facilityId: string;
   patientName: string;
   appointment?: string;
-  /** The appointment's schedule defaults: departments are prefilled and the
-   * care team is assigned once the encounter is created. */
+  /** The appointment's schedule defaults: the encounter type and departments
+   * are prefilled and the care team is assigned once the encounter is created. */
   scheduleDefaults?: ScheduleEncounterDefaults;
   trigger?: React.ReactNode;
   onSuccess?: (encounter: EncounterRead) => void;
@@ -107,6 +107,14 @@ export default function CreateEncounterForm({
   useShortcutSubContext();
   const defaultOrganizations = scheduleDefaults?.organizations ?? [];
   const defaultCareTeam = scheduleDefaults?.care_team ?? [];
+  // Fall back to the deployment default if this deployment doesn't offer the
+  // schedule's encounter type.
+  const scheduleEncounterType = scheduleDefaults?.encounter_type;
+  const defaultEncounterClass =
+    scheduleEncounterType &&
+    careConfig.encounterClasses.includes(scheduleEncounterType)
+      ? scheduleEncounterType
+      : careConfig.defaultEncounterType;
 
   const encounterFormSchema = z
     .object({
@@ -143,7 +151,7 @@ export default function CreateEncounterForm({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
       status: defaultStatus,
-      encounter_class: careConfig.defaultEncounterType,
+      encounter_class: defaultEncounterClass,
       priority: "routine",
       organizations: defaultOrganizations.map(({ id }) => id),
       start_date: new Date().toISOString(),
@@ -151,11 +159,12 @@ export default function CreateEncounterForm({
     },
   });
 
-  // Re-read the schedule's departments on every reset: the appointment may
-  // have been refetched with different defaults since the form mounted.
+  // Re-read the schedule's defaults on every reset: the appointment may have
+  // been refetched with different defaults since the form mounted.
   const resetForm = () =>
     form.reset({
       ...form.formState.defaultValues,
+      encounter_class: defaultEncounterClass,
       organizations: defaultOrganizations.map(({ id }) => id),
     });
 

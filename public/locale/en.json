@@ -4465,6 +4465,7 @@
   "schedule_availability_deleted_successfully": "Schedule availability deleted successfully",
   "schedule_creation_for_past_validation_error": "Schedule cannot be created for the past",
   "schedule_default_care_team_help": "These members are added to the care team of encounters created from this schedule's appointments.",
+  "schedule_default_encounter_type_help": "Preselected as the type of encounters created from this schedule's appointments.",
   "schedule_encounter_defaults": "Encounter defaults",
   "schedule_encounter_defaults_help": "Applied when an encounter is created from an appointment on this schedule.",
   "schedule_exception_creation_for_past_validation_error": "Schedule exception cannot be created for the past",
