@@ -88,10 +88,92 @@ jobs:
             node_modules/
           key: build-${{ github.sha }}
 
+  # Build the CARE backend image and a migrated, fixture-loaded DB snapshot
+  # once per backend revision, so test shards restore them instead of each
+  # building the image and running every migration from scratch.
+  backend:
+    if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      sha: ${{ steps.keys.outputs.sha }}
+      image-key: ${{ steps.keys.outputs.image }}
+      db-key: ${{ steps.keys.outputs.db }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout care
+        uses: actions/checkout@v4
+        with:
+          repository: ohcnetwork/care
+          path: care
+          ref: ${{ inputs.backend_ref || env.CARE_BACKEND_REF }}
+
+      - name: Compute cache keys
+        id: keys
+        run: |
+          sha=$(git -C care rev-parse HEAD)
+          {
+            echo "sha=$sha"
+            # The image only bakes in dependencies; the source is bind-mounted.
+            echo "image=${{ runner.os }}-care-image-v1-${{ hashFiles('care/Pipfile.lock', 'care/docker/dev.Dockerfile', 'care/plug_config.py', 'care/install_plugins.py') }}"
+            # The DB depends on the backend code (migrations, fixtures, synced data).
+            echo "db=${{ runner.os }}-care-db-v1-${sha}-${{ hashFiles('.github/runner-files/care-backend.sh') }}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Look up DB snapshot
+        id: db-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/care-db
+          key: ${{ steps.keys.outputs.db }}
+          lookup-only: true
+
+      - name: Restore backend image
+        id: image-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/care-image
+          key: ${{ steps.keys.outputs.image }}
+          # Only download the image when it is needed to build the snapshot.
+          lookup-only: ${{ steps.db-cache.outputs.cache-hit == 'true' }}
+
+      - name: Build backend image
+        if: steps.image-cache.outputs.cache-hit != 'true'
+        run: bash .github/runner-files/care-backend.sh build
+
+      - name: Save backend image
+        if: steps.image-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/care-image
+          key: ${{ steps.keys.outputs.image }}
+
+      - name: Build DB snapshot
+        if: steps.db-cache.outputs.cache-hit != 'true'
+        run: |
+          bash .github/runner-files/care-backend.sh configure
+          bash .github/runner-files/care-backend.sh snapshot
+        env:
+          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
+
+      - name: Save DB snapshot
+        if: steps.db-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/care-db
+          key: ${{ steps.keys.outputs.db }}
+
+      - name: Stop backend
+        if: always()
+        run: bash .github/runner-files/care-backend.sh stop
+
   # Run E2E tests with backend integration
   test:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
-    needs: [changes, build]
+    needs: [changes, build, backend]
     timeout-minutes: 30
     runs-on: ubuntu-latest
     strategy:
@@ -108,53 +190,32 @@ jobs:
         with:
           repository: ohcnetwork/care
           path: care
-          ref: ${{ inputs.backend_ref || env.CARE_BACKEND_REF }}
+          # Use the exact revision the snapshot was built from.
+          ref: ${{ needs.backend.outputs.sha || inputs.backend_ref || env.CARE_BACKEND_REF }}
 
-      - name: Resolve backend revision
-        id: backend-revision
-        run: echo "sha=$(git -C care rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Docker images
-        id: docker-cache
-        uses: actions/cache@v4
+      # If either cache is missing, the start script falls back to building
+      # the image / running migrations + fixtures, like before.
+      - name: Restore backend image
+        if: needs.backend.outputs.image-key != ''
+        uses: actions/cache/restore@v4
         with:
-          path: /tmp/docker-cache
-          key: ${{ runner.os }}-docker-care-${{ steps.backend-revision.outputs.sha }}
+          path: /tmp/care-image
+          key: ${{ needs.backend.outputs.image-key }}
 
-      - name: Load cached Docker images
-        run: |
-          if [ -d /tmp/docker-cache ]; then
-            for f in /tmp/docker-cache/*.tar; do
-              docker load -i "$f" 2>/dev/null || true
-            done
-          fi
+      - name: Restore DB snapshot
+        if: needs.backend.outputs.db-key != ''
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/care-db
+          key: ${{ needs.backend.outputs.db-key }}
 
-      - name: Start care docker containers
+      # Runs in the background while Node, the build and Playwright are set up.
+      - name: Start care backend
         run: |
-          cd care
-          echo DISABLE_RATELIMIT=True >> docker/.local.env
-          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
-          echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
-          # Shards reuse the setup logins for longer than the default
-          # 10-minute access token, so keep tokens valid for the whole job.
-          echo JWT_ACCESS_TOKEN_LIFETIME=60 >> docker/.local.env
-          echo JWT_REFRESH_TOKEN_LIFETIME=120 >> docker/.local.env
-          make docker_config_file=docker-compose.local.yaml up load-fixtures
-          cd ..
+          bash .github/runner-files/care-backend.sh configure
+          bash .github/runner-files/care-backend.sh start-bg
         env:
           JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
-
-      - name: Save Docker images to cache
-        if: steps.docker-cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p /tmp/docker-cache
-          # Only cache images used by the CARE backend services (not base images)
-          docker compose -f care/docker-compose.local.yaml config --images 2>/dev/null | while read -r img; do
-            filename=$(echo "$img" | tr '/:' '_')
-            if [ ! -f "/tmp/docker-cache/${filename}.tar" ]; then
-              docker save -o "/tmp/docker-cache/${filename}.tar" "$img" 2>/dev/null || true
-            fi
-          done
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -207,6 +268,9 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Wait for care backend
+        run: bash .github/runner-files/care-backend.sh wait
+
       - name: Run setup tests (serial)
         run: npx playwright test --project=setup --workers=1
         env:
@@ -238,9 +302,7 @@ jobs:
 
       - name: Stop backend services
         if: always()
-        run: |
-          cd care
-          make docker_config_file=docker-compose.local.yaml down || true
+        run: bash .github/runner-files/care-backend.sh stop
 
   # Aggregate results and create final report
   report:
