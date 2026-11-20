@@ -314,7 +314,7 @@ export function ValueSetList({ scope }: { scope: ValueSetScope }) {
             </p>
           </div>
         ) : (
-          <div className="w-full overflow-x-auto pb-1">
+          <div className="w-full overflow-x-auto">
             <Tabs
               value={qParams.status || ValueSetStatus.ACTIVE}
               onValueChange={(value) => updateQuery({ status: value, page: 1 })}

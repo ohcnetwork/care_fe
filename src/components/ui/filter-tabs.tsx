@@ -124,26 +124,19 @@ export function FilterTabs({
   return (
     <div className={cn("flex items-center gap-4", className)}>
       {label && (
-        <span className="text-sm font-medium text-gray-700">{t(label)}:</span>
+        <span className="text-sm font-medium text-soft-foreground">
+          {t(label)}:
+        </span>
       )}
       <Tabs
         value={value || "all"}
         onValueChange={handleValueChange}
-        className="min-w-0"
+        className={cn("min-w-0", variant === "underline" && "flex-1")}
       >
         <div
-          className={
-            variant === "underline"
-              ? "max-w-full overflow-x-auto pb-1"
-              : undefined
-          }
+          className={variant === "underline" ? "overflow-x-auto" : undefined}
         >
-          <TabsList
-            variant={variant === "underline" ? "line" : "default"}
-            className={
-              variant === "underline" ? "w-full justify-start" : undefined
-            }
-          >
+          <TabsList variant={variant === "underline" ? "line" : "default"}>
             {showAllOption && (
               <TabsTrigger value="all">{t(allOptionLabel)}</TabsTrigger>
             )}
@@ -155,7 +148,10 @@ export function FilterTabs({
             {showMoreDropdown && remainingOptions.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-full">
+                  <Button
+                    variant="ghost"
+                    className="h-full font-medium text-muted-foreground"
+                  >
                     {t("more")}
                     <ChevronDown className="ml-1 h-4 w-4" />
                   </Button>
