@@ -14,12 +14,11 @@ import {
 import { getPermissions } from "@/common/Permissions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { HrefLink } from "@/lib/router/HrefLink";
+import { patientQuery } from "@/lib/router/pageQueries";
 import { useQueryParams } from "@/lib/router/queryParams";
-import patientApi from "@/types/emr/patient/patientApi";
 
 import {
   PatientDeceasedInfo,
@@ -55,13 +54,7 @@ const PatientProfileContent = (props: PatientProfileProps) => {
   const { hasPermission } = usePermissions();
   useShortcutSubContext();
   const { data: patientData, isLoading } = useQuery({
-    queryKey: ["patient", id, facilityId],
-    queryFn: query(patientApi.get, {
-      pathParams: {
-        id,
-      },
-      queryParams: { facility: facilityId },
-    }),
+    ...patientQuery(id, facilityId),
     enabled: !!id,
   });
 

@@ -12,6 +12,7 @@ import { getPermissions, Permissions } from "@/common/Permissions";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { navigate } from "@/lib/router/navigate";
+import { encounterQuery, patientQuery } from "@/lib/router/pageQueries";
 import { useQueryParams } from "@/lib/router/queryParams";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
@@ -22,9 +23,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
-import patientApi from "@/types/emr/patient/patientApi";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 
 type EncounterContextType = {
   facilityId?: string;
@@ -96,36 +95,15 @@ export function EncounterProvider({
     setQParams,
   ] = useQueryParams();
 
-  const { data: patient, isLoading: isPatientLoading } = useQuery({
-    queryKey: ["patient", patientId, facilityId],
-    queryFn: query(patientApi.get, {
-      pathParams: { id: patientId },
-      queryParams: { facility: facilityId },
-      silent: true,
-    }),
-  });
+  const { data: patient, isLoading: isPatientLoading } = useQuery(
+    patientQuery(patientId, facilityId, { silent: true }),
+  );
 
   const { data: primaryEncounter, isLoading: isPrimaryEncounterLoading } =
-    useQuery({
-      queryKey: ["encounter", primaryEncounterId],
-      queryFn: query(encounterApi.get, {
-        pathParams: { id: primaryEncounterId },
-        queryParams: facilityId
-          ? { facility: facilityId }
-          : { patient: patientId },
-      }),
-    });
+    useQuery(encounterQuery(primaryEncounterId, { facilityId, patientId }));
 
   const { data: selectedEncounter, isLoading: isSelectedEncounterLoading } =
-    useQuery({
-      queryKey: ["encounter", selectedEncounterId],
-      queryFn: query(encounterApi.get, {
-        pathParams: { id: selectedEncounterId },
-        queryParams: facilityId
-          ? { facility: facilityId }
-          : { patient: patientId },
-      }),
-    });
+    useQuery(encounterQuery(selectedEncounterId, { facilityId, patientId }));
 
   const setSelectedEncounter = (encounterId: string | null) => {
     setQParams(

@@ -1,5 +1,10 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 
+import {
+  encounterQuery,
+  patientQuery,
+  startQuery,
+} from "@/lib/router/pageQueries";
 import { fullScreenPage } from "@/lib/router/staticData";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
@@ -8,6 +13,10 @@ import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 export const Route = createFileRoute(
   "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
 )({
+  loader: ({ context, params: { facilityId, patientId, encounterId } }) => {
+    startQuery(context, patientQuery(patientId, facilityId, { silent: true }));
+    startQuery(context, encounterQuery(encounterId, { facilityId, patientId }));
+  },
   component: RouteComponent,
   staticData: fullScreenPage,
 });

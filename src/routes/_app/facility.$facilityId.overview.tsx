@@ -1,8 +1,11 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 
+import { facilityQuery, startQuery } from "@/lib/router/pageQueries";
 import { FacilityOverview } from "@/pages/Facility/overview";
 
 export const Route = createFileRoute("/_app/facility/$facilityId/overview")({
+  loader: ({ context, params }) =>
+    startQuery(context, facilityQuery(params.facilityId)),
   component: RouteComponent,
 });
 

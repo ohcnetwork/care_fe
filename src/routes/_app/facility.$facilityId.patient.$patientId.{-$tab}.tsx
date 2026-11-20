@@ -4,6 +4,8 @@ import { PluginPathNotFound } from "@/components/Common/PluginPathNotFound";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientProfile } from "@/components/Patient/PatientProfile";
 
+import { patientQuery, startQuery } from "@/lib/router/pageQueries";
+
 type PatientTab = React.ComponentProps<typeof PatientProfile>["page"];
 
 /**
@@ -15,6 +17,8 @@ type PatientTab = React.ComponentProps<typeof PatientProfile>["page"];
 export const Route = createFileRoute(
   "/_app/facility/$facilityId/patient/$patientId/{-$tab}",
 )({
+  loader: ({ context, params }) =>
+    startQuery(context, patientQuery(params.patientId, params.facilityId)),
   component: RouteComponent,
 });
 

@@ -17,7 +17,10 @@ import { collectQuestionErrors } from "@/components/QuestionnaireV2/form/validat
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
 import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
-import { rendererSubjectOf } from "@/components/QuestionnaireV2/fill/subject";
+import {
+  isPatientBound,
+  rendererSubjectOf,
+} from "@/components/QuestionnaireV2/fill/subject";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { ResponsePath } from "@/types/questionnaire/form";
@@ -161,6 +164,18 @@ export function useSubmitFillSession({
     // result) is toasted by the mutation cache, like every other write.
     onSuccess: () => {
       setServerErrors([]);
+      // A questionnaire's actions can change the patient or the encounter,
+      // which the page this submit returns to reads.
+      if (isPatientBound(subject)) {
+        queryClient.invalidateQueries({
+          queryKey: ["patient", subject.patientId],
+        });
+      }
+      if (subject.type === "encounter") {
+        queryClient.invalidateQueries({
+          queryKey: ["encounter", subject.encounterId],
+        });
+      }
       toast.success(t("questionnaire_submitted_successfully"));
       onSuccess();
     },

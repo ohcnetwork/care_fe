@@ -49,6 +49,7 @@ import query from "@/Utils/request/query";
 import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { accountQuery } from "@/lib/router/pageQueries";
 import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import InvoicesData from "@/pages/Facility/billing/invoice/InvoicesData";
 import PaymentsData from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
@@ -154,12 +155,9 @@ function AccountShow({
 
   useShortcutSubContext("facility:account:show");
 
-  const { data: account, isLoading } = useQuery({
-    queryKey: ["account", accountId],
-    queryFn: query(accountApi.retrieveAccount, {
-      pathParams: { facilityId, accountId },
-    }),
-  });
+  const { data: account, isLoading } = useQuery(
+    accountQuery(facilityId, accountId),
+  );
 
   const { data: billableChargeItems } = useQuery({
     queryKey: ["billableChargeItems", accountId],

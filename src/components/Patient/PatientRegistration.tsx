@@ -70,7 +70,7 @@ import { dateQueryString, goBack } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, isBefore, subYears } from "date-fns";
 import { TFunction } from "i18next";
 import { isValidPhoneNumber } from "libphonenumber-js";
@@ -90,6 +90,7 @@ interface QParams {
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   useShortcutSubContext();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { facility, facilityId } = useCurrentFacility();
   const [{ phone_number, flow }] = useQueryParams<QParams>();
 
@@ -299,6 +300,8 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     }),
     onSuccess: () => {
       toast.success(t("patient_update_success"));
+      // The pages this goes back to read the patient.
+      queryClient.invalidateQueries({ queryKey: ["patient", patientId] });
       form.reset(form.getValues());
       goBack();
     },

@@ -34,11 +34,10 @@ import {
   processCustomDashboardLinks,
   type DashboardShortcutIcon,
 } from "@/Utils/dashboardLinks";
-import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { HrefLink } from "@/lib/router/HrefLink";
-import facilityApi from "@/types/facility/facilityApi";
+import { facilityQuery } from "@/lib/router/pageQueries";
 import careConfig from "@careConfig";
 
 interface FacilityOverviewProps {
@@ -60,12 +59,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     useUserPreferences({ facilityId });
   const { defaultClass: defaultEncounterClass } = useDefaultEncounterClass();
 
-  const { data: facilityData } = useQuery({
-    queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.get, {
-      pathParams: { facilityId },
-    }),
-  });
+  const { data: facilityData } = useQuery(facilityQuery(facilityId));
 
   const { canViewAppointments, canListEncounters } = getPermissions(
     hasPermission,
