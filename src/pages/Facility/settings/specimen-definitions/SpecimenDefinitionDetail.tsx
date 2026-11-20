@@ -81,6 +81,10 @@ export function SpecimenDefinitionDetail({
     return <div>{t("specimen_definition_not_found")}</div>;
   }
 
+  const collectionMethod =
+    specimenDefinition.collection?.method ??
+    specimenDefinition.collection?.code;
+
   const formatQuantity = (
     quantity: { value: string | null; unit: Code | null } | null,
   ) => {
@@ -192,12 +196,12 @@ export function SpecimenDefinitionDetail({
                   </div>
                 )}
 
-                {specimenDefinition.collection?.code && (
+                {collectionMethod && (
                   <div>
                     <p className="text-sm font-medium text-gray-400">
                       {t("collection_method")}
                     </p>
-                    <p>{specimenDefinition.collection.code.display}</p>
+                    <p>{collectionMethod.display}</p>
                   </div>
                 )}
               </div>

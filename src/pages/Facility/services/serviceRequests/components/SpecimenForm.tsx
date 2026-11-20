@@ -97,7 +97,12 @@ export function SpecimenForm({
       accession_identifier: "",
       received_time: null,
       collection: {
-        method: specimenDefinition.collection?.method ?? null,
+        // The template's code and method share the same collection-method
+        // codes, and the definition form only edits code.
+        method:
+          specimenDefinition.collection?.method ??
+          specimenDefinition.collection?.code ??
+          null,
         body_site: specimenDefinition.collection?.body_site ?? null,
         collector: currentUserId || null, // Use user ID, default to null if not available yet
         collected_date_time: new Date().toISOString(),
@@ -450,7 +455,7 @@ export function SpecimenForm({
                       type="number"
                       placeholder={t("value")}
                       className="h-9"
-                      min={1}
+                      min={0}
                       value={
                         specimenData.specimen.collection?.quantity?.value ?? ""
                       }

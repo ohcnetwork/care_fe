@@ -82,7 +82,10 @@ export function SpecimenCollectionInstructions({
                     {t("required_method")}
                   </TableHead>
                   <TableCell className="text-foreground font-semibold">
-                    {requirement.collection?.code?.display ?? t("na")}
+                    {(
+                      requirement.collection?.method ??
+                      requirement.collection?.code
+                    )?.display ?? t("na")}
                   </TableCell>
                 </TableRow>
                 <TableRow>

@@ -315,15 +315,19 @@ function SpecimenDefinitionFormContent({
     });
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    // The form edits only the collection code; keep the template's other
-    // fields (quantity, method, body site) as they were.
+    // The form edits only the collection code. Keep the template's other
+    // fields (quantity, method, body site) even when the code is cleared,
+    // and send no template only when every field is empty.
     const collection = {
       ...initialData?.collection,
       code: data.collection ?? null,
     };
+    const hasCollection = Object.values(collection).some(
+      (value) => value != null,
+    );
     const payload: SpecimenDefinitionCreate = {
       ...data,
-      collection: Object.values(collection).some(Boolean) ? collection : null,
+      collection: hasCollection ? collection : null,
       patient_preparation:
         data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested
