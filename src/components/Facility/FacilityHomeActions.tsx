@@ -1,4 +1,5 @@
 import { ChevronDown, Printer, SquarePen } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -8,14 +9,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import PrintTemplateSheet from "@/components/Facility/PrintTemplateSheet";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import type { FacilityRead } from "@/types/facility/facility";
-
-import PrintTemplateSheet from "./PrintTemplateSheet";
 
 interface FacilityHomeActionsProps {
   facility: FacilityRead;
@@ -27,6 +28,7 @@ export function FacilityHomeActions({
   isSettings,
 }: FacilityHomeActionsProps) {
   const { t } = useTranslation();
+  const [printTemplatesOpen, setPrintTemplatesOpen] = useState(false);
   const editAction = (
     <EditFacilitySheet
       facilityId={facilityData.id}
@@ -53,25 +55,20 @@ export function FacilityHomeActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-full min-w-48">
         <DropdownMenuGroup className="flex flex-col gap-1">
-          <PrintTemplateSheet
-            facility={facilityData}
-            trigger={
-              <Button
-                variant="ghost"
-                type="button"
-                className={cn(
-                  "h-auto w-full justify-start rounded-sm px-2 py-1.5 text-sm whitespace-normal",
-                  isSettings && "min-h-12 md:min-h-10",
-                )}
-              >
-                <Printer
-                  className="size-4 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                {t("print_templates")}
-              </Button>
-            }
-          />
+          <DropdownMenuItem
+            onSelect={() => setPrintTemplatesOpen(true)}
+            className={cn(
+              "h-auto w-full justify-start rounded-sm px-2 py-1.5 text-sm whitespace-normal",
+              isSettings && "min-h-12 md:min-h-10",
+            )}
+          >
+            <Printer
+              className="size-4 text-muted-foreground"
+              aria-hidden="true"
+            />
+            {t("print_templates")}
+          </DropdownMenuItem>
+
           <PLUGIN_Component
             __name="FacilityHomeActions"
             facility={facilityData}
@@ -84,6 +81,11 @@ export function FacilityHomeActions({
   return (
     <>
       {configurationAction}
+      <PrintTemplateSheet
+        facility={facilityData}
+        open={printTemplatesOpen}
+        onOpenChange={setPrintTemplatesOpen}
+      />
       {editAction}
     </>
   );
