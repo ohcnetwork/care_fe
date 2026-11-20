@@ -297,18 +297,24 @@ export default function AuthUserProvider({ children }: Props) {
       localStorage.removeItem(LocalStorageKeys.accessToken);
       localStorage.removeItem(LocalStorageKeys.refreshToken);
       localStorage.removeItem(LocalStorageKeys.patientTokenKey);
+      localStorage.removeItem(LocalStorageKeys.selectedPatient);
       if (clearDrafts) clearQuestionnaireFillDrafts();
       setAccessToken(null);
       setPatientToken(null);
 
-      await queryClient.resetQueries({ queryKey: ["currentUser"] });
+      if (patientToken) {
+        await queryClient.cancelQueries();
+        queryClient.clear();
+      } else {
+        await queryClient.resetQueries({ queryKey: ["currentUser"] });
+      }
 
       const redirectURL = getRedirectURL();
       navigate({
         href: redirectURL ? `/login?redirect=${redirectURL}` : "/login",
       });
     },
-    [queryClient, setAccessToken, setPatientToken],
+    [patientToken, queryClient, setAccessToken, setPatientToken],
   );
 
   const signOut = useCallback(() => endSession(true), [endSession]);

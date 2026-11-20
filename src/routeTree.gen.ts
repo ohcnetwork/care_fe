@@ -31,6 +31,13 @@ import { Route as AppFacilityIndexRouteImport } from "./routes/_app/facility.ind
 import { Route as AppOrganizationIndexRouteImport } from "./routes/_app/organization.index";
 import { Route as AppUserIndexRouteImport } from "./routes/_app/user.index";
 import { Route as AppUserTabRouteImport } from "./routes/_app/user.$tab";
+import { Route as PatientPatientAddProfileRouteImport } from "./routes/_patient/patient.add-profile";
+import { Route as PatientPatientDiagnostic_reportsRouteImport } from "./routes/_patient/patient.diagnostic_reports";
+import { Route as PatientPatientMedicationsRouteImport } from "./routes/_patient/patient.medications";
+import { Route as PatientPatientProfileRouteImport } from "./routes/_patient/patient.profile";
+import { Route as PatientPatientRecordsRouteImport } from "./routes/_patient/patient.records";
+import { Route as PatientPatientSelectProfileRouteImport } from "./routes/_patient/patient.select-profile";
+import { Route as PatientPatientVisitsRouteImport } from "./routes/_patient/patient.visits";
 import { Route as PublicFacilityIdRouteImport } from "./routes/_public/facility.$id";
 import { Route as PublicPassword_resetTokenRouteImport } from "./routes/_public/password_reset.$token";
 import { Route as PatientIdChar123TabChar125RouteImport } from "./routes/patient.$id.{-$tab}";
@@ -75,6 +82,8 @@ import { Route as AppResponsibilitiesIdReferralsRouteImport } from "./routes/_ap
 import { Route as AppResponsibilitiesIdUsersRouteImport } from "./routes/_app/responsibilities.$id.users";
 import { Route as AppUsersUsernameIndexRouteImport } from "./routes/_app/users.$username.index";
 import { Route as AppUsersUsernameTabRouteImport } from "./routes/_app/users.$username.$tab";
+import { Route as PatientPatientBookFacilityIdRouteImport } from "./routes/_patient/patient.book.$facilityId";
+import { Route as PatientPatientVisitsAppointmentIdRouteImport } from "./routes/_patient/patient.visits_.$appointmentId";
 import { Route as AppAdminOrganizationsGovtIndexRouteImport } from "./routes/_app/admin.organizations.govt.index";
 import { Route as AppAdminOrganizationsGovtIdRouteImport } from "./routes/_app/admin.organizations.govt.$id";
 import { Route as AppAdminOrganizationsProduct_supplierIndexRouteImport } from "./routes/_app/admin.organizations.product_supplier.index";
@@ -130,6 +139,8 @@ import { Route as AppOrganizationIdSettingsReferralsRouteImport } from "./routes
 import { Route as AppPatientPatientIdHistoryTabRouteImport } from "./routes/_app/patient.$patientId.history.$tab";
 import { Route as AppPatientPatientIdQuestionnaireIndexRouteImport } from "./routes/_app/patient.$patientId.questionnaire.index";
 import { Route as AppResponsibilitiesIdSettingsReferralsRouteImport } from "./routes/_app/responsibilities.$id.settings.referrals";
+import { Route as PatientPatientRecordsPrescriptionsIdRouteImport } from "./routes/_patient/patient.records_.prescriptions.$id";
+import { Route as PatientPatientRecordsReportsIdRouteImport } from "./routes/_patient/patient.records_.reports.$id";
 import { Route as AppAdminQuestionnairesIdVersionsRevisionIdRouteImport } from "./routes/_app/admin.questionnaires.$id.versions.$revisionId";
 import { Route as AppFacilityFacilityIdBillingAccountIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.account.index";
 import { Route as AppFacilityFacilityIdBillingInvoicesIndexRouteImport } from "./routes/_app/facility.$facilityId.billing.invoices.index";
@@ -463,6 +474,45 @@ const AppUserTabRoute = AppUserTabRouteImport.update({
   path: "/user/$tab",
   getParentRoute: () => AppRoute,
 } as any);
+const PatientPatientAddProfileRoute =
+  PatientPatientAddProfileRouteImport.update({
+    id: "/patient/add-profile",
+    path: "/patient/add-profile",
+    getParentRoute: () => PatientRoute,
+  } as any);
+const PatientPatientDiagnostic_reportsRoute =
+  PatientPatientDiagnostic_reportsRouteImport.update({
+    id: "/patient/diagnostic_reports",
+    path: "/patient/diagnostic_reports",
+    getParentRoute: () => PatientRoute,
+  } as any);
+const PatientPatientMedicationsRoute =
+  PatientPatientMedicationsRouteImport.update({
+    id: "/patient/medications",
+    path: "/patient/medications",
+    getParentRoute: () => PatientRoute,
+  } as any);
+const PatientPatientProfileRoute = PatientPatientProfileRouteImport.update({
+  id: "/patient/profile",
+  path: "/patient/profile",
+  getParentRoute: () => PatientRoute,
+} as any);
+const PatientPatientRecordsRoute = PatientPatientRecordsRouteImport.update({
+  id: "/patient/records",
+  path: "/patient/records",
+  getParentRoute: () => PatientRoute,
+} as any);
+const PatientPatientSelectProfileRoute =
+  PatientPatientSelectProfileRouteImport.update({
+    id: "/patient/select-profile",
+    path: "/patient/select-profile",
+    getParentRoute: () => PatientRoute,
+  } as any);
+const PatientPatientVisitsRoute = PatientPatientVisitsRouteImport.update({
+  id: "/patient/visits",
+  path: "/patient/visits",
+  getParentRoute: () => PatientRoute,
+} as any);
 const PublicFacilityIdRoute = PublicFacilityIdRouteImport.update({
   id: "/facility/$id",
   path: "/facility/$id",
@@ -710,6 +760,18 @@ const AppUsersUsernameTabRoute = AppUsersUsernameTabRouteImport.update({
   path: "/users/$username/$tab",
   getParentRoute: () => AppRoute,
 } as any);
+const PatientPatientBookFacilityIdRoute =
+  PatientPatientBookFacilityIdRouteImport.update({
+    id: "/patient/book/$facilityId",
+    path: "/patient/book/$facilityId",
+    getParentRoute: () => PatientRoute,
+  } as any);
+const PatientPatientVisitsAppointmentIdRoute =
+  PatientPatientVisitsAppointmentIdRouteImport.update({
+    id: "/patient/visits_/$appointmentId",
+    path: "/patient/visits/$appointmentId",
+    getParentRoute: () => PatientRoute,
+  } as any);
 const AppAdminOrganizationsGovtIndexRoute =
   AppAdminOrganizationsGovtIndexRouteImport.update({
     id: "/organizations/govt/",
@@ -1038,6 +1100,18 @@ const AppResponsibilitiesIdSettingsReferralsRoute =
     id: "/responsibilities/$id/settings/referrals",
     path: "/responsibilities/$id/settings/referrals",
     getParentRoute: () => AppRoute,
+  } as any);
+const PatientPatientRecordsPrescriptionsIdRoute =
+  PatientPatientRecordsPrescriptionsIdRouteImport.update({
+    id: "/patient/records_/prescriptions/$id",
+    path: "/patient/records/prescriptions/$id",
+    getParentRoute: () => PatientRoute,
+  } as any);
+const PatientPatientRecordsReportsIdRoute =
+  PatientPatientRecordsReportsIdRouteImport.update({
+    id: "/patient/records_/reports/$id",
+    path: "/patient/records/reports/$id",
+    getParentRoute: () => PatientRoute,
   } as any);
 const AppAdminQuestionnairesIdVersionsRevisionIdRoute =
   AppAdminQuestionnairesIdVersionsRevisionIdRouteImport.update({
@@ -2644,6 +2718,13 @@ export interface FileRoutesByFullPath {
   "/patient/home": typeof PatientHomeRoute;
   "/admin/$": typeof AppAdminSplatRoute;
   "/user/$tab": typeof AppUserTabRoute;
+  "/patient/add-profile": typeof PatientPatientAddProfileRoute;
+  "/patient/diagnostic_reports": typeof PatientPatientDiagnostic_reportsRoute;
+  "/patient/medications": typeof PatientPatientMedicationsRoute;
+  "/patient/profile": typeof PatientPatientProfileRoute;
+  "/patient/records": typeof PatientPatientRecordsRoute;
+  "/patient/select-profile": typeof PatientPatientSelectProfileRoute;
+  "/patient/visits": typeof PatientPatientVisitsRoute;
   "/facility/$id": typeof PublicFacilityIdRoute;
   "/password_reset/$token": typeof PublicPassword_resetTokenRoute;
   "/patient/$id/{-$tab}": typeof PatientIdChar123TabChar125Route;
@@ -2680,6 +2761,8 @@ export interface FileRoutesByFullPath {
   "/responsibilities/$id/referrals": typeof AppResponsibilitiesIdReferralsRoute;
   "/responsibilities/$id/users": typeof AppResponsibilitiesIdUsersRoute;
   "/users/$username/$tab": typeof AppUsersUsernameTabRoute;
+  "/patient/book/$facilityId": typeof PatientPatientBookFacilityIdRoute;
+  "/patient/visits/$appointmentId": typeof PatientPatientVisitsAppointmentIdRoute;
   "/admin/actions/": typeof AppAdminActionsIndexRoute;
   "/admin/apps/": typeof AppAdminAppsIndexRoute;
   "/admin/immunization-policies/": typeof AppAdminImmunizationPoliciesIndexRoute;
@@ -2732,6 +2815,8 @@ export interface FileRoutesByFullPath {
   "/organization/$id/settings/referrals": typeof AppOrganizationIdSettingsReferralsRoute;
   "/patient/$patientId/history/$tab": typeof AppPatientPatientIdHistoryTabRoute;
   "/responsibilities/$id/settings/referrals": typeof AppResponsibilitiesIdSettingsReferralsRoute;
+  "/patient/records/prescriptions/$id": typeof PatientPatientRecordsPrescriptionsIdRoute;
+  "/patient/records/reports/$id": typeof PatientPatientRecordsReportsIdRoute;
   "/admin/organizations/govt/": typeof AppAdminOrganizationsGovtIndexRoute;
   "/admin/organizations/product_supplier/": typeof AppAdminOrganizationsProduct_supplierIndexRoute;
   "/admin/organizations/role/": typeof AppAdminOrganizationsRoleIndexRoute;
@@ -2988,6 +3073,13 @@ export interface FileRoutesByTo {
   "/patient/home": typeof PatientHomeRoute;
   "/admin/$": typeof AppAdminSplatRoute;
   "/user/$tab": typeof AppUserTabRoute;
+  "/patient/add-profile": typeof PatientPatientAddProfileRoute;
+  "/patient/diagnostic_reports": typeof PatientPatientDiagnostic_reportsRoute;
+  "/patient/medications": typeof PatientPatientMedicationsRoute;
+  "/patient/profile": typeof PatientPatientProfileRoute;
+  "/patient/records": typeof PatientPatientRecordsRoute;
+  "/patient/select-profile": typeof PatientPatientSelectProfileRoute;
+  "/patient/visits": typeof PatientPatientVisitsRoute;
   "/facility/$id": typeof PublicFacilityIdRoute;
   "/password_reset/$token": typeof PublicPassword_resetTokenRoute;
   "/patient/$id/{-$tab}": typeof PatientIdChar123TabChar125Route;
@@ -3021,6 +3113,8 @@ export interface FileRoutesByTo {
   "/responsibilities/$id/referrals": typeof AppResponsibilitiesIdReferralsRoute;
   "/responsibilities/$id/users": typeof AppResponsibilitiesIdUsersRoute;
   "/users/$username/$tab": typeof AppUsersUsernameTabRoute;
+  "/patient/book/$facilityId": typeof PatientPatientBookFacilityIdRoute;
+  "/patient/visits/$appointmentId": typeof PatientPatientVisitsAppointmentIdRoute;
   "/admin/actions": typeof AppAdminActionsIndexRoute;
   "/admin/apps": typeof AppAdminAppsIndexRoute;
   "/admin/immunization-policies": typeof AppAdminImmunizationPoliciesIndexRoute;
@@ -3054,6 +3148,8 @@ export interface FileRoutesByTo {
   "/organization/$id/settings/referrals": typeof AppOrganizationIdSettingsReferralsRoute;
   "/patient/$patientId/history/$tab": typeof AppPatientPatientIdHistoryTabRoute;
   "/responsibilities/$id/settings/referrals": typeof AppResponsibilitiesIdSettingsReferralsRoute;
+  "/patient/records/prescriptions/$id": typeof PatientPatientRecordsPrescriptionsIdRoute;
+  "/patient/records/reports/$id": typeof PatientPatientRecordsReportsIdRoute;
   "/admin/organizations/govt": typeof AppAdminOrganizationsGovtIndexRoute;
   "/admin/organizations/product_supplier": typeof AppAdminOrganizationsProduct_supplierIndexRoute;
   "/admin/organizations/role": typeof AppAdminOrganizationsRoleIndexRoute;
@@ -3313,6 +3409,13 @@ export interface FileRoutesById {
   "/patient/home": typeof PatientHomeRoute;
   "/_app/admin/$": typeof AppAdminSplatRoute;
   "/_app/user/$tab": typeof AppUserTabRoute;
+  "/_patient/patient/add-profile": typeof PatientPatientAddProfileRoute;
+  "/_patient/patient/diagnostic_reports": typeof PatientPatientDiagnostic_reportsRoute;
+  "/_patient/patient/medications": typeof PatientPatientMedicationsRoute;
+  "/_patient/patient/profile": typeof PatientPatientProfileRoute;
+  "/_patient/patient/records": typeof PatientPatientRecordsRoute;
+  "/_patient/patient/select-profile": typeof PatientPatientSelectProfileRoute;
+  "/_patient/patient/visits": typeof PatientPatientVisitsRoute;
   "/_public/facility/$id": typeof PublicFacilityIdRoute;
   "/_public/password_reset/$token": typeof PublicPassword_resetTokenRoute;
   "/patient/$id/{-$tab}": typeof PatientIdChar123TabChar125Route;
@@ -3349,6 +3452,8 @@ export interface FileRoutesById {
   "/_app/responsibilities/$id/referrals": typeof AppResponsibilitiesIdReferralsRoute;
   "/_app/responsibilities/$id/users": typeof AppResponsibilitiesIdUsersRoute;
   "/_app/users/$username/$tab": typeof AppUsersUsernameTabRoute;
+  "/_patient/patient/book/$facilityId": typeof PatientPatientBookFacilityIdRoute;
+  "/_patient/patient/visits_/$appointmentId": typeof PatientPatientVisitsAppointmentIdRoute;
   "/_app/admin/actions/": typeof AppAdminActionsIndexRoute;
   "/_app/admin/apps/": typeof AppAdminAppsIndexRoute;
   "/_app/admin/immunization-policies/": typeof AppAdminImmunizationPoliciesIndexRoute;
@@ -3401,6 +3506,8 @@ export interface FileRoutesById {
   "/_app/organization/$id/settings/referrals": typeof AppOrganizationIdSettingsReferralsRoute;
   "/_app/patient/$patientId/history/$tab": typeof AppPatientPatientIdHistoryTabRoute;
   "/_app/responsibilities/$id/settings/referrals": typeof AppResponsibilitiesIdSettingsReferralsRoute;
+  "/_patient/patient/records_/prescriptions/$id": typeof PatientPatientRecordsPrescriptionsIdRoute;
+  "/_patient/patient/records_/reports/$id": typeof PatientPatientRecordsReportsIdRoute;
   "/_app/admin/organizations/govt/": typeof AppAdminOrganizationsGovtIndexRoute;
   "/_app/admin/organizations/product_supplier/": typeof AppAdminOrganizationsProduct_supplierIndexRoute;
   "/_app/admin/organizations/role/": typeof AppAdminOrganizationsRoleIndexRoute;
@@ -3659,6 +3766,13 @@ export interface FileRouteTypes {
     | "/patient/home"
     | "/admin/$"
     | "/user/$tab"
+    | "/patient/add-profile"
+    | "/patient/diagnostic_reports"
+    | "/patient/medications"
+    | "/patient/profile"
+    | "/patient/records"
+    | "/patient/select-profile"
+    | "/patient/visits"
     | "/facility/$id"
     | "/password_reset/$token"
     | "/patient/$id/{-$tab}"
@@ -3695,6 +3809,8 @@ export interface FileRouteTypes {
     | "/responsibilities/$id/referrals"
     | "/responsibilities/$id/users"
     | "/users/$username/$tab"
+    | "/patient/book/$facilityId"
+    | "/patient/visits/$appointmentId"
     | "/admin/actions/"
     | "/admin/apps/"
     | "/admin/immunization-policies/"
@@ -3747,6 +3863,8 @@ export interface FileRouteTypes {
     | "/organization/$id/settings/referrals"
     | "/patient/$patientId/history/$tab"
     | "/responsibilities/$id/settings/referrals"
+    | "/patient/records/prescriptions/$id"
+    | "/patient/records/reports/$id"
     | "/admin/organizations/govt/"
     | "/admin/organizations/product_supplier/"
     | "/admin/organizations/role/"
@@ -4003,6 +4121,13 @@ export interface FileRouteTypes {
     | "/patient/home"
     | "/admin/$"
     | "/user/$tab"
+    | "/patient/add-profile"
+    | "/patient/diagnostic_reports"
+    | "/patient/medications"
+    | "/patient/profile"
+    | "/patient/records"
+    | "/patient/select-profile"
+    | "/patient/visits"
     | "/facility/$id"
     | "/password_reset/$token"
     | "/patient/$id/{-$tab}"
@@ -4036,6 +4161,8 @@ export interface FileRouteTypes {
     | "/responsibilities/$id/referrals"
     | "/responsibilities/$id/users"
     | "/users/$username/$tab"
+    | "/patient/book/$facilityId"
+    | "/patient/visits/$appointmentId"
     | "/admin/actions"
     | "/admin/apps"
     | "/admin/immunization-policies"
@@ -4069,6 +4196,8 @@ export interface FileRouteTypes {
     | "/organization/$id/settings/referrals"
     | "/patient/$patientId/history/$tab"
     | "/responsibilities/$id/settings/referrals"
+    | "/patient/records/prescriptions/$id"
+    | "/patient/records/reports/$id"
     | "/admin/organizations/govt"
     | "/admin/organizations/product_supplier"
     | "/admin/organizations/role"
@@ -4327,6 +4456,13 @@ export interface FileRouteTypes {
     | "/patient/home"
     | "/_app/admin/$"
     | "/_app/user/$tab"
+    | "/_patient/patient/add-profile"
+    | "/_patient/patient/diagnostic_reports"
+    | "/_patient/patient/medications"
+    | "/_patient/patient/profile"
+    | "/_patient/patient/records"
+    | "/_patient/patient/select-profile"
+    | "/_patient/patient/visits"
     | "/_public/facility/$id"
     | "/_public/password_reset/$token"
     | "/patient/$id/{-$tab}"
@@ -4363,6 +4499,8 @@ export interface FileRouteTypes {
     | "/_app/responsibilities/$id/referrals"
     | "/_app/responsibilities/$id/users"
     | "/_app/users/$username/$tab"
+    | "/_patient/patient/book/$facilityId"
+    | "/_patient/patient/visits_/$appointmentId"
     | "/_app/admin/actions/"
     | "/_app/admin/apps/"
     | "/_app/admin/immunization-policies/"
@@ -4415,6 +4553,8 @@ export interface FileRouteTypes {
     | "/_app/organization/$id/settings/referrals"
     | "/_app/patient/$patientId/history/$tab"
     | "/_app/responsibilities/$id/settings/referrals"
+    | "/_patient/patient/records_/prescriptions/$id"
+    | "/_patient/patient/records_/reports/$id"
     | "/_app/admin/organizations/govt/"
     | "/_app/admin/organizations/product_supplier/"
     | "/_app/admin/organizations/role/"
@@ -4824,6 +4964,55 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppUserTabRouteImport;
       parentRoute: typeof AppRoute;
     };
+    "/_patient/patient/add-profile": {
+      id: "/_patient/patient/add-profile";
+      path: "/patient/add-profile";
+      fullPath: "/patient/add-profile";
+      preLoaderRoute: typeof PatientPatientAddProfileRouteImport;
+      parentRoute: typeof PatientRoute;
+    };
+    "/_patient/patient/diagnostic_reports": {
+      id: "/_patient/patient/diagnostic_reports";
+      path: "/patient/diagnostic_reports";
+      fullPath: "/patient/diagnostic_reports";
+      preLoaderRoute: typeof PatientPatientDiagnostic_reportsRouteImport;
+      parentRoute: typeof PatientRoute;
+    };
+    "/_patient/patient/medications": {
+      id: "/_patient/patient/medications";
+      path: "/patient/medications";
+      fullPath: "/patient/medications";
+      preLoaderRoute: typeof PatientPatientMedicationsRouteImport;
+      parentRoute: typeof PatientRoute;
+    };
+    "/_patient/patient/profile": {
+      id: "/_patient/patient/profile";
+      path: "/patient/profile";
+      fullPath: "/patient/profile";
+      preLoaderRoute: typeof PatientPatientProfileRouteImport;
+      parentRoute: typeof PatientRoute;
+    };
+    "/_patient/patient/records": {
+      id: "/_patient/patient/records";
+      path: "/patient/records";
+      fullPath: "/patient/records";
+      preLoaderRoute: typeof PatientPatientRecordsRouteImport;
+      parentRoute: typeof PatientRoute;
+    };
+    "/_patient/patient/select-profile": {
+      id: "/_patient/patient/select-profile";
+      path: "/patient/select-profile";
+      fullPath: "/patient/select-profile";
+      preLoaderRoute: typeof PatientPatientSelectProfileRouteImport;
+      parentRoute: typeof PatientRoute;
+    };
+    "/_patient/patient/visits": {
+      id: "/_patient/patient/visits";
+      path: "/patient/visits";
+      fullPath: "/patient/visits";
+      preLoaderRoute: typeof PatientPatientVisitsRouteImport;
+      parentRoute: typeof PatientRoute;
+    };
     "/_public/facility/$id": {
       id: "/_public/facility/$id";
       path: "/facility/$id";
@@ -5131,6 +5320,20 @@ declare module "@tanstack/react-router" {
       fullPath: "/users/$username/$tab";
       preLoaderRoute: typeof AppUsersUsernameTabRouteImport;
       parentRoute: typeof AppRoute;
+    };
+    "/_patient/patient/book/$facilityId": {
+      id: "/_patient/patient/book/$facilityId";
+      path: "/patient/book/$facilityId";
+      fullPath: "/patient/book/$facilityId";
+      preLoaderRoute: typeof PatientPatientBookFacilityIdRouteImport;
+      parentRoute: typeof PatientRoute;
+    };
+    "/_patient/patient/visits_/$appointmentId": {
+      id: "/_patient/patient/visits_/$appointmentId";
+      path: "/patient/visits/$appointmentId";
+      fullPath: "/patient/visits/$appointmentId";
+      preLoaderRoute: typeof PatientPatientVisitsAppointmentIdRouteImport;
+      parentRoute: typeof PatientRoute;
     };
     "/_app/admin/organizations/govt/": {
       id: "/_app/admin/organizations/govt/";
@@ -5516,6 +5719,20 @@ declare module "@tanstack/react-router" {
       fullPath: "/responsibilities/$id/settings/referrals";
       preLoaderRoute: typeof AppResponsibilitiesIdSettingsReferralsRouteImport;
       parentRoute: typeof AppRoute;
+    };
+    "/_patient/patient/records_/prescriptions/$id": {
+      id: "/_patient/patient/records_/prescriptions/$id";
+      path: "/patient/records/prescriptions/$id";
+      fullPath: "/patient/records/prescriptions/$id";
+      preLoaderRoute: typeof PatientPatientRecordsPrescriptionsIdRouteImport;
+      parentRoute: typeof PatientRoute;
+    };
+    "/_patient/patient/records_/reports/$id": {
+      id: "/_patient/patient/records_/reports/$id";
+      path: "/patient/records/reports/$id";
+      fullPath: "/patient/records/reports/$id";
+      preLoaderRoute: typeof PatientPatientRecordsReportsIdRouteImport;
+      parentRoute: typeof PatientRoute;
     };
     "/_app/admin/questionnaires/$id/versions/$revisionId": {
       id: "/_app/admin/questionnaires/$id/versions/$revisionId";
@@ -8296,6 +8513,17 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren);
 
 interface PatientRouteChildren {
   PatientNearby_facilitiesRoute: typeof PatientNearby_facilitiesRoute;
+  PatientPatientAddProfileRoute: typeof PatientPatientAddProfileRoute;
+  PatientPatientDiagnostic_reportsRoute: typeof PatientPatientDiagnostic_reportsRoute;
+  PatientPatientMedicationsRoute: typeof PatientPatientMedicationsRoute;
+  PatientPatientProfileRoute: typeof PatientPatientProfileRoute;
+  PatientPatientRecordsRoute: typeof PatientPatientRecordsRoute;
+  PatientPatientSelectProfileRoute: typeof PatientPatientSelectProfileRoute;
+  PatientPatientVisitsRoute: typeof PatientPatientVisitsRoute;
+  PatientPatientBookFacilityIdRoute: typeof PatientPatientBookFacilityIdRoute;
+  PatientPatientVisitsAppointmentIdRoute: typeof PatientPatientVisitsAppointmentIdRoute;
+  PatientPatientRecordsPrescriptionsIdRoute: typeof PatientPatientRecordsPrescriptionsIdRoute;
+  PatientPatientRecordsReportsIdRoute: typeof PatientPatientRecordsReportsIdRoute;
   PatientFacilityFacilityIdAppointmentsAppointmentIdSuccessRoute: typeof PatientFacilityFacilityIdAppointmentsAppointmentIdSuccessRoute;
   PatientFacilityFacilityIdAppointmentsStaffIdBookAppointmentRoute: typeof PatientFacilityFacilityIdAppointmentsStaffIdBookAppointmentRoute;
   PatientFacilityFacilityIdAppointmentsStaffIdPatientRegistrationRoute: typeof PatientFacilityFacilityIdAppointmentsStaffIdPatientRegistrationRoute;
@@ -8305,6 +8533,19 @@ interface PatientRouteChildren {
 
 const PatientRouteChildren: PatientRouteChildren = {
   PatientNearby_facilitiesRoute: PatientNearby_facilitiesRoute,
+  PatientPatientAddProfileRoute: PatientPatientAddProfileRoute,
+  PatientPatientDiagnostic_reportsRoute: PatientPatientDiagnostic_reportsRoute,
+  PatientPatientMedicationsRoute: PatientPatientMedicationsRoute,
+  PatientPatientProfileRoute: PatientPatientProfileRoute,
+  PatientPatientRecordsRoute: PatientPatientRecordsRoute,
+  PatientPatientSelectProfileRoute: PatientPatientSelectProfileRoute,
+  PatientPatientVisitsRoute: PatientPatientVisitsRoute,
+  PatientPatientBookFacilityIdRoute: PatientPatientBookFacilityIdRoute,
+  PatientPatientVisitsAppointmentIdRoute:
+    PatientPatientVisitsAppointmentIdRoute,
+  PatientPatientRecordsPrescriptionsIdRoute:
+    PatientPatientRecordsPrescriptionsIdRoute,
+  PatientPatientRecordsReportsIdRoute: PatientPatientRecordsReportsIdRoute,
   PatientFacilityFacilityIdAppointmentsAppointmentIdSuccessRoute:
     PatientFacilityFacilityIdAppointmentsAppointmentIdSuccessRoute,
   PatientFacilityFacilityIdAppointmentsStaffIdBookAppointmentRoute:
