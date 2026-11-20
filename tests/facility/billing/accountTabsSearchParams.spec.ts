@@ -101,4 +101,18 @@ test.describe("Account tabs search params", () => {
     expect(params.has("ordering")).toBe(false);
     await expect(page).toHaveURL(/[?&]status=draft(&|$)/);
   });
+
+  test("lists the first reports when the query string has a page", async ({
+    page,
+  }) => {
+    // The files tab keeps `page` (and `limit`) when it switches to the reports
+    // sub tab; the reports list has no pagination of its own to go back with.
+    const request = waitForApiList(page, "/template_reports/");
+    await page.goto(accountUrl("reports", { page: "2", limit: "15" }));
+    const params = new URL((await request).url()).searchParams;
+
+    expect(params.get("limit")).toBe("15");
+    expect(params.has("offset")).toBe(false);
+    expect(params.has("page")).toBe(false);
+  });
 });

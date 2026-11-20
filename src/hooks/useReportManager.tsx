@@ -36,7 +36,6 @@ export interface UseReportManagerOptions {
   qParams?: {
     name?: string;
     is_archived?: string;
-    page?: number;
     limit?: number;
   };
   reportType?: ReportType;
@@ -80,19 +79,18 @@ export default function useReportManager({
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
 
   // Fetch reports
-  const { name, is_archived, page, limit } = qParams ?? {};
+  const { name, is_archived, limit } = qParams ?? {};
   const {
     data: reportsData,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["reports", associatingId, name, is_archived, page, limit],
+    queryKey: ["reports", associatingId, name, is_archived, limit],
     queryFn: query(reportApi.listReports, {
       queryParams: {
         name,
         is_archived,
         limit,
-        offset: page && limit ? (page - 1) * limit : undefined,
         associating_id: associatingId,
         upload_completed: "true",
         report_type: reportType,
