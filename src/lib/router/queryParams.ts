@@ -9,9 +9,8 @@ import {
   type SearchValues,
 } from "@/lib/router/search/fields";
 
-/** Query string values. Every value that is read is a string. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type QueryParams = Record<string, any>;
+/** Query string values, as a page or a scoped widget holds them. */
+export type QueryParams = Record<string, unknown>;
 
 export interface SetQueryParamsOptions {
   /**
@@ -27,29 +26,31 @@ export interface SetQueryParamsOptions {
   replace?: boolean;
 }
 
-function parseQuery<T extends QueryParams>(query: string): T {
-  return Object.fromEntries(new URLSearchParams(query).entries()) as T;
+function parseQuery(query: string): Record<string, string> {
+  return Object.fromEntries(new URLSearchParams(query).entries());
 }
 
-function serializeQuery(query: QueryParams): string {
+function serializeQuery(query: object): string {
   return new URLSearchParams(
-    Object.entries(query).filter(
-      ([, value]) => value !== null && value !== undefined,
-    ),
+    Object.entries(query)
+      .filter(([, value]) => value !== null && value !== undefined)
+      .map(([key, value]) => [key, String(value)]),
   ).toString();
 }
 
-export type SetQueryParams<T extends QueryParams = QueryParams> = (
-  query: T,
+export type SetQueryParams = (
+  /** The values to write. `null` and `undefined` remove a key. */
+  query: object,
   options?: SetQueryParamsOptions,
 ) => void;
 
 /**
  * Reads and writes the query string of the current page.
  *
- * - Read: the query of the page that is on screen (see `useCurrentLocation`),
- *   as strings. With a search schema (`src/lib/router/search/`), the values
- *   that the schema lists are parsed and typed.
+ * - Read: the query of the page that is on screen (see `useCurrentLocation`).
+ *   With a search schema (`src/lib/router/search/`), the values that the
+ *   schema lists are parsed and typed. Without one, every value is a string:
+ *   use that only to copy the whole query string.
  * - Write: `setQueryParams(query, { overwrite, replace })`. A `null` or
  *   `undefined` value removes the key (a schema reads an invalid value as
  *   `undefined`). A write merges with the latest URL, also before the page
@@ -60,12 +61,10 @@ export type SetQueryParams<T extends QueryParams = QueryParams> = (
 export function useQueryParams<S extends SearchSchema>(
   schema: S,
 ): [SearchValues<S>, SetQueryParams];
-export function useQueryParams<T extends QueryParams = QueryParams>(
-  schema?: undefined,
-): [T, SetQueryParams<T>];
+export function useQueryParams(): [Record<string, string>, SetQueryParams];
 export function useQueryParams(
   schema?: SearchSchema,
-): [QueryParams, SetQueryParams] {
+): [Record<string, unknown>, SetQueryParams] {
   const { searchStr } = useCurrentLocation();
 
   const setQueryParams = useCallback<SetQueryParams>(

@@ -4,14 +4,15 @@ import { z } from "zod";
  * Field schemas for a route's `validateSearch`.
  *
  * The search serializer (`src/lib/router/searchParams.ts`) reads every value
- * as a string. On each navigation the router runs `validateSearch` again and
- * writes the output into the URL with `String(value)`. So each field:
+ * as a string. When the page loads and on each navigation, the router runs
+ * `validateSearch` and writes the output into the URL with `String(value)`.
+ * So each field:
  *
  * - is optional and has no default (a default would appear in every URL),
  * - outputs a string, number or boolean that `String()` writes back as the
  *   input text (no `Date`, no trimming),
  * - reads an invalid value as `undefined`, so a bad bookmark does not fail
- *   the route. The next navigation drops the value from the URL.
+ *   the route. The router drops the value from the URL when the page loads.
  */
 
 export const searchString = () => z.string().optional().catch(undefined);

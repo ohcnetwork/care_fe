@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
+  type SetQueryParams,
   type SetQueryParamsOptions,
-  type QueryParams as UrlQueryParams,
 } from "@/lib/router/queryParams";
 import {
   type SearchSchema,
@@ -32,16 +32,15 @@ interface FilterBadgeProps {
   paramKey: string | string[];
 }
 
-/** `qParams`: typed by the search schema, or untyped strings without one. */
-type FilterParams<S extends SearchSchema> = [S] extends [never]
-  ? UrlQueryParams
-  : SearchValues<S>;
+/** The filters as the hook handles them inside; pages get typed `qParams`. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type UrlQueryParams = Record<string, any>;
 
 /**
  * A custom hook wrapped around `useScopedQueryParams` to ease handling
  * of pagination and filters.
  */
-export default function useFilters<S extends SearchSchema = never>({
+export default function useFilters<S extends SearchSchema>({
   schema,
   limit = 14,
   cache = false,
@@ -52,7 +51,7 @@ export default function useFilters<S extends SearchSchema = never>({
    * The search schema of the page (`src/lib/router/search/`). Give the
    * routes that render the page the same schema in `validateSearch`.
    */
-  schema?: S;
+  schema: S;
   limit?: number;
   /**
    * Save the filters of the page (per path) and restore them when the page
@@ -67,7 +66,8 @@ export default function useFilters<S extends SearchSchema = never>({
   const { t } = useTranslation();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
-  const [qParams, _setQueryParams] = useScopedQueryParams(schema);
+  const [qParams, _setQueryParams]: [UrlQueryParams, SetQueryParams] =
+    useScopedQueryParams(schema);
   const scoped = useIsScopedQueryParams();
   const [clearSearch, setClearSearch] = useState<{
     value: boolean;
@@ -308,7 +308,7 @@ export default function useFilters<S extends SearchSchema = never>({
   };
 
   return {
-    qParams: qParams as FilterParams<S>,
+    qParams: qParams as SearchValues<S>,
     resultsPerPage: limit,
     /**
      * Updates the query params and resets to page 1.
