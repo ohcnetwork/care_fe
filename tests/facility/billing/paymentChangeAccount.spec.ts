@@ -31,20 +31,23 @@ interface Seed {
   source: SeededAccount;
   target: SeededAccount;
   closed: SeededAccount;
+  inactive: SeededAccount;
 }
 
 /**
  * A patient whose source account holds an active and a draft advance
  * (movable), a cancelled advance and a payment against an invoice (not
- * movable), plus a target account and a billing-closed account.
+ * movable), plus a target account, a billing-closed account and an inactive
+ * account.
  */
 async function seedPayments(facilityId: string): Promise<Seed> {
   const suffix = faker.string.alphanumeric(6);
   const patientId = await createTestPatient("Payment Account");
-  const account = (name: string, billing_status?: string) =>
+  const account = (name: string, billing_status?: string, status?: string) =>
     createAccount(facilityId, patientId, {
       name: `${name} ${suffix}`,
       billing_status,
+      status,
     });
 
   // A patient may have only one active + open account, so the target uses
@@ -52,6 +55,7 @@ async function seedPayments(facilityId: string): Promise<Seed> {
   const source = await account("Source");
   const target = await account("Target", "carecomplete_notbilled");
   const closed = await account("Closed", "closed_completed");
+  const inactive = await account("Inactive", "open", "inactive");
 
   const chargeItem = await createChargeItem(facilityId, {
     patientId,
@@ -83,7 +87,7 @@ async function seedPayments(facilityId: string): Promise<Seed> {
     targetInvoiceId: invoice.id,
   });
 
-  return { source, target, closed };
+  return { source, target, closed, inactive };
 }
 
 function paymentRow(page: Page, amount: string) {
@@ -175,9 +179,9 @@ test.describe("Payment change account", () => {
     ).toBeVisible();
     await expect(sheet.getByText("Selected payments (1)")).toBeVisible();
 
-    await test.step("The patient's other active accounts are offered", async () => {
-      await expect(sheet.getByRole("radio")).toHaveCount(2);
-      for (const offered of [seed.target, seed.closed]) {
+    await test.step("The patient's other accounts are offered, whatever their status", async () => {
+      await expect(sheet.getByRole("radio")).toHaveCount(3);
+      for (const offered of [seed.target, seed.closed, seed.inactive]) {
         await expect(
           sheet.getByRole("radio", { name: offered.name }),
         ).toBeVisible();
