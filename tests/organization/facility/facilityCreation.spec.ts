@@ -12,13 +12,12 @@ function facilityTypeLine(page: Page, facilityName: string) {
     .locator('[data-slot="badge"]');
 }
 
-/** The value of a row in the Facility details list, found by its label. */
-function facilityDetail(page: Page, label: string) {
-  return page
-    .getByRole("region", { name: "Facility details", exact: true })
-    .locator("dt")
-    .filter({ hasText: new RegExp(`^${label}$`) })
-    .locator("xpath=following-sibling::dd[1]");
+/** Edit and delete live in the facility's Configurations menu. */
+async function openConfigurationsItem(page: Page, item: string) {
+  await page
+    .getByRole("button", { name: "Configurations", exact: true })
+    .click();
+  await page.getByRole("menuitem", { name: item, exact: true }).click();
 }
 
 test.describe("Facility Creation", () => {
@@ -198,7 +197,7 @@ test.describe("Facility Creation", () => {
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "Show on Map" })).toBeVisible();
 
-    await page.getByRole("button", { name: "Edit Facility Details" }).click();
+    await openConfigurationsItem(page, "Edit Facility Details");
 
     // Verify edit form opened
     const editDialog = page.getByRole("dialog", { name: "Edit Facility" });
@@ -213,7 +212,7 @@ test.describe("Facility Creation", () => {
     ).toHaveValue(facilityName);
     await expect(
       editDialog.getByRole("textbox", { name: "Description" }),
-    ).toHaveValue(description);
+    ).toHaveText(description);
 
     // Verify no. of facility features badge is displayed in the form
     await expect(
@@ -265,16 +264,13 @@ test.describe("Facility Creation", () => {
       page.getByRole("link", { name: "Show on Map" }),
     ).not.toBeVisible();
 
-    // Optional fields that were not provided show their empty state: the
-    // details list keeps the Description row and says there is none.
-    await expect(
-      facilityDetail(page, "Description").getByText("No Description", {
-        exact: true,
-      }),
-    ).toBeVisible();
+    // Without a description the details card has no description section.
+    await expect(page.locator('[data-cy="facility-description"]')).toHaveCount(
+      0,
+    );
 
     // Open edit form
-    await page.getByRole("button", { name: "Edit Facility Details" }).click();
+    await openConfigurationsItem(page, "Edit Facility Details");
 
     // Verify edit form opened
     const editDialog = page.getByRole("dialog", { name: "Edit Facility" });
@@ -300,7 +296,7 @@ test.describe("Facility Creation", () => {
     // Verify optional fields are empty
     await expect(
       editDialog.getByRole("textbox", { name: "Description" }),
-    ).toHaveValue("");
+    ).toHaveText("");
 
     // Verify no facility features are selected
     const featuresButton = editDialog.getByRole("combobox", {
@@ -365,7 +361,7 @@ test.describe("Facility Creation", () => {
     await page.getByRole("link", { name: "View Facility" }).first().click();
 
     // Click Edit Facility Details button
-    await page.getByRole("button", { name: "Edit Facility Details" }).click();
+    await openConfigurationsItem(page, "Edit Facility Details");
 
     // Wait for edit dialog
     const editDialog = page.getByRole("dialog", { name: "Edit Facility" });
@@ -400,13 +396,13 @@ test.describe("Facility Creation", () => {
     await expect(page.getByText(address)).toBeVisible();
 
     // Open edit form again to verify data persistence
-    await page.getByRole("button", { name: "Edit Facility Details" }).click();
+    await openConfigurationsItem(page, "Edit Facility Details");
     await expect(editDialog).toBeVisible();
 
     // Verify all edited fields contain the new data
     await expect(
       editDialog.getByRole("textbox", { name: "Description" }),
-    ).toHaveValue(description);
+    ).toHaveText(description);
     await expect(
       editDialog.getByRole("textbox", { name: "Phone Number" }),
     ).toHaveValue(`+91 ${phoneNumber}`);
@@ -443,7 +439,7 @@ test.describe("Facility Creation", () => {
     await page.getByRole("link", { name: "View Facility" }).first().click();
 
     // Click Edit Facility Details button
-    await page.getByRole("button", { name: "Edit Facility Details" }).click();
+    await openConfigurationsItem(page, "Edit Facility Details");
 
     // Wait for edit dialog
     const editDialog = page.getByRole("dialog", { name: "Edit Facility" });
@@ -500,13 +496,8 @@ test.describe("Facility Creation", () => {
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
 
-    // Expand the delete section, then click Delete Facility button
-    await page
-      .getByRole("button", { name: "Delete facility", exact: true })
-      .click();
-    await page
-      .getByRole("button", { name: "Delete Facility", exact: true })
-      .click();
+    // Open the delete confirmation from the Configurations menu
+    await openConfigurationsItem(page, "Delete Facility");
 
     // Type the confirmation text
     await page
