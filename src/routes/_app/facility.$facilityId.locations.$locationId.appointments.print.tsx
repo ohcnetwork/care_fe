@@ -1,11 +1,13 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 
+import { appointmentListSearch } from "@/lib/router/search/appointments";
 import PrintAppointments from "@/pages/Appointments/components/PrintAppointments";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 
 export const Route = createFileRoute(
   "/_app/facility/$facilityId/locations/$locationId/appointments/print",
 )({
+  validateSearch: appointmentListSearch,
   component: RouteComponent,
 });
 

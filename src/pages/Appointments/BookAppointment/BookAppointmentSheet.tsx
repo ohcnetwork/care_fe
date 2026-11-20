@@ -16,6 +16,7 @@ import { BookAppointmentDetails } from "./BookAppointmentDetails";
 import { BookingsList } from "./BookingsList";
 
 import { useQueryParams } from "@/lib/router/queryParams";
+import { bookAppointmentSheetSearch } from "@/lib/router/search/appointments";
 
 interface Props {
   patientId: string;
@@ -32,10 +33,10 @@ export default function BookAppointmentSheet({
   onSuccess,
   defaultOpen,
 }: Props) {
-  const [qParams] = useQueryParams();
+  const [qParams] = useQueryParams(bookAppointmentSheetSearch);
   const referralContext = useAppointmentReferral(patientId);
   const [isOpen, setIsOpen] = useState(
-    defaultOpen || qParams.open_schedule === "true",
+    defaultOpen || qParams.open_schedule === true,
   );
   const { t } = useTranslation();
 
