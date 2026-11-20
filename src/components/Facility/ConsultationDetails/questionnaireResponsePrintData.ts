@@ -49,7 +49,7 @@ function answersOf(
       [
         formatValue(value, question.type),
         precedentUnit?.code,
-        coding ? `${coding.display} (${coding.code})` : "",
+        coding?.display,
         index === values.length - 1 && response.note
           ? `(${response.note})`
           : "",
