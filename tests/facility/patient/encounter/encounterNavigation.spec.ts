@@ -412,6 +412,22 @@ test.describe("Encounter navigation", () => {
         page,
       }) => {
         const patientPath = `/facility/${getFacilityId()}/patient/${patientId}`;
+        // The failed load raises an error toast. On a phone it spans the top
+        // of the screen over Back, and hovering it pauses its auto-dismiss,
+        // so close it the way a user would whenever it is in the way.
+        await page.addLocatorHandler(
+          page.locator(
+            "li[data-sonner-toast][data-type='error'][data-removed='false']",
+          ),
+          async (toasts) => {
+            while ((await toasts.count()) > 0) {
+              await toasts
+                .first()
+                .getByRole("button", { name: "Close toast", exact: true })
+                .click();
+            }
+          },
+        );
         await page.route(
           (url) => url.pathname === `/api/v1/encounter/${primaryEncounterId}/`,
           (route) =>
