@@ -597,6 +597,32 @@ test("a populated popover opens on the start date", async ({ page }) => {
   await expect(to(page)).toHaveValue("19/11/2026");
 });
 
+test("focusing a date field shows that date's month", async ({ page }) => {
+  const caption = (name: string) =>
+    page.getByRole("button", { name, exact: true });
+  await open(page, "popover&value");
+  await page
+    .getByRole("button", { name: "9 Nov – 19 Nov 2026", exact: true })
+    .click();
+  await from(page).fill("20/10/2026");
+  await apply(page).click();
+  await page
+    .getByRole("button", { name: "20 Oct – 19 Nov 2026", exact: true })
+    .click();
+  await expect(from(page)).toBeFocused();
+  await expect(caption("Oct 2026")).toBeVisible();
+  await to(page).click();
+  await expect(caption("Nov 2026")).toBeVisible();
+  await from(page).click();
+  await expect(caption("Oct 2026")).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(to(page)).toBeFocused();
+  await expect(caption("Nov 2026")).toBeVisible();
+  await day(page, "2026-11-12").click();
+  await expect(from(page)).toHaveValue("20/10/2026");
+  await expect(to(page)).toHaveValue("12/11/2026");
+});
+
 test("arrow keys select and edit date segments, clamping month and leap-year ends", async ({
   page,
 }) => {

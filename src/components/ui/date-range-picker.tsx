@@ -301,6 +301,13 @@ function RangePanel({
   );
   const [monthView, setMonthView] = useState(false);
   const [year, setYear] = useState(month.getFullYear());
+  const showDate = (date: Date) => {
+    const next = clampMonth(date);
+    setMonth(next);
+    setYear(next.getFullYear());
+  };
+  // Set while a day click moves focus to End, so the calendar stays put.
+  const keepMonth = useRef(false);
 
   const dateLabel = (date: Date, includeYear = true) =>
     new Intl.DateTimeFormat(i18n.language, {
@@ -348,7 +355,7 @@ function RangePanel({
         : {}),
     }));
     // Blur re-commits unchanged text; moving the month then would swallow a day click.
-    if (date && !sameDay(date, current[edge])) setMonth(clampMonth(date));
+    if (date && !sameDay(date, current[edge])) showDate(date);
     return true;
   };
   const handleDay = (day: Date) => {
@@ -360,7 +367,9 @@ function RangePanel({
         to: current.to && current.to >= date ? current.to : undefined,
       });
       setActiveEdge("to");
+      keepMonth.current = true;
       toRef.current?.focus({ preventScroll: true });
+      keepMonth.current = false;
     } else if (current.from && date < current.from && current.to) {
       updateRange({ from: date, to: current.to });
     } else {
@@ -462,7 +471,13 @@ function RangePanel({
               active={activeEdge === edge}
               invalid={!!errors[edge]}
               describedBy={errors[edge] ? `${id}-${edge}-error` : undefined}
-              onFocus={() => setActiveEdge(edge)}
+              onFocus={() => {
+                setActiveEdge(edge);
+                const date = latestRange.current[edge];
+                if (date && !keepMonth.current && !isSameMonth(date, month)) {
+                  showDate(date);
+                }
+              }}
               onChange={(value) => {
                 const next = maskDate(value, text[edge]);
                 setText((previous) => ({ ...previous, [edge]: next }));
