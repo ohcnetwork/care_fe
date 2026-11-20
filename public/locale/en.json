@@ -1362,6 +1362,7 @@
   "diagnostic_report_not_found": "Diagnostic Report Not Found",
   "diagnostic_report_one": "Diagnostic Report",
   "diagnostic_report_other": "Diagnostic Reports",
+  "diagnostic_report_print_failed_attachments": "Couldn't load: {{files}}. Printing is disabled until every attachment loads.",
   "diagnostic_report_print_load_error": "Unable to load all reports and attachments. Please reload the page and try again.",
   "diagnostic_report_saved_successfully": "Diagnostic report saved successfully",
   "didnt_receive_a_message": "Didn't receive a message?",
@@ -3058,7 +3059,7 @@
   "no_organization_found": "No organization found",
   "no_organizations_found": "No Organizations Found",
   "no_organizations_selected": "No organizations selected",
-  "no_other_accounts_available": "No other active accounts available",
+  "no_other_accounts_available": "No other accounts available",
   "no_patient_is_being_served": "No patient is being served",
   "no_patient_is_finished": "No tokens have been finished",
   "no_patient_is_waiting": "No patient is waiting in this queue",
@@ -5926,6 +5927,5 @@
   "you_cannot_change_once_submitted": "You cannot change once submitted.",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞",
-  "diagnostic_report_print_failed_attachments": "Couldn't load: {{files}}. Printing is disabled until every attachment loads."
+  "℞": "℞"
 }

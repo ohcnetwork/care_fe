@@ -197,17 +197,15 @@ test.describe("Charge item change account", () => {
     ).toBeVisible();
     await expect(sheet.getByText(seed.billable[0])).toBeVisible();
 
-    await test.step("Only the patient's other active accounts are offered", async () => {
+    await test.step("The patient's other accounts are offered, whatever their status", async () => {
       await expect(sheet.getByText("Select target account")).toBeVisible();
-      await expect(sheet.getByRole("radio")).toHaveCount(2);
-      for (const offered of [seed.target, seed.closed]) {
+      await expect(sheet.getByRole("radio")).toHaveCount(3);
+      for (const offered of [seed.target, seed.closed, seed.inactive]) {
         await expect(
           sheet.getByRole("radio", { name: offered.name }),
         ).toBeVisible();
       }
-      for (const excluded of [seed.source, seed.inactive]) {
-        await expect(sheet.getByText(excluded.name)).toHaveCount(0);
-      }
+      await expect(sheet.getByText(seed.source.name)).toHaveCount(0);
     });
 
     const submit = sheet.getByRole("button", {

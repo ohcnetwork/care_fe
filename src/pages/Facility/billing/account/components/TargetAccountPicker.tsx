@@ -16,10 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
-import {
-  ACCOUNT_BILLING_STATUS_COLORS,
-  AccountStatus,
-} from "@/types/billing/account/Account";
+import { ACCOUNT_BILLING_STATUS_COLORS } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
@@ -36,8 +33,8 @@ interface TargetAccountPickerProps {
 }
 
 /**
- * Lists the patient's other active accounts as single-select choice cards,
- * as targets for moving charge items or payments.
+ * Lists the patient's other accounts, whatever their status, as single-select
+ * choice cards, as targets for moving charge items or payments.
  */
 export default function TargetAccountPicker({
   facilityId,
@@ -56,7 +53,6 @@ export default function TargetAccountPicker({
       pathParams: { facilityId },
       queryParams: {
         patient: patientId,
-        status: AccountStatus.active,
         limit: 50,
       },
     }),
