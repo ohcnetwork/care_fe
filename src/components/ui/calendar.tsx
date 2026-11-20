@@ -82,7 +82,8 @@ function Calendar({
     }, [yearRange]),
   );
 
-  const { onPrevClick, onNextClick, startMonth, endMonth, captionLayout } = props;
+  const { onPrevClick, onNextClick, startMonth, endMonth, captionLayout } =
+    props;
 
   const columnsDisplayed = navView === "years" ? 1 : numberOfMonths;
 
@@ -123,8 +124,14 @@ function Calendar({
     "pointer-events-none absolute inset-x-0 top-0 flex items-start [&>button]:pointer-events-auto",
     props.navClassName,
   );
-  const _monthGridClassName = cn("mx-auto mt-4 w-full", props.monthGridClassName);
-  const _weekClassName = cn("mt-2 flex w-full items-start", props.weekClassName);
+  const _monthGridClassName = cn(
+    "mx-auto mt-4 w-full",
+    props.monthGridClassName,
+  );
+  const _weekClassName = cn(
+    "mt-2 flex w-full items-start",
+    props.weekClassName,
+  );
   const _dayClassName = cn(
     "flex size-(--cell-size) min-w-0 flex-1 items-center justify-center p-0 text-sm",
     props.dayClassName,
@@ -219,6 +226,8 @@ function Calendar({
     [
       displayYears,
       navView,
+      setDisplayYears,
+      setNavView,
       startMonth,
       endMonth,
       onPrevClick,

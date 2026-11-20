@@ -35,6 +35,7 @@
     "care.config.ts",
     "scripts/**/*.ts",
     "playwright.config.ts",
-    "plugins/**/*.ts"
+    "plugins/**/*.ts",
+    "tests/fixtures/**/*.tsx"
   ]
 }

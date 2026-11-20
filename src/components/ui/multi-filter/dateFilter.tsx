@@ -112,7 +112,9 @@ export default function RenderDateFilter({
   defaultView?: "options" | "custom";
 }) {
   const { t } = useTranslation();
-  const [view, setView] = useState<"options" | "custom">(defaultView || "options");
+  const [view, setView] = useState<"options" | "custom">(
+    defaultView || "options",
+  );
   const meta = filter.meta as DateFilterMeta;
   const options = meta?.presetOptions || longDateRangeOptions;
 

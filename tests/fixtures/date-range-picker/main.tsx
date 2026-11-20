@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- test-only fixture scaffolding, not shipped UI */
 import { format, startOfDay } from "date-fns";
 import i18next from "i18next";
 import { useState } from "react";
@@ -16,8 +17,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import RenderDateFilter from "@/components/ui/multi-filter/dateFilter";
 
-import en from "../../../public/locale/en.json";
 import "@/style/index.css";
+import en from "../../../public/locale/en.json";
 
 await i18next.init({
   lng: "en-IN",
@@ -76,12 +77,10 @@ function Fixture() {
             {panel}
           </DropdownMenuContent>
         </DropdownMenu>
-      ) : panel}
-      <button
-        type="button"
-        className="fixed end-2 top-2"
-        data-testid="outside"
-      >
+      ) : (
+        panel
+      )}
+      <button type="button" className="fixed end-2 top-2" data-testid="outside">
         Outside
       </button>
       <output data-testid="applied">

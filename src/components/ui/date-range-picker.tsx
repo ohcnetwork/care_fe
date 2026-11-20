@@ -21,7 +21,11 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import FilterHeader from "@/components/ui/multi-filter/filterHeader";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { SegmentedDateInput } from "@/components/ui/segmented-date-input";
 import { cn } from "@/lib/utils";
 
@@ -87,9 +91,7 @@ function maskDate(next: string, previous: string) {
 }
 
 function hasFullYear(text: string) {
-  return (
-    /^\d{1,2}[/.-]\d{1,2}[/.-]\d{4}$/.test(text) || /^\d{8}$/.test(text)
-  );
+  return /^\d{1,2}[/.-]\d{1,2}[/.-]\d{4}$/.test(text) || /^\d{8}$/.test(text);
 }
 
 function rangeText(
@@ -551,7 +553,9 @@ function RangePanel({
               })}
             </div>
           ) : range.from ? (
-            <div className="mt-0.5 text-muted-foreground">{t("pick_end_date")}</div>
+            <div className="mt-0.5 text-muted-foreground">
+              {t("pick_end_date")}
+            </div>
           ) : null}
         </div>
         <Button
