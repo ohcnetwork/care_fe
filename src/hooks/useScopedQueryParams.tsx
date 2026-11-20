@@ -7,11 +7,18 @@ import {
   type ReactNode,
 } from "react";
 
-import { useQueryParams, type QueryParams } from "@/lib/router/queryParams";
+import {
+  useQueryParams,
+  type QueryParams,
+  type SetQueryParams,
+} from "@/lib/router/queryParams";
+import {
+  readSearch,
+  type SearchSchema,
+  type SearchValues,
+} from "@/lib/router/search/fields";
 
-type QueryState<T extends QueryParams = QueryParams> = ReturnType<
-  typeof useQueryParams<T>
->;
+type QueryState<T extends QueryParams = QueryParams> = [T, SetQueryParams<T>];
 
 const QueryParamsContext = createContext<QueryState | null>(null);
 
@@ -40,12 +47,28 @@ export function ScopedQueryParamsProvider({
   );
 }
 
-export function useScopedQueryParams<
-  T extends QueryParams = QueryParams,
->(): QueryState<T> {
-  const routed = useQueryParams<T>();
+/**
+ * `useQueryParams`, or the params of the nearest `ScopedQueryParamsProvider`.
+ * With a search schema, the values that it lists are parsed and typed.
+ */
+export function useScopedQueryParams<S extends SearchSchema>(
+  schema: S,
+): [SearchValues<S>, SetQueryParams];
+// Overloads are not redeclarations; TypeScript checks real ones (TS2451).
+// eslint-disable-next-line no-redeclare
+export function useScopedQueryParams<T extends QueryParams = QueryParams>(
+  schema?: undefined,
+): QueryState<T>;
+// eslint-disable-next-line no-redeclare
+export function useScopedQueryParams(
+  schema?: SearchSchema,
+): QueryState<QueryParams>;
+// eslint-disable-next-line no-redeclare
+export function useScopedQueryParams(schema?: SearchSchema): QueryState {
+  const routed = useQueryParams();
   const scoped = useContext(QueryParamsContext);
-  return scoped ? [scoped[0] as T, scoped[1]] : routed;
+  const [params, setParams] = scoped ?? routed;
+  return [schema ? readSearch(schema, params) : params, setParams];
 }
 
 export function useIsScopedQueryParams() {

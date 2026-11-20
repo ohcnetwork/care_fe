@@ -6,6 +6,10 @@ import {
   type SetQueryParamsOptions,
   type QueryParams as UrlQueryParams,
 } from "@/lib/router/queryParams";
+import {
+  type SearchSchema,
+  type SearchValues,
+} from "@/lib/router/search/fields";
 import { cn } from "@/lib/utils";
 
 import GenericFilterBadge from "@/CAREUI/display/FilterBadge";
@@ -28,16 +32,27 @@ interface FilterBadgeProps {
   paramKey: string | string[];
 }
 
+/** `qParams`: typed by the search schema, or untyped strings without one. */
+type FilterParams<S extends SearchSchema> = [S] extends [never]
+  ? UrlQueryParams
+  : SearchValues<S>;
+
 /**
  * A custom hook wrapped around `useScopedQueryParams` to ease handling
  * of pagination and filters.
  */
-export default function useFilters({
+export default function useFilters<S extends SearchSchema = never>({
+  schema,
   limit = 14,
   cache = false,
   cacheBlacklist = [],
   defaultQueryParams = {},
 }: {
+  /**
+   * The search schema of the page (`src/lib/router/search/`). Give the
+   * routes that render the page the same schema in `validateSearch`.
+   */
+  schema?: S;
   limit?: number;
   /**
    * Save the filters of the page (per path) and restore them when the page
@@ -52,7 +67,7 @@ export default function useFilters({
   const { t } = useTranslation();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
-  const [qParams, _setQueryParams] = useScopedQueryParams();
+  const [qParams, _setQueryParams] = useScopedQueryParams(schema);
   const scoped = useIsScopedQueryParams();
   const [clearSearch, setClearSearch] = useState<{
     value: boolean;
@@ -291,7 +306,7 @@ export default function useFilters({
   };
 
   return {
-    qParams,
+    qParams: qParams as FilterParams<S>,
     resultsPerPage: limit,
     /**
      * Updates the query params and resets to page 1.

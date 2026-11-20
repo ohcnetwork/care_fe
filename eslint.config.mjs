@@ -210,6 +210,26 @@ const config = [
     },
   },
 
+  // Search schemas load with the route tree at startup: `validateSearch` is
+  // not code-split. Keep pages, components and their imports out of them.
+  {
+    files: ["src/lib/router/search/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/*", "!@/types/**", "!@/lib/router/search/**"],
+              message:
+                "A search schema loads at startup. Import only zod, the search fields and `@/types`.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // i18next plugin rules
   {
     files: ["**/*.{js,jsx,ts,tsx}"],

@@ -3,6 +3,11 @@ import { useCallback } from "react";
 import { useCurrentLocation } from "@/lib/router/location";
 import { navigate } from "@/lib/router/navigate";
 import { getRouter } from "@/lib/router/routerRef";
+import {
+  readSearch,
+  type SearchSchema,
+  type SearchValues,
+} from "@/lib/router/search/fields";
 
 /** Query string values. Every value that is read is a string. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,32 +37,40 @@ function serializeQuery(query: QueryParams): string {
   ).toString();
 }
 
+export type SetQueryParams<T extends QueryParams = QueryParams> = (
+  query: T,
+  options?: SetQueryParamsOptions,
+) => void;
+
 /**
  * Reads and writes the query string of the current page.
  *
  * - Read: the query of the page that is on screen (see `useCurrentLocation`),
- *   as strings.
+ *   as strings. With a search schema (`src/lib/router/search/`), the values
+ *   that the schema lists are parsed and typed.
  * - Write: `setQueryParams(query, { overwrite, replace })`. A `null` value
  *   removes the key. A write merges with the latest URL, also before the
  *   page renders again.
  *
  * Prefer `useSearch` from `@tanstack/react-router` where the route is known.
  */
-export function useQueryParams<T extends QueryParams = QueryParams>(): [
-  T,
-  (query: T, options?: SetQueryParamsOptions) => void,
-] {
+export function useQueryParams<S extends SearchSchema>(
+  schema: S,
+): [SearchValues<S>, SetQueryParams];
+export function useQueryParams<T extends QueryParams = QueryParams>(
+  schema?: undefined,
+): [T, SetQueryParams<T>];
+export function useQueryParams(
+  schema?: SearchSchema,
+): [QueryParams, SetQueryParams] {
   const { searchStr } = useCurrentLocation();
 
-  const setQueryParams = useCallback(
-    (
-      query: T,
-      { overwrite = true, replace = false }: SetQueryParamsOptions = {},
-    ) => {
+  const setQueryParams = useCallback<SetQueryParams>(
+    (query, { overwrite = true, replace = false } = {}) => {
       const location = getRouter().history.location;
       const next = overwrite
         ? query
-        : { ...parseQuery<T>(location.search), ...query };
+        : { ...parseQuery(location.search), ...query };
       const serialized = serializeQuery(next);
       let href = location.pathname;
       if (serialized) href += "?" + serialized;
@@ -67,5 +80,6 @@ export function useQueryParams<T extends QueryParams = QueryParams>(): [
     [],
   );
 
-  return [parseQuery<T>(searchStr), setQueryParams];
+  const params = parseQuery(searchStr);
+  return [schema ? readSearch(schema, params) : params, setQueryParams];
 }
