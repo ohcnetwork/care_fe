@@ -39,7 +39,10 @@ export function FilterSelect({
       className={cn("inline-flex min-w-0", className)}
     >
       <DropdownMenu>
-        <DropdownMenuTrigger className="w-full justify-between">
+        <DropdownMenuTrigger
+          appearance="field"
+          className="w-full justify-between"
+        >
           {icon || <ListFilter aria-hidden="true" />}
           <span>{value ? label : placeholder || label}</span>
           {value && <span className="text-muted-foreground">{t(value)}</span>}

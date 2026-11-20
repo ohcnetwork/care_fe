@@ -91,7 +91,7 @@ Built on **CareUI** + **Base UI primitives** + **Tailwind CSS v4**, distributed 
 
 Use the shared `FilterSelect` for single-value toolbar filters. It composes CareUI's radio dropdown, displays the selected value beside the label, and clears through `onClear` when "All" is selected. Browser tests should target its button and `menuitemradio` options rather than a combobox or a separate clear button.
 
-Use `DropdownMenuTrigger` directly for a native Base UI trigger with its own styling: the default `field` appearance uses the input's `shadow-2xs`, and `appearance="icon"` is flat for overflow menus. Give icon-only triggers an accessible name. Use `render` or `asChild` only when supplying a custom trigger that owns its styling, such as a CareUI Button. The menu popup styles are independent of the trigger.
+Use `DropdownMenuTrigger` directly for a native Base UI trigger with its own styling. Plain triggers are unstyled by default; opt into `appearance="field"` for field-like controls or `appearance="icon"` for flat overflow menus. Give icon-only triggers an accessible name. Use `render` or `asChild` only when supplying a custom trigger that owns its styling, such as a CareUI Button. The menu popup styles are independent of the trigger.
 
 Select, standalone Combobox, and DropdownMenu field triggers share the same field surface without sharing behavior. Autocomplete and MultiSelect use that surface on both their desktop and mobile triggers. Inside a Combobox input, the input group owns the shadow and the chevron uses the flat `addon` appearance.
 
