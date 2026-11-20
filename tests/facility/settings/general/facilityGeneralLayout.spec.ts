@@ -155,7 +155,8 @@ test.describe("Facility general settings layout", () => {
     await expect(
       header.getByRole("heading", { name: facility.name }),
     ).toBeVisible();
-    await expect(header.getByText("Part of Kerala")).toBeVisible();
+    // The geo organization is shown in the details card, not the header.
+    await expect(header.getByText(/^Part of/)).toHaveCount(0);
     await test.info().attach("desktop-empty-cover", {
       body: await page.screenshot({ fullPage: true }),
       contentType: "image/png",

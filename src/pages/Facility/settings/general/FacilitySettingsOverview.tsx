@@ -99,13 +99,6 @@ export function FacilitySettingsOverview({
                 >
                   {facility.facility_type}
                 </Badge>
-                {facility.geo_organization && (
-                  <span className="break-words">
-                    {t("facility_settings_part_of", {
-                      organization: facility.geo_organization.name,
-                    })}
-                  </span>
-                )}
               </div>
             </div>
             {actions && (

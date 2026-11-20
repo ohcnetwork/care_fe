@@ -1903,7 +1903,6 @@
   "facility_responses_empty_description": "Submitted forms for this facility will appear here.",
   "facility_settings_add_cover": "Add cover photo",
   "facility_settings_cover_empty": "No cover photo yet. It appears on this facility's card and page.",
-  "facility_settings_part_of": "Part of {{organization}}",
   "facility_type": "Facility Type",
   "facility_type_required": "Facility type is required",
   "facility_updated_successfully": "Facility updated successfully",
