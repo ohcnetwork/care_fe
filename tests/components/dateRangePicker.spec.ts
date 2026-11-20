@@ -602,7 +602,8 @@ test("shared CARE input and button sizes are retained at mobile and desktop widt
       "height",
       `${height}px`,
     );
-    await expect(apply(page)).toHaveCSS("height", "36px");
+    await expect(apply(page)).toHaveAttribute("data-size", "default");
+    await expect(apply(page)).toHaveCSS("height", `${height}px`);
     const caption = page.getByRole("button", {
       name: "Nov 2026",
       exact: true,

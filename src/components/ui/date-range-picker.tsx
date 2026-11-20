@@ -594,7 +594,7 @@ function RangePanel({
           ref={applyRef}
           type="button"
           variant="primary"
-          size="sm"
+          size="default"
           disabled={!canApply}
           onClick={() => {
             const fromError = validate(text.from);
