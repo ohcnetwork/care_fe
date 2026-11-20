@@ -106,6 +106,8 @@ export default function useFilters<S extends SearchSchema = never>({
   const removeFilter = (param: string) => removeFilters([param]);
 
   useEffect(() => {
+    // Defaults fill the keys that are missing, or invalid for the schema
+    // (read as `undefined`).
     const defaults = Object.fromEntries(
       Object.entries(defaultQueryParams).filter(
         ([key]) => qParams[key] === undefined,
@@ -114,7 +116,7 @@ export default function useFilters<S extends SearchSchema = never>({
 
     if (scoped) {
       if (Object.keys(defaults).length > 0)
-        setQueryParams({ ...defaults, ...qParams });
+        setQueryParams({ ...qParams, ...defaults });
       return;
     }
     if (!cache) {
@@ -123,7 +125,7 @@ export default function useFilters<S extends SearchSchema = never>({
 
       // Set default query params if they are not present, preserving existing params
       if (Object.keys(defaults).length > 0) {
-        setQueryParams({ ...defaults, ...qParams });
+        setQueryParams({ ...qParams, ...defaults });
       }
 
       // Skip cache restoration logic for this usage.
@@ -142,7 +144,7 @@ export default function useFilters<S extends SearchSchema = never>({
     const cached = FiltersCache.get();
     if (!cached) {
       if (Object.keys(defaults).length > 0) {
-        setQueryParams({ ...defaults, ...qParams });
+        setQueryParams({ ...qParams, ...defaults });
       }
       return;
     }
