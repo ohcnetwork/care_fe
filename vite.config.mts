@@ -442,7 +442,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       // route component into its own chunk. Must run before react().
       tanstackRouter({
         target: "react",
-        autoCodeSplitting: true,
+        autoCodeSplitting: false,
         routesDirectory: "./src/routes",
         generatedRouteTree: "./src/routeTree.gen.ts",
         routeFileIgnorePrefix: "-",
