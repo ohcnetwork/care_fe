@@ -1,6 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import {
+  filterSelectButton,
   queryParam,
   recordApiQueries,
   waitForApiList,
@@ -14,9 +15,6 @@ test.use({ storageState: "tests/.auth/user.json" });
 // The specimen definition list reads its query string with a typed search
 // schema (`specimenDefinitionListSearch` in
 // `src/lib/router/search/settings.ts`). It opens with the active definitions.
-
-const filterCombobox = (page: Page, text: RegExp) =>
-  page.getByRole("combobox").filter({ hasText: text });
 
 test.describe("Specimen definition list search params", () => {
   let facilityId: string;
@@ -54,7 +52,7 @@ test.describe("Specimen definition list search params", () => {
     await page.goto(withSearch(listPath(), { status: "draft" }));
     await request;
 
-    await expect(filterCombobox(page, /status is\s*draft/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*draft/i)).toBeVisible();
   });
 
   test("uses the active status in place of an invalid one", async ({

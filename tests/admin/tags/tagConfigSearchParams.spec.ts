@@ -1,6 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import {
+  filterSelectButton,
   queryParam,
   recordApiQueries,
   waitForApiList,
@@ -14,9 +15,6 @@ test.use({ storageState: "tests/.auth/user.json" });
 // The tag config list reads its query string with a typed search schema
 // (`tagConfigListSearch` in `src/lib/router/search/admin.ts`), on the admin
 // and the facility settings routes. It opens with the active tag configs.
-
-const filterCombobox = (page: Page, text: RegExp) =>
-  page.getByRole("combobox").filter({ hasText: text });
 
 test.describe("Tag config list search params", () => {
   const listPath = "/admin/tag_config";
@@ -52,8 +50,8 @@ test.describe("Tag config list search params", () => {
     );
     await request;
 
-    await expect(filterCombobox(page, /status is\s*archived/i)).toBeVisible();
-    await expect(filterCombobox(page, /resource is\s*patient/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*archived/i)).toBeVisible();
+    await expect(filterSelectButton(page, /resource\s*patient/i)).toBeVisible();
   });
 
   test("uses the active status in place of invalid filters", async ({
@@ -102,7 +100,7 @@ test.describe("Tag config list search params", () => {
     );
     await request;
 
-    await expect(filterCombobox(page, /category is\s*diet/i)).toBeVisible();
+    await expect(filterSelectButton(page, /category\s*diet/i)).toBeVisible();
     await expect(page).toHaveURL(queryParam("status", "active"));
   });
 });

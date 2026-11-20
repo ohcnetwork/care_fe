@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import {
+  filterSelectButton,
   queryParam,
   recordApiQueries,
   waitForApiList,
@@ -14,9 +15,6 @@ test.use({ storageState: "tests/.auth/user.json" });
 // The product knowledge pages read their query string with a typed search
 // schema (`productKnowledgePageSearch` in `src/lib/router/search/settings.ts`):
 // the category search and the filters of the products in a category.
-
-const filterCombobox = (page: Page, text: RegExp) =>
-  page.getByRole("combobox").filter({ hasText: text });
 
 test.describe("Product knowledge search params", () => {
   let facilityId: string;
@@ -82,9 +80,9 @@ test.describe("Product knowledge search params", () => {
     );
     await request;
 
-    await expect(filterCombobox(page, /status is\s*retired/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*retired/i)).toBeVisible();
     await expect(
-      filterCombobox(page, /product type is\s*medication/i),
+      filterSelectButton(page, /product type\s*medication/i),
     ).toBeVisible();
   });
 

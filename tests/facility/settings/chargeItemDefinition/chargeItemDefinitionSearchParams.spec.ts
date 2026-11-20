@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 
 import {
+  filterSelectButton,
   queryParam,
   recordApiQueries,
   waitForApiList,
@@ -15,9 +16,6 @@ test.use({ storageState: "tests/.auth/user.json" });
 // search schema (`chargeItemDefinitionsPageSearch` in
 // `src/lib/router/search/settings.ts`): the category search and the filters
 // of the definitions in a category.
-
-const filterCombobox = (page: Page, text: RegExp) =>
-  page.getByRole("combobox").filter({ hasText: text });
 
 test.describe("Charge item definition search params", () => {
   let facilityId: string;
@@ -78,7 +76,7 @@ test.describe("Charge item definition search params", () => {
     );
     await request;
 
-    await expect(filterCombobox(page, /status is\s*draft/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*draft/i)).toBeVisible();
     await expect(page).toHaveURL(queryParam("status", "draft"));
   });
 
@@ -102,7 +100,7 @@ test.describe("Charge item definition search params", () => {
     await request;
 
     await expect(page).toHaveURL(queryParam("status", "active"));
-    await expect(filterCombobox(page, /status is\s*active/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*active/i)).toBeVisible();
     api.expectNotSent("bogus");
     api.expectNotSent("abc");
   });

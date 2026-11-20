@@ -1,6 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import {
+  filterSelectButton,
   queryParam,
   recordApiQueries,
   waitForApiList,
@@ -14,9 +15,6 @@ test.use({ storageState: "tests/.auth/user.json" });
 // The observation definition list reads its query string with a typed search
 // schema (`observationDefinitionListSearch` in
 // `src/lib/router/search/settings.ts`). It opens with the active definitions.
-
-const filterCombobox = (page: Page, text: RegExp) =>
-  page.getByRole("combobox").filter({ hasText: text });
 
 test.describe("Observation definition list search params", () => {
   let facilityId: string;
@@ -59,9 +57,9 @@ test.describe("Observation definition list search params", () => {
     );
     await request;
 
-    await expect(filterCombobox(page, /status is\s*draft/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*draft/i)).toBeVisible();
     await expect(
-      filterCombobox(page, /category is\s*laboratory/i),
+      filterSelectButton(page, /category\s*laboratory/i),
     ).toBeVisible();
   });
 
@@ -87,7 +85,7 @@ test.describe("Observation definition list search params", () => {
     await request;
 
     await expect(page).toHaveURL(queryParam("status", "active"));
-    await expect(filterCombobox(page, /status is\s*active/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*active/i)).toBeVisible();
     api.expectNotSent("bogus");
     api.expectNotSent("abc");
   });

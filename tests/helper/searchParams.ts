@@ -49,3 +49,14 @@ export function recordApiQueries(page: Page) {
     },
   };
 }
+
+/**
+ * The button of a filter select (`FilterSelect`). It shows the label of the
+ * filter and the selected value, for example "Status" and "Draft".
+ */
+export function filterSelectButton(page: Page, text: string | RegExp) {
+  return page
+    .locator('[data-slot="filter-select"]')
+    .getByRole("button")
+    .filter({ hasText: text });
+}

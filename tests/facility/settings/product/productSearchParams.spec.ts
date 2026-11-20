@@ -1,6 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import {
+  filterSelectButton,
   queryParam,
   recordApiQueries,
   waitForApiList,
@@ -14,9 +15,6 @@ test.use({ storageState: "tests/.auth/user.json" });
 // The product list reads its query string with a typed search schema
 // (`productListSearch` in `src/lib/router/search/settings.ts`). It opens with
 // the active products.
-
-const filterCombobox = (page: Page, text: RegExp) =>
-  page.getByRole("combobox").filter({ hasText: text });
 
 test.describe("Product list search params", () => {
   let facilityId: string;
@@ -53,7 +51,7 @@ test.describe("Product list search params", () => {
     await page.goto(withSearch(listPath(), { status: "inactive" }));
     await request;
 
-    await expect(filterCombobox(page, /status is\s*inactive/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*inactive/i)).toBeVisible();
   });
 
   test("uses the active status in place of an invalid one", async ({
@@ -70,7 +68,7 @@ test.describe("Product list search params", () => {
     await request;
 
     await expect(page).toHaveURL(queryParam("status", "active"));
-    await expect(filterCombobox(page, /status is\s*active/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*active/i)).toBeVisible();
     api.expectNotSent("bogus");
     api.expectNotSent("abc");
   });

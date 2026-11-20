@@ -1,6 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import {
+  filterSelectButton,
   queryParam,
   recordApiQueries,
   waitForApiList,
@@ -15,9 +16,6 @@ test.use({ storageState: "tests/.auth/user.json" });
 // search schema (`patientIdentifierConfigListSearch` in
 // `src/lib/router/search/admin.ts`), on the admin and the facility settings
 // routes. It opens with the active configs.
-
-const filterCombobox = (page: Page, text: RegExp) =>
-  page.getByRole("combobox").filter({ hasText: text });
 
 test.describe("Patient identifier config list search params", () => {
   const listPath = "/admin/patient_identifier_config";
@@ -48,7 +46,7 @@ test.describe("Patient identifier config list search params", () => {
     await page.goto(withSearch(listPath, { status: "draft" }));
     await request;
 
-    await expect(filterCombobox(page, /status is\s*draft/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*draft/i)).toBeVisible();
   });
 
   test("uses the active status in place of an invalid one", async ({
@@ -73,7 +71,7 @@ test.describe("Patient identifier config list search params", () => {
     await request;
 
     await expect(page).toHaveURL(queryParam("status", "active"));
-    await expect(filterCombobox(page, /status is\s*active/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*active/i)).toBeVisible();
     api.expectNotSent("bogus");
     api.expectNotSent("abc");
   });

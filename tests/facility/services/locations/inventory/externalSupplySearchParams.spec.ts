@@ -4,6 +4,7 @@ import {
   recordRequestUrls,
   waitForListRequest,
 } from "tests/facility/services/helpers";
+import { filterSelectButton } from "tests/helper/searchParams";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -80,9 +81,7 @@ test.describe("Purchase order list search params", () => {
     await request;
 
     await expectSelectedTab(page, "Completed");
-    await expect(
-      page.getByRole("combobox").filter({ hasText: /urgent/i }),
-    ).toBeVisible();
+    await expect(filterSelectButton(page, /urgent/i)).toBeVisible();
   });
 
   test("ignores invalid values in a bookmarked URL", async ({ page }) => {

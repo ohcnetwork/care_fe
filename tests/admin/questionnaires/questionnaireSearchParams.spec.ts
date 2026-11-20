@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { selectQuestionnaireStatusTab } from "tests/helper/questionnaireV2";
 import {
+  filterSelectButton,
   queryParam,
   recordApiQueries,
   waitForApiList,
@@ -18,7 +19,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 // and the questionnaire page (`questionnaireShowSearch`).
 
 const subjectTypeFilter = (page: Page) =>
-  page.getByRole("combobox").filter({ hasText: /subject type/i });
+  filterSelectButton(page, /subject type/i);
 
 test.describe("Questionnaire list search params", () => {
   const listPath = "/admin/questionnaires";

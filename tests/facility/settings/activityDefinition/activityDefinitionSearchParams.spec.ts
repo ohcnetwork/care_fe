@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 
 import {
+  filterSelectButton,
   queryParam,
   recordApiQueries,
   waitForApiList,
@@ -16,9 +17,6 @@ test.use({ storageState: "tests/.auth/user.json" });
 // schema (`activityDefinitionsPageSearch` in
 // `src/lib/router/search/settings.ts`): the category search
 // (`searchCategory`) and the filters of the definitions in a category.
-
-const filterCombobox = (page: Page, text: RegExp) =>
-  page.getByRole("combobox").filter({ hasText: text });
 
 test.describe("Activity definition search params", () => {
   let facilityId: string;
@@ -98,7 +96,7 @@ test.describe("Activity definition search params", () => {
     await request;
 
     await expect(page).toHaveURL(queryParam("status", "draft"));
-    await expect(filterCombobox(page, /status is\s*draft/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*draft/i)).toBeVisible();
   });
 
   test("restores the filters of a category from a bookmarked URL", async ({
@@ -120,9 +118,9 @@ test.describe("Activity definition search params", () => {
     );
     await request;
 
-    await expect(filterCombobox(page, /status is\s*retired/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*retired/i)).toBeVisible();
     await expect(
-      filterCombobox(page, /category is\s*laboratory/i),
+      filterSelectButton(page, /category\s*laboratory/i),
     ).toBeVisible();
   });
 
@@ -149,7 +147,7 @@ test.describe("Activity definition search params", () => {
     await request;
 
     await expect(page).toHaveURL(queryParam("status", "active"));
-    await expect(filterCombobox(page, /status is\s*active/i)).toBeVisible();
+    await expect(filterSelectButton(page, /status\s*active/i)).toBeVisible();
     api.expectNotSent("bogus");
     api.expectNotSent("abc");
   });

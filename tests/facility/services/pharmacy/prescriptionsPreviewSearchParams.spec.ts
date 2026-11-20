@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { openServiceLocation } from "tests/facility/services/helpers";
+import { filterSelectButton } from "tests/helper/searchParams";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -42,7 +43,7 @@ test.describe("Prescriptions preview search params", () => {
 
   const searchBox = (page: Page) => page.getByPlaceholder("Search Medications");
   const statusSelect = (page: Page) =>
-    page.getByRole("combobox").filter({ hasText: "Dispense Status" });
+    filterSelectButton(page, "Dispense Status");
 
   test("writes the medication search and the status to the URL", async ({
     page,
@@ -54,7 +55,9 @@ test.describe("Prescriptions preview search params", () => {
     await expect(page).toHaveURL(/[?&]search=para(&|$)/);
 
     await statusSelect(page).click();
-    await page.getByRole("option", { name: "Partial", exact: true }).click();
+    await page
+      .getByRole("menuitemradio", { name: "Partial", exact: true })
+      .click();
     await expect(page).toHaveURL(/[?&]status=partial(&|$)/);
     await expect(statusSelect(page)).toContainText("Partial");
   });
