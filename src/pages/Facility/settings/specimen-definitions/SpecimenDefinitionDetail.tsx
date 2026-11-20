@@ -192,12 +192,12 @@ export function SpecimenDefinitionDetail({
                   </div>
                 )}
 
-                {specimenDefinition.collection && (
+                {specimenDefinition.collection?.code && (
                   <div>
                     <p className="text-sm font-medium text-gray-400">
                       {t("collection_method")}
                     </p>
-                    <p>{specimenDefinition.collection.display}</p>
+                    <p>{specimenDefinition.collection.code.display}</p>
                   </div>
                 )}
               </div>

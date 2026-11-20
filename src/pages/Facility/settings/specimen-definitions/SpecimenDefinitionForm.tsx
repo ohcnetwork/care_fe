@@ -197,7 +197,7 @@ function SpecimenDefinitionFormContent({
       derived_from_uri: initialData?.derived_from_uri ?? undefined,
       type_collected: initialData?.type_collected,
       patient_preparation: initialData?.patient_preparation ?? [],
-      collection: initialData?.collection ?? undefined,
+      collection: initialData?.collection?.code ?? undefined,
       type_tested: initialData?.type_tested ?? {
         is_derived: false,
         preference: Preference.preferred,
@@ -315,8 +315,15 @@ function SpecimenDefinitionFormContent({
     });
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    // The form edits only the collection code; keep the template's other
+    // fields (quantity, method, body site) as they were.
+    const collection = {
+      ...initialData?.collection,
+      code: data.collection ?? null,
+    };
     const payload: SpecimenDefinitionCreate = {
       ...data,
+      collection: Object.values(collection).some(Boolean) ? collection : null,
       patient_preparation:
         data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested

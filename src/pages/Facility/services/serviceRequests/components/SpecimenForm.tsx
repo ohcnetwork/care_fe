@@ -97,11 +97,11 @@ export function SpecimenForm({
       accession_identifier: "",
       received_time: null,
       collection: {
-        method: specimenDefinition.collection || null,
-        body_site: null,
+        method: specimenDefinition.collection?.method ?? null,
+        body_site: specimenDefinition.collection?.body_site ?? null,
         collector: currentUserId || null, // Use user ID, default to null if not available yet
         collected_date_time: new Date().toISOString(),
-        quantity: null,
+        quantity: specimenDefinition.collection?.quantity ?? null,
         procedure: null,
         fasting_status_codeable_concept: null,
         fasting_status_duration: null,
