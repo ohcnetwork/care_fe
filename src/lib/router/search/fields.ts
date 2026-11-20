@@ -43,9 +43,12 @@ export const searchBoolean = () =>
 export function searchEnum<const T extends readonly string[]>(
   values: T,
 ): z.ZodCatch<z.ZodOptional<z.ZodEnum<z.core.util.ToEnum<T[number]>>>>;
+// Overloads are not redeclarations; TypeScript checks real ones (TS2451).
+// eslint-disable-next-line no-redeclare
 export function searchEnum<const T extends z.core.util.EnumLike>(
   values: T,
 ): z.ZodCatch<z.ZodOptional<z.ZodEnum<T>>>;
+// eslint-disable-next-line no-redeclare
 export function searchEnum(values: readonly string[] | z.core.util.EnumLike) {
   return z
     .enum(values as z.core.util.EnumLike)

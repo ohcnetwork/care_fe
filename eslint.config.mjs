@@ -51,7 +51,11 @@ const config = [
     ignores: [
       "**/dist",
       "**/public",
-      "**/lib",
+      "**/lib/*",
+      // Lint the search schemas: their import rule keeps them small.
+      "!src/lib/router",
+      "src/lib/router/*",
+      "!src/lib/router/search",
       "**/build",
       "**/*.css",
       "**/*.csv",
@@ -220,7 +224,7 @@ const config = [
         {
           patterns: [
             {
-              group: ["@/*", "!@/types/**", "!@/lib/router/search/**"],
+              regex: "^@/(?!types/|lib/router/search/)",
               message:
                 "A search schema loads at startup. Import only zod, the search fields and `@/types`.",
             },
