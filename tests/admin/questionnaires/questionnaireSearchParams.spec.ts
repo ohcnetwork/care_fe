@@ -126,3 +126,19 @@ test.describe("Questionnaire page search params", () => {
     );
   });
 });
+
+test.describe("Questionnaire studio search params", () => {
+  const studioPath = () => `/admin/questionnaires/${getQuestionnaireId()}/edit`;
+
+  test("removes the import flag and an invalid mode from the URL", async ({
+    page,
+  }) => {
+    // The studio removes `import` from the URL and writes back the other
+    // values. An invalid `mode` reads as `undefined` and must not come back.
+    await page.goto(withSearch(studioPath(), { import: "1", mode: "bogus" }));
+
+    await expect(page).not.toHaveURL(/import=/);
+    await expect(page).not.toHaveURL(/mode=/);
+    await expect(page).not.toHaveURL(/undefined/);
+  });
+});

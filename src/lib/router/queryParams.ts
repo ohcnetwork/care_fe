@@ -33,7 +33,9 @@ function parseQuery<T extends QueryParams>(query: string): T {
 
 function serializeQuery(query: QueryParams): string {
   return new URLSearchParams(
-    Object.entries(query).filter(([, value]) => value !== null),
+    Object.entries(query).filter(
+      ([, value]) => value !== null && value !== undefined,
+    ),
   ).toString();
 }
 
@@ -48,9 +50,10 @@ export type SetQueryParams<T extends QueryParams = QueryParams> = (
  * - Read: the query of the page that is on screen (see `useCurrentLocation`),
  *   as strings. With a search schema (`src/lib/router/search/`), the values
  *   that the schema lists are parsed and typed.
- * - Write: `setQueryParams(query, { overwrite, replace })`. A `null` value
- *   removes the key. A write merges with the latest URL, also before the
- *   page renders again.
+ * - Write: `setQueryParams(query, { overwrite, replace })`. A `null` or
+ *   `undefined` value removes the key (a schema reads an invalid value as
+ *   `undefined`). A write merges with the latest URL, also before the page
+ *   renders again.
  *
  * Prefer `useSearch` from `@tanstack/react-router` where the route is known.
  */
