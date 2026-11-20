@@ -177,21 +177,34 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
       exact: true,
     }),
   ).toHaveAttribute("aria-checked", "true");
+  // A distinct edit after Resume makes autosave write the resumed state, so
+  // the stored draft checked below cannot be the pre-Resume copy (which
+  // never had Option 3).
+  await multiSelect.click();
+  await page.getByRole("option", { name: "Option 3", exact: true }).click();
+  await page.getByRole("button", { name: "Done", exact: true }).click();
+  await expect(
+    multiSelect.getByText("Option 3", { exact: true }),
+  ).toBeVisible();
   const retained = variants.filter(({ id }) => id !== "multiple_dropdown");
   await expect
     .poll(async () => {
       const values = await draftValues(page, questionnaireId);
       return {
         retained: retained.map(({ id }) => values?.[id]?.[0]?.coding),
-        // The surviving dropdown selection keeps its coding too.
-        multipleDropdown: values?.multiple_dropdown?.find(
-          (entry) => entry.value === "Option 2",
-        )?.coding,
+        // The surviving dropdown selection keeps its coding, alongside the
+        // new one.
+        multipleDropdown: values?.multiple_dropdown?.map(
+          (entry) => entry.coding,
+        ),
       };
     })
     .toEqual({
       retained: retained.map(() => coding),
-      multipleDropdown: { ...coding, code: "2", display: "Option 2" },
+      multipleDropdown: [
+        { ...coding, code: "2", display: "Option 2" },
+        { ...coding, code: "3", display: "Option 3" },
+      ],
     });
 });
 
