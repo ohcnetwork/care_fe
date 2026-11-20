@@ -121,6 +121,7 @@ export function ReferralAppointmentContext({
           {context.returnUrl && (
             <HrefLink
               href={context.returnUrl}
+              back={context.returnToReferral}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
               <ArrowLeft className="size-4" />

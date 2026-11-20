@@ -1,4 +1,5 @@
 # Care 3.1
+
 <a href="https://ohc.network/">
   <p align="center">
     <picture>
@@ -83,18 +84,18 @@ REACT_CARE_API_URL=http://127.0.0.1:9000
 
 Once you have the local backend running and loaded dummy data, you can use the following credentials to authenticate:
 
-| Role | Username | Password |
-| :--- | :--- | :--- |
-| **Superuser** | `admin` | `admin` |
-| **Doctor** | `care-doctor` | `Ohcn@123` |
-| **Staff** | `care-staff` | `Ohcn@123` |
-| **Nurse** | `care-nurse` | `Ohcn@123` |
-| **Administrator** | `care-admin` | `Ohcn@123` |
-| **Volunteer** | `care-volunteer` | `Ohcn@123` |
-| **Facility Admin** | `care-fac-admin` | `Ohcn@123` |
-| **Admin** | `care-role-admin` | `Ohcn@123` |
-| **Manager** | `care-role-manager` | `Ohcn@123` |
-| **Member** | `care-role-member` | `Ohcn@123` |
+| Role               | Username            | Password   |
+| :----------------- | :------------------ | :--------- |
+| **Superuser**      | `admin`             | `admin`    |
+| **Doctor**         | `care-doctor`       | `Ohcn@123` |
+| **Staff**          | `care-staff`        | `Ohcn@123` |
+| **Nurse**          | `care-nurse`        | `Ohcn@123` |
+| **Administrator**  | `care-admin`        | `Ohcn@123` |
+| **Volunteer**      | `care-volunteer`    | `Ohcn@123` |
+| **Facility Admin** | `care-fac-admin`    | `Ohcn@123` |
+| **Admin**          | `care-role-admin`   | `Ohcn@123` |
+| **Manager**        | `care-role-manager` | `Ohcn@123` |
+| **Member**         | `care-role-member`  | `Ohcn@123` |
 
 ## Multitenancy for Development
 
@@ -179,6 +180,16 @@ For patient login via phone number:
 - Ensure the issue number is mentioned in the PR with a closing tag by following the PR body template. (Refer: [Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword))
 - Once the code review is done, the PR will be marked with a "Needs Testing" label where it'll be queued for QA testing.
 - Once tested, the PR would be marked with a "Tested" label and would be queued for merge.
+
+## 🧭 Routing
+
+CARE uses [TanStack Router](https://tanstack.com/router/latest/docs/framework/react/overview) with file-based routes:
+
+- Each page is a file in `src/routes/` (staff pages are in `src/routes/_app/`). The file name gives the URL: `facility.$facilityId.overview.tsx` is `/facility/:facilityId/overview`.
+- The dev server generates `src/routeTree.gen.ts` from these files. Commit it with your route changes. Do not edit it by hand.
+- Link to a page with `<Link to="/facility/$facilityId/overview" params={{ facilityId }}>` from `@tanstack/react-router`. In code, navigate with `navigate()` from `@/lib/router/navigate`. TypeScript checks both against the routes.
+
+For the steps to add a page and the helpers to use, see [Routing in AGENTS.md](AGENTS.md#routing-tanstack-router). For the full reference, see [docs/architecture.md](docs/architecture.md#routing-tanstack-router).
 
 ## Translations
 

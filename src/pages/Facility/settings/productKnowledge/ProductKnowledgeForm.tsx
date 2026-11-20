@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { CheckIcon, PlusCircle, X } from "lucide-react";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -36,6 +35,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
@@ -167,6 +167,7 @@ function ProductKnowledgeFormContent({
     navigate({
       to: "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug",
       params: { facilityId, categorySlug },
+      replace: true,
     });
   },
 }: {
@@ -287,6 +288,7 @@ function ProductKnowledgeFormContent({
         navigate({
           to: "/facility/$facilityId/settings/product_knowledge/$slug",
           params: { facilityId, slug: productKnowledge.slug },
+          replace: true,
         });
       },
     },
@@ -1020,21 +1022,16 @@ function ProductKnowledgeFormContent({
 
             <div className="mt-6 flex justify-end space-x-4">
               <Button type="button" variant="outline" asChild>
-                {slug ? (
-                  <Link
-                    to="/facility/$facilityId/settings/product_knowledge/$slug"
-                    params={{ facilityId, slug }}
-                  >
-                    {t("cancel")}
-                  </Link>
-                ) : (
-                  <Link
-                    to="/facility/$facilityId/settings/product_knowledge/categories/$categorySlug"
-                    params={{ facilityId, categorySlug: categorySlug ?? "" }}
-                  >
-                    {t("cancel")}
-                  </Link>
-                )}
+                <HrefLink
+                  href={
+                    slug
+                      ? `/facility/${facilityId}/settings/product_knowledge/${slug}`
+                      : `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug ?? ""}`
+                  }
+                  back
+                >
+                  {t("cancel")}
+                </HrefLink>
               </Button>
               <Button
                 type="submit"

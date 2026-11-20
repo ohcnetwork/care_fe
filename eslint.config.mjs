@@ -162,9 +162,9 @@ const config = [
             "Pass `context: ExtensionContexts.<slot>` in the options. Create a new context if needed.",
         },
         {
-          // Route files: `Route.useParams()` in a lazy route component makes
-          // its chunk import the route file, and every route definition then
-          // loads as a separate chunk at startup.
+          // Route files: `Route.useX()` makes a route component depend on its
+          // route module. With `autoCodeSplitting` on, every route definition
+          // then loads as a separate chunk at startup.
           selector:
             "CallExpression[callee.object.name='Route'][callee.property.name=/^use[A-Z]/]",
           message:

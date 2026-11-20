@@ -1,3 +1,4 @@
+import { HrefLink } from "@/lib/router/HrefLink";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
@@ -111,12 +112,9 @@ function PaymentReconciliationShow({
           <h2 className="text-2xl font-bold">{t("payment_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("payment_may_not_exist")}</p>
           <Button asChild className="mt-4">
-            <Link
-              to="/facility/$facilityId/billing/payments"
-              params={{ facilityId }}
-            >
+            <HrefLink href={`/facility/${facilityId}/billing/payments`} back>
               {t("back_to_payments")}
-            </Link>
+            </HrefLink>
           </Button>
         </div>
       </div>

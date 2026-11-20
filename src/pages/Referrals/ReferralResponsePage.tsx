@@ -74,7 +74,8 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
     canShowCached ? data : undefined,
   );
   const readOnly = canShowCached && !permissionsLoading && !canWrite;
-  const close = () => navigate({ href: detailUrl });
+  // Replaces the response page, so going back does not reopen it.
+  const close = () => navigate({ href: detailUrl, replace: true });
 
   return (
     <Page title={t("referral_respond")} hideTitleOnPage>

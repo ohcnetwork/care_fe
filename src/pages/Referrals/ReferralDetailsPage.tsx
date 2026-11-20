@@ -120,6 +120,7 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
         >
           <HrefLink
             href={backUrl}
+            back
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             <ArrowLeft className="size-4" />
