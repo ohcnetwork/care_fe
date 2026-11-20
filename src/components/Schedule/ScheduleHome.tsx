@@ -17,6 +17,7 @@ import {
 import { usePermissions } from "@/context/PermissionContext";
 import { HrefLink } from "@/lib/router/HrefLink";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
 import { cn } from "@/lib/utils";
 import {
   getAppointmentsPath,
@@ -68,7 +69,7 @@ interface Props {
 
 export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
   const { t } = useTranslation();
-  const [qParams, setQParams] = useQueryParams<ScheduleHomeQueryParams>();
+  const [qParams, setQParams] = useQueryParams(scheduleHomeSearch);
   const view = qParams.tab || "schedule";
   const [month, setMonth] = useState(new Date());
   const { facility } = useCurrentFacility();
