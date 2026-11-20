@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -17,6 +17,7 @@ import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { formatName, isUserOnline } from "@/Utils/utils";
+import { navigate } from "@/lib/router/navigate";
 import { UserReadMinimal } from "@/types/user/user";
 import { Bot } from "lucide-react";
 
@@ -85,7 +86,6 @@ export function UserCard(props: UserCardProps) {
   const additionalResponsibilities =
     responsibilities.length - visibleResponsibilities.length;
   const userDetailsPath = `${facility ? `/facility/${facility}/users/${user.username}` : `/users/${user.username}`}`;
-  const navigate = useNavigate();
 
   return (
     <Card key={user.id} className={cn("h-full", user.deleted && "opacity-60")}>
