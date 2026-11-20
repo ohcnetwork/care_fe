@@ -28,7 +28,7 @@ env:
   REACT_CARE_API_URL: http://localhost:9000
   REACT_ENABLE_QUESTIONNAIRE_DRAFT: "true"
   BACKEND_STARTUP_TIMEOUT: 120
-  TEST_SHARDS: 3
+  TEST_SHARDS: 6
   # Questionnaire actions require this companion backend. Restore develop
   # once that dependency lands, independently of the frontend branch name.
   CARE_BACKEND_REF: ENG-737-backup
@@ -97,7 +97,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        shard: [1, 2, 3, 4, 5, 6]
 
     steps:
       - name: Checkout
