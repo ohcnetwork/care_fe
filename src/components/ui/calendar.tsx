@@ -226,6 +226,8 @@ function Calendar({
     [
       displayYears,
       navView,
+      setDisplayYears,
+      setNavView,
       startMonth,
       endMonth,
       onPrevClick,
