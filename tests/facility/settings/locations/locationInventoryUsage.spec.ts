@@ -10,13 +10,25 @@ function locationRow(page: Page, name: string) {
   });
 }
 
-async function reopenLocation(page: Page, name: string) {
+async function reopenLocation(
+  page: Page,
+  name: string,
+  kind: "location" | "bed" = "location",
+) {
   // Reload so persisted API data, rather than cached form state, is verified.
   await page.reload();
   await page.getByRole("textbox", { name: "Search by name" }).fill(name);
-  await locationRow(page, name)
-    .getByRole("button", { name: "Edit Location" })
-    .click();
+  if (kind === "bed") {
+    // Beds sit in a grid; a tile opens the same edit sheet.
+    await page
+      .locator('[data-cy="location-beds"]')
+      .getByRole("button", { name, exact: true })
+      .click();
+  } else {
+    await locationRow(page, name)
+      .getByRole("button", { name: "Edit Location" })
+      .click();
+  }
 }
 
 async function selectInventoryUsage(page: Page, usage: string) {
@@ -111,7 +123,7 @@ test.describe("Facility Location Inventory Usage", () => {
 
     await test.step("Reload and verify the saved usage on each bed", async () => {
       for (const index of [1, 2]) {
-        await reopenLocation(page, `${bedName} ${index}`);
+        await reopenLocation(page, `${bedName} ${index}`, "bed");
         await expect(
           page.getByRole("combobox", { name: "Inventory Usage", exact: true }),
         ).toContainText("Consumption");
