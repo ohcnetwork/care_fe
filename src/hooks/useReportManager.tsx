@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -21,42 +26,41 @@ import FilePreviewDialog, {
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  ReportRead,
-  ReportReadList,
-  ReportType,
-} from "@/types/emr/report/report";
+import { QueryParams } from "@/Utils/request/types";
+import { ReportReadList, ReportType } from "@/types/emr/report/report";
 import reportApi from "@/types/emr/report/reportApi";
 import { FILE_EXTENSIONS, FileReadMinimal } from "@/types/files/file";
 
 export interface UseReportManagerOptions {
   associatingId: string;
   enabled?: boolean;
-  qParams?: Record<string, string>;
+  /** Server-side filters and pagination (name, is_archived, limit, offset…). */
+  queryParams?: QueryParams;
   reportType?: ReportType;
 }
 
 export interface UseReportManagerResult {
   reports: ReportReadList[];
+  count: number;
   isLoading: boolean;
+  isFetching: boolean;
   viewFile: (report: ReportReadList) => void;
   downloadFile: (report: ReportReadList) => Promise<void>;
-  archiveReport: (report: ReportRead) => void;
-  refetch: () => void;
+  archiveReport: (report: ReportReadList) => void;
+  refetch: () => Promise<unknown>;
   Dialogs: React.ReactNode;
 }
 
 export default function useReportManager({
   associatingId,
   enabled = true,
-  qParams,
+  queryParams,
   reportType = ReportType.DISCHARGE_SUMMARY,
 }: UseReportManagerOptions): UseReportManagerResult {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [archiveDialogOpen, setArchiveDialogOpen] = useState<ReportRead | null>(
-    null,
-  );
+  const [archiveDialogOpen, setArchiveDialogOpen] =
+    useState<ReportReadList | null>(null);
   const [archiveReason, setArchiveReason] = useState("");
   const [archiveReasonError, setArchiveReasonError] = useState("");
 
@@ -77,18 +81,21 @@ export default function useReportManager({
   const {
     data: reportsData,
     isLoading,
+    isFetching,
     refetch,
   } = useQuery({
-    queryKey: ["reports", associatingId, qParams],
-    queryFn: query(reportApi.listReports, {
+    queryKey: ["reports", associatingId, reportType, queryParams],
+    queryFn: query.debounced(reportApi.listReports, {
       queryParams: {
-        ...qParams,
+        ordering: "-created_date",
+        ...queryParams,
         associating_id: associatingId,
         upload_completed: "true",
         report_type: reportType,
       },
     }),
     enabled: enabled && !!associatingId,
+    placeholderData: keepPreviousData,
   });
 
   const retrieveReport = async (reportId: string) => {
@@ -196,7 +203,7 @@ export default function useReportManager({
     });
 
   // Archive report handler
-  const archiveReport = (report: ReportRead) => {
+  const archiveReport = (report: ReportReadList) => {
     setArchiveDialogOpen(report);
   };
 
@@ -326,7 +333,9 @@ export default function useReportManager({
 
   return {
     reports: reportsData?.results || [],
+    count: reportsData?.count ?? 0,
     isLoading,
+    isFetching,
     viewFile,
     downloadFile,
     archiveReport,
