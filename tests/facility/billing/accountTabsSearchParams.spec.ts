@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { selectedMultiFilterBar } from "tests/helper/multiFilter";
+import { waitForApiList } from "tests/helper/searchParams";
 import { getAccountId } from "tests/support/accountId";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -79,5 +80,25 @@ test.describe("Account tabs search params", () => {
 
     await expect(sortByTitle).not.toBeChecked();
     await expect(page).not.toHaveURL(/ordering=/);
+  });
+
+  test("sends only the report filters of the query string to the reports API", async ({
+    page,
+  }) => {
+    const request = waitForApiList(page, "/template_reports/");
+    await page.goto(
+      accountUrl("reports", {
+        status: "draft",
+        ordering: "-created_date",
+        is_archived: "true",
+      }),
+    );
+    const params = new URL((await request).url()).searchParams;
+
+    expect(params.get("associating_id")).toBe(accountId);
+    expect(params.get("is_archived")).toBe("true");
+    expect(params.has("status")).toBe(false);
+    expect(params.has("ordering")).toBe(false);
+    await expect(page).toHaveURL(/[?&]status=draft(&|$)/);
   });
 });
