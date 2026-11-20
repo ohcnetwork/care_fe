@@ -137,8 +137,12 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
   await page.getByRole("option", { name: "Option 1", exact: true }).click();
   await page.getByRole("option", { name: "Option 2", exact: true }).click();
   await page.getByRole("button", { name: "Done", exact: true }).click();
-  await expect(multiSelect.getByText("Option 1", { exact: true })).toBeVisible();
-  await expect(multiSelect.getByText("Option 2", { exact: true })).toBeVisible();
+  await expect(
+    multiSelect.getByText("Option 1", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    multiSelect.getByText("Option 2", { exact: true }),
+  ).toBeVisible();
 
   await expect
     .poll(async () => {
@@ -152,7 +156,9 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
   removeFirstOption = true;
   await page.reload();
   await page.getByRole("button", { name: "Resume", exact: true }).click();
-  await expect(multiSelect.getByText("Option 1", { exact: true })).toBeVisible();
+  await expect(
+    multiSelect.getByText("Option 1", { exact: true }),
+  ).toBeVisible();
   await expect(
     questionBlock(page, "single_chips").getByRole("radio", {
       name: "Option 1",
