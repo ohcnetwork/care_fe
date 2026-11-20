@@ -164,7 +164,7 @@ export default function PrescriptionDetail({ id }: { id: string }) {
   const { t } = useTranslation();
   const { tokenData } = usePatientContext();
 
-  const { data: prescription } = useQuery({
+  const { data: prescription, isLoading } = useQuery({
     queryKey: ["portal-prescription", id],
     queryFn: query(patientPortalApi.getPrescription, {
       pathParams: { id },
@@ -184,11 +184,13 @@ export default function PrescriptionDetail({ id }: { id: string }) {
       backTo="/patient/records?tab=prescriptions"
     >
       <div className="flex flex-col gap-3 p-4">
-        {!prescription ? (
+        {isLoading ? (
           <>
             <Skeleton className="h-28 w-full rounded-2xl" />
             <Skeleton className="h-40 w-full rounded-2xl" />
           </>
+        ) : !prescription ? (
+          <p role="alert">{t("network_failure")}</p>
         ) : (
           <>
             <PrescriptionSummary prescription={prescription} />

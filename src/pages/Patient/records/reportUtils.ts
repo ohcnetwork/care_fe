@@ -2,6 +2,7 @@ import { Activity, FileText, type LucideIcon, SquarePlus } from "lucide-react";
 
 import { isObservationFlagged } from "@/Utils/observationRange";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
+import { ObservationStatus } from "@/types/emr/observation/observation";
 
 type Translate = (key: string) => string;
 
@@ -39,7 +40,8 @@ export function reportIcon(report: DiagnosticReportRead): LucideIcon {
 export function reportFlagSummary(report: DiagnosticReportRead): number {
   return (report.observations ?? []).filter(
     (observation) =>
-      isObservationFlagged(observation) ||
-      (observation.component ?? []).some(isObservationFlagged),
+      observation.status !== ObservationStatus.ENTERED_IN_ERROR &&
+      (isObservationFlagged(observation) ||
+        (observation.component ?? []).some(isObservationFlagged)),
   ).length;
 }

@@ -48,37 +48,57 @@ function usePortalInfiniteList<TItem>({
 }) {
   const { headers } = useAuthHeaders();
 
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey,
-      queryFn: ({ pageParam, signal }) =>
-        query(route, {
-          headers,
-          queryParams: {
-            ...queryParams,
-            limit: PORTAL_PAGE_SIZE,
-            offset: pageParam,
-          },
-          silent: true,
-        })({ signal }),
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const offset = allPages.length * PORTAL_PAGE_SIZE;
-        return offset < lastPage.count ? offset : null;
-      },
-      enabled,
-    });
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetchNextPageError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey,
+    queryFn: ({ pageParam, signal }) =>
+      query(route, {
+        headers,
+        queryParams: {
+          ...queryParams,
+          limit: PORTAL_PAGE_SIZE,
+          offset: pageParam,
+        },
+        silent: true,
+      })({ signal }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const offset = allPages.reduce(
+        (total, page) => total + page.results.length,
+        0,
+      );
+      return offset < lastPage.count && lastPage.results.length ? offset : null;
+    },
+    enabled,
+  });
 
   return useMemo(
     () => ({
       isLoading,
+      isError,
+      isFetchNextPageError,
       count: data?.pages[0]?.count ?? 0,
       items: data?.pages.flatMap((page) => page.results) ?? [],
       fetchNextPage,
       hasNextPage,
       isFetchingNextPage,
     }),
-    [data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage],
+    [
+      data,
+      isLoading,
+      isError,
+      isFetchNextPageError,
+      fetchNextPage,
+      hasNextPage,
+      isFetchingNextPage,
+    ],
   );
 }
 
@@ -86,7 +106,7 @@ export function usePatientAppointments() {
   const { selectedPatient } = usePatientContext();
   const { token, phoneNumber, headers } = useAuthHeaders();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["appointment", phoneNumber],
     queryFn: query(PublicAppointmentApi.getAppointments, { headers }),
     enabled: !!token,
@@ -109,13 +129,14 @@ export function usePatientAppointments() {
 
     return {
       isLoading,
+      isError,
       appointments,
       upcoming,
       // Most recent first — history reads backwards from today.
       history: appointments.filter((a) => !isUpcoming(a)).reverse(),
       nextAppointment: upcoming[0],
     };
-  }, [data, isLoading, selectedPatient?.id]);
+  }, [data, isLoading, isError, selectedPatient?.id]);
 }
 
 export function usePatientPrescriptions({
@@ -227,6 +248,7 @@ export function usePatientEncounterRecords(encounter?: string) {
   const {
     items: prescriptions,
     isLoading: isLoadingPrescriptions,
+    isError: isErrorPrescriptions,
     ...prescriptionPages
   } = usePortalInfiniteList({
     queryKey: ["portal-encounter-prescriptions", phoneNumber, encounter],
@@ -238,6 +260,7 @@ export function usePatientEncounterRecords(encounter?: string) {
   const {
     items: reports,
     isLoading: isLoadingReports,
+    isError: isErrorReports,
     ...reportPages
   } = usePortalInfiniteList({
     queryKey: ["portal-encounter-diagnostic-reports", phoneNumber, encounter],
@@ -248,6 +271,7 @@ export function usePatientEncounterRecords(encounter?: string) {
 
   return {
     isLoading: enabled && (isLoadingPrescriptions || isLoadingReports),
+    isError: isErrorPrescriptions || isErrorReports,
     prescriptions,
     reports,
     prescriptionPages,

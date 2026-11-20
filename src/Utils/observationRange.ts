@@ -16,7 +16,10 @@ const NORMAL_INTERPRETATION = /^norm/i;
  * shared type declares numbers, so coerce defensively.
  */
 const toNumber = (value: unknown): number | undefined => {
-  if (value === null || value === undefined || value === "") {
+  if (
+    (typeof value !== "number" && typeof value !== "string") ||
+    (typeof value === "string" && value.trim() === "")
+  ) {
     return undefined;
   }
   const parsed = Number(value);
@@ -36,13 +39,16 @@ function matchingBand(
     return undefined;
   }
 
-  return (result.reference_range ?? []).find((range) => {
+  const matches = (result.reference_range ?? []).filter((range) => {
     const min = toNumber(range.min);
     const max = toNumber(range.max);
     return (
-      (min === undefined || value >= min) && (max === undefined || value <= max)
+      (min !== undefined || max !== undefined) &&
+      (min === undefined || value >= min) &&
+      (max === undefined || value <= max)
     );
   });
+  return matches.length === 1 ? matches[0] : undefined;
 }
 
 /**
@@ -81,8 +87,8 @@ export function formatRangeBounds(
   min: string | number | undefined | null,
   max: string | number | undefined | null,
 ): string {
-  const hasMin = min !== null && min !== undefined;
-  const hasMax = max !== null && max !== undefined;
+  const hasMin = min !== null && min !== undefined && String(min).trim() !== "";
+  const hasMax = max !== null && max !== undefined && String(max).trim() !== "";
   if (hasMin && hasMax) return `${min} - ${max}`;
   if (hasMin) return `> ${min}`;
   if (hasMax) return `< ${max}`;

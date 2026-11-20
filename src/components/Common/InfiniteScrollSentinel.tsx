@@ -1,13 +1,16 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 interface InfiniteScrollSentinelProps {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
+  isFetchNextPageError?: boolean;
   fetchNextPage: () => void;
   /** Applied to the placeholder so the sentinel matches the list's row height. */
   className?: string;
@@ -21,18 +24,40 @@ interface InfiniteScrollSentinelProps {
 export function InfiniteScrollSentinel({
   hasNextPage,
   isFetchingNextPage,
+  isFetchNextPageError,
   fetchNextPage,
   className,
 }: InfiniteScrollSentinelProps) {
   const { ref, inView } = useInView();
+  const { t } = useTranslation();
 
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
+    if (
+      inView &&
+      hasNextPage &&
+      !isFetchingNextPage &&
+      !isFetchNextPageError
+    ) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [
+    inView,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    fetchNextPage,
+  ]);
 
   if (!hasNextPage) return null;
+
+  if (isFetchNextPageError) {
+    return (
+      <div role="alert">
+        <p>{t("network_failure")}</p>
+        <Button onClick={() => fetchNextPage()}>{t("retry")}</Button>
+      </div>
+    );
+  }
 
   return (
     <div ref={ref}>

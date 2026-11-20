@@ -91,8 +91,15 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
       return;
     }
 
-    await navigator.clipboard.writeText(`${text}\n${url}`);
-    toast.success(t("copied_to_clipboard"));
+    try {
+      if (!navigator.clipboard) {
+        throw new Error("Clipboard unavailable");
+      }
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      toast.success(t("copied_to_clipboard"));
+    } catch {
+      toast.error(t("network_failure"));
+    }
   };
 
   return (

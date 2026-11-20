@@ -86,6 +86,7 @@ export default function PatientRecords() {
   const {
     prescriptions,
     isLoading: isLoadingPrescriptions,
+    isError: isErrorPrescriptions,
     ...prescriptionPages
   } = usePatientPrescriptions({
     status: PRESCRIPTION_STATUSES,
@@ -95,6 +96,7 @@ export default function PatientRecords() {
     reports,
     count: reportCount,
     isLoading: isLoadingReports,
+    isError: isErrorReports,
     ...reportPages
   } = usePatientDiagnosticReports({
     status:
@@ -130,6 +132,8 @@ export default function PatientRecords() {
           <>
             {isLoadingPrescriptions ? (
               <Skeleton className="h-24 w-full rounded-2xl" />
+            ) : isErrorPrescriptions && !prescriptions.length ? (
+              <p role="alert">{t("network_failure")}</p>
             ) : prescriptions.length ? (
               <>
                 {groupByDate(prescriptions).map(({ date, items }) => (
@@ -195,6 +199,8 @@ export default function PatientRecords() {
 
             {isLoadingReports ? (
               <Skeleton className="h-20 w-full rounded-2xl" />
+            ) : isErrorReports && !reports.length ? (
+              <p role="alert">{t("network_failure")}</p>
             ) : reports.length ? (
               <>
                 {groupByDate(reports).map(({ date, items }) => (

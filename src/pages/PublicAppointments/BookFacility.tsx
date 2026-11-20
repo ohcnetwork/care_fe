@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronRight, Info, Search } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { InfiniteScrollSentinel } from "@/components/Common/InfiniteScrollSentinel";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
@@ -50,28 +51,49 @@ export default function BookFacility() {
   // Default to the patient's own district; a state-level deployment has far too
   // many facilities to list, and the filter lets them widen or move area.
   const district = districtOrganization(selectedPatient);
-  const organization = qParams.organization ?? district?.id;
+  const organization =
+    qParams.organization === "all"
+      ? undefined
+      : qParams.organization ?? district?.id;
 
   const facilityType =
     qParams.facility_type && qParams.facility_type !== "undefined"
       ? qParams.facility_type
       : undefined;
 
-  const { data, isLoading } = useQuery({
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetchNextPageError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["facilities", organization, facilityType, search],
-    queryFn: query.debounced(publicFacilityApi.getAll, {
-      queryParams: {
-        ...(search && { name: search }),
-        ...(organization && { organization }),
-        ...(facilityType && { facility_type: facilityType }),
-        page: 1,
-        limit: RESULTS_PER_PAGE_LIMIT,
-        offset: 0,
-      },
-    }),
+    queryFn: ({ pageParam, signal }) =>
+      query.debounced(publicFacilityApi.getAll, {
+        queryParams: {
+          ...(search && { name: search }),
+          ...(organization && { organization }),
+          ...(facilityType && { facility_type: facilityType }),
+          limit: RESULTS_PER_PAGE_LIMIT,
+          offset: pageParam,
+        },
+      })({ signal }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      const offset = pages.reduce(
+        (total, page) => total + page.results.length,
+        0,
+      );
+      return offset < lastPage.count && lastPage.results.length
+        ? offset
+        : undefined;
+    },
   });
 
-  const facilities = data?.results ?? [];
+  const facilities = data?.pages.flatMap((page) => page.results) ?? [];
 
   return (
     <BookingStepLayout
@@ -89,7 +111,13 @@ export default function BookFacility() {
             skipLevels={[]}
             selected={organization}
             onChange={(filter) => {
-              const merged = { ...qParams, ...filter };
+              const merged = {
+                ...qParams,
+                ...filter,
+                ...("organization" in filter && {
+                  organization: filter.organization || "all",
+                }),
+              };
               setQParams(
                 {
                   ...(merged.organization && {
@@ -142,8 +170,11 @@ export default function BookFacility() {
             <Skeleton className="h-20 w-full rounded-2xl" />
             <Skeleton className="h-20 w-full rounded-2xl" />
           </>
+        ) : isError && !facilities.length ? (
+          <p role="alert">{t("network_failure")}</p>
         ) : facilities.length ? (
-          facilities.map((facility) => (
+          <>
+            {facilities.map((facility) => (
             <Link
               key={facility.id}
               href={`/patient/book/${facility.id}`}
@@ -163,7 +194,11 @@ export default function BookFacility() {
               </div>
               <ChevronRight className="size-4 shrink-0 text-gray-400" />
             </Link>
-          ))
+            ))}
+            <InfiniteScrollSentinel
+              {...{ fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError }}
+            />
+          </>
         ) : (
           <p className="py-8 text-center text-sm text-gray-600">
             {t("no_facilities_found")}

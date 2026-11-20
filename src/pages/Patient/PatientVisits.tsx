@@ -44,7 +44,7 @@ function groupVisitsByYear(history: PublicAppointment[]) {
 export default function PatientVisits() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<VisitsTab>("upcoming");
-  const { upcoming, history, isLoading } = usePatientAppointments();
+  const { upcoming, history, isLoading, isError } = usePatientAppointments();
 
   return (
     <PatientAppShell
@@ -69,6 +69,8 @@ export default function PatientVisits() {
       <div className="flex flex-col gap-3 p-4">
         {isLoading ? (
           <Skeleton className="h-40 w-full rounded-2xl" />
+        ) : isError ? (
+          <p role="alert">{t("network_failure")}</p>
         ) : tab === "upcoming" ? (
           upcoming.length ? (
             upcoming.map((appointment) => (

@@ -52,7 +52,7 @@ export default function VisitSummary({
   appointmentId: string;
 }) {
   const { t } = useTranslation();
-  const { appointments, isLoading } = usePatientAppointments();
+  const { appointments, isLoading, isError } = usePatientAppointments();
 
   const appointment = appointments.find((entry) => entry.id === appointmentId);
 
@@ -70,6 +70,7 @@ export default function VisitSummary({
     prescriptionPages,
     reportPages,
     isLoading: isLoadingRecords,
+    isError: isRecordsError,
   } = usePatientEncounterRecords(encounterId);
 
   const isPractitionerVisit =
@@ -78,7 +79,9 @@ export default function VisitSummary({
   // "Upcoming" here means the visit has not been closed out — the pass is still
   // the thing the patient needs at the counter, right through check-in.
   const isUpcoming =
-    !!appointment && UpcomingAppointmentStatuses.includes(appointment.status);
+    !!appointment &&
+    !!visitDate?.isAfter(dayjs()) &&
+    UpcomingAppointmentStatuses.includes(appointment.status);
 
   const isPassVisible = isUpcoming;
   const canReschedule = isPractitionerVisit && isUpcoming;
@@ -92,6 +95,8 @@ export default function VisitSummary({
       <div className="flex flex-1 flex-col gap-3 p-4">
         {isLoading ? (
           <Skeleton className="h-32 w-full rounded-2xl" />
+        ) : isError ? (
+          <p role="alert">{t("network_failure")}</p>
         ) : !appointment ? (
           <p className="py-10 text-center text-sm text-gray-600">
             {t("patient_visits__not_found")}
@@ -188,6 +193,7 @@ export default function VisitSummary({
             {isLoadingRecords && (
               <Skeleton className="h-[62px] w-full rounded-[14px]" />
             )}
+            {isRecordsError && <p role="alert">{t("network_failure")}</p>}
 
             {(visitPrescriptions.length > 0 || visitReports.length > 0) && (
               <>

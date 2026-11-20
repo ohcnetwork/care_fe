@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { ChevronRight, Info } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -6,6 +6,9 @@ import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { InfiniteScrollSentinel } from "@/components/Common/InfiniteScrollSentinel";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
@@ -34,14 +37,34 @@ export default function BookPractitioner({
     }),
   });
 
-  const { data, isLoading } = useQuery({
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetchNextPageError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["schedulable-users", facilityId],
-    queryFn: query(publicFacilityApi.listSchedulableUsers, {
-      pathParams: { facilityId },
-    }),
+    queryFn: ({ pageParam, signal }) =>
+      query(publicFacilityApi.listSchedulableUsers, {
+        pathParams: { facilityId },
+        queryParams: { limit: RESULTS_PER_PAGE_LIMIT, offset: pageParam },
+      })({ signal }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      const offset = pages.reduce(
+        (total, page) => total + page.results.length,
+        0,
+      );
+      return offset < lastPage.count && lastPage.results.length
+        ? offset
+        : undefined;
+    },
   });
 
-  const practitioners = data?.results ?? [];
+  const practitioners = data?.pages.flatMap((page) => page.results) ?? [];
 
   return (
     <BookingStepLayout
@@ -67,8 +90,11 @@ export default function BookPractitioner({
             <Skeleton className="h-[76px] w-full rounded-2xl" />
             <Skeleton className="h-[76px] w-full rounded-2xl" />
           </>
+        ) : isError && !practitioners.length ? (
+          <p role="alert">{t("network_failure")}</p>
         ) : practitioners.length ? (
-          practitioners.map((practitioner) => (
+          <>
+            {practitioners.map((practitioner) => (
             <Link
               key={practitioner.id}
               href={`/facility/${facilityId}/appointments/${practitioner.id}/book-appointment`}
@@ -86,7 +112,11 @@ export default function BookPractitioner({
               </span>
               <ChevronRight className="size-4 shrink-0 text-gray-400" />
             </Link>
-          ))
+            ))}
+            <InfiniteScrollSentinel
+              {...{ fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError }}
+            />
+          </>
         ) : (
           <div className="flex items-start gap-2.5 rounded-2xl bg-gray-100 px-3.5 py-3">
             <Info className="mt-0.5 size-4 shrink-0 text-gray-500" />

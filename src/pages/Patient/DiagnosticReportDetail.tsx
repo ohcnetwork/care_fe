@@ -12,6 +12,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import { ObservationStatus } from "@/types/emr/observation/observation";
 import patientPortalApi from "@/types/emr/patientPortal/patientPortalApi";
 
 import { reportTitle } from "./records/reportUtils";
@@ -38,7 +39,9 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
     enabled: !!tokenData?.token,
   });
 
-  const observations = report?.observations ?? [];
+  const observations = (report?.observations ?? []).filter(
+    (observation) => observation.status !== ObservationStatus.ENTERED_IN_ERROR,
+  );
   const collectedAt = observations
     .map((observation) => observation.effective_datetime)
     .filter(Boolean)
@@ -50,11 +53,13 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
       backTo="/patient/records?tab=reports"
     >
       <div className="flex flex-col gap-3 p-4">
-        {isLoading || !report ? (
+        {isLoading ? (
           <>
             <Skeleton className="h-16 w-full rounded-2xl" />
             <Skeleton className="h-64 w-full rounded-2xl" />
           </>
+        ) : !report ? (
+          <p role="alert">{t("network_failure")}</p>
         ) : (
           <>
             <div className="flex flex-wrap gap-4 rounded-2xl border border-gray-200 bg-white p-4">
