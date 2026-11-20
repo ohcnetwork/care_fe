@@ -20,6 +20,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { referralContextSearch } from "@/lib/router/search/referral";
 import referralApi from "@/types/emr/referral/referralApi";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
@@ -33,12 +34,7 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
       referralEncounterId,
       referralFacilityId,
     },
-  ] = useQueryParams<{
-    sourceUrl?: string;
-    referralAppointmentId?: string;
-    referralEncounterId?: string;
-    referralFacilityId?: string;
-  }>();
+  ] = useQueryParams(referralContextSearch);
   const hasVisitContext = [
     referralAppointmentId,
     referralEncounterId,
