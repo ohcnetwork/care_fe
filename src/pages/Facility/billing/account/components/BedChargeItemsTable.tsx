@@ -29,6 +29,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/ui/empty-state";
 
 import useFilters from "@/hooks/useFilters";
+import { chargeItemListSearch } from "@/lib/router/search/billing";
 
 import query from "@/Utils/request/query";
 import {
@@ -208,6 +209,7 @@ function BedChargeItemsTable({
     {},
   );
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: chargeItemListSearch,
     limit: 15,
   });
   const [addChargeItemState, setAddChargeItemState] = useState<{

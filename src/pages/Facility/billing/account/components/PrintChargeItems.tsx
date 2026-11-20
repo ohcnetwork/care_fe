@@ -19,6 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import BackButton from "@/components/Common/BackButton";
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
+import { chargeItemPrintSearch } from "@/lib/router/search/billing";
 import {
   buildChargeItemsPrintContent,
   getCategoryTitle,
@@ -93,7 +94,9 @@ export const PrintChargeItems = (props: {
   const [showAllStatuses, setShowAllStatuses] = useState(false);
   const selectedStatuses = showAllStatuses ? ALL_STATUSES : ACTIVE_STATUSES;
 
-  const { qParams, updateQuery } = useFilters({});
+  const { qParams, updateQuery } = useFilters({
+    schema: chargeItemPrintSearch,
+  });
 
   const { data: account, isLoading: isLoadingAccount } = useQuery({
     queryKey: ["account", accountId],

@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import {
-  openMultiFilter,
+  applyOptionFilter,
   selectedMultiFilterBar,
 } from "tests/helper/multiFilter";
 import { getAccountId } from "tests/support/accountId";
@@ -24,11 +24,8 @@ async function waitForInvoiceRows(page: Page) {
   await expect(invoiceRows(page).first()).toBeVisible();
 }
 
-async function applyInvoiceStatusFilter(page: Page, status: RegExp) {
-  await openMultiFilter(page, /invoice status/i);
-  await page.getByRole("option", { name: status }).click();
-  await page.keyboard.press("Escape");
-}
+const applyInvoiceStatusFilter = (page: Page, status: RegExp) =>
+  applyOptionFilter(page, /invoice status/i, status);
 
 /** Every listed invoice has `status`; its badge is the first in the row. */
 async function expectAllRowsWithStatus(page: Page, status: string) {

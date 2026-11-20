@@ -28,6 +28,7 @@ import {
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { invoiceChargeItemSearch } from "@/lib/router/search/billing";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import AddChargeItemsBillingSheet from "@/pages/Facility/billing/account/components/AddChargeItemsBillingSheet";
@@ -65,6 +66,7 @@ export default function AddChargeItemSheet({
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = React.useState(false);
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: invoiceChargeItemSearch,
     limit: 15,
   });
   useShortcutSubContext("facility:billing:invoice");

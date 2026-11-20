@@ -32,6 +32,7 @@ import {
 } from "@/components/Common/Table";
 
 import useFilters from "@/hooks/useFilters";
+import { paymentListSearch } from "@/lib/router/search/billing";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
@@ -89,6 +90,7 @@ export default function PaymentsData({
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [isChangeAccountOpen, setIsChangeAccountOpen] = useState(false);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: paymentListSearch,
     limit: RESULTS_PER_PAGE_LIMIT,
   });
 
@@ -100,7 +102,7 @@ export default function PaymentsData({
   const { data: selectedUser } = useQuery({
     queryKey: ["user", qParams.created_by_username],
     queryFn: query(userApi.get, {
-      pathParams: { username: qParams.created_by_username },
+      pathParams: { username: qParams.created_by_username ?? "" },
     }),
     enabled: !!qParams.created_by_username && !createdBy,
   });

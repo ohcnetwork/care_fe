@@ -1,3 +1,4 @@
+import { useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,6 @@ import Page from "@/components/Common/Page";
 import PaymentsData from "./PaymentsData";
 
 import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 
 function PaymentReconciliationList({
   facilityId,
@@ -18,8 +18,9 @@ function PaymentReconciliationList({
   hideHeader?: boolean;
 }) {
   const { t } = useTranslation();
-  const [urlParams] = useQueryParams();
-  const urlAccountId = urlParams.accountId;
+  const { accountId: urlAccountId } = useSearch({
+    from: "/_app/facility/$facilityId/billing/payments/",
+  });
 
   // Use the prop accountId if provided, otherwise use from URL params
   const effectiveAccountId = accountId || urlAccountId;

@@ -70,6 +70,7 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareApps } from "@/hooks/useCareApps";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { invoiceShowSearch } from "@/lib/router/search/billing";
 import { cn } from "@/lib/utils";
 import { isAccountActiveAndBillable } from "@/pages/Facility/billing/account/utils";
 import {
@@ -112,10 +113,7 @@ function InvoiceShow({
   paymentType?: "pay";
 }) {
   const { t } = useTranslation();
-  const [qParams] = useQueryParams<{
-    sourceUrl?: string;
-    relatedInvoices?: string;
-  }>();
+  const [qParams] = useQueryParams(invoiceShowSearch);
   const openPaymentSheet = () => {
     navigate({
       to: "/facility/$facilityId/billing/invoices/$invoiceId/pay",

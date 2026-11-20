@@ -42,6 +42,7 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import useFilters from "@/hooks/useFilters";
+import { accountListSearch } from "@/lib/router/search/billing";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
 import {
@@ -87,6 +88,7 @@ export function AccountList({
   const [editingAccount, setEditingAccount] =
     React.useState<AccountRead | null>(null);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: accountListSearch,
     limit: 15,
     defaultQueryParams: { status: "active" },
   });
