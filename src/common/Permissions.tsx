@@ -65,6 +65,20 @@ export const PERMISSION_READ_QUESTIONNAIRE = "can_read_questionnaire";
 export const PERMISSION_SUBMIT_QUESTIONNAIRE = "can_submit_questionnaire";
 export const PERMISSION_MANAGE_QUESTIONNAIRE = "can_manage_questionnaire";
 
+// ValueSet Permissions
+export const PERMISSION_WRITE_VALUESET = "can_write_valueset";
+
+// Immunization Policy Permissions
+export const PERMISSION_READ_IMMUNIZATION_POLICY =
+  "can_read_immunization_policy";
+export const PERMISSION_WRITE_IMMUNIZATION_POLICY =
+  "can_write_immunization_policy";
+
+// Immunization Permissions
+export const PERMISSION_WRITE_IMMUNIZATION = "can_write_immunization";
+export const PERMISSION_WRITE_IMMUNIZATION_RECOMMENDATION =
+  "can_write_immunization_recommendation";
+
 // Appointment Permissions
 export const PERMISSION_LIST_BOOKING = "can_list_booking";
 export const PERMISSION_WRITE_BOOKING = "can_write_booking";
@@ -98,6 +112,12 @@ export const PERMISSION_LIST_TOKEN_CATEGORIES = "can_list_token_category";
 export const PERMISSION_WRITE_TOKEN = "can_write_token";
 export const PERMISSION_LIST_TOKENS = "can_list_token";
 
+// Patient Identifier Config Permissions
+export const PERMISSION_WRITE_PATIENT_IDENTIFIER_CONFIG =
+  "can_write_patient_identifier_config";
+export const PERMISSION_READ_PATIENT_IDENTIFIER_CONFIG =
+  "can_read_patient_identifier_config";
+
 // Healthcare Permissions
 export const PERMISSION_WRITE_HEALTHCARE_SERVICE =
   "can_write_healthcare_service";
@@ -116,7 +136,17 @@ export const PERMISSION_READ_ACCOUNT = "can_read_account";
 export const PERMISSION_MANAGE_LOCKED_INVOICE =
   "can_manage_locked_invoice_in_facility";
 
+export const PERMISSION_MANAGE_REFERRAL_AVAILABILITY =
+  "can_manage_referral_availability";
+export const PERMISSION_CREATE_REFERRAL = "can_create_referral";
+export const PERMISSION_READ_REFERRAL = "can_read_referral";
+export const PERMISSION_WRITE_REFERRAL = "can_write_referral";
+
 export interface Permissions {
+  canManageReferralAvailability: boolean;
+  canCreateReferral: boolean;
+  canReadReferral: boolean;
+  canWriteReferral: boolean;
   // Patient Permissions
   /** Permission slug: "can_create_patient" */
   canCreatePatient: boolean;
@@ -207,6 +237,20 @@ export interface Permissions {
   /** Permission slug: "can_manage_questionnaire" */
   canManageQuestionnaire: boolean;
 
+  // ValueSet Permissions
+  /** Permission slug: "can_write_valueset" */
+  canWriteValueSet: boolean;
+
+  // Immunization Policy Permissions
+  canReadImmunizationPolicy: boolean;
+  canWriteImmunizationPolicy: boolean;
+
+  // Immunization Permissions
+  /** Permission slug: "can_write_immunization" */
+  canWriteImmunization: boolean;
+  /** Permission slug: "can_write_immunization_recommendation" */
+  canWriteImmunizationRecommendation: boolean;
+
   // Appointment Permissions
   /** Permission slug: "can_list_booking" */
   canViewAppointments: boolean;
@@ -258,6 +302,12 @@ export interface Permissions {
   /** Permission slug: "can_list_token" */
   canListTokens: boolean;
 
+  // Patient Identifier Config Permissions
+  /** Permission slug: "can_write_patient_identifier_config" */
+  canWritePatientIdentifierConfig: boolean;
+  /** Permission slug: "can_read_patient_identifier_config" */
+  canReadPatientIdentifierConfig: boolean;
+
   /** Permission slug: "can_write_healthcare_service" */
   canWriteHealthcareService: boolean;
   /** Permission slug: "can_read_healthcare_service" */
@@ -289,6 +339,13 @@ export function getPermissions(
   permissions: string[],
 ): Permissions {
   return {
+    canManageReferralAvailability: hasPermission(
+      PERMISSION_MANAGE_REFERRAL_AVAILABILITY,
+      permissions,
+    ),
+    canCreateReferral: hasPermission(PERMISSION_CREATE_REFERRAL, permissions),
+    canReadReferral: hasPermission(PERMISSION_READ_REFERRAL, permissions),
+    canWriteReferral: hasPermission(PERMISSION_WRITE_REFERRAL, permissions),
     // Patients
     canCreatePatient: hasPermission(PERMISSION_CREATE_PATIENT, permissions),
     canWritePatient: hasPermission(PERMISSION_WRITE_PATIENT, permissions),
@@ -422,6 +479,28 @@ export function getPermissions(
       permissions,
     ),
 
+    // ValueSets
+    canWriteValueSet: hasPermission(PERMISSION_WRITE_VALUESET, permissions),
+
+    canReadImmunizationPolicy: hasPermission(
+      PERMISSION_READ_IMMUNIZATION_POLICY,
+      permissions,
+    ),
+    canWriteImmunizationPolicy: hasPermission(
+      PERMISSION_WRITE_IMMUNIZATION_POLICY,
+      permissions,
+    ),
+
+    // Immunizations
+    canWriteImmunization: hasPermission(
+      PERMISSION_WRITE_IMMUNIZATION,
+      permissions,
+    ),
+    canWriteImmunizationRecommendation: hasPermission(
+      PERMISSION_WRITE_IMMUNIZATION_RECOMMENDATION,
+      permissions,
+    ),
+
     // Appointments
     canViewAppointments: hasPermission(PERMISSION_LIST_BOOKING, permissions),
     canWriteAppointment: hasPermission(PERMISSION_WRITE_BOOKING, permissions),
@@ -475,6 +554,16 @@ export function getPermissions(
     ),
     canWriteToken: hasPermission(PERMISSION_WRITE_TOKEN, permissions),
     canListTokens: hasPermission(PERMISSION_LIST_TOKENS, permissions),
+
+    // Patient Identifier Config
+    canWritePatientIdentifierConfig: hasPermission(
+      PERMISSION_WRITE_PATIENT_IDENTIFIER_CONFIG,
+      permissions,
+    ),
+    canReadPatientIdentifierConfig: hasPermission(
+      PERMISSION_READ_PATIENT_IDENTIFIER_CONFIG,
+      permissions,
+    ),
 
     //Healthcare Services
     canWriteHealthcareService: hasPermission(

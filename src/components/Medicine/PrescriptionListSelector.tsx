@@ -13,12 +13,12 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { PrescritionList } from "@/types/emr/prescription/prescription";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+import type { PrescriptionList } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronDown, ReceiptTextIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useOnInView } from "react-intersection-observer";
@@ -46,7 +46,7 @@ interface PrescriptionListSelectorProps {
   encounterId: string;
   facilityId?: string;
   selectedPrescriptionId?: string;
-  onSelectPrescription: (prescription: PrescritionList | undefined) => void;
+  onSelectPrescription: (prescription: PrescriptionList | undefined) => void;
 }
 
 export default function PrescriptionListSelector({
@@ -60,30 +60,16 @@ export default function PrescriptionListSelector({
   const [openDrawer, setOpenDrawer] = React.useState(false);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
+    useInfiniteList({
       queryKey: ["infinite-prescriptions", patientId, encounterId, facilityId],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(prescriptionApi.list, {
-          pathParams: { patientId },
-          queryParams: {
-            encounter: encounterId,
-            facility: facilityId,
-            limit: String(RESULTS_PER_PAGE_LIMIT),
-            offset: String(pageParam),
-          },
-        })({
-          signal,
-        });
-        return response;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
+      ...query.infinite(prescriptionApi.list, {
+        pathParams: { patientId },
+        queryParams: { encounter: encounterId, facility: facilityId },
+        pageSize: RESULTS_PER_PAGE_LIMIT,
+      }),
     });
 
-  const prescriptions = data?.pages.flatMap((page) => page.results) ?? [];
+  const prescriptions = data?.results ?? [];
 
   const loadMoreRef = useOnInView<HTMLDivElement>((inView) => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -92,7 +78,7 @@ export default function PrescriptionListSelector({
   });
 
   const handleSelectPrescription = React.useCallback(
-    (prescription: PrescritionList | undefined) => {
+    (prescription: PrescriptionList | undefined) => {
       onSelectPrescription(prescription);
       setOpenDrawer(false);
     },
@@ -116,7 +102,7 @@ export default function PrescriptionListSelector({
   return (
     <>
       <div className="hidden lg:block h-full overflow-y-auto pr-1">
-        <PrescriptionList
+        <PrescriptionListComponent
           prescriptions={prescriptions}
           selectedPrescriptionId={selectedPrescriptionId}
           onSelectPrescription={onSelectPrescription}
@@ -176,15 +162,15 @@ export default function PrescriptionListSelector({
             )}
           </DrawerTrigger>
 
-          <DrawerContent className="max-h-[85vh]">
-            <DrawerHeader>
-              <DrawerTitle>{t("prescription")}</DrawerTitle>
+          <DrawerContent height="fixed">
+            <DrawerHeader showCloseButton className="border-b shadow-2xs">
+              <DrawerTitle>{t("select_prescription")}</DrawerTitle>
             </DrawerHeader>
-            <div className="overflow-y-auto pr-2">
-              <PrescriptionList
+            <div className="overflow-y-auto">
+              <PrescriptionListComponent
+                prescriptions={prescriptions}
                 loadMoreRef={loadMoreRef}
                 isFetchingNextPage={isFetchingNextPage}
-                prescriptions={prescriptions}
                 selectedPrescriptionId={selectedPrescriptionId}
                 onSelectPrescription={handleSelectPrescription}
               />
@@ -202,16 +188,16 @@ interface PrescriptionListItem {
   tags?: TagConfig[];
 }
 
-function PrescriptionList({
+function PrescriptionListComponent({
   prescriptions,
   selectedPrescriptionId,
   onSelectPrescription,
   isFetchingNextPage,
   loadMoreRef,
 }: {
-  prescriptions: PrescritionList[];
+  prescriptions: PrescriptionList[];
   selectedPrescriptionId: string | undefined;
-  onSelectPrescription: (prescription: PrescritionList | undefined) => void;
+  onSelectPrescription: (prescription: PrescriptionList | undefined) => void;
   isFetchingNextPage: boolean;
   loadMoreRef: React.Ref<HTMLDivElement>;
 }) {

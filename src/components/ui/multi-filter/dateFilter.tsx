@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
+import { parseLocalDate } from "@/Utils/utils";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -25,6 +26,7 @@ import {
   FilterConfig,
   FilterDateRange,
   FilterValues,
+  isSameDateRange,
   longDateRangeOptions,
 } from "./utils/Utils";
 
@@ -58,11 +60,9 @@ function CustomDateRange({
         <Calendar
           mode="range"
           selected={{ from: dateFrom, to: dateTo }}
-          onSelect={(date) => {
-            if (date) {
-              handleDateChange(date);
-            }
-          }}
+          onSelect={(range, triggerDate) =>
+            handleDateChange(range ?? { from: triggerDate, to: undefined })
+          }
           styles={{
             day: {
               width: "40px",
@@ -97,7 +97,7 @@ function CustomDateRange({
               value={dateFrom ? format(dateFrom, "yyyy-MM-dd") : ""}
               onChange={(e) => {
                 if (e.target.value) {
-                  setDateFrom(new Date(e.target.value));
+                  setDateFrom(parseLocalDate(e.target.value));
                 } else {
                   setDateFrom(undefined);
                 }
@@ -115,7 +115,7 @@ function CustomDateRange({
               value={dateTo ? format(dateTo, "yyyy-MM-dd") : ""}
               onChange={(e) => {
                 if (e.target.value) {
-                  setDateTo(new Date(e.target.value));
+                  setDateTo(parseLocalDate(e.target.value));
                 } else {
                   setDateTo(undefined);
                 }
@@ -169,7 +169,7 @@ function DateRangeOptions({
   isCustomDateRangeSelected: boolean;
   filter: FilterConfig;
   handleDateRangeSelect: (option: DateRangeOption) => void;
-  isSameRange: (option: DateRangeOption) => boolean | undefined;
+  isSameRange: (option: DateRangeOption) => boolean;
 }) {
   const { t } = useTranslation();
   const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
@@ -259,22 +259,25 @@ export default function RenderDateFilter({
     setDateTo(date?.to);
   };
 
-  const isSameRange = (option: DateRangeOption) => {
-    const { from, to } = option.getDateRange();
-    return (
-      dateFrom && isSameDay(dateFrom, from) && dateTo && isSameDay(dateTo, to)
-    );
-  };
+  const isSameRange = (option: DateRangeOption) =>
+    isSameDateRange({ from: dateFrom, to: dateTo }, option.getDateRange());
 
   const isCustomDateRangeSelected =
     selected.from || selected.to
       ? !options.some((option) => isSameRange(option))
       : false;
 
+  // Sync from the applied filter by date value, not object identity: the
+  // parent hands over a new `selected` object on every render, which would
+  // otherwise wipe a custom range the user is still typing.
+  const selectedFrom = selected.from?.getTime();
+  const selectedTo = selected.to?.getTime();
   useEffect(() => {
-    setDateFrom(selected.from);
-    setDateTo(selected.to);
-  }, [selected]);
+    setDateFrom(
+      selectedFrom === undefined ? undefined : new Date(selectedFrom),
+    );
+    setDateTo(selectedTo === undefined ? undefined : new Date(selectedTo));
+  }, [selectedFrom, selectedTo]);
 
   return (
     <div className="pt-0">
@@ -322,10 +325,12 @@ export const SelectedDateBadge = ({
   selected,
   filter,
   onFilterChange,
+  interactive = true,
 }: {
   selected: FilterDateRange;
   filter: FilterConfig;
-  onFilterChange: (filterKey: string, values: FilterValues) => void;
+  onFilterChange?: (filterKey: string, values: FilterValues) => void;
+  interactive?: boolean;
 }) => {
   const { t } = useTranslation();
   const hasValidFrom = !!selected.from && isValid(selected.from);
@@ -335,51 +340,49 @@ export const SelectedDateBadge = ({
     selected.from && selected.to && isSameDay(selected.from, selected.to);
   const presentDate = isSameDate ? selected.from : selected.from || selected.to;
 
-  const isSameRange = (option: DateRangeOption) => {
-    const { from, to } = option.getDateRange();
-    return (
-      selected.from &&
-      isSameDay(selected.from, from) &&
-      selected.to &&
-      isSameDay(selected.to, to)
-    );
-  };
+  const isSameRange = (option: DateRangeOption) =>
+    isSameDateRange(selected, option.getDateRange());
 
   const isRangeSelected = (filter.meta as DateFilterMeta)?.presetOptions?.find(
     (option) => isSameRange(option),
   );
 
+  const selectedDateLabel = isRangeSelected
+    ? t(isRangeSelected.label, { count: isRangeSelected?.count })
+    : selected.from && selected.to && !isSameDate
+      ? (() => {
+          const needsYear =
+            selected.from.getFullYear() !== selected.to.getFullYear();
+          return [selected.from, selected.to]
+            .map((date) => format(date, needsYear ? "d MMM yy" : "d MMM"))
+            .join(" - ");
+        })()
+      : presentDate
+        ? format(presentDate, "d MMM yyyy")
+        : "";
+
+  if (!interactive || !onFilterChange) {
+    return (
+      <span className="block min-w-0 truncate whitespace-nowrap">
+        {selectedDateLabel}
+      </span>
+    );
+  }
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="text-sm underline cursor-pointer">
-        {isRangeSelected ? (
-          <span>
-            {t(isRangeSelected.label, { count: isRangeSelected?.count })}
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto min-w-0 flex-1 justify-start rounded-none border-0 p-0 font-normal shadow-none hover:bg-transparent focus-visible:outline-offset-0"
+        >
+          <span className="block min-w-0 truncate whitespace-nowrap">
+            {selectedDateLabel}
           </span>
-        ) : selected.from && selected.to && !isSameDate ? (
-          <span>
-            {(() => {
-              const needsYear =
-                selected.from.getFullYear() !== selected.to.getFullYear();
-              return [selected.from, selected.to].map((date, index) => (
-                <span key={date.toISOString() + index}>
-                  {index > 0 && " - "}
-                  <span>{format(date, needsYear ? "d MMM yy" : "d MMM")}</span>
-                </span>
-              ));
-            })()}
-          </span>
-        ) : presentDate ? (
-          <span>{format(presentDate, "d MMM yyyy")}</span>
-        ) : (
-          <></>
-        )}
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        sideOffset={15}
-        className="w-[320px] p-0"
-      >
+      <DropdownMenuContent align="start" sideOffset={15} className="w-80 p-0">
         <RenderDateFilter
           filter={filter}
           selected={selected}

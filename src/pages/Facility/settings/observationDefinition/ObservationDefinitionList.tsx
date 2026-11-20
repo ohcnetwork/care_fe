@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -32,6 +31,7 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import { valuesOf } from "@/Utils/utils";
 
+import { navigate } from "@/lib/router/navigate";
 import {
   OBSERVATION_DEFINITION_STATUS_COLORS,
   ObservationDefinitionCategory,
@@ -129,9 +129,10 @@ export default function ObservationDefinitionList({
             </div>
             <Button
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/observation_definitions/new`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/settings/observation_definitions/new",
+                  params: { facilityId },
+                })
               }
             >
               <CareIcon icon="l-plus" className="mr-2" />
@@ -211,7 +212,7 @@ export default function ObservationDefinitionList({
             </div>
             {/* Desktop Table View */}
             <div className="hidden md:block">
-              <div className="rounded-lg border">
+              <div>
                 <Table>
                   <TableHeader className="bg-gray-100">
                     <TableRow>

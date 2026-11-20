@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
@@ -44,16 +45,19 @@ import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ScheduleEncounterDefaultsFields } from "@/pages/Scheduling/components/ScheduleEncounterDefaultsFields";
 import {
   calculateSlotDuration,
   getSlotsPerSession,
   getTokenDuration,
 } from "@/pages/Scheduling/utils";
+import { CareTeamResponse, toCareTeamMembers } from "@/types/careTeam/careTeam";
 import {
   SchedulableResourceType,
   ScheduleAvailabilityCreateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { Info } from "lucide-react";
 
 interface Props {
   facilityId: string;
@@ -94,6 +98,8 @@ export default function CreateScheduleTemplateSheet({
         }),
       valid_to: z.date({ error: t("field_required") }),
       is_public: z.boolean(),
+      organizations: z.array(z.string()),
+      care_team: z.array(z.custom<CareTeamResponse>()),
 
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek, DayOfWeek>)
@@ -197,6 +203,8 @@ export default function CreateScheduleTemplateSheet({
       valid_to: undefined,
       weekdays: [],
       is_public: false,
+      organizations: [],
+      care_team: [],
       availabilities: [
         {
           name: "",
@@ -235,6 +243,8 @@ export default function CreateScheduleTemplateSheet({
       resource_type: resourceType,
       resource_id: resourceId,
       is_public: values.is_public,
+      organizations: values.organizations,
+      care_team: toCareTeamMembers(values.care_team),
       availabilities: values.availabilities.map(
         (availability) =>
           ({
@@ -275,7 +285,15 @@ export default function CreateScheduleTemplateSheet({
     if (!slotsPerSession || !tokenDuration) return null;
 
     return (
-      <Callout variant="alert" badge="Info">
+      <Callout
+        variant="alert"
+        badge={
+          <>
+            <Info className="size-4 shrink-0" />
+            <span className="sr-only">{t("info")}</span>
+          </>
+        }
+      >
         <Trans
           i18nKey="schedule_slots_allocation_callout"
           values={{
@@ -313,7 +331,7 @@ export default function CreateScheduleTemplateSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-fit">
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("create_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -321,172 +339,188 @@ export default function CreateScheduleTemplateSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="-mx-6 mb-16 overflow-auto px-6 pb-16 pt-6">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>
-                      {t("schedule_template_name")}
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("schedule_template_name_placeholder")}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <SheetBody className="bg-muted-background">
+              <div className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="valid_from"
+                  name="name"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel aria-required>{t("valid_from")}</FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        onChange={(date) => field.onChange(date)}
-                        disabled={(date) =>
-                          dayjs(date).isBefore(dayjs(), "day")
-                        }
-                      />
+                    <FormItem>
+                      <FormLabel aria-required>
+                        {t("schedule_template_name")}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t("schedule_template_name_placeholder")}
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="valid_to"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel aria-required>{t("valid_to")}</FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        onChange={(date) => field.onChange(date)}
-                        disabled={(date) =>
-                          dayjs(date).isBefore(dayjs(), "day")
-                        }
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div>
-                <FormLabel className="text-lg font-semibold">
-                  {t("weekly_schedule")}
-                </FormLabel>
-                <span className="block text-sm">
-                  {t("schedule_weekdays_description")}
-                </span>
-                <div className="py-2">
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="weekdays"
+                    name="valid_from"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <WeekdayCheckbox
-                            value={field.value}
-                            onChange={field.onChange}
-                            format={weekdayFormat}
-                          />
-                        </FormControl>
+                      <FormItem className="flex flex-col">
+                        <FormLabel aria-required>{t("valid_from")}</FormLabel>
+                        <DatePicker
+                          date={field.value}
+                          onChange={(date) => field.onChange(date)}
+                          disabled={(date) =>
+                            dayjs(date).isBefore(dayjs(), "day")
+                          }
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="valid_to"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel aria-required>{t("valid_to")}</FormLabel>
+                        <DatePicker
+                          date={field.value}
+                          onChange={(date) => field.onChange(date)}
+                          disabled={(date) =>
+                            dayjs(date).isBefore(dayjs(), "day")
+                          }
+                        />
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-              </div>
 
-              <FormField
-                control={form.control}
-                name="is_public"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4 bg-white">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none -mt-1">
-                      <FormLabel className="text-base">
-                        {t("make_template_public")}
-                      </FormLabel>
-                      <p className="text-sm text-gray-500">
-                        {t("make_template_public_description")}
-                      </p>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="space-y-4">
-                {form.watch("availabilities")?.map((_, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col rounded-lg bg-white p-4 shadow-sm"
-                  >
-                    <div className="flex items-center justify-between pb-6">
-                      <div className="flex items-center gap-2">
-                        <CareIcon
-                          icon="l-clock"
-                          className="text-lg text-blue-600"
+                <div>
+                  <FormLabel className="text-lg font-semibold">
+                    {t("weekly_schedule")}
+                  </FormLabel>
+                  <span className="block text-sm">
+                    {t("schedule_weekdays_description")}
+                  </span>
+                  <div className="py-2">
+                    <FormField
+                      control={form.control}
+                      name="weekdays"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <WeekdayCheckbox
+                              value={field.value}
+                              onChange={field.onChange}
+                              format={weekdayFormat}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="is_public"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4 bg-white">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
                         />
-                        <span className="font-semibold">
-                          {form.watch(`availabilities.${index}.name`)}
-                        </span>
+                      </FormControl>
+                      <div className="space-y-1 leading-none -mt-1">
+                        <FormLabel className="text-base">
+                          {t("make_template_public")}
+                        </FormLabel>
+                        <p className="text-sm text-gray-500">
+                          {t("make_template_public_description")}
+                        </p>
                       </div>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        className="text-gray-600 hover:text-gray-900"
-                        onClick={() => {
-                          const availabilities =
-                            form.getValues("availabilities");
-                          availabilities.splice(index, 1);
-                          form.setValue("availabilities", availabilities);
-                        }}
-                      >
-                        <CareIcon icon="l-trash" className="text-base" />
-                        <span className="ml-2">{t("remove")}</span>
-                      </Button>
-                    </div>
-
-                    <div className="flex flex-col gap-x-6 gap-y-4">
-                      <div className="items-stretch">
-                        <FormField
-                          control={form.control}
-                          name={`availabilities.${index}.name`}
-                          render={({ field }) => (
-                            <FormItem className="col-span-2">
-                              <FormLabel aria-required>
-                                {t("session_title")}
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder={t("session_title_placeholder")}
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <ScheduleEncounterDefaultsFields
+                  facilityId={facilityId}
+                  organizations={form.watch("organizations")}
+                  onOrganizationsChange={(value) =>
+                    form.setValue("organizations", value, { shouldDirty: true })
+                  }
+                  careTeam={form.watch("care_team")}
+                  onCareTeamChange={(value) =>
+                    form.setValue("care_team", value, { shouldDirty: true })
+                  }
+                  disabled={isPending}
+                />
+                <div className="space-y-4">
+                  {form.watch("availabilities")?.map((_, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col rounded-lg bg-white p-4 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between pb-6">
+                        <div className="flex items-center gap-2">
+                          <CareIcon
+                            icon="l-clock"
+                            className="text-lg text-blue-600"
+                          />
+                          <span className="font-semibold">
+                            {form.watch(`availabilities.${index}.name`)}
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          className="text-gray-600 hover:text-gray-900"
+                          onClick={() => {
+                            const availabilities =
+                              form.getValues("availabilities");
+                            availabilities.splice(index, 1);
+                            form.setValue("availabilities", availabilities);
+                          }}
+                        >
+                          <CareIcon icon="l-trash" className="text-base" />
+                          <span className="ml-2">{t("remove")}</span>
+                        </Button>
                       </div>
 
-                      {/* <FormField
+                      <div className="flex flex-col gap-x-6 gap-y-4">
+                        <div className="items-stretch">
+                          <FormField
+                            control={form.control}
+                            name={`availabilities.${index}.name`}
+                            render={({ field }) => (
+                              <FormItem className="col-span-2">
+                                <FormLabel aria-required>
+                                  {t("session_title")}
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder={t("session_title_placeholder")}
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* <FormField
                         control={form.control}
                         name={`availabilities.${index}.slot_type`}
                         render={({ field }) => (
@@ -530,46 +564,214 @@ export default function CreateScheduleTemplateSheet({
                           </FormItem>
                         )}
                       /> */}
-                      <div className="flex flex-wrap">
-                        <FormField
-                          control={form.control}
-                          name={`availabilities.${index}.start_time`}
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col w-full">
-                              <FormLabel aria-required>
-                                {t("start_time")}
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="time"
-                                  {...field}
-                                  onChange={(e) => {
-                                    field.onChange(e);
-                                    updateSlotDuration(index);
+                        <div className="flex flex-wrap">
+                          <FormField
+                            control={form.control}
+                            name={`availabilities.${index}.start_time`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col w-full">
+                                <FormLabel aria-required>
+                                  {t("start_time")}
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="time"
+                                    {...field}
+                                    onChange={(e) => {
+                                      field.onChange(e);
+                                      updateSlotDuration(index);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name={`availabilities.${index}.end_time`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col w-full mt-2">
+                                <FormLabel aria-required>
+                                  {t("end_time")}
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="time"
+                                    {...field}
+                                    onChange={(e) => {
+                                      field.onChange(e);
+                                      updateSlotDuration(index);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {form.watch(`availabilities.${index}.slot_type`) ===
+                          "appointment" && (
+                          <>
+                            <div className="flex flex-wrap mt-0 pt-2 gap-2">
+                              <div className="w-full gap-x-2 grid grid-cols-[auto_1fr_auto] mb-2 bg-gray-50 p-3 rounded-lg">
+                                <CareIcon
+                                  icon="l-bolt"
+                                  className="text-lg text-blue-600"
+                                />
+                                <Label
+                                  htmlFor={`auto-fill-${index}`}
+                                  className="text-sm font-medium cursor-pointer col-start-2"
+                                >
+                                  {t("auto_fill_slot_duration")}
+                                </Label>
+                                <Switch
+                                  className="col-start-3"
+                                  id={`auto-fill-${index}`}
+                                  checked={form.watch(
+                                    `availabilities.${index}.is_auto_fill`,
+                                  )}
+                                  onCheckedChange={(checked) => {
+                                    form.setValue(
+                                      `availabilities.${index}.is_auto_fill`,
+                                      checked,
+                                    );
+                                    if (checked) {
+                                      updateSlotDuration(index);
+                                    }
                                   }}
                                 />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                                {form.watch(
+                                  `availabilities.${index}.is_auto_fill`,
+                                ) && (
+                                  <div className="row-start-2 col-start-2 col-span-2">
+                                    <FormField
+                                      control={form.control}
+                                      name={`availabilities.${index}.num_of_slots`}
+                                      render={({ field }) => (
+                                        <FormItem className="flex flex-col mt-2 space-y-0">
+                                          <Label className="text-sm font-light">
+                                            {t("number_of_slots")}
+                                          </Label>
+                                          <FormControl>
+                                            <Input
+                                              type="number"
+                                              inputMode="numeric"
+                                              pattern="[0-9]*"
+                                              min={1}
+                                              defaultValue={1}
+                                              {...field}
+                                              className="shadow-none"
+                                              onChange={(e) => {
+                                                const value =
+                                                  e.target.valueAsNumber;
+                                                field.onChange(
+                                                  isNaN(value)
+                                                    ? undefined
+                                                    : value,
+                                                );
+                                                updateSlotDuration(index);
+                                              }}
+                                            />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </div>
+                                )}
+                              </div>
 
+                              <FormField
+                                control={form.control}
+                                name={`availabilities.${index}.slot_size_in_minutes`}
+                                render={({ field }) => (
+                                  <FormItem className="flex grow flex-col">
+                                    <FormLabel
+                                      aria-required
+                                      className="whitespace-nowrap "
+                                    >
+                                      {t("schedule_slot_size_label")}
+                                    </FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        min={1}
+                                        placeholder="e.g. 10"
+                                        {...field}
+                                        value={field.value ?? ""}
+                                        onChange={(e) => {
+                                          const value = e.target.valueAsNumber;
+                                          field.onChange(
+                                            isNaN(value) ? undefined : value,
+                                          );
+                                        }}
+                                        disabled={form.watch(
+                                          `availabilities.${index}.is_auto_fill`,
+                                        )}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name={`availabilities.${index}.tokens_per_slot`}
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-col grow">
+                                    <FormLabel
+                                      aria-required
+                                      className="whitespace-nowrap"
+                                    >
+                                      {t("patients_per_slot")}
+                                    </FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        min={1}
+                                        placeholder="e.g. 1"
+                                        {...field}
+                                        value={field.value ?? ""}
+                                        onChange={(e) => {
+                                          const value = e.target.valueAsNumber;
+                                          field.onChange(
+                                            isNaN(value) ? undefined : value,
+                                          );
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            <div className="col-span-2 mb-2">
+                              {timeAllocationCallout(index)}
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <div>
                         <FormField
                           control={form.control}
-                          name={`availabilities.${index}.end_time`}
+                          name={`availabilities.${index}.reason`}
                           render={({ field }) => (
-                            <FormItem className="flex flex-col w-full mt-2">
-                              <FormLabel aria-required>
-                                {t("end_time")}
-                              </FormLabel>
+                            <FormItem>
+                              <FormLabel>{t("remarks")}</FormLabel>
                               <FormControl>
-                                <Input
-                                  type="time"
+                                <Textarea
+                                  placeholder={t("remarks_placeholder")}
+                                  className="resize-none"
                                   {...field}
-                                  onChange={(e) => {
-                                    field.onChange(e);
-                                    updateSlotDuration(index);
-                                  }}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -577,227 +779,60 @@ export default function CreateScheduleTemplateSheet({
                           )}
                         />
                       </div>
-
-                      {form.watch(`availabilities.${index}.slot_type`) ===
-                        "appointment" && (
-                        <>
-                          <div className="flex flex-wrap mt-0 pt-2 gap-2">
-                            <div className="w-full gap-x-2 grid grid-cols-[auto_1fr_auto] mb-2 bg-gray-50 p-3 rounded-lg">
-                              <CareIcon
-                                icon="l-bolt"
-                                className="text-lg text-blue-600"
-                              />
-                              <Label
-                                htmlFor={`auto-fill-${index}`}
-                                className="text-sm font-medium cursor-pointer col-start-2"
-                              >
-                                {t("auto_fill_slot_duration")}
-                              </Label>
-                              <Switch
-                                className="col-start-3"
-                                id={`auto-fill-${index}`}
-                                checked={form.watch(
-                                  `availabilities.${index}.is_auto_fill`,
-                                )}
-                                onCheckedChange={(checked) => {
-                                  form.setValue(
-                                    `availabilities.${index}.is_auto_fill`,
-                                    checked,
-                                  );
-                                  if (checked) {
-                                    updateSlotDuration(index);
-                                  }
-                                }}
-                              />
-                              {form.watch(
-                                `availabilities.${index}.is_auto_fill`,
-                              ) && (
-                                <div className="row-start-2 col-start-2 col-span-2">
-                                  <FormField
-                                    control={form.control}
-                                    name={`availabilities.${index}.num_of_slots`}
-                                    render={({ field }) => (
-                                      <FormItem className="flex flex-col mt-2 space-y-0">
-                                        <Label className="text-sm font-light">
-                                          {t("number_of_slots")}
-                                        </Label>
-                                        <FormControl>
-                                          <Input
-                                            type="number"
-                                            inputMode="numeric"
-                                            pattern="[0-9]*"
-                                            min={1}
-                                            defaultValue={1}
-                                            {...field}
-                                            className="shadow-none"
-                                            onChange={(e) => {
-                                              const value =
-                                                e.target.valueAsNumber;
-                                              field.onChange(
-                                                isNaN(value)
-                                                  ? undefined
-                                                  : value,
-                                              );
-                                              updateSlotDuration(index);
-                                            }}
-                                          />
-                                        </FormControl>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                </div>
-                              )}
-                            </div>
-
-                            <FormField
-                              control={form.control}
-                              name={`availabilities.${index}.slot_size_in_minutes`}
-                              render={({ field }) => (
-                                <FormItem className="flex grow flex-col">
-                                  <FormLabel
-                                    aria-required
-                                    className="whitespace-nowrap "
-                                  >
-                                    {t("schedule_slot_size_label")}
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      inputMode="numeric"
-                                      pattern="[0-9]*"
-                                      min={1}
-                                      placeholder="e.g. 10"
-                                      {...field}
-                                      value={field.value ?? ""}
-                                      onChange={(e) => {
-                                        const value = e.target.valueAsNumber;
-                                        field.onChange(
-                                          isNaN(value) ? undefined : value,
-                                        );
-                                      }}
-                                      disabled={form.watch(
-                                        `availabilities.${index}.is_auto_fill`,
-                                      )}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={form.control}
-                              name={`availabilities.${index}.tokens_per_slot`}
-                              render={({ field }) => (
-                                <FormItem className="flex flex-col grow">
-                                  <FormLabel
-                                    aria-required
-                                    className="whitespace-nowrap"
-                                  >
-                                    {t("patients_per_slot")}
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      inputMode="numeric"
-                                      pattern="[0-9]*"
-                                      min={1}
-                                      placeholder="e.g. 1"
-                                      {...field}
-                                      value={field.value ?? ""}
-                                      onChange={(e) => {
-                                        const value = e.target.valueAsNumber;
-                                        field.onChange(
-                                          isNaN(value) ? undefined : value,
-                                        );
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                          <div className="col-span-2 mb-2">
-                            {timeAllocationCallout(index)}
-                          </div>
-                        </>
-                      )}
                     </div>
+                  ))}
+                  {form.formState.errors.availabilities && (
+                    <FormMessage>
+                      {form.formState.errors.availabilities.root?.message}
+                    </FormMessage>
+                  )}
+                </div>
 
-                    <div>
-                      <FormField
-                        control={form.control}
-                        name={`availabilities.${index}.reason`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("remarks")}</FormLabel>
-                            <FormControl>
-                              <Textarea
-                                placeholder={t("remarks_placeholder")}
-                                className="resize-none"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-                ))}
-                {form.formState.errors.availabilities && (
-                  <FormMessage>
-                    {form.formState.errors.availabilities.root?.message}
-                  </FormMessage>
-                )}
-              </div>
-
-              <Button
-                type="button"
-                variant="outline_primary"
-                onClick={() => {
-                  const availabilities = form.getValues("availabilities");
-                  form.setValue("availabilities", [
-                    ...availabilities,
-                    {
-                      name: "",
-                      slot_type: "appointment" as const,
-                      reason: "",
-                      start_time: undefined,
-                      end_time: undefined,
-                      tokens_per_slot: undefined,
-                      slot_size_in_minutes: undefined,
-                      is_auto_fill: false,
-                      num_of_slots: 1,
-                    },
-                  ]);
-                }}
-              >
-                <CareIcon icon="l-plus" className="text-lg" />
-                <span>{t("add_another_session")}</span>
-              </Button>
-
-              <SheetFooter className="absolute inset-x-0 bottom-0 border-t border-gray-200 bg-white p-6">
-                <SheetClose asChild>
-                  <Button
-                    variant="outline"
-                    type="button"
-                    disabled={isPending}
-                    onClick={() => form.reset()}
-                  >
-                    {t("cancel")}
-                  </Button>
-                </SheetClose>
-
-                <Button variant="primary" type="submit" disabled={isPending}>
-                  {isPending ? t("saving") : t("save")}
+                <Button
+                  type="button"
+                  variant="outline_primary"
+                  onClick={() => {
+                    const availabilities = form.getValues("availabilities");
+                    form.setValue("availabilities", [
+                      ...availabilities,
+                      {
+                        name: "",
+                        slot_type: "appointment" as const,
+                        reason: "",
+                        start_time: undefined,
+                        end_time: undefined,
+                        tokens_per_slot: undefined,
+                        slot_size_in_minutes: undefined,
+                        is_auto_fill: false,
+                        num_of_slots: 1,
+                      },
+                    ]);
+                  }}
+                >
+                  <CareIcon icon="l-plus" className="text-lg" />
+                  <span>{t("add_another_session")}</span>
                 </Button>
-              </SheetFooter>
-            </form>
-          </Form>
-        </div>
+              </div>
+            </SheetBody>
+
+            <SheetFooter>
+              <SheetClose asChild>
+                <Button
+                  variant="outline"
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => form.reset()}
+                >
+                  {t("cancel")}
+                </Button>
+              </SheetClose>
+
+              <Button variant="primary" type="submit" disabled={isPending}>
+                {isPending ? t("saving") : t("save")}
+              </Button>
+            </SheetFooter>
+          </form>
+        </Form>
       </SheetContent>
     </Sheet>
   );

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { navigate } from "raviger";
@@ -27,6 +28,7 @@ import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
 import AdminOrganizationNavbar from "@/pages/Admin/organizations/components/AdminOrganizationNavbar";
+import { OrganizationReferralLinks } from "@/pages/Organization/components/OrganizationReferralLinks";
 import RoleOrganizationConnections from "@/pages/Organization/components/RoleOrganizationConnections";
 import {
   Organization,
@@ -191,6 +193,7 @@ export default function AdminOrganizationList({
                         org={org}
                       />
                     </div>
+                    <OrganizationReferralLinks organization={org} />
                     {/* Role orgs show connections; suppliers just show the org info */}
                     {isRoleOrg && (
                       <RoleOrganizationConnections organization={org} />
@@ -266,7 +269,13 @@ export default function AdminOrganizationList({
                             navigate(`/admin/organizations/${organizationType}`)
                           }
                         >
-                          <button type="button">{t("organizations")}</button>
+                          <Button
+                            variant="link"
+                            type="button"
+                            className="h-auto p-0"
+                          >
+                            {t("organizations")}
+                          </Button>
                         </BreadcrumbLink>
                       </BreadcrumbItem>
                       <BreadcrumbSeparator />
@@ -278,7 +287,13 @@ export default function AdminOrganizationList({
                               className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
                               onClick={() => handleParentClick(parent.id)}
                             >
-                              <button type="button">{parent.name}</button>
+                              <Button
+                                variant="link"
+                                type="button"
+                                className="h-auto p-0"
+                              >
+                                {parent.name}
+                              </Button>
                             </BreadcrumbLink>
                           </BreadcrumbItem>
                           <BreadcrumbSeparator />
@@ -309,6 +324,9 @@ export default function AdminOrganizationList({
                           {org.description}
                         </p>
                       )}
+                    </div>
+                    <div className="mt-3">
+                      <OrganizationReferralLinks organization={org} />
                     </div>
                   </>
                 )}
@@ -388,15 +406,19 @@ function FlatOrgSidebar({
               {filtered.map((org) => {
                 const isSelected = org.id === selectedOrganizationId;
                 return (
-                  <button
+                  <Button
+                    variant="ghost"
                     key={org.id}
                     type="button"
                     onClick={() => onSelect(org)}
                     className={cn(
-                      "w-full rounded-md px-3 py-2 text-left text-sm transition-colors",
-                      isSelected
-                        ? "bg-primary-100 font-medium text-primary-900"
-                        : "text-gray-700 hover:bg-gray-50",
+                      "h-auto block whitespace-normal",
+                      cn(
+                        "w-full rounded-md px-3 py-2 text-left text-sm transition-colors",
+                        isSelected
+                          ? "bg-primary-100 font-medium text-primary-900"
+                          : "text-gray-700 hover:bg-gray-50",
+                      ),
                     )}
                   >
                     <span className="block truncate">{org.name}</span>
@@ -410,7 +432,7 @@ function FlatOrgSidebar({
                         {org.description}
                       </span>
                     )}
-                  </button>
+                  </Button>
                 );
               })}
             </div>

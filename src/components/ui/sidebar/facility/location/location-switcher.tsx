@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, MapPinIcon, X } from "lucide-react";
+import { ChevronLeft, ChevronsUpDown, MapPinIcon, X } from "lucide-react";
 import { navigate, usePath } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,26 +9,21 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
-  Command,
+  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 
 import PaginationComponent from "@/components/Common/Pagination";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { TooltipComponent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
@@ -41,9 +36,15 @@ import query from "@/Utils/request/query";
 export function LocationSwitcher() {
   const { t } = useTranslation();
   const { facilityId, location: extractedLocation } = useCurrentLocation();
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
+  const isCollapsed = state === "collapsed" && !isMobile;
   const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [openDialog, setOpenDialog] = useState(false);
+  const { handleMenuOpenChange } = useAppSidebar();
+  const handleDialogOpenChange = (open: boolean) => {
+    setOpenDialog(open);
+    handleMenuOpenChange(open);
+  };
 
   const fallbackUrl = `/facility/${facilityId}/overview`;
 
@@ -58,63 +59,76 @@ export function LocationSwitcher() {
         location={location}
         setLocation={setLocation}
         open={openDialog}
-        setOpen={setOpenDialog}
+        setOpen={handleDialogOpenChange}
         myLocations={true}
       />
-      <div className="flex flex-col items-start gap-4">
-        {state === "collapsed" ? (
+      <div
+        className={cn("flex min-w-0 flex-col gap-2", !isCollapsed && "px-2")}
+      >
+        <div className="flex min-h-8 items-center justify-between">
           <Button
             variant="ghost"
-            size="icon"
-            onClick={() => navigate(fallbackUrl)}
-            className="w-8 h-8"
+            size={isCollapsed ? "icon-sm" : "sm"}
+            onClick={() => {
+              if (isMobile) setOpenMobile(false);
+              navigate(fallbackUrl);
+            }}
+            className={cn(
+              "gap-1.5 text-muted-foreground",
+              !isCollapsed && "-ml-2 px-2",
+            )}
             aria-label={t("home")}
-            title={t("home")}
+            title={isCollapsed ? t("home") : undefined}
           >
-            <CareIcon icon="l-home-alt" />
+            <ChevronLeft className="size-4" />
+            {!isCollapsed && <span>{t("home")}</span>}
           </Button>
-        ) : (
-          <Button variant="ghost" onClick={() => navigate(fallbackUrl)}>
-            <CareIcon icon="l-arrow-left" />
-            <span className="underline underline-offset-2">{t("home")}</span>
-          </Button>
-        )}
-
-        <div className={cn("w-full", state === "expanded" ? "px-2" : "px-0")}>
-          <TooltipComponent content={location?.name ?? t("select_location")}>
+          {isMobile && (
             <Button
               variant="ghost"
+              size="icon-sm"
+              onClick={() => setOpenMobile(false)}
+              aria-label={t("close_sidebar")}
+            >
+              <X className="size-4" />
+            </Button>
+          )}
+        </div>
+
+        <div className="w-full">
+          <TooltipComponent content={location?.name ?? t("select_location")}>
+            <Button
+              variant="outline"
+              size={isCollapsed ? "icon-sm" : "sm"}
               className={cn(
-                "w-full flex items-center justify-between gap-3 overflow-hidden rounded-md border border-gray-200 bg-white px-2",
-                state === "collapsed" ? "justify-center" : "py-6",
+                "w-full min-w-0 gap-2 font-normal shadow-sm",
+                !isCollapsed && "h-auto justify-between py-2",
               )}
               aria-label={location?.name ?? t("select_location")}
-              onClick={() => setOpenDialog(true)}
+              aria-haspopup="dialog"
+              aria-expanded={openDialog}
+              onClick={() => handleDialogOpenChange(true)}
             >
               <div className="flex min-w-0 flex-1 items-center gap-2">
-                <MapPinIcon className="size-5 text-green-600" />
-                <div
-                  className={cn(
-                    "min-w-0 flex-1",
-                    state === "collapsed" && "hidden",
-                  )}
-                >
+                {isCollapsed && (
+                  <MapPinIcon className="mx-auto size-4 text-muted-foreground" />
+                )}
+                <div className={cn("min-w-0 flex-1", isCollapsed && "hidden")}>
                   <div className="flex min-w-0 w-full flex-col items-start overflow-hidden">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       {t("current_location")}
                     </span>
-                    <span className="max-w-full truncate text-left text-sm font-medium text-gray-900">
-                      {location?.name}
+                    <span className="max-w-full truncate text-left text-sm font-medium">
+                      {location?.name ?? t("select_location")}
                     </span>
                   </div>
                 </div>
               </div>
-              {state === "expanded" && (
-                <CareIcon icon="l-sort" className="shrink-0" />
+              {!isCollapsed && (
+                <ChevronsUpDown className="size-3.5 shrink-0 opacity-60" />
               )}
             </Button>
           </TooltipComponent>
-          <Separator className="mt-4" />
         </div>
       </div>
     </Fragment>
@@ -177,7 +191,7 @@ export function LocationSelectorDialog({
   });
 
   const handleSelect = (location: LocationRead) => {
-    if (location.has_children) {
+    if (location.has_sub_locations) {
       setLocationLevel(buildLocationPath(location));
     } else {
       handleConfirmSelection(location);
@@ -225,7 +239,11 @@ export function LocationSelectorDialog({
     const locationList = buildLocationPath(location);
 
     return (
-      <div className="flex flex-row items-center gap-1 text-sm font-normal flex-wrap">
+      <div
+        role="group"
+        aria-label={t("current_location")}
+        className="flex flex-row items-center gap-1 text-sm font-normal flex-wrap"
+      >
         <span className="text-gray-500">{t("current_location")}:</span>
         <div className="flex flex-row gap-1 items-center p-2 rounded-md bg-gray-100 flex-wrap overflow-hidden">
           {locationList.map((loc, index) => (
@@ -233,7 +251,7 @@ export function LocationSelectorDialog({
               className="flex flex-row gap-1 items-center truncate max-w-xs"
               key={loc.id}
             >
-              {loc.has_children ? (
+              {loc.has_sub_locations ? (
                 <Button
                   variant="link"
                   className="p-0 text-nowrap h-5 justify-start overflow-hidden"
@@ -255,7 +273,7 @@ export function LocationSelectorDialog({
   };
 
   return (
-    <Dialog
+    <CommandDialog
       open={open}
       onOpenChange={(open) => {
         setOpen(open);
@@ -264,118 +282,112 @@ export function LocationSelectorDialog({
           setCurrentPage(1);
         }
       }}
+      title={t("select_location")}
+      description={t("select_location")}
+      className="md:max-w-2xl"
+      shouldFilter={false}
     >
-      <DialogContent className="p-3 min-w-[calc(50vw)]">
-        <DialogHeader className="overflow-hidden">
-          <DialogTitle>{getCurrentLocation()}</DialogTitle>
-        </DialogHeader>
-        {locationLevel.length > 0 && (
-          <div className="flex flex-row justify-between gap-1 bg-gray-100 p-1 overflow-auto">
-            <div className="flex flex-row gap-1 items-center">
-              {locationLevel.map((level, index) => (
-                <div
-                  key={level.id}
-                  className="flex flex-row gap-1 items-center"
-                >
-                  {level.has_children ? (
-                    <Button
-                      variant="link"
-                      className="w-full text-nowrap text-xs border bg-gray-100 border-gray-200 rounded-md p-2"
-                      onClick={() => handleLocationClick(level)}
-                    >
-                      {level.name}
-                    </Button>
-                  ) : (
-                    <div className="w-full text-xs border bg-gray-100 border-gray-200 rounded-md p-2">
-                      {level.name}
-                    </div>
-                  )}
-                  {index < locationLevel.length - 1 && (
-                    <CareIcon icon="l-arrow-right" />
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="flex flex-row gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  setLocationLevel([]);
-                  setSearchValue("");
-                  setCurrentPage(1);
-                }}
-                aria-label={t("clear")}
-              >
-                <X />
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() =>
-                  handleConfirmSelection(
-                    locationLevel[locationLevel.length - 1],
-                  )
-                }
-              >
-                <span>{t("select")}</span>
-                <ShortcutBadge actionId="submit-action" />
-              </Button>
-            </div>
+      {location && (
+        <div className="shrink-0 overflow-hidden px-3 py-2">
+          {getCurrentLocation()}
+        </div>
+      )}
+      {locationLevel.length > 0 && (
+        <div className="flex shrink-0 flex-row justify-between gap-1 overflow-auto bg-gray-100 p-1">
+          <div className="flex flex-row gap-1 items-center">
+            {locationLevel.map((level, index) => (
+              <div key={level.id} className="flex flex-row gap-1 items-center">
+                {level.has_sub_locations ? (
+                  <Button
+                    variant="link"
+                    className="w-full text-nowrap text-xs border bg-gray-100 border-gray-200 rounded-md p-2"
+                    onClick={() => handleLocationClick(level)}
+                  >
+                    {level.name}
+                  </Button>
+                ) : (
+                  <div className="w-full text-xs border bg-gray-100 border-gray-200 rounded-md p-2">
+                    {level.name}
+                  </div>
+                )}
+                {index < locationLevel.length - 1 && (
+                  <CareIcon icon="l-arrow-right" />
+                )}
+              </div>
+            ))}
           </div>
-        )}
-        <Command className="pt-3" shouldFilter={false}>
-          <div className="border border-gray-200">
-            <CommandInput
-              className="border-0 ring-0 sm:text-sm text-base"
-              placeholder={t("search")}
-              onValueChange={(value) => {
-                setSearchValue(value);
+          <div className="flex flex-row gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setLocationLevel([]);
+                setSearchValue("");
                 setCurrentPage(1);
               }}
-              value={searchValue}
-              autoFocus
-            />
-            <CommandList
-              onWheel={(e) => {
-                e.stopPropagation();
-              }}
+              aria-label={t("clear")}
             >
-              <CommandEmpty>
-                {isLoading ? (
-                  <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                    <span className="ml-2 text-sm text-gray-500">
-                      {t("loading")}
-                    </span>
-                  </div>
-                ) : (
-                  t("no_locations_found")
-                )}
-              </CommandEmpty>
-              <CommandGroup>
-                {locations?.results.map((location) => (
-                  <LocationCommandItem
-                    key={location.id}
-                    location={location}
-                    handleSelect={handleSelect}
-                    handleConfirmSelection={handleConfirmSelection}
-                    isSearching={!!searchValue}
-                  />
-                ))}
-              </CommandGroup>
-            </CommandList>
+              <X />
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() =>
+                handleConfirmSelection(locationLevel[locationLevel.length - 1])
+              }
+            >
+              <span>{t("select")}</span>
+              <ShortcutBadge actionId="submit-action" />
+            </Button>
           </div>
-        </Command>
-        <div className="flex w-full justify-center">
-          <PaginationComponent
-            cPage={currentPage}
-            defaultPerPage={resultsPerPage}
-            data={{ totalCount: locations?.count || 0 }}
-            onChange={(page: number) => setCurrentPage(page)}
-          />
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+      <div className="shrink-0 border-b border-gray-100 shadow-xs">
+        <CommandInput
+          className="border-0 ring-0 sm:text-sm text-base"
+          placeholder={t("search")}
+          onValueChange={(value) => {
+            setSearchValue(value);
+            setCurrentPage(1);
+          }}
+          value={searchValue}
+          autoFocus
+        />
+      </div>
+      <CommandList
+        className="w-full md:max-h-[min(24rem,calc(75dvh-8rem))] scrollbar-gutter-auto"
+        onWheel={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {isLoading ? (
+          <div className="gap-2 flex flex-col px-2 pt-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : (
+          <CommandEmpty>{t("no_locations_found")}</CommandEmpty>
+        )}
+        <CommandGroup className="px-2">
+          {locations?.results.map((location) => (
+            <LocationCommandItem
+              key={location.id}
+              location={location}
+              handleSelect={handleSelect}
+              handleConfirmSelection={handleConfirmSelection}
+              isSearching={!!searchValue}
+            />
+          ))}
+        </CommandGroup>
+      </CommandList>
+      <div className="flex w-full shrink-0 justify-center py-2">
+        <PaginationComponent
+          cPage={currentPage}
+          defaultPerPage={resultsPerPage}
+          data={{ totalCount: locations?.count || 0 }}
+          onChange={(page: number) => setCurrentPage(page)}
+        />
+      </div>
+    </CommandDialog>
   );
 }
 
@@ -398,22 +410,22 @@ function LocationCommandItem({
       key={location.id}
       value={location.id}
       onSelect={() =>
-        location.has_children
+        location.has_sub_locations
           ? handleSelect(location)
           : handleConfirmSelection(location)
       }
-      className="flex items-start sm:items-center justify-between"
+      className="flex items-center justify-between [&>svg:last-child]:hidden"
     >
-      <div className="flex flex-col min-w-0">
+      <div className="flex flex-col min-w-0 flex-1">
         <span className="truncate">{location.name}</span>
         {isSearching && path && (
           <span className="text-xs text-gray-500 truncate">{path}</span>
         )}
       </div>
-      <div>
-        <Button variant="white" size="xs" className="p-2 mr-4 w-full shadow">
+      <div className="shrink-0">
+        <Button variant="white" size="xs" className="p-2 shadow">
           <CareIcon icon="l-corner-down-left" />
-          {location.has_children ? t("view_sub_locations") : t("select")}
+          {location.has_sub_locations ? t("view_sub_locations") : t("select")}
         </Button>
       </div>
     </CommandItem>

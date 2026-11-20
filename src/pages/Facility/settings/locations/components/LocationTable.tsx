@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import {
   ArrowDown,
   ArrowUp,
+  Bed,
   Folder,
   FolderOpen,
   PenLine,
@@ -32,6 +33,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import mutate from "@/Utils/request/mutate";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
@@ -91,7 +93,7 @@ export function LocationTable({
   });
 
   return (
-    <div className="rounded-lg border">
+    <div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -99,6 +101,7 @@ export function LocationTable({
             <TableHead>{t("type")}</TableHead>
             <TableHead>{t("status")}</TableHead>
             <TableHead>{t("availability")}</TableHead>
+            <TableHead>{t("tags_proper")}</TableHead>
             <TableHead className="text-right">{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
@@ -146,17 +149,37 @@ export function LocationTable({
                     >
                       {location.name}
                     </span>
-                    {location.has_children && (
+                    {location.has_sub_locations && (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="cursor-help">
+                            <span
+                              className="cursor-help"
+                              role="img"
+                              aria-label={t("has_sub_locations")}
+                            >
                               <FolderOpen className="size-3 text-gray-400" />
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {t("has_child_locations")}
+                            {t("has_sub_locations")}
                           </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                    {location.has_beds && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span
+                              className="cursor-help"
+                              role="img"
+                              aria-label={t("has_beds")}
+                            >
+                              <Bed className="size-3 text-gray-400" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>{t("has_beds")}</TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     )}
@@ -182,6 +205,19 @@ export function LocationTable({
                       ? t("unavailable")
                       : t("available")}
                   </Badge>
+                </TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <TagAssignmentSheet
+                    entityType="location"
+                    entityId={location.id}
+                    facilityId={facilityId}
+                    currentTags={location.tags ?? []}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["locations", facilityId],
+                      });
+                    }}
+                  />
                 </TableCell>
                 <TableCell className="text-right">
                   <div
@@ -254,6 +290,7 @@ export function LocationTable({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
+                                aria-label={t("delete")}
                                 variant="ghost"
                                 size="icon"
                                 className="text-destructive hover:text-destructive"

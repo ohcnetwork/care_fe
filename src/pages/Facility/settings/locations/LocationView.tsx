@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
+import { Link } from "@tanstack/react-router";
+import { Hash } from "lucide-react";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -26,10 +27,13 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import { TagBadges } from "@/components/Tags/TagBadges";
 
 import { useLocationManagement } from "@/hooks/useLocationManagement";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -100,7 +104,10 @@ export default function LocationView({
     if (isNested && onSelectLocation) {
       onSelectLocation(location);
     } else {
-      navigate(`/facility/${facilityId}/settings/locations/${location.id}`);
+      navigate({
+        to: "/facility/$facilityId/settings/locations/$id",
+        params: { facilityId, id: location.id },
+      });
     }
   };
 
@@ -156,7 +163,10 @@ export default function LocationView({
               {isNested ? (
                 <span>{t("home")}</span>
               ) : (
-                <Link href={`/facility/${facilityId}/settings/locations`}>
+                <Link
+                  to="/facility/$facilityId/settings/locations"
+                  params={{ facilityId }}
+                >
                   {t("home")}
                 </Link>
               )}
@@ -184,7 +194,8 @@ export default function LocationView({
                       <span>{breadcrumb.name}</span>
                     ) : (
                       <Link
-                        href={`/facility/${facilityId}/settings/locations/${breadcrumb.id}`}
+                        to="/facility/$facilityId/settings/locations/$id"
+                        params={{ facilityId, id: breadcrumb.id }}
                       >
                         {breadcrumb.name}
                       </Link>
@@ -222,6 +233,7 @@ export default function LocationView({
                   >
                     {location?.status}
                   </Badge>
+                  <TagBadges tags={location?.tags ?? []} size="xs" />
                 </>
               )}
             </div>
@@ -248,6 +260,27 @@ export default function LocationView({
                       {t("add_location")}
                     </Button>
                   )}
+                {!isLocationLoading && location && (
+                  <TagAssignmentSheet
+                    entityType="location"
+                    entityId={location.id}
+                    facilityId={facilityId}
+                    currentTags={location.tags ?? []}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["location", facilityId, id],
+                      });
+                    }}
+                    trigger={
+                      <Button variant="outline" className="w-full md:w-auto">
+                        <Hash className="size-4 mr-2" />
+                        {(location.tags?.length ?? 0) > 0
+                          ? t("manage_tags")
+                          : t("add_tags")}
+                      </Button>
+                    }
+                  />
+                )}
                 {!isLocationLoading && locationOrganizations && (
                   <LinkDepartmentsSheet
                     entityType="location"

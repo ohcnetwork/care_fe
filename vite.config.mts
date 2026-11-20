@@ -10,18 +10,24 @@ import {
 
 import federation from "@originjs/vite-plugin-federation";
 import tailwindcss from "@tailwindcss/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import { marked } from "marked";
+import { createRequire } from "module";
 import path from "path";
-import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
 import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
+import { typstCompilerWasm } from "./plugins/typstCompilerWasm";
 import validateEnv from "./scripts/validate-env";
+
+const ravigerVersion: string = createRequire(import.meta.url)(
+  "raviger/package.json",
+).version;
 
 const LOCAL_PLUGIN_MODULE_ID = "virtual:care-local-plugins";
 const RESOLVED_LOCAL_PLUGIN_MODULE_ID = `\0${LOCAL_PLUGIN_MODULE_ID}`;
@@ -50,26 +56,23 @@ function toImportName(slug: string) {
 }
 
 function getLocalPluginDefinitions(rootDir: string): LocalPluginDefinition[] {
-  const appsDir = path.join(rootDir, "apps");
-
-  if (!fs.existsSync(appsDir)) {
-    return [];
-  }
-
+  // ponytail: an app shipping two manifests (manifest.ts AND manifest.tsx) yields
+  // duplicate imports in the generated module; make this throw if it ever happens.
   return fs
-    .readdirSync(appsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => {
-      const slug = entry.name;
+    .globSync(
+      `apps/*/src/manifest{${LOCAL_PLUGIN_SOURCE_EXTENSIONS.join(",")}}`,
+      { cwd: rootDir },
+    )
+    .map((manifestFile) => {
+      const slug = manifestFile.split(/[\\/]/)[1];
       return {
         slug,
         importName: toImportName(slug),
-        manifestPath: path.join(appsDir, slug, "src", "manifest.tsx"),
-        publicDir: path.join(appsDir, slug, "public"),
+        manifestPath: path.join(rootDir, manifestFile),
+        publicDir: path.join(rootDir, "apps", slug, "public"),
       };
     })
-    .filter((plugin) => fs.existsSync(plugin.manifestPath))
-    .sort((left, right) => left.slug.localeCompare(right.slug));
+    .sort((left, right) => left.manifestPath.localeCompare(right.manifestPath));
 }
 
 function getMimeType(filePath: string) {
@@ -124,7 +127,9 @@ function isPluginManifestPath(rootDir: string, filePath: string) {
   const appsPrefix = `${normalizePath(path.join(rootDir, "apps"))}/`;
   return (
     normalizedFilePath.startsWith(appsPrefix) &&
-    normalizedFilePath.endsWith("/src/manifest.tsx")
+    LOCAL_PLUGIN_SOURCE_EXTENSIONS.some((extension) =>
+      normalizedFilePath.endsWith(`/src/manifest${extension}`),
+    )
   );
 }
 
@@ -225,8 +230,8 @@ function rewriteLocalPluginImports(rootDir: string, id: string, code: string) {
 // plugin's standalone build), strip those imports in dev. The host care_fe
 // app already provides Tailwind v4 theme/preflight/utilities and scans
 // apps/** via @source, so these imports would otherwise (a) re-run preflight
-// over the entire host page and (b) emit no utilities (the utilities.css
-// import isn't a v4 entry-point so it can't scan sources from here).
+// over the entire host page and (b) duplicate utilities. Keep a reference
+// to the theme so plugin @apply and --spacing() still compile.
 function stripPluginTailwindImports(rootDir: string, id: string, code: string) {
   if (!id.endsWith(".css")) {
     return null;
@@ -237,8 +242,10 @@ function stripPluginTailwindImports(rootDir: string, id: string, code: string) {
     return null;
   }
 
+  // Any import options ride along — `layer(theme)`, and `theme(reference)`
+  // for a plugin that compiles its utilities against the host's tokens.
   const stripped = code.replace(
-    /@import\s+["']tailwindcss(?:\/[^"']*)?["'](?:\s+layer\([^)]*\))?\s*;?/g,
+    /@import\s+["']tailwindcss(?:\/[^"']*)?["'](?:\s+\w+\([^)]*\))*\s*;?/g,
     "",
   );
 
@@ -246,7 +253,7 @@ function stripPluginTailwindImports(rootDir: string, id: string, code: string) {
     return null;
   }
 
-  return stripped;
+  return `@reference "tailwindcss";\n${stripped}`;
 }
 
 function createLocalPluginModule(rootDir: string, command: "serve" | "build") {
@@ -436,6 +443,17 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         ),
       }),
       tailwindcss(),
+      // Generates src/routeTree.gen.ts from src/routes/** and splits each
+      // route component into its own chunk. Must run before react().
+      tanstackRouter({
+        target: "react",
+        autoCodeSplitting: true,
+        routesDirectory: "./src/routes",
+        generatedRouteTree: "./src/routeTree.gen.ts",
+        routeFileIgnorePrefix: "-",
+        quoteStyle: "double",
+        semicolons: true,
+      }),
       federation({
         name: "core",
         remotes: {
@@ -446,26 +464,21 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "react-dom",
           "react-i18next",
           "@tanstack/react-query",
-          "raviger",
+          // One router instance: plugins read the host router's context.
+          "@tanstack/react-router",
+          // The alias points `raviger` at the shim, so give the version
+          // here; otherwise the plugin reads `raviger/package.json` through
+          // the alias and fails.
+          { raviger: { version: ravigerVersion } },
           "sonner",
           "decimal.js",
         ],
       }),
       react(),
-      checker({
-        typescript: true,
-        eslint: {
-          useFlatConfig: true,
-          lintCommand: "eslint ./src",
-          dev: {
-            logLevel: ["error"],
-          },
-        },
-        enableBuild: false,
-      }),
       treeShakeCareIcons({
         iconWhitelist: ["default"],
       }),
+      typstCompilerWasm(),
       VitePWA({
         strategies: "injectManifest",
         srcDir: "src",
@@ -516,6 +529,11 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         "@": path.resolve(__dirname, "./src"),
         "@careConfig": path.resolve(__dirname, "./care.config.ts"),
         "@core": path.resolve(__dirname, "src/"),
+        // Every `raviger` import (core, local plugins and the federated
+        // shared module) resolves to the compatibility shim, which sends all
+        // navigation through the TanStack router. Type-only imports of
+        // `raviger/dist/*` inside the shim are erased before resolution.
+        raviger: path.resolve(__dirname, "src/compat/raviger.tsx"),
       },
       // Dedupe shared packages so locally-served plugin source (apps/*) resolves
       // these from the main app's node_modules instead of the plugin's own copy.
@@ -527,6 +545,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         "react-i18next",
         "i18next",
         "@tanstack/react-query",
+        "@tanstack/react-router",
         "raviger",
         "sonner",
         "decimal.js",
@@ -535,16 +554,22 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
     // optimizeDeps: {
     //   include: getPluginDependencies(),
     // },
+    worker: {
+      // The print worker (src/print) loads the Typst compiler with a dynamic
+      // import, which needs ES module workers.
+      format: "es",
+    },
     build: {
       target: "es2022",
       outDir: "build",
-      sourcemap: true,
+      sourcemap: mode !== "production",
     },
     esbuild: {
       target: "es2022",
     },
     server: {
-      port: 4000,
+      port: Number(process.env.PORT) || 4000,
+      strictPort: !!process.env.PORT,
       host: "0.0.0.0",
       allowedHosts: true,
       watch: {
@@ -566,7 +591,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           img-src 'self' https://cdn.ohc.network ${cdnUrls};\
           object-src 'self' ${cdnUrls};`,
       },
-      port: 4000,
+      port: Number(process.env.PORT) || 4000,
+      strictPort: !!process.env.PORT,
     },
   };
 });

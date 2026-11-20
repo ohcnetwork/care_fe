@@ -10,7 +10,13 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
-export const DepartmentsAndTeams = () => {
+interface DepartmentsAndTeamsProps {
+  title?: string;
+}
+
+export const DepartmentsAndTeams = ({
+  title,
+}: DepartmentsAndTeamsProps = {}) => {
   const { t } = useTranslation();
   const {
     selectedEncounter: encounter,
@@ -21,20 +27,35 @@ export const DepartmentsAndTeams = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2 p-1 space-y-1">
-      <div className="flex justify-between items-center pl-2 text-gray-950">
-        <span className=" font-semibold">{t("departments_and_teams")}</span>
+    <section
+      aria-label={title ?? t("departments_and_teams")}
+      className="min-w-0 w-full rounded-xl border border-gray-200 bg-white"
+    >
+      <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
+        <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold uppercase tracking-wide text-gray-600">
+          {title ?? t("departments_and_teams")}
+        </span>
         {canEdit && (
-          <Button variant="ghost" size="sm" onClick={manageDepartments}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={manageDepartments}
+            className="shrink-0"
+            aria-label={t("update_department")}
+          >
             <SquarePen className="cursor-pointer" strokeWidth={1.5} />
           </Button>
         )}
       </div>
-      <div className="space-y-2 bg-white rounded-md p-2 shadow">
+      <div className="space-y-2 p-3">
         {encounter.organizations.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {encounter.organizations.map((org) => (
-              <Badge key={org.id} variant="blue" className="capitalize">
+              <Badge
+                key={org.id}
+                variant="blue"
+                className="max-w-full whitespace-normal capitalize [overflow-wrap:anywhere]"
+              >
                 {org.name}
               </Badge>
             ))}
@@ -43,6 +64,6 @@ export const DepartmentsAndTeams = () => {
           <EmptyState message={t("no_departments_and_teams")} />
         )}
       </div>
-    </div>
+    </section>
   );
 };

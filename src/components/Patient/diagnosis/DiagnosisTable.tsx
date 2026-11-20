@@ -18,30 +18,44 @@ import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import ClinicalInformationRow, {
   BadgeButtonDropdownTrigger,
 } from "@/components/Patient/Common/ClinicalInformationRow";
+import {
+  ClinicalSummaryGrid,
+  hasOnset,
+  OnsetMeta,
+  SeverityMeta,
+} from "@/components/Patient/Common/ClinicalSummaryGrid";
 
-import { formatName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
+  ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_CLINICAL_STATUS_COLORS,
   DIAGNOSIS_SEVERITY_COLORS,
   DIAGNOSIS_VERIFICATION_STATUS_COLORS,
   type Diagnosis,
 } from "@/types/emr/diagnosis/diagnosis";
 
-const DiagnosisCard = ({
+export const DiagnosisCard = ({
   diagnosis,
   onViewEncounter,
+  compact = false,
+  alwaysShowDetails = false,
+  className,
 }: {
   diagnosis: Diagnosis;
   onViewEncounter?: () => void;
+  compact?: boolean;
+  /** Display the complete shared record without an encounter link or note toggle. */
+  alwaysShowDetails?: boolean;
+  className?: string;
 }) => {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
   return (
-    <div className="border shadow rounded-md p-2 bg-white">
+    <div className={cn("border shadow rounded-md p-2 bg-white", className)}>
       <div className="flex justify-between items-start flex-wrap gap-3">
-        <div className="flex-1 font-semibold text-gray-900 break-words">
-          {diagnosis.code.display}
+        <div className="min-w-0 flex-1 font-semibold text-gray-900 break-words">
+          {diagnosis.code.display || diagnosis.code.code}
         </div>
 
         <div className="flex items-center gap-2">
@@ -52,51 +66,58 @@ const DiagnosisCard = ({
           >
             {t(diagnosis.clinical_status)}
           </Badge>
-          <DropdownMenu>
-            <BadgeButtonDropdownTrigger note={diagnosis.note} />
-            <DropdownMenuContent className="mx-1 w-28 text-xs p-1" align="end">
-              {diagnosis.note && (
-                <DropdownMenuItem
-                  onClick={() => setShowNote(!showNote)}
-                  className="flex items-center gap-1.5 px-2 py-1.5 font-medium text-xs"
-                >
-                  <File className="size-3.5" />
-                  <span>{showNote ? t("hide_note") : t("see_note")}</span>
-                </DropdownMenuItem>
-              )}
+          {!alwaysShowDetails && (
+            <DropdownMenu>
+              <BadgeButtonDropdownTrigger note={diagnosis.note} />
+              <DropdownMenuContent
+                className="mx-1 w-28 text-xs p-1"
+                align="end"
+              >
+                {diagnosis.note && (
+                  <DropdownMenuItem
+                    onClick={() => setShowNote(!showNote)}
+                    className="flex items-center gap-1.5 px-2 py-1.5 font-medium text-xs"
+                  >
+                    <File className="size-3.5" />
+                    <span>{showNote ? t("hide_note") : t("see_note")}</span>
+                  </DropdownMenuItem>
+                )}
 
-              {!!onViewEncounter && (
-                <DropdownMenuItem
-                  onClick={onViewEncounter}
-                  className="flex items-center gap-1.5 px-2 py-1.5 font-medium text-xs"
-                >
-                  <ExternalLink className="size-3.5" />
-                  <span>{t("go_to_encounter")}</span>
-                </DropdownMenuItem>
-              )}
+                {!!onViewEncounter && (
+                  <DropdownMenuItem
+                    onClick={onViewEncounter}
+                    className="flex items-center gap-1.5 px-2 py-1.5 font-medium text-xs"
+                  >
+                    <ExternalLink className="size-3.5" />
+                    <span>{t("go_to_encounter")}</span>
+                  </DropdownMenuItem>
+                )}
 
-              {(!!onViewEncounter || diagnosis.note) && (
-                <div className="my-1 border-t border-dashed border-gray-300" />
-              )}
+                {(!!onViewEncounter || diagnosis.note) && (
+                  <div className="my-1 border-t border-dashed border-gray-300" />
+                )}
 
-              <div className="p-1 text-xs">
-                <div className="text-gray-500">{t("reported_by")}:</div>
-                <div className="mt-1 flex items-center gap-1.5">
-                  <Avatar
-                    name={formatName(diagnosis.created_by, true)}
-                    className="size-5"
-                    imageUrl={diagnosis.created_by.profile_picture_url}
-                  />
-                  <span className="font-medium text-gray-900 truncate">
-                    {formatName(diagnosis.created_by)}
-                  </span>
+                <div className="p-1 text-xs">
+                  <div className="text-gray-500">{t("reported_by")}:</div>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <Avatar
+                      name={formatName(diagnosis.created_by, true)}
+                      className="size-5"
+                      imageUrl={diagnosis.created_by?.profile_picture_url}
+                    />
+                    <span className="font-medium text-gray-900 truncate">
+                      {formatName(diagnosis.created_by)}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
-      <div className="mt-4 flex gap-8 flex-wrap">
+      <div
+        className={cn("flex flex-wrap", compact ? "mt-2 gap-3" : "mt-4 gap-8")}
+      >
         <div>
           <div className="text-sm text-gray-600 mb-1">{t("verification")}</div>
           <Badge
@@ -117,7 +138,7 @@ const DiagnosisCard = ({
             </Badge>
           </div>
         )}
-        <div>
+        <div className="min-w-0">
           <div className="text-sm text-gray-600 mb-1">{t("onset")}</div>
           {diagnosis.onset?.onset_datetime ? (
             <RelativeDateTooltip
@@ -125,25 +146,60 @@ const DiagnosisCard = ({
               className="font-normal"
             />
           ) : (
-            "-"
+            diagnosis.onset?.onset_string || (diagnosis.onset?.onset_age ?? "-")
+          )}
+          {alwaysShowDetails && diagnosis.onset?.note && (
+            <p className="mt-1 whitespace-pre-wrap break-words text-sm text-gray-600">
+              {diagnosis.onset.note}
+            </p>
           )}
         </div>
+        {alwaysShowDetails && (
+          <div>
+            <div className="text-sm text-gray-600 mb-1">{t("category")}</div>
+            <div className="text-sm">
+              {t(`Diagnosis_${diagnosis.category}__title`, {
+                defaultValue: diagnosis.category.replaceAll("_", " "),
+              })}
+            </div>
+          </div>
+        )}
+        {alwaysShowDetails && diagnosis.created_by && (
+          <div>
+            <div className="text-sm text-gray-600 mb-1">{t("reported_by")}</div>
+            <div className="text-sm break-words">
+              {formatName(diagnosis.created_by)}
+            </div>
+          </div>
+        )}
+        {alwaysShowDetails && diagnosis.recorded_date && (
+          <div>
+            <div className="text-sm text-gray-600 mb-1">
+              {t("recorded_date")}
+            </div>
+            <div className="text-sm">
+              {formatDateTime(diagnosis.recorded_date)}
+            </div>
+          </div>
+        )}
       </div>
-      {showNote && diagnosis.note && (
+      {(alwaysShowDetails || showNote) && diagnosis.note && (
         <div className="col-span-full relative border border-gray-200 p-2 bg-gray-50 rounded mt-2 rounded-t-none">
           <div className="text-sm font-semibold text-gray-800">
             {t("note")}
             {":"}
           </div>
 
-          <Button
-            variant="link"
-            className="absolute top-0 right-2 flex items-center gap-1 p-0 text-sm"
-            onClick={() => setShowNote(false)}
-          >
-            <X />
-            <span className="underline">{t("hide_note")}</span>
-          </Button>
+          {!alwaysShowDetails && (
+            <Button
+              variant="link"
+              className="absolute top-0 right-2 flex items-center gap-1 p-0 text-sm"
+              onClick={() => setShowNote(false)}
+            >
+              <X />
+              <span className="underline">{t("hide_note")}</span>
+            </Button>
+          )}
 
           <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words mt-2">
             {diagnosis.note}
@@ -157,20 +213,63 @@ export const DiagnosisTable = ({
   diagnoses,
   patientId,
   showViewEncounter = true,
+  compact = false,
 }: {
   diagnoses: Diagnosis[];
   patientId: string;
   showViewEncounter?: boolean;
+  compact?: boolean;
 }) => {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
   const baseHeaderClasses =
     "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
 
+  if (compact) {
+    return (
+      <ClinicalSummaryGrid
+        items={diagnoses.map((diagnosis) => ({
+          id: diagnosis.id,
+          name: diagnosis.code.display || diagnosis.code.code,
+          dimmed: !ACTIVE_DIAGNOSIS_CLINICAL_STATUS.includes(
+            diagnosis.clinical_status,
+          ),
+          note: diagnosis.note,
+          createdBy: diagnosis.created_by,
+          onViewEncounter: showViewEncounter
+            ? () =>
+                navigate(
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                    : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+                )
+            : undefined,
+          meta: [
+            hasOnset(diagnosis.onset) && (
+              <OnsetMeta key="onset" onset={diagnosis.onset} />
+            ),
+            diagnosis.severity && (
+              <SeverityMeta key="severity" severity={diagnosis.severity} />
+            ),
+            diagnosis.category === "chronic_condition" && (
+              <span key="category">{t("clinical_summary_chronic")}</span>
+            ),
+            diagnosis.verification_status !== "confirmed" && (
+              <span key="verification">{t(diagnosis.verification_status)}</span>
+            ),
+            diagnosis.clinical_status !== "active" && (
+              <span key="status">{t(diagnosis.clinical_status)}</span>
+            ),
+          ],
+        }))}
+      />
+    );
+  }
+
   return (
     <>
       {/* Mobile: Card layout */}
-      <div className="space-y-3 block sm:hidden">
+      <div className="block space-y-3 sm:hidden">
         {diagnoses.map((diagnosis) => (
           <DiagnosisCard
             key={diagnosis.id}
@@ -189,8 +288,8 @@ export const DiagnosisTable = ({
         ))}
       </div>
       {/* Desktop: Table layout */}
-      <div className="overflow-x-auto hidden sm:block">
-        <div className="min-w-xl pb-2">
+      <div className="hidden overflow-x-auto sm:block">
+        <div className={"min-w-xl pb-2"}>
           <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-y-2">
             <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
               {t("diagnosis")}

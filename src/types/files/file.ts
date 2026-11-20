@@ -15,6 +15,7 @@ export enum FileType {
   CONSENT = "consent",
   DIAGNOSTIC_REPORT = "diagnostic_report",
   SERVICE_REQUEST = "service_request",
+  REFERRAL = "referral",
 }
 
 export interface FileBase {
@@ -31,6 +32,15 @@ export interface FileCreate extends FileBase {
 
 export interface FileUploadQuestion extends Omit<FileCreate, "mime_type"> {
   file_data: File;
+}
+
+export interface FileUploadRequest extends Omit<
+  FileUploadQuestion,
+  "file_data"
+> {
+  /** Contents of the file, base64 encoded without the data URL prefix. */
+  file_data: string;
+  encounter?: string;
 }
 
 export interface FileUpdate {

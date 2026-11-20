@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { PatientListRead, PatientRead } from "@/types/emr/patient/patient";
 import { Permissions } from "@/types/emr/permission/permission";
-import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationRead } from "@/types/location/association";
@@ -200,17 +200,12 @@ export type History = {
   moved_at: string;
 };
 
-export type EncounterClassHistory = {
-  history: History[];
-};
-
 export type StatusHistory = {
   history: History[];
 };
 
 export interface EncounterBase {
   status: EncounterStatus;
-  encounter_class: EncounterClass;
   period: Period;
   hospitalization?: Hospitalization | null;
   priority: EncounterPriority;
@@ -223,12 +218,12 @@ export interface EncounterListRead extends EncounterBase {
   patient: PatientListRead;
   facility: FacilityBareMinimum;
   status_history: StatusHistory;
-  encounter_class_history: EncounterClassHistory;
   created_date: string;
   modified_date: string;
   tags: TagConfig[];
   current_location: LocationMinSpec | null;
   care_team: CareTeamResponse[];
+  encounter_class: EncounterClass;
 }
 
 export interface EncounterRead
@@ -250,10 +245,11 @@ export interface EncounterCreate extends Omit<
   patient: string;
   facility: string;
   organizations: string[];
-  tags?: string[];
+  tags?: TagSetRequest[];
   appointment?: string;
   external_identifier?: string;
   discharge_summary_advice?: string;
+  encounter_class: EncounterClass;
 }
 
 export type EncounterEdit = EncounterBase;

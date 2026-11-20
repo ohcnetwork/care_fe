@@ -3,7 +3,7 @@ import { clickTabOrMenuItem, expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
-import { createServiceRequest } from "./serviceRequest";
+import { createServiceRequest, reportTypeCombobox } from "./serviceRequest";
 
 test.use({
   storageState: "tests/.auth/user.json",
@@ -156,7 +156,8 @@ test.describe("Patient Service Request Tab", () => {
       .getByRole("textbox", { name: "Type your Notes" })
       .fill("Test Notes");
     const collectButton = page.getByRole("button", {
-      name: "Collect ⇧ + ENTER",
+      name: "Mark as collected",
+      exact: true,
     });
     await expect(collectButton).toBeEnabled();
     const specimenResponse = page.waitForResponse(
@@ -171,18 +172,27 @@ test.describe("Patient Service Request Tab", () => {
       specimenResponse,
       specimenCollectedToast,
     ]);
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: "Select Diagnostic Report Type" })
-      .click();
+    const reportTypeSelect = reportTypeCombobox(page);
+
+    if (!(await reportTypeSelect.isVisible())) {
+      await page.getByText("Test Results Entry").click();
+    }
+    await reportTypeSelect.click();
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: "Create Report" }).click();
-    const observationCombobox = page
-      .locator('[data-slot="card-content"]')
-      .filter({ hasText: "Observation 1" })
-      .getByRole("combobox");
-    await observationCombobox.scrollIntoViewIfNeeded();
-    await expect(observationCombobox).toContainText("mg");
+    const observationGroup = page.getByRole("group", {
+      name: observationDefinitionTitle,
+      exact: true,
+    });
+    const result = observationGroup.getByRole("textbox", {
+      name: observationDefinitionTitle,
+      exact: true,
+    });
+    await result.scrollIntoViewIfNeeded();
+    await expect(
+      observationGroup.getByText("mg", { exact: true }),
+    ).toBeVisible();
+    await expect(result).toHaveAccessibleDescription("mg");
   });
 });
 
@@ -219,17 +229,15 @@ test("should fill result value, capture a photo and save results", async ({
     .getByRole("textbox", { name: "Type your Notes" })
     .fill("Test Notes");
   const collectButton = page.getByRole("button", {
-    name: "Collect ⇧ + ENTER",
+    name: "Mark as collected",
+    exact: true,
   });
   await expect(collectButton).toBeEnabled();
   const specimenCollectedToast = expectToast(page, /specimen collected/i);
   await Promise.all([collectButton.click(), specimenCollectedToast]);
 
   // Create the diagnostic report
-  await page
-    .getByRole("combobox")
-    .filter({ hasText: "Select Diagnostic Report Type" })
-    .click();
+  await reportTypeCombobox(page).click();
   await page.getByRole("option").first().click();
   await page.getByRole("button", { name: "Create Report" }).click();
 

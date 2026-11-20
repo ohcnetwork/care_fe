@@ -32,54 +32,47 @@ import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { useInView } from "react-intersection-observer";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 interface BookingsListProps {
   patientId: string;
   facilityId?: string;
+  appointmentQueryParams?: { referralId?: string; referralSourceUrl?: string };
 }
 
-export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
+export const BookingsList = ({
+  patientId,
+  facilityId,
+  appointmentQueryParams,
+}: BookingsListProps) => {
   const { t } = useTranslation();
   const today = new Date();
+  const appointmentQuery = appointmentQueryParams?.referralId
+    ? `?${new URLSearchParams(Object.entries(appointmentQueryParams).filter((entry): entry is [string, string] => typeof entry[1] === "string"))}`
+    : "";
   return (
     <div className="mt-2">
       <Tabs defaultValue="upcoming">
         <div className="flex flex-col gap-2">
-          <TabsList className="grid grid-cols-3 bg-gray-100 h-10 w-full sm:w-fit">
-            <TabsTrigger
-              value="upcoming"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
-            >
-              {t("upcoming")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="past"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
-            >
-              {t("past")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="cancelled"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
-            >
-              {t("cancelled")}
-            </TabsTrigger>
+          <TabsList className="grid grid-cols-3 w-full sm:w-fit">
+            <TabsTrigger value="upcoming">{t("upcoming")}</TabsTrigger>
+            <TabsTrigger value="past">{t("past")}</TabsTrigger>
+            <TabsTrigger value="cancelled">{t("cancelled")}</TabsTrigger>
           </TabsList>
-          <TabsContent value="upcoming" className="space-y-4 overflow-x-auto">
+          <TabsContent value="upcoming" className="space-y-4">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
+              appointmentQuery={appointmentQuery}
               statuses={UpcomingAppointmentStatuses}
               date_after={today}
             />
           </TabsContent>
-          <TabsContent value="past" className="space-y-4 overflow-x-auto">
+          <TabsContent value="past" className="space-y-4 ">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
+              appointmentQuery={appointmentQuery}
               statuses={PastAppointmentStatuses}
               date_before={today}
             />
@@ -88,6 +81,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
+              appointmentQuery={appointmentQuery}
               statuses={CancelledAppointmentStatuses}
             />
           </TabsContent>
@@ -101,10 +95,12 @@ const AppointmentCard = ({
   appointment,
   patientId,
   showFacilityInfo,
+  appointmentQuery,
 }: {
   appointment: Appointment;
   patientId: string;
   showFacilityInfo: boolean;
+  appointmentQuery: string;
 }) => {
   const { t } = useTranslation();
 
@@ -161,7 +157,7 @@ const AppointmentCard = ({
           asChild
         >
           <Link
-            href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`}
+            href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}${appointmentQuery}`}
           >
             {t("see_details")}
           </Link>
@@ -175,10 +171,12 @@ const AppointmentTable = ({
   appointments,
   patientId,
   showFacilityInfo,
+  appointmentQuery,
 }: {
   appointments: Appointment[];
   patientId: string;
   showFacilityInfo: boolean;
+  appointmentQuery: string;
 }) => {
   const { t } = useTranslation();
 
@@ -204,7 +202,7 @@ const AppointmentTable = ({
         {appointments.map((appointment) => (
           <Link
             key={appointment.id}
-            href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`}
+            href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}${appointmentQuery}`}
             className="contents"
           >
             <TableRow className="shadow bg-white space-y-3 rounded-lg cursor-pointer hover:bg-gray-50">
@@ -295,54 +293,38 @@ export const BookingListContent = ({
   statuses,
   date_after,
   date_before,
+  appointmentQuery = "",
 }: {
   patientId: string;
   facilityId?: string;
   statuses?: readonly AppointmentStatus[];
   date_after?: Date;
   date_before?: Date;
+  appointmentQuery?: string;
 }) => {
   const { t } = useTranslation();
-  const { ref, inView } = useInView();
-
   const {
     data: appointmentsData,
-    hasNextPage,
     isFetchingNextPage,
-    fetchNextPage,
+    hasNextPage,
     isLoading,
-  } = useInfiniteQuery({
+    ref,
+  } = useInfiniteList({
     queryKey: ["infinite-appointments", patientId, facilityId, statuses],
 
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(scheduleApi.appointments.getAppointments, {
-        pathParams: { patientId },
-        queryParams: {
-          offset: pageParam,
-          limit: 15,
-          facility: facilityId,
-          ...(date_after && { date_after: dateQueryString(date_after) }),
-          ...(date_before && { date_before: dateQueryString(date_before) }),
-          status: statuses?.join(","),
-        },
-      })({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * 15;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+    ...query.infinite(scheduleApi.appointments.getAppointments, {
+      pathParams: { patientId },
+      queryParams: {
+        facility: facilityId,
+        ...(date_after && { date_after: dateQueryString(date_after) }),
+        ...(date_before && { date_before: dateQueryString(date_before) }),
+        status: statuses?.join(","),
+      },
+      pageSize: 15,
+    }),
   });
 
-  const appointments =
-    appointmentsData?.pages.flatMap((page) => page.results) ?? [];
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
+  const appointments = appointmentsData?.results ?? [];
 
   if (isLoading) {
     return <CardListSkeleton count={15} />;
@@ -364,6 +346,7 @@ export const BookingListContent = ({
           appointments={appointments}
           patientId={patientId}
           showFacilityInfo={!facilityId}
+          appointmentQuery={appointmentQuery}
         />
       </div>
       <div className="sm:hidden space-y-4">
@@ -373,6 +356,7 @@ export const BookingListContent = ({
             appointment={appointment}
             patientId={patientId}
             showFacilityInfo={!facilityId}
+            appointmentQuery={appointmentQuery}
           />
         ))}
       </div>

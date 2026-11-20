@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -32,6 +33,8 @@ import {
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { ArrowUpRightSquare } from "lucide-react";
+import { Link } from "raviger";
 
 interface DispensedItemsSheetProps {
   open: boolean;
@@ -69,11 +72,11 @@ export function DispensedItemsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-3xl">
+      <SheetContent size="xl" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("dispensed_items")}</SheetTitle>
         </SheetHeader>
-        <div className="mt-4">
+        <SheetBody>
           {isLoading ? (
             <TableSkeleton count={3} />
           ) : dispensedItems?.results.length ? (
@@ -87,6 +90,7 @@ export function DispensedItemsSheet({
                     <TableHead>{t("dispensed_on")}</TableHead>
                     <TableHead>{t("status")}</TableHead>
                     <TableHead>{t("total_price")}</TableHead>
+                    <TableHead>{t("actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -97,7 +101,7 @@ export function DispensedItemsSheet({
                           {item.item.product.product_knowledge.name}
                         </TableCell>
                         <TableCell>
-                          {round(item.charge_item.quantity)}{" "}
+                          {round(item.charge_item?.quantity || "0")}{" "}
                           {/* Unit label from first instruction (unit is consistent across instructions) */}
                           {
                             item.dosage_instruction?.find(
@@ -128,6 +132,18 @@ export function DispensedItemsSheet({
                             amount={item?.charge_item?.total_price}
                           />
                         </TableCell>
+                        <TableCell>
+                          <Link
+                            href={`/medication_dispense/order/${item.order.id}`}
+                            className="flex items-center gap-2 whitespace-nowrap"
+                          >
+                            {t("view_order")}
+                            <ArrowUpRightSquare
+                              strokeWidth={1.5}
+                              className="size-4"
+                            />
+                          </Link>
+                        </TableCell>
                       </TableRow>
                     ),
                   )}
@@ -144,7 +160,7 @@ export function DispensedItemsSheet({
               {t("no_items_dispensed_yet")}
             </p>
           )}
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

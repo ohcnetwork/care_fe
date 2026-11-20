@@ -1,12 +1,13 @@
-import {
-  DotsVerticalIcon,
-  MinusCircledIcon,
-  Pencil2Icon,
-} from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
+import {
+  ChevronsDownUp,
+  ChevronsUpDown,
+  EllipsisVertical as DotsVerticalIcon,
+  CircleMinus as MinusCircledIcon,
+  Pencil as Pencil2Icon,
+} from "lucide-react";
+import React, { useEffect, useEffectEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -46,7 +47,7 @@ import {
 
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
+import { hasDuplicateClinicalCode } from "@/components/Questionnaire/QuestionTypes/conditionValidation";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -85,6 +86,7 @@ interface DiagnosisQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   question: Question;
 }
@@ -330,13 +332,7 @@ function checkForDuplicateDiagnosis(
   const codeValue =
     typeof codeToCheck === "string" ? codeToCheck : codeToCheck.code;
 
-  const isDuplicate = existingDiagnoses.some(
-    (diagnosis) =>
-      diagnosis.code.code === codeValue &&
-      diagnosis.verification_status !== "entered_in_error",
-  );
-
-  if (isDuplicate) {
+  if (hasDuplicateClinicalCode(existingDiagnoses, codeValue)) {
     toast.warning(t("diagnosis_already_exist_warning"));
     return true;
   }
@@ -348,8 +344,8 @@ export function DiagnosisQuestion({
   encounterId,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
-  question,
 }: DiagnosisQuestionProps) {
   const { t } = useTranslation();
 
@@ -391,9 +387,14 @@ export function DiagnosisQuestion({
     enabled: !isPreview,
   });
 
-  useEffect(() => {
-    if (patientDiagnoses?.results) {
-      updateQuestionnaireResponseCB(
+  // Reconcile fresh server data without reinitializing on clinician edits.
+  const initializeResponse = useEffectEvent(() => {
+    if (
+      patientDiagnoses?.results &&
+      (initializeQuestionnaireResponseCB ||
+        questionnaireResponse.values.length === 0)
+    ) {
+      (initializeQuestionnaireResponseCB ?? updateQuestionnaireResponseCB)(
         [
           {
             type: "diagnosis",
@@ -403,6 +404,10 @@ export function DiagnosisQuestion({
         questionnaireResponse.question_id,
       );
     }
+  });
+
+  useEffect(() => {
+    initializeResponse();
   }, [patientDiagnoses]);
 
   const handleCodeSelect = (code: Code) => {
@@ -540,14 +545,8 @@ export function DiagnosisQuestion({
   };
 
   return (
-    <div
-      className={cn(
-        "space-y-4",
-        sortedDiagnoses.length > 0 ? "md:max-w-fit" : "max-w-4xl",
-      )}
-    >
-      <div className="flex justify-between items-center flex-wrap">
-        <QuestionLabel question={question} />
+    <div className="min-w-0 w-full space-y-4">
+      <div className="flex flex-wrap items-center justify-end">
         <HistoricalRecordSelector<DiagnosisRequest>
           title={t("past_diagnoses")}
           structuredTypes={[
@@ -659,6 +658,7 @@ export function DiagnosisQuestion({
           buttonLabel={t("diagnosis_history")}
           onAddSelected={handleAddHistoricalDiagnoses}
           disableAPI={isPreview}
+          disabled={disabled}
         />
       </div>
 

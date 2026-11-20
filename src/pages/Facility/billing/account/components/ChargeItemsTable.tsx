@@ -1,5 +1,6 @@
-import { CheckedState } from "@radix-ui/react-checkbox";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckedState } from "@/components/ui/checkbox";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   ArrowRightLeft,
   ChevronDown,
@@ -9,10 +10,9 @@ import {
   PrinterIcon,
   Zap,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link as RavigerLink, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 
@@ -43,6 +43,7 @@ import SearchInput from "@/components/Common/SearchInput";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import {
   MonetaryComponent,
@@ -203,45 +204,29 @@ function ChargeItemsTable({
     };
   };
 
-  const RESULTS_PER_PAGE = 20;
-  const { ref: loadMoreRef, inView } = useInView();
-
   const {
-    data: chargeItems,
-    fetchNextPage,
+    data,
     hasNextPage,
     isFetchingNextPage,
     isLoading,
-  } = useInfiniteQuery({
+    ref: loadMoreRef,
+  } = useInfiniteList({
     queryKey: ["infinite-chargeItems", accountId, qParams],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(chargeItemApi.listChargeItem, {
-        pathParams: { facilityId },
-        queryParams: {
-          account: accountId,
-          status: qParams.status,
-          service_resource: qParams.service_resource,
-          created_by: qParams.created_by,
-          ordering: qParams.ordering,
-          title: qParams.title,
-          limit: RESULTS_PER_PAGE,
-          offset: pageParam,
-          ...getDateQueryParams(),
-        },
-      })({ signal });
-      return response as { results: ChargeItemRead[]; count: number };
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * RESULTS_PER_PAGE;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) => data?.pages.flatMap((p) => p.results) ?? [],
+    ...query.infinite(chargeItemApi.listChargeItem, {
+      pathParams: { facilityId },
+      pageSize: 20,
+      queryParams: {
+        account: accountId,
+        status: qParams.status,
+        service_resource: qParams.service_resource,
+        created_by: qParams.created_by,
+        ordering: qParams.ordering,
+        title: qParams.title,
+        ...getDateQueryParams(),
+      },
+    }),
   });
-
-  useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage();
-  }, [inView, hasNextPage, fetchNextPage]);
+  const chargeItems = data?.results;
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
@@ -328,18 +313,24 @@ function ChargeItemsTable({
 
   return (
     <div>
-      <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-        <MultiFilter
-          selectedFilters={selectedFilters}
-          onFilterChange={handleFilterChange}
-          onOperationChange={handleOperationChange}
-          onClearAll={handleClearAll}
-          onClearFilter={handleClearFilter}
-          className="flex flex-row-reverse flex-wrap sm:items-center"
-          facilityId={facilityId}
-        />
-        <div className="flex sm:flex-row flex-col sm:items-center gap-2 w-full sm:w-auto">
-          <div className="gap-2 flex items-center whitespace-nowrap">
+      <div className="mb-4 space-y-2">
+        <div className="w-full min-w-0">
+          <MultiFilter
+            selectedFilters={selectedFilters}
+            onFilterChange={handleFilterChange}
+            onOperationChange={handleOperationChange}
+            onClearAll={handleClearAll}
+            onClearFilter={handleClearFilter}
+            className="w-full min-w-0 items-start sm:flex-row sm:flex-wrap sm:items-center"
+            triggerButtonClassName="self-start sm:self-center"
+            clearAllButtonClassName="self-start sm:self-center"
+            selectedBarClassName="md:w-full lg:w-fit"
+            selectedValueClassName="w-0 flex-1 md:w-0 md:flex-1 md:max-w-none lg:w-auto lg:flex-none lg:max-w-80 xl:max-w-96"
+            facilityId={facilityId}
+          />
+        </div>
+        <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+          <div className="flex items-center gap-2 whitespace-nowrap">
             <Label htmlFor="sort-by-title">{t("sort_by_title")}</Label>
             <Switch
               id="sort-by-title"
@@ -352,7 +343,7 @@ function ChargeItemsTable({
           <Button
             variant="outline"
             onClick={() => navigate(`../${accountId}/charge_items/print`)}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto sm:max-w-full"
           >
             <PrinterIcon className="size-4 mr-2" />
             {t("print_charge_items")}
@@ -363,7 +354,7 @@ function ChargeItemsTable({
               <Button
                 variant="outline"
                 onClick={() => setIsQuickAddOpen(true)}
-                className="w-full sm:w-auto bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100"
+                className="w-full bg-linear-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100 sm:w-auto sm:max-w-full"
               >
                 <Zap className="size-4 mr-2 text-amber-500" />
                 {t("quick_add")}
@@ -371,7 +362,7 @@ function ChargeItemsTable({
               <Button
                 variant="outline"
                 onClick={() => setIsAddChargeItemsOpen(true)}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto sm:max-w-full"
               >
                 <PlusIcon className="size-4 mr-2" />
                 {t("add_charge_items")}
@@ -428,7 +419,7 @@ function ChargeItemsTable({
         />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
-          <Table className="rounded-lg border shadow-sm w-full bg-white">
+          <Table className="shadow-sm w-full bg-white">
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10">
@@ -465,10 +456,10 @@ function ChargeItemsTable({
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("performer")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[120px]">
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-30">
                   {t("status")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[60px]">
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-15">
                   {t("actions")}
                 </TableHead>
               </TableRow>
@@ -530,13 +521,13 @@ function ChargeItemsTable({
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
                       {linkedResource !== "" ? (
-                        <Link
+                        <RavigerLink
                           href={linkedResource}
                           className="flex items-center gap-0.5 underline text-gray-600"
                         >
                           {t(item.service_resource)}
                           <ExternalLinkIcon className="size-3" />
-                        </Link>
+                        </RavigerLink>
                       ) : (
                         <span className="text-gray-500">
                           {t(item.service_resource)}
@@ -564,7 +555,11 @@ function ChargeItemsTable({
                         </Badge>
                         {item.paid_invoice && (
                           <Link
-                            href={`/facility/${facilityId}/billing/invoices/${item.paid_invoice.id}`}
+                            to="/facility/$facilityId/billing/invoices/$invoiceId"
+                            params={{
+                              facilityId,
+                              invoiceId: item.paid_invoice.id,
+                            }}
                             className="flex items-center gap-0.5 underline text-gray-600"
                             title={t("view_invoice")}
                           >
@@ -669,7 +664,7 @@ function ChargeItemsTable({
                     <TableCell></TableCell>
                     <TableCell>{t("note")}</TableCell>
                     <TableCell></TableCell>
-                    <TableCell className="p-3 break-words whitespace-pre-wrap">
+                    <TableCell className="p-3 wrap-break-word whitespace-pre-wrap">
                       {noteText}
                     </TableCell>
                     <TableCell></TableCell>

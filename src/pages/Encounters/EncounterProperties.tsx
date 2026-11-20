@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -11,8 +12,6 @@ import {
 
 import { formatDateTime } from "@/Utils/utils";
 import {
-  ENCOUNTER_CLASS_ICONS,
-  ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_STATUS_COLORS,
   ENCOUNTER_STATUS_ICONS,
   EncounterRead,
@@ -27,13 +26,22 @@ export const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
         <Badge
           variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
           size="sm"
-          className="cursor-pointer"
+          className="min-h-7 cursor-pointer px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+          asChild
         >
-          {React.createElement(ENCOUNTER_STATUS_ICONS[encounter.status], {
-            className: "size-3",
-          })}
-          {t(`encounter_status__${encounter.status}`)}
-          <ChevronDown className="size-3 opacity-50" />
+          <Button
+            variant="ghost"
+            type="button"
+            aria-label={`${t("status_history")}: ${t(`encounter_status__${encounter.status}`)}`}
+            className="h-auto p-0 gap-1 text-inherit"
+          >
+            {React.createElement(ENCOUNTER_STATUS_ICONS[encounter.status], {
+              className: "size-3",
+              "aria-hidden": true,
+            })}
+            {t(`encounter_status__${encounter.status}`)}
+            <ChevronDown aria-hidden="true" className="size-3 opacity-50" />
+          </Button>
         </Badge>
       </PopoverTrigger>
       <PopoverContent align={"start"} className="w-auto p-2">
@@ -46,50 +54,6 @@ export const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
               </span>
               <span className="font-medium">
                 {t(`encounter_status__${history.status}`)}
-              </span>
-            </div>
-          ))}
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-export const EncounterClassBadge = ({
-  encounter,
-}: {
-  encounter: EncounterRead;
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Badge
-          variant={ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]}
-          size="sm"
-          className="cursor-pointer"
-        >
-          {React.createElement(
-            ENCOUNTER_CLASS_ICONS[encounter.encounter_class],
-            {
-              className: "size-3",
-            },
-          )}
-          {t(`encounter_class__${encounter.encounter_class}`)}
-          <ChevronDown className="size-3 opacity-50" />
-        </Badge>
-      </PopoverTrigger>
-      <PopoverContent align={"start"} className="w-auto p-2">
-        <div className="space-y-2">
-          <h4 className="font-medium text-sm">{t("class_history")}</h4>
-          {encounter.encounter_class_history.history.map((history, index) => (
-            <div key={index} className="flex items-center gap-2 text-sm">
-              <span className="text-gray-500">
-                {formatDateTime(history.moved_at)}
-              </span>
-              <span className="font-medium">
-                {t(`encounter_class__${history.status}`)}
               </span>
             </div>
           ))}

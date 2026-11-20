@@ -27,11 +27,12 @@ same _judgment_ here, but as a bot commenting on a pull request:
 - **You cannot ask a question and wait.** Where a lens says to ask before rewriting something you
   don't understand, say plainly in the comment what you'd need to know and frame the finding as a
   question rather than an assertion.
-- **You CAN read the repository**, and should — but the working tree is the **base branch, which
-  does not contain this PR's changes.** That is the right tree for the approach lens ("does this
-  already exist?" is a question about pre-existing code): verify a reuse claim against it before
-  making it. To see the PR's own content, use the GitHub API — don't assume a file on disk reflects
-  the change under review.
+- **You CAN read the repository**, and should — but any working tree you have is the **default
+  branch (`develop`), whatever the PR's base, and does not contain this PR's changes.** That is the
+  right tree for the approach lens ("does this already exist?" is a question about pre-existing
+  code): verify a reuse claim against it before making it — for a PR into another base, check that
+  base through the API instead. To see the PR's own content, use the GitHub API — don't assume a file
+  on disk reflects the change under review.
 
 The severity labels the lenses use — `Broken` / `Convention` / `Polish`, and Lens 1's legibility
 tiers — decide what is worth reporting and in what order. Lens 2 has no severity vocabulary; judge
@@ -132,6 +133,24 @@ Organize legibility findings by severity so the most important ones lead:
 While reading, if the code plainly can't fulfill the intent it implies, flag it: a logic/edge-case
 error, or a regression in the **other usages** of a shared component/hook/util/route the diff
 touched (always check those). Only concrete, evidenced issues — no speculation.
+
+**Silent failure paths (check every one).** Intent includes what happens when the operation fails,
+and a change that only handles the happy path is not legible — the reader cannot tell whether the
+failure case was considered or forgotten. For every new or modified failure-capable call, ask what
+the user sees when it rejects:
+
+- **`useMutation` with `onSuccess` but no `onError`** — the request fails, the toast never fires, the
+  dialog stays open, and the user retries into the same silence. This is a `Broken` finding, not a
+  polish note: it is invisible in testing and only surfaces in production. (Check how neighbouring
+  mutations in the same area surface errors and match that.)
+- **A rejected promise with no `.catch`**, or an `await` in a handler with no `try`/`catch`.
+- **An error already surfaced but swallowed** — `query()`/`mutate()` toast on 400/406 by default, so
+  `silent: true` on a user-initiated action means the user gets nothing unless the code handles it.
+- **A failed request that leaves the UI in a lying state** — a spinner that never clears, an
+  optimistic update never rolled back, a form that reports success regardless of outcome.
+
+Judge by what the user experiences, not by whether a handler exists. A `console.error` in place of
+user-visible feedback is still a silent failure.
 
 **Spec-boundary check (don't hedge a boundary you can derive).** When a change implements tiers,
 ranges, or thresholds and the criteria state exact boundary outputs, take each boundary value and

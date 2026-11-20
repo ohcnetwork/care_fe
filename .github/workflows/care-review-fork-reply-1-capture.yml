@@ -1,0 +1,80 @@
+# Reply bridge, Stage 1 of 3 — CAPTURE.
+#
+# Every inline review comment that could be meant for care-review passes through this bridge before
+# any agent starts, on fork and same-repo PRs alike. (The file name predates same-repo PRs using it.)
+#
+# Why a bridge: an inline reply fires `pull_request_review_comment`, and GitHub withholds
+# `COPILOT_GITHUB_TOKEN` when the PR head is a fork, so an agent started from that event dies at
+# activation. Stage 1 (here) runs powerless and just records which comment was posted; Stage 2
+# (`workflow_run`, which DOES get secrets) checks that the comment is addressed to care-review and
+# only then dispatches the reply agent (Stage 3). Conversation comments (`issue_comment`) keep the
+# credential, so the reply agent listens for those itself — this bridge does not.
+#
+# Why same-repo PRs use it too: care-review used to answer same-repo inline replies directly, which
+# started one full review-capable agent per comment, before anything checked who the comment was for.
+# On #17149 one push and nine author comments produced six APPROVE summaries; on 2026-11-01, 226
+# replies (215 of them in React Doctor threads) on #17002 started 226 runs and exhausted the daily
+# budget. Routing them here puts Stage 2's addressed gate in front of every agent, and the reply agent
+# cannot review.
+#
+# This stage is deliberately dumb and powerless. It holds NO token (`permissions: {}`) — proving the
+# untrusted fork side needs nothing GitHub withholds. Its YAML comes from the PR's merge commit, so a
+# PR can change it; Stage 2 re-checks everything through the API and trusts nothing it records. Same
+# split as pr-review-trigger.yml -> pr-automation.yml and the Cloudflare preview bridge.
+#
+# Fork PRs from first-time contributors: GitHub holds runs of this workflow for maintainer approval
+# ("Approve and run", because it runs from the PR's merge commit), so their inline replies reach the
+# reply agent only after a maintainer approves the run. Their conversation mentions need no approval.
+name: CARE Reply Bridge — Capture
+
+on:
+  pull_request_review_comment:
+    types: [created]
+
+# Zero permissions: a hostile fork comment can do nothing here. The captured context crosses to
+# Stage 2 as an artifact, never as a token-bearing action.
+permissions: {}
+
+# Cheap trigger-level gate on the event payload only, so most comments never spin up Stage 2:
+#   - upstream repo, humans only (see the reply agent's bot rationale);
+#   - a reply inside an existing thread, on a non-draft PR only: unsolicited replies on unfinished
+#     work stay muted, as care-review mutes reviews; or
+#   - a comment that mentions `@github-actions`, draft or not: an explicit ask gets an answer, the
+#     same rule the reply agent applies to conversation mentions.
+# A new top-level review comment with no mention can never be a reply to care-review, so a human's
+# own review with twenty inline comments starts nothing.
+# Whose thread a reply is in needs a token, so Stage 2 owns that check and must not dispatch Stage 3
+# unless it passes.
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    if: >-
+      ${{ github.repository == 'ohcnetwork/care_fe' &&
+          github.event.comment.user.type != 'Bot' &&
+          ((github.event.pull_request.draft == false &&
+            github.event.comment.in_reply_to_id != null) ||
+           contains(github.event.comment.body, '@github-actions')) }}
+    steps:
+      # Pointers only. Stage 2 re-fetches the comment via the API by id, so the attacker-controlled
+      # body never crosses this boundary and never needs to be logged.
+      - name: Record reply context
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$EVENT_NAME" > event_name.txt
+          printf '%s' "$PR_NUMBER"  > pr_number.txt
+          printf '%s' "$COMMENT_ID" > comment_id.txt
+
+      # The artifact keeps its original name so Stage 1 copies on branches that have not merged this
+      # change yet (they run from the PR's merge commit) still match Stage 2 on develop.
+      - name: Upload reply context
+        uses: actions/upload-artifact@v4
+        with:
+          name: fork-reply-context
+          path: |
+            event_name.txt
+            pr_number.txt
+            comment_id.txt

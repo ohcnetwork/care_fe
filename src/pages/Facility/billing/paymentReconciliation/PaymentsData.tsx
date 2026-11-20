@@ -1,8 +1,8 @@
-import { CheckedState } from "@radix-ui/react-checkbox";
+import { CheckedState } from "@/components/ui/checkbox";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { ArrowRightLeft, EyeIcon } from "lucide-react";
-import { Link } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -259,51 +259,49 @@ export default function PaymentsData({
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between w-full my-4 gap-2">
-        <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
-          <div className="w-full sm:w-fit">
-            <UserSelector
-              selected={createdBy}
-              onChange={(user) => {
-                setCreatedBy(user);
-                updateQuery({
-                  created_by: user.id,
-                  created_by_username: user.username,
-                });
-              }}
-              onClear={() => {
-                setCreatedBy(undefined);
-                updateQuery({
-                  created_by: undefined,
-                  created_by_username: undefined,
-                });
-              }}
-              placeholder={t("filter_by_user")}
-              facilityId={facilityId}
-            />
-          </div>
-          <div className="w-full sm:w-fit">
-            <MultiFilter
-              selectedFilters={selectedFilters}
-              onFilterChange={handleFilterChange}
-              onOperationChange={handleOperationChange}
-              onClearAll={handleClearAll}
-              onClearFilter={handleClearFilter}
-              className="flex sm:flex-row flex-wrap sm:items-center"
-              triggerButtonClassName="self-start sm:self-center"
-              clearAllButtonClassName="self-start"
-              facilityId={facilityId}
-            />
-          </div>
+      <div className="my-4 flex w-full flex-wrap items-start gap-2">
+        <div className="w-full sm:w-auto sm:shrink-0">
+          <UserSelector
+            selected={createdBy}
+            onChange={(user) => {
+              setCreatedBy(user);
+              updateQuery({
+                created_by: user.id,
+                created_by_username: user.username,
+              });
+            }}
+            onClear={() => {
+              setCreatedBy(undefined);
+              updateQuery({
+                created_by: undefined,
+                created_by_username: undefined,
+              });
+            }}
+            placeholder={t("filter_by_user")}
+            facilityId={facilityId}
+          />
         </div>
-        <div className="w-full sm:w-fit">
+        <div className="w-full sm:w-auto">
+          <MultiFilter
+            selectedFilters={selectedFilters}
+            onFilterChange={handleFilterChange}
+            onOperationChange={handleOperationChange}
+            onClearAll={handleClearAll}
+            onClearFilter={handleClearFilter}
+            className="w-full items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
+            triggerButtonClassName="self-start sm:self-center"
+            clearAllButtonClassName="self-center"
+            facilityId={facilityId}
+          />
+        </div>
+        <div className="w-full sm:ml-auto sm:w-auto sm:shrink-0">
           <Select
             value={qParams.ordering || ""}
             onValueChange={(value) => {
               updateQuery({ ordering: value });
             }}
           >
-            <SelectTrigger className="border-gray-400 text-gray-950 rounded-sm">
+            <SelectTrigger className="w-full rounded-sm border-gray-400 text-gray-950 sm:w-auto sm:min-w-48">
               <SelectValue placeholder={t("sort_by")} />
             </SelectTrigger>
             <SelectContent align="end">
@@ -349,7 +347,7 @@ export default function PaymentsData({
           description={t("no_payments_description")}
         />
       ) : (
-        <div>
+        <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -401,7 +399,11 @@ export default function PaymentsData({
                     <TableCell>
                       <Button variant="link" asChild>
                         <Link
-                          href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}
+                          to="/facility/$facilityId/billing/account/$accountId"
+                          params={{
+                            facilityId,
+                            accountId: payment.account?.id,
+                          }}
                           className="hover:text-primary "
                           target="_blank"
                           rel="noopener noreferrer"
@@ -436,7 +438,11 @@ export default function PaymentsData({
                     {payment.target_invoice && (
                       <Button variant="link" asChild>
                         <Link
-                          href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice?.id}`}
+                          to="/facility/$facilityId/billing/invoices/$invoiceId"
+                          params={{
+                            facilityId,
+                            invoiceId: payment.target_invoice?.id,
+                          }}
                           className="hover:text-primary underline underline-offset-2"
                           target="_blank"
                           rel="noopener noreferrer"
@@ -482,7 +488,11 @@ export default function PaymentsData({
                   <TableCell>
                     <Button variant="outline" className="font-semibold" asChild>
                       <Link
-                        href={`/facility/${facilityId}/billing/payments/${payment.id}`}
+                        to="/facility/$facilityId/billing/payments/$paymentReconciliationId"
+                        params={{
+                          facilityId,
+                          paymentReconciliationId: payment.id,
+                        }}
                       >
                         <EyeIcon />
                         {t("view")}

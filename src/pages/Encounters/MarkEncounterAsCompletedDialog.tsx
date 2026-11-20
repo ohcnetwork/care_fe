@@ -11,7 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { buttonVariants } from "@/components/ui/button";
 
 import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -38,7 +37,7 @@ export function MarkEncounterAsCompletedDialog({
   return (
     <AlertDialog {...props}>
       <AlertDialogContent>
-        <AlertDialogHeader>
+        <AlertDialogHeader className="pb-0 md:pb-0">
           <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
           <AlertDialogDescription className="flex flex-col gap-2">
             <span>{t("mark_encounter_as_complete_confirmation")}</span>
@@ -53,15 +52,17 @@ export function MarkEncounterAsCompletedDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <PLUGIN_Component
-          __name="PatientInfoCardMarkAsComplete"
-          encounter={encounter}
-        />
+        <div className="px-4 empty:hidden md:px-6">
+          <PLUGIN_Component
+            __name="PatientInfoCardMarkAsComplete"
+            encounter={encounter}
+          />
+        </div>
 
         <AlertDialogFooter>
           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
-            className={buttonVariants({ variant: "primary" })}
+            variant="primary"
             onClick={() => {
               if (completeEverythingToMark) {
                 completeEverything();
