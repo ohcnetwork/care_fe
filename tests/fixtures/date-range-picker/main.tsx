@@ -1,4 +1,3 @@
-/* eslint-disable i18next/no-literal-string -- test-only fixture scaffolding, not shipped UI */
 import { format, startOfDay } from "date-fns";
 import i18next from "i18next";
 import { useState } from "react";
