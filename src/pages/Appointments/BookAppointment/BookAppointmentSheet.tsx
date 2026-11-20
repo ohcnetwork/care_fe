@@ -58,7 +58,7 @@ export default function BookAppointmentSheet({
         </SheetHeader>
         <SheetBody>
           <Tabs defaultValue="appointment">
-            <div className="max-w-full overflow-x-auto pb-1">
+            <div className="max-w-full overflow-x-auto">
               <TabsList variant="line">
                 <TabsTrigger value="appointment">
                   {t("book_appointment")}

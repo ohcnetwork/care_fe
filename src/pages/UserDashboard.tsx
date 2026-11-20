@@ -235,12 +235,8 @@ export default function UserDashboard() {
             }}
             className="w-full"
           >
-            <div className="max-w-full overflow-x-auto pb-1">
-              <TabsList
-                variant="line"
-                className="w-full justify-start border-b border-border"
-                aria-label={t("dashboard_sections")}
-              >
+            <div className="max-w-full overflow-x-auto">
+              <TabsList variant="line" aria-label={t("dashboard_sections")}>
                 {availableTabs.map((tab) => (
                   <TabsTrigger
                     key={tab}
