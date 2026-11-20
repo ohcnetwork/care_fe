@@ -20,6 +20,7 @@ import { userChildProps } from "@/components/Common/UserColumns";
 import LinkUserToDepartmentSheet from "@/components/Users/LinkUserToDepartmentSheet";
 
 import useFilters from "@/hooks/useFilters";
+import { userDepartmentListSearch } from "@/lib/router/search/facility";
 
 import query from "@/Utils/request/query";
 import EditFacilityUserRoleSheet from "@/pages/Facility/settings/organizations/components/EditFacilityUserRoleSheet";
@@ -120,6 +121,7 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
   const { qParams, Pagination, resultsPerPage, updatePage } = useFilters({
+    schema: userDepartmentListSearch,
     limit: 15,
   });
   const { data, isLoading, isError, refetch } = useQuery({
