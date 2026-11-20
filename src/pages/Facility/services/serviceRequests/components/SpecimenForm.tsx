@@ -44,8 +44,9 @@ import specimenApi from "@/types/emr/specimen/specimenApi";
 import {
   SPECIMEN_DEFINITION_UNITS_CODES,
   type SpecimenDefinitionRead,
+  getCollectionMethod,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
-import { isNegative, round } from "@/Utils/decimal";
+import { isPositive, round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 
 interface SpecimenFormProps {
@@ -97,11 +98,11 @@ export function SpecimenForm({
       accession_identifier: "",
       received_time: null,
       collection: {
-        method: specimenDefinition.collection || null,
-        body_site: null,
+        method: getCollectionMethod(specimenDefinition.collection),
+        body_site: specimenDefinition.collection?.body_site ?? null,
         collector: currentUserId || null, // Use user ID, default to null if not available yet
         collected_date_time: new Date().toISOString(),
-        quantity: null,
+        quantity: specimenDefinition.collection?.quantity ?? null,
         procedure: null,
         fasting_status_codeable_concept: null,
         fasting_status_duration: null,
@@ -155,7 +156,9 @@ export function SpecimenForm({
     if (field === "quantity") {
       setErrors((prev) => {
         const newErrors = { ...prev };
-        if (value?.value) delete newErrors.quantityValue;
+        if (value?.value != null && value.value !== "") {
+          delete newErrors.quantityValue;
+        }
         if (value?.unit) delete newErrors.quantityUnit;
         return newErrors;
       });
@@ -190,17 +193,20 @@ export function SpecimenForm({
     }
 
     const quantity = specimenData.specimen.collection?.quantity;
+    const quantityValue = quantity?.value;
+    // Check presence explicitly: a typed 0 is falsy but present.
+    const hasQuantityValue = quantityValue != null && quantityValue !== "";
     const newErrors: typeof errors = {};
 
-    if (quantity?.value && !quantity.unit && !defaultUnit) {
+    if (hasQuantityValue && !quantity?.unit && !defaultUnit) {
       newErrors.quantityUnit = t("field_required");
     }
 
-    if (quantity?.value && isNegative(quantity.value)) {
+    if (hasQuantityValue && !isPositive(quantityValue)) {
       newErrors.quantityValue = t("invalid_quantity");
     }
 
-    if ((quantity?.unit || defaultUnit) && !quantity?.value) {
+    if ((quantity?.unit || defaultUnit) && !hasQuantityValue) {
       newErrors.quantityValue = t("field_required");
     }
 
@@ -450,7 +456,7 @@ export function SpecimenForm({
                       type="number"
                       placeholder={t("value")}
                       className="h-9"
-                      min={1}
+                      min={0}
                       value={
                         specimenData.specimen.collection?.quantity?.value ?? ""
                       }

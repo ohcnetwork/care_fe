@@ -152,25 +152,64 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
     .toEqual(variants.map(() => coding));
 
   // A reload round-trips the same coded entries, rather than rebuilding
-  // them from display strings when the controls mount again.
+  // them from display strings when the controls mount again. Resuming
+  // drops a fixed-choice answer whose option was removed from the form
+  // meanwhile (draftMerge), names it in the restore bar, and keeps the
+  // rest of that question's selections.
   removeFirstOption = true;
   await page.reload();
+  await expect(
+    page.getByText(
+      "multiple_dropdown — the selected option is no longer available",
+      { exact: true },
+    ),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Resume", exact: true }).click();
   await expect(
-    multiSelect.getByText("Option 1", { exact: true }),
+    multiSelect.getByText("Option 2", { exact: true }),
   ).toBeVisible();
+  await expect(multiSelect.getByText("Option 1", { exact: true })).toHaveCount(
+    0,
+  );
   await expect(
     questionBlock(page, "single_chips").getByRole("radio", {
       name: "Option 1",
       exact: true,
     }),
   ).toHaveAttribute("aria-checked", "true");
+  // A distinct edit after Resume makes autosave write the resumed state, so
+  // the stored draft checked below cannot be the pre-Resume copy. Make it on
+  // another question: any dropdown change rebuilds every dropdown entry from
+  // the current options (FixedChoiceInput), which would mask lost coding.
+  const secondChip = questionBlock(page, "multiple_chips").getByRole(
+    "checkbox",
+    { name: "Option 2", exact: true },
+  );
+  await secondChip.click();
+  await expect(secondChip).toBeChecked();
+  const option = (n: number) => ({
+    ...coding,
+    code: String(n),
+    display: `Option ${n}`,
+  });
   await expect
     .poll(async () => {
       const values = await draftValues(page, questionnaireId);
-      return variants.map(({ id }) => values?.[id]?.[0]?.coding);
+      return Object.fromEntries(
+        variants.map(({ id }) => [
+          id,
+          values?.[id]?.map((entry) => entry.coding),
+        ]),
+      );
     })
-    .toEqual(variants.map(() => coding));
+    .toEqual({
+      single_chips: [option(1)],
+      multiple_chips: [option(1), option(2)],
+      single_dropdown: [option(1)],
+      // Option 1 was dropped on Resume; Option 2 kept the coding it was
+      // restored with.
+      multiple_dropdown: [option(2)],
+    });
 });
 
 test("decimal answers remain browser-valid and optional dates can be cleared", async ({

@@ -226,6 +226,8 @@ test.describe("Encounter immunizations", () => {
     page,
     request,
   }) => {
+    // Room for the slow 20-entry batch below.
+    test.slow();
     const series = `Policy ${faker.string.uuid()}`;
     const policy = dosePolicy(series, 20);
     const oversizedPolicy = dosePolicy(series, 21);
@@ -263,8 +265,13 @@ test.describe("Encounter immunizations", () => {
     await expect(preview).toContainText("Due 01 Jan 2026");
     await expect(preview).toContainText("Due 29 Jan 2026");
 
+    // The backend validates each entry's vaccine code against the external
+    // terminology server, one uncached lookup per entry, so this 20-entry
+    // batch can take well over the default 10s when that server is slow.
     const [response] = await Promise.all([
-      page.waitForResponse((response) => isBatch(response.request())),
+      page.waitForResponse((response) => isBatch(response.request()), {
+        timeout: 60_000,
+      }),
       dialog.getByRole("button", { name: "Add 20 recommendations" }).click(),
     ]);
     expect(response.ok()).toBeTruthy();

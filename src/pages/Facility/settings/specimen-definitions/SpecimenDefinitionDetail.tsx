@@ -20,6 +20,7 @@ import {
   DurationSpec,
   SPECIMEN_DEFINITION_STATUS_COLORS,
   SpecimenDefinitionStatus,
+  getCollectionMethod,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 import { round } from "@/Utils/decimal";
@@ -81,6 +82,8 @@ export function SpecimenDefinitionDetail({
   if (!specimenDefinition) {
     return <div>{t("specimen_definition_not_found")}</div>;
   }
+
+  const collectionMethod = getCollectionMethod(specimenDefinition.collection);
 
   const formatQuantity = (
     quantity: { value: string | null; unit: Code | null } | null,
@@ -190,12 +193,12 @@ export function SpecimenDefinitionDetail({
                   </div>
                 )}
 
-                {specimenDefinition.collection && (
+                {collectionMethod && (
                   <div>
                     <p className="text-sm font-medium text-gray-400">
                       {t("collection_method")}
                     </p>
-                    <p>{specimenDefinition.collection.display}</p>
+                    <p>{collectionMethod.display}</p>
                   </div>
                 )}
               </div>

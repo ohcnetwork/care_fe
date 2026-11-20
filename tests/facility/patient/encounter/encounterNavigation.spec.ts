@@ -412,6 +412,25 @@ test.describe("Encounter navigation", () => {
         page,
       }) => {
         const patientPath = `/facility/${getFacilityId()}/patient/${patientId}`;
+        // The failed load raises an error toast. On a phone it spans the top
+        // of the screen over Back, and hovering it pauses its auto-dismiss,
+        // so close it the way a user would whenever it is in the way.
+        // Registered on the first toast so the handler's visibility check
+        // matches one element; Playwright re-runs the handler while a toast
+        // is still in the way, so one click per run handles stacked toasts.
+        await page.addLocatorHandler(
+          page
+            .locator(
+              "li[data-sonner-toast][data-type='error'][data-removed='false']",
+            )
+            .first(),
+          async (toast) => {
+            await toast
+              .getByRole("button", { name: "Close toast", exact: true })
+              .click();
+          },
+          { noWaitAfter: true },
+        );
         await page.route(
           (url) => url.pathname === `/api/v1/encounter/${primaryEncounterId}/`,
           (route) =>
@@ -743,7 +762,7 @@ test.describe("Encounter navigation", () => {
           ).toBeVisible();
         });
 
-        await test.step("Return to the appointments board with the back button", async () => {
+        await test.step("Return to the encounter and restore the appointment actions", async () => {
           // Leaving mid-request would cancel the mocked encounter refetch.
           const refetched = page.waitForResponse(
             (response) => new URL(response.url()).pathname === encounterPath,
@@ -751,12 +770,8 @@ test.describe("Encounter navigation", () => {
           await page.goBack();
           await refetched;
           await expect(bar).toBeVisible();
-          await page.getByRole("button", { name: "Back", exact: true }).click();
-          await expect(page).toHaveURL(
-            (url) =>
-              url.pathname === `/facility/${facilityId}/appointments` &&
-              url.searchParams.get("practitioners") === resourceId,
-          );
+          // Where the in-app Back goes from here (a browser back) is covered
+          // by tests/navigation/layoutFlags.spec.ts.
         });
       });
     });

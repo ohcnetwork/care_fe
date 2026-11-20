@@ -45,6 +45,7 @@ import {
   SpecimenDefinitionCreate,
   SpecimenDefinitionRead,
   SpecimenDefinitionStatus,
+  getCollectionMethod,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 import { zodDecimal } from "@/Utils/decimal";
@@ -191,7 +192,7 @@ function SpecimenDefinitionFormContent({
       derived_from_uri: initialData?.derived_from_uri ?? undefined,
       type_collected: initialData?.type_collected,
       patient_preparation: initialData?.patient_preparation ?? [],
-      collection: initialData?.collection ?? undefined,
+      collection: getCollectionMethod(initialData?.collection) ?? undefined,
       type_tested: initialData?.type_tested ?? {
         is_derived: false,
         preference: Preference.preferred,
@@ -311,8 +312,19 @@ function SpecimenDefinitionFormContent({
     });
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    // The form edits only the collection code. Keep the template's other
+    // fields (quantity, method, body site) even when the code is cleared,
+    // and send no template only when every field is empty.
+    const collection = {
+      ...initialData?.collection,
+      code: data.collection ?? null,
+    };
+    const hasCollection = Object.values(collection).some(
+      (value) => value != null,
+    );
     const payload: SpecimenDefinitionCreate = {
       ...data,
+      collection: hasCollection ? collection : null,
       patient_preparation:
         data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested

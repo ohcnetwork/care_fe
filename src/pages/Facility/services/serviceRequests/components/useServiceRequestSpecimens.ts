@@ -14,7 +14,10 @@ import {
   SpecimenStatus,
 } from "@/types/emr/specimen/specimen";
 import specimenApi from "@/types/emr/specimen/specimenApi";
-import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import {
+  SpecimenDefinitionRead,
+  getCollectionMethod,
+} from "@/types/emr/specimenDefinition/specimenDefinition";
 
 function createDraftPayload(
   requirement: SpecimenDefinitionRead,
@@ -27,11 +30,11 @@ function createDraftPayload(
       accession_identifier: "",
       received_time: null,
       collection: {
-        method: requirement.collection || null,
-        body_site: null,
+        method: getCollectionMethod(requirement.collection),
+        body_site: requirement.collection?.body_site ?? null,
         collector: null,
         collected_date_time: null,
-        quantity: null,
+        quantity: requirement.collection?.quantity ?? null,
         procedure: null,
         fasting_status_codeable_concept: null,
         fasting_status_duration: null,

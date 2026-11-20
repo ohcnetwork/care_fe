@@ -28,9 +28,8 @@ env:
   REACT_CARE_API_URL: http://localhost:9000
   REACT_ENABLE_QUESTIONNAIRE_DRAFT: "true"
   BACKEND_STARTUP_TIMEOUT: 120
-  TEST_SHARDS: 3
-  # Questionnaire actions require this companion backend. Restore develop
-  # once that dependency lands, independently of the frontend branch name.
+  # The 3.1 backend features (questionnaire actions, symptom value set) are
+  # merged into care develop (ohcnetwork/care#3817).
   CARE_BACKEND_REF: develop
 
 jobs:
@@ -97,7 +96,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        shard: [1, 2, 3, 4, 5, 6]
 
     steps:
       - name: Checkout
@@ -213,9 +212,9 @@ jobs:
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
-      - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
+      - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ strategy.job-total }})
         id: test
-        run: npx playwright test --project=chromium --workers=4 --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
+        run: npx playwright test --project=chromium --workers=4 --shard=${{ matrix.shard }}/${{ strategy.job-total }}
         env:
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
@@ -223,7 +222,7 @@ jobs:
       - name: Annotate test failure
         if: failure() && steps.test.conclusion == 'failure'
         run: |
-          echo "::error::Playwright tests failed in shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }}"
+          echo "::error::Playwright tests failed in shard ${{ matrix.shard }}/${{ strategy.job-total }}"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -291,6 +290,7 @@ jobs:
           PASSED_TESTS=0
           FAILED_TESTS=0
           SKIPPED_TESTS=0
+          SHARD_COUNT=$(find all-results -mindepth 1 -maxdepth 1 -type d -name 'playwright-results-shard-*' | wc -l)
 
           # Parse test results from each shard
           for dir in all-results/playwright-results-shard-*/; do
@@ -315,6 +315,7 @@ jobs:
             fi
           done
 
+          echo "shards=$SHARD_COUNT" >> "$GITHUB_OUTPUT"
           echo "total=$TOTAL_TESTS" >> "$GITHUB_OUTPUT"
           echo "passed=$PASSED_TESTS" >> "$GITHUB_OUTPUT"
           echo "failed=$FAILED_TESTS" >> "$GITHUB_OUTPUT"
@@ -341,7 +342,7 @@ jobs:
           ## 🎭 Playwright Test Results
 
           **Status:** ${{ steps.merge.outputs.status }}
-          **Test Shards:** ${{ env.TEST_SHARDS }}
+          **Test Shards:** ${{ steps.merge.outputs.shards }}
 
           | Metric | Count |
           |--------|-------|
