@@ -138,6 +138,7 @@ export default function RenderDateFilter({
           variant="panel"
           title={t("custom_date_range")}
           onBack={() => setView("options")}
+          autoFocus
           value={selected}
           minDate={meta?.minDate}
           maxDate={meta?.maxDate}

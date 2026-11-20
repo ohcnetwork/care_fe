@@ -15,7 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,8 @@ export interface DateRangePickerProps {
   allowOpenEnded?: boolean;
   title?: string;
   onBack?: () => void;
+  /** Focus the start date when a `panel` mounts; popovers always do this on open. */
+  autoFocus?: boolean;
   placeholder?: string;
   className?: string;
 }
@@ -160,7 +162,7 @@ export function DateRangePicker({
         align="start"
         initialFocus={() =>
           contentRef.current?.querySelector<HTMLInputElement>(
-            `input[data-range-edge="${from || to ? "to" : "from"}"]`,
+            'input[data-range-edge="from"]',
           ) ?? false
         }
         className="max-h-(--available-height) w-80 max-w-[calc(100vw-1rem)] gap-0 overflow-y-auto p-0"
@@ -179,6 +181,7 @@ function RangePanel({
   allowOpenEnded = true,
   title,
   onBack,
+  autoFocus,
   className,
 }: Omit<DateRangePickerProps, "variant" | "placeholder">) {
   const { t, i18n } = useTranslation();
@@ -194,10 +197,12 @@ function RangePanel({
     to: fieldDate(initial.to),
   });
   const [errors, setErrors] = useState<FieldText>({ from: "", to: "" });
-  const [activeEdge, setActiveEdge] = useState<Edge>(
-    initial.from || initial.to ? "to" : "from",
-  );
+  const [activeEdge, setActiveEdge] = useState<Edge>("from");
   const [hovered, setHovered] = useState<Date>();
+
+  useEffect(() => {
+    if (autoFocus) fromRef.current?.focus();
+  }, [autoFocus]);
   const minimum = minDate?.getTime();
   const maximum = maxDate?.getTime();
   const bounds = useMemo(

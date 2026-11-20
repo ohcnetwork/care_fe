@@ -297,7 +297,29 @@ test("short screens use one menu scroller and keyboard navigation reaches custom
   await expect(custom).toBeFocused();
   await expect(custom).toBeInViewport({ ratio: 1 });
   await page.keyboard.press("Enter");
-  await expect(from(page)).toBeVisible();
+  await expect(from(page)).toBeFocused();
+});
+
+test("Custom date range opens on the start date with a standard back button", async ({
+  page,
+}) => {
+  for (const [width, size] of [
+    [320, 48],
+    [1280, 40],
+  ]) {
+    await page.setViewportSize({ width, height: 900 });
+    await open(page, "menu&integration&value");
+    await page.getByRole("menuitem", { name: /custom date range/i }).click();
+    await expect(from(page)).toBeFocused();
+    const back = page.getByRole("button", { name: "Back", exact: true });
+    await expect(back).toHaveAttribute("data-size", "icon");
+    await expect(back).toHaveCSS("width", `${size}px`);
+    await expect(back).toHaveCSS("height", `${size}px`);
+    await back.click();
+    await expect(
+      page.getByRole("menuitem", { name: /custom date range/i }),
+    ).toBeVisible();
+  }
 });
 
 test("the real multi-filter passes bounds through and returns to presets after Apply", async ({
@@ -327,6 +349,7 @@ test("hover preview preserves day nodes and editing From clears an earlier To", 
 }) => {
   await open(page, "value");
   const firstDay = await day(page, "2026-11-03").elementHandle();
+  await to(page).focus();
   await day(page, "2026-11-16").hover();
   await expect(page.locator('[data-day="2026-11-12"]')).toHaveClass(
     /bg-primary\/10/,
@@ -446,16 +469,15 @@ test("range text stays readable in both themes and month buttons mark today and 
   await expect(november.locator('span[aria-hidden="true"]')).toHaveCount(1);
 });
 
-test("a populated popover starts on To rather than letting autofocus select From", async ({
-  page,
-}) => {
+test("a populated popover opens on the start date", async ({ page }) => {
   await open(page, "popover&value");
   await page
     .getByRole("button", { name: "9 Nov – 19 Nov 2026", exact: true })
     .click();
+  await expect(from(page)).toBeFocused();
   await day(page, "2026-11-16").click();
-  await expect(from(page)).toHaveValue("09/11/2026");
-  await expect(to(page)).toHaveValue("16/11/2026");
+  await expect(from(page)).toHaveValue("16/11/2026");
+  await expect(to(page)).toHaveValue("19/11/2026");
 });
 
 test("arrow keys select and edit date segments, clamping month and leap-year ends", async ({
