@@ -85,8 +85,22 @@ export function UserCard(props: UserCardProps) {
   const visibleResponsibilities = responsibilities.slice(0, 2);
   const additionalResponsibilities =
     responsibilities.length - visibleResponsibilities.length;
-  const userDetailsPath = `${facility ? `/facility/${facility}/users/${user.username}` : `/users/${user.username}`}`;
-
+  const handleExit = () => {
+    if (facility) {
+      navigate({
+        to: "/facility/$facilityId/users/$username",
+        params: {
+          facilityId: facility,
+          username: user.username,
+        },
+      });
+    } else {
+      navigate({
+        to: "/users/$username",
+        params: { username: user.username },
+      });
+    }
+  };
   return (
     <Card key={user.id} className={cn("h-full", user.deleted && "opacity-60")}>
       <CardContent className="p-4 flex flex-col h-full justify-between">
@@ -149,7 +163,7 @@ export function UserCard(props: UserCardProps) {
                     aria-label={t("see_count_more_responsibilities", {
                       count: additionalResponsibilities,
                     })}
-                    onClick={() => navigate({ to: userDetailsPath })}
+                    onClick={handleExit}
                   >
                     +{t("count_more", { count: additionalResponsibilities })}
                   </Button>
@@ -157,11 +171,7 @@ export function UserCard(props: UserCardProps) {
               </div>
               <div className="flex shrink-0 items-center justify-end gap-2">
                 {actions}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate({ to: userDetailsPath })}
-                >
+                <Button variant="outline" size="sm" onClick={handleExit}>
                   <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
                   <span>{t("see_details")}</span>
                 </Button>
