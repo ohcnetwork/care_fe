@@ -45,6 +45,7 @@ import {
   SpecimenDefinitionCreate,
   SpecimenDefinitionRead,
   SpecimenDefinitionStatus,
+  getCollectionMethod,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 import { zodDecimal } from "@/Utils/decimal";
@@ -197,7 +198,7 @@ function SpecimenDefinitionFormContent({
       derived_from_uri: initialData?.derived_from_uri ?? undefined,
       type_collected: initialData?.type_collected,
       patient_preparation: initialData?.patient_preparation ?? [],
-      collection: initialData?.collection?.code ?? undefined,
+      collection: getCollectionMethod(initialData?.collection) ?? undefined,
       type_tested: initialData?.type_tested ?? {
         is_derived: false,
         preference: Preference.preferred,

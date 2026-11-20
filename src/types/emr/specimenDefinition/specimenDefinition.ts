@@ -91,6 +91,14 @@ export interface CollectionTemplateSpec {
   body_site?: Code | null;
 }
 
+/** The collection method a template asks for. `code` and `method` draw on
+ * the same collection-method codes, and the definition form edits only
+ * `code`, so prefer it (an edit there takes effect) and fall back to
+ * `method` for templates that set only that. */
+export const getCollectionMethod = (
+  collection: CollectionTemplateSpec | null | undefined,
+) => collection?.code ?? collection?.method ?? null;
+
 export interface SpecimenDefinition {
   id: string;
   title: string;

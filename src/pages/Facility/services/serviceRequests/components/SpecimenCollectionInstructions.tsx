@@ -17,7 +17,10 @@ import {
 } from "@/components/ui/table";
 
 import { cn } from "@/lib/utils";
-import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import {
+  SpecimenDefinitionRead,
+  getCollectionMethod,
+} from "@/types/emr/specimenDefinition/specimenDefinition";
 import { round } from "@/Utils/decimal";
 
 import { formatQuantity } from "./specimenQuantity";
@@ -82,10 +85,8 @@ export function SpecimenCollectionInstructions({
                     {t("required_method")}
                   </TableHead>
                   <TableCell className="text-foreground font-semibold">
-                    {(
-                      requirement.collection?.method ??
-                      requirement.collection?.code
-                    )?.display ?? t("na")}
+                    {getCollectionMethod(requirement.collection)?.display ??
+                      t("na")}
                   </TableCell>
                 </TableRow>
                 <TableRow>

@@ -44,6 +44,7 @@ import specimenApi from "@/types/emr/specimen/specimenApi";
 import {
   SPECIMEN_DEFINITION_UNITS_CODES,
   type SpecimenDefinitionRead,
+  getCollectionMethod,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import { isNegative, round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
@@ -97,12 +98,7 @@ export function SpecimenForm({
       accession_identifier: "",
       received_time: null,
       collection: {
-        // The template's code and method share the same collection-method
-        // codes, and the definition form only edits code.
-        method:
-          specimenDefinition.collection?.method ??
-          specimenDefinition.collection?.code ??
-          null,
+        method: getCollectionMethod(specimenDefinition.collection),
         body_site: specimenDefinition.collection?.body_site ?? null,
         collector: currentUserId || null, // Use user ID, default to null if not available yet
         collected_date_time: new Date().toISOString(),

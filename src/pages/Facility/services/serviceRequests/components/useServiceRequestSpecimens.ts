@@ -14,7 +14,10 @@ import {
   SpecimenStatus,
 } from "@/types/emr/specimen/specimen";
 import specimenApi from "@/types/emr/specimen/specimenApi";
-import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import {
+  SpecimenDefinitionRead,
+  getCollectionMethod,
+} from "@/types/emr/specimenDefinition/specimenDefinition";
 
 function createDraftPayload(
   requirement: SpecimenDefinitionRead,
@@ -27,12 +30,7 @@ function createDraftPayload(
       accession_identifier: "",
       received_time: null,
       collection: {
-        // The template's code and method share the same collection-method
-        // codes, and the definition form only edits code.
-        method:
-          requirement.collection?.method ??
-          requirement.collection?.code ??
-          null,
+        method: getCollectionMethod(requirement.collection),
         body_site: requirement.collection?.body_site ?? null,
         collector: null,
         collected_date_time: null,
