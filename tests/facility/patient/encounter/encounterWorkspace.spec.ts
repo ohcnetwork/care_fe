@@ -1861,6 +1861,10 @@ test.describe("Encounter workspace rendering", () => {
   test("selects workspace defaults from the header for the current encounter class across facilities", async ({
     page,
   }) => {
+    // Fifteen full page loads check what applies on entry. Each cold load of
+    // the route-split build fetches hundreds of chunks, which overruns 60s on
+    // a busy CI runner.
+    test.slow();
     const fixture = await mockEncounterWorkspaceApi(page);
     fixture.defaults.splice(0);
     fixture.currentEncounter.encounter_class = "imp";
