@@ -34,6 +34,24 @@ export function AppSidebarToggle({
   } = useAppSidebar();
   const showLogo = isMobile || !(pinned || isOverlay);
 
+  const toggle = () => {
+    if (isMobile) setOpenMobile(!openMobile);
+    else toggleSidebar();
+  };
+
+  // A separate host keeps the keyboard shortcut from also toggling the
+  // tooltip, which opens on click for touch users.
+  const shortcutHost = (
+    <button
+      type="button"
+      className="sr-only"
+      tabIndex={-1}
+      aria-hidden="true"
+      data-shortcut-id="toggle-sidebar"
+      onClick={toggle}
+    />
+  );
+
   const button = (
     <Button
       type="button"
@@ -49,8 +67,7 @@ export function AppSidebarToggle({
       onClick={(event) => {
         onClick?.(event);
         if (event.defaultPrevented) return;
-        if (isMobile) setOpenMobile(!openMobile);
-        else toggleSidebar();
+        toggle();
       }}
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
@@ -65,7 +82,6 @@ export function AppSidebarToggle({
         if (!event.defaultPrevented) scheduleClose();
       }}
       {...props}
-      data-shortcut-id="toggle-sidebar"
     >
       {showLogo ? (
         <>
@@ -94,19 +110,29 @@ export function AppSidebarToggle({
     </Button>
   );
 
-  if (isMobile) return button;
+  if (isMobile) {
+    return (
+      <>
+        {shortcutHost}
+        {button}
+      </>
+    );
+  }
 
   return (
-    <TooltipComponent
-      content={
-        <span className="flex items-center gap-2">
-          {t("toggle_sidebar")}
-          <ShortcutBadge actionId="toggle-sidebar" />
-        </span>
-      }
-      side="left"
-    >
-      {button}
-    </TooltipComponent>
+    <>
+      {shortcutHost}
+      <TooltipComponent
+        content={
+          <span className="flex items-center gap-2">
+            {t("toggle_sidebar")}
+            <ShortcutBadge actionId="toggle-sidebar" />
+          </span>
+        }
+        side="left"
+      >
+        {button}
+      </TooltipComponent>
+    </>
   );
 }

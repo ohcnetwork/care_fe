@@ -111,9 +111,6 @@ export const dateTimeQueryString = (date: DateLike, isEndDate = false) => {
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/**
- * @deprecated Use feature detection or other methods to determine Apple devices instead of relying on user agent strings.
- */
 export const isAppleDevice = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 function hasTouch() {

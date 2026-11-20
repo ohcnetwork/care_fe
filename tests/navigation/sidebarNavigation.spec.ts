@@ -495,7 +495,9 @@ test.describe("Shared workspace navigation", () => {
       ),
     });
 
-    test("Command+B pins and unpins the sidebar", async ({ page }) => {
+    test("Command+B pins and unpins the sidebar without opening the toggle tooltip", async ({
+      page,
+    }) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.goto(`${facilityPath}/overview`);
       const navigation = sidebar(page);
@@ -506,6 +508,9 @@ test.describe("Shared workspace navigation", () => {
       await page.keyboard.press("Meta+b");
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
       await expect(navigation).not.toBeVisible();
+      await expect(page.locator('[data-slot="tooltip-content"]')).toHaveCount(
+        0,
+      );
       await page.keyboard.press("Meta+b");
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "true");
       await expect(navigation).toBeInViewport({ ratio: 1 });
