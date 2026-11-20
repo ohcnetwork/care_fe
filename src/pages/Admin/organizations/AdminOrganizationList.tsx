@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { navigate } from "raviger";
-import React, { useCallback, useEffect, useEffectEvent, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
@@ -26,6 +25,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { OrgSelect } from "@/components/Common/OrgSelect";
 import Page from "@/components/Common/Page";
+
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import query from "@/Utils/request/query";
 import AdminOrganizationNavbar from "@/pages/Admin/organizations/components/AdminOrganizationNavbar";
@@ -51,8 +52,6 @@ const FLAT_ORG_TYPES = new Set<string>([
   OrgType.ROLE,
   OrgType.PRODUCT_SUPPLIER,
 ]);
-
-const LIMIT = 20;
 
 export default function AdminOrganizationList({
   organizationId,
@@ -360,45 +359,22 @@ function FlatOrgSidebar({
 }) {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
-  const { ref, inView } = useInView();
 
-  const {
-    data: filtered = [],
-    isLoading,
-    isFetching,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["infinite-organization", "list", organizationType, searchTerm],
-    queryFn: ({ pageParam, signal }) =>
-      query.debounced(organizationApi.list, {
+  const { data, isLoading, isFetching, hasNextPage, isFetchingNextPage, ref } =
+    useInfiniteList({
+      queryKey: ["organization", "list", organizationType, searchTerm],
+      ...query.infinite(organizationApi.list, {
         queryParams: {
           parent: "",
           org_type: organizationType,
           name: searchTerm || undefined,
-          limit: LIMIT,
-          offset: pageParam,
         },
-      })({ signal }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) => data.pages.flatMap((page) => page.results),
-    refetchOnWindowFocus: false,
-  });
+        debounceInterval: 500,
+      }),
+      refetchOnWindowFocus: false,
+    });
 
-  const loadMore = useEffectEvent(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  });
-
-  useEffect(() => {
-    if (inView) loadMore();
-  }, [inView, hasNextPage]);
+  const filtered = data?.results ?? [];
 
   return (
     <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-lg">

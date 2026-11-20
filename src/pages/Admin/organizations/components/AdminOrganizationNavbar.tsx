@@ -1,17 +1,14 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { useEffect, useEffectEvent } from "react";
-import { useInView } from "react-intersection-observer";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+
 import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
-
-const LIMIT = 20;
 
 interface OrganizationTreeNodeProps {
   organization: Organization;
@@ -34,49 +31,19 @@ function OrganizationTreeNode({
 }: OrganizationTreeNodeProps) {
   const isExpanded = expandedOrganizations.has(organization.id);
   const isSelected = organization.id === selectedOrganizationId;
-  const { ref, inView } = useInView();
-
-  const {
-    data: children = [],
-    isLoading,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-  } = useInfiniteQuery({
-    queryKey: [
-      "infinite-organization",
-      "list",
-      organizationType,
-      organization.id,
-    ],
-    queryFn: ({ pageParam, signal }) =>
-      query(organizationApi.list, {
-        pathParams: { id: organization.id },
+  const { data, isLoading, hasNextPage, isFetchingNextPage, ref } =
+    useInfiniteList({
+      queryKey: ["organization", "list", organizationType, organization.id],
+      ...query.infinite(organizationApi.list, {
         queryParams: {
           parent: organization.id || "",
           org_type: organizationType,
-          limit: LIMIT,
-          offset: pageParam,
         },
-      })({ signal }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) => data.pages.flatMap((page) => page.results),
-    enabled: isExpanded,
-  });
+      }),
+      enabled: isExpanded,
+    });
 
-  const loadMore = useEffectEvent(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  });
-
-  useEffect(() => {
-    if (inView) loadMore();
-  }, [inView, hasNextPage]);
+  const children = data?.results ?? [];
 
   return (
     <div className="space-y-1">
@@ -156,44 +123,25 @@ export default function AdminOrganizationNavbar({
   onToggleExpand,
   onOrganizationSelect,
 }: AdminOrganizationNavbarProps) {
-  const { ref, inView } = useInView();
-
   const {
-    data: topLevelOrganizations = [],
+    data,
     isLoading: isLoadingOrganizations,
     hasNextPage,
     isFetchingNextPage,
-    fetchNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["infinite-organization", "list", organizationType],
-    queryFn: ({ pageParam, signal }) =>
-      query(organizationApi.list, {
-        queryParams: {
-          parent: "",
-          org_type: organizationType,
-          limit: LIMIT,
-          offset: pageParam,
-        },
-      })({ signal }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) => data.pages.flatMap((page) => page.results),
+    ref,
+  } = useInfiniteList({
+    queryKey: ["organization", "list", organizationType],
+    ...query.infinite(organizationApi.list, {
+      queryParams: {
+        parent: "",
+        org_type: organizationType,
+      },
+    }),
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
-  const loadMore = useEffectEvent(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  });
-
-  useEffect(() => {
-    if (inView) loadMore();
-  }, [inView, hasNextPage]);
+  const topLevelOrganizations = data?.results ?? [];
 
   return (
     <div className="h-full bg-white rounded-lg shadow-lg min-w-64 hidden md:block">
