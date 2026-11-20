@@ -24,6 +24,7 @@ import SearchInput from "@/components/Common/SearchInput";
 import { SectionHeader } from "@/components/Common/SectionHeader";
 
 import useFilters from "@/hooks/useFilters";
+import { organizationUserListSearch } from "@/lib/router/search/organization";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -94,6 +95,7 @@ export default function OrganizationUsers({
   routeContext,
 }: Props) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: organizationUserListSearch,
     limit: 15,
   });
   const { t } = useTranslation();

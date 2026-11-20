@@ -23,6 +23,7 @@ import SearchInput from "@/components/Common/SearchInput";
 import { SectionHeader } from "@/components/Common/SectionHeader";
 
 import useFilters from "@/hooks/useFilters";
+import { organizationPatientListSearch } from "@/lib/router/search/organization";
 
 import query from "@/Utils/request/query";
 import { navigate } from "@/lib/router/navigate";
@@ -47,7 +48,10 @@ export default function OrganizationPatients({
   const { t } = useTranslation();
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 15 });
+    useFilters({
+      schema: organizationPatientListSearch,
+      limit: 15,
+    });
 
   const [organization, setOrganization] = useState<Organization | null>(null);
 
