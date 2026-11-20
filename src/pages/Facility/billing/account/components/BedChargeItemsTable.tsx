@@ -316,7 +316,7 @@ function BedChargeItemsTable({
               status: value === "all" ? undefined : value,
             });
           }}
-          className="max-sm:hidden"
+          className="max-lg:hidden"
         >
           <TabsList>
             <TabsTrigger value="all">{t("all")}</TabsTrigger>
@@ -336,7 +336,7 @@ function BedChargeItemsTable({
             })
           }
         >
-          <SelectTrigger className="sm:hidden w-full">
+          <SelectTrigger className="lg:hidden w-full">
             <SelectValue placeholder={t("filter_by_status")} />
           </SelectTrigger>
           <SelectContent>

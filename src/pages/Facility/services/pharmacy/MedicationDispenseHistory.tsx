@@ -237,10 +237,10 @@ export default function MedicationDispenseHistory({
           onValueChange={(value) => updateQuery({ exclude_status: value })}
           className="w-full"
         >
-          <div className="w-full overflow-x-auto pb-1">
+          <div className="w-full overflow-x-auto">
             <TabsList
               variant="line"
-              className="w-full justify-evenly border-b border-border sm:justify-start"
+              className="justify-evenly sm:justify-start"
             >
               {Object.entries(DISPENSE_STATUS_OPTIONS).map(
                 ([key, { label }]) => (

@@ -277,7 +277,7 @@ export default function DeviceShow({
         <TabsList
           variant="browser"
           aria-label={t("device")}
-          className="overflow-x-auto"
+          className="overflow-x-auto overflow-y-hidden"
         >
           {(["overview", "responses"] as const).map((value) => {
             const href =

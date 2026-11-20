@@ -271,10 +271,10 @@ export default function PrescriptionQueue({
           onValueChange={(value) => updateQuery({ status: value })}
           className="w-full"
         >
-          <div className="w-full overflow-x-auto pb-1">
+          <div className="w-full overflow-x-auto">
             <TabsList
               variant="line"
-              className="w-full justify-evenly border-b border-border sm:justify-start"
+              className="justify-evenly sm:justify-start"
             >
               {[
                 PrescriptionStatus.active,

@@ -291,13 +291,13 @@ export const ObservationVisualizer = ({
           </div>
           <Tabs defaultValue="graph" className="w-full">
             <TabsList className="flex w-full">
-              <TabsTrigger className="flex-1" value="graph">
+              <TabsTrigger className="flex-1 px-2" value="graph">
                 {t("graph")}
               </TabsTrigger>
-              <TabsTrigger className="flex-1" value="data">
+              <TabsTrigger className="flex-1 px-2" value="data">
                 {t("recent_data")}
               </TabsTrigger>
-              <TabsTrigger className="flex-1" value="history">
+              <TabsTrigger className="flex-1 px-2" value="history">
                 {t("full_history")}
               </TabsTrigger>
             </TabsList>

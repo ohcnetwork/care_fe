@@ -253,7 +253,7 @@ export function QuestionnaireDetailPage({
                 </div>
               </div>
 
-              <div className="max-w-full overflow-x-auto border-b border-border pb-px">
+              <div className="max-w-full overflow-x-auto">
                 <TabsList variant="line">
                   <TabsTrigger value="questions">{t("questions")}</TabsTrigger>
                   <TabsTrigger value="versions">{t("versions")}</TabsTrigger>

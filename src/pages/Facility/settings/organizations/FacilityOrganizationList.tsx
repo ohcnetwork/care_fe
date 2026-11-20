@@ -246,11 +246,8 @@ export default function FacilityOrganizationList({
                         value={currentTab}
                         onValueChange={handleTabChange}
                       >
-                        <div className="w-full overflow-x-auto pb-1">
-                          <TabsList
-                            variant="line"
-                            className="w-full border-b border-border"
-                          >
+                        <div className="w-full overflow-x-auto">
+                          <TabsList variant="line">
                             {navItems.map((item) => (
                               <TabsTrigger key={item.value} value={item.value}>
                                 {item.title}
