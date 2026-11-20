@@ -27,6 +27,7 @@ import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWri
 
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { questionnaireShowSearch } from "@/lib/router/search/admin";
 import {
   QUESTIONNAIRE_STATUS_COLORS,
   QuestionnaireScope,
@@ -76,7 +77,7 @@ export function QuestionnaireDetailPage({
     useState<OrganizationSelection | null>(null);
   // `?tab=versions` deep-links straight to the Versions tab — it's how the
   // revision page's Back button returns to the tab it was opened from.
-  const [{ tab }] = useQueryParams();
+  const [{ tab }] = useQueryParams(questionnaireShowSearch);
   const { canWrite, isLoading: isPermissionLoading } =
     useCanWriteQuestionnaire(scope);
 

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -24,7 +25,6 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Loading from "@/components/Common/Loading";
 
 import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { AppIcon } from "@/pages/Apps/AppIcon";
 import { AppStorePlugin } from "@/types/appStore/appStore";
 import { PlugConfig } from "@/types/plugConfig";
@@ -50,7 +50,7 @@ interface Props {
 
 export function PlugConfigEdit({ slug }: Props) {
   const isNew = slug === "new";
-  const [{ appId }] = useQueryParams<{ appId?: string }>();
+  const { appId } = useSearch({ from: "/_app/admin/apps/$slug" });
   const isAppStoreConfigured = Boolean(careConfig.appStore.apiUrl);
 
   const buildTimeConfig = useMemo(

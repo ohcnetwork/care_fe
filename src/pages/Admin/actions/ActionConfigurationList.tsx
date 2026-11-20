@@ -19,6 +19,7 @@ import {
 import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
+import { actionConfigurationListSearch } from "@/lib/router/search/admin";
 
 import { navigate } from "@/lib/router/navigate";
 import { isSupportedActionConfigurationContext } from "@/types/actions/actionConfiguration";
@@ -36,6 +37,7 @@ import { actionConfigurationKeys } from "./queryKeys";
 export function ActionConfigurationList() {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage } = useFilters({
+    schema: actionConfigurationListSearch,
     limit: 15,
   });
 

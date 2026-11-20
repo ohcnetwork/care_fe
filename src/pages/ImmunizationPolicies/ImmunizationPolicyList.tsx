@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 
 import useFilters from "@/hooks/useFilters";
+import { immunizationPolicyListSearch } from "@/lib/router/search/admin";
 
 import query from "@/Utils/request/query";
 import { HrefLink } from "@/lib/router/HrefLink";
@@ -70,6 +71,7 @@ export default function ImmunizationPolicyList({
     isLoading: isAccessLoading,
   } = useImmunizationPolicyAccess(scope);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: immunizationPolicyListSearch,
     limit: 15,
   });
   const { data, isLoading, isError, refetch } = useQuery({
