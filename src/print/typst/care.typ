@@ -119,9 +119,49 @@
   }),
 )))
 
+#let _break-after = regex("[^-,;/)\\]]*[-,;/)\\]]?")
+
+/// Breaks words wider than their cell, like CSS `overflow-wrap: anywhere`
+/// (Typst can't: typst/typst#674). Uses line breaks, not zero-width spaces,
+/// which PDF viewers drop characters next to when copying.
+#let fit-words(body) = layout(size => {
+  show regex("\\S+"): word => context {
+    if measure(word).width <= size.width { return word }
+    let lines = ()
+    let line = ""
+    for piece in word.text.matches(_break-after).map(m => m.text).filter(p => p != "") {
+      let units = if measure(text(piece)).width > size.width { piece.clusters() } else { (piece,) }
+      for unit in units {
+        if line != "" and measure(text(line + unit)).width > size.width {
+          lines.push(line)
+          line = unit
+        } else {
+          line += unit
+        }
+      }
+    }
+    lines.push(line)
+    lines.join(linebreak())
+  }
+  body
+})
+
+/// Applies `fit-words` to a table's cells, except in `auto` columns, where it
+/// would split values that should fit (amounts, "6.00%").
+#let fit-cells(columns, body) = {
+  show table.cell: cell => {
+    let spanned = range(cell.x, cell.x + cell.colspan)
+    if spanned.all(x => columns.at(x) == auto) { return cell }
+    let inset = if type(cell.inset) == dictionary { cell.inset } else { (rest: cell.inset) }
+    pad(..inset, align(cell.align, fit-words(cell.body)))
+  }
+  body
+}
+
 /// A bordered table in the style of CAREUI's `Table`. `header` repeats on
 /// every page; `header-align` defaults to centre; `empty` is shown without rows;
-/// `outer` sets the outer border's sides and corner radius.
+/// `outer` sets the outer border's sides and corner radius. Put free text in
+/// `fr` columns: long text in an `auto` column squeezes the `fr` ones.
 #let data-table(
   columns: (),
   align: (),
@@ -152,7 +192,7 @@
     set text(weight: "medium", fill: gray(950))
     // Never split a row across pages.
     set table.cell(breakable: false)
-    table(
+    fit-cells(columns, table(
       columns: columns,
       inset: (x: px(8), y: px(8)),
       align: (x, y) => if y == 0 { header-align.at(x) + horizon } else {
@@ -165,7 +205,7 @@
       ),
       table.header(..header),
       ..body,
-    )
+    ))
     },
   )
 }

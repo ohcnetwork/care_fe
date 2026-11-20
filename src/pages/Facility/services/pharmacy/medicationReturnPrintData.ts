@@ -50,6 +50,7 @@ export function buildMedicationReturnPrintContent({
         t("condition"),
         t("return_date"),
       ],
+      widths: [3, 1.5, null, null, null, null],
       rows: supplyDeliveries.map((delivery) => {
         const inventory = delivery.supplied_inventory_item;
         return [

@@ -148,6 +148,7 @@ export function PrintAppointments({
         t("token_no"),
         t("status"),
       ],
+      widths: [2, ...(showPractitioner ? [1.5] : []), null, null, null],
       rows: appointments.map((appointment) => [
         [
           appointment.patient.name,
