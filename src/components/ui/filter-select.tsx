@@ -1,14 +1,15 @@
-import { ListFilter, X } from "lucide-react";
-import { Trans, useTranslation } from "react-i18next";
+import { ChevronDown, ListFilter } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
+import { cn } from "@/lib/utils";
+
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export interface FilterSelectProps {
   value: string;
@@ -33,55 +34,40 @@ export function FilterSelect({
 }: FilterSelectProps) {
   const { t } = useTranslation();
   return (
-    <ButtonGroup className={className}>
-      <Select
-        value={value}
-        onValueChange={(newValue) => onValueChange(newValue || undefined)}
-      >
-        <SelectTrigger>
-          <div className="flex w-full items-center gap-2">
-            {icon || <ListFilter aria-hidden="true" />}
-            {value ? (
-              <>
-                <span>
-                  <Trans
-                    i18nKey="filter_label_is"
-                    components={{
-                      style: <span className="text-muted-foreground ml-1" />,
-                    }}
-                    values={{ label }}
-                  />
-                </span>
-                <span className="underline underline-offset-4">{t(value)}</span>
-              </>
-            ) : (
-              <span className="text-muted-foreground">
-                {placeholder ? placeholder : label}
-              </span>
+    <div
+      data-slot="filter-select"
+      className={cn("inline-flex min-w-0", className)}
+    >
+      <DropdownMenu>
+        <DropdownMenuTrigger className="w-full justify-between">
+          {icon || <ListFilter aria-hidden="true" />}
+          <span>{value ? label : placeholder || label}</span>
+          {value && <span className="text-muted-foreground">{t(value)}</span>}
+          <ChevronDown aria-hidden="true" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuRadioGroup
+            aria-label={label}
+            value={value}
+            onValueChange={(newValue) => {
+              if (newValue === "") {
+                onClear();
+              } else {
+                onValueChange(newValue);
+              }
+            }}
+          >
+            {!options.includes("all") && (
+              <DropdownMenuRadioItem value="">{t("all")}</DropdownMenuRadioItem>
             )}
-          </div>
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option} value={option}>
-              {t(option)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {value && (
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          className="border-input! shadow-xs"
-          onClick={onClear}
-          aria-label={t("remove_filter")}
-          aria-description={label}
-        >
-          <X className="size-4" />
-        </Button>
-      )}
-    </ButtonGroup>
+            {options.map((option) => (
+              <DropdownMenuRadioItem key={option} value={option}>
+                {t(option)}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }
