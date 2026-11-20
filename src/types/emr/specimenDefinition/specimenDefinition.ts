@@ -86,10 +86,10 @@ export interface TypeTestedSpec {
 
 /** Defaults applied to a specimen when it is collected. */
 export interface SpecimenCollectionTemplate {
-  code?: Code | null;
+  code?: Code;
   quantity?: QuantitySpec | null;
-  method?: Code | null;
-  body_site?: Code | null;
+  method?: Code;
+  body_site?: Code;
 }
 
 export interface SpecimenDefinition {
@@ -101,7 +101,7 @@ export interface SpecimenDefinition {
   description: string;
   type_collected: Code;
   patient_preparation?: Code[];
-  collection?: SpecimenCollectionTemplate | null;
+  collection?: SpecimenCollectionTemplate;
   slug_config: SlugConfig;
 }
 

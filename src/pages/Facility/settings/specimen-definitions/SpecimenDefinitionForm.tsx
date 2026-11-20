@@ -185,7 +185,7 @@ function SpecimenDefinitionFormContent({
     patient_preparation: z.array(CodeSchema).min(0),
     collection: z
       .object({
-        code: CodeSchema.nullish(),
+        code: CodeSchema.optional(),
         quantity: z
           .object({
             // The backend takes whole numbers only; zodDecimal would round 1.999 to 2.
@@ -199,11 +199,12 @@ function SpecimenDefinitionFormContent({
               .transform((value) => String(Number(value))),
             unit: CodeSchema,
           })
-          .nullish(),
-        method: CodeSchema.nullish(),
-        body_site: CodeSchema.nullish(),
+          .nullable()
+          .optional(),
+        method: CodeSchema.optional(),
+        body_site: CodeSchema.optional(),
       })
-      .nullish(),
+      .optional(),
     type_tested: typeTestedSchema.optional(),
   });
 
@@ -340,7 +341,7 @@ function SpecimenDefinitionFormContent({
       collection:
         data.collection && Object.values(data.collection).some(Boolean)
           ? data.collection
-          : null,
+          : undefined,
       patient_preparation:
         data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested
