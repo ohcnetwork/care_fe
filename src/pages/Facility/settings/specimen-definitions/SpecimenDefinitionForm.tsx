@@ -188,11 +188,15 @@ function SpecimenDefinitionFormContent({
         code: CodeSchema.nullish(),
         quantity: z
           .object({
-            // The backend takes whole numbers only.
-            value: zodDecimal({ min: 1 }).refine(
-              (value) => Number.isInteger(Number(value)),
-              t("invalid_quantity"),
-            ),
+            // The backend takes whole numbers only; zodDecimal would round 1.999 to 2.
+            value: z
+              .string()
+              .refine(
+                (value) =>
+                  Number.isInteger(Number(value)) && Number(value) >= 1,
+                t("invalid_quantity"),
+              )
+              .transform((value) => String(Number(value))),
             unit: CodeSchema,
           })
           .nullish(),
