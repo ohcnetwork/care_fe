@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  searchAppPath,
   searchBoolean,
   searchEnum,
   searchInt,
@@ -36,11 +37,11 @@ export const referralListSearch = z.object({
  */
 export const referralContextSearch = z.object({
   /** The page that opened the referral. The referral page links back to it. */
-  sourceUrl: searchString(),
+  sourceUrl: searchAppPath(),
   /** The referral that an appointment or encounter page works on. */
   referralId: searchString(),
   /** The `sourceUrl` of the referral, kept for the way back to it. */
-  referralSourceUrl: searchString(),
+  referralSourceUrl: searchAppPath(),
   /** The receiving visit. An empty value stays, so the page can reject it. */
   referralAppointmentId: searchString(),
   referralEncounterId: searchString(),

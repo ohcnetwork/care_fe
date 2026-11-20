@@ -72,6 +72,8 @@ test.describe("Facility responses search params", () => {
     const request = responseListRequest(page, () => true);
     await page.goto(responsesUrl({ status: "bogus", page: "abc" }));
     const params = new URL((await request).url()).searchParams;
+    // The router drops the invalid values when the page loads.
+    await expect(page).not.toHaveURL(/status=bogus|page=abc/);
 
     expect(params.get("status")).toBeNull();
     expect(params.get("offset")).toBe("0");

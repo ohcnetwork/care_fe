@@ -38,8 +38,22 @@ async function expectAllRowsWithStatus(page: Page, status: string) {
   }
 }
 
-const pageButton = (page: Page, pageNumber: number) =>
-  page.getByRole("button", { name: `Go to page ${pageNumber}`, exact: true });
+/** The invoice list shows 14 invoices per page. */
+const PAGE_SIZE = 14;
+
+/** The next invoice list request whose query matches `match`. */
+const invoiceListRequest = (
+  page: Page,
+  match: (params: URLSearchParams) => boolean,
+) =>
+  page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return (
+      response.request().method() === "GET" &&
+      /\/api\/v1\/facility\/[^/]+\/invoice\/$/.test(url.pathname) &&
+      match(url.searchParams)
+    );
+  });
 
 test.describe("Invoice List search params", () => {
   let facilityId: string;
@@ -56,8 +70,13 @@ test.describe("Invoice List search params", () => {
   test("writes the status filter to the URL and lists only that status", async ({
     page,
   }) => {
+    // The second page can be empty: it depends on the number of invoices.
+    const secondPage = invoiceListRequest(
+      page,
+      (params) => params.get("offset") === String(PAGE_SIZE),
+    );
     await page.goto(listUrl({ page: "2" }));
-    await waitForInvoiceRows(page);
+    await secondPage;
 
     await applyInvoiceStatusFilter(page, /^issued$/i);
 
@@ -77,10 +96,13 @@ test.describe("Invoice List search params", () => {
   });
 
   test("opens the bookmarked page number", async ({ page }) => {
+    const secondPage = invoiceListRequest(
+      page,
+      (params) => params.get("offset") === String(PAGE_SIZE),
+    );
     await page.goto(listUrl({ page: "2" }));
-    await waitForInvoiceRows(page);
+    await secondPage;
 
-    await expect(pageButton(page, 2)).toHaveAttribute("aria-current", "page");
     await expect(page).toHaveURL(/[?&]page=2(&|$)/);
   });
 
@@ -98,15 +120,21 @@ test.describe("Invoice List search params", () => {
   });
 
   test("ignores invalid values in a bookmarked URL", async ({ page }) => {
+    const firstPage = invoiceListRequest(
+      page,
+      (params) => params.get("offset") === "0" && !params.has("status"),
+    );
     await page.goto(listUrl({ page: "abc", status: "bogus" }));
 
     await test.step("Lists invoices from the first page, unfiltered", async () => {
+      await firstPage;
+      // The router drops the invalid values when the page loads.
+      await expect(page).not.toHaveURL(/status=|page=abc/);
       await waitForInvoiceRows(page);
       await expect(statusFilterBar(page)).toBeHidden();
-      await expect(pageButton(page, 1)).toHaveAttribute("aria-current", "page");
     });
 
-    await test.step("Drops the invalid values on the next filter change", async () => {
+    await test.step("Keeps them out on the next filter change", async () => {
       await page.getByRole("textbox", { name: /search invoices/i }).fill("1");
 
       await expect(page).toHaveURL(/[?&]search=1(&|$)/);

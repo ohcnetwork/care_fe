@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import {
   paginationSearch,
+  searchAppPath,
+  searchBoolean,
   searchEnum,
   searchInt,
   searchString,
@@ -71,11 +73,11 @@ export const fileListSearch = z.object({
   name: searchString(),
   is_archived: searchEnum(["true", "false"]),
   /** Set with `is_archived` by the filter of the reports sub tab. */
-  include_archived: searchEnum(["true", "false"]),
+  include_archived: searchBoolean(),
 });
 
 /** The clinical history page of a patient. */
 export const clinicalHistoryPageSearch = z.object({
   /** The page that opened the history. The close button goes back to it. */
-  sourceUrl: searchString(),
+  sourceUrl: searchAppPath(),
 });

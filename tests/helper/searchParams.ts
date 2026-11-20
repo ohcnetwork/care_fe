@@ -9,9 +9,14 @@ export function withSearch(
   return search ? `${path}?${search}` : path;
 }
 
-/** Matches `key=value` in the query string of a URL. */
+/** Matches `key=value` in the query string of a URL, encoded as the app does. */
 export function queryParam(key: string, value: string | number): RegExp {
-  return new RegExp(`[?&]${key}=${value}(&|$)`);
+  const pair = new URLSearchParams({ [key]: String(value) }).toString();
+  return new RegExp(`[?&]${escapeRegExp(pair)}(&|$)`);
+}
+
+function escapeRegExp(text: string) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
@@ -34,18 +39,24 @@ export function waitForApiList(
 }
 
 /**
- * Records the query strings of the API requests that the page sends. Use
- * `expectNotSent(text)` to check that a value never reached the API.
+ * Records the query parameters of the API requests that the page sends. Use
+ * `expectNotSent(value)` to check that no parameter of any request had that
+ * value (decoded and compared whole, so an id that contains it still passes).
  */
 export function recordApiQueries(page: Page) {
-  const queries: string[] = [];
+  const queries: URLSearchParams[] = [];
   page.on("request", (request) => {
     const url = new URL(request.url());
-    if (url.pathname.startsWith("/api/")) queries.push(url.search);
+    if (url.pathname.startsWith("/api/")) queries.push(url.searchParams);
   });
   return {
-    expectNotSent(text: string) {
-      expect(queries.filter((query) => query.includes(text))).toEqual([]);
+    expectNotSent(value: string) {
+      const sent = queries.flatMap((params) =>
+        [...params]
+          .filter(([, paramValue]) => paramValue === value)
+          .map(([key]) => `${key}=${value}`),
+      );
+      expect(sent).toEqual([]);
     },
   };
 }

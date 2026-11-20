@@ -82,9 +82,11 @@ test.describe("Encounter list search params", () => {
     await test.step("Lists the first page", async () => {
       const params = new URL((await request).url()).searchParams;
       expect(params.get("offset")).toBe("0");
+      // The router drops the invalid page when the page loads.
+      await expect(page).not.toHaveURL(/page=abc/);
     });
 
-    await test.step("Drops the invalid page on the next filter change", async () => {
+    await test.step("Keeps it out on the next filter change", async () => {
       const filtered = encounterListRequest(
         page,
         facilityId,

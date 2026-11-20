@@ -17,18 +17,24 @@ import { z } from "zod";
 
 export const searchString = () => z.string().optional().catch(undefined);
 
-/** An integer. Accepts `2` and `"2"`. */
-export const searchInt = () =>
+/** A safe integer, from `2` or `"2"`. */
+const integer = () =>
   z
     .union([
-      z.number().int(),
+      z.number(),
       z
         .string()
         .regex(/^-?\d+$/)
         .transform(Number),
     ])
-    .optional()
-    .catch(undefined);
+    .pipe(z.number().int());
+
+/** An integer. Accepts `2` and `"2"`. */
+export const searchInt = () => integer().optional().catch(undefined);
+
+/** A positive integer, such as a page number. */
+export const searchPositiveInt = () =>
+  integer().pipe(z.number().positive()).optional().catch(undefined);
 
 /** Accepts `true`, `"true"`, `false` and `"false"`. */
 export const searchBoolean = () =>
@@ -57,18 +63,29 @@ export function searchEnum(values: readonly string[] | z.core.util.EnumLike) {
     .catch(undefined);
 }
 
-/** A `yyyy-MM-dd` date. It stays a string. */
-export const searchDate = () =>
-  z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .optional()
-    .catch(undefined);
+/** A `yyyy-MM-dd` calendar date. It stays a string. */
+export const searchDate = () => z.iso.date().optional().catch(undefined);
+
+/**
+ * A path in this app, such as the page to go back to. A URL on another origin
+ * reads as `undefined`, so a link cannot send the user off the app.
+ */
+export const searchAppPath = () =>
+  z.string().refine(isAppPath).optional().catch(undefined);
+
+function isAppPath(value: string) {
+  try {
+    const origin = window.location.origin;
+    return new URL(value, origin).origin === origin;
+  } catch {
+    return false;
+  }
+}
 
 /** The pagination keys that `useFilters` writes. */
 export const paginationSearch = {
-  page: searchInt(),
-  limit: searchInt(),
+  page: searchPositiveInt(),
+  limit: searchPositiveInt(),
 };
 
 /** A search schema: an object of the fields above. */

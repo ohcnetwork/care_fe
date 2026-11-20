@@ -43,6 +43,24 @@ test.describe("Invoice page search params", () => {
     await expect(page).toHaveURL(new RegExp(`${sourcePath()}$`));
   });
 
+  test("offers no way back to a source URL on another origin", async ({
+    page,
+  }) => {
+    const invoicePath = await openIssuedInvoice(page, facilityId);
+
+    await page.goto(
+      `${invoicePath}?${new URLSearchParams({ sourceUrl: "https://example.com/" })}`,
+    );
+
+    // The schema reads the other origin as no source URL.
+    await expect(
+      page.getByRole("button", { name: /^record payment/i }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /^back to/i })).toHaveCount(
+      0,
+    );
+  });
+
   test("keeps sourceUrl when the payment sheet opens and closes", async ({
     page,
   }) => {

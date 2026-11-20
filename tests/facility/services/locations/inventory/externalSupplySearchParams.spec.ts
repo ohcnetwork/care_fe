@@ -96,6 +96,7 @@ test.describe("Purchase order list search params", () => {
     );
     await page.goto(ordersUrl("?tab=bogus&priority=bogus&page=abc"));
     await request;
+    await expectSelectedTab(page, "Requested");
 
     await expect(
       page.getByRole("heading", { name: "Purchase Orders" }),

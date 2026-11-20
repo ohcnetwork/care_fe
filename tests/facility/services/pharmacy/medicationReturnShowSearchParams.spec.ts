@@ -8,12 +8,13 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-// A new medication return opens with `dispenseOrderIds`: the dispense orders
-// that the medicines return from. The return page reads it with a typed
-// search schema (`src/lib/router/search/pharmacy.ts`) and lists the
-// dispensed medicines of those orders.
+// A medication return opens with `dispenseOrderIds`: the dispense orders that
+// the medicines return from. The return page reads it with a typed search
+// schema (`medicationReturnShowSearch` in `src/lib/router/search/pharmacy.ts`)
+// and requests the dispensed medicines of each order. The requests do not
+// depend on the return or the orders existing, so the test needs no data.
 
-test("a new medication return lists the dispenses of the orders in the URL", async ({
+test("the return page requests the dispenses of the orders in the URL", async ({
   page,
 }) => {
   const pharmacyPath = await openServiceLocation(
@@ -22,48 +23,22 @@ test("a new medication return lists the dispenses of the orders in the URL", asy
     "Main Pharmacy",
     "Pharmacy",
   );
-
-  await test.step("Select a completed dispense order of a patient", async () => {
-    await page.goto(
-      `${pharmacyPath}/medication_dispense?exclude_status=history`,
-    );
-    const completedOrder = page
-      .locator('[data-slot="table-body"] [data-slot="table-row"]')
-      .filter({ hasText: "Completed" })
-      .first();
-    await expect(completedOrder).toBeVisible();
-    await completedOrder.getByRole("cell").first().click();
-    await expect(page).toHaveURL(/[?&]patientId=/);
-    await expect(page).toHaveURL(/[?&]exclude_status=history(&|$)/);
-
-    await page
-      .getByRole("checkbox", { name: "Select dispense", exact: true })
-      .first()
-      .check();
-  });
-
-  await test.step("Create the return", async () => {
-    await page.getByRole("button", { name: /^Return Medicines/ }).click();
-    const sheet = page.getByRole("dialog", {
-      name: "Create Medication Return",
-    });
-    await sheet
-      .getByRole("textbox", { name: "Name", exact: true })
-      .fill(`Return ${faker.string.alphanumeric(8)}`);
-
-    const dispenses = waitForListRequest(
+  const returnId = faker.string.uuid();
+  const orderIds = [faker.string.uuid(), faker.string.uuid()];
+  const dispenses = orderIds.map((orderId) =>
+    waitForListRequest(
       page,
       "/medication/dispense/",
-      (params) => params.has("order"),
-    );
-    await sheet.getByRole("button", { name: "Create Return" }).click();
+      (params) => params.get("order") === orderId,
+    ),
+  );
 
-    await expect(page).toHaveURL(
-      /\/medication_return\/order\/[^/?]+\?dispenseOrderIds=[0-9a-f-]+$/,
-    );
-    const orderId = new URL(page.url()).searchParams.get("dispenseOrderIds");
-    expect(new URL((await dispenses).url()).searchParams.get("order")).toBe(
-      orderId,
-    );
-  });
+  await page.goto(
+    `${pharmacyPath}/medication_return/order/${returnId}?dispenseOrderIds=${orderIds.join(",")}`,
+  );
+
+  await Promise.all(dispenses);
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get("dispenseOrderIds") === orderIds.join(","),
+  );
 });

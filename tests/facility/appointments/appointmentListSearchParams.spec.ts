@@ -4,6 +4,7 @@ import {
   type APIRequestContext,
   type Page,
 } from "@playwright/test";
+import { format } from "date-fns";
 
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
@@ -67,13 +68,15 @@ test.describe("Appointment list search params", () => {
     request,
   }) => {
     const userId = await currentUserId(request);
+    // With the default configuration, the list opens on today.
+    const today = format(new Date(), "yyyy-MM-dd");
     await page.goto(listUrl());
 
     await expect(page).toHaveURL(
       (url) =>
         url.searchParams.get("practitioners") === userId &&
-        /^\d{4}-\d{2}-\d{2}$/.test(url.searchParams.get("date_from") ?? "") &&
-        url.searchParams.get("date_from") === url.searchParams.get("date_to"),
+        url.searchParams.get("date_from") === today &&
+        url.searchParams.get("date_to") === today,
     );
   });
 
@@ -165,6 +168,10 @@ test.describe("Appointment list search params", () => {
         page: "abc",
         autoRefresh: "bogus",
       }),
+    );
+    // The router drops the invalid values when the page loads.
+    await expect(page).not.toHaveURL(
+      /date_from=bogus|page=abc|autoRefresh=bogus/,
     );
 
     await test.step("Lists the first page without the invalid date", async () => {

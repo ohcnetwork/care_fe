@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import {
   paginationSearch,
+  searchAppPath,
   searchDate,
   searchEnum,
   searchString,
@@ -131,7 +132,7 @@ export const invoiceChargeItemSearch = z.object({
 /** The invoice page, with its add charge items sheet. */
 export const invoiceShowSearch = invoiceChargeItemSearch.extend({
   /** The page that opened the invoice. The invoice page links back to it. */
-  sourceUrl: searchString(),
+  sourceUrl: searchAppPath(),
   /** Comma-separated ids of invoices that print with this one. */
   relatedInvoices: searchString(),
 });

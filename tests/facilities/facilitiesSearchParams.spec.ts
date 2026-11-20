@@ -1,6 +1,7 @@
+import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 
-import { getFacilityId } from "tests/support/facilityId";
+import type { FacilityPublicRead } from "@/types/facility/facility";
 
 // The public facility pages read their query string with typed search
 // schemas (`facilitiesPageSearch` and `facilityDetailsPageSearch` in
@@ -115,19 +116,40 @@ test.describe("Public facility list search params", () => {
 
 test.describe("Public facility page search params", () => {
   test("opens with an invalid page in the URL", async ({ page }) => {
-    const facilityId = getFacilityId();
-    const request = page.waitForResponse(
-      (response) =>
-        new URL(response.url()).pathname ===
-        `/api/v1/getallfacilities/${facilityId}/`,
+    // The public endpoint lists only public facilities, and the fixture
+    // facility need not be one. Serve a public facility for this page.
+    const facility: FacilityPublicRead = {
+      id: faker.string.uuid(),
+      name: `Public facility ${faker.string.alphanumeric(8)}`,
+      description: "",
+      address: "12 Example Road",
+      phone_number: "+919876543210",
+      facility_type: "Private Hospital",
+      is_public: true,
+      features: [],
+      geo_organization: {
+        id: faker.string.uuid(),
+        name: "Kerala",
+        org_type: "govt",
+        metadata: { govt_org_type: "state" },
+        level_cache: 1,
+        has_children: false,
+        active: true,
+        created_at: "",
+        updated_at: "",
+        permissions: [],
+      },
+    };
+    await page.route(`**/api/v1/getallfacilities/${facility.id}/`, (route) =>
+      route.fulfill({ json: facility }),
     );
-    await page.goto(`/facility/${facilityId}?page=abc`);
-    const response = await request;
-    expect(response.ok()).toBe(true);
-    const facility = (await response.json()) as { name: string };
+
+    await page.goto(`/facility/${facility.id}?page=abc`);
 
     await expect(
       page.getByRole("heading", { name: facility.name }),
     ).toBeVisible();
+    // The router drops the invalid page when the page loads.
+    await expect(page).not.toHaveURL(/page=abc/);
   });
 });

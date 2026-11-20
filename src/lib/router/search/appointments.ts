@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import {
   paginationSearch,
+  searchAppPath,
   searchBoolean,
   searchDate,
   searchString,
@@ -43,7 +44,7 @@ export const appointmentShowSearch = z.object({
    * opened it. `useAppointmentReferral` reads them.
    */
   referralId: searchString(),
-  referralSourceUrl: searchString(),
+  referralSourceUrl: searchAppPath(),
 });
 
 /** The book appointment sheet, on the patient pages and in a referral. */

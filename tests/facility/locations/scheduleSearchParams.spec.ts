@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
@@ -11,6 +11,17 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 const addExceptionSheet = (page: Page) =>
   page.getByRole("dialog").filter({ hasText: "Add Schedule Exceptions" });
+
+/** The date picker of the form field with `label`. */
+const dateField = (sheet: Locator, label: string) =>
+  sheet
+    .locator('[data-slot="form-item"]')
+    .filter({
+      has: sheet.page().locator('[data-slot="form-label"]', {
+        hasText: label,
+      }),
+    })
+    .getByRole("button");
 
 test.describe("Location schedule search params", () => {
   let schedulePath: string;
@@ -66,10 +77,13 @@ test.describe("Location schedule search params", () => {
 
     const sheet = addExceptionSheet(page);
     await expect(sheet).toBeVisible();
-    // Both date pickers show a date from the URL.
-    await expect(
-      sheet.getByRole("button", { name: /pick a date/i }),
-    ).toHaveCount(0);
+    // Each date picker shows its date from the URL.
+    await expect(dateField(sheet, "Valid From")).toContainText(
+      "March 15th, 2099",
+    );
+    await expect(dateField(sheet, "Valid Till")).toContainText(
+      "March 16th, 2099",
+    );
 
     await test.step("Closing the sheet drops it and its dates from the URL", async () => {
       await page.keyboard.press("Escape");
@@ -87,6 +101,8 @@ test.describe("Location schedule search params", () => {
         valid_from: "bogus",
       })}`,
     );
+    // The router drops the invalid values when the page loads.
+    await expect(page).not.toHaveURL(/bogus/);
 
     // The schedule view, with no sheet open.
     await expect(

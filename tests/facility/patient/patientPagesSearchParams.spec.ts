@@ -117,4 +117,21 @@ test.describe("Patient pages search params", () => {
       `/facility/${facilityId}/patient/${patientId}`,
     );
   });
+
+  test("goes back to the patient for a source URL on another origin", async ({
+    page,
+  }) => {
+    await page.goto(
+      `/facility/${facilityId}/patient/${patientId}/history/responses?${new URLSearchParams({ sourceUrl: "https://example.com/" })}`,
+    );
+
+    // The schema reads the other origin as no source URL.
+    const back = page.getByText("Back to Patient", { exact: true });
+    await expect(back).toBeVisible();
+    await back.locator("..").getByRole("button").click();
+
+    await expect(page).toHaveURL(
+      `/facility/${facilityId}/patient/${patientId}`,
+    );
+  });
 });
