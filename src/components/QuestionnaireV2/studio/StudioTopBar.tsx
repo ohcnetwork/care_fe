@@ -132,11 +132,10 @@ export function StudioTopBar({
 
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white px-4 py-2.5">
-      {/* A real anchor (not navigate()) so middle-click and open-in-new-tab
-          work. HrefLink still routes client-side, and useNavigationBlocker
-          keeps guarding unsaved changes. */}
+      {/* A real anchor so middle-click and open-in-new-tab work. A left click
+          goes back, and useNavigationBlocker keeps guarding unsaved changes. */}
       <Button asChild variant="outline" size="xs">
-        <HrefLink href={backPath}>
+        <HrefLink href={backPath} back>
           <ArrowLeft className="size-4" />
           {t("back")}
         </HrefLink>

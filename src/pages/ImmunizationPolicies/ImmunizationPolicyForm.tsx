@@ -97,7 +97,7 @@ export default function ImmunizationPolicyForm({
           </Alert>
           <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <HrefLink href={scope.basePath}>
+              <HrefLink href={scope.basePath} back>
                 <ArrowLeft className="size-4" />
                 {t("back")}
               </HrefLink>
@@ -176,7 +176,7 @@ function ImmunizationPolicyEditor({
       ),
     );
     flushSync(() => form.reset(form.getValues()));
-    navigate({ href: scope.basePath });
+    navigate({ href: scope.basePath, replace: true });
   };
 
   const create = useMutation({
@@ -211,6 +211,7 @@ function ImmunizationPolicyEditor({
           <header className="space-y-4 border-b border-gray-200 pb-5">
             <HrefLink
               href={scope.basePath}
+              back
               className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
             >
               <ArrowLeft className="size-3.5" aria-hidden="true" />

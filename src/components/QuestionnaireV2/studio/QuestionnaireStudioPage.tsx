@@ -7,9 +7,9 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
+import { goBack } from "@/Utils/utils";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -213,10 +213,7 @@ export function QuestionnaireStudioPage({
           <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{t("no_data_found")}</AlertDescription>
         </Alert>
-        <Button
-          variant="outline"
-          onClick={() => navigate({ href: scope.basePath })}
-        >
+        <Button variant="outline" onClick={() => goBack(scope.basePath)}>
           <ArrowLeft className="size-4" />
           {t("back")}
         </Button>

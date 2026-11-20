@@ -20,7 +20,6 @@ import BackButton from "@/components/Common/BackButton";
 import Page from "@/components/Common/Page";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import { navigate } from "@/lib/router/navigate";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
@@ -29,6 +28,7 @@ import {
   DeliveryOrderStatus,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { goBack } from "@/Utils/utils";
 
 import { DeliveryOrderRoutingField } from "./DeliveryOrderRoutingField";
 
@@ -179,7 +179,7 @@ export function DeliveryOrderFormContent({
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate({ href: returnPath })}
+              onClick={() => goBack(returnPath)}
             >
               {t("cancel")}
               <ShortcutBadge actionId="cancel-action" />
