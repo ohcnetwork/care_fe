@@ -255,6 +255,9 @@ const ScheduleTemplateEditor = ({
     const careTeamChanged =
       JSON.stringify(careTeamMembers) !==
       JSON.stringify(toCareTeamMembers(savedCareTeam));
+    // The API keeps the saved type when the field is omitted and clears it on
+    // null, so send it only when edited. The picker stays disabled until the
+    // detail loads, so both sides of this check come from the same response.
     const encounterTypeChanged = values.encounter_type !== savedEncounterType;
     updateTemplate({
       name: values.name,

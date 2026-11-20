@@ -46,6 +46,12 @@ export function ScheduleEncounterDefaultsFields({
 }: Props) {
   const { t } = useTranslation();
   const encounterTypeId = useId();
+  // Keep a saved type this deployment no longer offers selectable, or the
+  // trigger would render blank while that type is still stored.
+  const encounterTypeOptions =
+    encounterType && !careConfig.encounterClasses.includes(encounterType)
+      ? [...careConfig.encounterClasses, encounterType]
+      : careConfig.encounterClasses;
 
   return (
     <FieldSet className="gap-4 rounded-lg border border-gray-200 bg-white p-4">
@@ -94,7 +100,7 @@ export function ScheduleEncounterDefaultsFields({
             <SelectItem value={NO_ENCOUNTER_TYPE}>
               {t("not_specified")}
             </SelectItem>
-            {careConfig.encounterClasses.map((value) => (
+            {encounterTypeOptions.map((value) => (
               <SelectItem key={value} value={value}>
                 {t(`encounter_class__${value}`)}
               </SelectItem>
