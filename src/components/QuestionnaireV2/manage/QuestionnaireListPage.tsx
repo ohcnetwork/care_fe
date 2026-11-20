@@ -72,7 +72,6 @@ export function QuestionnaireListPage({
     useCanWriteQuestionnaire(scope);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
     defaultQueryParams: { status: "active" },
   });
 

@@ -60,7 +60,6 @@ export default function MedicationDispenseHistory({
   const authUser = useAuthUser();
   const { qParams, Pagination, updateQuery, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
   });
   const [selectedDispenses, setSelectedDispenses] = useState<string[]>([]);
 

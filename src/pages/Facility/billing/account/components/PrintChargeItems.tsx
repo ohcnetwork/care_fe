@@ -93,7 +93,7 @@ export const PrintChargeItems = (props: {
   const [showAllStatuses, setShowAllStatuses] = useState(false);
   const selectedStatuses = showAllStatuses ? ALL_STATUSES : ACTIVE_STATUSES;
 
-  const { qParams, updateQuery } = useFilters({ disableCache: true });
+  const { qParams, updateQuery } = useFilters({});
 
   const { data: account, isLoading: isLoadingAccount } = useQuery({
     queryKey: ["account", accountId],

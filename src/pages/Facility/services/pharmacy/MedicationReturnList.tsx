@@ -53,7 +53,6 @@ export default function MedicationReturnList({
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
   });
 
   const currentStatus = qParams.status || "all";

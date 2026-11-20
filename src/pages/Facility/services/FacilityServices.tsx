@@ -22,7 +22,6 @@ export default function FacilityServicesPage({
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 12,
-    disableCache: true,
   });
 
   const { data: response, isLoading } = useQuery({

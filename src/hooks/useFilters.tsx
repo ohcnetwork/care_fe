@@ -34,13 +34,19 @@ interface FilterBadgeProps {
  */
 export default function useFilters({
   limit = 14,
+  cache = false,
   cacheBlacklist = [],
-  disableCache = false,
   defaultQueryParams = {},
 }: {
   limit?: number;
+  /**
+   * Save the filters of the page (per path) and restore them when the page
+   * opens without a query string.
+   * @default false
+   */
+  cache?: boolean;
+  /** Keys that the cache does not save. Applies only with `cache`. */
   cacheBlacklist?: string[];
-  disableCache?: boolean;
   defaultQueryParams?: QueryParams;
 }) {
   const { t } = useTranslation();
@@ -54,7 +60,7 @@ export default function useFilters({
   }>({ value: false });
 
   const updateCache = (query: UrlQueryParams) => {
-    if (disableCache || scoped) return;
+    if (!cache || scoped) return;
     const blacklist = FILTERS_CACHE_BLACKLIST.concat(cacheBlacklist);
     FiltersCache.set(query, blacklist);
   };
@@ -96,7 +102,7 @@ export default function useFilters({
         setQueryParams({ ...defaults, ...qParams });
       return;
     }
-    if (disableCache) {
+    if (!cache) {
       // Clean-up any existing cache if present for this path.
       FiltersCache.invalidate();
 
@@ -118,8 +124,8 @@ export default function useFilters({
       return;
     }
 
-    const cache = FiltersCache.get();
-    if (!cache) {
+    const cached = FiltersCache.get();
+    if (!cached) {
       if (Object.keys(defaults).length > 0) {
         setQueryParams({ ...defaults, ...qParams });
       }
@@ -127,7 +133,7 @@ export default function useFilters({
     }
 
     // Restore cache
-    setQueryParams({ ...defaults, ...cache, ...qParams });
+    setQueryParams({ ...defaults, ...cached, ...qParams });
   }, []);
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {

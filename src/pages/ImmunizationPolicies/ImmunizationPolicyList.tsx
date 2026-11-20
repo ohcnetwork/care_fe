@@ -71,7 +71,6 @@ export default function ImmunizationPolicyList({
   } = useImmunizationPolicyAccess(scope);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["immunization-policies", scope.facilityId, qParams],

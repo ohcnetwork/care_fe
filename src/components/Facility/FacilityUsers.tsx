@@ -24,7 +24,6 @@ export default function FacilityUsers(props: { facilityId: string }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
   const [activeTab, setActiveTab] = useView("users", "card");
 

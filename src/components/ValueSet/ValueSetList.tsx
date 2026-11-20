@@ -221,7 +221,6 @@ export function ValueSetList({ scope }: { scope: ValueSetScope }) {
   const { canWrite } = useCanWriteValueSet(scope);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
 
   // The admin area only ever lists instance sets; inside a facility the

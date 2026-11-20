@@ -95,7 +95,6 @@ export default function OrganizationUsers({
 }: Props) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();

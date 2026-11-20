@@ -66,7 +66,6 @@ export function DeliveryOrderList({
   const currentTab = (qParams.tab as Tab) || TABS_CONFIG[0].value;
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
   });
 
   const handleTabChange = (value: string) => {

@@ -90,7 +90,6 @@ export default function PaymentsData({
   const [isChangeAccountOpen, setIsChangeAccountOpen] = useState(false);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: RESULTS_PER_PAGE_LIMIT,
-    disableCache: true,
   });
 
   useEffect(() => {

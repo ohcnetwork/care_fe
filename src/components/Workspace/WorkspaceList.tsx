@@ -53,7 +53,6 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
   const searchId = useId();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
   const listDescription = {
     instance: "workspace_instance_description",

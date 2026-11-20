@@ -39,7 +39,7 @@ export default function OrganizationFacilities({
   );
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 12, disableCache: true });
+    useFilters({ limit: 12 });
 
   const { data: facilities, isFetching } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],

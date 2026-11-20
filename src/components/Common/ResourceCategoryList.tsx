@@ -323,7 +323,6 @@ export function ResourceCategoryList<
     React.useState<ResourceCategoryRead | null>(null);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: RESULTS_PER_PAGE_LIMIT,
-    disableCache: true,
   });
 
   // Fetch current category by slug

@@ -135,7 +135,6 @@ function ChargeItemsTable({
   useShortcutSubContext("facility:billing");
   const { qParams, updateQuery } = useFilters({
     limit: 15,
-    disableCache: true,
   });
 
   // MultiFilter configuration

@@ -188,6 +188,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
 
   const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
     limit: 15,
+    cache: true,
     defaultQueryParams: {
       ...(practitionerFilterEnabled ? { practitioners: authUser.id } : {}),
       ...getDefaultDateFilter(),

@@ -57,7 +57,6 @@ export default function TemplateList({
     getPermissions(hasPermission, permissions);
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: RESULTS_PER_PAGE_LIMIT,
-    disableCache: true,
   });
 
   const { data: templatesData, isLoading: isTemplatesLoading } = useQuery({

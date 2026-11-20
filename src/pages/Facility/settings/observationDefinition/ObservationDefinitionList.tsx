@@ -92,7 +92,6 @@ export default function ObservationDefinitionList({
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
     defaultQueryParams: {
       status: ObservationDefinitionStatus.ACTIVE,
     },

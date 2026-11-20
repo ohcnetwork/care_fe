@@ -44,7 +44,6 @@ export const EncounterServiceRequestTab = () => {
     resultsPerPage,
   } = useFilters({
     limit: 20,
-    disableCache: true,
   });
 
   const { data, isLoading } = useQuery({

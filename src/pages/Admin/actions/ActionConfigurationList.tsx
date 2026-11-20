@@ -37,7 +37,6 @@ export function ActionConfigurationList() {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
 
   const { data: response, isLoading } = useQuery({

@@ -23,6 +23,7 @@ export function FacilitiesPage() {
   const { mainLogo } = careConfig;
   const { qParams, updateQuery, advancedFilter, Pagination } = useFilters({
     limit: RESULTS_PER_PAGE_LIMIT,
+    cache: true,
   });
 
   const { t } = useTranslation();

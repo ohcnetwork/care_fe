@@ -88,6 +88,7 @@ export default function PrescriptionQueue({
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
+    cache: true,
     cacheBlacklist: ["patient_external_id", "patient_name", "status"],
   });
 

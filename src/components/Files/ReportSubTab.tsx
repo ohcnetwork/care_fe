@@ -63,7 +63,6 @@ export function ReportSubTab({
   const { facility } = useCurrentFacilitySilently();
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
-    disableCache: true,
   });
 
   const {

@@ -162,7 +162,6 @@ function OutgoingOrdersTab({
   const [qParams] = useQueryParams();
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
     defaultQueryParams: { status: defaultStatus },
   });
   const currentStatus = qParams.status || defaultStatus;
@@ -302,7 +301,6 @@ function IncomingDeliveriesTab({
   const [qParams] = useQueryParams();
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
     defaultQueryParams: { status: defaultStatus },
   });
   const currentStatus = qParams.status || defaultStatus;

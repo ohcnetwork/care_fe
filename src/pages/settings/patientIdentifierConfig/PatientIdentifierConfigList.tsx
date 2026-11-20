@@ -113,7 +113,6 @@ export default function PatientIdentifierConfigList({
   const canWrite = !facilityId || canWritePatientIdentifierConfig;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
     defaultQueryParams: {
       status: PatientIdentifierConfigStatus.active,
     },

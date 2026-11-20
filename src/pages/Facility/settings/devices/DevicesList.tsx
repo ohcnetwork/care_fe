@@ -48,6 +48,7 @@ export default function DevicesList({ facilityId }: Props) {
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 12,
+    cache: true,
   });
 
   // Handle search input change

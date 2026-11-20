@@ -121,7 +121,6 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
   const { facilityId } = useCurrentFacility();
   const { qParams, Pagination, resultsPerPage, updatePage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: [

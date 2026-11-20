@@ -47,7 +47,7 @@ export default function OrganizationPatients({
   const { t } = useTranslation();
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 15, disableCache: true });
+    useFilters({ limit: 15 });
 
   const [organization, setOrganization] = useState<Organization | null>(null);
 
