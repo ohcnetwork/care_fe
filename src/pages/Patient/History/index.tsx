@@ -9,10 +9,9 @@ import Page from "@/components/Common/Page";
 
 import { ClinicalHistoryWorkspace } from "@/components/Workspace/ClinicalHistoryWorkspace";
 
-import query from "@/Utils/request/query";
 import { navigate } from "@/lib/router/navigate";
+import { patientQuery } from "@/lib/router/pageQueries";
 import { useQueryParams } from "@/lib/router/queryParams";
-import patientApi from "@/types/emr/patient/patientApi";
 
 import { Separator } from "@/components/ui/separator";
 
@@ -30,13 +29,7 @@ function ClinicalHistoryPage({
   const { t } = useTranslation();
   const [{ sourceUrl }] = useQueryParams();
 
-  const { data: patient } = useQuery({
-    queryKey: ["patient", patientId, facilityId],
-    queryFn: query(patientApi.get, {
-      pathParams: { id: patientId },
-      queryParams: { facility: facilityId },
-    }),
-  });
+  const { data: patient } = useQuery(patientQuery(patientId, facilityId));
 
   const handleClose = () => {
     navigate({ href: sourceUrl || fallBackUrl });

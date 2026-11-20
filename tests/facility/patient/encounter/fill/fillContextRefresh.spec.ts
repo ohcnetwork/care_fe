@@ -119,6 +119,9 @@ for (const target of [
     try {
       // Reconnect triggers the normal stale-query refetch without navigating
       // away from the form or exposing QueryClient through a test-only API.
+      // The page's queries stay fresh for 3 s after they load (`staleTime`
+      // in src/lib/router/pageQueries.ts), so let them go stale first.
+      await page.waitForTimeout(3_000);
       await context.setOffline(true);
       await expect
         .poll(() => page.evaluate(() => navigator.onLine))

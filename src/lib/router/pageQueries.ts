@@ -5,17 +5,20 @@ import {
   queryOptions,
 } from "@tanstack/react-query";
 
-import query from "@/Utils/request/query";
+import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import type { RouterContext } from "@/router";
 import accountApi from "@/types/billing/account/accountApi";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
+import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import facilityApi from "@/types/facility/facilityApi";
+import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import query from "@/Utils/request/query";
 
 /*
  * Queries that a page reads and its route loader starts. Both use these
  * options, so the loader fills the cache entry the page reads. Loaders stay
- * in the entry chunk: import only API route objects here.
+ * in the entry chunk: import only API route objects and query keys here.
  */
 
 /**
@@ -68,6 +71,32 @@ export const accountQuery = (facilityId: string, accountId: string) =>
     staleTime,
     queryFn: query(accountApi.retrieveAccount, {
       pathParams: { facilityId, accountId },
+    }),
+  });
+
+export const questionnaireQuery = (id: string) =>
+  queryOptions({
+    queryKey: questionnaireKeys.detail(id),
+    staleTime,
+    queryFn: query(questionnaireApi.get, { pathParams: { id } }),
+  });
+
+/**
+ * Built-in forms (`encounter`, `service_request`, ...) are opened by slug and
+ * defined in the app. Only a questionnaire opened by its id is fetched.
+ */
+export const isQuestionnaireId = (id: string) =>
+  /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(id);
+
+export const serviceRequestQuery = (
+  facilityId: string,
+  serviceRequestId: string,
+) =>
+  queryOptions({
+    queryKey: ["serviceRequest", facilityId, serviceRequestId],
+    staleTime,
+    queryFn: query(serviceRequestApi.retrieveServiceRequest, {
+      pathParams: { facilityId, serviceRequestId },
     }),
   });
 

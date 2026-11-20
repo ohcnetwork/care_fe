@@ -1,14 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { FIXED_QUESTIONNAIRES } from "@/components/Questionnaire/data/StructuredFormData";
+import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 import {
-  formSubmissionKeys,
-  questionnaireKeys,
-} from "@/components/QuestionnaireV2/queryKeys";
-import encounterApi from "@/types/emr/encounter/encounterApi";
+  encounterQuery as encounterQueryOptions,
+  questionnaireQuery as questionnaireQueryOptions,
+} from "@/lib/router/pageQueries";
 import patientApi from "@/types/emr/patient/patientApi";
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
-import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
 
 import { isPatientBound, subjectKeyOf, type FillSubject } from "./subject";
@@ -31,22 +30,16 @@ export function useFillPageQueries({
     : undefined;
 
   const questionnaireQuery = useQuery({
-    queryKey: questionnaireKeys.detail(questionnaireId ?? ""),
-    queryFn: query(questionnaireApi.get, {
-      pathParams: { id: questionnaireId ?? "" },
-    }),
+    ...questionnaireQueryOptions(questionnaireId ?? ""),
     enabled: !!questionnaireId && !fixedQuestionnaire,
   });
 
   const encounterId =
     subject.type === "encounter" ? subject.encounterId : undefined;
   const encounterQuery = useQuery({
-    queryKey: ["encounter", encounterId],
-    queryFn: query(encounterApi.get, {
-      pathParams: { id: encounterId ?? "" },
-      queryParams: {
-        facility: subject.type === "encounter" ? subject.facilityId : "",
-      },
+    ...encounterQueryOptions(encounterId ?? "", {
+      facilityId: subject.facilityId,
+      patientId: patientBound?.patientId ?? "",
     }),
     enabled: !!encounterId,
   });

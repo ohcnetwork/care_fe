@@ -8,12 +8,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import query from "@/Utils/request/query";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { serviceRequestQuery } from "@/lib/router/pageQueries";
 import { cn } from "@/lib/utils";
 import { Classification } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { EDITABLE_SERVICE_REQUEST_STATUSES } from "@/types/emr/serviceRequest/serviceRequest";
-import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import { ServiceRequestActions } from "./components/ServiceRequestActions";
 import { ServiceRequestCompletion } from "./components/ServiceRequestCompletion";
 import { ServiceRequestDetails } from "./components/ServiceRequestDetails";
@@ -50,15 +50,9 @@ export default function ServiceRequestShow({
   // Set only by a tab click; scrolling never highlights, and it fades after a moment
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const ignoreScrollUntil = useRef(0);
-  const { data: request, isLoading: isLoadingRequest } = useQuery({
-    queryKey: ["serviceRequest", facilityId, serviceRequestId],
-    queryFn: query(serviceRequestApi.retrieveServiceRequest, {
-      pathParams: {
-        facilityId: facilityId,
-        serviceRequestId: serviceRequestId,
-      },
-    }),
-  });
+  const { data: request, isLoading: isLoadingRequest } = useQuery(
+    serviceRequestQuery(facilityId, serviceRequestId),
+  );
 
   const activityDefinitionSlug = request?.activity_definition?.slug;
 
