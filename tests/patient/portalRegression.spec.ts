@@ -40,6 +40,76 @@ test("patient list failure does not offer a new profile", async ({ page }) => {
   await expect(page).toHaveURL(/\/patient\/home/);
 });
 
+test("a patient without profiles can open registration from the picker", async ({
+  page,
+}) => {
+  await page.route("**/api/v1/otp/patient/", (route) =>
+    route.fulfill({ json: { count: 0, results: [] } }),
+  );
+  await page.goto("/patient/select-profile");
+  await page.getByRole("link", { name: /add a family member/i }).click();
+  await expect(page).toHaveURL(/\/patient\/add-profile$/);
+  await expect(
+    page.getByRole("button", { name: /register patient/i }),
+  ).toBeVisible();
+});
+
+test("legacy record links redirect to the appropriate records tab", async ({
+  page,
+}) => {
+  await page.goto("/patient/medications");
+  await expect(page).toHaveURL(/\/patient\/records\?tab=prescriptions$/);
+  await page.goto("/patient/diagnostic_reports");
+  await expect(page).toHaveURL(/\/patient\/records\?tab=reports$/);
+});
+
+test("a visit detail route renders independently of the visits list", async ({
+  page,
+}) => {
+  await page.route("**/api/v1/otp/slots/get_appointments/", (route) =>
+    route.fulfill({ status: 500, json: { detail: "error" } }),
+  );
+  await page.goto("/patient/visits/missing");
+  await expect(page.getByRole("alert")).toBeVisible();
+});
+
+test("visit prescriptions use the same status filter as the records list", async ({
+  page,
+}) => {
+  const start = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const end = new Date(start.getTime() + 30 * 60 * 1000);
+  await page.route("**/api/v1/otp/slots/get_appointments/", (route) =>
+    route.fulfill({
+      json: {
+        results: [{
+          id: "appointment-1",
+          status: "booked",
+          patient,
+          resource_type: "practitioner",
+          resource: { id: "doctor-1", first_name: "Doctor", last_name: "One" },
+          facility: { id: "facility-1", name: "Facility" },
+          associated_encounter: { id: "encounter-1" },
+          token_slot: {
+            id: "slot-1",
+            start_datetime: start.toISOString(),
+            end_datetime: end.toISOString(),
+            availability: { name: "Morning" },
+          },
+        }],
+      },
+    }),
+  );
+  const request = page.waitForRequest((req) => {
+    const url = new URL(req.url());
+    return url.pathname === "/api/v1/otp/medication_prescription/" &&
+      url.searchParams.get("encounter") === "encounter-1";
+  });
+  await page.goto("/patient/visits/appointment-1");
+  expect(new URL((await request).url()).searchParams.get("status")).toBe(
+    "active,completed",
+  );
+});
+
 test("a failed prescription is not shown as an endless loading state", async ({
   page,
 }) => {
@@ -159,4 +229,62 @@ test("a reschedule with an unavailable appointment cannot create a new booking",
   await page.getByRole("button", { name: /continue/i }).click();
   await expect(page.getByRole("button", { name: /reschedule/i })).toBeDisabled();
   expect(created).toBe(0);
+});
+
+test("booking can reach dates beyond the initial 30 days", async ({ page }) => {
+  await page.route("**/api/v1/facility/facility-1/schedulable_users/doctor-1/", (route) =>
+    route.fulfill({ json: { id: "doctor-1", first_name: "Doctor", last_name: "One" } }),
+  );
+  await page.goto("/facility/facility-1/appointments/doctor-1/book-appointment");
+  const expectedDay = await page.evaluate(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 30);
+    return [
+      date.getFullYear(),
+      String(date.getMonth() + 1).padStart(2, "0"),
+      String(date.getDate()).padStart(2, "0"),
+    ].join("-");
+  });
+  const request = page.waitForRequest(
+    (req) =>
+      req.url().includes("/get_slots_for_day/") &&
+      req.postDataJSON()?.day === expectedDay,
+  );
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await request;
+  await expect(page.getByRole("button", { name: "Previous", exact: true })).toBeEnabled();
+});
+
+test("appointments in consultation cannot be rescheduled", async ({ page }) => {
+  const start = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const end = new Date(start.getTime() + 30 * 60 * 1000);
+  const slot = {
+    id: "slot-1",
+    start_datetime: start.toISOString(),
+    end_datetime: end.toISOString(),
+    allocated: 0,
+    availability: { name: "Morning", tokens_per_slot: 10 },
+  };
+  await page.route("**/api/v1/**", (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === "/api/v1/otp/patient/") {
+      return route.fulfill({ json: { count: 1, results: [patient] } });
+    }
+    if (path.endsWith("/get_appointments/")) {
+      return route.fulfill({
+        json: { results: [{ id: "appointment-1", status: "in_consultation", patient, token_slot: { ...slot, id: "old-slot" } }] },
+      });
+    }
+    if (path.endsWith("/get_slots_for_day/")) {
+      return route.fulfill({ json: { results: [slot] } });
+    }
+    if (path.endsWith("/schedulable_users/doctor-1/")) {
+      return route.fulfill({ json: { id: "doctor-1", first_name: "Doctor", last_name: "One" } });
+    }
+    return route.fulfill({ json: { count: 0, results: [] } });
+  });
+  await page.goto("/facility/facility-1/appointments/doctor-1/reschedule/appointment-1");
+  await page.getByRole("button", { name: start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) }).click();
+  await page.getByRole("button", { name: /continue/i }).click();
+  await expect(page.getByRole("button", { name: /reschedule/i })).toBeDisabled();
 });

@@ -4,8 +4,8 @@ import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface InfiniteScrollSentinelProps {
   hasNextPage: boolean;
@@ -32,12 +32,7 @@ export function InfiniteScrollSentinel({
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (
-      inView &&
-      hasNextPage &&
-      !isFetchingNextPage &&
-      !isFetchNextPageError
-    ) {
+    if (inView && hasNextPage && !isFetchingNextPage && !isFetchNextPageError) {
       fetchNextPage();
     }
   }, [

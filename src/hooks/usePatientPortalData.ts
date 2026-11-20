@@ -253,7 +253,7 @@ export function usePatientEncounterRecords(encounter?: string) {
   } = usePortalInfiniteList({
     queryKey: ["portal-encounter-prescriptions", phoneNumber, encounter],
     route: patientPortalApi.listPrescriptions,
-    queryParams: { encounter },
+    queryParams: { encounter, status: PRESCRIPTION_STATUSES.join(",") },
     enabled,
   });
 

@@ -4,9 +4,9 @@ import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { InfiniteScrollSentinel } from "@/components/Common/InfiniteScrollSentinel";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { InfiniteScrollSentinel } from "@/components/Common/InfiniteScrollSentinel";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
@@ -54,7 +54,7 @@ export default function BookFacility() {
   const organization =
     qParams.organization === "all"
       ? undefined
-      : qParams.organization ?? district?.id;
+      : (qParams.organization ?? district?.id);
 
   const facilityType =
     qParams.facility_type && qParams.facility_type !== "undefined"
@@ -175,28 +175,33 @@ export default function BookFacility() {
         ) : facilities.length ? (
           <>
             {facilities.map((facility) => (
-            <Link
-              key={facility.id}
-              href={`/patient/book/${facility.id}`}
-              className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 hover:border-primary-200 hover:bg-primary-50/40"
-            >
-              {/* Facility names and addresses are long and matter for
+              <Link
+                key={facility.id}
+                href={`/patient/book/${facility.id}`}
+                className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 hover:border-primary-200 hover:bg-primary-50/40"
+              >
+                {/* Facility names and addresses are long and matter for
                   choosing — wrap them rather than cutting them off mid-word. */}
-              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="line-clamp-2 font-bold text-gray-900">
-                  {facility.name}
-                </span>
-                <span className="line-clamp-2 text-xs text-gray-600">
-                  {[facility.facility_type, facility.address]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </span>
-              </div>
-              <ChevronRight className="size-4 shrink-0 text-gray-400" />
-            </Link>
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="line-clamp-2 font-bold text-gray-900">
+                    {facility.name}
+                  </span>
+                  <span className="line-clamp-2 text-xs text-gray-600">
+                    {[facility.facility_type, facility.address]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                </div>
+                <ChevronRight className="size-4 shrink-0 text-gray-400" />
+              </Link>
             ))}
             <InfiniteScrollSentinel
-              {...{ fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError }}
+              {...{
+                fetchNextPage,
+                hasNextPage,
+                isFetchingNextPage,
+                isFetchNextPageError,
+              }}
             />
           </>
         ) : (

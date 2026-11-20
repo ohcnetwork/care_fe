@@ -95,26 +95,31 @@ export default function BookPractitioner({
         ) : practitioners.length ? (
           <>
             {practitioners.map((practitioner) => (
-            <Link
-              key={practitioner.id}
-              href={`/facility/${facilityId}/appointments/${practitioner.id}/book-appointment`}
-              className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 hover:border-primary-200 hover:bg-primary-50/40"
-            >
-              <Avatar
-                imageUrl={practitioner.profile_picture_url}
-                name={formatName(practitioner)}
-                className="size-[50px] shrink-0 rounded-full"
-              />
-              {/* No qualification or next-available-slot on this payload, so
+              <Link
+                key={practitioner.id}
+                href={`/facility/${facilityId}/appointments/${practitioner.id}/book-appointment`}
+                className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 hover:border-primary-200 hover:bg-primary-50/40"
+              >
+                <Avatar
+                  imageUrl={practitioner.profile_picture_url}
+                  name={formatName(practitioner)}
+                  className="size-[50px] shrink-0 rounded-full"
+                />
+                {/* No qualification or next-available-slot on this payload, so
                   the name is all we can honestly show. */}
-              <span className="min-w-0 flex-1 truncate font-bold text-gray-900">
-                {formatName(practitioner)}
-              </span>
-              <ChevronRight className="size-4 shrink-0 text-gray-400" />
-            </Link>
+                <span className="min-w-0 flex-1 truncate font-bold text-gray-900">
+                  {formatName(practitioner)}
+                </span>
+                <ChevronRight className="size-4 shrink-0 text-gray-400" />
+              </Link>
             ))}
             <InfiniteScrollSentinel
-              {...{ fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError }}
+              {...{
+                fetchNextPage,
+                hasNextPage,
+                isFetchingNextPage,
+                isFetchNextPageError,
+              }}
             />
           </>
         ) : (

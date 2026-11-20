@@ -26,6 +26,7 @@ import {
 
 import { formatName } from "@/Utils/utils";
 import {
+  AppointmentStatus,
   SchedulableResourceType,
   UpcomingAppointmentStatuses,
   formatScheduleResourceName,
@@ -84,7 +85,10 @@ export default function VisitSummary({
     UpcomingAppointmentStatuses.includes(appointment.status);
 
   const isPassVisible = isUpcoming;
-  const canReschedule = isPractitionerVisit && isUpcoming;
+  const canReschedule =
+    isPractitionerVisit &&
+    isUpcoming &&
+    appointment.status !== AppointmentStatus.IN_CONSULTATION;
   const canRebook = isPractitionerVisit;
 
   return (

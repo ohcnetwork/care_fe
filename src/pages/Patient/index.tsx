@@ -16,7 +16,6 @@ import { VisitCard } from "@/components/Patient/VisitCard";
 import {
   PRESCRIPTION_STATUSES,
   READY_REPORT_STATUSES,
-  PRESCRIPTION_STATUSES,
   usePatientAppointments,
   usePatientDiagnosticReports,
   usePatientPrescriptions,
