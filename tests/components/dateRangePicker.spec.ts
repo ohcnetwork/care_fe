@@ -146,9 +146,7 @@ test("future days/months and bound navigation are disabled; month grid is single
   await expect(
     page.getByRole("button", { name: "Next month", exact: true }),
   ).toBeDisabled();
-  await page
-    .getByRole("button", { name: "November 2026", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Nov 2026", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Dec", exact: true }),
   ).toBeDisabled();
@@ -177,9 +175,7 @@ test("popover discards drafts on Escape and outside click, and closes on Apply",
   });
   await trigger.click();
   await day(page, "2026-11-03").click();
-  await page
-    .getByRole("button", { name: "November 2026", exact: true })
-    .focus();
+  await page.getByRole("button", { name: "Nov 2026", exact: true }).focus();
   await page.keyboard.press("Escape");
   await trigger.click();
   await expect(from(page)).toHaveValue("");
@@ -216,9 +212,7 @@ test("320px layout and 200% zoom have no inner scrolling or native date inputs",
   await expect(apply(page)).toBeInViewport();
   for (const monthView of [false, true]) {
     if (monthView)
-      await page
-        .getByRole("button", { name: "November 2026", exact: true })
-        .click();
+      await page.getByRole("button", { name: "Nov 2026", exact: true }).click();
     const layout = await page
       .locator('[data-slot="date-range-picker"]')
       .evaluate((root) => ({
@@ -463,7 +457,7 @@ test("range text stays readable in both themes and month buttons mark today and 
   await page
     .getByRole("button", { name: "Previous month", exact: true })
     .click();
-  await page.getByRole("button", { name: "October 2026", exact: true }).click();
+  await page.getByRole("button", { name: "Oct 2026", exact: true }).click();
   const november = page.getByRole("button", { name: "Nov", exact: true });
   await expect(november).toHaveAttribute("data-variant", "outline");
   await expect(november.locator('span[aria-hidden="true"]')).toHaveCount(1);
@@ -558,7 +552,7 @@ test("shared CARE input and button sizes are retained at mobile and desktop widt
     );
     await expect(apply(page)).toHaveCSS("height", "36px");
     const caption = page.getByRole("button", {
-      name: "November 2026",
+      name: "Nov 2026",
       exact: true,
     });
     await expect(caption).toHaveAttribute("data-variant", "ghost");
@@ -577,6 +571,32 @@ test("shared CARE input and button sizes are retained at mobile and desktop widt
     await expect(
       page.getByRole("button", { name: "Nov", exact: true }),
     ).toHaveCSS("height", `${height}px`);
+  }
+});
+
+test("the short month caption fits beside Today without clipping", async ({
+  page,
+}) => {
+  for (const width of [360, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await open(page);
+    const next = page.getByRole("button", { name: "Next month", exact: true });
+    await next.click();
+    await expect(
+      page.getByRole("button", { name: "Dec 2026", exact: true }),
+    ).toBeVisible();
+    for (let index = 0; index < 12; index++) {
+      await expect(
+        page.getByRole("button", { name: "Today", exact: true }),
+      ).toBeVisible();
+      const clipped = await page
+        .locator('[aria-controls$="-calendar"] span > span')
+        .evaluateAll((parts) =>
+          parts.some((part) => part.scrollWidth > part.clientWidth),
+        );
+      expect(clipped).toBe(false);
+      await next.click();
+    }
   }
 });
 

@@ -391,7 +391,7 @@ function RangePanel({
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-1 px-3 pt-2">
+      <div className="flex items-center px-3 pt-2">
         <Button
           ref={captionRef}
           type="button"
@@ -405,13 +405,27 @@ function RangePanel({
             setMonthView(!monthView);
           }}
         >
-          <span className="truncate">
+          {/* Only the month may ellipsize; the year always stays readable. */}
+          <span className="flex min-w-0 whitespace-pre">
             {new Intl.DateTimeFormat(i18n.language, {
-              month: "long",
+              month: "short",
               year: "numeric",
-            }).format(month)}
+            })
+              .formatToParts(month)
+              .map(({ type, value }, index) => (
+                <span
+                  key={index}
+                  className={type === "month" ? "truncate" : "shrink-0"}
+                >
+                  {value}
+                </span>
+              ))}
           </span>
-          <ChevronDown aria-hidden="true" className="size-3.5" />
+          <ChevronDown
+            aria-hidden="true"
+            data-icon="inline-end"
+            className="size-3.5"
+          />
         </Button>
         <div className="ms-auto flex shrink-0 items-center">
           {!isSameMonth(month, today) && (
