@@ -75,7 +75,7 @@ function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
 }
 
 function DropdownMenuTrigger({
-  appearance = "field",
+  appearance = "unstyled",
   asChild,
   nativeButton,
   render,
@@ -83,23 +83,24 @@ function DropdownMenuTrigger({
   className,
   ...props
 }: Omit<MenuPrimitive.Trigger.Props, "render" | "className"> & {
-  appearance?: "field" | "icon";
+  appearance?: "unstyled" | "field" | "icon";
   asChild?: boolean;
   render?: RenderProp;
   className?: string;
 }) {
   const usesChild = asChild && React.isValidElement(children);
   const resolved = resolveAsChild(usesChild, children, render, className);
-  const triggerClassName = resolved.render
-    ? className
-    : cn(
-        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm transition-colors [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-        triggerFocus,
-        appearance === "icon"
-          ? "size-9 text-muted-foreground hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground"
-          : cn(fieldTriggerLayout, fieldTriggerSurface),
-        className,
-      );
+  const triggerClassName =
+    resolved.render || appearance === "unstyled"
+      ? className
+      : cn(
+          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm transition-colors [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+          triggerFocus,
+          appearance === "icon"
+            ? "size-9 text-muted-foreground hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground"
+            : cn(fieldTriggerLayout, fieldTriggerSurface),
+          className,
+        );
   return (
     <MenuPrimitive.Trigger
       data-slot="dropdown-menu-trigger"
