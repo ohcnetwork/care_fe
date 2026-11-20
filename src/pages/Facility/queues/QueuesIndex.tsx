@@ -35,6 +35,7 @@ import Page from "@/components/Common/Page";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { queueListSearch } from "@/lib/router/search/queues";
 
 import query from "@/Utils/request/query";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -228,7 +229,9 @@ export default function QueuesIndex({
   resourceId?: string;
 }) {
   const { t } = useTranslation();
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({});
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: queueListSearch,
+  });
 
   const { id: currentUserId } = useAuthUser();
   const [cachedPractitionerId, setCachedPractitionerId] = useAtom(
@@ -242,7 +245,7 @@ export default function QueuesIndex({
     resourceId ||
     (resourceType === SchedulableResourceType.Practitioner
       ? cachedPractitionerId || currentUserId
-      : undefined);
+      : "");
 
   // Fetch available users for practitioner resource type
   const { data: availableUsersData } = useQuery({
