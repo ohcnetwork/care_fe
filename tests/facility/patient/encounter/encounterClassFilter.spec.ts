@@ -1,52 +1,14 @@
-import { type APIRequestContext, expect, test } from "@playwright/test";
-import { setTimeout as delay } from "node:timers/promises";
+import { expect, test } from "@playwright/test";
+import { createTestEncounter } from "tests/helper/encounter";
 import {
   clearSelectedMultiFilter,
   openMultiFilter,
   selectedMultiFilterBar,
 } from "tests/helper/multiFilter";
 import { createTestPatient } from "tests/helper/patient";
-import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
-
-async function createCompletedEncounter(
-  request: APIRequestContext,
-  facilityId: string,
-  patientId: string,
-  encounterClass: string,
-) {
-  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  for (let attempt = 0; ; attempt++) {
-    const response = await request.post(`${getApiUrl()}/api/v1/encounter/`, {
-      headers: getApiHeaders(),
-      data: {
-        patient: patientId,
-        facility: facilityId,
-        status: "completed",
-        encounter_class: encounterClass,
-        period: { start: yesterday, end: yesterday },
-        priority: "routine",
-        organizations: [],
-      },
-    });
-    if (response.ok()) return;
-    const error = await response.text();
-    // The backend serializes encounter creation per facility with a lock
-    // (the rejected create is rolled back), so retry only that rejection.
-    if (
-      attempt >= 4 ||
-      response.status() !== 400 ||
-      !error.includes("Encounter creation failed, try again after a while")
-    ) {
-      throw new Error(
-        `Failed to create ${encounterClass} encounter: ${response.status()} — ${error}`,
-      );
-    }
-    await delay(250 * (attempt + 1));
-  }
-}
 
 test.describe("All Encounters encounter class filter", () => {
   let facilityId: string;
@@ -55,20 +17,22 @@ test.describe("All Encounters encounter class filter", () => {
     facilityId = getFacilityId();
   });
 
-  test("filters the list by encounter class", async ({ page, request }) => {
-    const encounterCards = page.locator("[data-status]");
+  test("filters the list by encounter class", async ({ page }) => {
+    const encounterCards = page.locator('[data-cy="encounter-card"]');
     let patientId = "";
 
     await test.step("Create an ambulatory and a virtual encounter", async () => {
       // A dedicated patient keeps the list down to the encounters created here.
       patientId = await createTestPatient("Encounter Class Filter");
+      const yesterday = new Date(
+        Date.now() - 24 * 60 * 60 * 1000,
+      ).toISOString();
       for (const encounterClass of ["amb", "vr"]) {
-        await createCompletedEncounter(
-          request,
-          facilityId,
-          patientId,
+        await createTestEncounter(facilityId, patientId, {
+          status: "completed",
           encounterClass,
-        );
+          period: { start: yesterday, end: yesterday },
+        });
       }
     });
 
