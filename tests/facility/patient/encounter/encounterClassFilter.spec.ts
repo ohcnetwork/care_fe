@@ -116,10 +116,34 @@ test.describe("All Encounters encounter class filter", () => {
       await expect(encounterCards).toContainText("Ambulatory");
     });
 
+    await test.step("The saved filter is restored without URL params", async () => {
+      await page.goto(`/facility/${facilityId}/encounters/patients/all`);
+      await expect(page).toHaveURL(
+        (url) => url.searchParams.get("encounter_class") === "amb",
+      );
+      await expect(
+        selectedMultiFilterBar(page, /^Encounter Class$/),
+      ).toContainText("Ambulatory");
+    });
+
     await test.step("Clearing the filter shows both encounters", async () => {
+      await page.goto(
+        `/facility/${facilityId}/encounters/patients/all?patient_filter=${patientId}&encounter_class=amb`,
+      );
+      await expect(encounterCards).toHaveCount(1);
       await clearSelectedMultiFilter(page, /^Encounter Class$/);
       await expect(page).not.toHaveURL(/encounter_class=/);
       await expect(encounterCards).toHaveCount(2);
+    });
+
+    await test.step("A cleared filter is not restored", async () => {
+      await page.goto(`/facility/${facilityId}/encounters/patients/all`);
+      // The default date range shows that saved filters were restored.
+      await expect(page).toHaveURL(
+        (url) =>
+          url.searchParams.has("created_date_after") &&
+          !url.searchParams.has("encounter_class"),
+      );
     });
   });
 
