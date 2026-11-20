@@ -86,12 +86,13 @@ export function FilterTabs({
     : activeIsInDropdown && visibleOptions.length > 0
       ? [...visibleOptions.slice(0, -1), value]
       : visibleOptions;
-  const remainingOptions = activeIsInDropdown && visibleOptions.length > 0
-    ? [
-        ...dropdownOptions.filter((option) => option !== value),
-        visibleOptions[visibleOptions.length - 1],
-      ]
-    : dropdownOptions;
+  const remainingOptions =
+    activeIsInDropdown && visibleOptions.length > 0
+      ? [
+          ...dropdownOptions.filter((option) => option !== value),
+          visibleOptions[visibleOptions.length - 1],
+        ]
+      : dropdownOptions;
 
   const handleDropdownSelect = (selectedOption: string) => {
     if (!showMoreDropdown) return;

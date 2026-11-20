@@ -2967,7 +2967,9 @@ test.describe("Encounter workspace rendering", () => {
     await expect(
       page.getByRole("menuitemradio", { name: "All", exact: true }),
     ).toBeChecked();
-    await page.getByRole("menuitemradio", { name: "Urgent", exact: true }).click();
+    await page
+      .getByRole("menuitemradio", { name: "Urgent", exact: true })
+      .click();
     await expect(page).toHaveURL(
       (url) =>
         url.searchParams.get("priority") === "urgent" &&
@@ -3021,7 +3023,10 @@ test.describe("Encounter workspace rendering", () => {
     await expect(priority).toHaveCSS("outline-width", "2px");
     await expect(page).toHaveURL((url) => !url.searchParams.has("priority"));
     await expect(priority).toHaveText("Priority");
-    await expect(priority).toHaveAttribute("data-slot", "dropdown-menu-trigger");
+    await expect(priority).toHaveAttribute(
+      "data-slot",
+      "dropdown-menu-trigger",
+    );
     await expect(priority).not.toHaveAttribute("data-variant");
 
     for (const dark of [false, true]) {

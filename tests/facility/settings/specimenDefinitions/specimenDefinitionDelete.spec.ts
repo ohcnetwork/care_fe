@@ -51,7 +51,9 @@ test.describe("Specimen Definitions Delete", () => {
 
     // Apply status filter before searching
     await page.getByRole("button", { name: /^Status/ }).click();
-    await page.getByRole("menuitemradio", { name: status.toLowerCase() }).click();
+    await page
+      .getByRole("menuitemradio", { name: status.toLowerCase() })
+      .click();
 
     // Search for the newly created definition
     await page

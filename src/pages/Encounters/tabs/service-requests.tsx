@@ -81,7 +81,11 @@ export const EncounterServiceRequestTab = () => {
           variant="underline"
           showMoreDropdown
           maxVisibleTabs={3}
-          defaultVisibleOptions={[Status.active, Status.completed, Status.draft]}
+          defaultVisibleOptions={[
+            Status.active,
+            Status.completed,
+            Status.draft,
+          ]}
         />
       </div>
 

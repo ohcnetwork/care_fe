@@ -66,7 +66,9 @@ test.describe("Patient Identifier Config - Create", () => {
     await page.getByRole("button", { name: "Create" }).click();
 
     await page.getByRole("button", { name: /^Status/ }).click();
-    await page.getByRole("menuitemradio", { name: status, exact: true }).click();
+    await page
+      .getByRole("menuitemradio", { name: status, exact: true })
+      .click();
 
     // Verify that the new config appears in the list
     await page

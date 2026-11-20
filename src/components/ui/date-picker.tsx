@@ -52,7 +52,9 @@ export function DatePicker({
               <span className="block sm:hidden">
                 {format(date, "MMM d, yyyy")}
               </span>
-              <span className="hidden sm:block">{format(date, dateFormat)}</span>
+              <span className="hidden sm:block">
+                {format(date, dateFormat)}
+              </span>
             </>
           ) : (
             <span>{t("pick_a_date")}</span>
