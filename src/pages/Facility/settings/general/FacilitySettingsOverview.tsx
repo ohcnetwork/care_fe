@@ -20,12 +20,8 @@ import ContactLink from "@/components/Common/ContactLink";
 import FacilityDeleteDialog from "@/components/Facility/FacilityDeleteDialog";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 
-import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
-import {
-  FACILITY_FEATURE_TYPES,
-  type FacilityRead,
-} from "@/types/facility/facility";
+import { type FacilityRead } from "@/types/facility/facility";
 import { renderGeoOrganizations } from "@/types/organization/organization";
 
 interface FacilitySettingsOverviewProps {
@@ -49,10 +45,6 @@ export function FacilitySettingsOverview({
   const organizations = facility.geo_organization
     ? renderGeoOrganizations(facility.geo_organization)
     : [];
-  const features =
-    facility.features?.filter((feature) =>
-      FACILITY_FEATURE_TYPES.some(({ id }) => id === feature),
-    ) ?? [];
   const phoneNumber = facility.phone_number
     ? formatPhoneNumberIntl(String(facility.phone_number))
     : undefined;
@@ -196,16 +188,6 @@ export function FacilitySettingsOverview({
                     <dd>{organization.value}</dd>
                   </div>
                 ))}
-                <div>
-                  <dt>{t("features")}</dt>
-                  <dd className="flex flex-wrap items-center gap-2">
-                    {features.length > 0
-                      ? features.map((featureId) => (
-                          <FeatureBadge key={featureId} featureId={featureId} />
-                        ))
-                      : t("not_specified")}
-                  </dd>
-                </div>
                 <div>
                   <dt>{t("description")}</dt>
                   <dd>

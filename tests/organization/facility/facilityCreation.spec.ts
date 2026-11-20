@@ -198,11 +198,6 @@ test.describe("Facility Creation", () => {
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "Show on Map" })).toBeVisible();
 
-    // Verify facility features are displayed
-    for (const feature of facilityFeatures) {
-      await expect(page.getByText(feature)).toBeVisible();
-    }
-
     await page.getByRole("button", { name: "Edit Facility Details" }).click();
 
     // Verify edit form opened
