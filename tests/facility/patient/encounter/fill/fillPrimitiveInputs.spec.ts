@@ -178,33 +178,37 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
     }),
   ).toHaveAttribute("aria-checked", "true");
   // A distinct edit after Resume makes autosave write the resumed state, so
-  // the stored draft checked below cannot be the pre-Resume copy (which
-  // never had Option 3).
-  await multiSelect.click();
-  await page.getByRole("option", { name: "Option 3", exact: true }).click();
-  await page.getByRole("button", { name: "Done", exact: true }).click();
-  await expect(
-    multiSelect.getByText("Option 3", { exact: true }),
-  ).toBeVisible();
-  const retained = variants.filter(({ id }) => id !== "multiple_dropdown");
+  // the stored draft checked below cannot be the pre-Resume copy. Make it on
+  // another question: any dropdown change rebuilds every dropdown entry from
+  // the current options (FixedChoiceInput), which would mask lost coding.
+  const secondChip = questionBlock(page, "multiple_chips").getByRole(
+    "checkbox",
+    { name: "Option 2", exact: true },
+  );
+  await secondChip.click();
+  await expect(secondChip).toBeChecked();
+  const option = (n: number) => ({
+    ...coding,
+    code: String(n),
+    display: `Option ${n}`,
+  });
   await expect
     .poll(async () => {
       const values = await draftValues(page, questionnaireId);
-      return {
-        retained: retained.map(({ id }) => values?.[id]?.[0]?.coding),
-        // The surviving dropdown selection keeps its coding, alongside the
-        // new one.
-        multipleDropdown: values?.multiple_dropdown?.map(
-          (entry) => entry.coding,
-        ),
-      };
+      return Object.fromEntries(
+        variants.map(({ id }) => [
+          id,
+          values?.[id]?.map((entry) => entry.coding),
+        ]),
+      );
     })
     .toEqual({
-      retained: retained.map(() => coding),
-      multipleDropdown: [
-        { ...coding, code: "2", display: "Option 2" },
-        { ...coding, code: "3", display: "Option 3" },
-      ],
+      single_chips: [option(1)],
+      multiple_chips: [option(1), option(2)],
+      single_dropdown: [option(1)],
+      // Option 1 was dropped on Resume; Option 2 kept the coding it was
+      // restored with.
+      multiple_dropdown: [option(2)],
     });
 });
 
