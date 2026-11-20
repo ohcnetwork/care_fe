@@ -8,7 +8,8 @@
     "src/lib/override/index.ts",
     "public/loading-screen.js",
     "tests/globalSetup.ts",
-    "tests/setup/*.setup.ts"
+    "tests/setup/*.setup.ts",
+    "tests/fixtures/date-range-picker/main.tsx"
   ],
   "ignoreExportsUsedInFile": true,
   "exclude": ["types", "nsExports", "nsTypes", "enumMembers", "duplicates"],
