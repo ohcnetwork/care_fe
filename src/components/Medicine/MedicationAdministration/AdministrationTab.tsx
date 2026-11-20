@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { Pill, Utensils } from "lucide-react";
-import { Link, usePathParams } from "raviger";
 import React, { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -52,6 +52,8 @@ import {
   groupMedicationsByProduct,
   isTimeInSlot,
 } from "./utils";
+
+import { useRouteParams } from "@/hooks/useRouteParams";
 
 // Types and Interfaces
 interface AdministrationTabProps {
@@ -126,7 +128,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   showTimeLine = false,
 }) => {
   const { t } = useTranslation();
-  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const subpathMatch = useRouteParams("/facility/:facilityId");
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { facilityId } = useCurrentFacilitySilently();
   const [selectedProductType, setSelectedProductType] =
@@ -750,7 +752,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 </Button>
               )}
               {facilityIdExists && (
-                <Link
+                <HrefLink
                   href={`../${encounterId}/type/${selectedProductType}/administrations/print`}
                 >
                   <Button
@@ -767,7 +769,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                       ? t("view_drug_chart")
                       : t("view_intake_chart")}
                   </Button>
-                </Link>
+                </HrefLink>
               )}
             </div>
           </div>

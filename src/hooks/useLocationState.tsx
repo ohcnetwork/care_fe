@@ -1,7 +1,8 @@
-import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 
 import { LocationRead as LocationListType } from "@/types/location/location";
+
+import { navigate } from "@/lib/router/navigate";
 
 type LocationPathType = "encounters" | "beds";
 
@@ -50,9 +51,9 @@ export function useLocationState(
     (location: LocationListType) => {
       if (!location.id) {
         // Navigate to the base locations URL when deselecting
-        navigate(
-          pathType === "encounters" ? `${basePath}` : `${basePath}/beds`,
-        );
+        navigate({
+          href: pathType === "encounters" ? `${basePath}` : `${basePath}/beds`,
+        });
         setState((prev) => ({
           ...prev,
           selectedLocationId: null,
@@ -63,11 +64,12 @@ export function useLocationState(
       }
 
       // Navigate to the selected location URL
-      navigate(
-        pathType === "encounters"
-          ? `${basePath}/${location.id}`
-          : `${basePath}/${location.id}/beds`,
-      );
+      navigate({
+        href:
+          pathType === "encounters"
+            ? `${basePath}/${location.id}`
+            : `${basePath}/${location.id}/beds`,
+      });
 
       setState((prev) => ({
         ...prev,

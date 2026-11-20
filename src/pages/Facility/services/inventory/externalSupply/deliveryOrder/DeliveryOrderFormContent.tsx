@@ -1,5 +1,4 @@
 import { X } from "lucide-react";
-import { navigate } from "raviger";
 import { ReactNode, SubmitEventHandler } from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -21,6 +20,7 @@ import BackButton from "@/components/Common/BackButton";
 import Page from "@/components/Common/Page";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
+import { navigate } from "@/lib/router/navigate";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
@@ -179,7 +179,7 @@ export function DeliveryOrderFormContent({
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(returnPath)}
+              onClick={() => navigate({ href: returnPath })}
             >
               {t("cancel")}
               <ShortcutBadge actionId="cancel-action" />

@@ -1,8 +1,8 @@
 import { ExternalLink, File, X } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
@@ -170,11 +170,11 @@ export const AllergyTable = ({
         createdBy: allergy.created_by,
         onViewEncounter: showViewEncounter
           ? () =>
-              navigate(
-                facilityId
+              navigate({
+                href: facilityId
                   ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
                   : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
-              )
+              })
           : undefined,
         meta: [
           <span key="category">{t(allergy.category)}</span>,
@@ -220,11 +220,11 @@ export const AllergyTable = ({
                 onViewEncounter={
                   showViewEncounter
                     ? () =>
-                        navigate(
-                          facilityId
+                        navigate({
+                          href: facilityId
                             ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
                             : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
-                        )
+                        })
                     : undefined
                 }
               />
@@ -276,11 +276,11 @@ export const AllergyTable = ({
                 onViewEncounter={
                   showViewEncounter
                     ? () =>
-                        navigate(
-                          facilityId
+                        navigate({
+                          href: facilityId
                             ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
                             : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
-                        )
+                        })
                     : undefined
                 }
                 note={allergy.note}

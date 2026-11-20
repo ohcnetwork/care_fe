@@ -1,5 +1,4 @@
 import { ChevronsUpDown as CaretSortIcon, Plus } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,6 +33,7 @@ import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import query from "@/Utils/request/query";
 import { conditionalAttribute } from "@/Utils/utils";
+import { navigate } from "@/lib/router/navigate";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -52,7 +52,7 @@ export function QuestionnaireSearch({
   placeholder,
   trigger,
   size = "default",
-  onSelect = (selected) => navigate(`questionnaire/${selected.id}`),
+  onSelect = (selected) => navigate({ href: `questionnaire/${selected.id}` }),
   subjectType,
   facilityId,
 

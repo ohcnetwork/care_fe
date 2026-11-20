@@ -37,7 +37,10 @@ import {
   InvoiceRead,
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
-import { PaymentReconciliationStatus } from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import {
+  PAYMENT_RECONCILIATION_METHOD_MAP,
+  PaymentReconciliationStatus,
+} from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
@@ -50,11 +53,6 @@ import {
   ReceiptText,
   SquareArrowOutUpRight,
 } from "lucide-react";
-import {
-  Link as RavigerLink,
-  navigate as ravigerNavigate,
-  useQueryParams,
-} from "raviger";
 import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -71,6 +69,7 @@ import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareApps } from "@/hooks/useCareApps";
 import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
 import { isAccountActiveAndBillable } from "@/pages/Facility/billing/account/utils";
 import {
@@ -85,7 +84,6 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
-import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import {
   getPartialId,
   getPatientIdentifiers,
@@ -119,18 +117,19 @@ function InvoiceShow({
     relatedInvoices?: string;
   }>();
   const openPaymentSheet = () => {
-    ravigerNavigate(
-      `/facility/${facilityId}/billing/invoices/${invoiceId}/pay`,
-      {
-        replace: true,
-        query: qParams,
-      },
-    );
+    navigate({
+      to: "/facility/$facilityId/billing/invoices/$invoiceId/pay",
+      params: { facilityId, invoiceId },
+      replace: true,
+      search: qParams,
+    });
   };
   const closePaymentSheet = () => {
-    ravigerNavigate(`/facility/${facilityId}/billing/invoices/${invoiceId}`, {
+    navigate({
+      to: "/facility/$facilityId/billing/invoices/$invoiceId",
+      params: { facilityId, invoiceId },
       replace: true,
-      query: qParams,
+      search: qParams,
     });
   };
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -380,21 +379,21 @@ function InvoiceShow({
               <label className="text-gray-700 text-sm font-medium">
                 {t("patient_name")}
               </label>
-              <RavigerLink
-                href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
-                  {
-                    phone_number: invoice.account.patient.phone_number,
-                    year_of_birth:
-                      invoice.account.patient.year_of_birth?.toString() || "",
-                    partial_id: invoice.account.patient.id.slice(0, 5),
-                  },
-                ).toString()}`}
+              <Link
+                to="/facility/$facilityId/patients/home"
+                params={{ facilityId }}
+                search={{
+                  phone_number: invoice.account.patient.phone_number,
+                  year_of_birth:
+                    invoice.account.patient.year_of_birth?.toString() || "",
+                  partial_id: invoice.account.patient.id.slice(0, 5),
+                }}
               >
                 <div className="font-semibold text-gray-950 underline">
                   {invoice.account.patient.name}
                   <SquareArrowOutUpRight className="ml-1 size-4 inline" />
                 </div>
-              </RavigerLink>
+              </Link>
             </div>
 
             <div>
@@ -1622,7 +1621,7 @@ function InvoiceShow({
               <div className="flex items-center bg-white rounded-r-lg p-2 pl-0">
                 <Button
                   variant="primary"
-                  onClick={() => ravigerNavigate(sourceUrl)}
+                  onClick={() => navigate({ href: sourceUrl })}
                   className="shadow ml-2"
                 >
                   <CareIcon icon="l-arrow-left" className="mr-2 size-4" />

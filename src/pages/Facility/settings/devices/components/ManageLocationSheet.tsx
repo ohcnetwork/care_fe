@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -108,7 +108,8 @@ export default function ManageLocationSheet({
                     {t("current_location")}
                   </div>
                   <Link
-                    href={`/locations/${device.current_location.id}`}
+                    to="/facility/$facilityId/settings/locations/$id"
+                    params={{ facilityId, id: device.current_location.id }}
                     className="text-sm text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
                   >
                     {device.current_location.name}
@@ -164,6 +165,7 @@ export default function ManageLocationSheet({
                     {locationsData?.results?.map((locationData) => (
                       <li key={locationData.id} className="group">
                         <DeviceLocationTimelineCard
+                          facilityId={facilityId}
                           locationData={locationData}
                         />
                       </li>

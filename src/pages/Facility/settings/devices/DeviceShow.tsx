@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { formatDate } from "date-fns";
 import { AlertCircle, ExternalLink, Pencil, Trash2 } from "lucide-react";
-import { Link as RavigerLink, navigate as ravigerNavigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -31,6 +30,7 @@ import { ResourceFormPicker } from "@/components/Questionnaire/ResourceFormPicke
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import { usePluginDevice } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
@@ -260,7 +260,12 @@ export default function DeviceShow({
           <Button
             variant="outline"
             className={buttonClassName}
-            onClick={() => ravigerNavigate(`${baseUrl}/edit`)}
+            onClick={() =>
+              navigate({
+                to: "/facility/$facilityId/settings/devices/$id/edit",
+                params: { facilityId, id: deviceId },
+              })
+            }
           >
             <Pencil className="size-5" />
             {t("edit")}
@@ -285,13 +290,11 @@ export default function DeviceShow({
                 onKeyDown={(event) => {
                   if (event.key === " ") {
                     event.preventDefault();
-                    ravigerNavigate(href);
+                    navigate({ href });
                   }
                 }}
               >
-                <RavigerLink basePath="/" href={href}>
-                  {t(value)}
-                </RavigerLink>
+                <HrefLink href={href}>{t(value)}</HrefLink>
               </TabsTrigger>
             );
           })}

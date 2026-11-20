@@ -79,7 +79,6 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import { navigate as ravigerNavigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -106,6 +105,7 @@ import { Separator } from "@/components/ui/separator";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
@@ -205,13 +205,21 @@ export default function AppointmentDetail(props: Props) {
     return <Loading />;
   }
   const currentStatus = appointment.status;
-  const encounterUrl = (encounterId: string) => {
-    const params = new URLSearchParams(
-      Object.entries(referralEncounterParams ?? {}).filter(
-        (entry): entry is [string, string] => entry[1] !== undefined,
+  const goToEncounter = (encounterId: string) => {
+    navigate({
+      to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
+      params: {
+        facilityId,
+        patientId: appointment.patient.id,
+        encounterId,
+        tab: "updates",
+      },
+      search: Object.fromEntries(
+        Object.entries(referralEncounterParams ?? {}).filter(
+          (entry): entry is [string, string] => entry[1] !== undefined,
+        ),
       ),
-    );
-    return `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${encounterId}/updates${params.size ? `?${params}` : ""}`;
+    });
   };
 
   const canCheckIn = isWithinInterval(new Date(), {
@@ -463,9 +471,7 @@ export default function AppointmentDetail(props: Props) {
                       size="sm"
                       disabled={referralContextLoading}
                       onClick={() =>
-                        ravigerNavigate(
-                          encounterUrl(appointment.associated_encounter!.id),
-                        )
+                        goToEncounter(appointment.associated_encounter!.id)
                       }
                       className="flex items-center gap-2"
                     >
@@ -476,9 +482,13 @@ export default function AppointmentDetail(props: Props) {
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        ravigerNavigate(
-                          `/facility/${facility.id}/patient/${appointment.patient.id}`,
-                        )
+                        navigate({
+                          to: "/facility/$facilityId/patient/$patientId/{-$tab}",
+                          params: {
+                            facilityId: facility.id,
+                            patientId: appointment.patient.id,
+                          },
+                        })
                       }
                       className="flex items-center gap-2"
                     >
@@ -511,11 +521,7 @@ export default function AppointmentDetail(props: Props) {
                               status: AppointmentStatus.IN_CONSULTATION,
                               note: appointment.note,
                             });
-                            ravigerNavigate(
-                              encounterUrl(
-                                appointment.associated_encounter!.id,
-                              ),
-                            );
+                            goToEncounter(appointment.associated_encounter!.id);
                           }}
                         />
                       ) : (
@@ -581,7 +587,6 @@ export default function AppointmentDetail(props: Props) {
                     icon={<PrinterIcon className="size-4" />}
                     title={t("print_appointment")}
                     actionId="print-appointment"
-                    basePath="/"
                     href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
                   />
                 )}
@@ -589,7 +594,6 @@ export default function AppointmentDetail(props: Props) {
                   icon={<Wallet className="size-4" />}
                   title={t("accounts")}
                   actionId="goto-account"
-                  basePath="/"
                   href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${appointment.patient.id}&patient_name=${encodeURIComponent(appointment.patient.name || "")}`}
                 />
               </div>

@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
@@ -9,6 +8,7 @@ import {
   CareUIPageTitle as PageTitle,
 } from "@/components/ui/typography";
 
+import { useQueryParams } from "@/lib/router/queryParams";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import query from "@/Utils/request/query";
 

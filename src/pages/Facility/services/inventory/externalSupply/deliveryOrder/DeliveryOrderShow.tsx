@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   ChevronLeft,
   Edit,
@@ -9,7 +10,6 @@ import {
   MoreVertical,
   Printer,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -45,6 +45,9 @@ import {
   NamespacedExtensionData,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { usePathname } from "@/lib/router/location";
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import UpsertLimitCallout from "@/pages/Facility/services/inventory/externalSupply/components/UpsertLimitCallout";
 import {
@@ -125,6 +128,8 @@ export function DeliveryOrderShow({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  // The print and edit pages are below the order page, in the same tab.
+  const pathname = usePathname();
   const { getExtensions } = useExtensionSchemas();
 
   const allExtensions = getExtensions(
@@ -440,8 +445,8 @@ export function DeliveryOrderShow({
               variant="outline"
               className="shrink-0"
               onClick={() =>
-                navigate(
-                  getInventoryBasePath(
+                navigate({
+                  href: getInventoryBasePath(
                     facilityId,
                     locationId,
                     internal,
@@ -449,7 +454,7 @@ export function DeliveryOrderShow({
                     isRequester,
                     "",
                   ),
-                )
+                })
               }
             >
               <ChevronLeft />
@@ -477,7 +482,13 @@ export function DeliveryOrderShow({
             {supplyOrderId && (
               <Button variant="outline" asChild>
                 <Link
-                  href={`/inventory/internal/${isRequester ? "receive" : "dispatch"}/orders/${supplyOrderId}`}
+                  to="/facility/$facilityId/locations/$locationId/inventory/internal/$type/orders/$id"
+                  params={{
+                    facilityId,
+                    locationId,
+                    type: isRequester ? "receive" : "dispatch",
+                    id: supplyOrderId,
+                  }}
                 >
                   <Eye className="size-4" />{" "}
                   {isRequester
@@ -487,10 +498,10 @@ export function DeliveryOrderShow({
               </Button>
             )}
             <Button variant="outline" asChild>
-              <Link href={`${deliveryOrderId}/print`}>
+              <HrefLink href={`${pathname}/print`}>
                 <Printer className="size-4" /> {t("print")}
                 <ShortcutBadge actionId="print-delivery-order" />
-              </Link>
+              </HrefLink>
             </Button>
 
             {(!isRequester || !internal) &&
@@ -501,10 +512,10 @@ export function DeliveryOrderShow({
                 </Button>
               ) : (
                 <Button variant="outline" asChild>
-                  <Link href={`${deliveryOrderId}/edit`}>
+                  <HrefLink href={`${pathname}/edit`}>
                     <Edit /> {t("edit_order")}
                     <ShortcutBadge actionId="edit-order" />
-                  </Link>
+                  </HrefLink>
                 </Button>
               ))}
 

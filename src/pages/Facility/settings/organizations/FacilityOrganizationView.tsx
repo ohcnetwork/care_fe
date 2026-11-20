@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Building, FolderOpen, PenLine, Trash } from "lucide-react";
-import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -163,7 +163,10 @@ function OrganizationCard({
           )}
 
           <Button variant="white" size="sm" className="font-semibold" asChild>
-            <Link href={`/departments/${org.id}/departments`}>
+            <Link
+              to="/facility/$facilityId/settings/departments/$id/$tab"
+              params={{ facilityId, id: org.id, tab: "departments" }}
+            >
               {t("see_details")}
             </Link>
           </Button>
