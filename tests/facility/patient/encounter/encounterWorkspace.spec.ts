@@ -1371,7 +1371,10 @@ test("formatting-only optional appointment notes do not require a slot", async (
       .filter({ hasText: "Validation failed" }),
   ).toBeVisible();
   expect(posts).toHaveLength(0);
-  await editor.fill("");
+  // fill("") selects via a DOM range that Lexical may not have synced before
+  // Delete on a busy main thread; its own select-all updates it synchronously.
+  await editor.press("ControlOrMeta+a");
+  await editor.press("Delete");
   await editor.pressSequentially("# ");
   await expect(editor).toHaveText("");
   await page.getByRole("button", { name: "Save Changes" }).click();
