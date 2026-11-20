@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -9,6 +8,7 @@ import TypstPrintPreview from "@/CAREUI/misc/TypstPrintPreview";
 
 import { Switch } from "@/components/ui/switch";
 
+import { useQueryParams } from "@/lib/router/queryParams";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import type { DetailsTablePrintContent } from "@/print/detailsTable";
 import { buildGeneratedFooter } from "@/print/patientDetails";

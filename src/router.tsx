@@ -3,8 +3,8 @@ import { createRouter } from "@tanstack/react-router";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
-import { setRouter } from "@/compat/routerRef";
 import { type RouterAuth, routerAuth } from "@/lib/router/auth";
+import { setRouter } from "@/lib/router/routerRef";
 import { parseSearch, stringifySearch } from "@/lib/router/searchParams";
 import "@/lib/router/staticData";
 import { routeTree } from "@/routeTree.gen";

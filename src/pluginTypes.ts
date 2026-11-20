@@ -19,7 +19,26 @@ import { UserRead, UserReadMinimal } from "@/types/user/user";
 import type { JSONSchema2020 } from "@/Utils/schema/types";
 import { ComponentType, LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { AppRoutes } from "./Routers/AppRouter";
+
+type RouteParams<T extends string> =
+  T extends `${string}:${infer Param}/${infer Rest}`
+    ? { [_ in Param | keyof RouteParams<Rest>]: string }
+    : T extends `${string}:${infer Param}`
+      ? { [_ in Param]: string }
+      : Record<string, never>;
+
+type RouteFunction<T extends string> = (
+  params: RouteParams<T>,
+) => React.ReactNode;
+
+/**
+ * Plugin pages: a path pattern (`/a/:id`, `/a/*`) maps to a render function
+ * that gets the path params. The host attaches each one as a route under the
+ * signed-in layout (`src/lib/router/pluginRoutes.tsx`).
+ */
+export type AppRoutes = {
+  [K in string]: RouteFunction<K>;
+};
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserReadMinimal;

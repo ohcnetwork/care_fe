@@ -1,8 +1,8 @@
 import type { AnyRouter } from "@tanstack/react-router";
 
 /**
- * Holds the app router so modules that run before `src/router.ts` (such as
- * the raviger compatibility shim) can reach it without an import cycle.
+ * Holds the app router so modules that run before `src/router.tsx` (such as
+ * the `navigate` helper) can reach it without an import cycle.
  */
 let current: AnyRouter | undefined;
 

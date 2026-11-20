@@ -1,5 +1,4 @@
 import { t } from "i18next";
-import { useQueryParams } from "raviger";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -9,6 +8,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 import { useCareAppTabs } from "@/hooks/useCareApps";
+import { useQueryParams } from "@/lib/router/queryParams";
 import {
   EncounterRead,
   inactiveEncounterStatus,

@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { CheckIcon, PlusCircle, X } from "lucide-react";
-import { Link, navigate as ravigerNavigate } from "raviger";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -162,10 +162,13 @@ function ProductKnowledgeFormContent({
   slug,
   existingData,
   categorySlug,
-  onSuccess = () =>
-    ravigerNavigate(
-      `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
-    ),
+  onSuccess = () => {
+    if (!categorySlug) return;
+    navigate({
+      to: "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug",
+      params: { facilityId, categorySlug },
+    });
+  },
 }: {
   facilityId: string;
   slug?: string;
@@ -256,9 +259,11 @@ function ProductKnowledgeFormContent({
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
-        ravigerNavigate(
-          `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
-        );
+        if (!categorySlug) return;
+        navigate({
+          to: "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug",
+          params: { facilityId, categorySlug },
+        });
       },
     },
   );
@@ -1015,15 +1020,21 @@ function ProductKnowledgeFormContent({
 
             <div className="mt-6 flex justify-end space-x-4">
               <Button type="button" variant="outline" asChild>
-                <Link
-                  href={
-                    isEditMode
-                      ? `/product_knowledge/${slug}`
-                      : `/product_knowledge/categories/${categorySlug}`
-                  }
-                >
-                  {t("cancel")}
-                </Link>
+                {slug ? (
+                  <Link
+                    to="/facility/$facilityId/settings/product_knowledge/$slug"
+                    params={{ facilityId, slug }}
+                  >
+                    {t("cancel")}
+                  </Link>
+                ) : (
+                  <Link
+                    to="/facility/$facilityId/settings/product_knowledge/categories/$categorySlug"
+                    params={{ facilityId, categorySlug: categorySlug ?? "" }}
+                  >
+                    {t("cancel")}
+                  </Link>
+                )}
               </Button>
               <Button
                 type="submit"

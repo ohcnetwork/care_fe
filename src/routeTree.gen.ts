@@ -15,7 +15,7 @@ import { Route as PatientRouteImport } from "./routes/_patient";
 import { Route as PublicRouteImport } from "./routes/_public";
 import { Route as LicensesRouteImport } from "./routes/licenses";
 import { Route as SessionExpiredRouteImport } from "./routes/session-expired";
-import { Route as AppLegacyRouteImport } from "./routes/_app/_legacy";
+import { Route as AppSplatRouteImport } from "./routes/_app/$";
 import { Route as AppAdminRouteImport } from "./routes/_app/admin";
 import { Route as AppIconsRouteImport } from "./routes/_app/icons";
 import { Route as AppNotFoundRouteImport } from "./routes/_app/not-found";
@@ -26,7 +26,6 @@ import { Route as PublicForgotPasswordRouteImport } from "./routes/_public/forgo
 import { Route as PublicInvalidResetRouteImport } from "./routes/_public/invalid-reset";
 import { Route as PublicLoginRouteImport } from "./routes/_public/login";
 import { Route as PatientHomeRouteImport } from "./routes/patient.home";
-import { Route as AppLegacySplatRouteImport } from "./routes/_app/_legacy/$";
 import { Route as AppAdminSplatRouteImport } from "./routes/_app/admin.$";
 import { Route as AppFacilityIndexRouteImport } from "./routes/_app/facility.index";
 import { Route as AppOrganizationIndexRouteImport } from "./routes/_app/organization.index";
@@ -383,8 +382,9 @@ const SessionExpiredRoute = SessionExpiredRouteImport.update({
   path: "/session-expired",
   getParentRoute: () => rootRouteImport,
 } as any);
-const AppLegacyRoute = AppLegacyRouteImport.update({
-  id: "/_legacy",
+const AppSplatRoute = AppSplatRouteImport.update({
+  id: "/$",
+  path: "/$",
   getParentRoute: () => AppRoute,
 } as any);
 const AppAdminRoute = AppAdminRouteImport.update({
@@ -437,11 +437,6 @@ const PatientHomeRoute = PatientHomeRouteImport.update({
   id: "/patient/home",
   path: "/patient/home",
   getParentRoute: () => rootRouteImport,
-} as any);
-const AppLegacySplatRoute = AppLegacySplatRouteImport.update({
-  id: "/$",
-  path: "/$",
-  getParentRoute: () => AppLegacyRoute,
 } as any);
 const AppAdminSplatRoute = AppAdminSplatRouteImport.update({
   id: "/$",
@@ -2636,6 +2631,7 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/licenses": typeof LicensesRoute;
   "/session-expired": typeof SessionExpiredRoute;
+  "/$": typeof AppSplatRoute;
   "/admin": typeof AppAdminRouteWithChildren;
   "/icons": typeof AppIconsRoute;
   "/not-found": typeof AppNotFoundRoute;
@@ -2646,7 +2642,6 @@ export interface FileRoutesByFullPath {
   "/invalid-reset": typeof PublicInvalidResetRoute;
   "/login": typeof PublicLoginRoute;
   "/patient/home": typeof PatientHomeRoute;
-  "/$": typeof AppLegacySplatRoute;
   "/admin/$": typeof AppAdminSplatRoute;
   "/user/$tab": typeof AppUserTabRoute;
   "/facility/$id": typeof PublicFacilityIdRoute;
@@ -2980,6 +2975,7 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/licenses": typeof LicensesRoute;
   "/session-expired": typeof SessionExpiredRoute;
+  "/$": typeof AppSplatRoute;
   "/admin": typeof AppAdminRouteWithChildren;
   "/icons": typeof AppIconsRoute;
   "/not-found": typeof AppNotFoundRoute;
@@ -2990,7 +2986,6 @@ export interface FileRoutesByTo {
   "/invalid-reset": typeof PublicInvalidResetRoute;
   "/login": typeof PublicLoginRoute;
   "/patient/home": typeof PatientHomeRoute;
-  "/$": typeof AppLegacySplatRoute;
   "/admin/$": typeof AppAdminSplatRoute;
   "/user/$tab": typeof AppUserTabRoute;
   "/facility/$id": typeof PublicFacilityIdRoute;
@@ -3305,7 +3300,7 @@ export interface FileRoutesById {
   "/_public": typeof PublicRouteWithChildren;
   "/licenses": typeof LicensesRoute;
   "/session-expired": typeof SessionExpiredRoute;
-  "/_app/_legacy": typeof AppLegacyRouteWithChildren;
+  "/_app/$": typeof AppSplatRoute;
   "/_app/admin": typeof AppAdminRouteWithChildren;
   "/_app/icons": typeof AppIconsRoute;
   "/_app/not-found": typeof AppNotFoundRoute;
@@ -3316,7 +3311,6 @@ export interface FileRoutesById {
   "/_public/invalid-reset": typeof PublicInvalidResetRoute;
   "/_public/login": typeof PublicLoginRoute;
   "/patient/home": typeof PatientHomeRoute;
-  "/_app/_legacy/$": typeof AppLegacySplatRoute;
   "/_app/admin/$": typeof AppAdminSplatRoute;
   "/_app/user/$tab": typeof AppUserTabRoute;
   "/_public/facility/$id": typeof PublicFacilityIdRoute;
@@ -3652,6 +3646,7 @@ export interface FileRouteTypes {
     | "/"
     | "/licenses"
     | "/session-expired"
+    | "/$"
     | "/admin"
     | "/icons"
     | "/not-found"
@@ -3662,7 +3657,6 @@ export interface FileRouteTypes {
     | "/invalid-reset"
     | "/login"
     | "/patient/home"
-    | "/$"
     | "/admin/$"
     | "/user/$tab"
     | "/facility/$id"
@@ -3996,6 +3990,7 @@ export interface FileRouteTypes {
     | "/"
     | "/licenses"
     | "/session-expired"
+    | "/$"
     | "/admin"
     | "/icons"
     | "/not-found"
@@ -4006,7 +4001,6 @@ export interface FileRouteTypes {
     | "/invalid-reset"
     | "/login"
     | "/patient/home"
-    | "/$"
     | "/admin/$"
     | "/user/$tab"
     | "/facility/$id"
@@ -4320,7 +4314,7 @@ export interface FileRouteTypes {
     | "/_public"
     | "/licenses"
     | "/session-expired"
-    | "/_app/_legacy"
+    | "/_app/$"
     | "/_app/admin"
     | "/_app/icons"
     | "/_app/not-found"
@@ -4331,7 +4325,6 @@ export interface FileRouteTypes {
     | "/_public/invalid-reset"
     | "/_public/login"
     | "/patient/home"
-    | "/_app/_legacy/$"
     | "/_app/admin/$"
     | "/_app/user/$tab"
     | "/_public/facility/$id"
@@ -4719,11 +4712,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof SessionExpiredRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/_app/_legacy": {
-      id: "/_app/_legacy";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof AppLegacyRouteImport;
+    "/_app/$": {
+      id: "/_app/$";
+      path: "/$";
+      fullPath: "/$";
+      preLoaderRoute: typeof AppSplatRouteImport;
       parentRoute: typeof AppRoute;
     };
     "/_app/admin": {
@@ -4795,13 +4788,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/patient/home";
       preLoaderRoute: typeof PatientHomeRouteImport;
       parentRoute: typeof rootRouteImport;
-    };
-    "/_app/_legacy/$": {
-      id: "/_app/_legacy/$";
-      path: "/$";
-      fullPath: "/$";
-      preLoaderRoute: typeof AppLegacySplatRouteImport;
-      parentRoute: typeof AppLegacyRoute;
     };
     "/_app/admin/$": {
       id: "/_app/admin/$";
@@ -7102,18 +7088,6 @@ declare module "@tanstack/react-router" {
   }
 }
 
-interface AppLegacyRouteChildren {
-  AppLegacySplatRoute: typeof AppLegacySplatRoute;
-}
-
-const AppLegacyRouteChildren: AppLegacyRouteChildren = {
-  AppLegacySplatRoute: AppLegacySplatRoute,
-};
-
-const AppLegacyRouteWithChildren = AppLegacyRoute._addFileChildren(
-  AppLegacyRouteChildren,
-);
-
 interface AppAdminRouteChildren {
   AppAdminSplatRoute: typeof AppAdminSplatRoute;
   AppAdminActionsIdRoute: typeof AppAdminActionsIdRoute;
@@ -7993,7 +7967,7 @@ const AppFacilityFacilityIdLocationsLocationIdRouteWithChildren =
   );
 
 interface AppRouteChildren {
-  AppLegacyRoute: typeof AppLegacyRouteWithChildren;
+  AppSplatRoute: typeof AppSplatRoute;
   AppAdminRoute: typeof AppAdminRouteWithChildren;
   AppIconsRoute: typeof AppIconsRoute;
   AppNotFoundRoute: typeof AppNotFoundRoute;
@@ -8111,7 +8085,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppLegacyRoute: AppLegacyRouteWithChildren,
+  AppSplatRoute: AppSplatRoute,
   AppAdminRoute: AppAdminRouteWithChildren,
   AppIconsRoute: AppIconsRoute,
   AppNotFoundRoute: AppNotFoundRoute,

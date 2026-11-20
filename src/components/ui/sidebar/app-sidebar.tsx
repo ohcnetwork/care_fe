@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
-import { Link, useLocationChange } from "raviger";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -32,6 +32,7 @@ import { ResponsibilityNav } from "@/components/ui/sidebar/responsibility-switch
 
 import { useRouteParams } from "@/hooks/useRouteParams";
 import { useLayoutFlags } from "@/lib/router/layoutFlags";
+import { useLocationChange } from "@/lib/router/location";
 import { ServiceSwitcher } from "./facility/service/service-switcher";
 
 import PinPageDialog from "@/components/Common/PinPageDialog";
@@ -186,8 +187,7 @@ export function AppSidebar({
             )}
           >
             <Link
-              href="/"
-              basePath="/"
+              to="/"
               aria-label={t("view_dashboard")}
               className="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
