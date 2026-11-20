@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetBody,
@@ -536,7 +536,7 @@ export function ObservationInterpretation<
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmTypeChange}
-              className={buttonVariants({ variant: "destructive" })}
+              variant="destructive"
             >
               {t("continue_and_clear")}
             </AlertDialogAction>

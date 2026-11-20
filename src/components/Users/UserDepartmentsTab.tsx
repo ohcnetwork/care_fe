@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -67,7 +67,8 @@ function DepartmentRow({
     <TableRow>
       <TableCell className="whitespace-normal">
         <Link
-          href={`/facility/${facilityId}/settings/departments/${department.id}/departments`}
+          to="/facility/$facilityId/settings/departments/$id/$tab"
+          params={{ facilityId, id: department.id, tab: "departments" }}
           className="font-medium text-gray-900 underline underline-offset-4 break-words hover:text-primary-600"
         >
           {department.name}

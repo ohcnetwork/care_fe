@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Hash } from "lucide-react";
-import { Link, navigate } from "raviger";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -33,6 +33,7 @@ import { TagBadges } from "@/components/Tags/TagBadges";
 import { useLocationManagement } from "@/hooks/useLocationManagement";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -103,7 +104,10 @@ export default function LocationView({
     if (isNested && onSelectLocation) {
       onSelectLocation(location);
     } else {
-      navigate(`/facility/${facilityId}/settings/locations/${location.id}`);
+      navigate({
+        to: "/facility/$facilityId/settings/locations/$id",
+        params: { facilityId, id: location.id },
+      });
     }
   };
 
@@ -159,7 +163,10 @@ export default function LocationView({
               {isNested ? (
                 <span>{t("home")}</span>
               ) : (
-                <Link href={`/facility/${facilityId}/settings/locations`}>
+                <Link
+                  to="/facility/$facilityId/settings/locations"
+                  params={{ facilityId }}
+                >
                   {t("home")}
                 </Link>
               )}
@@ -187,7 +194,8 @@ export default function LocationView({
                       <span>{breadcrumb.name}</span>
                     ) : (
                       <Link
-                        href={`/facility/${facilityId}/settings/locations/${breadcrumb.id}`}
+                        to="/facility/$facilityId/settings/locations/$id"
+                        params={{ facilityId, id: breadcrumb.id }}
                       >
                         {breadcrumb.name}
                       </Link>

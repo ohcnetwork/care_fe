@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Trash2 } from "lucide-react";
-import { Link, navigate, useNavigationPrompt } from "raviger";
+import { Link, navigate } from "raviger";
 import { useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { useForm, useWatch } from "react-hook-form";
@@ -46,6 +46,7 @@ import {
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { ActionConfigurationFields } from "./ActionConfigurationFields";
 import {
   ActionConfigurationFormValues,
@@ -188,7 +189,7 @@ function ActionConfigurationEditor({
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const dirty = form.formState.isDirty || actionsDirty;
-  useNavigationPrompt(dirty, t("unsaved_changes_warning"));
+  useNavigationBlocker(dirty, t("unsaved_changes_warning"));
 
   const registry = useActionRegistry();
   // `useWatch`, not `form.watch`: the latter is a subscription the React
@@ -219,7 +220,7 @@ function ActionConfigurationEditor({
     queryClient.invalidateQueries({ queryKey: actionConfigurationKeys.all });
 
   /** Back to the list. The dirty flags must be flushed pristine BEFORE the
-   *  navigation, or `useNavigationPrompt` still sees unsaved changes and
+   *  navigation, or `useNavigationBlocker` still sees unsaved changes and
    *  blocks it (the same ordering the fill page relies on). */
   const leavePristine = () => {
     flushSync(() => {

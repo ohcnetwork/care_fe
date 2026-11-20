@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -158,7 +158,10 @@ export default function TemplateList({
             !qParams.status &&
             !qParams.template_type && (
               <Button variant="outline_primary" asChild>
-                <Link href={`/facility/${facilityId}/template/builder`}>
+                <Link
+                  to="/facility/$facilityId/template/builder"
+                  params={{ facilityId }}
+                >
                   <CareIcon icon="l-plus" className="mr-1" />
                   <span>{t("create_first_template")}</span>
                 </Link>

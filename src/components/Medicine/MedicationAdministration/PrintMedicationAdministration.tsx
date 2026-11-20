@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
@@ -6,29 +5,23 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import PrintLoading from "@/CAREUI/misc/PrintLoading";
+import TypstPrintPreview from "@/CAREUI/misc/TypstPrintPreview";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
-import Loading from "@/components/Common/Loading";
-import PrintFooter from "@/components/Common/PrintFooter";
-import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
+import {
+  type AdministrationIndex,
+  type GroupedMedication,
+  buildMedicationAdministrationPrintContent,
+} from "@/components/Medicine/MedicationAdministration/medicationAdministrationPrintData";
 
 import useCurrentFacilitySilently from "@/pages/Facility/utils/useCurrentFacility";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
 import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
-import {
-  ACTIVE_MEDICATION_STATUSES,
-  MedicationRequestRead,
-} from "@/types/emr/medicationRequest/medicationRequest";
+import { ACTIVE_MEDICATION_STATUSES } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import {
@@ -36,7 +29,6 @@ import {
   ProductKnowledgeType,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import query from "@/Utils/request/query";
-import { formatName, formatPatientAge } from "@/Utils/utils";
 
 // Generate time slots based on count per day
 const generateTimeSlots = (count: number) => {
@@ -53,14 +45,6 @@ const generateTimeSlots = (count: number) => {
   }
   return slots;
 };
-
-interface GroupedMedication {
-  productId: string;
-  productName: string;
-  requests: MedicationRequestRead[];
-  isPRN: boolean;
-  hasActiveRequests: boolean;
-}
 
 export const PrintMedicationAdministration = (props: {
   facilityId: string;
@@ -189,7 +173,7 @@ export const PrintMedicationAdministration = (props: {
     if (end < start) return [];
 
     const weeks: Date[][] = [];
-    let cursor = new Date(start);
+    const cursor = new Date(start);
 
     while (cursor <= end) {
       const week: Date[] = [];
@@ -205,10 +189,7 @@ export const PrintMedicationAdministration = (props: {
 
   // Index administrations by request ID, date, and time slot
   const adminIndex = useMemo(() => {
-    const index: Record<
-      string,
-      Record<string, Record<string, MedicationAdministrationRead[]>>
-    > = {};
+    const index: AdministrationIndex = {};
 
     medicationAdministrations?.results?.forEach((admin) => {
       const requestId = admin.request;
@@ -239,9 +220,7 @@ export const PrintMedicationAdministration = (props: {
     return index;
   }, [medicationAdministrations, timeSlots]);
 
-  const isLoading = requestsLoading || adminsLoading;
-
-  if (isLoading) return <Loading />;
+  if (requestsLoading || adminsLoading) return <PrintLoading />;
 
   const hasData =
     groupedMedications.regular.length > 0 || groupedMedications.prn.length > 0;
@@ -256,442 +235,69 @@ export const PrintMedicationAdministration = (props: {
     );
   }
 
+  const printOptions = (
+    <div className="mb-4 p-3 bg-gray-50 rounded-lg border flex items-center gap-6 flex-wrap">
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id="show-discontinued"
+          checked={showDiscontinued}
+          onCheckedChange={(checked) => setShowDiscontinued(checked === true)}
+        />
+        <Label htmlFor="show-discontinued" className="text-sm cursor-pointer">
+          {isMedication
+            ? t("show_discontinued_medications")
+            : t("show_discontinued_nutritional_products")}
+        </Label>
+      </div>
+      <div className="flex items-center gap-2">
+        <Label className="text-sm">{t("time_slots_per_day")}:</Label>
+        <div className="flex rounded-md border border-gray-300 overflow-hidden">
+          {[1, 2, 3, 4].map((num) => (
+            <Button
+              key={num}
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "h-8 w-10 rounded-none border-r last:border-r-0 border-gray-300",
+                slotsPerDay === num
+                  ? "bg-primary-100 text-primary-700 font-semibold"
+                  : "hover:bg-gray-100",
+              )}
+              onClick={() => setSlotsPerDay(num)}
+            >
+              {num}
+            </Button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <PrintPreview
+    <TypstPrintPreview
+      template="medication-administration"
       title={`${
         isMedication ? t("drug_chart") : t("intake_chart")
       } - ${encounter?.patient.name}`}
-      disabled={!hasData}
+      content={
+        encounter
+          ? buildMedicationAdministrationPrintContent({
+              encounter,
+              groupedMedications,
+              dateRanges,
+              adminIndex,
+              timeSlots,
+              isMedication,
+              productType,
+              t,
+            })
+          : undefined
+      }
       facility={facility}
       templateSlug={PrintTemplateType.medication_administration}
-    >
-      {/* Force landscape with tight margins so the wide drug chart fits on
-          a single A4 sheet per week. The parent print container also adds
-          a chunky p-10 that would otherwise eat into the printable width. */}
-      <style>{`
-        @media print {
-          @page { size: A4 landscape; margin: 6mm; }
-          html, body { background: white !important; }
-          /* Strip outer padding/shadow that the generic PrintPreview wrapper
-             applies, so the chart can use the full landscape width. */
-          div:has(> #section-to-print) {
-            padding: 0 !important;
-            box-shadow: none !important;
-            max-width: none !important;
-          }
-          /* Avoid splitting an individual medication row across pages. */
-          .mar-row { break-inside: avoid; page-break-inside: avoid; }
-          /* Repeat the table header on each printed page. */
-          .mar-thead { display: table-header-group; }
-        }
-      `}</style>
-      {/* Print Options - hidden when printing */}
-      <div className="print:hidden mb-4 p-3 bg-gray-50 rounded-lg border flex items-center gap-6 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="show-discontinued"
-            checked={showDiscontinued}
-            onCheckedChange={(checked) => setShowDiscontinued(checked === true)}
-          />
-          <Label htmlFor="show-discontinued" className="text-sm cursor-pointer">
-            {isMedication
-              ? t("show_discontinued_medications")
-              : t("show_discontinued_nutritional_products")}
-          </Label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Label className="text-sm">{t("time_slots_per_day")}:</Label>
-          <div className="flex rounded-md border border-gray-300 overflow-hidden">
-            {[1, 2, 3, 4].map((num) => (
-              <Button
-                key={num}
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  "h-8 w-10 rounded-none border-r last:border-r-0 border-gray-300",
-                  slotsPerDay === num
-                    ? "bg-primary-100 text-primary-700 font-semibold"
-                    : "hover:bg-gray-100",
-                )}
-                onClick={() => setSlotsPerDay(num)}
-              >
-                {num}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="p-4 max-w-[297mm] mx-auto text-[11px] print:p-0 print:max-w-none print:text-[9px]">
-        {/* Header */}
-        <div className="border-2 border-gray-400 mb-4">
-          <div className="flex justify-between items-start p-3 border-b-2 border-gray-400 bg-gray-100">
-            <div>
-              <h1 className="text-xl font-bold uppercase tracking-wide">
-                {isMedication
-                  ? t("medication_administration_record")
-                  : t("nutritional_product_administration_record")}
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                {encounter?.facility?.name}
-              </p>
-            </div>
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Logo"
-              className="h-12 w-auto object-contain"
-            />
-          </div>
-
-          {/* Patient Info - Simplified */}
-          <div className="grid grid-cols-4 divide-x-2 divide-gray-400">
-            <div className="p-2 col-span-2">
-              <div className="font-bold text-xs text-gray-500 uppercase">
-                {t("patient_name")}
-              </div>
-              <div className="font-bold text-base">
-                {encounter?.patient.name}
-              </div>
-            </div>
-            <div className="p-2">
-              <div className="font-bold text-xs text-gray-500 uppercase">
-                {t("age")} / {t("sex")}
-              </div>
-              <div className="font-semibold">
-                {encounter?.patient &&
-                  `${formatPatientAge(encounter.patient, true)}, ${t(`GENDER__${encounter.patient.gender}`)}`}
-              </div>
-            </div>
-            <div className="p-2">
-              <div className="font-bold text-xs text-gray-500 uppercase">
-                {t("encounter_date")}
-              </div>
-              <div className="font-semibold">
-                {encounter?.period?.start &&
-                  format(new Date(encounter.period.start), "dd MMM yyyy")}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Regular Medications Drug Chart */}
-        {groupedMedications.regular.length > 0 && (
-          <div className="mb-6">
-            <h2 className="font-bold text-sm uppercase tracking-wide mb-2 bg-gray-800 text-white px-2 py-1">
-              {isMedication
-                ? t("regular_medications")
-                : t("regular_nutritional_products")}
-            </h2>
-            {dateRanges.map((dates, idx) => (
-              <div
-                key={`reg-${dates[0].toISOString()}`}
-                className={cn(idx > 0 && "mt-3 print:break-before-page")}
-              >
-                <div className="text-[10px] font-semibold text-gray-700 mb-1">
-                  {format(dates[0], "dd MMM yyyy")} –{" "}
-                  {format(dates[dates.length - 1], "dd MMM yyyy")}
-                </div>
-                <DrugChartTable
-                  groups={groupedMedications.regular}
-                  dates={dates}
-                  adminIndex={adminIndex}
-                  timeSlots={timeSlots}
-                  productType={productType}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* PRN Medications */}
-        {groupedMedications.prn.length > 0 && (
-          <div className="mb-6 print:break-before-page">
-            <h2 className="font-bold text-sm uppercase tracking-wide mb-2 bg-pink-700 text-white px-2 py-1">
-              {isMedication
-                ? t("prn_medications")
-                : t("prn_nutritional_products")}{" "}
-              ({t("as_needed")})
-            </h2>
-            {dateRanges.map((dates, idx) => (
-              <div
-                key={`prn-${dates[0].toISOString()}`}
-                className={cn(idx > 0 && "mt-3 print:break-before-page")}
-              >
-                <div className="text-[10px] font-semibold text-gray-700 mb-1">
-                  {format(dates[0], "dd MMM yyyy")} –{" "}
-                  {format(dates[dates.length - 1], "dd MMM yyyy")}
-                </div>
-                <DrugChartTable
-                  groups={groupedMedications.prn}
-                  dates={dates}
-                  adminIndex={adminIndex}
-                  timeSlots={timeSlots}
-                  productType={productType}
-                  isPRN
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        <PrintFooter
-          className="mt-4"
-          leftContent={
-            isMedication
-              ? t("computer_generated_medication_administration")
-              : t("computer_generated_nutritional_product_administration")
-          }
-        />
-      </div>
-    </PrintPreview>
-  );
-};
-
-// Drug Chart Table Component
-const DrugChartTable = ({
-  groups,
-  dates,
-  adminIndex,
-  timeSlots,
-  productType,
-  isPRN = false,
-}: {
-  groups: GroupedMedication[];
-  dates: Date[];
-  adminIndex: Record<
-    string,
-    Record<string, Record<string, MedicationAdministrationRead[]>>
-  >;
-  timeSlots: { label: string; start: number; end: number }[];
-  productType: AdministrableProductType;
-  isPRN?: boolean;
-}) => {
-  const { t } = useTranslation();
-
-  // Check if this is the last slot of the day (needs thicker border)
-  const isLastSlotOfDay = (slotIndex: number) =>
-    slotIndex === timeSlots.length - 1;
-
-  return (
-    <div className="border-1 border-gray-400 overflow-hidden">
-      <table className="w-full border-collapse text-[10px] table-fixed">
-        <thead className="mar-thead">
-          <tr className="bg-gray-100">
-            <th
-              className="border-r-2 border-b-1 border-gray-400 p-1.5 text-left font-bold w-[160px]"
-              rowSpan={2}
-            >
-              {t(productType)}
-            </th>
-            {dates.map((date, dateIdx) => (
-              <th
-                key={date.toISOString()}
-                className={cn(
-                  "border-b border-gray-400 p-1 text-center font-bold",
-                  dateIdx < dates.length - 1
-                    ? "border-r-2 border-r-gray-400"
-                    : "border-r border-gray-400",
-                )}
-                colSpan={timeSlots.length}
-              >
-                <div className="font-bold">{format(date, "EEE")}</div>
-                <div className="text-[9px] font-normal">
-                  {format(date, "dd/MM")}
-                </div>
-              </th>
-            ))}
-          </tr>
-          <tr className="bg-gray-50">
-            {dates.map((date, dateIdx) =>
-              timeSlots.map((slot, slotIdx) => (
-                <th
-                  key={`${date.toISOString()}-${slot.label}`}
-                  className={cn(
-                    "border-b border-gray-400 p-0.5 text-center font-normal text-[9px] w-[32px]",
-                    isLastSlotOfDay(slotIdx) && dateIdx < dates.length - 1
-                      ? "border-r-2 border-r-gray-400"
-                      : "border-r border-gray-400",
-                  )}
-                >
-                  {slot.label.slice(0, 2)}
-                </th>
-              )),
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {groups.map((group) => {
-            // Get the latest active request for display
-            const latestRequest = group.requests[0];
-            const instructions = latestRequest.dosage_instruction;
-
-            return (
-              <tr
-                key={group.productId}
-                className={cn("mar-row", isPRN && "bg-pink-50")}
-              >
-                <td className="border-r-2 border-b border-gray-400 p-1.5 align-top">
-                  <div className="font-bold text-[11px] leading-tight text-wrap break-all">
-                    {group.productName}
-                  </div>
-                  {instructions.map((di, idx) => {
-                    const doseText = formatDosage(di);
-                    const routeText = di.route?.display;
-                    const frequencyText = isPRN
-                      ? t("as_needed")
-                      : formatFrequency(di);
-                    const summary = [doseText, routeText, frequencyText]
-                      .filter(Boolean)
-                      .join(" · ");
-                    return summary ? (
-                      <div
-                        key={idx}
-                        className={cn(
-                          "text-[9px] text-gray-600 leading-snug",
-                          idx === 0 && "mt-0.5",
-                          idx > 0 &&
-                            "mt-0.5 pt-0.5 border-t border-dashed border-gray-300",
-                        )}
-                      >
-                        {summary}
-                      </div>
-                    ) : null;
-                  })}
-                  {group.requests.length > 1 && (
-                    <div className="text-[8px] text-gray-400 mt-0.5">
-                      ({group.requests.length} {t("orders")})
-                    </div>
-                  )}
-                </td>
-                {dates.map((date, dateIdx) =>
-                  timeSlots.map((slot, slotIdx) => {
-                    const dateKey = format(date, "yyyy-MM-dd");
-                    // Check all requests in this group for administrations
-                    const admins = group.requests.flatMap(
-                      (req) =>
-                        adminIndex[req.id]?.[dateKey]?.[slot.label] || [],
-                    );
-
-                    const hasAdmins = admins.length > 0;
-
-                    // Show checkmarks for each administration (up to 3, then show count)
-                    const cellContent = hasAdmins ? (
-                      <div className="flex flex-col items-center justify-center h-full gap-0.5">
-                        {admins.length <= 3 ? (
-                          // Show individual checkmarks
-                          <div className="flex items-center justify-center gap-0.5">
-                            {admins.map((admin) => (
-                              <span
-                                key={admin.id}
-                                className="text-green-700 text-[10px] font-bold"
-                              >
-                                ✓
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          // Show count with checkmark
-                          <div className="flex items-center gap-0.5">
-                            <span className="text-green-700 text-[10px] font-bold">
-                              ✓
-                            </span>
-                            <span className="text-[9px] font-semibold text-gray-700">
-                              ×{admins.length}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    ) : null;
-
-                    return (
-                      <td
-                        key={`${date.toISOString()}-${slot.label}`}
-                        className={cn(
-                          "border-b border-gray-400 p-0 text-center align-middle h-8",
-                          isLastSlotOfDay(slotIdx) && dateIdx < dates.length - 1
-                            ? "border-r-2 border-r-gray-400"
-                            : "border-r border-gray-400",
-                          hasAdmins && "bg-green-100",
-                        )}
-                      >
-                        {hasAdmins ? (
-                          <>
-                            {/* Print version - simple content without popover */}
-                            <div className="hidden print:flex items-center justify-center w-full h-full">
-                              {cellContent}
-                            </div>
-                            {/* Screen version - with popover for details */}
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  type="button"
-                                  className="p-0 w-full h-full min-h-[28px] cursor-pointer hover:bg-green-200 transition-colors flex items-center justify-center print:hidden"
-                                >
-                                  {cellContent}
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-64 p-0 print:hidden"
-                                side="top"
-                              >
-                                <div className="bg-gray-50 px-3 py-2 border-b">
-                                  <div className="font-semibold text-sm">
-                                    {group.productName}
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    {format(date, "EEE, dd MMM")} · {slot.label}
-                                  </div>
-                                </div>
-                                <div className="max-h-48 overflow-y-auto">
-                                  {admins.map((admin, idx) => (
-                                    <div
-                                      key={admin.id}
-                                      className={cn(
-                                        "px-3 py-2 text-sm",
-                                        idx !== admins.length - 1 && "border-b",
-                                      )}
-                                    >
-                                      <div className="flex justify-between items-start">
-                                        <span className="font-medium">
-                                          {format(
-                                            new Date(
-                                              admin.occurrence_period_start,
-                                            ),
-                                            "HH:mm",
-                                          )}
-                                        </span>
-                                        <span className="text-xs text-gray-600">
-                                          {admin.dosage?.dose?.value}{" "}
-                                          {admin.dosage?.dose?.unit?.display}
-                                        </span>
-                                      </div>
-                                      <div className="text-xs text-gray-600 mt-0.5">
-                                        {t("by")} {formatName(admin.created_by)}
-                                      </div>
-                                      {admin.note && (
-                                        <div className="text-xs text-gray-500 mt-1 italic">
-                                          {admin.note}
-                                        </div>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                          </>
-                        ) : (
-                          <span className="text-gray-200">·</span>
-                        )}
-                      </td>
-                    );
-                  }),
-                )}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+      landscape
+      defaultMargin={6}
+      toolbar={printOptions}
+    />
   );
 };

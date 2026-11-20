@@ -151,8 +151,14 @@ export default function RequestOrderForm({
       },
     }),
     select: (data: PaginatedResponse<LocationRead>) => {
-      // Filter out the current location
-      return data.results.filter((location) => location.id !== locationId);
+      // Only inventory locations other than the current one; keep an existing
+      // order's origin so it still shows when editing
+      return data.results.filter(
+        (location) =>
+          location.id !== locationId &&
+          (location.inventory_usage !== "none" ||
+            location.id === existingData?.origin?.id),
+      );
     },
   });
 

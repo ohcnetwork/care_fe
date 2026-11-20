@@ -2,7 +2,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon } from "lucide-react";
-import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -40,6 +39,7 @@ import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPick
 
 import { cn } from "@/lib/utils";
 
+import { navigate } from "@/lib/router/navigate";
 import { CodeSchema } from "@/types/base/code/code";
 import {
   ConditionForm,
@@ -88,14 +88,15 @@ export function ChargeItemDefinitionForm({
   categorySlug,
   onSuccess = () => {
     if (categorySlug) {
-      navigate(
-        `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}`,
-        {
-          replace: true,
-        },
-      );
+      navigate({
+        to: "/facility/$facilityId/settings/charge_item_definitions/categories/$slug",
+        params: { facilityId, slug: categorySlug },
+        replace: true,
+      });
     } else {
-      navigate(`/facility/${facilityId}/settings/charge_item_definitions`, {
+      navigate({
+        to: "/facility/$facilityId/settings/charge_item_definitions",
+        params: { facilityId },
         replace: true,
       });
     }
