@@ -229,6 +229,15 @@ test.describe("Appointment list search params", () => {
 
     await expect(page).toHaveURL(/[?&]autoRefresh=false(&|$)/);
     await expect(autoRefresh).not.toBeChecked();
+
+    await test.step("Keeps it off on the next filter change", async () => {
+      await listTab(page).click();
+      await page.getByRole("tab", { name: "Fulfilled", exact: true }).click();
+
+      await expect(page).toHaveURL(/[?&]status=fulfilled(&|$)/);
+      await expect(page).toHaveURL(/[?&]autoRefresh=false(&|$)/);
+      await expect(autoRefresh).not.toBeChecked();
+    });
   });
 
   test("opens the print page with the filters of the list", async ({
