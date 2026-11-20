@@ -3,6 +3,7 @@ import {
   CurrentUserRead,
   GenerateServiceAccountTokenResponse,
   UserCreate,
+  UserQualificationDegree,
   UserRead,
   UserReadMinimal,
   UserUpdate,
@@ -10,6 +11,11 @@ import {
 import { UserPreferenceRequest } from "@/types/user/userPreferences";
 
 export default {
+  degrees: {
+    path: "/api/v1/users/degrees/",
+    method: HttpMethod.GET,
+    TRes: Type<UserQualificationDegree[]>(),
+  },
   list: {
     path: "/api/v1/users/",
     method: HttpMethod.GET,

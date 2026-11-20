@@ -74,7 +74,7 @@ export function QualifiedRangeEditor<
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <div className="flex flex-col gap-5 flex-1 overflow-y-auto py-2 px-0.5">
+      <div className="flex flex-col gap-5 flex-1 overflow-y-auto py-2 px-3">
         <FormField
           control={form.control}
           name={`${fieldName}.title` as any}

@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { PluginManifest, PluginManifestWithMeta } from "@/pluginTypes";
-import { CableIcon, Loader2Icon } from "lucide-react";
+import { CableIcon } from "lucide-react";
 import { Suspense, createContext, useContext } from "react";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
@@ -57,7 +58,7 @@ const withSuspense = <T extends object>(
         <Suspense
           fallback={
             <div className="flex items-center justify-center gap-2">
-              <Loader2Icon
+              <Spinner
                 role="status"
                 aria-label="Loading"
                 className="size-4 animate-spin"

@@ -1,5 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import {
+  Archive,
+  Clock,
+  File as FileIcon,
+  LucideIcon,
+  User,
+} from "lucide-react";
+import { useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -84,6 +91,9 @@ export default function useFileManager(
     useState<FileReadMinimal | null>(null);
   const [editError, setEditError] = useState("");
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
+  // Identifies the latest preview load, so a load that finishes after the
+  // preview was closed or moved to another file cannot reopen or replace it.
+  const previewRequest = useRef(0);
   const queryClient = useQueryClient();
 
   const getExtension = (url: string) => {
@@ -110,6 +120,7 @@ export default function useFileManager(
   };
 
   const viewFile = async (file: FileReadMinimal, associating_id: string) => {
+    const request = ++previewRequest.current;
     const index = uploadedFiles?.findIndex((f) => f.id === file.id) ?? -1;
     setCurrentIndex(index);
     setFileUrl("");
@@ -117,7 +128,7 @@ export default function useFileManager(
 
     const data = await retrieveUpload(file, associating_id);
 
-    if (!data) return;
+    if (!data || request !== previewRequest.current) return;
 
     const signedUrl = data.read_signed_url as string;
     const extension = getExtension(signedUrl);
@@ -193,6 +204,7 @@ export default function useFileManager(
   };
 
   const handleFilePreviewClose = () => {
+    previewRequest.current++;
     setDownloadURL("");
     setFileState({
       ...file_state,
@@ -201,6 +213,43 @@ export default function useFileManager(
       isZoomOutDisabled: false,
     });
   };
+
+  const archiveInfoItems: {
+    label: string;
+    content?: string;
+    icon: LucideIcon;
+  }[] = [
+    {
+      label: t("file_name"),
+      content: archiveDialogueOpen?.name,
+      icon: FileIcon,
+    },
+    {
+      label: t("uploaded_by"),
+      content: formatName(archiveDialogueOpen?.uploaded_by),
+      icon: User,
+    },
+    {
+      label: t("uploaded_on"),
+      content: formatDateTime(archiveDialogueOpen?.created_date),
+      icon: Clock,
+    },
+    {
+      label: t("archive_reason"),
+      content: archiveDialogueOpen?.archive_reason,
+      icon: Archive,
+    },
+    {
+      label: t("archived_by"),
+      content: formatName(archiveDialogueOpen?.archived_by),
+      icon: User,
+    },
+    {
+      label: t("archived_on"),
+      content: formatDateTime(archiveDialogueOpen?.archived_datetime),
+      icon: Clock,
+    },
+  ];
 
   const validateEditFileName = (name: string) => {
     if (name.trim() === "") {
@@ -356,44 +405,10 @@ export default function useFileManager(
             {t("this_file_has_been_archived")}
           </div>
           <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
-            {[
-              {
-                label: "File Name",
-                content: archiveDialogueOpen?.name,
-                icon: "l-file",
-              },
-              {
-                label: "Uploaded By",
-                content: formatName(archiveDialogueOpen?.uploaded_by),
-                icon: "l-user",
-              },
-              {
-                label: "Uploaded On",
-                content: formatDateTime(archiveDialogueOpen?.created_date),
-                icon: "l-clock",
-              },
-              {
-                label: "Archive Reason",
-                content: archiveDialogueOpen?.archive_reason,
-                icon: "l-archive",
-              },
-              {
-                label: "Archived By",
-                content: formatName(archiveDialogueOpen?.archived_by),
-                icon: "l-user",
-              },
-              {
-                label: "Archived On",
-                content: formatDateTime(archiveDialogueOpen?.archived_datetime),
-                icon: "l-clock",
-              },
-            ].map((item, index) => (
+            {archiveInfoItems.map((item, index) => (
               <div key={index} className="flex gap-2">
                 <div className="flex aspect-square h-10 items-center justify-center rounded-full bg-primary-100">
-                  <CareIcon
-                    icon={item.icon as any}
-                    className="text-lg text-primary-500"
-                  />
+                  <item.icon className="size-5 text-primary-500" />
                 </div>
                 <div>
                   <div className="text-xs uppercase text-secondary-700">

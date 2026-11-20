@@ -1,11 +1,11 @@
 import { BillMedicationLineItemSchemaType } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
+import { createAndIssueInvoice } from "@/pages/Facility/services/pharmacy/utils/createAndIssueInvoice";
 import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDefaultBillingAccount";
 import {
   ChargeItemBatchResponse,
   extractChargeItemsFromBatchResponse,
 } from "@/types/billing/chargeItem/chargeItem";
-import { InvoiceStatus } from "@/types/billing/invoice/invoice";
-import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import { InvoiceCreate } from "@/types/billing/invoice/invoice";
 import {
   DispenseOrderBatchResponse,
   DispenseOrderRead,
@@ -19,7 +19,7 @@ import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequ
 import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
-import mutate from "@/Utils/request/mutate";
+import { generateAlternateIdentifier } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -64,9 +64,8 @@ export default function useBillMedications({
   });
 
   const createInvoiceMutation = useMutation({
-    mutationFn: mutate(invoiceApi.createInvoice, {
-      pathParams: { facilityId },
-    }),
+    mutationFn: (data: Pick<InvoiceCreate, "account" | "charge_items">) =>
+      createAndIssueInvoice(facilityId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
     },
@@ -85,7 +84,7 @@ export default function useBillMedications({
           items,
           locationId,
           fallbackEncounterId,
-          alternateIdentifier: getDispenseCreateAlternateIdentifier(patientId),
+          alternateIdentifier: generateAlternateIdentifier(patientId),
         }),
 
         ...(prescriptionsToComplete
@@ -106,24 +105,36 @@ export default function useBillMedications({
       // Get the account ID from the account or refetch it if it's not available.
       const accountId = account?.id ?? (await refetchAccount()).data?.id;
 
+      let invoiceFailed = false;
+      let issuedInvoiceId: string | undefined;
       if (chargeItems.length > 0 && accountId) {
-        await createInvoiceMutation.mutateAsync({
-          status: InvoiceStatus.draft,
-          account: accountId,
-          charge_items: chargeItems.map((item) => item.id),
-        });
+        try {
+          const invoice = await createInvoiceMutation.mutateAsync({
+            account: accountId,
+            charge_items: chargeItems.map((item) => item.id),
+          });
+          issuedInvoiceId = invoice.id;
+        } catch {
+          // The dispenses are already saved and the mutation reports the error.
+          // Continue to their order to retry billing without dispensing again.
+          invoiceFailed = true;
+        }
       }
 
-      return dispenseOrder;
+      return { dispenseOrder, invoiceFailed, issuedInvoiceId };
     },
-    onSuccess: (response: DispenseOrderRead) => {
+    onSuccess: ({ dispenseOrder, invoiceFailed, issuedInvoiceId }) => {
       queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
       queryClient.invalidateQueries({ queryKey: ["accounts", patientId] });
       queryClient.invalidateQueries({ queryKey: ["invoice"] });
 
-      toast.success(t("medications_billed_successfully"));
+      if (window.location.pathname.startsWith("/session-expired")) return;
+
+      if (!invoiceFailed) {
+        toast.success(t("medications_billed_successfully"));
+      }
       navigate(
-        `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${response.id}?autoAdvanceStatus=true`,
+        `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}?autoAdvanceStatus=true${issuedInvoiceId ? `&collectPayment=${issuedInvoiceId}` : ""}`,
         { replace: true },
       );
     },
@@ -131,10 +142,6 @@ export default function useBillMedications({
 
   return billMedicationsMutation;
 }
-
-const getDispenseCreateAlternateIdentifier = (patientId: string) => {
-  return `${patientId}-${new Date().toISOString().replace(/[:.]/g, "-")}`;
-};
 
 const getDispenseCreateRequests = ({
   items,

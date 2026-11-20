@@ -282,7 +282,7 @@ export function ActivityDefinitionListContent({
         <>
           {/* Desktop Table View */}
           <div className="hidden lg:block">
-            <div className="border rounded-lg overflow-hidden">
+            <div className="rounded-md overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>

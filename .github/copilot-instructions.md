@@ -119,7 +119,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - Testing requires local backend: Follow [CARE backend setup docs](https://github.com/ohcnetwork/care#self-hosting)
 - Environment setup for testing:
   ```env
-  REACT_CARE_API_URL=https://care-api.do.ohc.network
+  REACT_CARE_API_URL=http://127.0.0.1:9000
   ```
 
 ## Validation
@@ -169,8 +169,10 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ## Configuration Files & Environment
 
-- `.env` -- environment variables (not committed)
+- `.env` -- default environment variables (committed); put local overrides in `.env.local`
+- `.example.env` -- reference of all supported environment variables with descriptions and defaults
 - `.env.docker` -- Docker environment template
+- `scripts/validate-env.ts` -- validates environment variables at build/dev server startup
 - `REACT_CARE_API_URL` -- backend API URL (required for full functionality)
 - `care.config.ts` -- application configuration
 - `vite.config.mts` -- Vite build configuration
@@ -186,8 +188,8 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ### Environment Variables
 
-- `REACT_CARE_API_URL` -- backend API endpoint (default: staging API)
-- `REACT_ENABLE_HCX` -- enable HCX features
+- `REACT_CARE_API_URL` -- backend API endpoint (`.env` defaults to the production API; empty means same-origin requests)
+- See `.example.env` for every supported variable. When adding or removing one, update `care.config.ts`, `src/vite-env.d.ts`, `scripts/validate-env.ts` and `.example.env` together.
 - `NODE_OPTIONS="--max-old-space-size=4096"` -- required for Docker builds
 
 ### Build Process Details

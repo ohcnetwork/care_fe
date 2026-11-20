@@ -244,12 +244,13 @@ function BedChargeItemsTable({
     isLoading: boolean;
   };
 
+  const chargeItemResults = chargeItems?.results;
   const groupedChargeItems = useMemo(() => {
-    if (!chargeItems?.results?.length) {
+    if (!chargeItemResults?.length) {
       return {};
     }
-    return groupChargeItemsByLocation(chargeItems.results);
-  }, [chargeItems?.results]);
+    return groupChargeItemsByLocation(chargeItemResults);
+  }, [chargeItemResults]);
 
   const toggleItemExpand = (itemId: string) => {
     setExpandedItems((prev) => ({
@@ -363,7 +364,7 @@ function BedChargeItemsTable({
         />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
-          <Table className="rounded-lg border shadow-sm w-full bg-white">
+          <Table className="shadow-sm w-full bg-white">
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>

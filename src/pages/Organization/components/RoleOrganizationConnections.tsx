@@ -1,6 +1,7 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link2, Loader2, Plus, Unlink, X } from "lucide-react";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
+import { Link2, Plus, Unlink, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -50,7 +51,8 @@ function OrganizationRow({
   return (
     <div className="flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-white px-3 py-2">
       <Link
-        href={`/admin/organizations/role/${organization.id}`}
+        to="/admin/organizations/role/$id"
+        params={{ id: organization.id }}
         className="min-w-0 truncate text-sm font-medium text-gray-900 hover:text-primary-700 hover:underline"
       >
         {organization.name}
@@ -64,7 +66,7 @@ function OrganizationRow({
           disabled={isPending}
         >
           {isPending ? (
-            <Loader2 className="size-3.5 animate-spin" />
+            <Spinner className="size-3.5 animate-spin" />
           ) : (
             <X className="size-3.5" />
           )}
@@ -289,7 +291,7 @@ export default function RoleOrganizationConnections({
                   disabled={!selectedManagingOrganization || isPending}
                 >
                   {isPending ? (
-                    <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                    <Spinner className="mr-1.5 size-3.5 animate-spin" />
                   ) : (
                     <Plus className="mr-1.5 size-3.5" />
                   )}
@@ -321,7 +323,7 @@ export default function RoleOrganizationConnections({
           <div className="space-y-2 p-3">
             {isLoadingManagedOrganizations ? (
               <div className="flex items-center justify-center gap-2 py-5 text-sm text-gray-400">
-                <Loader2 className="size-4 animate-spin" />
+                <Spinner className="size-4 animate-spin" />
                 {t("loading")}
               </div>
             ) : currentManagedOrganizations.length > 0 ? (
@@ -375,7 +377,7 @@ export default function RoleOrganizationConnections({
                   disabled={!selectedManagedOrganization || isPending}
                 >
                   {isPending ? (
-                    <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                    <Spinner className="mr-1.5 size-3.5 animate-spin" />
                   ) : (
                     <Plus className="mr-1.5 size-3.5" />
                   )}

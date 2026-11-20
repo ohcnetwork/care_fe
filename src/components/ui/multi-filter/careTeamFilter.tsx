@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, User } from "lucide-react";
+import { User } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -113,7 +114,7 @@ function CareTeamFilterDropdown({
               >
                 <Checkbox
                   checked={true}
-                  className="data-[state=checked]:border-primary-700 text-white"
+                  className="data-checked:border-primary-700 text-white"
                 />
                 <div className="flex items-center gap-2 max-w-xs truncate">
                   <Avatar
@@ -209,7 +210,7 @@ function CareTeamFilterDropdown({
 
         {isLoading && (
           <div className="px-2 py-4 text-sm text-gray-500 text-center flex items-center justify-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Spinner className="h-4 w-4 animate-spin" />
             {t("loading")}
           </div>
         )}

@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Bed, Eye, Loader2, Lock } from "lucide-react";
+import { ArrowRight, Bed, Eye, Lock } from "lucide-react";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +18,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -74,14 +76,14 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
           {t("view_encounter")}
         </Button>
       </div>
-      <SheetContent className="sm:max-w-lg overflow-y-auto">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("bed_encounter_details")}</SheetTitle>
         </SheetHeader>
-        <div className="mt-4">
+        <SheetBody>
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="size-8 animate-spin text-gray-400" />
+              <Spinner className="size-8 animate-spin text-gray-400" />
               <p className="text-sm text-gray-500 mt-2">{t("loading")}</p>
             </div>
           ) : firstAssociation?.encounter ? (
@@ -97,7 +99,7 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
               </p>
             </div>
           )}
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );
@@ -186,19 +188,31 @@ function LocationCard({ location, onClick }: LocationCardProps) {
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons];
 
   return (
-    <div
+    <Card
       className="border border-gray-200 rounded-lg overflow-hidden shadow-xs hover:shadow-md transition-shadow cursor-pointer"
-      onClick={onClick}
+      onClick={(event) => {
+        if (
+          event.target instanceof Element &&
+          event.target.closest("button, a, input")
+        )
+          return;
+        onClick();
+      }}
     >
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-        <div className="flex items-center">
+      <Button
+        type="button"
+        variant="ghost"
+        className="h-auto w-full rounded-none px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center whitespace-normal text-left"
+        onClick={onClick}
+      >
+        <span className="flex items-center">
           <Icon className="size-4 mr-2 text-gray-600" />
           <span className="font-medium">{location.name}</span>
-        </div>
+        </span>
         <ArrowRight className="size-4 text-gray-400" />
-      </div>
+      </Button>
 
-      <div className="p-4">
+      <CardContent className="p-4">
         <p className="text-sm text-gray-600 mb-3 line-clamp-2">
           {location.description}
         </p>
@@ -209,8 +223,8 @@ function LocationCard({ location, onClick }: LocationCardProps) {
           </span>
           <TagBadges tags={location.tags} size="xs" />
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 

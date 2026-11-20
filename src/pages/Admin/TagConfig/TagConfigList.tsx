@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -13,6 +12,7 @@ import Page from "@/components/Common/Page";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import {
   TagCategory,
   TagResource,
@@ -20,7 +20,7 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
-import TagConfigFormDrawer from "./components/TagConfigFormDrawer";
+import TagConfigForm from "./TagConfigForm";
 import TagConfigTable from "./components/TagConfigTable";
 
 interface TagConfigListProps {
@@ -57,9 +57,12 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
 
   const handleView = (configId: string) => {
     if (facilityId) {
-      navigate(`/facility/${facilityId}/settings/tag_config/${configId}`);
+      navigate({
+        to: "/facility/$facilityId/settings/tag_config/$tagId",
+        params: { facilityId, tagId: configId },
+      });
     } else {
-      navigate(`/admin/tag_config/${configId}`);
+      navigate({ to: "/admin/tag_config/$id", params: { id: configId } });
     }
   };
 
@@ -76,7 +79,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                 {t("manage_tag_config_description")}
               </p>
             </div>
-            <TagConfigFormDrawer
+            <TagConfigForm
               title={t("add_tag_config")}
               facilityId={facilityId}
               trigger={

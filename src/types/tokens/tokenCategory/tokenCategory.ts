@@ -14,11 +14,8 @@ export type TokenCategoryRead = TokenCategory & {
   default: boolean;
 };
 
-export interface TokenCategoryUpdate {
-  name: string;
-  resource_type: SchedulableResourceType;
-  shorthand: string;
-}
+/** `resource_type` is fixed at creation and not accepted on update. */
+export type TokenCategoryUpdate = Omit<TokenCategoryCreate, "resource_type">;
 
 export interface TokenCategoryRetrieveSpec extends TokenCategoryRead {
   created_by: UserReadMinimal;
