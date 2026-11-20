@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { selectedMultiFilterBar } from "tests/helper/multiFilter";
+import { waitForApiList } from "tests/helper/searchParams";
 import { getAccountId } from "tests/support/accountId";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -79,5 +80,39 @@ test.describe("Account tabs search params", () => {
 
     await expect(sortByTitle).not.toBeChecked();
     await expect(page).not.toHaveURL(/ordering=/);
+  });
+
+  test("sends only the report filters of the query string to the reports API", async ({
+    page,
+  }) => {
+    const request = waitForApiList(page, "/template_reports/");
+    await page.goto(
+      accountUrl("reports", {
+        status: "draft",
+        ordering: "-created_date",
+        is_archived: "true",
+      }),
+    );
+    const params = new URL((await request).url()).searchParams;
+
+    expect(params.get("associating_id")).toBe(accountId);
+    expect(params.get("is_archived")).toBe("true");
+    expect(params.has("status")).toBe(false);
+    expect(params.has("ordering")).toBe(false);
+    await expect(page).toHaveURL(/[?&]status=draft(&|$)/);
+  });
+
+  test("lists the first reports when the query string has a page", async ({
+    page,
+  }) => {
+    // The files tab keeps `page` (and `limit`) when it switches to the reports
+    // sub tab; the reports list has no pagination of its own to go back with.
+    const request = waitForApiList(page, "/template_reports/");
+    await page.goto(accountUrl("reports", { page: "2", limit: "15" }));
+    const params = new URL((await request).url()).searchParams;
+
+    expect(params.get("limit")).toBe("15");
+    expect(params.has("offset")).toBe(false);
+    expect(params.has("page")).toBe(false);
   });
 });
