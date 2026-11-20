@@ -19,6 +19,7 @@ import SpecimenIDScanDialog from "@/components/Scan/SpecimenIDScanDialog";
 import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable";
 
 import useFilters from "@/hooks/useFilters";
+import { serviceRequestListSearch } from "@/lib/router/search/services";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
@@ -163,6 +164,7 @@ export default function ServiceRequestList({
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: serviceRequestListSearch,
     limit: 14,
     defaultQueryParams: {
       status: "active",
@@ -186,7 +188,7 @@ export default function ServiceRequestList({
     queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
       pathParams: {
         facilityId,
-        activityDefinitionSlug: qParams.activity_definition,
+        activityDefinitionSlug: qParams.activity_definition ?? "",
       },
     }),
     enabled: !!qParams.activity_definition && !selectedActivityDefinition,

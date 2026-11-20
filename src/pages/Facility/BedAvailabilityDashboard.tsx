@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import useFilters from "@/hooks/useFilters";
+import { bedAvailabilitySearch } from "@/lib/router/search/services";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,7 @@ export default function BedAvailabilityDashboard({
 
   // Use query parameters for filters to enable URL sharing and navigation
   const { qParams, updateQuery } = useFilters({
+    schema: bedAvailabilitySearch,
     limit: 0, // Disable pagination as we want to show all wards
     cache: true,
     cacheBlacklist: ["refresh"], // Don't cache refresh parameter

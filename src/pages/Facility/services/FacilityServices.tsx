@@ -8,6 +8,7 @@ import Page from "@/components/Common/Page";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { facilityServicesSearch } from "@/lib/router/search/services";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
@@ -21,6 +22,7 @@ export default function FacilityServicesPage({
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: facilityServicesSearch,
     limit: 12,
   });
 
