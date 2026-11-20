@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -54,7 +55,6 @@ import {
   getTokenDuration,
 } from "@/pages/Scheduling/utils";
 import { CareTeamResponse, toCareTeamMembers } from "@/types/careTeam/careTeam";
-import { EncounterClass } from "@/types/emr/encounter/encounter";
 import {
   AvailabilityDateTime,
   SchedulableResourceType,
@@ -153,7 +153,7 @@ const ScheduleTemplateEditor = ({
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  // The list response omits the encounter defaults; only the detail has them.
+  // Only the detail has the saved departments and care team.
   // The key nests under the list's so saving refreshes both.
   const { data: templateDetail } = useQuery({
     queryKey: [
@@ -167,8 +167,13 @@ const ScheduleTemplateEditor = ({
   });
   const savedOrganizations = templateDetail?.organizations ?? [];
   const savedCareTeam = templateDetail?.care_team ?? [];
-  const savedEncounterType =
-    (templateDetail ?? template).encounter_type ?? null;
+  const savedEncounterType = (templateDetail ?? template).encounter_type ?? null;
+  // Keep the stored option available so an unsaved change can be undone.
+  const encounterTypeOptions =
+    savedEncounterType &&
+    !careConfig.encounterClasses.includes(savedEncounterType)
+      ? [...careConfig.encounterClasses, savedEncounterType]
+      : careConfig.encounterClasses;
 
   const templateFormSchema = z
     .object({
@@ -180,7 +185,7 @@ const ScheduleTemplateEditor = ({
         error: t("field_required"),
       }),
       is_public: z.boolean(),
-      encounter_type: z.custom<EncounterClass>().nullable(),
+      encounter_type: z.enum(encounterTypeOptions).nullable(),
       organizations: z.array(z.string()),
       care_team: z.array(z.custom<CareTeamResponse>()),
     })
@@ -255,10 +260,11 @@ const ScheduleTemplateEditor = ({
     const careTeamChanged =
       JSON.stringify(careTeamMembers) !==
       JSON.stringify(toCareTeamMembers(savedCareTeam));
-    // The API keeps the saved type when the field is omitted and clears it on
-    // null, so send it only when edited. The picker stays disabled until the
-    // detail loads, so both sides of this check come from the same response.
-    const encounterTypeChanged = values.encounter_type !== savedEncounterType;
+    // Omission preserves the server value; an explicit null clears it.
+    const encounterTypeChanged =
+      templateDetail &&
+      form.getFieldState("encounter_type").isDirty &&
+      values.encounter_type !== savedEncounterType;
     updateTemplate({
       name: values.name,
       valid_from: dateQueryString(values.valid_from),
@@ -366,6 +372,7 @@ const ScheduleTemplateEditor = ({
           <ScheduleEncounterDefaultsFields
             facilityId={facilityId}
             encounterType={encounterType}
+            encounterTypeOptions={encounterTypeOptions}
             onEncounterTypeChange={(value) =>
               form.setValue("encounter_type", value, { shouldDirty: true })
             }

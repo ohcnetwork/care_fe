@@ -17,12 +17,13 @@ import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { EncounterClass } from "@/types/emr/encounter/encounter";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
-/** Radix Select can't use an empty string as an item value. */
+/** The shared Select does not emit empty values. */
 const NO_ENCOUNTER_TYPE = "none";
 
 interface Props {
   facilityId: string;
   encounterType: EncounterClass | null;
+  encounterTypeOptions?: readonly EncounterClass[];
   onEncounterTypeChange: (encounterType: EncounterClass | null) => void;
   organizations: string[];
   onOrganizationsChange: (organizations: string[]) => void;
@@ -36,6 +37,7 @@ interface Props {
 export function ScheduleEncounterDefaultsFields({
   facilityId,
   encounterType,
+  encounterTypeOptions = careConfig.encounterClasses,
   onEncounterTypeChange,
   organizations,
   onOrganizationsChange,
@@ -46,12 +48,6 @@ export function ScheduleEncounterDefaultsFields({
 }: Props) {
   const { t } = useTranslation();
   const encounterTypeId = useId();
-  // Keep a saved type this deployment no longer offers selectable, or the
-  // trigger would render blank while that type is still stored.
-  const encounterTypeOptions =
-    encounterType && !careConfig.encounterClasses.includes(encounterType)
-      ? [...careConfig.encounterClasses, encounterType]
-      : careConfig.encounterClasses;
 
   return (
     <FieldSet className="gap-4 rounded-lg border border-gray-200 bg-white p-4">
@@ -78,22 +74,22 @@ export function ScheduleEncounterDefaultsFields({
         title={t("care_team")}
         description={t("schedule_default_care_team_help")}
       />
-      {/* Same layout as the care team section above. */}
       <FieldSet className="gap-3">
         <FieldLegend id={encounterTypeId}>{t("type_of_encounter")}</FieldLegend>
-        <FieldDescription>
+        <FieldDescription id={`${encounterTypeId}-help`}>
           {t("schedule_default_encounter_type_help")}
         </FieldDescription>
-        <Select
+        <Select<EncounterClass | typeof NO_ENCOUNTER_TYPE>
           value={encounterType ?? NO_ENCOUNTER_TYPE}
           onValueChange={(value) =>
-            onEncounterTypeChange(
-              value === NO_ENCOUNTER_TYPE ? null : (value as EncounterClass),
-            )
+            onEncounterTypeChange(value === NO_ENCOUNTER_TYPE ? null : value)
           }
           disabled={disabled}
         >
-          <SelectTrigger aria-labelledby={encounterTypeId}>
+          <SelectTrigger
+            aria-labelledby={encounterTypeId}
+            aria-describedby={`${encounterTypeId}-help`}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -102,7 +98,9 @@ export function ScheduleEncounterDefaultsFields({
             </SelectItem>
             {encounterTypeOptions.map((value) => (
               <SelectItem key={value} value={value}>
-                {t(`encounter_class__${value}`)}
+                {t(`encounter_class__${value}`, { defaultValue: value })}
+                {!careConfig.encounterClasses.includes(value) &&
+                  ` (${t("unavailable")})`}
               </SelectItem>
             ))}
           </SelectContent>

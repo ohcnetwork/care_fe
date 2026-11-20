@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -52,7 +53,6 @@ import {
   getTokenDuration,
 } from "@/pages/Scheduling/utils";
 import { CareTeamResponse, toCareTeamMembers } from "@/types/careTeam/careTeam";
-import { EncounterClass } from "@/types/emr/encounter/encounter";
 import {
   SchedulableResourceType,
   ScheduleAvailabilityCreateRequest,
@@ -99,7 +99,7 @@ export default function CreateScheduleTemplateSheet({
         }),
       valid_to: z.date({ error: t("field_required") }),
       is_public: z.boolean(),
-      encounter_type: z.custom<EncounterClass>().nullable(),
+      encounter_type: z.enum(careConfig.encounterClasses).nullable(),
       organizations: z.array(z.string()),
       care_team: z.array(z.custom<CareTeamResponse>()),
 

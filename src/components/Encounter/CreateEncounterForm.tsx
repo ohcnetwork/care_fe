@@ -327,6 +327,7 @@ export default function CreateEncounterForm({
                             <Button
                               key={value}
                               type="button"
+                              aria-pressed={field.value === value}
                               className={cn(
                                 "h-auto min-h-24 w-full justify-center text-lg",
                                 field.value === value &&
