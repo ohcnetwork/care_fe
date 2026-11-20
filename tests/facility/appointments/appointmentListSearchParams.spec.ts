@@ -68,16 +68,20 @@ test.describe("Appointment list search params", () => {
     request,
   }) => {
     const userId = await currentUserId(request);
-    // With the default configuration, the list opens on today.
-    const today = format(new Date(), "yyyy-MM-dd");
+    // With the default configuration, the list opens on today. The day can
+    // change while the page loads, so the day after navigation also counts.
+    const dayBefore = format(new Date(), "yyyy-MM-dd");
     await page.goto(listUrl());
 
-    await expect(page).toHaveURL(
-      (url) =>
+    await expect(page).toHaveURL((url) => {
+      const today = [dayBefore, format(new Date(), "yyyy-MM-dd")];
+      const dateFrom = url.searchParams.get("date_from") ?? "";
+      return (
         url.searchParams.get("practitioners") === userId &&
-        url.searchParams.get("date_from") === today &&
-        url.searchParams.get("date_to") === today,
-    );
+        today.includes(dateFrom) &&
+        url.searchParams.get("date_to") === dateFrom
+      );
+    });
   });
 
   test("writes the status tab of the list to the URL and the request", async ({
