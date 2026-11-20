@@ -63,15 +63,20 @@ export interface DateRangePickerProps {
   "aria-labelledby"?: string;
   "aria-describedby"?: string;
   "aria-invalid"?: AriaAttributes["aria-invalid"];
+  /** Lets a `panel` host apply the draft when it closes, as the popover does. */
+  ref?: Ref<DateRangePickerHandle>;
+}
+
+export interface DateRangePickerHandle {
+  /**
+   * The draft to apply when the picker closes for any reason except Escape:
+   * a complete, valid range that differs from `value`, otherwise undefined.
+   */
+  readonly dismissRange?: DateRangeValue;
 }
 
 type Edge = "from" | "to";
 type FieldText = Record<Edge, string>;
-
-interface RangePanelHandle {
-  /** The range Apply would commit now, or undefined while Apply is disabled. */
-  pendingRange?: DateRangeValue;
-}
 
 const fieldDate = (date?: Date) => (date ? format(date, "dd/MM/yyyy") : "");
 const localDate = (date?: Date) =>
@@ -128,9 +133,9 @@ function rangeText(
 }
 
 /**
- * A local-date range editor. Panels apply drafts only through Apply. Popovers
- * also apply a draft that Apply would accept when dismissed by an outside
- * press, the trigger or focus leaving; Escape discards the draft.
+ * A local-date range editor. Apply commits any valid draft. Closing the
+ * picker for any reason except Escape applies a complete, changed range:
+ * popovers do this themselves; `panel` hosts read `dismissRange` via `ref`.
  */
 export function DateRangePicker({
   variant = "popover",
@@ -139,12 +144,22 @@ export function DateRangePicker({
   "aria-labelledby": labelledBy,
   "aria-describedby": describedBy,
   "aria-invalid": invalid,
+  ref,
   ...props
 }: DateRangePickerProps) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<RangePanelHandle>(null);
+  const panelRef = useRef<DateRangePickerHandle>(null);
+  useImperativeHandle(
+    ref,
+    () => ({
+      get dismissRange() {
+        return panelRef.current?.dismissRange;
+      },
+    }),
+    [],
+  );
   const valueId = useId();
   const dateLabel = (date: Date, year = true) =>
     new Intl.DateTimeFormat(i18n.language, {
@@ -179,10 +194,8 @@ export function DateRangePicker({
       open={open}
       onOpenChange={(next, details) => {
         if (!next && details.reason !== "escape-key") {
-          const range = panelRef.current?.pendingRange;
-          if (range && !(sameDay(range.from, from) && sameDay(range.to, to))) {
-            props.onApply(range);
-          }
+          const range = panelRef.current?.dismissRange;
+          if (range) props.onApply(range);
         }
         setOpen(next);
       }}
@@ -231,9 +244,7 @@ function RangePanel({
   autoFocus,
   className,
   ref,
-}: Omit<DateRangePickerProps, "variant" | "placeholder"> & {
-  ref?: Ref<RangePanelHandle>;
-}) {
+}: Omit<DateRangePickerProps, "variant" | "placeholder">) {
   const { t, i18n } = useTranslation();
   const id = useId();
   const fromRef = useRef<HTMLInputElement>(null);
@@ -379,7 +390,17 @@ function RangePanel({
     : parsedRange.from && parsedRange.to && parsedRange.from > parsedRange.to
       ? { from: parsedRange.to, to: parsedRange.from }
       : parsedRange;
-  useImperativeHandle(ref, () => ({ pendingRange }));
+  // Only a complete range applies on dismissal; a lone date may be mid-selection.
+  const dismissRange =
+    pendingRange?.from &&
+    pendingRange.to &&
+    !(
+      sameDay(pendingRange.from, value?.from) &&
+      sameDay(pendingRange.to, value?.to)
+    )
+      ? pendingRange
+      : undefined;
+  useImperativeHandle(ref, () => ({ dismissRange }));
   const summary =
     range.from && range.to
       ? rangeText(range, dateLabel)

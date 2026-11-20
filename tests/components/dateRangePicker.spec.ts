@@ -219,6 +219,30 @@ test("popover: Escape discards drafts, dismissing keeps applicable drafts", asyn
   );
 });
 
+test("closing an open-ended picker applies only complete ranges", async ({
+  page,
+}) => {
+  await open(page, "popover");
+  const trigger = page.getByRole("button", {
+    name: "Select date range",
+    exact: true,
+  });
+  await trigger.click();
+  await day(page, "2026-11-03").click();
+  await expect(apply(page)).toBeEnabled();
+  await page.getByTestId("outside").click();
+  await expect(from(page)).toBeHidden();
+  await expect(page.getByTestId("applied")).toContainText('"count":0');
+
+  await trigger.click();
+  await day(page, "2026-11-03").click();
+  await day(page, "2026-11-16").click();
+  await page.getByTestId("outside").click();
+  await expect(page.getByTestId("applied")).toContainText(
+    '{"from":"2026-11-03","to":"2026-11-16","count":1}',
+  );
+});
+
 test("open-ended rules, clear controls and To-only summary", async ({
   page,
 }) => {

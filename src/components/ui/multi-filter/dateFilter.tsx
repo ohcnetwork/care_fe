@@ -1,12 +1,21 @@
 import { format, isSameDay, isValid } from "date-fns";
 import { Check, ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  type Ref,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
+import {
+  DateRangePicker,
+  type DateRangePickerHandle,
+} from "@/components/ui/date-range-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -103,23 +112,46 @@ function DateRangeOptions({
   );
 }
 
+export interface DateFilterHandle {
+  /** Applies a complete custom range left without pressing Apply. */
+  applyDraft: () => void;
+}
+
+/** Menus hosting the date filter call this so closing, except by Escape, applies the draft. */
+export const applyDateDraftOnClose = (
+  draftRef: { current: DateFilterHandle | null },
+  open: boolean,
+  details: { reason: string },
+) => {
+  if (!open && details.reason !== "escape-key") draftRef.current?.applyDraft();
+};
+
 export default function RenderDateFilter({
   filter,
   selected,
   onFilterChange,
   handleBack,
   defaultView,
+  ref,
 }: {
   filter: FilterConfig;
   selected: FilterDateRange;
   onFilterChange: (filterKey: string, values: FilterValues) => void;
   handleBack?: () => void;
   defaultView?: "options" | "custom";
+  ref?: Ref<DateFilterHandle>;
 }) {
   const { t } = useTranslation();
   const [view, setView] = useState<"options" | "custom">(
     defaultView || "options",
   );
+  const pickerRef = useRef<DateRangePickerHandle>(null);
+  useImperativeHandle(ref, () => ({
+    applyDraft: () => {
+      const range = pickerRef.current?.dismissRange;
+      if (range) onFilterChange(filter.key, range);
+    },
+  }));
   const meta = filter.meta as DateFilterMeta;
   const options = meta?.presetOptions || longDateRangeOptions;
 
@@ -140,6 +172,7 @@ export default function RenderDateFilter({
     <div className="pt-0">
       {view == "custom" ? (
         <DateRangePicker
+          ref={pickerRef}
           variant="panel"
           title={t("custom_date_range")}
           onBack={() => setView("options")}
@@ -193,6 +226,7 @@ export const SelectedDateBadge = ({
   interactive?: boolean;
 }) => {
   const { t } = useTranslation();
+  const draftRef = useRef<DateFilterHandle>(null);
   const hasValidFrom = !!selected.from && isValid(selected.from);
   const hasValidTo = !!selected.to && isValid(selected.to);
   if (!hasValidFrom && !hasValidTo) return <></>;
@@ -230,7 +264,11 @@ export const SelectedDateBadge = ({
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu
+      onOpenChange={(open, details) =>
+        applyDateDraftOnClose(draftRef, open, details)
+      }
+    >
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
@@ -244,6 +282,7 @@ export const SelectedDateBadge = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" sideOffset={15} className="w-80 p-0">
         <RenderDateFilter
+          ref={draftRef}
           filter={filter}
           selected={selected}
           onFilterChange={onFilterChange}
