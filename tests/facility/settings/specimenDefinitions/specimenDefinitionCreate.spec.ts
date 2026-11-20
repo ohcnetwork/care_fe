@@ -132,8 +132,10 @@ test.describe("Specimen Definitions Create", () => {
     await page.getByRole("button", { name: /save/i }).click();
 
     // Apply status filter before searching
-    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
-    await page.getByRole("option", { name: status.toLowerCase() }).click();
+    await page.getByRole("button", { name: /^Status/ }).click();
+    await page
+      .getByRole("menuitemradio", { name: status.toLowerCase() })
+      .click();
 
     // Search for the newly created definition
     await page
@@ -207,8 +209,10 @@ test.describe("Specimen Definitions Create", () => {
     await page.getByRole("button", { name: /save/i }).click();
 
     // Apply status filter before searching
-    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
-    await page.getByRole("option", { name: status.toLowerCase() }).click();
+    await page.getByRole("button", { name: /^Status/ }).click();
+    await page
+      .getByRole("menuitemradio", { name: status.toLowerCase() })
+      .click();
 
     // Search for the newly created definition
     await page

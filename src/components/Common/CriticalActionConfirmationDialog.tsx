@@ -1,5 +1,5 @@
 import { AlertTriangleIcon, SkullIcon } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { type ButtonVariant, buttonVariants } from "@/components/ui/button";
+import { type ButtonVariant } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface ConfirmationDialogProps {
@@ -46,6 +46,7 @@ const CriticalActionConfirmationDialog = ({
   icon,
 }: ConfirmationDialogProps) => {
   const { t } = useTranslation();
+  const confirmationInputId = useId();
   const [internalOpen, setInternalOpen] = useState(false);
   const [confirmText, setConfirmText] = useState("");
 
@@ -123,10 +124,10 @@ const CriticalActionConfirmationDialog = ({
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
       {trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <div className="flex items-center gap-2 border-b pb-2">
-            <div className={cn("p-2 rounded", variantColors.bgColor)}>
+      <AlertDialogContent className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] gap-0 overflow-y-auto">
+        <AlertDialogHeader className="block text-left">
+          <div className="flex items-center gap-2">
+            <div className={cn("shrink-0 rounded p-2", variantColors.bgColor)}>
               {icon ?? variantColors.defaultIcon}
             </div>
             <AlertDialogTitle className="text-lg font-semibold">
@@ -134,23 +135,24 @@ const CriticalActionConfirmationDialog = ({
             </AlertDialogTitle>
           </div>
         </AlertDialogHeader>
-        <div className="space-y-3 text-sm text-black">
+        <div className="min-w-0 space-y-4 px-4 pb-4 text-sm text-foreground wrap-anywhere md:px-6 md:pb-6">
           <AlertDialogDescription asChild>
-            <div>{description}</div>
+            <div className="space-y-2">{description}</div>
           </AlertDialogDescription>
           <div>
-            <span>
+            <label htmlFor={confirmationInputId}>
               <Trans
                 i18nKey="confirmation_dialog_input_label"
                 components={{
                   code: (
-                    <code className="font-mono px-1 py-0.5 bg-gray-100 rounded" />
+                    <code className="rounded bg-muted px-1 py-0.5 font-mono wrap-anywhere" />
                   ),
                 }}
                 values={{ confirmationText }}
               />
-            </span>
+            </label>
             <Input
+              id={confirmationInputId}
               className="mt-2"
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
@@ -167,9 +169,10 @@ const CriticalActionConfirmationDialog = ({
             {t("cancel")}
           </AlertDialogCancel>
           <AlertDialogAction
+            variant={variant}
             onClick={handleConfirm}
             disabled={!isConfirmed || isLoading}
-            className={cn(buttonVariants({ variant }), "w-full sm:flex-1")}
+            className="w-full sm:flex-1"
           >
             {actionButtonText}
           </AlertDialogAction>

@@ -450,16 +450,17 @@ export function getCardByTitle(page: Page, title: string | RegExp) {
 }
 
 export async function clearFilter(page: Page) {
-  const clearButton = page
+  await page
+    .locator('[data-slot="filter-select"]')
     .getByRole("button")
-    .filter({ has: page.locator("svg.lucide-x") })
-    .first();
-  await clearButton.click();
+    .first()
+    .click();
+  await page.getByRole("menuitemradio", { name: "All", exact: true }).click();
 }
 
 /**
  * Helper to select a value from a FilterSelect component
- * FilterSelect uses a Select component with a combobox trigger that shows the label
+ * FilterSelect uses a radio dropdown with a button trigger that shows the label
  *
  * @param page - Playwright page object
  * @param label - The label text of the FilterSelect (e.g., "status", "category")
@@ -474,9 +475,9 @@ export async function selectFromFilterSelect(
   label: string | RegExp,
   value: string,
 ) {
-  // Find the FilterSelect combobox by its label text
   const filterSelect = page
-    .getByRole("combobox")
+    .locator('[data-slot="filter-select"]')
+    .getByRole("button")
     .filter({ hasText: label })
     .first();
   await filterSelect.waitFor({ state: "visible" });
@@ -484,7 +485,7 @@ export async function selectFromFilterSelect(
   await filterSelect.click();
 
   // Select the option by value (case-insensitive match)
-  const option = page.getByRole("option", {
+  const option = page.getByRole("menuitemradio", {
     name: new RegExp(value, "i"),
   });
   await option.waitFor({ state: "visible" });

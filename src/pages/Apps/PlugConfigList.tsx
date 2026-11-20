@@ -4,8 +4,9 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { CircleCheck, Plus, Search, ShoppingBag, Store } from "lucide-react";
-import { Link, useNavigate, useQueryParams } from "raviger";
+import { Link as RavigerLink, useNavigate, useQueryParams } from "raviger";
 import { type ReactNode, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -319,7 +320,7 @@ export function PlugConfigList() {
             )}
           </TabsList>
           <Button size="sm" variant="outline" asChild>
-            <Link href="/admin/apps/new">
+            <Link to="/admin/apps/$slug" params={{ slug: "new" }}>
               <Plus className="mr-1 size-4" />
               {t("manual_setup")}
             </Link>
@@ -362,7 +363,7 @@ export function PlugConfigList() {
                     }
                     actions={
                       <Button className="w-full" asChild>
-                        <Link
+                        <RavigerLink
                           href={
                             matchingApp
                               ? `/admin/apps/${config.slug}?appId=${encodeURIComponent(matchingApp.id)}`
@@ -372,7 +373,7 @@ export function PlugConfigList() {
                           {config.isReadOnly
                             ? t("view_config")
                             : t("edit_config")}
-                        </Link>
+                        </RavigerLink>
                       </Button>
                     }
                   />
@@ -462,13 +463,13 @@ export function PlugConfigList() {
                         actions={
                           installedConfig ? (
                             <Button className="w-full" asChild>
-                              <Link
+                              <RavigerLink
                                 href={`/admin/apps/${app.id}?appId=${encodeURIComponent(app.id)}`}
                               >
                                 {installedConfig.isReadOnly
                                   ? t("view_config")
                                   : t("edit_config")}
-                              </Link>
+                              </RavigerLink>
                             </Button>
                           ) : (
                             <div className="flex gap-2">
@@ -477,11 +478,11 @@ export function PlugConfigList() {
                                 className="flex-1"
                                 asChild
                               >
-                                <Link
+                                <RavigerLink
                                   href={`/admin/apps/new?appId=${encodeURIComponent(app.id)}`}
                                 >
                                   {t("configure")}
-                                </Link>
+                                </RavigerLink>
                               </Button>
                               <Button
                                 className="flex-1"

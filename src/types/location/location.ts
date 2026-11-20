@@ -81,12 +81,6 @@ export interface LocationWrite extends Omit<LocationBase, "inventory_usage"> {
   inventory_usage?: InventoryUsage;
 }
 
-export interface LocationImport extends LocationBase {
-  id?: string;
-  mode: LocationMode;
-  children: LocationImport[];
-}
-
 export const LocationFormOptions = [
   "si",
   "bu",

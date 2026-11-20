@@ -70,7 +70,8 @@ export function FacilityHomeOverview({
                       </span>
                       <span className="text-gray-700 truncate text-sm">
                         <ContactLink
-                          tel={formatPhoneNumberIntl(
+                          tel={String(facilityData.phone_number)}
+                          label={formatPhoneNumberIntl(
                             String(facilityData.phone_number),
                           )}
                         />

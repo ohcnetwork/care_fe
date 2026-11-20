@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -45,6 +45,7 @@ import query from "@/Utils/request/query";
 import { formatName, mergeAutocompleteOptions, valuesOf } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import BackButton from "@/components/Common/BackButton";
+import { navigate } from "@/lib/router/navigate";
 import patientApi from "@/types/emr/patient/patientApi";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
@@ -58,7 +59,7 @@ import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 interface ResourceProps {
-  facilityId: number;
+  facilityId: string;
   id?: string;
 }
 
@@ -152,7 +153,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     mutationFn: mutate(resourceRequestApi.create),
     onSuccess: (data: ResourceRequestRead) => {
       toast.success(t("resource_created_successfully"));
-      navigate(`/facility/${facilityId}/resource/${data.id}`, {
+      navigate({
+        to: "/facility/$facilityId/resource/$id",
+        params: { facilityId, id: data.id },
         replace: true,
       });
     },
@@ -164,7 +167,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }),
     onSuccess: (data: ResourceRequestRead) => {
       toast.success(t("resource_updated_successfully"));
-      navigate(`/facility/${facilityId}/resource/${data.id}`, {
+      navigate({
+        to: "/facility/$facilityId/resource/$id",
+        params: { facilityId, id: data.id },
         replace: true,
       });
     },

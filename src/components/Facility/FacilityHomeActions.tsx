@@ -1,9 +1,7 @@
-import { ChevronDown, ImageIcon, Printer } from "lucide-react";
+import { ChevronDown, Printer, SquarePen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,32 +20,19 @@ import PrintTemplateSheet from "./PrintTemplateSheet";
 interface FacilityHomeActionsProps {
   facility: FacilityRead;
   isSettings: boolean;
-  buttonClassName?: string;
-  onEditCoverImage: () => void;
 }
 
 export function FacilityHomeActions({
   facility: facilityData,
   isSettings,
-  buttonClassName,
-  onEditCoverImage,
 }: FacilityHomeActionsProps) {
   const { t } = useTranslation();
   const editAction = (
     <EditFacilitySheet
       facilityId={facilityData.id}
       trigger={
-        <Button
-          className={cn(
-            "cursor-pointer font-semibold",
-            isSettings && buttonClassName,
-            isSettings &&
-              "col-span-2 border-emerald-950 bg-emerald-800 text-white hover:bg-emerald-900 hover:text-white sm:col-span-1",
-          )}
-          variant="outline"
-          size="sm"
-        >
-          <CareIcon icon="l-pen" />
+        <Button variant="outline" size={isSettings ? "default" : "sm"}>
+          <SquarePen aria-hidden="true" />
           {t("edit_facility_details")}
         </Button>
       }
@@ -58,11 +43,7 @@ export function FacilityHomeActions({
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          size="sm"
-          className={cn(
-            "cursor-pointer font-semibold",
-            isSettings && buttonClassName,
-          )}
+          size={isSettings ? "default" : "sm"}
           aria-label={t(isSettings ? "configurations" : "more_options")}
           type="button"
         >
@@ -70,13 +51,7 @@ export function FacilityHomeActions({
           <ChevronDown className="size-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className={cn(
-          "w-full min-w-48",
-          isSettings && "rounded-lg border-neutral-200 shadow-md",
-        )}
-      >
+      <DropdownMenuContent align="end" className="w-full min-w-48">
         <DropdownMenuGroup className="flex flex-col gap-1">
           <PrintTemplateSheet
             facility={facilityData}
@@ -85,15 +60,14 @@ export function FacilityHomeActions({
                 variant="ghost"
                 type="button"
                 className={cn(
-                  "h-auto justify-start whitespace-normal",
-                  cn(
-                    "hover:bg-gray-100 hover:text-gray-900 flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-                    isSettings &&
-                      "min-h-12 text-neutral-950 hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-indigo-500 md:min-h-10",
-                  ),
+                  "h-auto w-full justify-start rounded-sm px-2 py-1.5 text-sm whitespace-normal",
+                  isSettings && "min-h-12 md:min-h-10",
                 )}
               >
-                <Printer className="size-4 text-gray-500" />
+                <Printer
+                  className="size-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 {t("print_templates")}
               </Button>
             }
@@ -101,7 +75,7 @@ export function FacilityHomeActions({
           <PLUGIN_Component
             __name="FacilityHomeActions"
             facility={facilityData}
-            className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
+            className="flex justify-start items-center border border-border rounded-md p-2 shadow-sm"
           />
         </DropdownMenuGroup>
       </DropdownMenuContent>
@@ -109,19 +83,8 @@ export function FacilityHomeActions({
   );
   return (
     <>
-      {isSettings && editAction}
-      {isSettings && (
-        <Button
-          variant="outline"
-          className={buttonClassName}
-          onClick={onEditCoverImage}
-        >
-          <ImageIcon className="size-5" />
-          {t("edit_cover_photo")}
-        </Button>
-      )}
       {configurationAction}
-      {!isSettings && editAction}
+      {editAction}
     </>
   );
 }

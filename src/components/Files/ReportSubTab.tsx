@@ -10,7 +10,6 @@ import {
   RefreshCw,
   SearchIcon,
 } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -60,6 +59,7 @@ import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
 
 import { formatDateTime } from "@/Utils/utils";
+import { navigate } from "@/lib/router/navigate";
 import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateReportSheet";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { ReportReadList, ReportType } from "@/types/emr/report/report";
@@ -120,9 +120,10 @@ export function ReportSubTab({
 
   const handleView = (report: ReportReadList) => {
     if (canNavigateToPreview) {
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/report/${report.id}`,
-      );
+      navigate({
+        to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId",
+        params: { facilityId, patientId, encounterId, reportId: report.id },
+      });
     } else {
       viewFile(report);
     }

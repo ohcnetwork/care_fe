@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Box, Eye } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
@@ -24,6 +23,7 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
+import { navigate } from "@/lib/router/navigate";
 import { CreateMedicationReturnSheet } from "@/pages/Facility/services/pharmacy/CreateMedicationReturnSheet";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
@@ -209,9 +209,14 @@ function MedicationReturnTable({
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/locations/${locationId}/medication_return/order/${delivery.id}`,
-                  )
+                  navigate({
+                    to: "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId",
+                    params: {
+                      facilityId,
+                      locationId,
+                      deliveryOrderId: delivery.id,
+                    },
+                  })
                 }
               >
                 <Eye className="mr-1 size-4" />
