@@ -23,6 +23,7 @@ import {
 } from "@/components/Common/Table";
 
 import useFilters from "@/hooks/useFilters";
+import { inventoryListSearch } from "@/lib/router/search/inventory";
 
 import { isLessThan, round } from "@/Utils/decimal";
 import { getExpiryBadgeVariant, getExpiryStatus } from "@/Utils/inventory";
@@ -63,6 +64,7 @@ interface InventoryListProps {
 export function InventoryList({ facilityId, locationId }: InventoryListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: inventoryListSearch,
     limit: 14,
   });
 

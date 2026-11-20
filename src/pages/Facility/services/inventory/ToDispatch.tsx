@@ -13,6 +13,10 @@ import useFilters from "@/hooks/useFilters";
 
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import {
+  dispatchDeliveryListSearch,
+  dispatchOrderListSearch,
+} from "@/lib/router/search/inventory";
 import query from "@/Utils/request/query";
 import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
 
@@ -131,8 +135,9 @@ function IncomingOrdersTab({
   ];
   const defaultStatus = EFFECTIVE_STATUSES[0].value;
 
-  const [qParams] = useQueryParams();
+  const [qParams] = useQueryParams(dispatchOrderListSearch);
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: dispatchOrderListSearch,
     limit: 14,
     defaultQueryParams: { status: defaultStatus },
   });
@@ -270,8 +275,9 @@ function OutgoingDeliveriesTab({
   ];
   const defaultStatus = EFFECTIVE_STATUSES[0].value;
 
-  const [qParams] = useQueryParams();
+  const [qParams] = useQueryParams(dispatchDeliveryListSearch);
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: dispatchDeliveryListSearch,
     limit: 14,
     defaultQueryParams: { status: defaultStatus },
   });
