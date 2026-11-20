@@ -5,7 +5,6 @@ import {
   GitPullRequestArrow,
   LockKeyhole,
 } from "lucide-react";
-import { Link, usePath, useQueryParams } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -54,6 +53,9 @@ import Pagination from "@/components/Common/Pagination";
 import { getReferralDetailUrl } from "@/components/Referral/referralNavigation";
 import { ReferralStatusBadge } from "@/components/Referral/ReferralStatusBadge";
 
+import { HrefLink } from "@/lib/router/HrefLink";
+import { usePathname } from "@/lib/router/location";
+import { useQueryParams } from "@/lib/router/queryParams";
 import {
   REFERRAL_STATUSES,
   ReferralDestinationType,
@@ -99,7 +101,7 @@ export function ReferralList({
   widgetConfig,
 }: ReferralListProps) {
   const { t } = useTranslation();
-  const path = usePath();
+  const path = usePathname();
   const [filters, setFilters] = useQueryParams<{
     referralDepartment?: string;
     referralDestination?: string;
@@ -304,7 +306,9 @@ export function ReferralList({
                     size="sm"
                     className="rounded-none text-left hover:bg-muted/50"
                   >
-                    <Link href={getReferralDetailUrl(referral.id, sourceUrl)}>
+                    <HrefLink
+                      href={getReferralDetailUrl(referral.id, sourceUrl)}
+                    >
                       <ItemContent className="min-w-0">
                         <ItemTitle className="max-w-full truncate">
                           {referral.title}
@@ -316,7 +320,7 @@ export function ReferralList({
                       <ItemActions>
                         <ReferralStatusBadge status={referral.status} />
                       </ItemActions>
-                    </Link>
+                    </HrefLink>
                   </Item>
                 </div>
               ))}
@@ -336,12 +340,12 @@ export function ReferralList({
                 {data.results.map((referral) => (
                   <TableRow key={referral.id} data-cy="referral-row">
                     <TableCell className="min-w-80 max-w-lg py-3 pl-4">
-                      <Link
+                      <HrefLink
                         href={getReferralDetailUrl(referral.id, sourceUrl)}
                         className="block max-w-full truncate text-left font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-ring"
                       >
                         {referral.title}
-                      </Link>
+                      </HrefLink>
                       <p className="mt-1 truncate text-xs text-muted-foreground">
                         {referral.availability_name}
                       </p>

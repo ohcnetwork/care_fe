@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreVertical } from "lucide-react";
-import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -24,6 +23,7 @@ import useFilters from "@/hooks/useFilters";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { Organization, OrgType } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -87,11 +87,11 @@ function OrganizationCard({
                 className="font-semibold"
                 asChild
               >
-                <Link
+                <HrefLink
                   href={`/admin/organizations/${organizationType}/${org.id}`}
                 >
                   {t("see_details")}
-                </Link>
+                </HrefLink>
               </Button>
 
               <DropdownMenu>

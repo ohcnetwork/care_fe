@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
-import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -132,7 +132,10 @@ export function SpecimenDefinitionDetail({
                     {t("delete")}
                   </Button>
                 )}
-                <Link href={`/specimen_definitions/${specimenSlug}/edit`}>
+                <Link
+                  to="/facility/$facilityId/settings/specimen_definitions/$specimenSlug/edit"
+                  params={{ facilityId, specimenSlug }}
+                >
                   <Button variant="outline" size="sm">
                     <Pencil className="h-4 w-4 mr-2" />
                     {t("edit")}

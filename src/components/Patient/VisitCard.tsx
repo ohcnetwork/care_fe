@@ -1,5 +1,5 @@
 import { ChevronRight } from "lucide-react";
-import { Link } from "raviger";
+import { HrefLink as Link } from "@/lib/router/HrefLink";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 

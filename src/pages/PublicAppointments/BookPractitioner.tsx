@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { ChevronRight, Info } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { HrefLink as Link } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import { useTranslation } from "react-i18next";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -72,7 +73,7 @@ export default function BookPractitioner({
       subtitle={facility?.name}
       step={2}
       totalSteps={TOTAL_STEPS}
-      onBack={() => navigate("/nearby_facilities")}
+      onBack={() => navigate({ href: "/nearby_facilities" })}
       footer={
         practitioners.length > 0 && (
           <div className="flex items-start gap-2.5 rounded-xl bg-gray-100 px-3.5 py-3">

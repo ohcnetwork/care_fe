@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Plus, Search, Syringe } from "lucide-react";
-import { Link } from "raviger";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -23,6 +22,7 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { HrefLink } from "@/lib/router/HrefLink";
 import {
   ImmunizationPolicyRead,
   ImmunizationPolicyScope,
@@ -154,10 +154,10 @@ export default function ImmunizationPolicyList({
         </div>
         {canWrite && !isAccessLoading && (
           <Button asChild size="sm" className="shrink-0">
-            <Link href={`${scope.basePath}/new`} basePath="/">
+            <HrefLink href={`${scope.basePath}/new`}>
               <Plus className="size-4" aria-hidden="true" />
               {t("immunization_policy_create_short")}
-            </Link>
+            </HrefLink>
           </Button>
         )}
       </div>
@@ -296,14 +296,13 @@ export default function ImmunizationPolicyList({
                           className="h-[72px] hover:bg-gray-50"
                         >
                           <TableCell className="px-4 py-3 whitespace-normal">
-                            <Link
+                            <HrefLink
                               href={`${scope.basePath}/${policy.id}`}
-                              basePath="/"
                               className="block truncate rounded-sm font-medium text-gray-950 hover:text-primary-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                               title={policy.name}
                             >
                               {policy.name}
-                            </Link>
+                            </HrefLink>
                             {policy.description && (
                               <p
                                 className="mt-1 truncate text-xs text-gray-500"
@@ -341,9 +340,8 @@ export default function ImmunizationPolicyList({
                   return (
                     <li key={policy.id} className="space-y-2 px-4 py-3">
                       <div className="flex items-start justify-between gap-3">
-                        <Link
+                        <HrefLink
                           href={`${scope.basePath}/${policy.id}`}
-                          basePath="/"
                           className="min-w-0 rounded-sm font-medium text-gray-950 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                         >
                           <span className="flex items-start gap-1">
@@ -355,7 +353,7 @@ export default function ImmunizationPolicyList({
                               aria-hidden="true"
                             />
                           </span>
-                        </Link>
+                        </HrefLink>
                         <div className="shrink-0">{scopeBadge(policy)}</div>
                       </div>
                       {policy.description && (

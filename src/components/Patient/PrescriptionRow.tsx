@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { ChevronRight } from "lucide-react";
-import { Link } from "raviger";
+import { HrefLink as Link } from "@/lib/router/HrefLink";
 
 import { cn } from "@/lib/utils";
 

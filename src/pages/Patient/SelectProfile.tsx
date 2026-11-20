@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { HrefLink as Link } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -33,7 +34,7 @@ export default function SelectProfile() {
       return;
     }
     setSelectedPatient(activePatient);
-    navigate("/patient/home");
+    navigate({ href: "/patient/home" });
   };
 
   // A single linked profile has nothing to pick, so skip the picker entirely.
@@ -43,7 +44,7 @@ export default function SelectProfile() {
       return;
     }
     setSelectedPatient(onlyPatient);
-    navigate("/patient/home", { replace: true });
+    navigate({ href: "/patient/home", replace: true });
   }, [onlyPatient, setSelectedPatient]);
 
   if (isLoadingPatients || onlyPatient) {

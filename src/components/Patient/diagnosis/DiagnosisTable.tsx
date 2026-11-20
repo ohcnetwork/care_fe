@@ -1,8 +1,8 @@
 import { ExternalLink, File, X } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
@@ -238,11 +238,11 @@ export const DiagnosisTable = ({
         createdBy: diagnosis.created_by,
         onViewEncounter: showViewEncounter
           ? () =>
-              navigate(
-                facilityId
+              navigate({
+                href: facilityId
                   ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
                   : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-              )
+              })
           : undefined,
         meta: [
           hasOnset(diagnosis.onset) && (
@@ -278,11 +278,11 @@ export const DiagnosisTable = ({
               onViewEncounter={
                 showViewEncounter
                   ? () =>
-                      navigate(
-                        facilityId
+                      navigate({
+                        href: facilityId
                           ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
                           : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-                      )
+                      })
                   : undefined
               }
             />
@@ -338,11 +338,11 @@ export const DiagnosisTable = ({
                 onViewEncounter={
                   showViewEncounter
                     ? () =>
-                        navigate(
-                          facilityId
+                        navigate({
+                          href: facilityId
                             ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
                             : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-                        )
+                        })
                     : undefined
                 }
                 columns={[

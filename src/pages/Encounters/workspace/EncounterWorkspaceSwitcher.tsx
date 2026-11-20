@@ -1,10 +1,10 @@
 import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useLayoutEffect, useRef } from "react";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { navigate } from "@/lib/router/navigate";
 import { EncounterTab } from "@/pages/Encounters/EncounterNavigation";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { EncounterClass } from "@/types/emr/encounter/encounter";
@@ -117,12 +117,12 @@ export function EncounterWorkspaceSwitcher({
             selectedEncounter: selectedEncounterParam,
           }).toString()
         : "";
-      navigate(
-        appendReferralNativeContext(
+      navigate({
+        href: appendReferralNativeContext(
           `${target.pathname}${target.search}`,
           window.location.search,
         ),
-      );
+      });
     },
   });
 

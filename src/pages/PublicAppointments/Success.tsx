@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { CalendarPlus, Check, Clock, Share2 } from "lucide-react";
-import { Link } from "raviger";
+import { HrefLink as Link } from "@/lib/router/HrefLink";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";

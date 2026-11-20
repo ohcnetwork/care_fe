@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate, usePath } from "raviger";
 import {
   createContext,
   useCallback,
@@ -16,6 +15,8 @@ import { LocalStorageKeys } from "@/common/constants";
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import query from "@/Utils/request/query";
+import { usePathname } from "@/lib/router/location";
+import { navigate } from "@/lib/router/navigate";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import { TokenData } from "@/types/otp/otp";
@@ -44,7 +45,7 @@ export default function PatientUserProvider({ children }: Props) {
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
     () => localStorage.getItem(LocalStorageKeys.selectedPatient),
   );
-  const path = usePath();
+  const path = usePathname();
 
   const { patientToken: tokenData, signOut } = useAuthContext();
 
@@ -86,7 +87,7 @@ export default function PatientUserProvider({ children }: Props) {
   // the public landing page.
   useEffect(() => {
     if (!tokenData) {
-      navigate("/", { replace: true });
+      navigate({ href: "/", replace: true });
     }
   }, [tokenData]);
 
@@ -97,7 +98,7 @@ export default function PatientUserProvider({ children }: Props) {
 
   useEffect(() => {
     if (tokenData && userData && patients.length === 0 && !isProfileSetupPath) {
-      navigate("/patient/select-profile", { replace: true });
+      navigate({ href: "/patient/select-profile", replace: true });
     }
   }, [tokenData, userData, patients.length, isProfileSetupPath]);
 

@@ -19,6 +19,30 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
+/**
+ * The path of the appointments page of a resource. The page of a location
+ * or a service lives under that resource. Practitioners have no page of their
+ * own: their appointments show at the facility level.
+ */
+export const getAppointmentsPath = ({
+  facilityId,
+  resourceType,
+  resourceId,
+}: {
+  facilityId: string;
+  resourceType: SchedulableResourceType;
+  resourceId?: string;
+}) => {
+  switch (resourceType) {
+    case SchedulableResourceType.Location:
+      return `/facility/${facilityId}/locations/${resourceId}/appointments`;
+    case SchedulableResourceType.HealthcareService:
+      return `/facility/${facilityId}/services/${resourceId}/appointments`;
+    default:
+      return `/facility/${facilityId}/appointments`;
+  }
+};
+
 export const getUniqueSchedulesFromSlots = (slots: TokenSlot[]) => {
   const scheduleMap = new Map<string, TokenSlot["availability"]["schedule"]>();
 

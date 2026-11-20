@@ -1,5 +1,4 @@
 import { useQueries } from "@tanstack/react-query";
-import { Link, useFullPath, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -18,6 +17,9 @@ import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { usePathname } from "@/lib/router/location";
+import { useQueryParams } from "@/lib/router/queryParams";
 import {
   displayMedicationName,
   fhirDosageToFrequencyValue,
@@ -89,7 +91,7 @@ export function CurrentMedicationsWidget({
 }: CurrentMedicationsWidgetProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
-  const path = useFullPath();
+  const path = usePathname();
   const [queryParams] = useQueryParams<Record<string, string>>();
   const parsedConfig = currentMedicationsConfigSchema.safeParse(config);
   const limit = parsedConfig.data?.limit ?? 10;
@@ -160,12 +162,12 @@ export function CurrentMedicationsWidget({
     ? `/facility/${facilityId}/patient/${patientId}`
     : `/patient/${patientId}`;
   const historyLink = (
-    <Link
+    <HrefLink
       href={`${patientPath}/history/medications?sourceUrl=${encodeURIComponent(sourceUrl)}`}
       className="text-xs font-medium text-primary-700 underline-offset-2 hover:underline"
     >
       {t("medication_history")}
-    </Link>
+    </HrefLink>
   );
 
   return (

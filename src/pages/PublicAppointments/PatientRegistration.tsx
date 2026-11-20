@@ -2,7 +2,6 @@ import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -34,6 +33,8 @@ import { validateName } from "@/common/validation";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import { Organization } from "@/types/organization/organization";
@@ -143,7 +144,8 @@ export default function PublicPatientRegistration(
         queryClient.invalidateQueries({
           queryKey: ["appointment", tokenData.phoneNumber],
         });
-        navigate(`/facility/${facilityId}/appointments/${data.id}/success`, {
+        navigate({
+          href: `/facility/${facilityId}/appointments/${data.id}/success`,
           replace: true,
         });
       },
@@ -176,7 +178,7 @@ export default function PublicPatientRegistration(
       });
       if (!isBookingFlow) {
         patientUserContext?.setSelectedPatient(data);
-        navigate("/patient/select-profile", { replace: true });
+        navigate({ href: "/patient/select-profile", replace: true });
         return;
       }
       createAppointment({
@@ -228,7 +230,7 @@ export default function PublicPatientRegistration(
           <header className="sticky top-0 z-10 flex shrink-0 items-center gap-2.5 border-b border-gray-200 bg-white px-4 py-3 sm:rounded-t-3xl">
             <button
               type="button"
-              onClick={() => navigate(backTo)}
+              onClick={() => navigate({ href: backTo })}
               aria-label={t("back")}
               className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-gray-900 hover:bg-gray-100"
             >
@@ -455,7 +457,7 @@ export default function PublicPatientRegistration(
             <Button
               variant="outline"
               type="button"
-              onClick={() => navigate(backTo)}
+              onClick={() => navigate({ href: backTo })}
             >
               {t("cancel")}
             </Button>

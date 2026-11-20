@@ -1,6 +1,8 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronRight, Info, Search } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
+import { HrefLink as Link } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -100,7 +102,7 @@ export default function BookFacility() {
       title={t("book_appointment")}
       step={1}
       totalSteps={TOTAL_STEPS}
-      onBack={() => navigate("/patient/home")}
+      onBack={() => navigate({ href: "/patient/home" })}
       headerExtra={
         // OrganizationFilter stacks its controls below `sm`, which leaves its
         // "Clear" ghost button as a full-width orphan under the select. Pull it

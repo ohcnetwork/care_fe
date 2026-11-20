@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Languages, LogOut, Plus } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { HrefLink as Link } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -35,7 +36,7 @@ export default function PatientProfileSettings() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/", { replace: true });
+    navigate({ href: "/", replace: true });
   };
 
   return (

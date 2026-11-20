@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -33,6 +32,7 @@ import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import mutate from "@/Utils/request/mutate";
 import BackButton from "@/components/Common/BackButton";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQueryParams } from "@/lib/router/queryParams";
 import {
   usePluginDevice,
   usePluginDevices,

@@ -1,9 +1,9 @@
 import { t } from "i18next";
-import { navigate } from "raviger";
 import { toast } from "sonner";
 
 import * as Notifications from "@/Utils/Notifications";
 import { HTTPError, StructuredError } from "@/Utils/request/types";
+import { navigate } from "@/lib/router/navigate";
 
 export function handleHttpError(error: Error) {
   // Skip handling silent errors and AbortError
@@ -76,7 +76,7 @@ function isSessionExpired(error: HTTPError["cause"]) {
 
 function handleSessionExpired() {
   if (!location.pathname.startsWith("/session-expired")) {
-    navigate(`/session-expired?redirect=${window.location.href}`);
+    navigate({ href: `/session-expired?redirect=${window.location.href}` });
   }
 }
 

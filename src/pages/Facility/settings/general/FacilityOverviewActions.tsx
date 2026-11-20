@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import {
   ChevronRight,
   ClipboardList,
@@ -8,7 +9,6 @@ import {
   Package,
   Stethoscope,
 } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/card";
 
 import { ResourceFormPicker } from "@/components/Questionnaire/ResourceFormPicker";
+
+import { HrefLink } from "@/lib/router/HrefLink";
 
 interface FacilityOverviewActionsProps {
   facilityId: string;
@@ -89,7 +91,10 @@ export function FacilityOverviewActions({
               className="w-full justify-start whitespace-normal text-left font-normal tracking-normal"
               asChild
             >
-              <Link basePath="/" href={`${baseUrl}/responses`}>
+              <Link
+                to="/facility/$facilityId/settings/responses"
+                params={{ facilityId }}
+              >
                 <ClipboardList aria-hidden="true" />
                 {t("responses")}
                 <ChevronRight className="ml-auto size-4" aria-hidden="true" />
@@ -123,7 +128,7 @@ export function FacilityOverviewActions({
                     className="h-auto min-h-12 w-full justify-start whitespace-normal py-2 text-left font-normal tracking-normal md:min-h-10"
                     asChild
                   >
-                    <Link basePath="/" href={`${baseUrl}${path}`}>
+                    <HrefLink href={`${baseUrl}${path}`}>
                       <Icon
                         className="text-muted-foreground"
                         aria-hidden="true"
@@ -133,7 +138,7 @@ export function FacilityOverviewActions({
                         className="ml-auto size-4 text-muted-foreground"
                         aria-hidden="true"
                       />
-                    </Link>
+                    </HrefLink>
                   </Button>
                 </li>
               ))}

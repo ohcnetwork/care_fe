@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -8,6 +7,8 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
@@ -212,7 +213,10 @@ export function QuestionnaireStudioPage({
           <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{t("no_data_found")}</AlertDescription>
         </Alert>
-        <Button variant="outline" onClick={() => navigate(scope.basePath)}>
+        <Button
+          variant="outline"
+          onClick={() => navigate({ href: scope.basePath })}
+        >
           <ArrowLeft className="size-4" />
           {t("back")}
         </Button>
@@ -230,8 +234,8 @@ export function QuestionnaireStudioPage({
       revealHidden={editing}
       inert={editing}
     >
-      {/* Fullscreen shell (the route opts out of the app sidebar in
-          AppRouter's PATHS_WITHOUT_SIDEBAR): the reference design's
+      {/* Fullscreen shell (the route opts out of the app sidebar with a
+          layout flag): the reference design's
           viewport-filling frame — fixed top bar, three independently
           scrolling columns, from md up. z-40 keeps portals (dialogs, popovers, toasts
           at z-50) above it. */}

@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isWithinInterval } from "date-fns";
 import dayjs from "dayjs";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -28,6 +27,7 @@ import {
   goBack,
 } from "@/Utils/utils";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
+import { navigate } from "@/lib/router/navigate";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
@@ -76,7 +76,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   useEffect(() => {
     if (!staffId) {
       toast.error(t("staff_username_not_found"));
-      navigate(`/facility/${facilityId}`);
+      navigate({ href: `/facility/${facilityId}` });
     }
   }, [staffId, facilityId, t]);
 
@@ -171,7 +171,8 @@ export function ScheduleAppointment(props: AppointmentsProps) {
         queryClient.invalidateQueries({
           queryKey: ["appointment", tokenData?.phoneNumber],
         });
-        navigate(`/facility/${facilityId}/appointments/${data.id}/success`, {
+        navigate({
+          href: `/facility/${facilityId}/appointments/${data.id}/success`,
           replace: true,
         });
       },

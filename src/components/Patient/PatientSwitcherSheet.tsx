@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { Link } from "raviger";
+import { HrefLink as Link } from "@/lib/router/HrefLink";
 import { useTranslation } from "react-i18next";
 
 import {

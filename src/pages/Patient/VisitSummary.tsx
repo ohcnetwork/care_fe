@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import { Activity, ChevronRight, FileText } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { HrefLink as Link } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -304,7 +305,7 @@ export default function VisitSummary({
                   <CancelAppointmentButton
                     appointment={appointment}
                     className="min-h-11 w-full text-red-600 hover:bg-red-50 hover:text-red-700"
-                    onCancelled={() => navigate("/patient/visits")}
+                    onCancelled={() => navigate({ href: "/patient/visits" })}
                   />
                 )}
             </div>

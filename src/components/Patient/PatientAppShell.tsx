@@ -1,5 +1,5 @@
 import { ArrowLeft } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate } from "@/lib/router/navigate";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -70,7 +70,7 @@ export function PatientAppShell({
               variant="ghost"
               size="icon"
               type="button"
-              onClick={() => navigate(backTo)}
+              onClick={() => navigate({ href: backTo })}
               aria-label={t("back")}
             >
               <ArrowLeft className="size-5" strokeWidth={1.9} />

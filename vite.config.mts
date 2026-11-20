@@ -15,7 +15,6 @@ import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import { marked } from "marked";
-import { createRequire } from "module";
 import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
@@ -24,10 +23,6 @@ import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 import { typstCompilerWasm } from "./plugins/typstCompilerWasm";
 import validateEnv from "./scripts/validate-env";
-
-const ravigerVersion: string = createRequire(import.meta.url)(
-  "raviger/package.json",
-).version;
 
 const LOCAL_PLUGIN_MODULE_ID = "virtual:care-local-plugins";
 const RESOLVED_LOCAL_PLUGIN_MODULE_ID = `\0${LOCAL_PLUGIN_MODULE_ID}`;
@@ -466,10 +461,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "@tanstack/react-query",
           // One router instance: plugins read the host router's context.
           "@tanstack/react-router",
-          // The alias points `raviger` at the shim, so give the version
-          // here; otherwise the plugin reads `raviger/package.json` through
-          // the alias and fails.
-          { raviger: { version: ravigerVersion } },
           "sonner",
           "decimal.js",
         ],
@@ -529,11 +520,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         "@": path.resolve(__dirname, "./src"),
         "@careConfig": path.resolve(__dirname, "./care.config.ts"),
         "@core": path.resolve(__dirname, "src/"),
-        // Every `raviger` import (core, local plugins and the federated
-        // shared module) resolves to the compatibility shim, which sends all
-        // navigation through the TanStack router. Type-only imports of
-        // `raviger/dist/*` inside the shim are erased before resolution.
-        raviger: path.resolve(__dirname, "src/compat/raviger.tsx"),
       },
       // Dedupe shared packages so locally-served plugin source (apps/*) resolves
       // these from the main app's node_modules instead of the plugin's own copy.
@@ -546,7 +532,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         "i18next",
         "@tanstack/react-query",
         "@tanstack/react-router",
-        "raviger",
         "sonner",
         "decimal.js",
       ],

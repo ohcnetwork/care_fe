@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { FileText } from "lucide-react";
-import { useQueryParams } from "raviger";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 

@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { ChevronRight, Clock } from "lucide-react";
-import { Link } from "raviger";
+import { HrefLink as Link } from "@/lib/router/HrefLink";
 import { createElement } from "react";
 import { useTranslation } from "react-i18next";
 
