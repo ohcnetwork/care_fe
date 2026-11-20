@@ -45,7 +45,7 @@ export default {
     TRes: Type<void>(),
   },
   getOrganizations: {
-    path: "/api/v1/facility/{facility_id}/location/{id}/organizations",
+    path: "/api/v1/facility/{facility_id}/location/{id}/organizations/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<FacilityOrganizationRead>>(),
   },
