@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { navigate as ravigerNavigate } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -30,12 +30,13 @@ import Page from "@/components/Common/Page";
 import RequirementsSelector from "@/components/Common/RequirementsSelector";
 import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 
 // import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import {
   type HealthcareServiceCreateSpec,
   type HealthcareServiceReadSpec,
@@ -173,7 +174,9 @@ function HealthcareServiceFormContent({
           queryKey: ["healthcareService", healthcareServiceId],
         });
         toast.success(t("healthcare_service_created_successfully"));
-        navigate(`/facility/${facilityId}/settings/healthcare_services`, {
+        navigate({
+          to: "/facility/$facilityId/settings/healthcare_services",
+          params: { facilityId },
           replace: true,
         });
       },
@@ -190,7 +193,7 @@ function HealthcareServiceFormContent({
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["healthcareServices"] });
         toast.success(t("healthcare_service_updated_successfully"));
-        navigate(
+        ravigerNavigate(
           `/facility/${facilityId}/settings/healthcare_services/${healthcareServiceId}`,
           {
             replace: true,
@@ -407,9 +410,9 @@ function HealthcareServiceFormContent({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <FacilityOrganizationSelector
+                        <FacilityOrganizationTreeSelect
                           value={field.value ? [field.value] : null}
-                          currentOrganizations={
+                          knownOrganizations={
                             existingData?.managing_organization
                               ? [existingData.managing_organization]
                               : []
@@ -471,9 +474,10 @@ function HealthcareServiceFormContent({
               <Button
                 variant="outline"
                 onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/healthcare_services`,
-                  )
+                  navigate({
+                    to: "/facility/$facilityId/settings/healthcare_services",
+                    params: { facilityId },
+                  })
                 }
               >
                 {t("cancel")}

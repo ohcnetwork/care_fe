@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -44,12 +45,12 @@ export function CreateInvoiceSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-4xl">
+      <SheetContent size="xl" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("create_invoice")}</SheetTitle>
           <SheetDescription>{t("create_invoice_description")}</SheetDescription>
         </SheetHeader>
-        <div className="h-[calc(100vh-8rem)] overflow-auto mt-6 -mx-4">
+        <SheetBody>
           <CreateInvoicePage
             facilityId={facilityId}
             accountId={accountId}
@@ -62,7 +63,7 @@ export function CreateInvoiceSheet({
             dispenseOrderId={dispenseOrderId}
             skipNavigation={skipNavigation}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

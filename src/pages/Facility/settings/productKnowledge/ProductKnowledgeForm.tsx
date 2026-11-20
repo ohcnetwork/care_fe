@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, PlusCircle, X } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link, navigate as ravigerNavigate } from "raviger";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -35,9 +35,11 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+
+import { navigate } from "@/lib/router/navigate";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import { slugValueSchema } from "@/types/base/slug/schema";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import {
   ProductKnowledgeBase,
@@ -49,24 +51,14 @@ import {
   UCUM_TIME_UNITS_CODES,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+import { generateSlugValue } from "@/Utils/slug";
 
 const createFormSchema = (
   t: (key: string, options?: Record<string, unknown>) => string,
 ) => {
   return z.object({
     name: z.string().min(1, { message: t("name_is_required") }),
-    slug_value: z
-      .string()
-      .trim()
-      .min(5, {
-        message: t("character_count_validation", { min: 5, max: 25 }),
-      })
-      .max(25, {
-        message: t("character_count_validation", { min: 5, max: 25 }),
-      })
-      .regex(/^[a-z0-9_-]+$/, {
-        message: t("slug_format_message"),
-      }),
+    slug_value: slugValueSchema(),
     product_type: z.enum(ProductKnowledgeType),
     status: z.enum(ProductKnowledgeStatus),
     alternate_identifier: z.string().trim().optional(),
@@ -171,7 +163,7 @@ function ProductKnowledgeFormContent({
   existingData,
   categorySlug,
   onSuccess = () =>
-    navigate(
+    ravigerNavigate(
       `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
     ),
 }: {
@@ -264,7 +256,7 @@ function ProductKnowledgeFormContent({
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
-        navigate(
+        ravigerNavigate(
           `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
         );
       },
@@ -287,9 +279,10 @@ function ProductKnowledgeFormContent({
           queryKey: ["productKnowledge", slug],
         });
         toast.success(t("product_knowledge_updated_successfully"));
-        navigate(
-          `/facility/${facilityId}/settings/product_knowledge/${productKnowledge.slug}`,
-        );
+        navigate({
+          to: "/facility/$facilityId/settings/product_knowledge/$slug",
+          params: { facilityId, slug: productKnowledge.slug },
+        });
       },
     },
   );
@@ -365,10 +358,8 @@ function ProductKnowledgeFormContent({
                               if (!isEditMode) {
                                 form.setValue(
                                   "slug_value",
-                                  generateSlug(e.target.value || "", 25),
-                                  {
-                                    shouldValidate: true,
-                                  },
+                                  generateSlugValue(e.target.value),
+                                  { shouldValidate: true },
                                 );
                               }
                             }}
@@ -586,7 +577,7 @@ function ProductKnowledgeFormContent({
                       {t("alternative_names")}
                     </h2>
                     <p className="mt-0.5 text-sm text-gray-500">
-                      {t("add_product_alternative name")}
+                      {t("add_product_alternative_name")}
                     </p>
                   </div>
                   <Button

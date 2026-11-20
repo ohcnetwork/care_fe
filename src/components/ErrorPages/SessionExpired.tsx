@@ -142,7 +142,7 @@ const SegmentedTime = ({ timeStr, scaleFactor }: SegmentedTimeProps) => (
 );
 
 export default function SessionExpired() {
-  const { signOut } = useAuthContext();
+  const { endSessionKeepingDrafts } = useAuthContext();
   const { t } = useTranslation();
 
   const [seconds, setSeconds] = useState(0);
@@ -240,7 +240,10 @@ export default function SessionExpired() {
           type="button"
           variant="primary"
           className="mt-6"
-          onClick={signOut}
+          // Drafts survive this button on purpose: the fill page flushed the
+          // in-progress answers to its local draft on unmount, and this is
+          // the path back to the login form that recovers them.
+          onClick={() => void endSessionKeepingDrafts()}
         >
           {t("log_in_again")}
         </Button>

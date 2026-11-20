@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -37,36 +36,37 @@ export function DatePicker({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn(
-            "w-full justify-start text-left font-normal",
-            !date && "text-gray-500",
-            "sm:w-auto",
-            className,
+      <PopoverTrigger
+        appearance="field"
+        className={cn(
+          "w-full justify-start text-left font-normal sm:w-auto",
+          !date && "text-placeholder-foreground",
+          className,
+        )}
+        disabled={disablePicker}
+      >
+        <CareIcon icon="l-calender" className="mr-0 size-4 shrink-0" />
+        <span className="truncate">
+          {date ? (
+            <>
+              <span className="block sm:hidden">
+                {format(date, "MMM d, yyyy")}
+              </span>
+              <span className="hidden sm:block">
+                {format(date, dateFormat)}
+              </span>
+            </>
+          ) : (
+            <span>{t("pick_a_date")}</span>
           )}
-          disabled={disablePicker}
-        >
-          <CareIcon icon="l-calender" className="mr-0 size-4 shrink-0" />
-          <span className="truncate">
-            {date ? (
-              <>
-                <span className="block sm:hidden">
-                  {format(date, "MMM d, yyyy")}
-                </span>
-                <span className="hidden sm:block">
-                  {format(date, dateFormat)}
-                </span>
-              </>
-            ) : (
-              <span>{t("pick_a_date")}</span>
-            )}
-          </span>
-        </Button>
+        </span>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 sm:w-64" align="start">
+      <PopoverContent
+        className="w-auto max-w-[calc(100vw-2rem)] p-0"
+        align="start"
+      >
         <Calendar
+          className="[--cell-size:min(--spacing(10),calc((100vw-4rem)/7))]"
           mode="single"
           selected={date}
           onSelect={(date) => {

@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { t as i18nT } from "i18next";
 import {
   CheckIcon,
@@ -9,7 +10,7 @@ import {
   SquareArrowOutUpRight,
   XIcon,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { navigate } from "raviger";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -69,6 +70,7 @@ import { UserReadMinimal } from "@/types/user/user";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, goBack } from "@/Utils/utils";
+import careConfig from "@careConfig";
 
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import { DateTimePicker } from "@/components/Common/DateTimePicker";
@@ -212,7 +214,7 @@ export function CreateInvoicePage({
     resolver: zodResolver(formSchema),
     defaultValues: {
       status: InvoiceStatus.draft,
-      payment_terms: import.meta.env.REACT_DEFAULT_PAYMENT_TERMS || "",
+      payment_terms: careConfig.defaultPaymentTerms,
       note: "",
       issue_date: "",
     },
@@ -376,7 +378,8 @@ export function CreateInvoicePage({
                     {t("account")}
                   </span>
                   <Link
-                    href={`/facility/${facilityId}/billing/account/${accountId}`}
+                    to="/facility/$facilityId/billing/account/$accountId"
+                    params={{ facilityId, accountId }}
                   >
                     <div className="font-semibold text-gray-950 underline">
                       {account.name}
@@ -435,7 +438,7 @@ export function CreateInvoicePage({
               {isLoading ? (
                 <TableSkeleton count={3} />
               ) : (
-                <div className="rounded-t-sm border border-gray-300">
+                <div className="rounded-t-sm border border-gray-300 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
                   <Table>
                     <TableHeader>
                       <TableRow className="border-b border-gray-200">
@@ -715,6 +718,7 @@ export function CreateInvoicePage({
                           },
                         }}
                         translationBaseKey="charge_item_definition"
+                        data-shortcut-id="enter-action"
                       />
                     </div>
                   )}
@@ -763,9 +767,10 @@ export function CreateInvoicePage({
               onOpenChange={setOptionalFieldsOpen}
             >
               <CollapsibleTrigger asChild>
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
-                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-950 transition-colors py-2 group"
+                  className="h-auto justify-start whitespace-normal px-0 flex items-center gap-2 text-sm text-gray-600 hover:text-gray-950 transition-colors py-2 group"
                 >
                   <ChevronRight
                     className={cn(
@@ -779,7 +784,7 @@ export function CreateInvoicePage({
                   <span className="text-xs text-gray-400 group-hover:text-gray-500">
                     ({t("optional")})
                   </span>
-                </button>
+                </Button>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="space-y-4 pt-2 pb-4">

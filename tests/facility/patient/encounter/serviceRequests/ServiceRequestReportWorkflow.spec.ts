@@ -187,7 +187,7 @@ test.describe("Service request report workflow", () => {
     ).toHaveCount(0);
   });
 
-  test("shows updates within the creation minute in expanded report details", async ({
+  test("shows updates within the creation minute in collapsed and expanded reports", async ({
     page,
   }) => {
     const fixture = await mockReportWorkflow(page, {
@@ -195,21 +195,34 @@ test.describe("Service request report workflow", () => {
       reportStatus: "final",
     });
     await page.goto(fixture.url);
-    const expand = page.getByRole("button", {
-      name: `Expand ${fixture.report.code.display}`,
-      exact: true,
-    });
+    const expand = page
+      .locator("#service-request-section-review")
+      .getByRole("button", {
+        name: `Expand ${fixture.report.code.display}`,
+        exact: true,
+      });
+    await expect(expand).toContainText("Updated:");
+    await expect(expand.locator("time")).toHaveAttribute(
+      "datetime",
+      fixture.report.modified_date,
+    );
     await expand.click();
 
-    const details = page.locator("#service-request-section-review");
-    await expect(details).toContainText("Created:");
-    await expect(details).toContainText("Last Updated:");
-    await expect(details.locator("time")).toHaveCount(2);
-    await expect(details.locator("time").first()).toHaveAttribute(
+    const review = page.locator("#service-request-section-review");
+    await expect(
+      review.getByRole("button", {
+        name: `Collapse ${fixture.report.code.display}`,
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(review.getByText(/^Created:/)).toBeVisible();
+    await expect(review.getByText(/^Last Updated:/)).toBeVisible();
+    await expect(review.locator("time")).toHaveCount(2);
+    await expect(review.locator("time").first()).toHaveAttribute(
       "datetime",
       fixture.report.created_date,
     );
-    await expect(details.locator("time").last()).toHaveAttribute(
+    await expect(review.locator("time").last()).toHaveAttribute(
       "datetime",
       fixture.report.modified_date,
     );

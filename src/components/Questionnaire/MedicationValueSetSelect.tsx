@@ -1,6 +1,10 @@
-import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, FolderOpen, Home, Loader2 } from "lucide-react";
+import {
+  ChevronsUpDown as CaretSortIcon,
+  ChevronRight,
+  FolderOpen,
+  Home,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,6 +34,7 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchContent";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -51,7 +56,6 @@ import {
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import query from "@/Utils/request/query";
-import { isIOSDevice } from "@/Utils/utils";
 
 interface Props {
   onSelect: (value: Code) => void;
@@ -60,9 +64,15 @@ interface Props {
   placeholder?: string;
   title?: string;
   value?: Code;
-  hideTrigger?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  closeOnSelect?: boolean;
   wrapTextForSmallScreen?: boolean;
   mobileTrigger?: React.ReactNode;
+  /** Mobile only: rendered inside the drawer content, so a drawer it holds nests on top. */
+  drawerChildren?: React.ReactNode;
+  /** Always render the drawer, even at widths where this would be a popover. */
+  drawerOnly?: boolean;
 }
 
 type TabType = "product" | "valueset";
@@ -74,18 +84,24 @@ export default function MedicationValueSetSelect({
   placeholder = "Search...",
   title,
   value,
-  hideTrigger = false,
+  open: controlledOpen,
+  onOpenChange: onControlledOpenChange,
+  closeOnSelect = true,
   wrapTextForSmallScreen = false,
   mobileTrigger,
+  drawerChildren,
+  drawerOnly = false,
 }: Props) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const setOpen = onControlledOpenChange ?? setUncontrolledOpen;
   const [activeTab, setActiveTab] = useState<TabType>(
     careConfig.medicationValueSetSelectDefaultTab,
   );
   const [search, setSearch] = useState("");
-  const isMobile = useBreakpoints({ default: true, sm: false });
+  const isMobile = useBreakpoints({ default: true, sm: false }) || drawerOnly;
 
   const [currentCategory, setCurrentCategory] = useState<string | undefined>(
     undefined,
@@ -173,6 +189,11 @@ export default function MedicationValueSetSelect({
     setSearch("");
   };
 
+  // The tabs only ask to close after a selection.
+  const handleTabOpenChange = (value: boolean) => {
+    if (value || closeOnSelect) setOpen(value);
+  };
+
   const tabContent = (
     <MedicationValueSetSelectTabContent
       activeTab={activeTab}
@@ -188,11 +209,11 @@ export default function MedicationValueSetSelect({
       onValueSetSelect={onSelect}
       title={title}
       onChange={setActiveTab}
-      onOpenChange={setOpen}
+      onOpenChange={handleTabOpenChange}
     />
   );
 
-  if (isMobile && !hideTrigger) {
+  if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
@@ -216,8 +237,9 @@ export default function MedicationValueSetSelect({
             </Button>
           )}
         </DrawerTrigger>
-        <DrawerContent className="min-h-[60vh] max-h-[85vh] px-0 pb-0 rounded-t-lg">
-          <DrawerHeader className="p-0 mt-1.5">
+
+        <DrawerContent height="fixed">
+          <DrawerHeader className="pt-2.5 flex flex-col items-stretch justify-start">
             <MedicationValueSetSelectTabs
               activeTab={activeTab}
               onChange={setActiveTab}
@@ -232,27 +254,12 @@ export default function MedicationValueSetSelect({
               onBreadcrumbClick={handleBreadcrumbClick}
             />
           </DrawerHeader>
-          <div className="flex-1 overflow-y-auto">{tabContent}</div>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
+            {tabContent}
+          </div>
+          {drawerChildren}
         </DrawerContent>
       </Drawer>
-    );
-  }
-
-  if (hideTrigger) {
-    return (
-      <div className="w-full mt-1.5">
-        <MedicationValueSetSelectTabs
-          activeTab={activeTab}
-          onChange={setActiveTab}
-        />
-        <CategoryBreadcrumbs
-          breadcrumbs={breadcrumbs}
-          activeTab={activeTab}
-          onBackToRoot={handleBackToRoot}
-          onBreadcrumbClick={handleBreadcrumbClick}
-        />
-        {tabContent}
-      </div>
     );
   }
 
@@ -273,11 +280,13 @@ export default function MedicationValueSetSelect({
           <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[600px] p-0" align="start">
-        <MedicationValueSetSelectTabs
-          activeTab={activeTab}
-          onChange={setActiveTab}
-        />
+      <PopoverContent className="w-150 p-0 gap-1 overflow-clip" align="start">
+        <div className="p-2 pb-0">
+          <MedicationValueSetSelectTabs
+            activeTab={activeTab}
+            onChange={setActiveTab}
+          />
+        </div>
         <CategoryBreadcrumbs
           breadcrumbs={breadcrumbs}
           activeTab={activeTab}
@@ -487,44 +496,42 @@ export function MedicationValueSetSelectTabContent({
 }: MedicationValueSetSelectTabContentProps) {
   const { t } = useTranslation();
 
+  const isListLoading = search
+    ? isProductLoading
+    : isCategoriesLoading || (!!currentCategory && isProductLoading);
+
   return (
-    <div>
+    <div className="flex min-h-0 flex-1 flex-col">
       <Tabs
         value={activeTab}
         onValueChange={(value: string) => {
           onChange(value as TabType);
         }}
-        className="w-full p-0"
+        className="min-h-0 w-full flex-1 p-0"
       >
-        <TabsContent value="product">
+        <TabsContent value="product" className="flex min-h-0 flex-col">
           <Command className="rounded-lg" filter={() => 1}>
-            <div className="bg-white z-10 w-full fixed mb-4">
+            <div className="shrink-0 border-b bg-white shadow-2xs">
               <CommandInput
                 placeholder={t("search_products")}
                 onValueChange={onSearchChange}
                 value={search}
-                className="border-none ring-0 text-base sm:text-sm"
-                autoFocus={!isIOSDevice}
+                autoFocus
               />
             </div>
 
-            <CommandList className="flex-1 mt-7 overflow-y-auto">
-              <CommandEmpty className="h-72 flex justify-center items-center py-6 text-gray-500">
-                {search.length < 3 ? (
-                  <p className="p-4 text-sm text-gray-500">
-                    {t("min_char_length_error", { min_length: 3 })}
-                  </p>
-                ) : isProductLoading || isCategoriesLoading ? (
-                  <p className="flex items-center justify-center p-4 text-sm text-gray-500">
-                    <Loader2 className="size-5 animate-spin mr-2" />
-                    {t("searching")}
-                  </p>
-                ) : (
+            <CommandList className="scrollbar-gutter-auto">
+              {isListLoading ? (
+                <div className="p-2">
+                  <FormSkeleton rows={5} />
+                </div>
+              ) : (
+                <CommandEmpty className="h-72 flex justify-center items-center py-6 text-gray-500">
                   <p className="p-4 text-sm text-gray-500">
                     {t("no_results_found")}
                   </p>
-                )}
-              </CommandEmpty>
+                </CommandEmpty>
+              )}
 
               {search ? (
                 <MedicationCommandGroup
@@ -556,7 +563,7 @@ export function MedicationValueSetSelectTabContent({
           </Command>
         </TabsContent>
 
-        <TabsContent value="valueset" className="p-0 overflow-y-auto">
+        <TabsContent value="valueset" className="flex min-h-0 flex-col p-0">
           <ValueSetSearchContent
             system="system-medication"
             onSelect={(value) => {

@@ -1,5 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { getFieldErrorMessage } from "tests/helper/error";
+import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -97,6 +99,10 @@ class ScheduleFormPage {
       .fill(data.patientsPerSlot);
   }
 
+  getSlotCountInput() {
+    return this.page.locator('input[name="availabilities.0.num_of_slots"]');
+  }
+
   async getAutoFilledSlotDuration(): Promise<string> {
     const slotDurationInput = this.page.getByRole("spinbutton", {
       name: "Slot duration (mins.)",
@@ -157,7 +163,7 @@ class ScheduleCardPage {
   async openEditForm(templateName: string): Promise<void> {
     const card = this.getScheduleCard(templateName);
     await card
-      .locator('button[data-slot="button"]')
+      .getByRole("button")
       .filter({ has: this.page.locator("svg.lucide-pen-line") })
       .first()
       .click();
@@ -288,7 +294,7 @@ test.describe("Schedule Template Management", () => {
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     await page.goto(`/facility/${facilityId}/users/admin`);
-    await page.getByRole("link", { name: "Availability" }).click();
+    await page.getByRole("tab", { name: "Availability" }).click();
   });
 
   test("should create and verify a weekday schedule template", async ({
@@ -356,6 +362,127 @@ test.describe("Schedule Template Management", () => {
       numberOfSlots: SCHEDULE_CONSTANTS.DEFAULT_SLOT_COUNT,
       weekdays: testData.weekdays,
       displayTime: testData.displayTime,
+    });
+  });
+
+  test("should allow clearing and re-entering the number of slots", async ({
+    page,
+  }) => {
+    const testData = ScheduleTestDataFactory.createWeekdaySchedule();
+    const formPage = new ScheduleFormPage(page);
+    const cardPage = new ScheduleCardPage(page);
+    const slotCountInput = formPage.getSlotCountInput();
+    const slotDurationInput = page.getByRole("spinbutton", {
+      name: "Slot duration (mins.)",
+    });
+
+    await test.step("Fill the template form with auto-fill enabled", async () => {
+      await page.getByRole("button", { name: "Create Template" }).click();
+      await formPage.fillTemplateName(testData.templateName);
+      await formPage.selectMidMonthDate("first", 1);
+      await formPage.selectWeekdays(testData.weekdays);
+      await formPage.selectMidMonthDate("second", 2);
+      await formPage.fillSessionDetails({
+        title: testData.sessionTitle,
+        startTime: testData.startTime,
+        endTime: testData.endTime,
+        patientsPerSlot: testData.patientsPerSlot,
+      });
+      await expect(slotCountInput).toHaveValue("1");
+      await expect(slotDurationInput).toHaveValue("300");
+    });
+
+    await test.step("Clearing the slot count keeps the field empty", async () => {
+      await slotCountInput.clear();
+      await expect(slotCountInput).toHaveValue("");
+      await expect(slotDurationInput).toHaveValue("");
+    });
+
+    await test.step("Saving with an empty slot count shows an error", async () => {
+      await formPage.submitTemplate();
+      await expect(getFieldErrorMessage(slotCountInput)).toContainText(
+        "This field is required",
+      );
+      await expect(
+        page.getByRole("textbox", { name: "Template Name *" }),
+      ).toBeVisible();
+    });
+
+    await test.step("Entering a new slot count recalculates the duration", async () => {
+      await slotCountInput.pressSequentially("6");
+      await expect(slotCountInput).toHaveValue("6");
+      await expect(slotDurationInput).toHaveValue("50");
+      await expect(getFieldErrorMessage(slotCountInput)).toBeHidden();
+      await expect(getFieldErrorMessage(slotDurationInput)).toBeHidden();
+    });
+
+    await test.step("Template is created with the new slot count", async () => {
+      await formPage.submitTemplate();
+      await expectToast(page, "Schedule template created successfully");
+      await page.getByRole("button", { name: "Next Month" }).click();
+      await cardPage.verifyCardContent(testData.templateName, {
+        sessionTitle: testData.sessionTitle,
+        displayTime: testData.displayTime,
+        slotDuration: "50",
+        numberOfSlots: 6,
+      });
+    });
+  });
+
+  test("should not validate the number of slots when auto-fill is off", async ({
+    page,
+  }) => {
+    const testData = ScheduleTestDataFactory.createWeekdaySchedule();
+    const formPage = new ScheduleFormPage(page);
+    const cardPage = new ScheduleCardPage(page);
+    const slotCountInput = formPage.getSlotCountInput();
+    const slotDurationInput = page.getByRole("spinbutton", {
+      name: "Slot duration (mins.)",
+    });
+
+    await test.step("Fill the template form with auto-fill enabled", async () => {
+      await page.getByRole("button", { name: "Create Template" }).click();
+      await formPage.fillTemplateName(testData.templateName);
+      await formPage.selectMidMonthDate("first", 1);
+      await formPage.selectWeekdays(testData.weekdays);
+      await formPage.selectMidMonthDate("second", 2);
+      await formPage.fillSessionDetails({
+        title: testData.sessionTitle,
+        startTime: testData.startTime,
+        endTime: testData.endTime,
+        patientsPerSlot: testData.patientsPerSlot,
+      });
+      await expect(slotCountInput).toHaveValue("1");
+    });
+
+    await test.step("Saving with an empty slot count shows an error", async () => {
+      await slotCountInput.clear();
+      await formPage.submitTemplate();
+      await expect(getFieldErrorMessage(slotCountInput)).toContainText(
+        "This field is required",
+      );
+    });
+
+    await test.step("Turning auto-fill off hides the slot count and asks for a duration", async () => {
+      await page
+        .getByRole("switch", { name: "Auto-fill slot duration" })
+        .click();
+      await expect(slotCountInput).toBeHidden();
+      await expect(slotDurationInput).toBeEnabled();
+      await expect(slotDurationInput).toHaveValue("");
+    });
+
+    await test.step("Template is created with a manual slot duration", async () => {
+      await slotDurationInput.fill("60");
+      await formPage.submitTemplate();
+      await expectToast(page, "Schedule template created successfully");
+      await page.getByRole("button", { name: "Next Month" }).click();
+      await cardPage.verifyCardContent(testData.templateName, {
+        sessionTitle: testData.sessionTitle,
+        displayTime: testData.displayTime,
+        slotDuration: "60",
+        numberOfSlots: 5,
+      });
     });
   });
 });

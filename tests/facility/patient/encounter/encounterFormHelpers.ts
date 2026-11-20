@@ -1,16 +1,19 @@
 import { faker } from "@faker-js/faker";
 import { expect, type Page } from "@playwright/test";
 import { ENCOUNTER_CLASSES } from "tests/facility/patient/encounter/encounterClasses";
+import { createTestPatient } from "tests/helper/patient";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
 
 export async function openCreateEncounterDialog(
   page: Page,
-  patientId = getPatientId(),
+  patientId?: string,
 ) {
   const facilityId = getFacilityId();
+  // A fresh patient by default: these specs leave their encounters active,
+  // and the backend caps active encounters per patient in a facility.
+  const encounterPatientId = patientId ?? (await createTestPatient());
 
-  await page.goto(`/facility/${facilityId}/patient/${patientId}`);
+  await page.goto(`/facility/${facilityId}/patient/${encounterPatientId}`);
   await page.getByRole("link", { name: "Patient Home" }).first().click();
 
   await expect(

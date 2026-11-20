@@ -45,7 +45,7 @@ export interface ChargeItemDefinitionCreate extends Omit<
 > {
   slug_value: string;
   category: string | null;
-  tags?: string[];
+  tags?: { tag: string }[];
   version?: number;
   discount_configuration: DiscountConfiguration | null;
 }

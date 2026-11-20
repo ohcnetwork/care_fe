@@ -197,8 +197,13 @@ export async function selectFromValueSet(
     }
   }
 
-  // Wait for options to load
-  const options = scope.getByRole("option");
+  // Scope to the requested column. Both columns render role=option, and the
+  // starred column stays mounted while a search is in flight, so an unscoped
+  // query can resolve against a starred entry instead of a search result.
+  const column = scope.getByTestId(
+    tab === "starred" ? "valueset-starred" : "valueset-search-results",
+  );
+  const options = column.getByRole("option");
   await options.first().waitFor({ state: "visible" });
 
   const count = await options.count();
@@ -417,97 +422,6 @@ export async function selectFromCategoryPicker(
   }
 }
 
-interface SelectFromDefinitionCategoryPickerOptions {
-  search?: string;
-  navigateCategories?: string[];
-  itemIndex?: number;
-}
-
-/**
- * Helper for ResourceDefinitionCategoryPicker component
- * This is different from selectFromCategoryPicker and handles definition selection
- * (used for activity definitions, etc.)
- *
- * @example
- * await selectFromDefinitionCategoryPicker(page, trigger, {
- *   navigateCategories: ["Lab Tests"],
- *   search: "Complete Blood Count",
- *   itemIndex: 0
- * });
- */
-export async function selectFromDefinitionCategoryPicker(
-  page: Page,
-  trigger: Locator,
-  {
-    search,
-    navigateCategories = [],
-    itemIndex = 0,
-  }: SelectFromDefinitionCategoryPickerOptions = {},
-) {
-  await trigger.waitFor({ state: "visible" });
-  await trigger.scrollIntoViewIfNeeded();
-
-  // Close any existing popovers before opening
-  await closeAnyOpenPopovers(page);
-
-  await trigger.click();
-
-  // Wait for the picker to open (could be dialog or popover)
-  const dialog = page.getByRole("dialog").last();
-  const hasDialog = await dialog.isVisible().catch(() => false);
-  const popper = page.locator("[data-radix-popper-content-wrapper]").last();
-  const scope = hasDialog ? dialog : popper;
-
-  await scope.waitFor({ state: "visible" });
-
-  // Navigate through categories if specified
-  for (const categoryTitle of navigateCategories) {
-    // Wait for the category to appear
-    const categoryItem = scope.getByRole("option", {
-      name: new RegExp(categoryTitle, "i"),
-    });
-    await categoryItem.waitFor({ state: "attached" });
-    await categoryItem.waitFor({ state: "visible" });
-    await categoryItem.click();
-
-    // Wait for navigation to complete - wait for new options to load after category click
-    const items = scope.getByRole("option");
-    await items.first().waitFor({ state: "attached" });
-  }
-
-  // If search is provided, use search to filter items
-  if (search) {
-    const input = scope.locator('[data-slot="command-input"]').first();
-    await input.waitFor({ state: "visible" });
-    await input.fill("");
-    await input.fill(search);
-
-    // Wait for search results to load - options will be updated after input change
-    const items = scope.getByRole("option");
-    await items.first().waitFor({ state: "attached" });
-  }
-
-  // Wait for items to load
-  const items = scope.getByRole("option");
-  await items.first().waitFor({ state: "attached" });
-  await items.first().waitFor({ state: "visible" });
-
-  const count = await items.count();
-  if (count === 0) {
-    throw new Error("No items found in definition category picker");
-  }
-
-  // Select item at itemIndex
-  const targetItem = items.nth(itemIndex);
-  await targetItem.waitFor({ state: "attached" });
-  await targetItem.waitFor({ state: "visible" });
-  await targetItem.scrollIntoViewIfNeeded();
-  await targetItem.click();
-
-  // Wait for selection to register and dialog to close
-  await scope.waitFor({ state: "hidden" }).catch(() => {});
-}
-
 /**
  * Checks if a toast notification with the given text is visible
  * @param page - Playwright page object
@@ -536,16 +450,17 @@ export function getCardByTitle(page: Page, title: string | RegExp) {
 }
 
 export async function clearFilter(page: Page) {
-  const clearButton = page
+  await page
+    .locator('[data-slot="filter-select"]')
     .getByRole("button")
-    .filter({ has: page.locator("svg.lucide-x") })
-    .first();
-  await clearButton.click();
+    .first()
+    .click();
+  await page.getByRole("menuitemradio", { name: "All", exact: true }).click();
 }
 
 /**
  * Helper to select a value from a FilterSelect component
- * FilterSelect uses a Select component with a combobox trigger that shows the label
+ * FilterSelect uses a radio dropdown with a button trigger that shows the label
  *
  * @param page - Playwright page object
  * @param label - The label text of the FilterSelect (e.g., "status", "category")
@@ -560,9 +475,9 @@ export async function selectFromFilterSelect(
   label: string | RegExp,
   value: string,
 ) {
-  // Find the FilterSelect combobox by its label text
   const filterSelect = page
-    .getByRole("combobox")
+    .locator('[data-slot="filter-select"]')
+    .getByRole("button")
     .filter({ hasText: label })
     .first();
   await filterSelect.waitFor({ state: "visible" });
@@ -570,7 +485,7 @@ export async function selectFromFilterSelect(
   await filterSelect.click();
 
   // Select the option by value (case-insensitive match)
-  const option = page.getByRole("option", {
+  const option = page.getByRole("menuitemradio", {
     name: new RegExp(value, "i"),
   });
   await option.waitFor({ state: "visible" });

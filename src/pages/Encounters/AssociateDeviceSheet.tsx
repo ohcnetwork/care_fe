@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/drawer";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -91,11 +92,9 @@ export default function AssociateDeviceSheet({
       }}
     >
       <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle className="font-semibold text-xl">
-            {t("associate_device")}
-          </DrawerTitle>
+      <DrawerContent height="fixed">
+        <DrawerHeader className="px-4 pb-2 border-b">
+          <DrawerTitle>{t("associate_device")}</DrawerTitle>
           <DrawerDescription>
             {t("associate_device_description")}
           </DrawerDescription>
@@ -120,7 +119,7 @@ export default function AssociateDeviceSheet({
             {t("associate_device_description")}
           </SheetDescription>
         </SheetHeader>
-        <div className="py-6">{deviceSearch}</div>
+        <SheetBody>{deviceSearch}</SheetBody>
         <SheetFooter>{footerButton}</SheetFooter>
       </SheetContent>
     </Sheet>

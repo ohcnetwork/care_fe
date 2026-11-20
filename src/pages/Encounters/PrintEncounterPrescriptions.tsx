@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import Loading from "@/components/Common/Loading";
+import PrintLoading from "@/CAREUI/misc/PrintLoading";
 
 import query from "@/Utils/request/query";
 import { PrintPrescriptions } from "@/components/Prescription/PrintPrescriptions";
@@ -29,7 +29,7 @@ export const PrintEncounterPrescriptions = ({
   });
 
   if (isLoading) {
-    return <Loading />;
+    return <PrintLoading />;
   }
 
   const prescriptionIds = data?.results?.map((p) => p.id) ?? [];

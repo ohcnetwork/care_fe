@@ -157,6 +157,7 @@ test.describe("Patient Service Request Tab", () => {
       .fill("Test Notes");
     const collectButton = page.getByRole("button", {
       name: "Mark as collected",
+      exact: true,
     });
     await expect(collectButton).toBeEnabled();
     const specimenResponse = page.waitForResponse(
@@ -179,12 +180,19 @@ test.describe("Patient Service Request Tab", () => {
     await reportTypeSelect.click();
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: "Create Report" }).click();
-    // The unit is shown as text beside the result input and describes it.
-    const observationInput = page
-      .getByRole("group", { name: observationDefinitionTitle, exact: true })
-      .getByRole("textbox", { name: observationDefinitionTitle, exact: true });
-    await observationInput.scrollIntoViewIfNeeded();
-    await expect(observationInput).toHaveAccessibleDescription("mg");
+    const observationGroup = page.getByRole("group", {
+      name: observationDefinitionTitle,
+      exact: true,
+    });
+    const result = observationGroup.getByRole("textbox", {
+      name: observationDefinitionTitle,
+      exact: true,
+    });
+    await result.scrollIntoViewIfNeeded();
+    await expect(
+      observationGroup.getByText("mg", { exact: true }),
+    ).toBeVisible();
+    await expect(result).toHaveAccessibleDescription("mg");
   });
 });
 
@@ -222,6 +230,7 @@ test("should fill result value, capture a photo and save results", async ({
     .fill("Test Notes");
   const collectButton = page.getByRole("button", {
     name: "Mark as collected",
+    exact: true,
   });
   await expect(collectButton).toBeEnabled();
   const specimenCollectedToast = expectToast(page, /specimen collected/i);

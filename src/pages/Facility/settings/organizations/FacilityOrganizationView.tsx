@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building, FolderOpen, PenLine, Trash } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -40,6 +40,7 @@ import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityO
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import { navigate } from "@/lib/router/navigate";
 import FacilityOrganizationFormSheet from "./components/FacilityOrganizationFormSheet";
 
 interface Props {
@@ -255,7 +256,7 @@ export default function FacilityOrganizationView({
         <div className="md:pb-4">
           {children?.results?.length ? (
             <>
-              <div className="hidden sm:block rounded-lg border">
+              <div className="hidden sm:block">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -271,9 +272,14 @@ export default function FacilityOrganizationView({
                       <TableRow
                         key={org.id}
                         onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/settings/departments/${org.id}/departments`,
-                          )
+                          navigate({
+                            to: "/facility/$facilityId/settings/departments/$id/$tab",
+                            params: {
+                              facilityId,
+                              id: org.id,
+                              tab: "departments",
+                            },
+                          })
                         }
                         className="hover:cursor-pointer group"
                       >

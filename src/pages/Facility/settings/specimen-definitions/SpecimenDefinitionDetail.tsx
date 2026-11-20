@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import Page from "@/components/Common/Page";
 import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
+import { navigate } from "@/lib/router/navigate";
 import { Code } from "@/types/base/code/code";
 import {
   DurationSpec,
@@ -53,7 +54,10 @@ export function SpecimenDefinitionDetail({
       onSuccess: () => {
         toast.success(t("specimen_definition_retired_successfully"));
         queryClient.invalidateQueries({ queryKey: ["specimenDefinitions"] });
-        navigate(`/facility/${facilityId}/settings/specimen_definitions`);
+        navigate({
+          to: "/facility/$facilityId/settings/specimen_definitions",
+          params: { facilityId },
+        });
       },
       onError: () => {
         toast.error(t("error_retiring_specimen_definition"));
@@ -97,9 +101,10 @@ export function SpecimenDefinitionDetail({
           <div className="space-y-4">
             <Button
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/specimen_definitions`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/settings/specimen_definitions",
+                  params: { facilityId },
+                })
               }
               variant="outline"
               className="text-destructive"
