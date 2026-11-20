@@ -10,8 +10,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import BackButton from "@/components/Common/BackButton";
-
 import { EditPreviewToggle } from "@/components/QuestionnaireV2/builder/EditPreviewToggle";
 import { ActionIssue } from "@/components/QuestionnaireV2/builder/actionValidation";
 import { SaveIssue } from "@/components/QuestionnaireV2/builder/saveValidation";
@@ -22,6 +20,8 @@ import {
   formatRevision,
   revisionOf,
 } from "@/types/questionnaire/questionnaire";
+
+import { HrefLink } from "@/lib/router/HrefLink";
 
 export interface StudioTopBarProps {
   questionnaire: QuestionnaireRead;
@@ -132,11 +132,14 @@ export function StudioTopBar({
 
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white px-4 py-2.5">
-      {/* useNavigationBlocker also guards going back with unsaved changes. */}
-      <BackButton size="xs" fallback={backPath}>
-        <ArrowLeft className="size-4" />
-        {t("back")}
-      </BackButton>
+      {/* A real anchor so middle-click and open-in-new-tab work. A left click
+          goes back, and useNavigationBlocker keeps guarding unsaved changes. */}
+      <Button asChild variant="outline" size="xs">
+        <HrefLink href={backPath} back>
+          <ArrowLeft className="size-4" />
+          {t("back")}
+        </HrefLink>
+      </Button>
 
       <span aria-hidden className="hidden h-5 w-px bg-gray-200 sm:block" />
 

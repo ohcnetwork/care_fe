@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import Loading from "@/components/Common/Loading";
 
 import query from "@/Utils/request/query";
+import { HrefLink } from "@/lib/router/HrefLink";
 import deviceApi from "@/types/device/deviceApi";
 
 import { goBack } from "@/Utils/utils";
@@ -56,14 +57,12 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
       ) : (
         <div className="flex flex-col items-center justify-center gap-4 py-16">
           <p className="text-gray-500">{t("device_not_found")}</p>
-          <Button
-            variant="outline"
-            onClick={() =>
-              goBack(`/facility/${facilityId}/settings/devices/${deviceId}`)
-            }
+          <HrefLink
+            href={`/facility/${facilityId}/settings/devices/${deviceId}`}
+            back
           >
-            {t("back")}
-          </Button>
+            <Button variant="outline">{t("back")}</Button>
+          </HrefLink>
         </div>
       )}
     </div>

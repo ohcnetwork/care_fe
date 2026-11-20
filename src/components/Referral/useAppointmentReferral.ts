@@ -100,16 +100,15 @@ export function useAppointmentReferral(patientId: string) {
 
   const referral = !error && !isLoading ? referralQuery.data : undefined;
   const sourceUrl = localSourceUrl(params.referralSourceUrl);
-  // Back to the referral the booking flow started from, else open it.
-  const returnToReferral = readableReferral
-    ? () => {
-        const referralPath = getReferralDetailUrl(readableReferral.id);
-        navigateBackFrom(
-          (pathname) => pathname === referralPath,
-          getReferralDetailUrl(readableReferral.id, sourceUrl),
-        );
-      }
+  const returnUrl = readableReferral
+    ? getReferralDetailUrl(readableReferral.id, sourceUrl)
     : undefined;
+  // Back to the referral the booking flow started from, else open it.
+  const returnToReferral = () => {
+    if (!readableReferral || !returnUrl) return;
+    const referralPath = getReferralDetailUrl(readableReferral.id);
+    navigateBackFrom((pathname) => pathname === referralPath, returnUrl);
+  };
   const successQueryParams: {
     referralId?: string;
     referralSourceUrl?: string;
@@ -161,6 +160,7 @@ export function useAppointmentReferral(patientId: string) {
     referral,
     isLoading,
     error,
+    returnUrl,
     returnToReferral,
     successQueryParams,
     attachAppointment,

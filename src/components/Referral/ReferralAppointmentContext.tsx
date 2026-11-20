@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle2, GitPullRequestArrow } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field";
 import {
   Item,
@@ -20,6 +20,8 @@ import {
   ReferralAppointment,
   useAppointmentReferral,
 } from "./useAppointmentReferral";
+
+import { HrefLink } from "@/lib/router/HrefLink";
 
 export function ReferralAppointmentContext({
   appointment,
@@ -116,15 +118,15 @@ export function ReferralAppointmentContext({
               {t("referral_appointment_link")}
             </Button>
           )}
-          {context.returnToReferral && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={context.returnToReferral}
+          {context.returnUrl && (
+            <HrefLink
+              href={context.returnUrl}
+              back={context.returnToReferral}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
             >
               <ArrowLeft className="size-4" />
               {t("referral_return_to_referral")}
-            </Button>
+            </HrefLink>
           )}
         </ItemActions>
       </Item>

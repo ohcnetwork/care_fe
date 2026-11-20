@@ -10,6 +10,7 @@ import { useAppointmentReferral } from "@/components/Referral/useAppointmentRefe
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -154,14 +155,14 @@ export const BookAppointmentDetails = ({
               {t("retry")}
             </Button>
           )}
-          {referralContext.returnToReferral && (
-            <button
-              type="button"
+          {referralContext.returnUrl && (
+            <HrefLink
               className="underline"
-              onClick={referralContext.returnToReferral}
+              href={referralContext.returnUrl}
+              back={referralContext.returnToReferral}
             >
               {t("referral_return_to_referral")}
-            </button>
+            </HrefLink>
           )}
         </div>
       )}

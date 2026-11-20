@@ -29,6 +29,7 @@ import useFileUpload from "@/hooks/useFileUpload";
 
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import { HrefLink } from "@/lib/router/HrefLink";
 import consentApi from "@/types/consent/consentApi";
 import { FileCategory, FileType } from "@/types/files/file";
 
@@ -114,13 +115,14 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
           <p className="text-gray-500 mb-4">
             {t("consent_not_found_description")}
           </p>
-          <BackButton
-            variant="ghost"
-            fallback={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents`}
+          <HrefLink
+            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents`}
+            back
+            className="hover:underline flex items-center gap-2"
           >
             <ChevronLeft className="size-4" />
             {t("back")}
-          </BackButton>
+          </HrefLink>
         </div>
       </Page>
     );

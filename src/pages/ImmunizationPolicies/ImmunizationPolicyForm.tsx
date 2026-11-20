@@ -9,7 +9,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import BackButton from "@/components/Common/BackButton";
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -28,7 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { goBack } from "@/Utils/utils";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import {
   ImmunizationPolicyRead,
@@ -97,10 +96,12 @@ export default function ImmunizationPolicyForm({
             </AlertDescription>
           </Alert>
           <div className="flex gap-2">
-            <BackButton fallback={scope.basePath}>
-              <ArrowLeft className="size-4" />
-              {t("back")}
-            </BackButton>
+            <Button variant="outline" asChild>
+              <HrefLink href={scope.basePath} back>
+                <ArrowLeft className="size-4" />
+                {t("back")}
+              </HrefLink>
+            </Button>
             {isError && (
               <Button variant="outline" onClick={() => refetch()}>
                 {t("immunization_retry")}
@@ -208,14 +209,14 @@ function ImmunizationPolicyEditor({
           })}
         >
           <header className="space-y-4 border-b border-gray-200 pb-5">
-            <button
-              type="button"
-              onClick={() => goBack(scope.basePath)}
+            <HrefLink
+              href={scope.basePath}
+              back
               className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
             >
               <ArrowLeft className="size-3.5" aria-hidden="true" />
               {t("immunization_policies")}
-            </button>
+            </HrefLink>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 space-y-2">
                 <div className="flex flex-wrap items-center gap-2.5">

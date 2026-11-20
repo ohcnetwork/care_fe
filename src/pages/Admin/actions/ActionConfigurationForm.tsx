@@ -7,7 +7,6 @@ import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import BackButton from "@/components/Common/BackButton";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -31,6 +30,7 @@ import { useActionRegistry } from "@/components/QuestionnaireV2/builder/actions/
 import { findActionIssues } from "@/components/QuestionnaireV2/builder/actionValidation";
 import { reachableContextPaths } from "@/components/QuestionnaireV2/builder/actionVariables";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import {
   ACTION_CONFIGURATION_CONTEXT_TYPES,
@@ -46,6 +46,7 @@ import {
 } from "@/types/questionnaire/actions";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 
 import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { ActionConfigurationFields } from "./ActionConfigurationFields";
@@ -98,10 +99,10 @@ export function ActionConfigurationForm({ id }: ActionConfigurationFormProps) {
             <AlertTitle>{t("error")}</AlertTitle>
             <AlertDescription>{t("no_data_found")}</AlertDescription>
           </Alert>
-          <BackButton fallback="/admin/actions">
+          <Button variant="outline" onClick={() => goBack("/admin/actions")}>
             <ArrowLeft className="size-4" />
             {t("back")}
-          </BackButton>
+          </Button>
         </div>
       </Page>
     );
@@ -116,10 +117,12 @@ export function ActionConfigurationForm({ id }: ActionConfigurationFormProps) {
                 {t("action_configuration_context_unsupported")}
               </AlertDescription>
             </Alert>
-            <BackButton fallback="/admin/actions">
-              <ArrowLeft className="size-4" />
-              {t("back")}
-            </BackButton>
+            <Button asChild variant="outline">
+              <HrefLink href="/admin/actions" back>
+                <ArrowLeft className="size-4" />
+                {t("back")}
+              </HrefLink>
+            </Button>
           </div>
         </Page>
       );
@@ -304,11 +307,14 @@ function ActionConfigurationEditor({
           noValidate
         >
           <div className="flex flex-wrap items-center gap-3">
-            {/* Going back also gets the unsaved-changes prompt. */}
-            <BackButton size="xs" fallback="/admin/actions">
-              <ArrowLeft className="size-4" />
-              {t("back")}
-            </BackButton>
+            {/* A left click goes back; a dirty form still gets the app's
+                unsaved-changes prompt. */}
+            <Button asChild variant="outline" size="xs">
+              <HrefLink href="/admin/actions" back>
+                <ArrowLeft className="size-4" />
+                {t("back")}
+              </HrefLink>
+            </Button>
             <h1 className="min-w-0 flex-1 truncate text-xl font-bold text-gray-900">
               {title}
             </h1>

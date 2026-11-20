@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
@@ -285,13 +286,11 @@ function AccountShow({
         <div className="text-center">
           <h2 className="text-2xl font-bold">{t("account_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("account_may_not_exist")}</p>
-          <BackButton
-            variant="default"
-            className="mt-4"
-            fallback={`/facility/${facilityId}/billing/account`}
-          >
-            {t("back_to_accounts")}
-          </BackButton>
+          <Button asChild className="mt-4">
+            <HrefLink href={`/facility/${facilityId}/billing/account`} back>
+              {t("back_to_accounts")}
+            </HrefLink>
+          </Button>
         </div>
       </div>
     );

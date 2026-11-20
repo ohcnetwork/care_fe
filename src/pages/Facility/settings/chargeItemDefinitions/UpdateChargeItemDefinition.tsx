@@ -8,7 +8,7 @@ import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
-import { goBack } from "@/Utils/utils";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
@@ -60,15 +60,13 @@ export function UpdateChargeItemDefinition({
             </AlertDescription>
           </Alert>
           <div className="flex justify-end">
-            <Button
-              variant="link"
-              onClick={() =>
-                goBack(
-                  `/facility/${facilityId}/settings/charge_item_definitions`,
-                )
-              }
-            >
-              {t("return_to_list")}
+            <Button variant="link" asChild>
+              <HrefLink
+                href={`/facility/${facilityId}/settings/charge_item_definitions`}
+                back
+              >
+                {t("return_to_list")}
+              </HrefLink>
             </Button>
           </div>
         </div>

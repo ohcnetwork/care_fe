@@ -4,12 +4,14 @@ import { useTranslation } from "react-i18next";
 import { getPermissions } from "@/common/Permissions";
 import Page from "@/components/Common/Page";
 import { useAppointmentReferral } from "@/components/Referral/useAppointmentReferral";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
 import BookAppointmentSheet from "./BookAppointment/BookAppointmentSheet";
 import { BookingsList } from "./BookAppointment/BookingsList";
+
+import { HrefLink } from "@/lib/router/HrefLink";
 
 // The appointment APIs authorize facility scheduling independently of chart
 // access. A referral supplies only the patient's identity, never PatientRead
@@ -31,10 +33,14 @@ export function ReferralPatientAppointments({
   return (
     <Page title={t("appointments")}>
       <div className="space-y-5">
-        {context.returnToReferral && (
-          <Button variant="ghost" size="sm" onClick={context.returnToReferral}>
+        {context.returnUrl && (
+          <HrefLink
+            href={context.returnUrl}
+            back={context.returnToReferral}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
             {t("referral_return_to_referral")}
-          </Button>
+          </HrefLink>
         )}
         {loading ? (
           <p role="status">{t("loading")}</p>

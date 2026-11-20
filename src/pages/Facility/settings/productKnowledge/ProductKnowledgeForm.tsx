@@ -34,8 +34,8 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { goBack } from "@/Utils/utils";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
@@ -1021,18 +1021,17 @@ function ProductKnowledgeFormContent({
             </div>
 
             <div className="mt-6 flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  goBack(
+              <Button type="button" variant="outline" asChild>
+                <HrefLink
+                  href={
                     slug
                       ? `/facility/${facilityId}/settings/product_knowledge/${slug}`
-                      : `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug ?? ""}`,
-                  )
-                }
-              >
-                {t("cancel")}
+                      : `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug ?? ""}`
+                  }
+                  back
+                >
+                  {t("cancel")}
+                </HrefLink>
               </Button>
               <Button
                 type="submit"

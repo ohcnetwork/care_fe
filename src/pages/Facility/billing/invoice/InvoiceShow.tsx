@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import {
   INVOICE_STATUS_COLORS,
@@ -348,14 +349,15 @@ function InvoiceShow({
         <div className="text-center">
           <h2 className="text-2xl font-bold">{t("invoice_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("invoice_may_not_exist")}</p>
-          <BackButton
-            variant="default"
-            className="mt-4"
-            fallback={`/facility/${facilityId}/billing/invoices`}
-            data-shortcut-id="go-back"
-          >
-            {t("back_to_invoices")}
-          </BackButton>
+          <Button asChild className="mt-4">
+            <HrefLink
+              href={`/facility/${facilityId}/billing/invoices`}
+              back
+              data-shortcut-id="go-back"
+            >
+              {t("back_to_invoices")}
+            </HrefLink>
+          </Button>
         </div>
       </div>
     );
