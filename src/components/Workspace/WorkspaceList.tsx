@@ -29,6 +29,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
 
 import { HrefLink } from "@/lib/router/HrefLink";
+import { workspaceListSearch } from "@/lib/router/search/encounter";
 import {
   isWorkspaceStatus,
   WORKSPACE_STATUSES,
@@ -52,6 +53,7 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
   const user = useAuthUser();
   const searchId = useId();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: workspaceListSearch,
     limit: 15,
   });
   const listDescription = {
