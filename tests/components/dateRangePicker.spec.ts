@@ -316,6 +316,39 @@ test("Custom date range opens on the start date with a standard back button", as
   }
 });
 
+test("clearing End on a reopened range keeps the calendar in sync and picks a new End", async ({
+  page,
+}) => {
+  const selected = (date: string) =>
+    page.locator(`[data-day="${date}"][data-selected="true"]`);
+  await open(page, "menu&integration&value");
+  await page.getByRole("menuitem", { name: /custom date range/i }).click();
+  await expect(from(page)).toBeFocused();
+  await page.getByRole("button", { name: /^clear end date$/i }).click();
+  await expect(to(page)).toHaveValue("");
+  await expect(to(page)).toBeFocused();
+  await expect(page.getByText("On or after 9 Nov 2026")).toBeVisible();
+  await expect(selected("2026-11-19")).toHaveCount(0);
+  await day(page, "2026-11-05").click();
+  await expect(from(page)).toHaveValue("05/11/2026");
+  await expect(to(page)).toHaveValue("09/11/2026");
+  await expect(apply(page)).toBeFocused();
+  await expect(selected("2026-11-07")).toHaveCount(1);
+  await expect(selected("2026-11-12")).toHaveCount(0);
+  await page.getByRole("button", { name: /^clear end date$/i }).click();
+  await day(page, "2026-11-12").click();
+  await expect(from(page)).toHaveValue("05/11/2026");
+  await expect(to(page)).toHaveValue("12/11/2026");
+  await from(page).fill("10/11/2026");
+  await expect(selected("2026-11-07")).toHaveCount(0);
+  await expect(selected("2026-11-11")).toHaveCount(1);
+  await apply(page).click();
+  await expect(page.getByTestId("applied")).toContainText(
+    '"from":"2026-11-10"',
+  );
+  await expect(page.getByTestId("applied")).toContainText('"to":"2026-11-12"');
+});
+
 test("the real multi-filter passes bounds through and returns to presets after Apply", async ({
   page,
 }) => {

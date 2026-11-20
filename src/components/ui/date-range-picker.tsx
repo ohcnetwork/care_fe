@@ -192,6 +192,13 @@ function RangePanel({
   const captionRef = useRef<HTMLButtonElement>(null);
   const initial = { from: localDate(value?.from), to: localDate(value?.to) };
   const [range, setRange] = useState<DateRangeValue>(initial);
+  // A commit can trigger another field's blur commit within one event,
+  // before React re-renders, so handlers read the latest draft from here.
+  const latestRange = useRef<DateRangeValue>(initial);
+  const saveRange = (next: DateRangeValue) => {
+    latestRange.current = next;
+    setRange(next);
+  };
   const [text, setText] = useState<FieldText>({
     from: fieldDate(initial.from),
     to: fieldDate(initial.to),
@@ -246,7 +253,7 @@ function RangePanel({
     return "";
   };
   const updateRange = (next: DateRangeValue) => {
-    setRange(next);
+    saveRange(next);
     setText({ from: fieldDate(next.from), to: fieldDate(next.to) });
     setErrors({ from: "", to: "" });
     setHovered(undefined);
@@ -256,18 +263,19 @@ function RangePanel({
     setErrors((previous) => ({ ...previous, [edge]: error }));
     if (error) return false;
     const date = parseDate(input);
-    let next = { ...range, [edge]: date };
+    const current = latestRange.current;
+    let next = { ...current, [edge]: date };
     if (next.from && next.to && next.to < next.from) {
       next = { from: next.to, to: next.from };
     }
-    setRange(next);
+    saveRange(next);
     setText((previous) => ({
       ...previous,
       [edge]: fieldDate(next[edge]),
-      ...(next.from !== range.from && edge === "to"
+      ...(next.from !== current.from && edge === "to"
         ? { from: fieldDate(next.from) }
         : {}),
-      ...(next.to !== range.to && edge === "from"
+      ...(next.to !== current.to && edge === "from"
         ? { to: fieldDate(next.to) }
         : {}),
     }));
@@ -276,17 +284,23 @@ function RangePanel({
   };
   const handleDay = (day: Date) => {
     const date = startOfDay(day);
+    const current = latestRange.current;
     if (activeEdge === "from") {
       updateRange({
         from: date,
-        to: range.to && range.to >= date ? range.to : undefined,
+        to: current.to && current.to >= date ? current.to : undefined,
       });
       setActiveEdge("to");
       toRef.current?.focus({ preventScroll: true });
-    } else if (range.from && date < range.from) {
-      updateRange({ from: date, to: range.to });
+    } else if (current.from && date < current.from && current.to) {
+      updateRange({ from: date, to: current.to });
     } else {
-      updateRange({ ...range, to: date });
+      // Picking End before Start swaps them, as typing an earlier End does.
+      updateRange(
+        current.from && date < current.from
+          ? { from: date, to: current.from }
+          : { ...current, to: date },
+      );
       applyRef.current?.focus({ preventScroll: true });
     }
   };
@@ -536,9 +550,8 @@ function RangePanel({
             month={month}
             onMonthChange={setMonth}
             selected={{ from: range.from, to: range.to }}
-            onDayClick={(day, modifiers) => {
-              if (!modifiers.disabled) handleDay(day);
-            }}
+            // onSelect (not onDayClick) keeps DayPicker's selection controlled by this draft.
+            onSelect={(_, day) => handleDay(day)}
             onDayMouseEnter={(day, modifiers) => {
               if (!modifiers.disabled) setHovered(startOfDay(day));
             }}
