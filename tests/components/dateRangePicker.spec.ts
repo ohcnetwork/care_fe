@@ -624,6 +624,15 @@ test("shared CARE input and button sizes are retained at mobile and desktop widt
     await expect(
       page.getByRole("button", { name: "Nov", exact: true }),
     ).toHaveCSS("height", `${height}px`);
+
+    await open(page, "popover");
+    const trigger = page.getByRole("button", {
+      name: "Select date range",
+      exact: true,
+    });
+    await expect(trigger).toHaveAttribute("data-slot", "popover-trigger");
+    await expect(trigger).toHaveAttribute("type", "button");
+    await expect(trigger).toHaveCSS("height", `${height}px`);
   }
 });
 

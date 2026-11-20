@@ -15,7 +15,14 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  type AriaAttributes,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -47,6 +54,12 @@ export interface DateRangePickerProps {
   autoFocus?: boolean;
   placeholder?: string;
   className?: string;
+  /** Forwarded to the popover trigger so `FormControl` can label and describe it. */
+  id?: string;
+  /** Names the popover trigger; the current range is appended to this label. */
+  "aria-labelledby"?: string;
+  "aria-describedby"?: string;
+  "aria-invalid"?: AriaAttributes["aria-invalid"];
 }
 
 type Edge = "from" | "to";
@@ -108,11 +121,16 @@ function rangeText(
 export function DateRangePicker({
   variant = "popover",
   className,
+  id,
+  "aria-labelledby": labelledBy,
+  "aria-describedby": describedBy,
+  "aria-invalid": invalid,
   ...props
 }: DateRangePickerProps) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const valueId = useId();
   const dateLabel = (date: Date, year = true) =>
     new Intl.DateTimeFormat(i18n.language, {
       day: "numeric",
@@ -142,20 +160,22 @@ export function DateRangePicker({
   if (variant === "panel") return panel;
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className={cn(
-            "max-w-full justify-start font-normal",
-            !from && !to && "text-muted-foreground",
-            className,
-          )}
-        >
-          <CalendarIcon aria-hidden="true" className="size-4 shrink-0" />
-          <span className="truncate">{label}</span>
-        </Button>
+      <PopoverTrigger
+        appearance="field"
+        id={id}
+        aria-labelledby={labelledBy && `${labelledBy} ${valueId}`}
+        aria-describedby={describedBy}
+        aria-invalid={invalid}
+        className={cn(
+          "max-w-full justify-start font-normal",
+          !from && !to && "text-placeholder-foreground",
+          className,
+        )}
+      >
+        <CalendarIcon aria-hidden="true" className="size-4 shrink-0" />
+        <span id={valueId} className="truncate">
+          {label}
+        </span>
       </PopoverTrigger>
       <PopoverContent
         ref={contentRef}
