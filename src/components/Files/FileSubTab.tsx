@@ -38,6 +38,7 @@ import FileUploadDropdown from "@/components/Files/FileUploadDropdown";
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
+import { fileListSearch } from "@/lib/router/search/patient";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -78,6 +79,7 @@ export const FilesPage = ({
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: fileListSearch,
     limit: 15,
   });
   // const queryClient = useQueryClient();

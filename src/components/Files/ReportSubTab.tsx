@@ -32,6 +32,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 
 import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
+import { fileListSearch } from "@/lib/router/search/patient";
 
 import queryClient from "@/Utils/request/queryClient";
 import { navigate } from "@/lib/router/navigate";
@@ -62,6 +63,7 @@ export function ReportSubTab({
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
   const { qParams, updateQuery, Pagination } = useFilters({
+    schema: fileListSearch,
     limit: 15,
   });
 
@@ -76,7 +78,8 @@ export function ReportSubTab({
   } = useReportManager({
     associatingId,
     enabled: true,
-    qParams,
+    // `useReportManager` sends these to the API, which also takes numbers.
+    qParams: qParams as Record<string, string>,
     reportType,
   });
 

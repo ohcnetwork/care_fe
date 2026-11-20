@@ -12,6 +12,7 @@ import { ClinicalHistoryWorkspace } from "@/components/Workspace/ClinicalHistory
 import query from "@/Utils/request/query";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { clinicalHistoryPageSearch } from "@/lib/router/search/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 import { Separator } from "@/components/ui/separator";
@@ -28,7 +29,7 @@ function ClinicalHistoryPage({
   tab: string;
 }) {
   const { t } = useTranslation();
-  const [{ sourceUrl }] = useQueryParams();
+  const [{ sourceUrl }] = useQueryParams(clinicalHistoryPageSearch);
 
   const { data: patient } = useQuery({
     queryKey: ["patient", patientId, facilityId],
@@ -39,7 +40,7 @@ function ClinicalHistoryPage({
   });
 
   const handleClose = () => {
-    navigate({ href: sourceUrl || fallBackUrl });
+    navigate({ href: sourceUrl || fallBackUrl || "" });
   };
 
   const handleTabChange = (value: string) => {
