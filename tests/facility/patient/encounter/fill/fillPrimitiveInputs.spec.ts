@@ -181,9 +181,18 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
   await expect
     .poll(async () => {
       const values = await draftValues(page, questionnaireId);
-      return retained.map(({ id }) => values?.[id]?.[0]?.coding);
+      return {
+        retained: retained.map(({ id }) => values?.[id]?.[0]?.coding),
+        // The surviving dropdown selection keeps its coding too.
+        multipleDropdown: values?.multiple_dropdown?.find(
+          (entry) => entry.value === "Option 2",
+        )?.coding,
+      };
     })
-    .toEqual(retained.map(() => coding));
+    .toEqual({
+      retained: retained.map(() => coding),
+      multipleDropdown: { ...coding, code: "2", display: "Option 2" },
+    });
 });
 
 test("decimal answers remain browser-valid and optional dates can be cleared", async ({

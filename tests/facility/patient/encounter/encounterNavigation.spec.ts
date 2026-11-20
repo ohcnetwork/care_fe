@@ -420,13 +420,14 @@ test.describe("Encounter navigation", () => {
             "li[data-sonner-toast][data-type='error'][data-removed='false']",
           ),
           async (toasts) => {
-            while ((await toasts.count()) > 0) {
-              await toasts
-                .first()
-                .getByRole("button", { name: "Close toast", exact: true })
-                .click();
-            }
+            // Playwright re-runs this handler while a toast is still in the
+            // way, so one click per run handles stacked toasts.
+            await toasts
+              .first()
+              .getByRole("button", { name: "Close toast", exact: true })
+              .click();
           },
+          { noWaitAfter: true },
         );
         await page.route(
           (url) => url.pathname === `/api/v1/encounter/${primaryEncounterId}/`,
@@ -759,7 +760,7 @@ test.describe("Encounter navigation", () => {
           ).toBeVisible();
         });
 
-        await test.step("Return to the encounter, then leave the chart with the back button", async () => {
+        await test.step("Return to the encounter and restore the appointment actions", async () => {
           // Leaving mid-request would cancel the mocked encounter refetch.
           const refetched = page.waitForResponse(
             (response) => new URL(response.url()).pathname === encounterPath,
@@ -767,15 +768,8 @@ test.describe("Encounter navigation", () => {
           await page.goBack();
           await refetched;
           await expect(bar).toBeVisible();
-          // Back is a real browser back (navigateBackFrom). The board is now
-          // a forward entry and the encounter was opened directly, so no
-          // page outside the chart lies behind it: Back falls back to the
-          // patient instead of jumping forward to the board.
-          await page.getByRole("button", { name: "Back", exact: true }).click();
-          await expect(page).toHaveURL(
-            (url) =>
-              url.pathname === `/facility/${facilityId}/patient/${patientId}`,
-          );
+          // Where the in-app Back goes from here (a browser back) is covered
+          // by tests/navigation/layoutFlags.spec.ts.
         });
       });
     });
