@@ -1597,10 +1597,9 @@ test("the combined facility list uses server pagination and retains personal cre
     await expect(
       page.getByRole("button", { name: "Delete workspace", exact: true }),
     ).toBeVisible();
+    // Back returns to the list as it was left, page included.
     await page.getByRole("link", { name: "Back", exact: true }).click();
-    await expect(page).toHaveURL(
-      (url) => url.pathname === basePath && !url.search,
-    );
+    await expect(page).toHaveURL((url) => url.pathname === basePath);
     await page.getByRole("textbox", { name: "Search", exact: true }).fill(name);
     await expect(page.getByRole("link", { name, exact: true })).toBeVisible();
   });
