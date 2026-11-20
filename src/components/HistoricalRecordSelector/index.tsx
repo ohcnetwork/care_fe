@@ -387,7 +387,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                 onValueChange={handleTabChange}
                 className="w-full"
               >
-                <div className="max-w-full overflow-x-auto pb-1">
+                <div className="max-w-full overflow-x-auto">
                   <TabsList variant="line">
                     {structuredTypes.map(({ type }) => (
                       <TabsTrigger key={type} value={type}>

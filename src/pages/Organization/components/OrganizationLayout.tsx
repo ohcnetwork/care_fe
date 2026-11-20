@@ -246,11 +246,8 @@ export default function OrganizationLayout({
           activationMode="manual"
           className="mt-2 hidden lg:flex"
         >
-          <div className="min-w-0 max-w-full overflow-x-auto pb-1">
-            <TabsList
-              variant="line"
-              className="w-full justify-start border-b border-border"
-            >
+          <div className="min-w-0 max-w-full overflow-x-auto">
+            <TabsList variant="line">
               {visibleNavItems.map((item) => (
                 <TabsTrigger key={item.url} value={item.url} asChild>
                   <HrefLink href={item.url}>{item.name}</HrefLink>

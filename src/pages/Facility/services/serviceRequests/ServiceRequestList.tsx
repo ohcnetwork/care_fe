@@ -362,7 +362,7 @@ export default function ServiceRequestList({
               </Button>
             </div>
           </div>
-          <div className="w-full mb-4 overflow-x-auto">
+          <div className="w-full mb-4">
             <FilterTabs
               value={qParams.status || Status.active}
               onValueChange={(value) => updateQuery({ status: value })}
