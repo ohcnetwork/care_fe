@@ -78,8 +78,7 @@ export function ReportSubTab({
   } = useReportManager({
     associatingId,
     enabled: true,
-    // `useReportManager` sends these to the API, which also takes numbers.
-    qParams: qParams as Record<string, string>,
+    qParams,
     reportType,
   });
 

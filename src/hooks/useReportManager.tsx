@@ -21,6 +21,7 @@ import FilePreviewDialog, {
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { QueryParams } from "@/Utils/request/types";
 import {
   ReportRead,
   ReportReadList,
@@ -32,7 +33,7 @@ import { FILE_EXTENSIONS, FileReadMinimal } from "@/types/files/file";
 export interface UseReportManagerOptions {
   associatingId: string;
   enabled?: boolean;
-  qParams?: Record<string, string>;
+  qParams?: Record<string, unknown>;
   reportType?: ReportType;
 }
 
@@ -82,7 +83,8 @@ export default function useReportManager({
     queryKey: ["reports", associatingId, qParams],
     queryFn: query(reportApi.listReports, {
       queryParams: {
-        ...qParams,
+        // Search values; keys outside a schema are `unknown`.
+        ...(qParams as QueryParams | undefined),
         associating_id: associatingId,
         upload_completed: "true",
         report_type: reportType,
