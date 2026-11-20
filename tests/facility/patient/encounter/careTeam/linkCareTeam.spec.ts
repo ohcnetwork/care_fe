@@ -1,6 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 import { format, subDays } from "date-fns";
+import {
+  departmentCards,
+  departmentTrigger,
+} from "tests/helper/departmentSelect";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -74,10 +78,10 @@ test.describe("Manage care team for an encounter", () => {
       });
 
       await test.step("Verify department selector", async () => {
+        await expect(departmentTrigger(page)).toBeVisible();
         await expect(
-          page.getByRole("combobox").filter({ hasText: "Select Department" }),
+          departmentCards(page).filter({ hasText: "Administration" }),
         ).toBeVisible();
-        await expect(page.getByText("Administration")).toBeVisible();
       });
 
       await test.step("Select member", async () => {
@@ -169,7 +173,9 @@ test.describe("Manage care team for an encounter", () => {
   }) => {
     await test.step("Open care team sheet", async () => {
       await openCareTeamDialog(page);
-      await expect(page.getByText("Administration")).toBeVisible();
+      await expect(
+        departmentCards(page).filter({ hasText: "Administration" }),
+      ).toBeVisible();
     });
 
     await test.step("Select member and role without adding", async () => {
