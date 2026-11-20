@@ -126,13 +126,11 @@ test.describe("Product Knowledge list with long values", () => {
       const search = page.getByPlaceholder("Search products");
       await expect(search).toBeVisible();
       const filterRow = search.locator("xpath=../..");
-      const clearButtons = filterRow.getByRole("button", {
-        name: "Remove filter",
-      });
-      await expect(clearButtons).toHaveCount(2);
-      // On narrow screens the filter group scrolls sideways instead of
-      // overflowing the page, so every clear button must stay reachable.
-      for (const button of await clearButtons.all()) {
+      const filterButtons = filterRow
+        .locator('[data-slot="filter-select"]')
+        .getByRole("button");
+      await expect(filterButtons).toHaveCount(2);
+      for (const button of await filterButtons.all()) {
         await button.scrollIntoViewIfNeeded();
         await expect(button).toBeInViewport();
       }
@@ -151,7 +149,7 @@ test.describe("Product Knowledge list with long values", () => {
 
       if (width >= 1280) {
         const searchBox = await search.boundingBox();
-        for (const button of await clearButtons.all()) {
+        for (const button of await filterButtons.all()) {
           const buttonBox = await button.boundingBox();
           expect(Math.abs(buttonBox!.y - searchBox!.y)).toBeLessThanOrEqual(2);
         }

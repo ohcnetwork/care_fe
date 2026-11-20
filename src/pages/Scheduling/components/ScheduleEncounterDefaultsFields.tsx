@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { FieldDescription, FieldLegend, FieldSet } from "@/components/ui/field";
 
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 import { ReferralDefaultCareTeam } from "@/pages/Facility/settings/referrals/ReferralDefaultCareTeam";
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
@@ -38,14 +38,10 @@ export function ScheduleEncounterDefaultsFields({
         </FieldDescription>
       </div>
       <fieldset disabled={disabled} className="min-w-0">
-        <FacilityOrganizationSelector
+        <FacilityOrganizationTreeSelect
           facilityId={facilityId}
           value={organizations}
-          // The selector treats these as already chosen, so pass only the
-          // ones still selected to allow re-adding a removed department.
-          currentOrganizations={currentOrganizations?.filter(({ id }) =>
-            organizations.includes(id),
-          )}
+          knownOrganizations={currentOrganizations}
           onChange={(value) => onOrganizationsChange(value ?? [])}
           optional
         />

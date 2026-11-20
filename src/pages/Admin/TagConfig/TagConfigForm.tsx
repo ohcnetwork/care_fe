@@ -15,7 +15,7 @@ import {
   isExpiryOffsetTooLong,
 } from "@/components/Tags/tagExpiry";
 import { TagExpiryOffsetInput } from "@/components/Tags/TagExpiryOffsetInput";
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 
 import { Badge } from "@/components/ui/badge";
 
@@ -137,8 +137,8 @@ export default function TagConfigForm({
       resource: z.enum(TagResource, {
         error: t("field_required"),
       }),
-      facility_organization: z.string().optional(),
-      organization: z.string().optional(),
+      facility_organization: z.string().nullable(),
+      organization: z.string().nullable(),
       color: z.string().optional(),
       autoset_expiry: z.boolean(),
       modification_allowed: z.boolean(),
@@ -186,8 +186,8 @@ export default function TagConfigForm({
       priority: parentTag?.priority || 100,
       status: TagStatus.ACTIVE,
       resource: parentTag?.resource || TagResource.PATIENT,
-      facility_organization: undefined,
-      organization: undefined,
+      facility_organization: null,
+      organization: null,
       color: "",
       autoset_expiry: false,
       modification_allowed: false,
@@ -217,8 +217,8 @@ export default function TagConfigForm({
         priority: existingConfig.priority,
         status: existingConfig.status,
         resource: existingConfig.resource,
-        facility_organization: existingConfig.facility_organization?.id,
-        organization: existingConfig.organization?.id,
+        facility_organization: existingConfig.facility_organization?.id ?? null,
+        organization: existingConfig.organization?.id ?? null,
         color:
           typeof existingConfig.metadata?.color === "string"
             ? existingConfig.metadata.color
@@ -241,8 +241,8 @@ export default function TagConfigForm({
         priority: parentTag.priority,
         status: TagStatus.ACTIVE,
         resource: parentTag.resource,
-        facility_organization: undefined,
-        organization: undefined,
+        facility_organization: null,
+        organization: null,
         color: "",
         autoset_expiry: false,
         modification_allowed: false,
@@ -303,12 +303,8 @@ export default function TagConfigForm({
       },
       ...(parentId && { parent: parentId }),
       ...(facilityId && { facility: facilityId }),
-      ...(data.facility_organization && {
-        facility_organization: data.facility_organization,
-      }),
-      ...(data.organization && {
-        organization: data.organization,
-      }),
+      facility_organization: data.facility_organization,
+      organization: data.organization,
     };
 
     if (isEditing) {
@@ -324,7 +320,7 @@ export default function TagConfigForm({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="flex flex-col">
+      <SheetContent className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -637,13 +633,13 @@ export default function TagConfigForm({
                       <FormItem>
                         <FormLabel>Facility Organisation</FormLabel>
                         <FormControl>
-                          <FacilityOrganizationSelector
+                          <FacilityOrganizationTreeSelect
                             facilityId={facilityId}
                             value={field.value ? [field.value] : null}
                             onChange={(value: string[] | null) => {
                               field.onChange(value?.[0] || null);
                             }}
-                            currentOrganizations={
+                            knownOrganizations={
                               existingConfig?.facility_organization
                                 ? [existingConfig.facility_organization]
                                 : []

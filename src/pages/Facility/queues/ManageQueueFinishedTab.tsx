@@ -372,10 +372,11 @@ function FinishedTokenOptions({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger
+          appearance="icon"
+          aria-label={t("more_actions")}
           disabled={isUpdating}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
         >
-          <MoreHorizontal className="size-4" />
+          <MoreHorizontal aria-hidden="true" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {token.sub_queue ? (

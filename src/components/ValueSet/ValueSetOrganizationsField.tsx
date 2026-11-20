@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 
 import valueSetApi from "@/types/valueSet/valueSetApi";
 import mutate from "@/Utils/request/mutate";
@@ -74,10 +74,10 @@ export function ValueSetOrganizationsField({
       </p>
       {canWrite ? (
         <fieldset disabled={!current || isPending} aria-busy={isPending}>
-          <FacilityOrganizationSelector
+          <FacilityOrganizationTreeSelect
             facilityId={facilityId}
             value={currentIds}
-            currentOrganizations={current?.results}
+            knownOrganizations={current?.results}
             optional
             onChange={(ids) => {
               // Portaled picker controls sit outside the disabled fieldset.

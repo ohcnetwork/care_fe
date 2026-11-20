@@ -172,7 +172,7 @@ export function AppSidebarProvider({
 
   const handleSidebarProviderOpenChange = useCallback(
     (open: boolean) => {
-      // The primitive's keyboard shortcut toggles its visible open state.
+      // The primitive's rail toggles its visible open state.
       // Toggling a preview pins it instead of dismissing the hovered sidebar.
       if (open || isOverlay) pinSidebar();
       else unpinSidebar();
@@ -197,7 +197,7 @@ export function AppSidebarProvider({
   );
 
   // Hovering never changes the saved preference. This also corrects the
-  // primitive's cookie write when its keyboard shortcut pins an open preview.
+  // primitive's cookie write when its rail pins an open preview.
   useEffect(() => {
     document.cookie = `sidebar:state=${pinned}; path=/; max-age=604800`;
   }, [pinned]);

@@ -95,6 +95,7 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
     })),
   }));
   const questionnaireId = await createForm(questions);
+  let removeFirstOption = false;
   // The current backend's fixed-option schema strips optional `code`.
   // Supply the frontend-supported coded option shape on the detail read so
   // this regression exercises retention by all four controls and drafts.
@@ -103,7 +104,21 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
     async (route) => {
       const response = await route.fetch();
       const definition = await response.json();
-      await route.fulfill({ response, json: { ...definition, questions } });
+      const currentQuestions = questions.map((question) =>
+        removeFirstOption && question.link_id === "multiple_dropdown"
+          ? {
+              ...question,
+              answer_option: [
+                ...question.answer_option.slice(1),
+                { value: "Replacement" },
+              ],
+            }
+          : question,
+      );
+      await route.fulfill({
+        response,
+        json: { ...definition, questions: currentQuestions },
+      });
     },
   );
   await page.goto(fillUrl(questionnaireId));
@@ -115,9 +130,15 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
     .click();
   await questionBlock(page, "single_dropdown").getByRole("combobox").click();
   await page.getByRole("option", { name: "Option 1", exact: true }).click();
-  await questionBlock(page, "multiple_dropdown").getByRole("combobox").click();
+  const multiSelect = questionBlock(page, "multiple_dropdown").getByRole(
+    "combobox",
+  );
+  await multiSelect.click();
   await page.getByRole("option", { name: "Option 1", exact: true }).click();
+  await page.getByRole("option", { name: "Option 2", exact: true }).click();
   await page.getByRole("button", { name: "Done", exact: true }).click();
+  await expect(multiSelect.getByText("Option 1", { exact: true })).toBeVisible();
+  await expect(multiSelect.getByText("Option 2", { exact: true })).toBeVisible();
 
   await expect
     .poll(async () => {
@@ -128,8 +149,10 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
 
   // A reload round-trips the same coded entries, rather than rebuilding
   // them from display strings when the controls mount again.
+  removeFirstOption = true;
   await page.reload();
   await page.getByRole("button", { name: "Resume", exact: true }).click();
+  await expect(multiSelect.getByText("Option 1", { exact: true })).toBeVisible();
   await expect(
     questionBlock(page, "single_chips").getByRole("radio", {
       name: "Option 1",

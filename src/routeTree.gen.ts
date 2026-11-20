@@ -179,7 +179,6 @@ import { Route as AppFacilityFacilityIdSettingsImmunizationPoliciesIdRouteImport
 import { Route as AppFacilityFacilityIdSettingsImmunizationPoliciesNewRouteImport } from "./routes/_app/facility.$facilityId.settings/immunization-policies.new";
 import { Route as AppFacilityFacilityIdSettingsLocationsIndexRouteImport } from "./routes/_app/facility.$facilityId.settings/locations.index";
 import { Route as AppFacilityFacilityIdSettingsLocationsIdRouteImport } from "./routes/_app/facility.$facilityId.settings/locations.$id";
-import { Route as AppFacilityFacilityIdSettingsLocationsImportRouteImport } from "./routes/_app/facility.$facilityId.settings/locations.import";
 import { Route as AppFacilityFacilityIdSettingsObservation_definitionsIndexRouteImport } from "./routes/_app/facility.$facilityId.settings/observation_definitions.index";
 import { Route as AppFacilityFacilityIdSettingsObservation_definitionsNewRouteImport } from "./routes/_app/facility.$facilityId.settings/observation_definitions.new";
 import { Route as AppFacilityFacilityIdSettingsPatient_identifier_configIndexRouteImport } from "./routes/_app/facility.$facilityId.settings/patient_identifier_config.index";
@@ -1340,12 +1339,6 @@ const AppFacilityFacilityIdSettingsLocationsIdRoute =
   AppFacilityFacilityIdSettingsLocationsIdRouteImport.update({
     id: "/$id",
     path: "/$id",
-    getParentRoute: () => AppFacilityFacilityIdSettingsLocationsRoute,
-  } as any);
-const AppFacilityFacilityIdSettingsLocationsImportRoute =
-  AppFacilityFacilityIdSettingsLocationsImportRouteImport.update({
-    id: "/import",
-    path: "/import",
     getParentRoute: () => AppFacilityFacilityIdSettingsLocationsRoute,
   } as any);
 const AppFacilityFacilityIdSettingsObservation_definitionsIndexRoute =
@@ -2787,7 +2780,6 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/settings/immunization-policies/$id": typeof AppFacilityFacilityIdSettingsImmunizationPoliciesIdRoute;
   "/facility/$facilityId/settings/immunization-policies/new": typeof AppFacilityFacilityIdSettingsImmunizationPoliciesNewRoute;
   "/facility/$facilityId/settings/locations/$id": typeof AppFacilityFacilityIdSettingsLocationsIdRoute;
-  "/facility/$facilityId/settings/locations/import": typeof AppFacilityFacilityIdSettingsLocationsImportRoute;
   "/facility/$facilityId/settings/observation_definitions/new": typeof AppFacilityFacilityIdSettingsObservation_definitionsNewRoute;
   "/facility/$facilityId/settings/patient_identifier_config/new": typeof AppFacilityFacilityIdSettingsPatient_identifier_configNewRoute;
   "/facility/$facilityId/settings/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdSettingsQuestionnaireQuestionnaireIdRoute;
@@ -3109,7 +3101,6 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/settings/immunization-policies/$id": typeof AppFacilityFacilityIdSettingsImmunizationPoliciesIdRoute;
   "/facility/$facilityId/settings/immunization-policies/new": typeof AppFacilityFacilityIdSettingsImmunizationPoliciesNewRoute;
   "/facility/$facilityId/settings/locations/$id": typeof AppFacilityFacilityIdSettingsLocationsIdRoute;
-  "/facility/$facilityId/settings/locations/import": typeof AppFacilityFacilityIdSettingsLocationsImportRoute;
   "/facility/$facilityId/settings/observation_definitions/new": typeof AppFacilityFacilityIdSettingsObservation_definitionsNewRoute;
   "/facility/$facilityId/settings/patient_identifier_config/new": typeof AppFacilityFacilityIdSettingsPatient_identifier_configNewRoute;
   "/facility/$facilityId/settings/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdSettingsQuestionnaireQuestionnaireIdRoute;
@@ -3458,7 +3449,6 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/settings/immunization-policies/$id": typeof AppFacilityFacilityIdSettingsImmunizationPoliciesIdRoute;
   "/_app/facility/$facilityId/settings/immunization-policies/new": typeof AppFacilityFacilityIdSettingsImmunizationPoliciesNewRoute;
   "/_app/facility/$facilityId/settings/locations/$id": typeof AppFacilityFacilityIdSettingsLocationsIdRoute;
-  "/_app/facility/$facilityId/settings/locations/import": typeof AppFacilityFacilityIdSettingsLocationsImportRoute;
   "/_app/facility/$facilityId/settings/observation_definitions/new": typeof AppFacilityFacilityIdSettingsObservation_definitionsNewRoute;
   "/_app/facility/$facilityId/settings/patient_identifier_config/new": typeof AppFacilityFacilityIdSettingsPatient_identifier_configNewRoute;
   "/_app/facility/$facilityId/settings/questionnaire/$questionnaireId": typeof AppFacilityFacilityIdSettingsQuestionnaireQuestionnaireIdRoute;
@@ -3805,7 +3795,6 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/immunization-policies/$id"
     | "/facility/$facilityId/settings/immunization-policies/new"
     | "/facility/$facilityId/settings/locations/$id"
-    | "/facility/$facilityId/settings/locations/import"
     | "/facility/$facilityId/settings/observation_definitions/new"
     | "/facility/$facilityId/settings/patient_identifier_config/new"
     | "/facility/$facilityId/settings/questionnaire/$questionnaireId"
@@ -4127,7 +4116,6 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/immunization-policies/$id"
     | "/facility/$facilityId/settings/immunization-policies/new"
     | "/facility/$facilityId/settings/locations/$id"
-    | "/facility/$facilityId/settings/locations/import"
     | "/facility/$facilityId/settings/observation_definitions/new"
     | "/facility/$facilityId/settings/patient_identifier_config/new"
     | "/facility/$facilityId/settings/questionnaire/$questionnaireId"
@@ -4475,7 +4463,6 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/settings/immunization-policies/$id"
     | "/_app/facility/$facilityId/settings/immunization-policies/new"
     | "/_app/facility/$facilityId/settings/locations/$id"
-    | "/_app/facility/$facilityId/settings/locations/import"
     | "/_app/facility/$facilityId/settings/observation_definitions/new"
     | "/_app/facility/$facilityId/settings/patient_identifier_config/new"
     | "/_app/facility/$facilityId/settings/questionnaire/$questionnaireId"
@@ -5871,13 +5858,6 @@ declare module "@tanstack/react-router" {
       path: "/$id";
       fullPath: "/facility/$facilityId/settings/locations/$id";
       preLoaderRoute: typeof AppFacilityFacilityIdSettingsLocationsIdRouteImport;
-      parentRoute: typeof AppFacilityFacilityIdSettingsLocationsRoute;
-    };
-    "/_app/facility/$facilityId/settings/locations/import": {
-      id: "/_app/facility/$facilityId/settings/locations/import";
-      path: "/import";
-      fullPath: "/facility/$facilityId/settings/locations/import";
-      preLoaderRoute: typeof AppFacilityFacilityIdSettingsLocationsImportRouteImport;
       parentRoute: typeof AppFacilityFacilityIdSettingsLocationsRoute;
     };
     "/_app/facility/$facilityId/settings/observation_definitions/": {
@@ -7403,7 +7383,6 @@ const AppFacilityFacilityIdSettingsImmunizationPoliciesRouteWithChildren =
 
 interface AppFacilityFacilityIdSettingsLocationsRouteChildren {
   AppFacilityFacilityIdSettingsLocationsIdRoute: typeof AppFacilityFacilityIdSettingsLocationsIdRoute;
-  AppFacilityFacilityIdSettingsLocationsImportRoute: typeof AppFacilityFacilityIdSettingsLocationsImportRoute;
   AppFacilityFacilityIdSettingsLocationsIndexRoute: typeof AppFacilityFacilityIdSettingsLocationsIndexRoute;
 }
 
@@ -7411,8 +7390,6 @@ const AppFacilityFacilityIdSettingsLocationsRouteChildren: AppFacilityFacilityId
   {
     AppFacilityFacilityIdSettingsLocationsIdRoute:
       AppFacilityFacilityIdSettingsLocationsIdRoute,
-    AppFacilityFacilityIdSettingsLocationsImportRoute:
-      AppFacilityFacilityIdSettingsLocationsImportRoute,
     AppFacilityFacilityIdSettingsLocationsIndexRoute:
       AppFacilityFacilityIdSettingsLocationsIndexRoute,
   };

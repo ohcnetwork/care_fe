@@ -111,9 +111,7 @@ export const dateTimeQueryString = (date: DateLike, isEndDate = false) => {
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export const isIOSDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-export const isMacDevice = /Mac/i.test(navigator.userAgent);
-export const isAppleDevice = isIOSDevice || isMacDevice;
+export const isAppleDevice = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 function hasTouch() {
   try {

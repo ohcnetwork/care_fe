@@ -16,7 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import {
   WorkspaceOrganizationRead,
@@ -103,10 +103,10 @@ export function WorkspaceOrganizationsField({
         disabled={disabled}
         onStateChange={onStateChange}
         renderSelector={({ ids, organizations, onChange }) => (
-          <FacilityOrganizationSelector
+          <FacilityOrganizationTreeSelect
             facilityId={scope.facilityId}
             value={ids}
-            currentOrganizations={organizations}
+            knownOrganizations={organizations}
             optional
             onChange={(nextIds, nextOrganizations) =>
               onChange(nextIds ?? [], nextOrganizations ?? organizations)

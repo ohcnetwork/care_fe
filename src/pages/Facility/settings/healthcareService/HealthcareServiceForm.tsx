@@ -29,7 +29,7 @@ import Page from "@/components/Common/Page";
 import RequirementsSelector from "@/components/Common/RequirementsSelector";
 import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -407,9 +407,9 @@ function HealthcareServiceFormContent({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <FacilityOrganizationSelector
+                        <FacilityOrganizationTreeSelect
                           value={field.value ? [field.value] : null}
-                          currentOrganizations={
+                          knownOrganizations={
                             existingData?.managing_organization
                               ? [existingData.managing_organization]
                               : []
