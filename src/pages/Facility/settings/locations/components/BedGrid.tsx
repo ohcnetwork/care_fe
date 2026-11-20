@@ -52,7 +52,7 @@ export function BedGrid({ beds, onManage, onMove, onDelete }: BedGridProps) {
           </div>
           <LocationActionsMenu
             locationName={bed.name}
-            className="relative z-10 size-8"
+            className="relative z-10"
             onMoveUp={onMove && index > 0 ? () => onMove(bed, "up") : undefined}
             onMoveDown={
               onMove && index < beds.length - 1

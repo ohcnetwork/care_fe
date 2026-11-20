@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Bed, FolderOpen, PenLine } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -12,23 +13,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { navigate } from "@/lib/router/navigate";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 
 import { LocationActionsMenu } from "./LocationActionsMenu";
 
 interface SubLocationTableProps {
+  facilityId: string;
   locations: LocationRead[];
-  onOpen: (location: LocationRead) => void;
   onManage: (location: LocationRead) => void;
   /** Reordering is offered only when the list is not filtered. */
   onMove?: (location: LocationRead, direction: "up" | "down") => void;
   onDelete: (location: LocationRead) => void;
 }
 
-/** Locations that hold other locations or beds. A row opens the location. */
+/**
+ * Locations that hold other locations or beds. The name is a link to the
+ * location, and a click anywhere else on the row opens it too.
+ */
 export function SubLocationTable({
+  facilityId,
   locations,
-  onOpen,
   onManage,
   onMove,
   onDelete,
@@ -56,7 +61,12 @@ export function SubLocationTable({
             <TableRow
               key={location.id}
               className="cursor-pointer hover:bg-muted/50"
-              onClick={() => onOpen(location)}
+              onClick={() =>
+                navigate({
+                  to: "/facility/$facilityId/settings/locations/$id",
+                  params: { facilityId, id: location.id },
+                })
+              }
             >
               <TableCell>
                 <div className="flex items-center gap-2 py-1 font-medium">
@@ -64,7 +74,15 @@ export function SubLocationTable({
                     className="size-4 shrink-0 text-muted-foreground"
                     aria-hidden="true"
                   />
-                  <span className="min-w-0 break-words">{location.name}</span>
+                  <Link
+                    to="/facility/$facilityId/settings/locations/$id"
+                    params={{ facilityId, id: location.id }}
+                    className="min-w-0 break-words underline-offset-4 hover:underline"
+                    // The row opens it as well: one click, one navigation.
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    {location.name}
+                  </Link>
                   {location.has_sub_locations && (
                     <span
                       role="img"

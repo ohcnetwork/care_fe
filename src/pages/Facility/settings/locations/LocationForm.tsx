@@ -188,18 +188,23 @@ export default function LocationForm({
 
   useEffect(() => {
     if (location) {
-      form.reset({
-        name: location.name,
-        description: location.description,
-        status: location.status,
-        operational_status: location.operational_status,
-        form: location.form,
-        inventory_usage: location.inventory_usage ?? "none",
-        parent: parentId || null,
-        organizations: [],
-        customizeNames: false,
-        bedNames: [],
-      });
+      form.reset(
+        {
+          name: location.name,
+          description: location.description,
+          status: location.status,
+          operational_status: location.operational_status,
+          form: location.form,
+          inventory_usage: location.inventory_usage ?? "none",
+          parent: parentId || null,
+          organizations: [],
+          customizeNames: false,
+          bedNames: [],
+        },
+        // The location is read again when its tags or departments change in
+        // this sheet. Fields the user has edited and not saved must stay.
+        { keepDirtyValues: true },
+      );
     }
   }, [location, form, parentId]);
 
@@ -263,22 +268,14 @@ export default function LocationForm({
     submitForm(data);
   }
 
-  const statusOptions: { value: Status; label: string }[] = [
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-    { value: "unknown", label: "Unknown" },
-  ];
-
-  const operationalStatusOptions: {
-    value: OperationalStatus;
-    label: string;
-  }[] = [
-    { value: "C", label: "Closed" },
-    { value: "H", label: "Housekeeping" },
-    { value: "I", label: "Isolated" },
-    { value: "K", label: "Contaminated" },
-    { value: "O", label: "Occupied" },
-    { value: "U", label: "Unoccupied" },
+  const statusOptions: Status[] = ["active", "inactive", "unknown"];
+  const operationalStatusOptions: OperationalStatus[] = [
+    "C",
+    "H",
+    "I",
+    "K",
+    "O",
+    "U",
   ];
 
   if (locationId && isLoading) {
@@ -544,9 +541,9 @@ export default function LocationForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {statusOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
+                        {statusOptions.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {t(status)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -569,9 +566,9 @@ export default function LocationForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {operationalStatusOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
+                        {operationalStatusOptions.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {t(`location_operational_status__${status}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>

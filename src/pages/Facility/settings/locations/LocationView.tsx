@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { PenLine } from "lucide-react";
+import { MapPinOff, PenLine } from "lucide-react";
 import { Fragment, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   EyebrowTitle,
@@ -51,7 +52,7 @@ export default function LocationView({ id, facilityId }: Props) {
   const headingId = useId();
   const [isManaging, setIsManaging] = useState(false);
 
-  const { data: location } = useQuery({
+  const { data: location, isError } = useQuery({
     queryKey: ["location", facilityId, id],
     queryFn: query(locationApi.get, {
       pathParams: { facility_id: facilityId, id },
@@ -63,6 +64,27 @@ export default function LocationView({ id, facilityId }: Props) {
       pathParams: { facility_id: facilityId, id },
     }),
   });
+
+  if (!location && isError) {
+    // A deleted location or a stale link: say so, and offer the way back.
+    return (
+      <EmptyState
+        className="rounded-xl border border-dashed"
+        icon={<MapPinOff className="size-6 text-muted-foreground" />}
+        title={t("location_not_found")}
+        action={
+          <Button variant="outline" asChild>
+            <Link
+              to="/facility/$facilityId/settings/locations"
+              params={{ facilityId }}
+            >
+              {t("locations")}
+            </Link>
+          </Button>
+        }
+      />
+    );
+  }
 
   if (!location) {
     return (

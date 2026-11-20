@@ -3,22 +3,19 @@ import { MapPin, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EyebrowTitle, Muted } from "@/components/ui/typography";
+import { Muted } from "@/components/ui/typography";
 
-import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
-
-import { navigate } from "@/lib/router/navigate";
 import { locationChildrenQuery } from "@/pages/Facility/locations/bed-board/locationQueries";
 import LocationSheet from "@/pages/Facility/settings/locations/LocationSheet";
 import { useLocationActions } from "@/pages/Facility/settings/locations/useLocationActions";
 import { LocationRead } from "@/types/location/location";
 
-import { BedGrid } from "./BedGrid";
-import { SubLocationTable } from "./SubLocationTable";
+import { LocationLists } from "./LocationLists";
 
 interface LocationChildrenProps {
   facilityId: string;
@@ -42,22 +39,23 @@ export function LocationChildren({
   const { remove, move, refresh } = useLocationActions(facilityId);
 
   const parentId = parent?.id ?? "";
-  const { data: subLocationList, isLoading: isLoadingSubLocations } = useQuery(
-    locationChildrenQuery(facilityId, parentId, "kind"),
-  );
-  const { data: bedList, isLoading: isLoadingBeds } = useQuery({
+  // A request is skipped only when the parent says it holds nothing of that
+  // kind. Without the flag, the request is made.
+  const subLocationsQuery = useQuery({
+    ...locationChildrenQuery(facilityId, parentId, "kind"),
+    enabled: parent?.has_sub_locations !== false,
+  });
+  const bedsQuery = useQuery({
     ...locationChildrenQuery(facilityId, parentId, "instance"),
     // Beds sit inside a location, never at the top of the facility.
-    enabled: !!parent,
+    enabled: !!parent && parent.has_beds !== false,
   });
-  const subLocations = subLocationList?.results ?? [];
-  const beds = bedList?.results ?? [];
-
-  const term = search.trim().toLowerCase();
-  const matches = (location: LocationRead) =>
-    !term || location.name.toLowerCase().includes(term);
-  const shownSubLocations = subLocations.filter(matches);
-  const shownBeds = beds.filter(matches);
+  const subLocations = subLocationsQuery.data?.results ?? [];
+  const beds = bedsQuery.data?.results ?? [];
+  // A failed request is not an empty list: say so and offer to try again.
+  const failed = [subLocationsQuery, bedsQuery].filter(
+    (query) => query.isError,
+  );
   const isEmpty = subLocations.length + beds.length === 0;
 
   return (
@@ -75,7 +73,23 @@ export function LocationChildren({
         </Button>
       </div>
 
-      {isLoadingSubLocations || isLoadingBeds ? (
+      {failed.length > 0 && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-3"
+        >
+          <Muted>{t("failed_to_load_locations")}</Muted>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => failed.forEach((query) => query.refetch())}
+          >
+            {t("retry")}
+          </Button>
+        </div>
+      )}
+
+      {subLocationsQuery.isLoading || bedsQuery.isLoading ? (
         <div role="status" className="space-y-2">
           <span className="sr-only">{t("loading")}</span>
           <Skeleton className="h-10 w-full" />
@@ -83,59 +97,26 @@ export function LocationChildren({
           <Skeleton className="h-10 w-full" />
         </div>
       ) : isEmpty ? (
-        <EmptyState
-          className="rounded-xl border border-dashed"
-          icon={<MapPin className="size-6 text-muted-foreground" />}
-          title={t(parent ? "no_child_locations_found" : "no_locations_found")}
-        />
-      ) : shownSubLocations.length + shownBeds.length === 0 ? (
-        <Muted className="py-6 text-center">{t("no_locations_found")}</Muted>
+        failed.length === 0 && (
+          <EmptyState
+            className="rounded-xl border border-dashed"
+            icon={<MapPin className="size-6 text-muted-foreground" />}
+            title={t(
+              parent ? "no_child_locations_found" : "no_locations_found",
+            )}
+          />
+        )
       ) : (
-        <>
-          {shownSubLocations.length > 0 && (
-            <section className="space-y-2">
-              {parent && (
-                <EyebrowTitle className="text-muted-foreground">
-                  {t("sub_locations")} · {subLocations.length}
-                </EyebrowTitle>
-              )}
-              <SubLocationTable
-                locations={shownSubLocations}
-                onOpen={(location) =>
-                  navigate({
-                    to: "/facility/$facilityId/settings/locations/$id",
-                    params: { facilityId, id: location.id },
-                  })
-                }
-                onManage={(location) => setSheet({ location })}
-                onMove={
-                  term
-                    ? undefined
-                    : (location, direction) =>
-                        move(subLocations, location, direction)
-                }
-                onDelete={setToDelete}
-              />
-            </section>
-          )}
-          {shownBeds.length > 0 && (
-            <section className="space-y-2">
-              <EyebrowTitle className="text-muted-foreground">
-                {t("beds")} · {beds.length}
-              </EyebrowTitle>
-              <BedGrid
-                beds={shownBeds}
-                onManage={(bed) => setSheet({ location: bed })}
-                onMove={
-                  term
-                    ? undefined
-                    : (bed, direction) => move(beds, bed, direction)
-                }
-                onDelete={setToDelete}
-              />
-            </section>
-          )}
-        </>
+        <LocationLists
+          facilityId={facilityId}
+          subLocations={subLocations}
+          beds={beds}
+          search={search}
+          showSubLocationHeading={!!parent}
+          onManage={(location) => setSheet({ location })}
+          onMove={move}
+          onDelete={setToDelete}
+        />
       )}
 
       <LocationSheet

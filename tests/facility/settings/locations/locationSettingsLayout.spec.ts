@@ -39,6 +39,8 @@ test.describe("Location settings layout", () => {
   let bed: LocationRead;
   let store: LocationRead;
   let children: Map<string, LocationRead[]>;
+  /** While set, the request for a location's beds fails. */
+  let failBedList: boolean;
 
   const tree = (page: Page) =>
     page.getByRole("navigation", { name: "Locations", exact: true });
@@ -93,6 +95,7 @@ test.describe("Location settings layout", () => {
       [ward.id, [room, bed]],
     ]);
     const everyLocation = () => [...children.values()].flat();
+    failBedList = false;
 
     await page.addInitScript(() => {
       localStorage.setItem("care_access_token", "location-settings-test");
@@ -136,6 +139,10 @@ test.describe("Location settings layout", () => {
         const params = url.searchParams;
         const mode = params.get("mode");
         const name = params.get("name")?.toLowerCase();
+        if (mode === "instance" && failBedList) {
+          await route.fulfill({ status: 500, json: { detail: "Failed" } });
+          return;
+        }
         const results = (children.get(params.get("parent") ?? "") ?? [])
           .filter((item) => !mode || item.mode === mode)
           .filter((item) => !name || item.name.toLowerCase().includes(name));
@@ -151,6 +158,13 @@ test.describe("Location settings layout", () => {
               : [],
           },
         });
+      } else if (
+        path.startsWith(locationPath) &&
+        path.endsWith("/remove_tags/")
+      ) {
+        // The location is read again afterwards, and now comes back untagged.
+        ward.tags = [];
+        await route.fulfill({ json: ward });
       } else if (path.startsWith(locationPath)) {
         const id = path.slice(locationPath.length).replace(/\/$/, "");
         const found = everyLocation().find((item) => item.id === id);
@@ -250,6 +264,19 @@ test.describe("Location settings layout", () => {
       .click();
     await expect(wardInTree).toBeHidden();
     await expect(page).toHaveURL(`${basePath}/${building.id}`);
+
+    // With the tree collapsed or hidden, the name in the list is a link, so a
+    // sub-location also opens from the keyboard.
+    const wardLink = rows(page).getByRole("link", {
+      name: "General Ward",
+      exact: true,
+    });
+    await expect(wardLink).toHaveAttribute("href", `${basePath}/${ward.id}`);
+    await wardLink.press("Enter");
+    await expect(page).toHaveURL(`${basePath}/${ward.id}`);
+    await expect(
+      page.getByRole("heading", { name: "General Ward", level: 3 }),
+    ).toBeVisible();
   });
 
   test("a location lists its sub-locations as rows and its beds as a grid", async ({
@@ -335,6 +362,76 @@ test.describe("Location settings layout", () => {
       mode: "kind",
     });
     await expect(editor(page)).toBeHidden();
+  });
+
+  test("changing tags keeps the fields that are not saved yet", async ({
+    page,
+  }) => {
+    await page.goto(`${basePath}/${ward.id}`);
+    await page
+      .getByRole("region", { name: "General Ward" })
+      .getByRole("button", { name: "Edit", exact: true })
+      .click();
+    const name = editor(page).getByRole("textbox", { name: "Name" });
+    await name.fill("General Ward A");
+
+    // Tags save on their own, and the location is then read again.
+    await editor(page)
+      .getByRole("button", { name: "Manage Tags", exact: true })
+      .click();
+    const picker = page.getByRole("menu", { name: "Manage Tags" });
+    const removed = page.waitForRequest(
+      (request) =>
+        request.method() === "POST" && request.url().endsWith("/remove_tags/"),
+    );
+    await picker.getByRole("menuitemcheckbox", { name: "Isolation" }).click();
+    await removed;
+    await page.keyboard.press("Escape");
+    await expect(picker).toBeHidden();
+    await expect(
+      editor(page).getByRole("button", { name: "Add Tags", exact: true }),
+    ).toBeVisible();
+
+    // What was typed is still there, and can still be saved.
+    await expect(name).toHaveValue("General Ward A");
+    await expect(
+      editor(page).getByRole("button", { name: "Update", exact: true }),
+    ).toBeEnabled();
+  });
+
+  test("a failed bed request is shown, not read as an empty location", async ({
+    page,
+  }) => {
+    failBedList = true;
+    await page.goto(`${basePath}/${ward.id}`);
+    // What did load stays on screen.
+    await expect(rows(page).filter({ hasText: "Room 1" })).toBeVisible();
+    const notice = page.getByRole("alert").filter({
+      hasText: "Failed to load locations",
+    });
+    await expect(notice).toBeVisible();
+    await expect(beds(page)).toHaveCount(0);
+
+    failBedList = false;
+    await notice.getByRole("button", { name: "Retry", exact: true }).click();
+    await expect(
+      beds(page).getByRole("button", { name: "Bed 1", exact: true }),
+    ).toBeVisible();
+    await expect(notice).toBeHidden();
+  });
+
+  test("a location that no longer exists says so", async ({ page }) => {
+    await page.goto(`${basePath}/${faker.string.uuid()}`);
+    await expect(
+      page.getByText("This location could not be found."),
+    ).toBeVisible();
+    await page
+      .locator("main")
+      .getByRole("link", { name: "Locations", exact: true })
+      .last()
+      .click();
+    await expect(page).toHaveURL(basePath);
+    await expect(rows(page).filter({ hasText: "Main Block" })).toBeVisible();
   });
 
   test("a new location is added from the same sheet", async ({ page }) => {
