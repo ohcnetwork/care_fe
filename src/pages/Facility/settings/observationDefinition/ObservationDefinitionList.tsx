@@ -27,6 +27,7 @@ import {
 import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
+import { observationDefinitionListSearch } from "@/lib/router/search/settings";
 
 import query from "@/Utils/request/query";
 import { valuesOf } from "@/Utils/utils";
@@ -91,6 +92,7 @@ export default function ObservationDefinitionList({
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: observationDefinitionListSearch,
     limit: 15,
     defaultQueryParams: {
       status: ObservationDefinitionStatus.ACTIVE,

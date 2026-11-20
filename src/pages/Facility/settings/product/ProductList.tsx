@@ -27,6 +27,7 @@ import {
 import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
+import { productListSearch } from "@/lib/router/search/settings";
 
 import query from "@/Utils/request/query";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
@@ -89,6 +90,7 @@ function ProductCard({
 export default function ProductList({ facilityId }: { facilityId: string }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: productListSearch,
     limit: 15,
     defaultQueryParams: {
       status: "active",
@@ -114,7 +116,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
     queryKey: ["productKnowledge", qParams.product_knowledge_slug],
     queryFn: query.debounced(productKnowledgeApi.retrieveProductKnowledge, {
       pathParams: {
-        slug: qParams.product_knowledge_slug,
+        slug: qParams.product_knowledge_slug ?? "",
       },
     }),
     enabled: !!qParams.product_knowledge_slug,

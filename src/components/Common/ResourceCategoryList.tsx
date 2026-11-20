@@ -33,6 +33,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { ResourceCategoryForm } from "@/components/Common/ResourceCategoryForm";
 import useFilters from "@/hooks/useFilters";
 import { navigate } from "@/lib/router/navigate";
+import { resourceCategoryListSearch } from "@/lib/router/search/settings";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ResourceCategoryParent,
@@ -42,6 +43,7 @@ import {
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import query from "@/Utils/request/query";
 import queryClient from "@/Utils/request/queryClient";
+import { QueryParams } from "@/Utils/request/types";
 
 export interface BaseSearchableItem {
   id: string;
@@ -264,7 +266,7 @@ interface ItemSearchConfig<T extends BaseSearchableItem> {
       TRes: { results: T[]; count: number };
     };
     pathParams?: Record<string, string>;
-    queryParams?: Record<string, unknown>;
+    queryParams?: QueryParams;
   };
   searchParamName?: string;
   queryKeyPrefix: string;
@@ -322,6 +324,7 @@ export function ResourceCategoryList<
   const [monetaryComponentsCategory, setMonetaryComponentsCategory] =
     React.useState<ResourceCategoryRead | null>(null);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: resourceCategoryListSearch,
     limit: RESULTS_PER_PAGE_LIMIT,
   });
 

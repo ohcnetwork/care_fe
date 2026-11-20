@@ -30,6 +30,7 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { facilityOrganizationListSearch } from "@/lib/router/search/settings";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -183,6 +184,7 @@ export default function FacilityOrganizationView({
 }: Props) {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
+    schema: facilityOrganizationListSearch,
     limit: 14,
   });
 

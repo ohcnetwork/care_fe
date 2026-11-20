@@ -23,6 +23,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
+import { productKnowledgeListSearch } from "@/lib/router/search/settings";
 
 import { navigate } from "@/lib/router/navigate";
 import {
@@ -177,6 +178,7 @@ export function ProductKnowledgeListContent({
 }: ProductKnowledgeListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: productKnowledgeListSearch,
     limit: 15,
     defaultQueryParams: {
       status: "active",
@@ -202,7 +204,7 @@ export function ProductKnowledgeListContent({
   const products = productsResponse?.results || [];
 
   useEffect(() => {
-    if (!qParams.search && qParams.page === "1") {
+    if (!qParams.search && qParams.page === 1) {
       setAllowCategoryCreate(!productsResponse?.count);
     }
   }, [

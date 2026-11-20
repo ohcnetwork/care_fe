@@ -32,6 +32,7 @@ import PageTitle from "@/components/Common/PageTitle";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { deviceListSearch } from "@/lib/router/search/settings";
 
 import query from "@/Utils/request/query";
 import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
@@ -47,6 +48,7 @@ export default function DevicesList({ facilityId }: Props) {
   const pluginDevices = usePluginDevices();
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: deviceListSearch,
     limit: 12,
     cache: true,
   });

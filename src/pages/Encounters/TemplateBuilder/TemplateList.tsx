@@ -18,6 +18,7 @@ import {
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { templateListSearch } from "@/lib/router/search/settings";
 
 import query from "@/Utils/request/query";
 import templateApi from "@/types/emr/template/templateApi";
@@ -56,6 +57,7 @@ export default function TemplateList({
   const { canListTemplate, canWriteTemplate, canGenerateReportFromTemplate } =
     getPermissions(hasPermission, permissions);
   const { qParams, updateQuery, Pagination } = useFilters({
+    schema: templateListSearch,
     limit: RESULTS_PER_PAGE_LIMIT,
   });
 

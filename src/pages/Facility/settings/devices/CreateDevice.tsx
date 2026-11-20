@@ -1,3 +1,4 @@
+import { useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -5,7 +6,6 @@ import { Separator } from "@/components/ui/separator";
 
 import DeviceForm from "@/pages/Facility/settings/devices/components/DeviceForm";
 
-import { useQueryParams } from "@/lib/router/queryParams";
 import { goBack } from "@/Utils/utils";
 import DeviceTypeIcon from "./components/DeviceTypeIcon";
 
@@ -15,7 +15,9 @@ interface Props {
 
 export default function CreateDevice({ facilityId }: Props) {
   const { t } = useTranslation();
-  const [qParams] = useQueryParams<{ type?: string }>();
+  const qParams = useSearch({
+    from: "/_app/facility/$facilityId/settings/devices/create",
+  });
 
   return (
     <div className="space-y-3 max-w-3xl mx-auto">

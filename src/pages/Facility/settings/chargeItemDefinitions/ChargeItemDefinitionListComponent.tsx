@@ -25,6 +25,7 @@ import TagBadge from "@/components/Tags/TagBadge";
 import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
+import { chargeItemDefinitionListSearch } from "@/lib/router/search/settings";
 
 import {
   CHARGE_ITEM_DEFINITION_STATUS_COLORS,
@@ -165,6 +166,7 @@ export function ChargeItemList({
 }: ChargeItemListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: chargeItemDefinitionListSearch,
     limit: 15,
     defaultQueryParams: {
       status: "active",

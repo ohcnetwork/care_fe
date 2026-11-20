@@ -11,6 +11,7 @@ import Page from "@/components/Common/Page";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { healthcareServiceListSearch } from "@/lib/router/search/settings";
 
 import query from "@/Utils/request/query";
 import { navigate } from "@/lib/router/navigate";
@@ -25,6 +26,7 @@ export default function HealthcareServiceList({
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: healthcareServiceListSearch,
     limit: 15,
   });
 
