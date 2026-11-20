@@ -702,10 +702,6 @@ export function DeliveryOrderShow({
                 const value = getExtensionValue(
                   deliveryOrder.extensions as NamespacedExtensionData,
                   field,
-                  {
-                    delivery_order: deliveryOrder,
-                    supply_deliveries: supplyDeliveries,
-                  },
                 );
                 if (value === undefined || value === null) return null;
 
