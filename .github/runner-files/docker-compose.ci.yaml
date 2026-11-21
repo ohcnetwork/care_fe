@@ -12,8 +12,9 @@ x-care: &care
   env_file:
     - ./docker/.prebuilt.env
   environment:
-    # Matches the dev setup the tests were written against; load_fixtures
-    # also refuses to run without it.
+    # Matches the dev setup the tests were written against. load_fixtures also
+    # needs it: care_fixture_context (care/fixtures/context.py) refuses to run
+    # unless DEBUG is on.
     DJANGO_DEBUG: "true"
     CORS_ALLOWED_ORIGINS: '["http://localhost:4000"]'
     DJANGO_EMAIL_BACKEND: django.core.mail.backends.console.EmailBackend
@@ -41,6 +42,9 @@ services:
       # so this does not pass until the server is really up.
       test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres"]
       interval: 1s
+      # Without a start period every failed probe counts, so allow about a
+      # minute (care's file sets retries: 5) before `up --wait` gives up.
+      retries: 60
       start_period: 0s
 
   backend:

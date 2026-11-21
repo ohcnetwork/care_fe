@@ -100,6 +100,8 @@ jobs:
     needs: changes
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
     outputs:
       image: ${{ steps.image.outputs.image }}
       revision: ${{ steps.revision.outputs.sha }}
@@ -116,11 +118,13 @@ jobs:
             # care publishes :latest from develop. Pin its digest so every
             # shard runs the same image even if :latest moves during this run,
             # and check out the commit it was built from.
-            image=ghcr.io/ohcnetwork/care:latest
-            digest=$(docker buildx imagetools inspect "$image" --format '{{json .Manifest}}' | jq -r .digest)
+            digest=$(docker buildx imagetools inspect ghcr.io/ohcnetwork/care:latest --format '{{json .Manifest}}' | jq -r .digest)
+            image=ghcr.io/ohcnetwork/care@$digest
+            # Read the revision from the pinned digest, not :latest, so the
+            # image, checkout and snapshot key always describe the same build.
             ref=$(docker buildx imagetools inspect "$image" --format '{{json .Image}}' \
               | jq -r '."linux/amd64".config.Labels."org.opencontainers.image.revision"')
-            echo "image=ghcr.io/ohcnetwork/care@$digest" >> "$GITHUB_OUTPUT"
+            echo "image=$image" >> "$GITHUB_OUTPUT"
           else
             # Other refs have no published image, so build one below.
             ref=$BACKEND_REF
@@ -286,7 +290,7 @@ jobs:
           status=$(timeout "$BACKEND_STARTUP_TIMEOUT" docker wait care-fixtures) || status=timeout
           if [ "$status" != 0 ]; then
             docker logs care-fixtures
-            echo "::error::Loading fixtures failed (exit status: $status)"
+            echo "::error::Installing Faker or loading fixtures failed (exit status: $status)"
             exit 1
           fi
           if ! timeout "$BACKEND_STARTUP_TIMEOUT" bash -c 'until curl -fsS http://localhost:9000/ping/ > /dev/null; do sleep 1; done'; then
