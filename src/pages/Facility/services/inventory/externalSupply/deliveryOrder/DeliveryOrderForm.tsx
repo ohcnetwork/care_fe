@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -26,6 +26,7 @@ import {
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
+import locationApi from "@/types/location/locationApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { ExtensionContexts } from "@/Utils/schema/types";
@@ -116,6 +117,30 @@ export default function DeliveryOrderForm({
     },
   });
 
+  // A transfer to a supplier location returns the stock to a supplier, so it names one
+  const destination = useWatch({ control: form.control, name: "destination" });
+  const { data: destinationLocation } = useQuery({
+    queryKey: ["location", facilityId, destination],
+    queryFn: query(locationApi.get, {
+      pathParams: { facility_id: facilityId, id: destination },
+    }),
+    enabled: internal && !!destination,
+  });
+  const isSupplierDestination =
+    internal && destinationLocation?.inventory_usage === "supplier";
+
+  // Drop a supplier picked for a supplier location once another destination is chosen
+  useEffect(() => {
+    if (
+      internal &&
+      destinationLocation &&
+      !isSupplierDestination &&
+      form.getValues("supplier")
+    ) {
+      form.setValue("supplier", undefined);
+    }
+  }, [internal, destinationLocation, isSupplierDestination, form]);
+
   const extensions = useEntityExtensions({
     entityType: ExtensionEntityType.supply_delivery_order,
     schemaType: "write",
@@ -199,6 +224,11 @@ export default function DeliveryOrderForm({
   });
 
   function onSubmit(data: FormValues) {
+    // Care sets an order's supplier only when it is created
+    if (!isEditMode && isSupplierDestination && !data.supplier) {
+      form.setError("supplier", { message: t("supplier_required") });
+      return;
+    }
     const { extensions: formExtensions, ...restData } = data;
     const cleanedExtensions = extensions.prepareForSubmit(
       formExtensions as NamespacedExtensionData,
@@ -252,6 +282,7 @@ export default function DeliveryOrderForm({
         status={existingData?.status || DeliveryOrderStatus.draft}
         isEditMode={isEditMode}
         isPending={isPending}
+        showSupplier={isSupplierDestination}
         onSubmit={form.handleSubmit(onSubmit)}
       >
         {extensions.fields}
