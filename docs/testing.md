@@ -32,6 +32,16 @@ npm run playwright:test:ui                              # Interactive Playwright
 - Run specific test directories to iterate faster: `npx playwright test tests/auth/`
 - The `setup` project runs first to authenticate test users and save storage state
 
+## Isolated component checks
+
+The date-range picker suite builds its fixture in memory with the existing Vite dependencies and serves it through Playwright request interception. It exercises the real picker, popover and date multi-filter without backend data or saved authentication:
+
+```bash
+npx playwright test tests/components/dateRangePicker.spec.ts --project=chromium --no-deps --workers=1 --reporter=line
+```
+
+Keep a frontend server running at the configured base URL, or provide a production build so Playwright can start its preview server. The suite covers typed and clicked ranges, validation, bounds, keyboard focus, draft cancellation, month navigation, a 320px viewport and CSS 200% zoom. It also checks segment selection/stepping/replacement, leap-year clamping, T/Escape shortcuts, side-by-side field layout and the actual shared input/button dimensions at mobile and desktop widths. It does not replace authenticated list-page or mobile-device QA.
+
 ## Database management for re-runs
 
 Tests create data (patients, roles, locations, etc.) that can cause conflicts on re-run. Use the DB snapshot system:
