@@ -24,8 +24,13 @@
 #if c.table_title != none {
   block(below: px(8), text(size: text-size.base, weight: "semibold", c.table_title))
 }
+#let widths = c.table.widths
+#assert(
+  widths.len() == c.table.header.len(),
+  message: "details-table: table.widths needs one entry per header column",
+)
 #data-table(
-  columns: (1fr,) + (auto,) * (c.table.header.len() - 1),
+  columns: widths.map(w => if w == none { auto } else { w * 1fr }),
   align: (left,) + (center,) * (c.table.header.len() - 1),
   header-align: (left,) + (center,) * (c.table.header.len() - 1),
   header: c.table.header,

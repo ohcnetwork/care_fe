@@ -14,8 +14,9 @@
   if section.title != none {
     block(above: px(16), below: px(4), text(size: text-size.sm, weight: "semibold", section.title))
   } else { v(px(4)) }
-  table(
-    columns: range(n).map(i => if i == section.grow { 1fr } else { auto }),
+  let columns = range(n).map(i => if i == section.grow { 1fr } else { auto })
+  fit-cells(columns, table(
+    columns: columns,
     inset: (x: px(4), y: px(2)),
     align: (x, y) => alignments.at(section.align.at(x)) + horizon,
     stroke: (x, y) => if y == 0 { (y: rule) },
@@ -37,7 +38,7 @@
         row.cells.map(cell => table.cell(fill: fill, text(fill: ink, cell)))
       }
     }).flatten(),
-  )
+  ))
 }
 
 #if c.warning != none {

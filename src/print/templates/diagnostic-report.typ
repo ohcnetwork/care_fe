@@ -19,8 +19,9 @@
 
 #let results-table(results) = {
   let n = results.header.len()
-  table(
-    columns: (1fr,) * n,
+  let columns = (1fr,) * n
+  fit-cells(columns, table(
+    columns: columns,
     inset: px(6),
     stroke: border,
     align: left + top,
@@ -38,7 +39,7 @@
         cell,
       ),
     ))).flatten(),
-  )
+  ))
 }
 
 #let labelled-text(item) = block(above: px(12), width: 100%, {

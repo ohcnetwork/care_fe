@@ -57,7 +57,7 @@
       ..days.map(_ => slots).flatten().map(slot => table.cell(align: center + horizon, text(size: px(9), slot))),
     ),
     ..week.rows.map(row => (
-      table.cell(inset: px(6), align: left + top, {
+      table.cell(inset: px(6), align: left + top, fit-words({
         text(size: text-size.xs, weight: "bold", row.name)
         for summary in row.summaries {
           linebreak()
@@ -67,7 +67,7 @@
           linebreak()
           text(size: px(8), fill: gray(400), row.orders)
         }
-      }),
+      })),
       ..row.counts.map(count-cell),
     )).flatten(),
   )

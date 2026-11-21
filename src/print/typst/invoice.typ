@@ -99,7 +99,7 @@
   )
 
   let transactions-table(rows, outer) = data-table(
-    columns: (auto, 1fr, auto, auto, auto),
+    columns: (auto, 1fr, auto, 1fr, auto),
     align: (center, left, left, left, right),
     header-align: (center, left, left, left, right),
     header: ("#", l.date_and_time, l.payment_method, l.reference, l.amount),

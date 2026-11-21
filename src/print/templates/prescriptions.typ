@@ -98,7 +98,7 @@
     })
     if rx.medications.len() > 0 {
       data-table(
-        columns: (auto, auto, auto, auto, auto, 1fr),
+        columns: (auto, 3fr, 2fr, 2fr, 1.5fr, 3fr),
         align: (center, left, left, left, left, left),
         header-align: (center, left, left, left, left, left),
         header: c.table_header,
