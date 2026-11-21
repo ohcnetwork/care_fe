@@ -59,9 +59,12 @@ export function LocationChildren({
     : [];
   const beds = holdsBeds ? (bedsQuery.data?.results ?? []) : [];
   // A failed request is not an empty list: say so and offer to try again.
-  const failed = [subLocationsQuery, bedsQuery].filter(
-    (query) => query.isError,
-  );
+  // A request the parent's flag has switched off is no longer asked for, so
+  // an error it left behind does not count.
+  const failed = [
+    ...(holdsSubLocations ? [subLocationsQuery] : []),
+    ...(holdsBeds ? [bedsQuery] : []),
+  ].filter((query) => query.isError);
   const isEmpty = subLocations.length + beds.length === 0;
 
   return (
