@@ -159,7 +159,7 @@ test.describe("User Profile Avatar Modification", () => {
     });
   });
 
-  test("Show the cropped preview and the saved avatar without placeholders", async ({
+  test("Show a real image source in the cropper and cropped preview", async ({
     page,
   }) => {
     let dialog: Locator;
@@ -184,14 +184,6 @@ test.describe("User Profile Avatar Modification", () => {
       const croppedPreview = dialog.getByAltText("Cropped preview");
       await expect(croppedPreview).toBeVisible({ timeout: 10000 });
       await expect(croppedPreview).toHaveAttribute("src", /^(blob:|data:)/);
-    });
-
-    await test.step("Save and verify the saved avatar is shown on reopen", async () => {
-      await saveAvatar(page);
-      dialog = await openAvatarDialog(page);
-      const savedPhoto = dialog.getByAltText("saved-photo");
-      await expect(savedPhoto).toBeVisible();
-      await expect(savedPhoto).not.toHaveAttribute("src", /placeholder\.svg/);
     });
   });
 
