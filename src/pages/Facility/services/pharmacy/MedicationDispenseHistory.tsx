@@ -24,7 +24,11 @@ import useFilters from "@/hooks/useFilters";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
-import { dateQueryString, formatDateTime } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  formatDateTime,
+} from "@/Utils/utils";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -144,8 +148,12 @@ export default function MedicationDispenseHistory({
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         created_by: qParams.created_by,
-        created_date_after: qParams.created_date_after,
-        created_date_before: qParams.created_date_before,
+        created_date_after: qParams.created_date_after
+          ? dateTimeQueryString(qParams.created_date_after)
+          : undefined,
+        created_date_before: qParams.created_date_before
+          ? dateTimeQueryString(qParams.created_date_before, true)
+          : undefined,
       },
     }),
   });
