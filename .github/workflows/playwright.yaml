@@ -30,8 +30,9 @@ env:
   REACT_ENABLE_QUESTIONNAIRE_DRAFT: "true"
   BACKEND_STARTUP_TIMEOUT: 120
   TEST_SHARDS: 3
-  # Questionnaire actions require this companion backend. Restore develop
-  # once that dependency lands, independently of the frontend branch name.
+  # care backend ref to test against. `develop` uses the published
+  # ghcr.io/ohcnetwork/care:latest image; any other branch, tag or commit is
+  # built from source. Override per run with the `backend_ref` input.
   CARE_BACKEND_REF: develop
   # Backend stack: care's db/redis/minio plus the CI backend services.
   COMPOSE_FILE: care/docker-compose.yaml:.github/runner-files/docker-compose.ci.yaml
