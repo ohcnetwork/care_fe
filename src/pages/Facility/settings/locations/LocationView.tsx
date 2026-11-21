@@ -26,6 +26,7 @@ import {
 import { TagBadges } from "@/components/Tags/TagBadges";
 
 import query from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 import { navigate } from "@/lib/router/navigate";
 import { LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
@@ -52,7 +53,11 @@ export default function LocationView({ id, facilityId }: Props) {
   const headingId = useId();
   const [isManaging, setIsManaging] = useState(false);
 
-  const { data: location, isError } = useQuery({
+  const {
+    data: location,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["location", facilityId, id],
     queryFn: query(locationApi.get, {
       pathParams: { facility_id: facilityId, id },
@@ -65,22 +70,31 @@ export default function LocationView({ id, facilityId }: Props) {
     }),
   });
 
-  if (!location && isError) {
-    // A deleted location or a stale link: say so, and offer the way back.
+  if (!location && error) {
+    // A deleted location or a stale link is told apart from a request that
+    // failed for another reason, which is worth trying again.
+    const isMissing = error instanceof HTTPError && error.status === 404;
     return (
       <EmptyState
         className="rounded-xl border border-dashed"
         icon={<MapPinOff className="size-6 text-muted-foreground" />}
-        title={t("location_not_found")}
+        title={t(isMissing ? "location_not_found" : "failed_to_load_location")}
         action={
-          <Button variant="outline" asChild>
-            <Link
-              to="/facility/$facilityId/settings/locations"
-              params={{ facilityId }}
-            >
-              {t("locations")}
-            </Link>
-          </Button>
+          <div className="flex flex-wrap justify-center gap-2">
+            {!isMissing && (
+              <Button variant="outline" onClick={() => refetch()}>
+                {t("retry")}
+              </Button>
+            )}
+            <Button variant="outline" asChild>
+              <Link
+                to="/facility/$facilityId/settings/locations"
+                params={{ facilityId }}
+              >
+                {t("locations")}
+              </Link>
+            </Button>
+          </div>
         }
       />
     );

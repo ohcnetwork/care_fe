@@ -41,17 +41,23 @@ export function LocationChildren({
   const parentId = parent?.id ?? "";
   // A request is skipped only when the parent says it holds nothing of that
   // kind. Without the flag, the request is made.
+  const holdsSubLocations = parent?.has_sub_locations !== false;
+  // Beds sit inside a location, never at the top of the facility.
+  const holdsBeds = !!parent && parent.has_beds !== false;
   const subLocationsQuery = useQuery({
     ...locationChildrenQuery(facilityId, parentId, "kind"),
-    enabled: parent?.has_sub_locations !== false,
+    enabled: holdsSubLocations,
   });
   const bedsQuery = useQuery({
     ...locationChildrenQuery(facilityId, parentId, "instance"),
-    // Beds sit inside a location, never at the top of the facility.
-    enabled: !!parent && parent.has_beds !== false,
+    enabled: holdsBeds,
   });
-  const subLocations = subLocationsQuery.data?.results ?? [];
-  const beds = bedsQuery.data?.results ?? [];
+  // A skipped request is not refreshed, so rows cached on an earlier visit
+  // are not shown once the parent says it holds none.
+  const subLocations = holdsSubLocations
+    ? (subLocationsQuery.data?.results ?? [])
+    : [];
+  const beds = holdsBeds ? (bedsQuery.data?.results ?? []) : [];
   // A failed request is not an empty list: say so and offer to try again.
   const failed = [subLocationsQuery, bedsQuery].filter(
     (query) => query.isError,

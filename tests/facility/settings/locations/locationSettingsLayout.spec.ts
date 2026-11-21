@@ -41,6 +41,8 @@ test.describe("Location settings layout", () => {
   let children: Map<string, LocationRead[]>;
   /** While set, the request for a location's beds fails. */
   let failBedList: boolean;
+  /** While set, the request for one location fails with a server error. */
+  let failLocation: boolean;
 
   const tree = (page: Page) =>
     page.getByRole("navigation", { name: "Locations", exact: true });
@@ -96,6 +98,7 @@ test.describe("Location settings layout", () => {
     ]);
     const everyLocation = () => [...children.values()].flat();
     failBedList = false;
+    failLocation = false;
 
     await page.addInitScript(() => {
       localStorage.setItem("care_access_token", "location-settings-test");
@@ -135,6 +138,19 @@ test.describe("Location settings layout", () => {
         });
       } else if (path === "/api/v1/plug_config/") {
         await route.fulfill({ json: { configs: [] } });
+      } else if (path === locationPath && route.request().method() === "POST") {
+        // A created location is kept, so the lists show it afterwards.
+        const body = route.request().postDataJSON();
+        const parent = everyLocation().find((item) => item.id === body.parent);
+        const created = location(
+          { name: body.name, form: body.form, mode: body.mode },
+          parent,
+        );
+        children.set(body.parent ?? "", [
+          ...(children.get(body.parent ?? "") ?? []),
+          created,
+        ]);
+        await route.fulfill({ json: created });
       } else if (path === locationPath) {
         const params = url.searchParams;
         const mode = params.get("mode");
@@ -168,6 +184,15 @@ test.describe("Location settings layout", () => {
       } else if (path.startsWith(locationPath)) {
         const id = path.slice(locationPath.length).replace(/\/$/, "");
         const found = everyLocation().find((item) => item.id === id);
+        if (failLocation) {
+          await route.fulfill({ status: 500, json: { detail: "Failed" } });
+          return;
+        }
+        if (found && route.request().method() === "PUT") {
+          // Saved fields are kept, so the page shows them afterwards.
+          const { name, description, status } = route.request().postDataJSON();
+          Object.assign(found, { name, description, status });
+        }
         await route.fulfill(
           found
             ? { json: found }
@@ -362,6 +387,13 @@ test.describe("Location settings layout", () => {
       mode: "kind",
     });
     await expect(editor(page)).toBeHidden();
+    // The page and the tree show what was saved.
+    await expect(
+      page.getByRole("heading", { name: "General Ward A", level: 3 }),
+    ).toBeVisible();
+    await expect(
+      tree(page).getByRole("button", { name: "General Ward A", exact: true }),
+    ).toBeVisible();
   });
 
   test("changing tags keeps the fields that are not saved yet", async ({
@@ -434,6 +466,24 @@ test.describe("Location settings layout", () => {
     await expect(rows(page).filter({ hasText: "Main Block" })).toBeVisible();
   });
 
+  test("a location that fails to load can be tried again", async ({ page }) => {
+    failLocation = true;
+    await page.goto(`${basePath}/${ward.id}`);
+    // Not the same as a missing location: it exists, the request failed.
+    await expect(
+      page.getByText("This location could not be loaded."),
+    ).toBeVisible();
+    await expect(
+      page.getByText("This location could not be found."),
+    ).toHaveCount(0);
+
+    failLocation = false;
+    await page.getByRole("button", { name: "Retry", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "General Ward", level: 3 }),
+    ).toBeVisible();
+  });
+
   test("a new location is added from the same sheet", async ({ page }) => {
     await page.goto(`${basePath}/${ward.id}`);
     await page.getByRole("button", { name: "Add Location" }).click();
@@ -467,6 +517,9 @@ test.describe("Location settings layout", () => {
       parent: ward.id,
     });
     await expect(sheet).toBeHidden();
+    // The new location is listed once the sheet has closed.
+    await expect(rows(page).filter({ hasText: "Room 2" })).toBeVisible();
+    await expect(page.getByText("Sub-locations · 2")).toBeVisible();
   });
 
   test("a bed is managed like any other location", async ({ page }) => {
