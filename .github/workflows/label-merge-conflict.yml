@@ -15,6 +15,7 @@ jobs:
   auto-label:
     if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     steps:
       - uses: prince-chrismc/label-merge-conflicts-action@v3
         with:

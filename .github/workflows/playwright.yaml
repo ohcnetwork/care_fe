@@ -38,6 +38,7 @@ jobs:
   changes:
     if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       tests: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.tests == 'true' }}
     steps:
@@ -247,6 +248,7 @@ jobs:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe'"
     needs: [changes, test]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check if tests were skipped
         id: skipped
