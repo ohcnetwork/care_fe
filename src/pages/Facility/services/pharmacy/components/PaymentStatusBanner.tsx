@@ -692,17 +692,18 @@ export function PaymentStatusBanner({
                             {t("view_invoice")}
                           </Link>
                         </DropdownMenuItem>
-                        {accountId && (
-                          <DropdownMenuItem asChild>
-                            <Link
-                              to="/facility/$facilityId/billing/account/$accountId"
-                              params={{ facilityId, accountId }}
-                            >
-                              <BanknoteIcon className="size-4" />
-                              {t("go_to_account")}
-                            </Link>
-                          </DropdownMenuItem>
-                        )}
+                        <DropdownMenuItem asChild>
+                          <Link
+                            to="/facility/$facilityId/billing/account/$accountId"
+                            params={{
+                              facilityId,
+                              accountId: invoice.account.id,
+                            }}
+                          >
+                            <BanknoteIcon className="size-4" />
+                            {t("go_to_account")}
+                          </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => promptCancel()}
                           variant="destructive"
