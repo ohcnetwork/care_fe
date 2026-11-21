@@ -86,23 +86,23 @@ const accountId = getAccountId();
 
 ## Common URLs
 
-```typescript
+```text
 // Facility pages
-`/facility/${facilityId}/overview`
-`/facility/${facilityId}/settings/locations`
-`/facility/${facilityId}/settings/departments`
-`/facility/${facilityId}/settings/devices`
-`/facility/${facilityId}/settings/services`
-`/facility/${facilityId}/users`
+/facility/${facilityId}/overview
+/facility/${facilityId}/settings/locations
+/facility/${facilityId}/settings/departments
+/facility/${facilityId}/settings/devices
+/facility/${facilityId}/settings/services
+/facility/${facilityId}/users
 
 // Patient pages
-`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`
-`/facility/${facilityId}/patient/${patientId}/profile`
-`/facility/${facilityId}/encounters`
+/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}
+/facility/${facilityId}/patient/${patientId}/profile
+/facility/${facilityId}/encounters
 
 // Admin pages
-`/admin/questionnaire`
-`/admin/valueset`
+/admin/questionnaires
+/admin/valuesets
 ```
 
 ## Data Generation
@@ -378,8 +378,14 @@ await page.goto(`/facility/${facilityId}/settings/locations`);
 ### Sidebar
 
 ```typescript
-await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-await page.getByRole("button", { name: "Patients", exact: true }).click();
+// The sidebar may already be expanded; only expand it when collapsed.
+const sidebarToggle = page.getByRole("button", {
+  name: "Toggle Sidebar",
+  exact: true,
+});
+if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
+  await sidebarToggle.click();
+}
 await page.getByRole("link", { name: /search patients/i }).click();
 ```
 

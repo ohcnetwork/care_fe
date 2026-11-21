@@ -95,7 +95,7 @@ export function NumericRangeEditor<
             return (
               <div
                 key={index}
-                className="flex gap-2 p-2.5 items-center"
+                className="flex min-w-0 items-start gap-2 p-2.5"
                 title={`Range ${index + 1}`}
               >
                 <div className="flex flex-col gap-1.5 flex-1 min-w-0">
@@ -109,12 +109,12 @@ export function NumericRangeEditor<
                       fieldName={`${fieldName}.ranges.${index}.interpretation`}
                     />
                   )}
-                  <div className="flex items-center gap-1.5">
+                  <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-1.5">
                     <FormField
                       control={form.control}
                       name={`${fieldName}.ranges.${index}.min` as any}
                       render={({ field }) => (
-                        <FormItem className="flex-1">
+                        <FormItem className="min-w-0">
                           <FormControl>
                             <Input
                               {...field}
@@ -131,12 +131,14 @@ export function NumericRangeEditor<
                         </FormItem>
                       )}
                     />
-                    <span className="text-gray-300 text-xs shrink-0">–</span>
+                    <span className="flex h-8 items-center text-xs text-gray-300">
+                      –
+                    </span>
                     <FormField
                       control={form.control}
                       name={`${fieldName}.ranges.${index}.max` as any}
                       render={({ field }) => (
-                        <FormItem className="flex-1">
+                        <FormItem className="min-w-0">
                           <FormControl>
                             <Input
                               {...field}

@@ -1,3 +1,4 @@
+import { navigate } from "@/lib/router/navigate";
 import {
   BillMedicationsFormValues,
   BillMedicationsMode,
@@ -9,7 +10,6 @@ import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
 import { useQueries } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useMemo } from "react";
 
 interface Options {
@@ -70,11 +70,21 @@ export default function usePrescriptionsMode({
   const onRemovePrescription = (prescriptionId: string) => {
     const newIds = prescriptionIds.filter((id) => id !== prescriptionId);
     if (newIds.length === 0) {
-      navigate(
-        `/facility/${facilityId}/locations/${locationId}/medication_requests`,
-      );
+      navigate({
+        to: "/facility/$facilityId/locations/$locationId/medication_requests",
+        params: { facilityId, locationId },
+      });
     } else {
-      navigate(newIds.join(","), { replace: true });
+      navigate({
+        to: "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds",
+        params: {
+          facilityId,
+          locationId,
+          patientId,
+          prescriptionIds: newIds.join(","),
+        },
+        replace: true,
+      });
     }
   };
 
@@ -89,6 +99,7 @@ export default function usePrescriptionsMode({
         ? {
             patientId,
             facilityId,
+            locationId,
             encounterId: anyEncounter.id,
             excludePrescriptionIds: prescriptionIds,
           }

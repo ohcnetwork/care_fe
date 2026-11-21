@@ -27,6 +27,7 @@ interface PinPageDialogProps {
 function PinPageDialog({ url }: PinPageDialogProps) {
   const { t } = useTranslation();
   const [open, onOpenChange] = useState(false);
+  const { facilityId } = useCurrentFacilitySilently();
   const {
     addCustomLink,
     isCustomLink,
@@ -34,8 +35,7 @@ function PinPageDialog({ url }: PinPageDialogProps) {
     isPending,
     canAddMoreLinks,
     maxCustomLinks,
-  } = useUserPreferences();
-  const { facilityId } = useCurrentFacilitySilently();
+  } = useUserPreferences({ facilityId });
 
   const [includeQueryParams, setIncludeQueryParams] = useState(false);
   const pathUrl = includeQueryParams

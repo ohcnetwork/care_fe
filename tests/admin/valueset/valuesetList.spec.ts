@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
-import { expectedSlug } from "tests/helper/utils";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -25,7 +24,7 @@ test.describe("ValueSet List", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/admin/valuesets");
     name = faker.company.name();
-    slug = expectedSlug(name);
+    slug = `vs-${faker.string.alphanumeric(12).toLowerCase()}`;
     description = faker.lorem.sentence();
   });
 

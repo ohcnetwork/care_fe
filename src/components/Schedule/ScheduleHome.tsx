@@ -15,8 +15,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { usePermissions } from "@/context/PermissionContext";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
-import { useAvailabilityHeatmap } from "@/pages/Appointments/utils";
+import {
+  getAppointmentsPath,
+  useAvailabilityHeatmap,
+} from "@/pages/Appointments/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
 import CreateScheduleTemplateSheet from "@/pages/Scheduling/components/CreateScheduleTemplateSheet";
@@ -45,7 +50,6 @@ import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import dayjs from "dayjs";
 import { ExternalLinkIcon } from "lucide-react";
-import { Link, useQueryParams } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -142,7 +146,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
               <PopoverTrigger asChild>
                 <div
                   className={cn(
-                    "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-[state=open]:bg-white",
+                    "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-popup-open:bg-white",
                     templatesQuery.isLoading &&
                       "opacity-50 pointer-events-none",
                     "transition-all duration-200 ease-in-out",
@@ -332,9 +336,17 @@ function DayDetailsPopover({
         {bookedSlots > 0 && (
           <>
             <hr className="bg-gray-200 h-px my-3" />
-            <Link
+            <HrefLink
               className="flex items-center gap-2 text-sm text-gray-500 underline underline-offset-2"
-              href={`/facility/${facilityId}/appointments?practitioners=${resourceId}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`}
+              href={`${getAppointmentsPath({ facilityId, resourceType, resourceId })}?${new URLSearchParams(
+                {
+                  ...(resourceType === SchedulableResourceType.Practitioner && {
+                    practitioners: resourceId,
+                  }),
+                  date_from: dateQueryString(date),
+                  date_to: dateQueryString(date),
+                },
+              )}`}
             >
               <span className="text-sm text-gray-500">
                 {t("appointments_scheduled_for_day_link", {
@@ -342,7 +354,7 @@ function DayDetailsPopover({
                 })}
               </span>
               <ExternalLinkIcon className="size-4" />
-            </Link>
+            </HrefLink>
           </>
         )}
 

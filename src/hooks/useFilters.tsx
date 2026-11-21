@@ -1,12 +1,20 @@
-import { QueryParam, setQueryParamsOptions, useQueryParams } from "raviger";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import {
+  type SetQueryParamsOptions,
+  type QueryParams as UrlQueryParams,
+} from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
 
 import GenericFilterBadge from "@/CAREUI/display/FilterBadge";
 
 import PaginationComponent from "@/components/Common/Pagination";
+import {
+  useIsScopedQueryParams,
+  useScopedQueryParams,
+} from "@/hooks/useScopedQueryParams";
 
 import FiltersCache from "@/Utils/FiltersCache";
 import { QueryParams } from "@/Utils/request/types";
@@ -21,7 +29,7 @@ interface FilterBadgeProps {
 }
 
 /**
- * A custom hook wrapped around raviger's `useQueryParams` hook to ease handling
+ * A custom hook wrapped around `useScopedQueryParams` to ease handling
  * of pagination and filters.
  */
 export default function useFilters({
@@ -38,21 +46,22 @@ export default function useFilters({
   const { t } = useTranslation();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
-  const [qParams, _setQueryParams] = useQueryParams();
+  const [qParams, _setQueryParams] = useScopedQueryParams();
+  const scoped = useIsScopedQueryParams();
   const [clearSearch, setClearSearch] = useState<{
     value: boolean;
     params?: string[];
   }>({ value: false });
 
-  const updateCache = (query: QueryParam) => {
-    if (disableCache) return;
+  const updateCache = (query: UrlQueryParams) => {
+    if (disableCache || scoped) return;
     const blacklist = FILTERS_CACHE_BLACKLIST.concat(cacheBlacklist);
     FiltersCache.set(query, blacklist);
   };
 
   const setQueryParams = (
-    query: QueryParam,
-    options?: setQueryParamsOptions,
+    query: UrlQueryParams,
+    options?: SetQueryParamsOptions,
   ) => {
     query = FiltersCache.utils.clean(query);
     _setQueryParams(query, { ...options, replace: true });
@@ -82,6 +91,11 @@ export default function useFilters({
       ),
     );
 
+    if (scoped) {
+      if (Object.keys(defaults).length > 0)
+        setQueryParams({ ...defaults, ...qParams });
+      return;
+    }
     if (disableCache) {
       // Clean-up any existing cache if present for this path.
       FiltersCache.invalidate();
@@ -227,13 +241,15 @@ export default function useFilters({
         ))}
         {children}
         {show && (
-          <button
+          <Button
+            variant="outline"
+            type="button"
             id="clear-all-filters"
-            className="rounded-full border border-secondary-300 bg-white px-2 py-1 text-xs text-secondary-600 hover:text-secondary-800"
+            className="h-auto rounded-full border border-secondary-300 bg-white px-2 py-1 text-xs text-secondary-600 hover:text-secondary-800"
             onClick={() => removeFilters()}
           >
             {t("clear_all_filters")}
-          </button>
+          </Button>
         )}
       </div>
     );

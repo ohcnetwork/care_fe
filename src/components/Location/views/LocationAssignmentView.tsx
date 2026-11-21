@@ -146,7 +146,7 @@ export function LocationAssignmentView({
         onGoBack={onGoBack}
       />
 
-      <div className="mt-8 flex justify-end gap-2">
+      <div className="mt-8 flex flex-col sm:flex-row justify-end gap-2">
         {!isOverview && (
           <Button variant="outline" onClick={resetScreen}>
             {t("cancel")}

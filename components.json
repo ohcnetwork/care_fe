@@ -1,13 +1,13 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "new-york",
+  "style": "base-vega",
   "rsc": false,
   "tsx": true,
   "tailwind": {
-    "config": "tailwind.config.js",
+    "config": "",
     "css": "src/style/index.css",
-    "baseColor": "gray",
-    "cssVariables": false,
+    "baseColor": "neutral",
+    "cssVariables": true,
     "prefix": ""
   },
   "aliases": {
@@ -16,5 +16,9 @@
     "ui": "@/components/ui",
     "lib": "@/lib",
     "hooks": "@/hooks"
+  },
+  "iconLibrary": "lucide",
+  "registries": {
+    "@careui": "https://careui.ohc.network/registry/care-ui/{name}/{name}.json"
   }
 }

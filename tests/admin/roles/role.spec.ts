@@ -95,7 +95,7 @@ test.describe("Admin Roles Management", () => {
     await expect(page.getByRole("heading", { name: roleName })).toBeVisible();
 
     // verify five random permissions are checked
-    await page.getByRole("button", { name: "Actions" }).click();
+    await page.getByRole("button", { name: "Actions", exact: true }).click();
     await page.getByRole("menuitem", { name: /Edit/i }).click();
     for (const permission of randomPermissions) {
       await page.getByPlaceholder("Search permissions").fill(permission);
@@ -117,7 +117,10 @@ test.describe("Admin Roles Management", () => {
     // edit role name
     const updatedRoleName = `${roleName} - updated`;
     await page.getByRole("textbox", { name: /Search Roles/i }).fill(roleName);
-    await page.getByRole("button", { name: "Actions" }).first().click();
+    await page
+      .getByRole("button", { name: "Actions", exact: true })
+      .first()
+      .click();
     await page.getByRole("menuitem", { name: /Edit/i }).click();
     await page.getByPlaceholder("Enter role name").fill(updatedRoleName);
 
@@ -141,7 +144,7 @@ test.describe("Admin Roles Management", () => {
     ).toBeVisible();
 
     // verify unchecked permission
-    await page.getByRole("button", { name: "Actions" }).click();
+    await page.getByRole("button", { name: "Actions", exact: true }).click();
     await page.getByRole("menuitem", { name: /Edit/i }).click();
     await page.getByPlaceholder("Search permissions").fill(uncheckedPermission);
     await page
@@ -162,7 +165,7 @@ test.describe("Admin Roles Management", () => {
     await createRole(page, roleName, description, randomPermissions);
 
     await page.getByRole("textbox", { name: /Search Roles/i }).fill(roleName);
-    await page.getByRole("button", { name: "Actions" }).click();
+    await page.getByRole("button", { name: "Actions", exact: true }).click();
     await page.getByRole("menuitem", { name: /Clone/i }).click();
     await page.getByRole("button", { name: /Create Role/i }).click();
 
@@ -178,7 +181,7 @@ test.describe("Admin Roles Management", () => {
     ).toBeVisible();
 
     // verify three random permissions are checked
-    await page.getByRole("button", { name: "Actions" }).click();
+    await page.getByRole("button", { name: "Actions", exact: true }).click();
     await page.getByRole("menuitem", { name: /Edit/i }).click();
     for (const permission of randomPermissions) {
       await page.getByPlaceholder("Search permissions").fill(permission);

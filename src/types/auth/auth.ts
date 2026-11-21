@@ -12,6 +12,7 @@ export interface JwtTokenObtainPair {
 export interface LoginRequest {
   username: string;
   password: string;
+  "g-recaptcha-response"?: string;
 }
 
 export interface TokenRefreshRequest {
