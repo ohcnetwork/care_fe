@@ -88,6 +88,8 @@
       "
     ></div>
     <div id="root"></div>
+    <!-- Runtime REACT_* overrides; must load before the app module runs. -->
+    <script src="/runtime-env.js"></script>
     <script src="/loading-screen.js"></script>
     <script type="module" src="/src/index.tsx"></script>
     <!-- Script injected by Vite from environment variable -->

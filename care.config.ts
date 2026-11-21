@@ -10,7 +10,13 @@ import { NonEmptyArray } from "@/Utils/types";
 import Decimal from "decimal.js";
 import { CountryCode } from "libphonenumber-js";
 
-const env = import.meta.env;
+// The Docker image writes the container's REACT_* environment variables to
+// /runtime-env.js at startup (see nginx/runtime-env.sh). They override the
+// values baked in at build time, so one image can serve any deployment.
+const env: ImportMetaEnv = {
+  ...import.meta.env,
+  ...(typeof window !== "undefined" ? window.__CARE_RUNTIME_ENV__ : undefined),
+};
 
 interface ILogo {
   light: string;

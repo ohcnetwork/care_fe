@@ -296,6 +296,17 @@ npm run preview
 Starts a production http-server in local to run the project with Service worker.
 The build is minified and the filenames include the hashes.
 
+#### Run with Docker
+
+```sh
+docker build -t care_fe .
+docker run -p 8080:80 -e REACT_CARE_API_URL=https://careapi.example.org care_fe
+```
+
+`REACT_*` variables passed to the container override the values from the build, so one image can serve different deployments without a rebuild. They are written to `/runtime-env.js` when the container starts and are visible to anyone who loads the app, as build-time values already are, so never put secrets in them.
+
+These settings are still applied only at build time: `REACT_APP_TITLE`, `REACT_APP_META_DESCRIPTION`, `REACT_APP_COVER_IMAGE`, `REACT_PUBLIC_URL`, `REACT_INJECTED_HEAD` and `REACT_INJECTED_HTML` (written into `index.html`), `REACT_CUSTOM_DESCRIPTION` and `REACT_MFE_REGISTERED_COMPONENTS`.
+
 **🚀 Your app is ready to be deployed!**
 
 <div align="center">
