@@ -357,6 +357,7 @@ export function EncounterCommandDialog({
           label: encounterRequiresDischarge(encounter)
             ? t("mark_for_discharge")
             : t("mark_as_completed"),
+          shortcut: getShortcutDisplay("mark-as-completed"),
           icon: <CheckCircle2 />,
         },
         {
@@ -401,18 +402,6 @@ export function EncounterCommandDialog({
       items: actionItems,
     });
 
-    if (
-      canNavigateToReferrals &&
-      (selectedEncounterPermissions.canReadReferral ||
-        selectedEncounterPermissions.canCreateReferral)
-    ) {
-      actionItems.push({
-        id: "referrals",
-        label: t("referrals"),
-        icon: <ArrowBigRight />,
-      });
-    }
-
     // Go to navigation - limited to pages visible in the active workspace
     const goToItems: (ActionItem & { pageKey: string })[] = [
       {
@@ -432,6 +421,7 @@ export function EncounterCommandDialog({
         pageKey: "immunizations",
         label: t("immunizations"),
       },
+      { id: "referrals", pageKey: "referrals", label: t("referrals") },
       { id: "responses", pageKey: "responses", label: t("responses") },
       { id: "files", pageKey: "files", label: t("files") },
       { id: "notes", pageKey: "notes", label: t("notes") },
@@ -452,7 +442,13 @@ export function EncounterCommandDialog({
     groups.push({
       group: t("go_to"),
       items: goToItems
-        .filter(({ pageKey }) => isPageVisible(pageKey))
+        .filter(({ pageKey }) =>
+          pageKey === "referrals"
+            ? canNavigateToReferrals &&
+              (selectedEncounterPermissions.canReadReferral ||
+                selectedEncounterPermissions.canCreateReferral)
+            : isPageVisible(pageKey),
+        )
         .map(({ pageKey: _pageKey, ...item }) => ({
           ...item,
           shortcut: getShortcutDisplay(item.id),
