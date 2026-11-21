@@ -1,25 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { FileText, X } from "lucide-react";
+import { Plus, Trash2, TriangleAlert } from "lucide-react";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Autocomplete from "@/components/ui/autocomplete";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Empty, EmptyDescription } from "@/components/ui/empty";
 import {
   FieldDescription,
   FieldError,
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemGroup,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
 import {
   Select,
   SelectContent,
@@ -29,19 +21,20 @@ import {
 } from "@/components/ui/select";
 
 import query from "@/Utils/request/query";
+import {
+  QuestionnaireMappingDraft,
+  ReferralQuestionnaireType,
+} from "@/types/emr/referral/referral";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-
-export interface QuestionnaireMappingSelection {
-  id: string;
-  title: string;
-  status: string;
-  questionnaire_type: "request" | "response";
-}
 
 interface Props {
   facilityId?: string;
-  value: QuestionnaireMappingSelection[];
-  onChange: (value: QuestionnaireMappingSelection[]) => void;
+  value: QuestionnaireMappingDraft[];
+  onChange: (value: QuestionnaireMappingDraft[]) => void;
+  /** Show "required" errors on rows without a form (set after a failed save). */
+  showErrors?: boolean;
+  /** A rule that applies to the whole list, e.g. an active request form is required. */
+  error?: string;
   disabled?: boolean;
 }
 
@@ -49,12 +42,87 @@ export function ReferralQuestionnaireMappings({
   facilityId,
   value,
   onChange,
+  showErrors,
+  error,
   disabled,
 }: Props) {
   const { t } = useTranslation();
-  const searchLabelId = useId();
+
+  return (
+    <FieldSet className="gap-3">
+      <div className="space-y-1">
+        <div className="flex items-center justify-between gap-3">
+          <FieldLegend variant="label" className="mb-0">
+            {t("referral_configuration_forms")}
+          </FieldLegend>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              onChange([...value, { questionnaire_type: "request" }])
+            }
+            disabled={disabled}
+          >
+            <Plus className="size-4" />
+            {t("add_form")}
+          </Button>
+        </div>
+        <FieldDescription>
+          {t("referral_configuration_forms_help")}
+        </FieldDescription>
+      </div>
+
+      {value.length === 0 ? (
+        <Empty className="border">
+          <EmptyDescription>{t("referral_no_forms_added")}</EmptyDescription>
+        </Empty>
+      ) : (
+        <div role="list" className="space-y-4 sm:space-y-2">
+          {value.map((row, index) => (
+            <QuestionnaireMappingRow
+              key={row.id ?? `new-${index}`}
+              facilityId={facilityId}
+              row={row}
+              takenIds={value.flatMap((other, i) =>
+                i !== index && other.id ? [other.id] : [],
+              )}
+              onChange={(next) =>
+                onChange(
+                  value.map((current, i) => (i === index ? next : current)),
+                )
+              }
+              onRemove={() => onChange(value.filter((_, i) => i !== index))}
+              showErrors={showErrors}
+              disabled={disabled}
+            />
+          ))}
+        </div>
+      )}
+      {error && <FieldError>{error}</FieldError>}
+    </FieldSet>
+  );
+}
+
+function QuestionnaireMappingRow({
+  facilityId,
+  row,
+  takenIds,
+  onChange,
+  onRemove,
+  showErrors,
+  disabled,
+}: {
+  facilityId?: string;
+  row: QuestionnaireMappingDraft;
+  takenIds: string[];
+  onChange: (row: QuestionnaireMappingDraft) => void;
+  onRemove: () => void;
+  showErrors?: boolean;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
-  const [formType, setFormType] = useState<"request" | "response">("request");
   const { data, isFetching, isError } = useQuery({
     queryKey: ["referral-configuration-questionnaires", facilityId, search],
     queryFn: query.debounced(questionnaireApi.list, {
@@ -67,22 +135,28 @@ export function ReferralQuestionnaireMappings({
       },
     }),
   });
-  const options = (data?.results ?? []).filter(
+  const results = (data?.results ?? []).filter(
     (form) =>
       form.subject_type === "referral" &&
-      !value.some((selected) => selected.id === form.id),
+      form.id !== row.id &&
+      !takenIds.includes(form.id),
   );
+  const options = [
+    ...(row.id ? [{ value: row.id, label: row.title ?? row.id }] : []),
+    ...results.map((form) => ({ value: form.id, label: form.title })),
+  ];
+  const formLabel = row.title ?? t("referral_search_active_forms");
+  const isInactive = !!row.id && row.status !== "active";
+  const inactiveHintId = useId();
 
   return (
-    <FieldSet className="gap-3">
-      <FieldLegend>{t("referral_configuration_forms")}</FieldLegend>
-      <FieldDescription>
-        {t("referral_configuration_forms_help")}
-      </FieldDescription>
-      <div className="grid gap-2 sm:grid-cols-[150px_1fr]">
+    <div role="listitem" className="flex items-start gap-2">
+      <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-[150px_1fr]">
         <Select
-          value={formType}
-          onValueChange={(value: "request" | "response") => setFormType(value)}
+          value={row.questionnaire_type}
+          onValueChange={(type: ReferralQuestionnaireType) =>
+            onChange({ ...row, questionnaire_type: type })
+          }
           disabled={disabled}
         >
           <SelectTrigger aria-label={t("referral_form_type")}>
@@ -97,83 +171,59 @@ export function ReferralQuestionnaireMappings({
             </SelectItem>
           </SelectContent>
         </Select>
-        <div className="min-w-0">
-          <span id={searchLabelId} className="sr-only">
-            {t("referral_search_active_forms")}
-          </span>
+        <div className="min-w-0 space-y-1">
           <Autocomplete
-            aria-labelledby={searchLabelId}
-            options={options.map((form) => ({
-              value: form.id,
-              label: form.title,
-            }))}
-            value=""
+            aria-label={t("referral_search_active_forms")}
+            aria-invalid={showErrors && !row.id}
+            aria-describedby={isInactive ? inactiveHintId : undefined}
+            className={isInactive ? "border-warning-400" : undefined}
+            options={options}
+            value={row.id ?? ""}
             onChange={(id) => {
-              const selected = options.find((form) => form.id === id);
+              const selected = results.find((form) => form.id === id);
               if (!selected) return;
-              onChange([
-                ...value,
-                {
-                  id: selected.id,
-                  title: selected.title,
-                  status: selected.status,
-                  questionnaire_type: formType,
-                },
-              ]);
+              onChange({
+                ...row,
+                id: selected.id,
+                title: selected.title,
+                status: selected.status,
+              });
               setSearch("");
             }}
             onSearch={setSearch}
             placeholder={t("referral_search_active_forms")}
             isLoading={isFetching}
+            showClearButton={false}
             disabled={disabled}
           />
+          {isInactive && (
+            <p
+              id={inactiveHintId}
+              className="flex items-start gap-1.5 text-sm text-warning-700 dark:text-warning-400"
+            >
+              <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
+              {t("referral_form_inactive_help")}
+            </p>
+          )}
+          {showErrors && !row.id && (
+            <FieldError>{t("please_select_form")}</FieldError>
+          )}
+          {isError && <FieldError>{t("referral_forms_load_error")}</FieldError>}
         </div>
       </div>
-      {isError && <FieldError>{t("referral_forms_load_error")}</FieldError>}
-      {value.length > 0 && (
-        <ItemGroup>
-          {value.map((form) => (
-            <Item key={form.id} role="listitem" size="sm" variant="outline">
-              <ItemMedia variant="icon">
-                <FileText />
-              </ItemMedia>
-              <ItemContent className="min-w-0">
-                <ItemTitle className="line-clamp-none break-words">
-                  {form.title}
-                </ItemTitle>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  <Badge variant="neutral">
-                    {t(
-                      form.questionnaire_type === "request"
-                        ? "referral_request_form"
-                        : "referral_response_form",
-                    )}
-                  </Badge>
-                  {form.status !== "active" && (
-                    <Badge variant="destructive">
-                      {t("referral_form_inactive")}
-                    </Badge>
-                  )}
-                </div>
-              </ItemContent>
-              <ItemActions>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t("referral_remove_form", { name: form.title })}
-                  disabled={disabled}
-                  onClick={() =>
-                    onChange(value.filter((item) => item.id !== form.id))
-                  }
-                >
-                  <X className="size-4" />
-                </Button>
-              </ItemActions>
-            </Item>
-          ))}
-        </ItemGroup>
-      )}
-    </FieldSet>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="text-muted-foreground hover:text-destructive"
+        aria-label={
+          row.id ? t("referral_remove_form", { name: formLabel }) : t("remove")
+        }
+        disabled={disabled}
+        onClick={onRemove}
+      >
+        <Trash2 className="size-4" />
+      </Button>
+    </div>
   );
 }

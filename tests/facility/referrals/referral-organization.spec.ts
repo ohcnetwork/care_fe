@@ -75,6 +75,7 @@ test("configures an organization destination and receives its referral in the or
     await dialog
       .getByRole("textbox", { name: "Name", exact: true })
       .fill(availabilityName);
+    await dialog.getByRole("button", { name: "Add Form", exact: true }).click();
     await dialog
       .getByRole("combobox", { name: "Search active forms", exact: true })
       .click();

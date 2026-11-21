@@ -14,12 +14,26 @@ export type ReferralStatus = (typeof REFERRAL_STATUSES)[number];
 export type ReferralDestinationType =
   "facility" | "internal_organization" | "external_organization";
 export type ReferralEntityType = ReferralDestinationType | "external";
-export type ReferralType = "consultation" | "lab";
-export type ReferralAvailabilityStatus = "draft" | "active" | "inactive";
+export const REFERRAL_TYPES = ["consultation", "lab"] as const;
+export type ReferralType = (typeof REFERRAL_TYPES)[number];
+export const REFERRAL_AVAILABILITY_STATUSES = [
+  "draft",
+  "active",
+  "inactive",
+] as const;
+export type ReferralAvailabilityStatus =
+  (typeof REFERRAL_AVAILABILITY_STATUSES)[number];
 export type ReferralQuestionnaireType = "request" | "response";
 
 export interface ReferralQuestionnaireMapping {
   questionnaire: string;
+  questionnaire_type: ReferralQuestionnaireType;
+}
+
+export interface QuestionnaireMappingDraft {
+  id?: string;
+  title?: string;
+  status?: string;
   questionnaire_type: ReferralQuestionnaireType;
 }
 
