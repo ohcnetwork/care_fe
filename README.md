@@ -296,6 +296,10 @@ npm run preview
 Starts a production http-server in local to run the project with Service worker.
 The build is minified and the filenames include the hashes.
 
+#### Configure a deployment at runtime
+
+A deployment can override `REACT_*` settings without a rebuild by serving its own `/runtime-env.js`. See [Runtime configuration](docs/runtime-configuration.md).
+
 **🚀 Your app is ready to be deployed!**
 
 <div align="center">

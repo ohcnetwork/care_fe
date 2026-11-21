@@ -10,7 +10,12 @@ import { NonEmptyArray } from "@/Utils/types";
 import Decimal from "decimal.js";
 import { CountryCode } from "libphonenumber-js";
 
-const env = import.meta.env;
+// A deployment can serve its own /runtime-env.js to override the REACT_* values
+// baked in at build time (see docs/runtime-configuration.md).
+const env: ImportMetaEnv = {
+  ...import.meta.env,
+  ...(typeof window !== "undefined" ? window.__CARE_RUNTIME_ENV__ : undefined),
+};
 
 interface ILogo {
   light: string;

@@ -67,4 +67,9 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
+interface Window {
+  /** Set by /runtime-env.js; overrides `import.meta.env` in care.config.ts. */
+  __CARE_RUNTIME_ENV__?: Partial<ImportMetaEnv>;
+}
+
 declare module "@fontsource/*";
