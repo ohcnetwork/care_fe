@@ -1,5 +1,37 @@
 import { isAppleDevice } from "./utils";
 
+function formatKeyToken(token: string): string {
+  const trimmed = token.trim();
+  const lower = trimmed.toLowerCase();
+
+  if (lower === "ctrl" || lower === "cmd" || lower === "meta") {
+    return isAppleDevice ? "⌘" : "CTRL";
+  }
+  if (lower === "shift") {
+    return "⇧";
+  }
+  if (lower === "alt" || lower === "option") {
+    return isAppleDevice ? "⌥" : "ALT";
+  }
+  if (lower === "arrowleft") {
+    return "←";
+  }
+  if (lower === "arrowright") {
+    return "→";
+  }
+  if (lower === "arrowup") {
+    return "↑";
+  }
+  if (lower === "arrowdown") {
+    return "↓";
+  }
+  if (lower === "escape" || lower === "esc") {
+    return "ESC";
+  }
+
+  return trimmed.toUpperCase();
+}
+
 /**
  * Formats a keyboard shortcut string for display, using appropriate symbols for modifier keys
  * based on the user's operating system.
@@ -7,49 +39,31 @@ import { isAppleDevice } from "./utils";
  * Examples:
  * - "ctrl+k" -> "⌘ + K" (on macOS) or "CTRL + K" (on other OS)
  * - "shift+p" -> "⇧ + P"
+ * - "shift+arrowLeft" -> "⇧ + ←"
  * - "alt+x" -> "⌥ + X" (on macOS) or "ALT + X" (on other OS)
  * - "g p" -> "G + P"
+ * - "arrowDown" -> "↓"
  *
- * @param key The keyboard shortcut string (e.g., "ctrl+k", "shift+p", "g p")
+ * @param key The keyboard shortcut string (e.g., "ctrl+k", "shift+p", "shift+arrowLeft", "g p")
  * @returns Formatted string for display
  */
 export function formatKeyboardShortcut(key: string): string {
-  if (key.includes("+")) {
-    // Modifier key combination (ctrl+k -> CTRL + K or ⌘ + K)
-    const parts = key.split("+");
-    return parts
-      .map((k) => {
-        const lower = k.toLowerCase();
-        if (lower === "ctrl" || lower === "cmd" || lower === "meta") {
-          return isAppleDevice ? "⌘" : "CTRL";
-        }
-        if (lower === "shift") {
-          return "⇧";
-        }
-        if (lower === "alt") {
-          return isAppleDevice ? "⌥" : "ALT";
-        }
-        return k.toUpperCase();
-      })
-      .join(" + ");
-  } else if (key.includes(" ")) {
-    // Space-separated keys (g p -> G + P)
-    return key
-      .split(" ")
-      .map((k) => k.toUpperCase())
-      .join(" + ");
-  } else {
-    // Single key (a -> A)
-    if (key === "arrowDown") {
-      return "↓";
-    }
-    if (key === "escape") {
-      return "ESC";
-    } else if (key === "arrowLeft") {
-      return "←";
-    }
-    return key.toUpperCase();
+  if (!key) {
+    return "";
   }
+
+  if (key.includes("+")) {
+    // Modifier key combination (e.g., ctrl+k -> CTRL + K or ⌘ + K, shift+arrowLeft -> ⇧ + ←)
+    return key.split("+").map(formatKeyToken).join(" + ");
+  }
+
+  if (key.includes(" ")) {
+    // Space-separated keys (e.g., g p -> G + P)
+    return key.split(" ").filter(Boolean).map(formatKeyToken).join(" + ");
+  }
+
+  // Single key (e.g., arrowDown -> ↓, escape -> ESC, a -> A)
+  return formatKeyToken(key);
 }
 
 // Debounce map to prevent multiple rapid clicks
