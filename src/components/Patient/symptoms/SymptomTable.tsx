@@ -1,8 +1,8 @@
 import { ExternalLink, File, X } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,15 +18,28 @@ import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import ClinicalInformationRow, {
   BadgeButtonDropdownTrigger,
 } from "@/components/Patient/Common/ClinicalInformationRow";
+import {
+  ClinicalSummaryGrid,
+  hasOnset,
+  OnsetMeta,
+  SeverityMeta,
+} from "@/components/Patient/Common/ClinicalSummaryGrid";
 
 import { formatName } from "@/Utils/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
+  Symptom,
   SYMPTOM_CLINICAL_STATUS_COLORS,
   SYMPTOM_SEVERITY_COLORS,
   SYMPTOM_VERIFICATION_STATUS_COLORS,
-  Symptom,
+  SymptomClinicalStatus,
 } from "@/types/emr/symptom/symptom";
+
+const ACTIVE_SYMPTOM_CLINICAL_STATUS: SymptomClinicalStatus[] = [
+  "active",
+  "recurrence",
+  "relapse",
+];
 
 const SymptomCard = ({
   symptom,
@@ -94,7 +107,7 @@ const SymptomCard = ({
           </DropdownMenu>
         </div>
       </div>
-      <div className="mt-4 flex gap-5 flex-wrap">
+      <div className={"mt-4 flex flex-wrap gap-5"}>
         <div>
           <div className="text-sm text-gray-600 mb-1">{t("verification")}</div>
           <Badge
@@ -152,75 +165,133 @@ export const SymptomTable = ({
   symptoms,
   patientId,
   showViewEncounter = true,
+  compact = false,
 }: {
   symptoms: Symptom[];
   patientId: string;
   showViewEncounter?: boolean;
+  compact?: boolean;
 }) => {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
   const baseHeaderClasses =
-    "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
+    "text-center border-y border-l border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
+
+  const compactGrid = compact && (
+    <ClinicalSummaryGrid
+      className="@3xl/clinical-widget:hidden"
+      items={symptoms.map((symptom) => ({
+        id: symptom.id,
+        name: symptom.code.display || symptom.code.code,
+        dimmed: !ACTIVE_SYMPTOM_CLINICAL_STATUS.includes(
+          symptom.clinical_status,
+        ),
+        note: symptom.note,
+        createdBy: symptom.created_by,
+        onViewEncounter: showViewEncounter
+          ? () =>
+              navigate({
+                href: facilityId
+                  ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                  : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+              })
+          : undefined,
+        meta: [
+          hasOnset(symptom.onset) && (
+            <OnsetMeta key="onset" onset={symptom.onset} />
+          ),
+          symptom.severity && (
+            <SeverityMeta key="severity" severity={symptom.severity} />
+          ),
+          symptom.verification_status !== "confirmed" && (
+            <span key="verification">{t(symptom.verification_status)}</span>
+          ),
+          symptom.clinical_status !== "active" && (
+            <span key="status">{t(symptom.clinical_status)}</span>
+          ),
+        ],
+      }))}
+    />
+  );
+
   return (
     <>
+      {compactGrid}
       {/* Mobile: Card layout */}
-      <div className="space-y-3 block sm:hidden">
-        {symptoms.map((symptom) => (
-          <SymptomCard
-            key={symptom.id}
-            symptom={symptom}
-            onViewEncounter={
-              showViewEncounter
-                ? () =>
-                    navigate(
-                      facilityId
-                        ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
-                        : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
-                    )
-                : undefined
-            }
-          />
-        ))}
-      </div>
+      {!compact && (
+        <div className="block space-y-3 sm:hidden">
+          {symptoms.map((symptom) => (
+            <SymptomCard
+              key={symptom.id}
+              symptom={symptom}
+              onViewEncounter={
+                showViewEncounter
+                  ? () =>
+                      navigate({
+                        href: facilityId
+                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                          : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+                      })
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+      )}
       {/* Desktop: Table layout */}
-      <div className="overflow-x-auto hidden sm:block">
-        <div className="min-w-2xl pb-2">
-          <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-y-2">
-            <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
+      <div
+        className={cn(
+          "hidden overflow-x-auto",
+          compact ? "-m-2.25 @3xl/clinical-widget:block" : "sm:block",
+        )}
+      >
+        <div className={cn("min-w-2xl", !compact && "pb-2")}>
+          <div
+            className={cn(
+              "grid grid-cols-[1fr_auto_auto_auto_auto_auto]",
+              compact ? "gap-y-0" : "gap-y-2",
+            )}
+          >
+            <div
+              className={cn(
+                "px-3 border border-r-0 border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm",
+                compact && "rounded-none",
+              )}
+            >
               {t("symptom")}
             </div>
 
-            <div className={cn(baseHeaderClasses)}>{t("severity")}</div>
+            <div className={cn(baseHeaderClasses)}>{t("status")}</div>
 
-            <div className={cn(baseHeaderClasses, "border-x")}>
-              {t("status")}
-            </div>
+            <div className={cn(baseHeaderClasses)}>{t("severity")}</div>
 
             <div className={cn(baseHeaderClasses)}>{t("verification")}</div>
 
-            <div className={cn(baseHeaderClasses, "border-l")}>
+            <div className={cn(baseHeaderClasses, "border-r")}>
               {t("onset")}
             </div>
 
             <div
               className={cn(
                 "text-center border border-l-0 border-gray-200 rounded-tr-lg bg-gray-50",
+                compact && "rounded-none",
               )}
             ></div>
 
             {symptoms.map((symptom) => (
               <ClinicalInformationRow
                 key={symptom.id}
+                compact={compact}
                 note={symptom.note}
                 createdBy={symptom.created_by}
                 onViewEncounter={
                   showViewEncounter
                     ? () =>
-                        navigate(
-                          facilityId
+                        navigate({
+                          href: facilityId
                             ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
                             : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
-                        )
+                        })
                     : undefined
                 }
                 columns={[
@@ -229,16 +300,6 @@ export const SymptomTable = ({
                     className:
                       "bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900 rounded-l",
                     render: () => symptom.code.display,
-                  },
-                  {
-                    key: "severity",
-                    render: () => (
-                      <Badge
-                        variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}
-                      >
-                        {t(symptom.severity)}
-                      </Badge>
-                    ),
                   },
                   {
                     key: "status",
@@ -251,6 +312,16 @@ export const SymptomTable = ({
                         }
                       >
                         {t(symptom.clinical_status)}
+                      </Badge>
+                    ),
+                  },
+                  {
+                    key: "severity",
+                    render: () => (
+                      <Badge
+                        variant={SYMPTOM_SEVERITY_COLORS[symptom.severity]}
+                      >
+                        {t(symptom.severity)}
                       </Badge>
                     ),
                   },
@@ -270,7 +341,6 @@ export const SymptomTable = ({
                   },
                   {
                     key: "onset",
-                    className: "bg-gray-100",
                     render: () =>
                       symptom.onset?.onset_datetime ? (
                         <RelativeDateTooltip

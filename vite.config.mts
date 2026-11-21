@@ -10,6 +10,7 @@ import {
 
 import federation from "@originjs/vite-plugin-federation";
 import tailwindcss from "@tailwindcss/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
@@ -20,6 +21,7 @@ import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
+import { typstCompilerWasm } from "./plugins/typstCompilerWasm";
 import validateEnv from "./scripts/validate-env";
 
 const LOCAL_PLUGIN_MODULE_ID = "virtual:care-local-plugins";
@@ -49,26 +51,23 @@ function toImportName(slug: string) {
 }
 
 function getLocalPluginDefinitions(rootDir: string): LocalPluginDefinition[] {
-  const appsDir = path.join(rootDir, "apps");
-
-  if (!fs.existsSync(appsDir)) {
-    return [];
-  }
-
+  // ponytail: an app shipping two manifests (manifest.ts AND manifest.tsx) yields
+  // duplicate imports in the generated module; make this throw if it ever happens.
   return fs
-    .readdirSync(appsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => {
-      const slug = entry.name;
+    .globSync(
+      `apps/*/src/manifest{${LOCAL_PLUGIN_SOURCE_EXTENSIONS.join(",")}}`,
+      { cwd: rootDir },
+    )
+    .map((manifestFile) => {
+      const slug = manifestFile.split(/[\\/]/)[1];
       return {
         slug,
         importName: toImportName(slug),
-        manifestPath: path.join(appsDir, slug, "src", "manifest.tsx"),
-        publicDir: path.join(appsDir, slug, "public"),
+        manifestPath: path.join(rootDir, manifestFile),
+        publicDir: path.join(rootDir, "apps", slug, "public"),
       };
     })
-    .filter((plugin) => fs.existsSync(plugin.manifestPath))
-    .sort((left, right) => left.slug.localeCompare(right.slug));
+    .sort((left, right) => left.manifestPath.localeCompare(right.manifestPath));
 }
 
 function getMimeType(filePath: string) {
@@ -123,7 +122,9 @@ function isPluginManifestPath(rootDir: string, filePath: string) {
   const appsPrefix = `${normalizePath(path.join(rootDir, "apps"))}/`;
   return (
     normalizedFilePath.startsWith(appsPrefix) &&
-    normalizedFilePath.endsWith("/src/manifest.tsx")
+    LOCAL_PLUGIN_SOURCE_EXTENSIONS.some((extension) =>
+      normalizedFilePath.endsWith(`/src/manifest${extension}`),
+    )
   );
 }
 
@@ -224,8 +225,8 @@ function rewriteLocalPluginImports(rootDir: string, id: string, code: string) {
 // plugin's standalone build), strip those imports in dev. The host care_fe
 // app already provides Tailwind v4 theme/preflight/utilities and scans
 // apps/** via @source, so these imports would otherwise (a) re-run preflight
-// over the entire host page and (b) emit no utilities (the utilities.css
-// import isn't a v4 entry-point so it can't scan sources from here).
+// over the entire host page and (b) duplicate utilities. Keep a reference
+// to the theme so plugin @apply and --spacing() still compile.
 function stripPluginTailwindImports(rootDir: string, id: string, code: string) {
   if (!id.endsWith(".css")) {
     return null;
@@ -236,8 +237,10 @@ function stripPluginTailwindImports(rootDir: string, id: string, code: string) {
     return null;
   }
 
+  // Any import options ride along — `layer(theme)`, and `theme(reference)`
+  // for a plugin that compiles its utilities against the host's tokens.
   const stripped = code.replace(
-    /@import\s+["']tailwindcss(?:\/[^"']*)?["'](?:\s+layer\([^)]*\))?\s*;?/g,
+    /@import\s+["']tailwindcss(?:\/[^"']*)?["'](?:\s+\w+\([^)]*\))*\s*;?/g,
     "",
   );
 
@@ -245,7 +248,7 @@ function stripPluginTailwindImports(rootDir: string, id: string, code: string) {
     return null;
   }
 
-  return stripped;
+  return `@reference "tailwindcss";\n${stripped}`;
 }
 
 function createLocalPluginModule(rootDir: string, command: "serve" | "build") {
@@ -435,6 +438,17 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         ),
       }),
       tailwindcss(),
+      // Generates src/routeTree.gen.ts from src/routes/**. Must run before
+      // react().
+      tanstackRouter({
+        target: "react",
+        autoCodeSplitting: false,
+        routesDirectory: "./src/routes",
+        generatedRouteTree: "./src/routeTree.gen.ts",
+        routeFileIgnorePrefix: "-",
+        quoteStyle: "double",
+        semicolons: true,
+      }),
       federation({
         name: "core",
         remotes: {
@@ -445,7 +459,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "react-dom",
           "react-i18next",
           "@tanstack/react-query",
-          "raviger",
+          // One router instance: plugins read the host router's context.
+          "@tanstack/react-router",
           "sonner",
           "decimal.js",
         ],
@@ -454,6 +469,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       treeShakeCareIcons({
         iconWhitelist: ["default"],
       }),
+      typstCompilerWasm(),
       VitePWA({
         strategies: "injectManifest",
         srcDir: "src",
@@ -515,7 +531,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         "react-i18next",
         "i18next",
         "@tanstack/react-query",
-        "raviger",
+        "@tanstack/react-router",
         "sonner",
         "decimal.js",
       ],
@@ -523,10 +539,15 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
     // optimizeDeps: {
     //   include: getPluginDependencies(),
     // },
+    worker: {
+      // The print worker (src/print) loads the Typst compiler with a dynamic
+      // import, which needs ES module workers.
+      format: "es",
+    },
     build: {
       target: "es2022",
       outDir: "build",
-      sourcemap: true,
+      sourcemap: mode !== "production",
     },
     esbuild: {
       target: "es2022",

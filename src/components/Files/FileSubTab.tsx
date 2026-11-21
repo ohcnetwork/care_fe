@@ -77,7 +77,7 @@ export const FilesPage = ({
     useState<FileReadMinimal | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
-  const { qParams, updateQuery, Pagination } = useFilters({
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
   });
@@ -102,8 +102,8 @@ export const FilesPage = ({
         file_type: type,
         associating_id: associatingId,
         name: qParams.name,
-        limit: qParams.limit,
-        offset: ((qParams.page || 1) - 1) * qParams.limit,
+        limit: resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         ...(qParams.is_archived !== undefined && {
           is_archived: qParams.is_archived,
         }),

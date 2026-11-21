@@ -59,12 +59,18 @@ const INTERACTIVE_HOST_SELECTOR =
   "button, [role='button'], a, [data-shortcut-target]";
 
 const OPEN_OVERLAY_SELECTOR = [
+  "[role='dialog'][data-open]",
+  "[role='alertdialog'][data-open]",
+  "[role='menu'][data-open]",
+  "[data-slot='select-content'][data-open]",
   "[role='dialog'][data-state='open']",
   "[role='alertdialog'][data-state='open']",
   "[data-radix-popper-content-wrapper] [data-state='open']",
 ].join(", ");
 
 const MOUNTED_OVERLAY_SELECTOR = "[role='dialog'], [role='alertdialog']";
+
+const COMMAND_DIALOG_SELECTOR = "[data-shortcut-command-dialog]";
 
 const DISABLED_HOST_SELECTOR =
   "[disabled], [aria-disabled='true'], [data-disabled]";
@@ -95,28 +101,40 @@ function resolveInteractiveHosts(shortcutId: string): HTMLElement[] {
   return [...hosts];
 }
 
-// Among enabled candidates, prefer the one inside the topmost (last-rendered) open overlay
-function resolveBestHost(hosts: HTMLElement[]): HTMLElement | undefined {
-  let lastInOverlay: HTMLElement | undefined;
+// Only the topmost (last-rendered) open overlay can receive a shortcut. Actions
+// chosen from the command dialog skip it and run against what's underneath.
+function resolveBestHost(
+  hosts: HTMLElement[],
+  skipCommandDialog = false,
+): HTMLElement | undefined {
+  const isActiveOverlay = (overlay: Element) =>
+    !skipCommandDialog || !overlay.querySelector(COMMAND_DIALOG_SELECTOR);
 
-  for (const host of hosts) {
-    if (host.closest(OPEN_OVERLAY_SELECTOR)) {
-      lastInOverlay = host;
-    }
+  const topOverlay = [...document.querySelectorAll(OPEN_OVERLAY_SELECTOR)]
+    .filter(isActiveOverlay)
+    .at(-1);
+
+  if (topOverlay) {
+    return hosts.filter((host) => topOverlay.contains(host)).at(-1);
   }
 
-  if (lastInOverlay) {
-    return lastInOverlay;
-  }
+  const hasBlockingOverlay = [
+    ...document.querySelectorAll(MOUNTED_OVERLAY_SELECTOR),
+  ].some(isActiveOverlay);
 
-  if (document.querySelector(MOUNTED_OVERLAY_SELECTOR)) {
-    return undefined;
-  }
-
-  return hosts[0];
+  return hasBlockingOverlay ? undefined : hosts[0];
 }
 
-export function shortcutActionHandler(shortcutId: string) {
+export function canRunFromCommandDialog(shortcutId: string) {
+  return (
+    resolveBestHost(resolveInteractiveHosts(shortcutId), true) !== undefined
+  );
+}
+
+export function shortcutActionHandler(
+  shortcutId: string,
+  { fromCommandDialog = false }: { fromCommandDialog?: boolean } = {},
+) {
   return () => {
     const now = Date.now();
     const lastClick = clickDebounceMap.get(shortcutId) || 0;
@@ -128,7 +146,10 @@ export function shortcutActionHandler(shortcutId: string) {
 
     clickDebounceMap.set(shortcutId, now);
 
-    const host = resolveBestHost(resolveInteractiveHosts(shortcutId));
+    const host = resolveBestHost(
+      resolveInteractiveHosts(shortcutId),
+      fromCommandDialog,
+    );
 
     if (host) {
       host.click();

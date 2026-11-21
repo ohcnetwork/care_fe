@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -20,13 +20,14 @@ import Page from "@/components/Common/Page";
 import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import BackButton from "@/components/Common/BackButton";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { navigate } from "@/lib/router/navigate";
 import { PRODUCT_STATUS_COLORS } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import { PRODUCT_KNOWLEDGE_TYPE_COLORS } from "@/types/inventory/productKnowledge/productKnowledge";
 import { ArrowLeft } from "lucide-react";
-import { Link } from "raviger";
 
 interface Props {
   facilityId: string;
@@ -66,7 +67,7 @@ export default function ProductView({ facilityId, productId }: Props) {
           <Button
             variant="outline"
             className="mt-4"
-            onClick={() => navigate(`/facility/${facilityId}/settings/product`)}
+            onClick={() => goBack(`/facility/${facilityId}/settings/product`)}
           >
             <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
             {t("back_to_list")}
@@ -84,10 +85,10 @@ export default function ProductView({ facilityId, productId }: Props) {
           {t("back_to_list")}
         </BackButton>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0 flex-[1_1_16rem]">
+            <div className="flex min-w-0 flex-wrap items-center gap-3">
+              <h1 className="min-w-0 break-all text-2xl font-bold">
                 {t("product")}: {product.id}
               </h1>
               <Badge variant={PRODUCT_STATUS_COLORS[product.status]}>
@@ -103,9 +104,10 @@ export default function ProductView({ facilityId, productId }: Props) {
           <Button
             variant="outline"
             onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/product/${product.id}/edit`,
-              )
+              navigate({
+                to: "/facility/$facilityId/settings/product/$id/edit",
+                params: { facilityId, id: product.id },
+              })
             }
           >
             <CareIcon icon="l-pen" className="mr-2 size-4" />
@@ -165,8 +167,8 @@ export default function ProductView({ facilityId, productId }: Props) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
+              <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0 flex-[1_1_16rem] space-y-2">
                   <div className="flex items-center gap-2">
                     <Badge
                       variant={
@@ -178,10 +180,10 @@ export default function ProductView({ facilityId, productId }: Props) {
                       {t(product.product_knowledge.product_type)}
                     </Badge>
                   </div>
-                  <h3 className="font-medium">
+                  <h3 className="break-words font-medium">
                     {product.product_knowledge.name}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="break-all text-sm text-gray-500">
                     {product.product_knowledge.slug}
                   </p>
                 </div>
@@ -190,9 +192,13 @@ export default function ProductView({ facilityId, productId }: Props) {
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/settings/product_knowledge/${product.product_knowledge.slug}`,
-                      )
+                      navigate({
+                        to: "/facility/$facilityId/settings/product_knowledge/$slug",
+                        params: {
+                          facilityId,
+                          slug: product.product_knowledge.slug,
+                        },
+                      })
                     }
                   >
                     <CareIcon icon="l-eye" className="mr-2 size-4" />
@@ -226,8 +232,11 @@ export default function ProductView({ facilityId, productId }: Props) {
                   </div>
                   <Button variant="outline" size="sm" asChild>
                     <Link
-                      basePath="/"
-                      href={`/facility/${facilityId}/settings/charge_item_definitions/${product.charge_item_definition.slug}`}
+                      to="/facility/$facilityId/settings/charge_item_definitions/$slug"
+                      params={{
+                        facilityId,
+                        slug: product.charge_item_definition.slug,
+                      }}
                     >
                       <CareIcon icon="l-eye" className="mr-2 size-4" />
                       {t("view_details")}

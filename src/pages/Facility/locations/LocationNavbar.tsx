@@ -5,9 +5,6 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
@@ -32,6 +29,7 @@ export function LocationTreeNode({
   level = 0,
   facilityId,
 }: LocationTreeNodeProps) {
+  const { t } = useTranslation();
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = location.id === selectedLocationId;
   const Icon =
@@ -48,10 +46,10 @@ export function LocationTreeNode({
         limit: 100,
       },
     }),
-    enabled: true,
+    enabled: isExpanded && location.has_sub_locations,
   });
 
-  const hasChildren = children?.results && children.results.length > 0;
+  const hasChildren = location.has_sub_locations;
 
   return (
     <div className="space-y-1">
@@ -71,6 +69,7 @@ export function LocationTreeNode({
             variant="ghost"
             size="icon"
             className="size-6"
+            aria-label={`${t(isExpanded ? "collapse" : "expand")} ${location.name}`}
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand(location.id);
@@ -85,98 +84,39 @@ export function LocationTreeNode({
         ) : (
           <span className="w-6" />
         )}
-        <div
-          className="flex items-center flex-1 text-sm gap-2 w-0"
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto min-w-0 justify-start p-0 text-left flex items-center flex-1 text-sm gap-2 w-0"
           onClick={(e) => {
             e.stopPropagation();
             onSelect(location);
-            onToggleExpand(location.id);
+            if (hasChildren) onToggleExpand(location.id);
           }}
         >
           <Icon className="size-4 shrink-0" />
           <span className="truncate">{location.name}</span>
-        </div>
+        </Button>
       </div>
-      {isExpanded && children?.results && children.results.length > 0 && (
-        <div className="pl-2">
-          {children.results.map((child) => (
-            <LocationTreeNode
-              key={child.id}
-              location={child}
-              selectedLocationId={selectedLocationId}
-              onSelect={onSelect}
-              expandedLocations={expandedLocations}
-              onToggleExpand={onToggleExpand}
-              level={level + 1}
-              facilityId={facilityId}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-interface LocationNavbarProps {
-  facilityId: string;
-  selectedLocationId: string | null;
-  expandedLocations: Set<string>;
-  onLocationSelect: (location: LocationRead) => void;
-  onToggleExpand: (locationId: string) => void;
-}
-
-export default function LocationNavbar({
-  facilityId,
-  selectedLocationId,
-  expandedLocations,
-  onLocationSelect,
-  onToggleExpand,
-}: LocationNavbarProps) {
-  const { t } = useTranslation();
-
-  const { data: allLocations, isLoading: isLoadingLocations } = useQuery({
-    queryKey: ["locations", facilityId, "mine", "kind"],
-    queryFn: query.paginated(locationApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        mine: true,
-        mode: "kind",
-      },
-    }),
-  });
-
-  const topLevelLocations = allLocations?.results || [];
-
-  if (topLevelLocations.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block">
-      <div className="p-4">
-        <h2 className="text-lg font-semibold">{t("locations")}</h2>
-      </div>
-      <ScrollArea>
-        <div className="p-2">
-          {isLoadingLocations ? (
-            <div className="p-4">
-              <CardGridSkeleton count={3} />
-            </div>
-          ) : (
-            topLevelLocations.map((location) => (
+      {hasChildren &&
+        isExpanded &&
+        children?.results &&
+        children.results.length > 0 && (
+          <div className="pl-2">
+            {children.results.map((child) => (
               <LocationTreeNode
-                key={location.id}
-                location={location}
+                key={child.id}
+                location={child}
                 selectedLocationId={selectedLocationId}
-                onSelect={onLocationSelect}
+                onSelect={onSelect}
                 expandedLocations={expandedLocations}
                 onToggleExpand={onToggleExpand}
+                level={level + 1}
                 facilityId={facilityId}
               />
-            ))
-          )}
-        </div>
-      </ScrollArea>
+            ))}
+          </div>
+        )}
     </div>
   );
 }

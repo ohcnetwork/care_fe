@@ -4,7 +4,7 @@ import Page from "@/components/Common/Page";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import TemplateList from "./TemplateList";
 
@@ -26,7 +26,10 @@ export default function TemplatePage({ facilityId }: TemplatePageProps) {
       options={
         canWriteTemplate && (
           <Button variant="primary" asChild>
-            <Link href={`/facility/${facilityId}/template/builder`}>
+            <Link
+              to="/facility/$facilityId/template/builder"
+              params={{ facilityId }}
+            >
               <CareIcon icon="l-plus" className="mr-1" />
               <span>{t("create_template")}</span>
             </Link>

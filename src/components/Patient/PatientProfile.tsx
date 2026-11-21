@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -18,24 +17,39 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { useQueryParams } from "@/lib/router/queryParams";
 import patientApi from "@/types/emr/patient/patientApi";
 
 import {
   PatientDeceasedInfo,
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
-import { useSidebar } from "@/components/ui/sidebar";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import { cn } from "@/lib/utils";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
+import { ReferralPatientAppointments } from "@/pages/Appointments/ReferralPatientAppointments";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
-export const PatientProfile = (props: {
+
+interface PatientProfileProps {
   facilityId?: string;
   id: string;
   page: (typeof tabs)[0]["route"];
-}) => {
+}
+
+export const PatientProfile = (props: PatientProfileProps) => {
+  const [params] = useQueryParams<{ referralId?: string }>();
+  if (
+    props.facilityId &&
+    props.page === "appointments" &&
+    params.referralId !== undefined
+  ) {
+    return <ReferralPatientAppointments patientId={props.id} />;
+  }
+  return <PatientProfileContent {...props} />;
+};
+
+const PatientProfileContent = (props: PatientProfileProps) => {
   const { facilityId, id, page } = props;
-  const { open: isSidebarOpen } = useSidebar();
 
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -90,14 +104,7 @@ export const PatientProfile = (props: {
         </>
       }
     >
-      <div
-        className={cn(
-          "w-full mt-3 overflow-y-auto",
-          isSidebarOpen
-            ? "md:max-w-[calc(100vw-25rem)]"
-            : "md:max-w-[calc(100vw-8rem)]",
-        )}
-      >
+      <div className="w-full mt-3">
         <div className="flex flex-col gap-2">
           <PatientHeader
             patient={patientData}
@@ -111,10 +118,10 @@ export const PatientProfile = (props: {
           className="sticky top-0 z-9 mt-4 w-full border-b border-gray-200 bg-gray-50"
           role="navigation"
         >
-          <div className="overflow-x-auto pb-3">
+          <div className="overflow-x-auto">
             <div className="flex flex-row" role="tablist">
               {tabs.map((tab) => (
-                <Link
+                <HrefLink
                   key={tab.route}
                   href={
                     facilityId
@@ -131,7 +138,7 @@ export const PatientProfile = (props: {
                   aria-controls={`${tab.route}-panel`}
                 >
                   {t(tab.route)}
-                </Link>
+                </HrefLink>
               ))}
             </div>
           </div>
@@ -159,7 +166,7 @@ export const PatientProfile = (props: {
 
                   <div className="mt-2 h-full space-y-2">
                     <Button asChild variant="outline" className="w-full">
-                      <Link
+                      <HrefLink
                         href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                           {
                             phone_number: patientData.phone_number,
@@ -170,7 +177,7 @@ export const PatientProfile = (props: {
                         ).toString()}`}
                       >
                         {t("patient_home")}
-                      </Link>
+                      </HrefLink>
                     </Button>
                     <div className="space-y-3 text-left text-lg font-semibold text-secondary-900">
                       <div className="space-y-2">

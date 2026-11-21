@@ -1,9 +1,9 @@
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import specimenApi from "@/types/emr/specimen/specimenApi";
 
 import GenericQRScanDialog from "./GenericQRScanDialog";
@@ -73,9 +73,9 @@ function QRScanDialog({
       toast.error(t("service_request_not_found"));
       return;
     }
-    navigate(
-      `/facility/${facilityId}/locations/${locationId}/service_requests/${serviceRequestId}`,
-    );
+    navigate({
+      href: `/facility/${facilityId}/locations/${locationId}/service_requests/${serviceRequestId}`,
+    });
     setShowSuccess(false);
     onOpenChange(false);
   }

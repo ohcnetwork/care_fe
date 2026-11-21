@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 
 import Page from "@/components/Common/Page";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
@@ -19,18 +20,19 @@ export default function FacilityServicesPage({
   facilityId: string;
 }) {
   const { t } = useTranslation();
-  const { qParams, Pagination, resultsPerPage } = useFilters({
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 12,
     disableCache: true,
   });
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["healthcareServices", qParams],
-    queryFn: query(healthcareServiceApi.listHealthcareService, {
+    queryFn: query.debounced(healthcareServiceApi.listHealthcareService, {
       pathParams: { facilityId },
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
+        name: qParams.search,
       },
     }),
   });
@@ -45,6 +47,20 @@ export default function FacilityServicesPage({
           <p className="mt-1 text-sm text-gray-600">
             {t("discover_healthcare_services")}
           </p>
+        </div>
+        <div className="relative w-full md:w-auto mb-6">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <CareIcon icon="l-search" className="size-5" />
+          </span>
+          <Input
+            placeholder={t("search_healthcare_services")}
+            value={qParams.search || ""}
+            onChange={(e) =>
+              updateQuery({ search: e.target.value || undefined })
+            }
+            className="w-full md:w-75 pl-10"
+            aria-label={t("search_healthcare_services")}
+          />
         </div>
 
         {isLoading ? (

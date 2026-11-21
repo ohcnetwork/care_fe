@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { ExternalLink, Unlink } from "lucide-react";
-import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -79,7 +79,7 @@ export const EncounterDevicesTab = () => {
         <TableSkeleton count={6} />
       ) : (
         <div className="space-y-6">
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
             <CardContent className="p-0">
               {data?.results?.length ? (
                 <Table className="w-full overflow-x-auto whitespace-nowrap">
@@ -99,8 +99,11 @@ export const EncounterDevicesTab = () => {
                         >
                           <TableCell className="font-medium">
                             <Link
-                              href={`/devices/${device.id}`}
-                              basePath={`/facility/${facilityId}/settings`}
+                              to="/facility/$facilityId/settings/devices/$id"
+                              params={{
+                                facilityId: facilityId!,
+                                id: device.id,
+                              }}
                               className="group flex items-start gap-1"
                             >
                               <div>

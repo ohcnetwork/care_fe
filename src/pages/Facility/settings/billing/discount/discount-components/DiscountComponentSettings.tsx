@@ -108,7 +108,7 @@ export function DiscountComponentSettings() {
           <CreateDiscountMonetaryComponentSheet />
         </div>
 
-        <div className="rounded-md border overflow-x-auto md:overflow-hidden mt-4">
+        <div className="rounded-md overflow-x-auto md:overflow-hidden mt-4">
           <Table className="w-full md:table-fixed">
             <TableHeader>
               <TableRow>

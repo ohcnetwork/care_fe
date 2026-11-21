@@ -1,26 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon, X } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { NavTabs } from "@/components/ui/nav-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
+import { ClinicalHistoryWorkspace } from "@/components/Workspace/ClinicalHistoryWorkspace";
 
+import { navigateBackFrom } from "@/Utils/navigationTrail";
 import query from "@/Utils/request/query";
-import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import patientApi from "@/types/emr/patient/patientApi";
 
-import { DiagnosticReportsTab } from "@/pages/Encounters/tabs/diagnostic-reports";
-import { Separator } from "@radix-ui/react-separator";
-import { AllergyHistory } from "./AllergyHistory";
-import { DiagnosesHistory } from "./DiagnosesHistory";
-import { ResponsesHistory } from "./ResponsesHistory";
-import { SymptomsHistory } from "./SymptomsHistory";
+import { Separator } from "@/components/ui/separator";
 
 function ClinicalHistoryPage({
   patientId,
@@ -28,7 +23,7 @@ function ClinicalHistoryPage({
   tab = "symptoms",
   fallBackUrl,
 }: {
-  fallBackUrl?: string;
+  fallBackUrl: string;
   facilityId?: string;
   patientId: string;
   tab: string;
@@ -37,58 +32,30 @@ function ClinicalHistoryPage({
   const [{ sourceUrl }] = useQueryParams();
 
   const { data: patient } = useQuery({
-    queryKey: ["patient", patientId],
+    queryKey: ["patient", patientId, facilityId],
     queryFn: query(patientApi.get, {
       pathParams: { id: patientId },
+      queryParams: { facility: facilityId },
     }),
   });
 
+  const backLabel = sourceUrl ? t("back_to_encounter") : t("back_to_patient");
+
+  // Tab changes add history entries; leave to the page this was opened from.
   const handleClose = () => {
-    navigate(sourceUrl || fallBackUrl);
+    navigateBackFrom(
+      (pathname) => !pathname.includes(`/patient/${patientId}/history/`),
+      sourceUrl || fallBackUrl,
+    );
   };
 
   const handleTabChange = (value: string) => {
-    navigate(value, {
-      ...(sourceUrl ? { query: { sourceUrl } } : {}),
+    navigate({
+      href: sourceUrl
+        ? `${value}?${new URLSearchParams({ sourceUrl })}`
+        : value,
     });
   };
-
-  const showMoreAfterIndex = useBreakpoints({
-    default: 1,
-    xs: 2,
-    sm: 6,
-    xl: 9,
-    "2xl": 12,
-  });
-
-  const tabs = {
-    responses: {
-      label: t("responses"),
-      component: <ResponsesHistory patientId={patientId} />,
-    },
-    diagnostic_reports: {
-      label: t("diagnostic_report_other", { count: 2 }),
-      component: (
-        <DiagnosticReportsTab patientId={patientId} facilityId={facilityId} />
-      ),
-    },
-    symptoms: {
-      label: t("past_symptoms"),
-      component: <SymptomsHistory patientId={patientId} />,
-    },
-    diagnoses: {
-      label: t("past_diagnoses"),
-      component: <DiagnosesHistory patientId={patientId} />,
-    },
-    allergies: {
-      label: t("allergies"),
-      component: <AllergyHistory patientId={patientId} />,
-    },
-    medications: {
-      label: t("past_medications"),
-      component: <MedicationHistory patientId={patientId} />,
-    },
-  } as const;
 
   return (
     <Page
@@ -99,14 +66,19 @@ function ClinicalHistoryPage({
       }
       hideTitleOnPage
     >
-      <div className="flex justify-between items-center bg-gray-100 -mx-3 -mt-8 md:-mt-8 md:-mx-9 px-3 md:px-6 pb-3 pt-2 md:rounded-t-lg">
+      <div className="flex justify-between items-center bg-gray-100 -mx-3 -mt-3 md:-mx-8 px-3 md:px-6 pb-3 pt-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="flex items-center gap-2 shrink-0">
-            <Button variant="outline" onClick={handleClose} size="icon">
+            <Button
+              variant="outline"
+              onClick={handleClose}
+              size="icon"
+              aria-label={backLabel}
+            >
               <ArrowLeftIcon />
             </Button>
-            <span className="text-sm text-gray-700">
-              {sourceUrl ? t("back_to_encounter") : t("back_to_patient")}
+            <span className="text-sm text-gray-700" aria-hidden="true">
+              {backLabel}
             </span>
           </div>
           <Separator orientation="vertical" />
@@ -123,20 +95,22 @@ function ClinicalHistoryPage({
           </div>
         </div>
         <div className="shrink-0">
-          <Button variant="outline" onClick={handleClose} size="icon">
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            size="icon"
+            aria-label={t("close")}
+          >
             <X className="size-4" />
           </Button>
         </div>
       </div>
       <section>
-        <NavTabs
-          className="w-full mt-4"
-          tabContentClassName="mt-8"
-          tabs={tabs}
+        <ClinicalHistoryWorkspace
+          patientId={patientId}
+          facilityId={facilityId}
           currentTab={tab}
           onTabChange={handleTabChange}
-          setPageTitle={false}
-          showMoreAfterIndex={showMoreAfterIndex}
         />
       </section>
     </Page>

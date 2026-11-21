@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { createLocationHierarchy } from "tests/helper/locations";
 import { getAccountId } from "tests/support/accountId";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -98,18 +99,50 @@ test.describe("Payment Reconciliation", () => {
     await expect(successMessage).toBeVisible();
   });
 
-  test("should open record payment dialog using keyboard shortcut R", async ({
+  test("should open record payment dialog using keyboard shortcut C", async ({
     page,
   }) => {
+    // "R" is bound only to the lg:hidden mobile button; desktop uses "C"
     await expect(page.getByRole("button", { name: /advance/i })).toBeVisible();
-    // Press 'R' to open Record Payment
-    await page.keyboard.press("r");
+    await page.keyboard.press("c");
 
     // Verify Record Payment sheet is open by checking for the sheet heading
     const sheet = page.locator("[role='dialog']").filter({
       has: page.getByRole("heading", { name: /collect payment/i }),
     });
     await expect(sheet).toBeVisible();
+  });
+
+  test("selects a ward with beds without opening an empty sub-location list", async ({
+    page,
+    request,
+  }) => {
+    const { root, ward, rootBed } = await createLocationHierarchy(
+      request,
+      getFacilityId(),
+    );
+    await page.getByRole("button", { name: /advance/i }).click();
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Select Location" })
+      .click();
+    await page.getByPlaceholder("Search locations...").fill(root.name);
+    await page.getByRole("option", { name: root.name, exact: true }).click();
+
+    await expect(
+      page.getByRole("option", { name: ward.name, exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("option", { name: rootBed.name, exact: true }),
+    ).toHaveCount(0);
+    await page.getByRole("option", { name: ward.name, exact: true }).click();
+
+    await expect(
+      page.getByRole("combobox").filter({ hasText: ward.name }),
+    ).toHaveAttribute("aria-expanded", "false");
+    await expect(
+      page.getByPlaceholder("Search locations..."),
+    ).not.toBeVisible();
   });
 
   test("should show validation error when submitting empty payment", async ({

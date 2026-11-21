@@ -61,21 +61,22 @@ import {
 } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
-import { DotsVerticalIcon, MinusCircledIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import {
   BadgeInfo,
   Check,
   CheckCircleIcon,
   CheckIcon,
+  EllipsisVertical as DotsVerticalIcon,
   FileTextIcon,
+  CircleMinus as MinusCircledIcon,
   Pill,
   PrinterIcon,
   RefreshCcwIcon,
   XCircleIcon,
 } from "lucide-react";
-import { Link } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -362,8 +363,12 @@ const PrescriptionSummary = ({
         />
         <Button variant="outline" asChild>
           <Link
-            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
-            basePath="/"
+            to="/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print"
+            params={{
+              facilityId: encounter.facility.id,
+              patientId: encounter.patient.id,
+              prescriptionId: prescription.id,
+            }}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -380,8 +385,13 @@ const PrescriptionSummary = ({
           <DropdownMenuContent align="end">
             <DropdownMenuItem disabled={isPending} asChild>
               <Link
-                href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${encounter.patient.id}/prescriptions/${prescription.id}`}
-                basePath="/"
+                to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds"
+                params={{
+                  facilityId,
+                  locationId,
+                  patientId: encounter.patient.id,
+                  prescriptionIds: prescription.id,
+                }}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -391,8 +401,12 @@ const PrescriptionSummary = ({
             </DropdownMenuItem>
             <DropdownMenuItem disabled={isPending} asChild>
               <Link
-                href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
-                basePath="/"
+                to="/facility/$facilityId/patient/$patientId/prescription/$prescriptionId/print"
+                params={{
+                  facilityId: encounter.facility.id,
+                  patientId: encounter.patient.id,
+                  prescriptionId: prescription.id,
+                }}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -637,7 +651,7 @@ const MedicineLineItem = ({
                 type="button"
                 onClick={() => autoSelectInventoryItems()}
                 disabled={disabled || isAutoSelectingInventoryItems}
-                className="absolute top-1/2 -translate-y-1/2 -right-2.25 size-4.5 [&_svg]:size-3 z-10 text-gray-500"
+                className="absolute top-1/2 -translate-y-1/2 -right-2.75 size-5 z-10 text-gray-500"
                 size="xs"
                 title={t("auto_select_lots")}
               >
@@ -777,7 +791,7 @@ const MedicineLineItem = ({
                   <FormItem>
                     <FormControl>
                       <Switch
-                        className="data-[state=checked]:bg-primary-600"
+                        className="data-checked:bg-primary-600"
                         checked={field.value}
                         onCheckedChange={field.onChange}
                         disabled={disabled}
