@@ -190,13 +190,34 @@ export function SpecimenDefinitionDetail({
                   </div>
                 )}
 
-                {specimenDefinition.collection && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-400">
-                      {t("collection_method")}
-                    </p>
-                    <p>{specimenDefinition.collection.display}</p>
-                  </div>
+                {[
+                  [
+                    t("collection"),
+                    specimenDefinition.collection?.code?.display,
+                  ],
+                  [
+                    t("collection_method"),
+                    specimenDefinition.collection?.method?.display,
+                  ],
+                  [
+                    t("expected_quantity"),
+                    specimenDefinition.collection?.quantity &&
+                      `${specimenDefinition.collection.quantity.value} ${specimenDefinition.collection.quantity.unit.display}`,
+                  ],
+                  [
+                    t("body_site"),
+                    specimenDefinition.collection?.body_site?.display,
+                  ],
+                ].map(
+                  ([label, value]) =>
+                    value && (
+                      <div key={label}>
+                        <p className="text-sm font-medium text-gray-400">
+                          {label}
+                        </p>
+                        <p>{value}</p>
+                      </div>
+                    ),
                 )}
               </div>
 
