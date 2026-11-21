@@ -75,6 +75,7 @@ import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowl
 import {
   ActivityDefinitionTemplateSpec,
   QuestionnaireResponseTemplateCreateSpec,
+  QuestionnaireResponseTemplateKeyFilter,
   QuestionnaireResponseTemplateReadSpec,
   QuestionnaireResponseTemplateRetrieveSpec,
   QuestionnaireResponseTemplateUpdateSpec,
@@ -577,7 +578,7 @@ interface ManageResponseTemplatesSheetProps {
   disabled?: boolean;
   currentMedications?: MedicationRequestCreate[];
   currentActivityDefinitions?: ActivityDefinitionTemplateSpec[];
-  key_filter: string;
+  key_filter: QuestionnaireResponseTemplateKeyFilter;
   facilityOrganizations?: string[];
 }
 
@@ -830,12 +831,7 @@ export default function ManageResponseTemplatesSheet({
             setSavingCurrent(true);
             setViewMode("create");
             setEditableMedications(
-              currentMedications.map(
-                (med) =>
-                  buildMedicationForTemplate(
-                    med,
-                  ) as MedicationRequestTemplateSpec,
-              ),
+              currentMedications.map((med) => buildMedicationForTemplate(med)),
             );
             setEditableActivityDefinitions([...currentActivityDefinitions]);
           }}
