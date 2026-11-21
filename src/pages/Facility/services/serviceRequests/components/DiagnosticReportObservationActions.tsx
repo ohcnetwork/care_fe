@@ -34,7 +34,7 @@ export function DiagnosticReportObservationActions({
           variant="ghost"
           size="icon"
           className={cn(
-            "size-10 shrink-0 text-gray-500",
+            "size-10 shrink-0 text-muted-foreground",
             hasComponents && "-mt-2",
           )}
           aria-label={`${t("result_actions")} ${index + 1}`}

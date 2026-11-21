@@ -26,13 +26,13 @@ test.use({
 
 function getEntry(page: Page, reportType: string) {
   return page
+    .locator("#service-request-section-results")
     .locator('[data-slot="collapsible"]')
     .filter({
       has: page.locator('[data-slot="collapsible-trigger"]').filter({
         hasText: reportType,
       }),
-    })
-    .first();
+    });
 }
 
 function getObservationGroup(
@@ -79,10 +79,6 @@ async function addObservation(
     .getByRole("combobox", { name: "Search observations", exact: true })
     .fill(definition.title);
   await page.getByRole("option", { name: definition.title }).click();
-  // The picker stays open after a selection so more definitions can be added.
-  await page
-    .getByRole("combobox", { name: "Search observations", exact: true })
-    .press("Escape");
   await expect(
     page.getByRole("combobox", { name: "Search observations", exact: true }),
   ).toHaveCount(0);
@@ -255,6 +251,10 @@ test.describe("Additional diagnostic report observations", () => {
     const numericCard = getObservationGroup(firstEntry, numericDefinition);
     const textCard = getObservationGroup(firstEntry, textDefinition);
     const componentCard = getObservationGroup(secondEntry, componentDefinition);
+    const componentInputs = componentCard.getByRole("spinbutton", {
+      name: componentDefinition.component![0].code.display,
+      exact: true,
+    });
     let firstReportId: string;
     let secondReportId: string;
 
@@ -324,8 +324,6 @@ test.describe("Additional diagnostic report observations", () => {
         path: testInfo.outputPath("extra-observations-picker.png"),
       });
       await page.getByRole("option", { name: numericDefinition.title }).click();
-      // Close the picker, which stays open after a selection.
-      await search.press("Escape");
       await expect(search).toHaveCount(0);
       await numericCard.getByPlaceholder("Result value").fill("108.5");
       await addObservation(page, firstEntry, textDefinition);
@@ -338,9 +336,7 @@ test.describe("Additional diagnostic report observations", () => {
       await expect(secondEntry.getByText(textDefinition.title)).toHaveCount(0);
 
       await addObservation(page, secondEntry, componentDefinition);
-      await componentCard
-        .getByPlaceholder("Result value")
-        .fill(COMPONENT_RESULT);
+      await componentInputs.fill(COMPONENT_RESULT);
       await expect(firstEntry.getByText(componentDefinition.title)).toHaveCount(
         0,
       );
@@ -352,9 +348,7 @@ test.describe("Additional diagnostic report observations", () => {
 
     await test.step("Saving one report preserves the other's added draft", async () => {
       await saveResults(page, firstEntry);
-      await expect(componentCard.getByPlaceholder("Result value")).toHaveValue(
-        COMPONENT_RESULT,
-      );
+      await expect(componentInputs).toHaveValue(COMPONENT_RESULT);
       await saveResults(page, secondEntry);
       const firstResults = await readObservations(firstReportId);
       expect(firstResults).toHaveLength(2);
@@ -389,9 +383,7 @@ test.describe("Additional diagnostic report observations", () => {
       await expect(textCard.getByPlaceholder("Result value")).toHaveValue(
         "No growth detected",
       );
-      await expect(componentCard.getByPlaceholder("Result value")).toHaveValue(
-        COMPONENT_RESULT,
-      );
+      await expect(componentInputs).toHaveValue(COMPONENT_RESULT);
 
       await page.screenshot({
         path: testInfo.outputPath("extra-observations-saved.png"),
@@ -406,14 +398,9 @@ test.describe("Additional diagnostic report observations", () => {
         .nth(1)
         .fill("Reviewed sample");
       await selectResultAction(page, componentCard, "Add Another Result");
-      await componentCard
-        .getByPlaceholder("Result value")
-        .nth(1)
-        .fill("101.25");
+      await componentInputs.nth(1).fill("101.25");
       await saveResults(page, firstEntry);
-      await expect(
-        componentCard.getByPlaceholder("Result value").nth(1),
-      ).toHaveValue("101.25");
+      await expect(componentInputs.nth(1)).toHaveValue("101.25");
       await saveResults(page, secondEntry);
 
       const firstResults = await readObservations(firstReportId);

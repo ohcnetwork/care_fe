@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { navigate } from "raviger";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -21,6 +20,7 @@ import { formatPatientAge } from "@/Utils/utils";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import usePatientExtensionData from "@/hooks/usePatientExtensionData";
+import { navigate } from "@/lib/router/navigate";
 import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 import {
   getOrgLabel,
@@ -59,16 +59,16 @@ export const Demography = (props: PatientProps) => {
 
   const handleEditClick = (sectionId: string) => {
     if (sectionId === "tags") {
-      navigate(`/patient/${patientId}/tags`);
+      navigate({ href: `/patient/${patientId}/tags` });
       return;
     }
     if (sectionId === "general-info" || sectionId === "additional-details") {
       if (facilityId) {
-        navigate(
-          `/facility/${facilityId}/patient/${patientId}/update?section=${sectionId}`,
-        );
+        navigate({
+          href: `/facility/${facilityId}/patient/${patientId}/update?section=${sectionId}`,
+        });
       } else {
-        navigate(`/patient/${patientId}/update?section=${sectionId}`);
+        navigate({ href: `/patient/${patientId}/update?section=${sectionId}` });
       }
     }
   };
@@ -313,9 +313,14 @@ export const Demography = (props: PatientProps) => {
           {data
             .filter((s) => !s.hidden)
             .map((subtab, i) => (
-              <button
+              <Button
+                type="button"
+                variant="ghost"
                 key={i}
-                className={`cursor-pointer rounded-lg p-3 transition-colors duration-300 text-left ${
+                aria-current={
+                  activeSection === subtab.id ? "location" : undefined
+                }
+                className={`h-auto justify-start whitespace-normal cursor-pointer rounded-lg p-3 transition-colors duration-300 text-left ${
                   activeSection === subtab.id
                     ? "bg-white text-green-800"
                     : "hover:bg-white hover:text-green-800"
@@ -323,7 +328,7 @@ export const Demography = (props: PatientProps) => {
                 onClick={() => scrollToSection(subtab.id)}
               >
                 {t(`patient__${subtab.id}`)}
-              </button>
+              </Button>
             ))}
         </div>
 

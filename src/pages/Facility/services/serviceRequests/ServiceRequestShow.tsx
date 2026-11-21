@@ -178,7 +178,7 @@ export default function ServiceRequestShow({
   const canShowMarkAsCompleteFootBar = canMarkAsComplete && !disableEdit;
 
   return (
-    <div className="min-h-screen bg-gray-50 relative">
+    <div className="min-h-screen bg-soft-background relative">
       <div
         className={cn(
           "mx-auto w-full max-w-4xl",
@@ -211,7 +211,7 @@ export default function ServiceRequestShow({
                   block: "start",
                 });
               }}
-              className="sticky top-0 z-20 -mx-2 bg-gray-50/95 px-2 py-1 backdrop-blur sm:hidden"
+              className="sticky top-0 z-20 -mx-2 bg-soft-background/95 px-2 py-1 backdrop-blur sm:hidden"
             >
               <TabsList className="h-auto w-full">
                 {mobileSections.map((section) => (

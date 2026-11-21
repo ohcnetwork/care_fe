@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -130,17 +130,15 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                 />
                 <div>
                   <Tabs value={incoming ? "incoming" : "outgoing"}>
-                    <TabsList className="inline-flex bg-transparent p-0 h-8 w-full">
+                    <TabsList className="w-full">
                       <TabsTrigger
                         value="outgoing"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
                         onClick={() => updateQuery({ incoming: false })}
                       >
                         {t("outgoing")}
                       </TabsTrigger>
                       <TabsTrigger
                         value="incoming"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
                         onClick={() => updateQuery({ incoming: true })}
                       >
                         {t("incoming")}
@@ -150,10 +148,9 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                 </div>
                 <div className="sm:hidden block">
                   <Tabs value={isActive ? "active" : "completed"}>
-                    <TabsList className="bg-transparent p-0 h-8 w-full">
+                    <TabsList className="w-full">
                       <TabsTrigger
                         value="active"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
                         onClick={() =>
                           updateQuery({ status: ResourceRequestStatus.PENDING })
                         }
@@ -162,7 +159,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       </TabsTrigger>
                       <TabsTrigger
                         value="completed"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
                         onClick={() =>
                           updateQuery({
                             status: ResourceRequestStatus.COMPLETED,
@@ -177,10 +173,9 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
               </div>
               <div className="hidden sm:block">
                 <Tabs value={isActive ? "active" : "completed"}>
-                  <TabsList className="bg-transparent p-0 h-8">
+                  <TabsList>
                     <TabsTrigger
                       value="active"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                       onClick={() =>
                         updateQuery({ status: ResourceRequestStatus.PENDING })
                       }
@@ -189,7 +184,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     </TabsTrigger>
                     <TabsTrigger
                       value="completed"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                       onClick={() =>
                         updateQuery({ status: ResourceRequestStatus.COMPLETED })
                       }
@@ -224,12 +218,14 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
 
               {/* Desktop Tabs */}
               <Tabs value={currentStatus} className="hidden sm:block w-full">
-                <TabsList className="bg-transparent p-0 h-auto flex-wrap justify-start gap-y-2 overflow-auto">
+                <TabsList
+                  variant="line"
+                  className="h-auto w-full max-w-full flex-wrap gap-y-2"
+                >
                   {currentStatuses.map((statusOption) => (
                     <TabsTrigger
                       key={statusOption}
                       value={statusOption}
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                       onClick={() => updateQuery({ status: statusOption })}
                     >
                       <CareIcon
@@ -299,7 +295,11 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <CardFooter className="flex flex-col p-0">
                       <Separator className="my-2" />
                       <Link
-                        href={`/facility/${resource.origin_facility.id}/resource/${resource.id}`}
+                        to="/facility/$facilityId/resource/$id"
+                        params={{
+                          facilityId: resource.origin_facility.id,
+                          id: resource.id,
+                        }}
                         className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
                       >
                         {t("view_details")}

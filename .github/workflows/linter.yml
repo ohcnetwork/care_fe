@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - develop
+      - "3.1/**"
   merge_group:
 
 jobs:
@@ -25,9 +26,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Generate supported browsers
-        run: npm run supported-browsers
 
       - name: Run type check
         run: npm run typecheck

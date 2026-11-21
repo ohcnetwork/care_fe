@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t as translate } from "i18next";
 import { AlertCircle, PlusCircle, Trash2 } from "lucide-react";
-import { useQueryParams } from "raviger";
 import {
   Ref,
   useCallback,
@@ -18,6 +17,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import careConfig from "@/../care.config";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
 
 import { DisablingCover } from "@/components/Common/DisablingCover";
@@ -776,7 +776,7 @@ export function AddSupplyDeliveryForm({
           price_components: priceComponents,
           discount_configuration:
             sourceChargeItem?.discount_configuration ?? null,
-          tags: sourceChargeItem?.tags?.map((tag) => tag.id),
+          tags: sourceChargeItem?.tags?.map(({ id }) => ({ tag: id })),
         };
 
         const newChargeItem =
@@ -1043,7 +1043,7 @@ export function AddSupplyDeliveryForm({
                     </div>
                   )}
 
-                  <div className="rounded-md border border-gray-200 bg-white shadow overflow-hidden">
+                  <div className="rounded-md bg-white shadow overflow-hidden">
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader className="bg-gray-100">

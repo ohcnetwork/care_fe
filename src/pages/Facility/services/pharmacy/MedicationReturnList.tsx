@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Box, Eye } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
@@ -24,6 +23,7 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
+import { navigate } from "@/lib/router/navigate";
 import { CreateMedicationReturnSheet } from "@/pages/Facility/services/pharmacy/CreateMedicationReturnSheet";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
@@ -97,17 +97,18 @@ export default function MedicationReturnList({
             onValueChange={(value) => updateQuery({ status: value, page: 1 })}
             className="w-full"
           >
-            <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-              {STATUS_TABS.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-                >
-                  {t(tab.label)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="w-full overflow-x-auto">
+              <TabsList
+                variant="line"
+                className="justify-evenly sm:justify-start"
+              >
+                {STATUS_TABS.map((tab) => (
+                  <TabsTrigger key={tab.value} value={tab.value}>
+                    {t(tab.label)}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
           </Tabs>
         </div>
 
@@ -208,9 +209,14 @@ function MedicationReturnTable({
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/locations/${locationId}/medication_return/order/${delivery.id}`,
-                  )
+                  navigate({
+                    to: "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId",
+                    params: {
+                      facilityId,
+                      locationId,
+                      deliveryOrderId: delivery.id,
+                    },
+                  })
                 }
               >
                 <Eye className="mr-1 size-4" />

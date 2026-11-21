@@ -1,10 +1,9 @@
+import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
-
-import { buttonVariants } from "@/components/ui/button";
 
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 
@@ -18,16 +17,23 @@ interface FacilityDeleteDialogProps {
     name?: string;
   };
   trigger?: React.ReactNode;
+  /** Control the dialog from outside, e.g. when opened from a menu item. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const FacilityDeleteDialog = ({
   facility,
   trigger,
+  open: controlledOpen,
+  onOpenChange,
 }: FacilityDeleteDialogProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
 
   const confirmationText = `Delete ${facility.name}`;
 
@@ -58,10 +64,10 @@ const FacilityDeleteDialog = ({
   });
 
   const defaultTrigger = (
-    <button className={buttonVariants({ variant: "destructive", size: "sm" })}>
+    <Button variant="destructive" size="sm" type="button">
       <Trash2Icon className="mr-2 size-4" />
       {t("delete_facility")}
-    </button>
+    </Button>
   );
 
   const description = (
@@ -82,7 +88,9 @@ const FacilityDeleteDialog = ({
 
   return (
     <CriticalActionConfirmationDialog
-      trigger={trigger ?? defaultTrigger}
+      trigger={
+        controlledOpen === undefined ? (trigger ?? defaultTrigger) : trigger
+      }
       title={t("delete_facility")}
       description={description}
       confirmationText={confirmationText}

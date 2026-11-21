@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { createContext, useEffect, useState } from "react";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import { TokenData } from "@/types/otp/otp";
@@ -49,7 +49,7 @@ export default function PatientUserProvider({ children }: Props) {
   }, [userData]);
 
   if (!tokenData) {
-    navigate("/");
+    navigate({ to: "/" });
     return null;
   }
 

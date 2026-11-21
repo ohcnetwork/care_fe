@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { Pill, Utensils } from "lucide-react";
-import { Link, usePathParams } from "raviger";
 import React, { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -52,6 +52,8 @@ import {
   groupMedicationsByProduct,
   isTimeInSlot,
 } from "./utils";
+
+import { useRouteParams } from "@/hooks/useRouteParams";
 
 // Types and Interfaces
 interface AdministrationTabProps {
@@ -126,7 +128,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   showTimeLine = false,
 }) => {
   const { t } = useTranslation();
-  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const subpathMatch = useRouteParams("/facility/:facilityId");
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { facilityId } = useCurrentFacilitySilently();
   const [selectedProductType, setSelectedProductType] =
@@ -322,6 +324,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       queryClient.invalidateQueries({
         queryKey: ["medication_requests_stopped"],
       });
+      queryClient.invalidateQueries({ queryKey: ["medication_requests"] });
     },
   });
 
@@ -697,18 +700,12 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                   setSearchQuery("");
                 }}
               >
-                <TabsList className="h-[38px] border border-gray-200">
-                  <TabsTrigger
-                    value={ProductKnowledgeType.medication}
-                    className="flex-1 data-[state=active]:bg-primary-700 data-[state=active]:text-white"
-                  >
+                <TabsList>
+                  <TabsTrigger value={ProductKnowledgeType.medication}>
                     <Pill className="size-4" />
                     {t("medications")}
                   </TabsTrigger>
-                  <TabsTrigger
-                    value={ProductKnowledgeType.nutritional_product}
-                    className="flex-1 data-[state=active]:bg-primary-700 data-[state=active]:text-white"
-                  >
+                  <TabsTrigger value={ProductKnowledgeType.nutritional_product}>
                     <Utensils className="size-4" />
                     {t("nutrition")}
                   </TabsTrigger>
@@ -755,7 +752,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 </Button>
               )}
               {facilityIdExists && (
-                <Link
+                <HrefLink
                   href={`../${encounterId}/type/${selectedProductType}/administrations/print`}
                 >
                   <Button
@@ -772,7 +769,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                       ? t("view_drug_chart")
                       : t("view_intake_chart")}
                   </Button>
-                </Link>
+                </HrefLink>
               )}
             </div>
           </div>

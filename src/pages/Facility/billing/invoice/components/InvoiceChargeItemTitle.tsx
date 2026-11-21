@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { getChargeItemTitle } from "@/pages/Facility/billing/invoice/invoicePrintData";
 import {
   ChargeItemRead,
   ChargeItemServiceResource,
@@ -42,31 +42,16 @@ export function InvoiceChargeItemTitle({
     );
   }
 
-  // Try to get dispense data
-  const dispense = item.service_resource_id
-    ? dispenseMap[item.service_resource_id]
-    : undefined;
+  const { title, subtitle } = getChargeItemTitle(item, dispenseMap, t);
 
-  // If no dispense data found, fallback to original title
-  if (!dispense) {
-    return <span>{item.title}</span>;
+  if (!subtitle) {
+    return <span>{title}</span>;
   }
-
-  const medicineName = dispense.item?.product?.product_knowledge?.name;
-  const lotNumber = dispense.item?.product?.batch?.lot_number;
-  const expiryDate = dispense.item?.product?.expiration_date;
 
   return (
     <div className="flex flex-col">
-      <span>{medicineName || item.title}</span>
-      {(lotNumber || expiryDate) && (
-        <span className="text-xs text-gray-500">
-          {lotNumber && `${t("lot")}: ${lotNumber}`}
-          {lotNumber && expiryDate && " | "}
-          {expiryDate &&
-            `${t("expiry")}: ${format(new Date(expiryDate), "dd/MM/yyyy")}`}
-        </span>
-      )}
+      <span>{title}</span>
+      <span className="text-xs text-gray-500">{subtitle}</span>
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -25,6 +24,7 @@ import { useLocationManagement } from "@/hooks/useLocationManagement";
 
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
+import { navigate } from "@/lib/router/navigate";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
 import facilityApi from "@/types/facility/facilityApi";
 import { LocationRead as LocationListType } from "@/types/location/location";
@@ -110,7 +110,10 @@ export default function LocationSettings({
 
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
-      navigate(`/facility/${facilityId}/settings/locations/${location.id}`);
+      navigate({
+        to: "/facility/$facilityId/settings/locations/$id",
+        params: { facilityId, id: location.id },
+      });
     },
     [facilityId],
   );
@@ -140,7 +143,7 @@ export default function LocationSettings({
   return (
     <Page title={t("locations")} hideTitleOnPage className="p-0">
       <div className="container mx-auto">
-        <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4">
+        <div className="flex flex-col sm:flex-row items-start justify-between pb-2 pt-4">
           <h3>{t("locations")}</h3>
           <Tabs
             value={activeTab}
@@ -151,7 +154,7 @@ export default function LocationSettings({
               <TabsTrigger
                 value="list"
                 id="location-list-view"
-                className="data-[state=active]:text-primary"
+                className="data-active:text-primary"
               >
                 <CareIcon icon="l-list-ul" className="text-lg" />
                 <span>{t("list")}</span>
@@ -159,7 +162,7 @@ export default function LocationSettings({
               <TabsTrigger
                 value="map"
                 id="location-map-view"
-                className="data-[state=active]:text-primary"
+                className="data-active:text-primary"
               >
                 <CareIcon icon="l-map" className="text-lg" />
                 <span>{t("map")}</span>
@@ -218,7 +221,10 @@ export default function LocationSettings({
                     facilityId={facilityId}
                     isNested={true}
                     onBackToParent={() =>
-                      navigate(`/facility/${facilityId}/settings/locations`)
+                      navigate({
+                        to: "/facility/$facilityId/settings/locations",
+                        params: { facilityId },
+                      })
                     }
                     onSelectLocation={handleLocationSelect}
                   />

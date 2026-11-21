@@ -1,5 +1,6 @@
-import { CheckedState } from "@radix-ui/react-checkbox";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { Checkbox, CheckedState } from "@/components/ui/checkbox";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   ArrowRightLeft,
   ChevronDown,
@@ -9,16 +10,13 @@ import {
   PrinterIcon,
   Zap,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
@@ -43,7 +41,10 @@ import SearchInput from "@/components/Common/SearchInput";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import {
   MonetaryComponent,
   MonetaryComponentType,
@@ -203,45 +204,29 @@ function ChargeItemsTable({
     };
   };
 
-  const RESULTS_PER_PAGE = 20;
-  const { ref: loadMoreRef, inView } = useInView();
-
   const {
-    data: chargeItems,
-    fetchNextPage,
+    data,
     hasNextPage,
     isFetchingNextPage,
     isLoading,
-  } = useInfiniteQuery({
+    ref: loadMoreRef,
+  } = useInfiniteList({
     queryKey: ["infinite-chargeItems", accountId, qParams],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(chargeItemApi.listChargeItem, {
-        pathParams: { facilityId },
-        queryParams: {
-          account: accountId,
-          status: qParams.status,
-          service_resource: qParams.service_resource,
-          created_by: qParams.created_by,
-          ordering: qParams.ordering,
-          title: qParams.title,
-          limit: RESULTS_PER_PAGE,
-          offset: pageParam,
-          ...getDateQueryParams(),
-        },
-      })({ signal });
-      return response as { results: ChargeItemRead[]; count: number };
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * RESULTS_PER_PAGE;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) => data?.pages.flatMap((p) => p.results) ?? [],
+    ...query.infinite(chargeItemApi.listChargeItem, {
+      pathParams: { facilityId },
+      pageSize: 20,
+      queryParams: {
+        account: accountId,
+        status: qParams.status,
+        service_resource: qParams.service_resource,
+        created_by: qParams.created_by,
+        ordering: qParams.ordering,
+        title: qParams.title,
+        ...getDateQueryParams(),
+      },
+    }),
   });
-
-  useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage();
-  }, [inView, hasNextPage, fetchNextPage]);
+  const chargeItems = data?.results;
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
@@ -357,7 +342,12 @@ function ChargeItemsTable({
           </div>
           <Button
             variant="outline"
-            onClick={() => navigate(`../${accountId}/charge_items/print`)}
+            onClick={() =>
+              navigate({
+                to: "/facility/$facilityId/billing/account/$accountId/charge_items/print",
+                params: { facilityId, accountId },
+              })
+            }
             className="w-full sm:w-auto sm:max-w-full"
           >
             <PrinterIcon className="size-4 mr-2" />
@@ -434,7 +424,7 @@ function ChargeItemsTable({
         />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
-          <Table className="rounded-lg border shadow-sm w-full bg-white">
+          <Table className="shadow-sm w-full bg-white">
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10">
@@ -536,13 +526,13 @@ function ChargeItemsTable({
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
                       {linkedResource !== "" ? (
-                        <Link
+                        <HrefLink
                           href={linkedResource}
                           className="flex items-center gap-0.5 underline text-gray-600"
                         >
                           {t(item.service_resource)}
                           <ExternalLinkIcon className="size-3" />
-                        </Link>
+                        </HrefLink>
                       ) : (
                         <span className="text-gray-500">
                           {t(item.service_resource)}
@@ -570,7 +560,11 @@ function ChargeItemsTable({
                         </Badge>
                         {item.paid_invoice && (
                           <Link
-                            href={`/facility/${facilityId}/billing/invoices/${item.paid_invoice.id}`}
+                            to="/facility/$facilityId/billing/invoices/$invoiceId"
+                            params={{
+                              facilityId,
+                              invoiceId: item.paid_invoice.id,
+                            }}
                             className="flex items-center gap-0.5 underline text-gray-600"
                             title={t("view_invoice")}
                           >

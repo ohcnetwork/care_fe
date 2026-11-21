@@ -36,7 +36,7 @@ test.describe("Allergy in Encounter", () => {
     );
     await page.getByRole("link", { name: "View Encounter" }).first().click();
 
-    await page.getByRole("link", { name: "A Allergy Allergy" }).click();
+    await page.getByRole("link", { name: "Add Allergy", exact: true }).click();
 
     // Wait for allergy intolerance API to load
     await page.waitForResponse(
@@ -58,7 +58,9 @@ test.describe("Allergy in Encounter", () => {
     await option.scrollIntoViewIfNeeded();
     await option.click();
 
-    await page.getByRole("button", { name: "Submit", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Save Changes", exact: true })
+      .click();
     await expect(
       page
         .locator("li[data-sonner-toast]")
