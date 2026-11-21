@@ -148,10 +148,11 @@ function AccountShow({
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
-  const { canUpdateAccount } = getPermissions(
-    hasPermission,
-    facility?.permissions || [],
-  );
+  const {
+    canUpdateAccount,
+    canCreateChargeItem,
+    canWritePaymentReconciliation,
+  } = getPermissions(hasPermission, facility?.permissions || []);
 
   useShortcutSubContext("facility:account:show");
 
@@ -322,6 +323,7 @@ function AccountShow({
           accountId={accountId}
           patientId={account.patient.id}
           canAddChargeItems={isAccountBillableAndActive}
+          canChangeAccount={canCreateChargeItem}
         />
       ),
       shortcutId: "switch-to-charge-items-tab",
@@ -334,6 +336,7 @@ function AccountShow({
           accountId={accountId}
           patientId={account.patient.id}
           hideAccountColumn
+          canChangeAccount={canWritePaymentReconciliation}
         />
       ),
       shortcutId: "switch-to-payments-tab",
