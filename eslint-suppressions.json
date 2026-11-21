@@ -1,0 +1,682 @@
+{
+  "src/CAREUI/interactive/WeekdayCheckbox.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/Utils/utils.ts": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Billing/CompactConditionEditor.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 6
+    }
+  },
+  "src/components/Common/ResourceDefinitionCategoryPicker.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 5
+    }
+  },
+  "src/components/Common/RichTextEditorContent.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Consent/ConsentFormSheet.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 6
+    }
+  },
+  "src/components/Encounter/CreateEncounterForm.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/components/Encounter/EncounterCommandDialog.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Encounter/EncounterInfoCard.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 4
+    }
+  },
+  "src/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Facility/EncounterCard.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 4
+    }
+  },
+  "src/components/Immunization/ImmunizationRecordList.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Immunization/ImmunizationRecordSheet.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Immunization/ImmunizationScheduleList.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Location/LocationCardList.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Medicine/MedicationAdministration/PrintMedicationAdministration.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Organization/GovtOrganizationPicker.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Patient/MedicationStatementTable.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Patient/PatientDetailsTab/Demography.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/components/Patient/PatientDetailsTab/ResourceRequests.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Patient/PatientHeader.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/components/Patient/PatientInfoHoverCard.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Patient/PatientRegistration.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Patient/diagnosis/DiagnosisTable.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Patient/procedures/ProcedureTable.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Prescription/PrintPrescriptions.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Questionnaire/EntitySelectionDrawer.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/components/Questionnaire/QuestionTypes/DiagnosisQuestion.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Questionnaire/QuestionTypes/EncounterQuestion.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 5
+    }
+  },
+  "src/components/Questionnaire/QuestionTypes/MedicationRequestQuestion.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Questionnaire/QuestionTypes/MedicationStatementQuestion.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 4
+    }
+  },
+  "src/components/Questionnaire/QuestionTypes/ProcedureQuestion.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Questionnaire/ResourceResponses/ResourceResponseFilters.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Questionnaire/ResourceResponses/ResourceResponses.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Questionnaire/ResourceResponses/ResourceResponsesEmptyState.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/QuestionnaireV2/builder/QuestionTypePicker.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 4
+    }
+  },
+  "src/components/QuestionnaireV2/fill/FillHeader.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/QuestionnaireV2/form/StructuredSlot.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/QuestionnaireV2/shared/QuestionTypeBadge.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/QuestionnaireV2/structured/registry.ts": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Referral/CreateReferralDialog.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Referral/ReferralAppointments.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/components/Referral/ReferralDestinationPicker.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Referral/ReferralList.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Referral/ReferralResourcePicker.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 6
+    }
+  },
+  "src/components/Referral/ReferralResponseEditor.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Referral/ReferralSharedRecords.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/components/Referral/ReferralStatusBadge.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Referral/ReferralWorkflowActions.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Referral/referralResourceCandidates.ts": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Resource/PrintResourceLetter.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/components/Resource/ResourceDetails.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Resource/ResourceForm.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Resource/ResourceList.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/components/Schedule/ScheduleHome.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Tags/TagExpiryOffsetInput.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Tags/tagExpiry.ts": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Tokens/CreateTokenForm.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/components/Users/UserCommunicationFields.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Users/UserDepartmentsTab.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Users/UserHome.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Users/UserSummary.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Users/UserViewDetails.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Workspace/RecentEncountersWidget.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/Workspace/WorkspaceSectionPicker.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Workspace/WorkspaceStudio.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 5
+    }
+  },
+  "src/components/Workspace/WorkspaceTabDialog.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/Workspace/workspaceEditorUtils.ts": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/components/ui/multi-filter/filterConfigs.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/ui/multi-select.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/components/ui/sidebar/facility/encounter-nav-item.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/hooks/useFilters.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Appointments/AppointmentDetail.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 5
+    }
+  },
+  "src/pages/Appointments/AppointmentPrint.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Appointments/AppointmentsPage.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Appointments/BookAppointment/AppointmentFormSection.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Appointments/components/AppointmentTokenCard.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Appointments/components/PrintAppointments.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Encounters/ConsentDetail.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Encounters/EncounterDetailsHeader.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Encounters/EncounterHistorySelector.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 5
+    }
+  },
+  "src/pages/Encounters/EncounterList.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Encounters/EncounterProperties.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/pages/Encounters/EncounterShow.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Encounters/tabs/consents.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Encounters/tabs/overview/summary-panel-details-tab/discharge-summary.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Encounters/tabs/overview/summary-panel-details-tab/hospitalisation.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Encounters/widgets/EncounterVitalsWidget.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/BedAvailabilityDashboard.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/billing/account/components/PrintChargeItems.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/billing/invoice/PrintInvoice.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/billing/invoice/PrintInvoices.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/billing/paymentReconciliation/PaymentReconciliationShow.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/billing/paymentReconciliation/PrintPaymentReconciliation.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/locations/LocationContent.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/locations/LocationOverview.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/overview.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/queues/OngoingQueueTokenCard.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/queues/TokenCard.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Facility/services/diagnosticReports/DiagnosticReportPrintPreview.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/services/pharmacy/DispenseOrderView.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/services/pharmacy/MedicationDispenseHistory.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/services/pharmacy/PrescriptionQueue.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/pages/Facility/services/pharmacy/PrintDispenseOrder.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/services/pharmacy/PrintMedicationReturn.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/services/pharmacy/components/DispenseOrderViewFooter.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 4
+    }
+  },
+  "src/pages/Facility/services/serviceRequests/PatientHoverCard.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Facility/settings/billing/discount/discount-configuration/DiscountConfigurationSettings.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/settings/devices/DeviceShow.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Facility/settings/devices/components/DeviceCard.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Facility/settings/devices/components/DeviceForm.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 5
+    }
+  },
+  "src/pages/Facility/settings/devices/components/DeviceLocationTimelineCard.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/settings/locations/LocationForm.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Facility/settings/locations/LocationMap.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/settings/locations/LocationView.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/settings/locations/components/LocationCard.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/settings/locations/components/LocationTable.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/settings/observationDefinition/components/ConditionEditor.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 5
+    }
+  },
+  "src/pages/Facility/settings/organizations/FacilityOrganizationList.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/settings/organizations/FacilityOrganizationView.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Facility/settings/productKnowledge/ProductKnowledgeForm.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/settings/productKnowledge/ProductKnowledgeView.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Facility/settings/tokenCategory/TokenCategoryGroup.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/ImmunizationPolicies/ImmunizationPolicyForm.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/ImmunizationPolicies/ImmunizationPolicyList.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Landing/LandingPage.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Organization/OrganizationView.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Organization/components/OrganizationLevel.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Patient/components/AppointmentDialog.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/PublicAppointments/PatientRegistration.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/PublicAppointments/PatientSelect.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/pages/Scheduling/ScheduleTemplates.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/pages/Scheduling/components/EditScheduleTemplateSheet.tsx": {
+    "care-i18n/static-translation-keys": {
+      "count": 1
+    }
+  },
+  "src/types/base/condition/condition.ts": {
+    "care-i18n/static-translation-keys": {
+      "count": 3
+    }
+  },
+  "src/types/organization/organization.ts": {
+    "care-i18n/static-translation-keys": {
+      "count": 2
+    }
+  },
+  "src/types/workspace/widgetConfigSchemas.ts": {
+    "care-i18n/static-translation-keys": {
+      "count": 6
+    }
+  }
+}

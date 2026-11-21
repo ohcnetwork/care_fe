@@ -11,6 +11,7 @@ import globals from "globals";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import staticTranslationKeys from "./scripts/eslint-rules/static-translation-keys.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -217,9 +218,16 @@ const config = [
       i18next: i18nextPlugin,
       "i18next-no-undefined-translation-keys":
         i18nextNoUndefinedTranslationKeysPlugin,
+      "care-i18n": {
+        rules: { "static-translation-keys": staticTranslationKeys },
+      },
     },
     rules: {
       ...i18nextPlugin.configs.recommended.rules,
+      // Keys must appear literally in src/ so `npm run lint:locale` can find
+      // unused translations. Existing violations are grandfathered in
+      // eslint-suppressions.json; new ones fail the build.
+      "care-i18n/static-translation-keys": "error",
       "i18next/no-literal-string": [
         dynamicRules({
           error: isPreCommit || isProduction,
