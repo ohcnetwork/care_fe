@@ -174,7 +174,13 @@ function SpecimenDefinitionFormContent({
     slug_value: slugValueSchema(),
     status: z.enum(SpecimenDefinitionStatus),
     description: z.string().min(1, t("field_required")),
-    derived_from_uri: z.url({ message: t("field_required") }).optional(),
+    // A cleared input holds "". Keep it rather than mapping it to undefined or
+    // null: on update the API skips missing and null values, so "" is what
+    // clears a saved URI.
+    derived_from_uri: z
+      .url({ message: t("invalid_url") })
+      .or(z.literal(""))
+      .optional(),
     type_collected: CodeSchema,
     patient_preparation: z.array(CodeSchema).min(0),
     collection: CodeSchema.optional(),
