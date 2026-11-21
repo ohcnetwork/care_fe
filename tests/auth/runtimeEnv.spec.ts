@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-// The Docker image writes REACT_* env vars to /runtime-env.js on container
-// start; care.config.ts lets them override the values from the build.
+// A deployment can serve its own /runtime-env.js; care.config.ts lets its
+// REACT_* values override the values from the build.
 test.describe("Runtime env overrides", () => {
   // page.route() can't intercept requests a service worker answers.
   test.use({ serviceWorkers: "block" });

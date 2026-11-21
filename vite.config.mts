@@ -481,7 +481,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         },
         injectManifest: {
           maximumFileSizeToCacheInBytes: 8000000,
-          // Rewritten at container start, so it must always come from the network.
+          // Replaced per deployment, so it must always come from the network.
           globIgnores: ["**/node_modules/**/*", "runtime-env.js"],
         },
         manifest: {

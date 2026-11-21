@@ -1,7 +1,8 @@
 #!/bin/sh
-# Runs on container start (nginx image's /docker-entrypoint.d). Writes the
-# container's REACT_* environment variables to runtime-env.js, which overrides
-# the values baked into the build (see care.config.ts).
+# Writes the REACT_* environment variables to runtime-env.js, which overrides
+# the values baked into the build (see care.config.ts and README). The Docker
+# image runs it on container start. Elsewhere, set CARE_RUNTIME_ENV_FILE to
+# the output path, for example in a deploy pipeline.
 set -eu
 
 out="${CARE_RUNTIME_ENV_FILE:-/usr/share/nginx/html/runtime-env.js}"
