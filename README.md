@@ -298,38 +298,7 @@ The build is minified and the filenames include the hashes.
 
 #### Configure a deployment at runtime
 
-`REACT_*` settings are read at build time, but a deployment can override them without a rebuild by serving its own `/runtime-env.js` next to `index.html`. The build ships an empty one, so the build's values apply until you replace it.
-
-1. Write a `runtime-env.js` with the settings to override. Names and formats are the same as in `.env`, and every value is a string:
-
-   ```js
-   window.__CARE_RUNTIME_ENV__ = {
-     REACT_CARE_API_URL: "https://careapi.example.org",
-     REACT_DISABLE_PATIENT_LOGIN: "true",
-   };
-   ```
-
-   Or generate it from environment variables (needs only `sh` and `awk`):
-
-   ```sh
-   REACT_CARE_API_URL=https://careapi.example.org \
-   CARE_RUNTIME_ENV_FILE=runtime-env.js sh nginx/runtime-env.sh
-   ```
-
-2. Serve it at `/runtime-env.js` in place of the build's empty file, with `Content-Type: text/javascript` and `Cache-Control: no-cache`. The service worker never caches it, so returning visitors get new values too.
-3. To change settings later, replace that file.
-
-Examples:
-
-- **S3 + CloudFront:** `aws s3 sync build/ s3://<bucket>/ --delete --exclude runtime-env.js`, then `aws s3 cp runtime-env.js s3://<bucket>/runtime-env.js --cache-control no-cache --content-type text/javascript`. A plain sync of a new build replaces your file with the empty one, so exclude it or upload it again after every deploy. Invalidate `/runtime-env.js` if the CDN has already cached it.
-- **Cloudflare Pages or Netlify:** write the file into `build/` before uploading, for example `CARE_RUNTIME_ENV_FILE=build/runtime-env.js sh nginx/runtime-env.sh`. Both serve files with `max-age=0, must-revalidate` by default.
-- **Docker:** `docker run -p 8080:80 -e REACT_CARE_API_URL=https://careapi.example.org <image>`. The container writes its `REACT_*` variables to `runtime-env.js` on every start, so restart it to apply new values.
-
-To check a deployment, run `window.__CARE_RUNTIME_ENV__` (the overrides) or `window.__CORE_ENV__` (the resulting config) in the browser console.
-
-- The values are visible to anyone who loads the app, as build-time values already are, so never put secrets in them.
-- They aren't validated like build-time values. A malformed JSON value, for example in `REACT_CUSTOM_SHORTCUTS`, stops the app from loading, so try changes on a staging site first.
-- These settings are still applied only at build time: `REACT_APP_TITLE`, `REACT_APP_META_DESCRIPTION`, `REACT_APP_COVER_IMAGE`, `REACT_PUBLIC_URL`, `REACT_INJECTED_HEAD` and `REACT_INJECTED_HTML` (written into `index.html`), `REACT_CUSTOM_DESCRIPTION` and `REACT_MFE_REGISTERED_COMPONENTS`.
+A deployment can override `REACT_*` settings without a rebuild by serving its own `/runtime-env.js`. See [Runtime configuration](docs/runtime-configuration.md).
 
 **🚀 Your app is ready to be deployed!**
 

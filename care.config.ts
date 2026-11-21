@@ -11,7 +11,7 @@ import Decimal from "decimal.js";
 import { CountryCode } from "libphonenumber-js";
 
 // A deployment can serve its own /runtime-env.js to override the REACT_* values
-// baked in at build time, so one build can serve any deployment (see README).
+// baked in at build time (see docs/runtime-configuration.md).
 const env: ImportMetaEnv = {
   ...import.meta.env,
   ...(typeof window !== "undefined" ? window.__CARE_RUNTIME_ENV__ : undefined),
