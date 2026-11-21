@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -110,6 +110,12 @@ export default function EditFacilityUserRoleSheet({
       role: selectedRole.id,
     });
   };
+
+  useEffect(() => {
+    if (open) {
+      setSelectedRole(userRole.role);
+    }
+  }, [open, userRole.role]);
 
   return (
     <>

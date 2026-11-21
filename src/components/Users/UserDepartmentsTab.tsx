@@ -6,6 +6,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -54,7 +56,7 @@ function DepartmentRow({
     ],
     // The API supports name/username search, but no exact user-id filter.
     // Read every matching page, then match the id to avoid ambiguous names.
-    queryFn: query.paginated(facilityOrganizationApi.listUsers, {
+    queryFn: query.debounced(facilityOrganizationApi.listUsers, {
       pathParams: { facilityId, organizationId: department.id },
       queryParams: { search: userData.username },
     }),
@@ -119,7 +121,7 @@ function DepartmentRow({
 export default function UserDepartmentsTab({ userData }: userChildProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
-  const { qParams, Pagination, resultsPerPage, updatePage } = useFilters({
+  const { qParams, updateQuery, Pagination, resultsPerPage, updatePage } = useFilters({
     limit: 15,
     disableCache: true,
   });
@@ -129,13 +131,14 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
       "byUser",
       facilityId,
       userData.id,
-      qParams.page,
+      qParams,
       resultsPerPage,
     ],
     queryFn: query(facilityOrganizationApi.list, {
       pathParams: { facilityId: facilityId! },
       queryParams: {
         containing_user: userData.id,
+        name: qParams.name || undefined,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
@@ -160,6 +163,13 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
           facilityId={facilityId}
         />
       </div>
+      <Input
+        placeholder={t("search_departments_placeholder")}
+        aria-label={t("search_departments_placeholder")}
+        value={qParams.name || ""}
+        onChange={(e) => updateQuery({ name: e.target.value || undefined })}
+        className="w-full max-w-sm"
+      />
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }, (_, index) => (
