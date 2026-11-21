@@ -28,6 +28,7 @@ import {
   careTeamFilter,
   dateFilter,
   departmentFilter,
+  encounterClassFilter,
   encounterPriorityFilter,
   encounterStatusFilter,
   tagFilter,
@@ -192,6 +193,11 @@ export function EncounterList({
     care_team_user,
   } = qParams;
 
+  // Class-specific lists fix the class in the route, so only the All list
+  // filters by, saves and restores an encounter class. A stray
+  // ?encounter_class= on a class-specific list is ignored.
+  const filtersByEncounterClass = !encounterClass;
+
   const getDefaultDateRange = () => {
     const today = new Date();
     const defaultDays = careConfig.encounterDateFilter;
@@ -313,6 +319,7 @@ export function EncounterList({
     const hasUrlFilters =
       status ||
       priority ||
+      (filtersByEncounterClass && qParams.encounter_class) ||
       organization ||
       care_team_user ||
       qParams.tags ||
@@ -325,6 +332,8 @@ export function EncounterList({
           const filters = JSON.parse(stored);
           if (filters.status) restoredParams.status = filters.status;
           if (filters.priority) restoredParams.priority = filters.priority;
+          if (filtersByEncounterClass && filters.encounterClass)
+            restoredParams.encounter_class = filters.encounterClass;
           if (filters.selectedOrg)
             restoredParams.organization = filters.selectedOrg.id;
           if (filters.selectedCareTeamMember)
@@ -380,7 +389,9 @@ export function EncounterList({
           organization,
           care_team_user,
         ),
-        encounter_class: encounterClass,
+        encounter_class: filtersByEncounterClass
+          ? qParams.encounter_class
+          : encounterClass,
         external_identifier: searchQueryParams.external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
@@ -450,6 +461,9 @@ export function EncounterList({
   const filters = [
     encounterStatusFilter("status", "multi"),
     encounterPriorityFilter("priority"),
+    ...(filtersByEncounterClass
+      ? [encounterClassFilter("encounter_class")]
+      : []),
     departmentFilter("organization"),
     careTeamFilter("care_team"),
     tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
@@ -469,6 +483,9 @@ export function EncounterList({
             break;
           case "priority":
             updates.priority = (value as string) || undefined;
+            break;
+          case "encounter_class":
+            updates.encounterClass = (value as string) || undefined;
             break;
           case "tags":
             updates.selectedTags = (value as TagConfig[]) ?? [];
