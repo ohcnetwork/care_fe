@@ -91,9 +91,17 @@ export default function UserForm({
   );
   const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
   const roleOrgSchema = z.object({
-    organization: z.string().min(1, t("select_role_organization")),
-    role: z.string().min(1, t("please_select_role")),
+    organization: z.string(),
+    role: z.string(),
   });
+  const roleOrgListSchema = z
+    .array(roleOrgSchema)
+    .refine(
+      (entries) =>
+        entries.every((entry) => !!entry.organization === !!entry.role),
+      t("role_organization_designation_required"),
+    )
+    .transform((entries) => entries.filter((entry) => entry.organization));
 
   const userFormSchema = z
     .object({
@@ -151,7 +159,7 @@ export default function UserForm({
       // role_orgs only used in create mode
       role_orgs: isEditMode
         ? z.array(roleOrgSchema).optional()
-        : z.array(roleOrgSchema).default([]),
+        : roleOrgListSchema.default([]),
     })
     .refine(
       (data) => {
@@ -954,12 +962,10 @@ export default function UserForm({
                 <FormControl>
                   <RoleOrgAccessEditor
                     value={field.value || []}
-                    onChange={(value) =>
-                      form.setValue("role_orgs", value, {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      })
-                    }
+                    onChange={(value) => {
+                      form.setValue("role_orgs", value, { shouldDirty: true });
+                      form.clearErrors("role_orgs");
+                    }}
                     disabled={isLoadingUser || isSubmitting}
                   />
                 </FormControl>

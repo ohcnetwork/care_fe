@@ -70,7 +70,6 @@ export function RoleOrgAccessEditor({
   };
 
   const removeEntry = (index: number) => {
-    if (entries.length <= 1) return;
     onChange(entries.filter((_, currentIndex) => currentIndex !== index));
   };
 
@@ -124,7 +123,7 @@ export function RoleOrgAccessEditor({
                   })
                 }
                 context={RoleContext.ROLE_ORG}
-                disabled={disabled}
+                disabled={disabled || !entry.organization}
                 placeholder={t("select_designation")}
               />
             </div>
@@ -135,7 +134,10 @@ export function RoleOrgAccessEditor({
                 size="icon"
                 className="size-8 text-gray-400 hover:text-red-600"
                 onClick={() => removeEntry(index)}
-                disabled={disabled || entries.length <= 1}
+                disabled={
+                  disabled ||
+                  (entries.length === 1 && !entry.organization && !entry.role)
+                }
               >
                 <Trash2 className="size-3.5" />
                 <span className="sr-only">{t("remove")}</span>
@@ -292,6 +294,7 @@ export function RoleOrgAccessSummary({
                       value={newRole}
                       onChange={setNewRole}
                       context={RoleContext.ROLE_ORG}
+                      disabled={!newOrg}
                       placeholder={t("select_designation")}
                     />
                     <Button
