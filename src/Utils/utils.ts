@@ -4,6 +4,7 @@ import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
+import { navigate } from "@/lib/router/navigate";
 import { getRouter } from "@/lib/router/routerRef";
 import {
   PatientListRead,
@@ -399,7 +400,7 @@ export const goBack = (fallback?: string) => {
     .slice()
     .reverse()
     .find((match) => match.pathname !== current)?.pathname;
-  void router.navigate({ to: fallback ?? parent ?? "/", replace: true });
+  navigate({ href: fallback ?? parent ?? "/", replace: true });
 };
 
 /**

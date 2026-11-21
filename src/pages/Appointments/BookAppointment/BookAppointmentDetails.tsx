@@ -156,7 +156,11 @@ export const BookAppointmentDetails = ({
             </Button>
           )}
           {referralContext.returnUrl && (
-            <HrefLink className="underline" href={referralContext.returnUrl}>
+            <HrefLink
+              className="underline"
+              href={referralContext.returnUrl}
+              back={referralContext.returnToReferral}
+            >
               {t("referral_return_to_referral")}
             </HrefLink>
           )}

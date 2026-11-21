@@ -52,7 +52,7 @@ export function WorkspaceEditor({ scope, id }: WorkspaceEditorProps) {
           </Alert>
           <div className="flex gap-2">
             <Button asChild variant="outline">
-              <HrefLink href={scope.basePath}>
+              <HrefLink href={scope.basePath} back>
                 <ArrowLeft className="size-4" />
                 {t("back")}
               </HrefLink>

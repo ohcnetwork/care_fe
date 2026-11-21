@@ -5,9 +5,6 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
@@ -120,70 +117,6 @@ export function LocationTreeNode({
             ))}
           </div>
         )}
-    </div>
-  );
-}
-
-interface LocationNavbarProps {
-  facilityId: string;
-  selectedLocationId: string | null;
-  expandedLocations: Set<string>;
-  onLocationSelect: (location: LocationRead) => void;
-  onToggleExpand: (locationId: string) => void;
-}
-
-export default function LocationNavbar({
-  facilityId,
-  selectedLocationId,
-  expandedLocations,
-  onLocationSelect,
-  onToggleExpand,
-}: LocationNavbarProps) {
-  const { t } = useTranslation();
-
-  const { data: allLocations, isLoading: isLoadingLocations } = useQuery({
-    queryKey: ["locations", facilityId, "mine", "kind"],
-    queryFn: query.paginated(locationApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        mine: true,
-        mode: "kind",
-      },
-    }),
-  });
-
-  const topLevelLocations = allLocations?.results || [];
-
-  if (topLevelLocations.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block">
-      <div className="p-4">
-        <h2 className="text-lg font-semibold">{t("locations")}</h2>
-      </div>
-      <ScrollArea>
-        <div className="p-2">
-          {isLoadingLocations ? (
-            <div className="p-4">
-              <CardGridSkeleton count={3} />
-            </div>
-          ) : (
-            topLevelLocations.map((location) => (
-              <LocationTreeNode
-                key={location.id}
-                location={location}
-                selectedLocationId={selectedLocationId}
-                onSelect={onLocationSelect}
-                expandedLocations={expandedLocations}
-                onToggleExpand={onToggleExpand}
-                facilityId={facilityId}
-              />
-            ))
-          )}
-        </div>
-      </ScrollArea>
     </div>
   );
 }

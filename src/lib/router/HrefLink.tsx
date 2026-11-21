@@ -1,5 +1,6 @@
 import { type ComponentPropsWithoutRef, forwardRef } from "react";
 
+import { goBack } from "@/Utils/utils";
 import { navigate } from "@/lib/router/navigate";
 
 export interface HrefLinkProps extends ComponentPropsWithoutRef<"a"> {
@@ -7,6 +8,12 @@ export interface HrefLinkProps extends ComponentPropsWithoutRef<"a"> {
   href: string;
   /** Replace the current history entry, not push a new one. */
   replace?: boolean;
+  /**
+   * A back link: a left click goes back in history (`goBack`, with `href` as
+   * the fallback) or runs the given function. Other clicks, such as opening
+   * in a new tab, still open `href`.
+   */
+  back?: boolean | (() => void);
 }
 
 function isPlainLeftClick(
@@ -33,7 +40,7 @@ function isPlainLeftClick(
  * active state.
  */
 export const HrefLink = forwardRef<HTMLAnchorElement, HrefLinkProps>(
-  function HrefLink({ href, replace, onClick, ...props }, ref) {
+  function HrefLink({ href, replace, back, onClick, ...props }, ref) {
     return (
       <a
         {...props}
@@ -48,7 +55,9 @@ export const HrefLink = forwardRef<HTMLAnchorElement, HrefLinkProps>(
           }
           if (isPlainLeftClick(event, props.target)) {
             event.preventDefault();
-            navigate({ href: event.currentTarget.href, replace });
+            if (typeof back === "function") back();
+            else if (back) goBack(event.currentTarget.href);
+            else navigate({ href: event.currentTarget.href, replace });
           }
         }}
       />
