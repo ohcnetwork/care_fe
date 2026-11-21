@@ -92,7 +92,7 @@ export function CurrentMedicationsWidget({
   const { t } = useTranslation();
   const user = useAuthUser();
   const path = usePathname();
-  const [queryParams] = useQueryParams<Record<string, string>>();
+  const [queryParams] = useQueryParams();
   const parsedConfig = currentMedicationsConfigSchema.safeParse(config);
   const limit = parsedConfig.data?.limit ?? 10;
   const sources = parsedConfig.data?.sources ?? "both";

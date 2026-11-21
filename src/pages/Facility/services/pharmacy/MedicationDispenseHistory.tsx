@@ -21,6 +21,7 @@ import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDi
 import { MedicationReturnSheet } from "@/pages/Facility/services/pharmacy/MedicationReturnSheet";
 
 import useFilters from "@/hooks/useFilters";
+import { dispenseOrderListSearch } from "@/lib/router/search/pharmacy";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
@@ -59,8 +60,8 @@ export default function MedicationDispenseHistory({
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { qParams, Pagination, updateQuery, resultsPerPage } = useFilters({
+    schema: dispenseOrderListSearch,
     limit: 14,
-    disableCache: true,
   });
   const [selectedDispenses, setSelectedDispenses] = useState<string[]>([]);
 

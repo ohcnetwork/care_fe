@@ -1,10 +1,12 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 
+import { chargeItemPrintSearch } from "@/lib/router/search/billing";
 import { PrintChargeItems } from "@/pages/Facility/billing/account/components/PrintChargeItems";
 
 export const Route = createFileRoute(
   "/_app/facility/$facilityId/billing/account/$accountId/charge_items/print",
 )({
+  validateSearch: chargeItemPrintSearch,
   component: RouteComponent,
 });
 

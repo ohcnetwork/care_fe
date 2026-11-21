@@ -51,7 +51,11 @@ const config = [
     ignores: [
       "**/dist",
       "**/public",
-      "**/lib",
+      "**/lib/*",
+      // Lint the search schemas: their import rule keeps them small.
+      "!src/lib/router",
+      "src/lib/router/*",
+      "!src/lib/router/search",
       "**/build",
       "**/*.css",
       "**/*.csv",
@@ -205,6 +209,26 @@ const config = [
           allowSameFolder: true,
           rootDir: "src",
           prefix: "@",
+        },
+      ],
+    },
+  },
+
+  // Search schemas load with the route tree at startup: `validateSearch` is
+  // not code-split. Keep pages, components and their imports out of them.
+  {
+    files: ["src/lib/router/search/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: "^@/(?!types/|lib/router/search/)",
+              message:
+                "A search schema loads at startup. Import only zod, the search fields and `@/types`.",
+            },
+          ],
         },
       ],
     },
