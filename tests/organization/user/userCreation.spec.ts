@@ -41,6 +41,26 @@ test.describe("User Creation", () => {
     await validateFieldError(page, "Gender", "Gender is required");
   });
 
+  test("Keep focus in the mobile language list when adding and removing cards", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: "Add User" }).click();
+    await page.setViewportSize({ width: 390, height: 844 });
+    const sheet = page.getByRole("dialog");
+    const add = sheet.getByRole("button", { name: "Add language" });
+    const card = (number: number) =>
+      sheet.getByRole("group", { name: `Language ${number}`, exact: true });
+
+    await add.click();
+    await expect(card(1).getByRole("combobox").first()).toBeFocused();
+    await add.click();
+    await expect(card(2).getByRole("combobox").first()).toBeFocused();
+    await card(1).getByRole("button", { name: "Remove language 1" }).click();
+    await expect(card(1).getByRole("combobox").first()).toBeFocused();
+    await card(1).getByRole("button", { name: "Remove language 1" }).click();
+    await expect(add).toBeFocused();
+  });
+
   test("Create a new user and link to organization", async ({ page }) => {
     const firstName = faker.person.firstName();
     const lastName = faker.person.lastName();
@@ -69,8 +89,7 @@ test.describe("User Creation", () => {
       await page
         .getByRole("textbox", { name: "Phone Number" })
         .fill(phoneNumber);
-      await page.getByRole("combobox", { name: "Gender" }).click();
-      await page.getByRole("option", { name: gender, exact: true }).click();
+      await page.getByRole("radio", { name: gender, exact: true }).check();
     });
 
     await test.step("Add Responsibilities", async () => {
