@@ -77,6 +77,7 @@ export interface DateRangePickerHandle {
 
 type Edge = "from" | "to";
 type FieldText = Record<Edge, string>;
+const YEARS_PER_PAGE = 12;
 
 const fieldDate = (date?: Date) => (date ? format(date, "dd/MM/yyyy") : "");
 const localDate = (date?: Date) =>
@@ -299,12 +300,23 @@ function RangePanel({
   const [month, setMonth] = useState(() =>
     clampMonth(initial.from ?? initial.to ?? today),
   );
-  const [monthView, setMonthView] = useState(false);
+  const [view, setView] = useState<"days" | "years" | "months">("days");
   const [year, setYear] = useState(month.getFullYear());
+  const firstYear = year - (YEARS_PER_PAGE / 2 - 1);
+  const lastYear = firstYear + YEARS_PER_PAGE - 1;
+  const gridRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const target =
+      grid.querySelector<HTMLButtonElement>(
+        'button[aria-pressed="true"]:enabled',
+      ) ?? grid.querySelector<HTMLButtonElement>("button:enabled");
+    target?.focus({ preventScroll: true });
+  }, [view]);
   const showDate = (date: Date) => {
-    const next = clampMonth(date);
-    setMonth(next);
-    setYear(next.getFullYear());
+    setMonth(clampMonth(date));
+    setView("days");
   };
   // Set while a day click moves focus to End, so the calendar stays put.
   const keepMonth = useRef(false);
@@ -429,10 +441,44 @@ function RangePanel({
     { before: bounds.min ?? new Date(1900, 0, 1) },
     ...(bounds.max ? [{ after: bounds.max }] : []),
   ];
-  const closeMonths = (date: Date) => {
-    setMonth(date);
-    setMonthView(false);
+  const closeNavigation = (date: Date) => {
+    showDate(date);
     captionRef.current?.focus({ preventScroll: true });
+  };
+  const yearLabel = (value: number) =>
+    value.toLocaleString(i18n.language, { useGrouping: false });
+  const yearRangeLabel = (start: number) =>
+    `${yearLabel(start)} – ${yearLabel(start + YEARS_PER_PAGE - 1)}`;
+  const navigationStep = (direction: -1 | 1) => {
+    const previous = direction === -1;
+    if (view === "days") {
+      const next = addMonths(month, direction);
+      return {
+        label: t(previous ? "previous_month" : "next_month"),
+        disabled: next < firstMonth || !!(lastMonth && next > lastMonth),
+        navigate: () => {
+          setMonth(next);
+          setHovered(undefined);
+        },
+      };
+    }
+    if (view === "years") {
+      const nextStart = firstYear + direction * YEARS_PER_PAGE;
+      return {
+        label: `${t(previous ? "previous" : "next")}: ${yearRangeLabel(nextStart)}`,
+        disabled: previous
+          ? firstYear <= firstMonth.getFullYear()
+          : !!lastMonth && lastYear >= lastMonth.getFullYear(),
+        navigate: () => setYear(year + direction * YEARS_PER_PAGE),
+      };
+    }
+    return {
+      label: t(previous ? "previous_year" : "next_year"),
+      disabled: previous
+        ? year <= firstMonth.getFullYear()
+        : !!lastMonth && year >= lastMonth.getFullYear(),
+      navigate: () => setYear(year + direction),
+    };
   };
 
   return (
@@ -474,7 +520,11 @@ function RangePanel({
               onFocus={() => {
                 setActiveEdge(edge);
                 const date = latestRange.current[edge];
-                if (date && !keepMonth.current && !isSameMonth(date, month)) {
+                if (
+                  date &&
+                  !keepMonth.current &&
+                  (view !== "days" || !isSameMonth(date, month))
+                ) {
                   showDate(date);
                 }
               }}
@@ -512,29 +562,35 @@ function RangePanel({
           variant="ghost"
           size="default"
           className="min-w-0 shrink"
-          aria-expanded={monthView}
+          aria-expanded={view !== "days"}
           aria-controls={`${id}-calendar`}
           onClick={() => {
-            setYear(month.getFullYear());
-            setMonthView(!monthView);
+            if (view === "days") setYear(month.getFullYear());
+            setView(view === "years" ? "days" : "years");
+            setHovered(undefined);
           }}
         >
-          {/* Only the month may ellipsize; the year always stays readable. */}
-          <span className="flex min-w-0 whitespace-pre">
-            {new Intl.DateTimeFormat(i18n.language, {
-              month: "short",
-              year: "numeric",
-            })
-              .formatToParts(month)
-              .map(({ type, value }, index) => (
-                <span
-                  key={index}
-                  className={type === "month" ? "truncate" : "shrink-0"}
-                >
-                  {value}
-                </span>
-              ))}
-          </span>
+          {view === "days" ? (
+            <span className="flex min-w-0 whitespace-pre">
+              {new Intl.DateTimeFormat(i18n.language, {
+                month: "short",
+                year: "numeric",
+              })
+                .formatToParts(month)
+                .map(({ type, value }, index) => (
+                  <span
+                    key={index}
+                    className={type === "month" ? "truncate" : "shrink-0"}
+                  >
+                    {value}
+                  </span>
+                ))}
+            </span>
+          ) : (
+            <span className="whitespace-nowrap tabular-nums">
+              {view === "years" ? yearRangeLabel(firstYear) : yearLabel(year)}
+            </span>
+          )}
           <ChevronDown
             aria-hidden="true"
             data-icon="inline-end"
@@ -548,101 +604,93 @@ function RangePanel({
               variant="ghost"
               size="default"
               className="underline underline-offset-4"
-              onClick={() => closeMonths(clampMonth(today))}
+              onClick={() => closeNavigation(today)}
             >
               {t("today")}
             </Button>
           )}
-          {!monthView &&
-            ([-1, 1] as const).map((direction) => {
-              const next = addMonths(month, direction);
+          {([-1, 1] as const).map((direction) => {
+            const step = navigationStep(direction);
+            return (
+              <Button
+                key={direction}
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label={step.label}
+                disabled={step.disabled}
+                onClick={step.navigate}
+              >
+                {direction === -1 ? (
+                  <ChevronLeft aria-hidden="true" />
+                ) : (
+                  <ChevronRight aria-hidden="true" />
+                )}
+              </Button>
+            );
+          })}
+        </div>
+      </div>
+      <div id={`${id}-calendar`} onMouseLeave={() => setHovered(undefined)}>
+        {view === "years" ? (
+          <div ref={gridRef} className="grid grid-cols-4 gap-2 px-3 pb-2">
+            {Array.from({ length: YEARS_PER_PAGE }, (_, index) => {
+              const option = firstYear + index;
+              const shown = option === month.getFullYear();
               return (
                 <Button
-                  key={direction}
+                  key={option}
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t(
-                    direction === -1 ? "previous_month" : "next_month",
-                  )}
+                  variant={shown ? "primary" : "ghost"}
+                  aria-pressed={shown}
                   disabled={
-                    next < firstMonth || !!(lastMonth && next > lastMonth)
+                    option < firstMonth.getFullYear() ||
+                    !!(lastMonth && option > lastMonth.getFullYear())
                   }
                   onClick={() => {
-                    setMonth(next);
-                    setHovered(undefined);
+                    setYear(option);
+                    setView("months");
                   }}
                 >
-                  {direction === -1 ? (
-                    <ChevronLeft aria-hidden="true" />
-                  ) : (
-                    <ChevronRight aria-hidden="true" />
+                  {yearLabel(option)}
+                </Button>
+              );
+            })}
+          </div>
+        ) : view === "months" ? (
+          <div ref={gridRef} className="grid grid-cols-3 gap-2 px-3 pb-2">
+            {Array.from({ length: 12 }, (_, index) => {
+              const date = new Date(year, index, 1);
+              const shown = isSameMonth(date, month);
+              const current = isSameMonth(date, today);
+              const containsEdge = [range.from, range.to].some(
+                (edge) => edge && isSameMonth(edge, date),
+              );
+              return (
+                <Button
+                  key={index}
+                  type="button"
+                  variant={shown ? "primary" : current ? "outline" : "ghost"}
+                  size="default"
+                  className="relative min-w-0"
+                  aria-pressed={shown}
+                  disabled={
+                    date < firstMonth || !!(lastMonth && date > lastMonth)
+                  }
+                  onClick={() => closeNavigation(date)}
+                >
+                  {new Intl.DateTimeFormat(i18n.language, {
+                    month: "short",
+                  }).format(date)}
+                  {containsEdge && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute bottom-1 size-1 rounded-full bg-current"
+                    />
                   )}
                 </Button>
               );
             })}
-        </div>
-      </div>
-      <div id={`${id}-calendar`} onMouseLeave={() => setHovered(undefined)}>
-        {monthView ? (
-          <div className="flex h-[17.5rem] flex-col gap-2 px-3 pb-2">
-            <div className="flex items-center justify-between">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label={t("previous_year")}
-                disabled={year <= firstMonth.getFullYear()}
-                onClick={() => setYear(year - 1)}
-              >
-                <ChevronLeft aria-hidden="true" />
-              </Button>
-              <span className="text-sm font-medium tabular-nums">{year}</span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label={t("next_year")}
-                disabled={!!lastMonth && year >= lastMonth.getFullYear()}
-                onClick={() => setYear(year + 1)}
-              >
-                <ChevronRight aria-hidden="true" />
-              </Button>
-            </div>
-            <div className="grid flex-1 grid-cols-3 grid-rows-4 gap-2">
-              {Array.from({ length: 12 }, (_, index) => {
-                const date = new Date(year, index, 1);
-                const shown = isSameMonth(date, month);
-                const current = isSameMonth(date, today);
-                const containsEdge = [range.from, range.to].some(
-                  (edge) => edge && isSameMonth(edge, date),
-                );
-                return (
-                  <Button
-                    key={index}
-                    type="button"
-                    variant={shown ? "primary" : current ? "outline" : "ghost"}
-                    size="default"
-                    className="relative min-w-0"
-                    aria-pressed={shown}
-                    disabled={
-                      date < firstMonth || !!(lastMonth && date > lastMonth)
-                    }
-                    onClick={() => closeMonths(date)}
-                  >
-                    {new Intl.DateTimeFormat(i18n.language, {
-                      month: "short",
-                    }).format(date)}
-                    {containsEdge && (
-                      <span
-                        aria-hidden="true"
-                        className="absolute bottom-1 size-1 rounded-full bg-current"
-                      />
-                    )}
-                  </Button>
-                );
-              })}
-            </div>
           </div>
         ) : (
           <Calendar

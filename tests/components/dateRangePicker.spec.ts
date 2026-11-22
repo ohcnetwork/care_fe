@@ -138,7 +138,7 @@ test("mask respects short hand-written dates and supports all accepted formats",
   await expect(from(page)).toHaveAttribute("aria-invalid", "true");
 });
 
-test("future days/months and bound navigation are disabled; month grid is single-level", async ({
+test("bounds disable unavailable years, year pages, months and days", async ({
   page,
 }) => {
   await open(page, "min&max");
@@ -147,6 +147,17 @@ test("future days/months and bound navigation are disabled; month grid is single
     page.getByRole("button", { name: "Next month", exact: true }),
   ).toBeDisabled();
   await page.getByRole("button", { name: "Nov 2026", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "2025", exact: true }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "2027", exact: true }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: /^Previous:/i }),
+  ).toBeDisabled();
+  await expect(page.getByRole("button", { name: /^Next:/i })).toBeDisabled();
+  await page.getByRole("button", { name: "2026", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Dec", exact: true }),
   ).toBeDisabled();
@@ -163,6 +174,37 @@ test("future days/months and bound navigation are disabled; month grid is single
   await expect(
     page.getByRole("button", { name: "Today", exact: true }),
   ).toBeVisible();
+});
+
+test("year pages and month selection navigate without editing the draft", async ({
+  page,
+}) => {
+  await open(page, "menu&value");
+  const button = (name: string | RegExp) =>
+    page.getByRole("button", { name, exact: true });
+  await button("Nov 2026").press("Enter");
+  await expect(button("2026")).toBeFocused();
+  await button(/^Next:/i).click();
+  await expect(button("2044")).toBeVisible();
+  await button(/^Previous:/i).click();
+  await button("2032").press("Enter");
+  await expect(button("Jan")).toBeFocused();
+  await button("Dec").press("Enter");
+  await expect(button("Dec 2032")).toBeFocused();
+  await button("Next month").click();
+  await expect(day(page, "2033-01-15")).toBeVisible();
+  await button("Previous month").click();
+  await expect(day(page, "2032-12-15")).toBeVisible();
+  await expect(from(page)).toHaveValue("09/11/2026");
+  await expect(to(page)).toHaveValue("19/11/2026");
+  await expect(page.getByTestId("applied")).toContainText('"count":0');
+  await day(page, "2032-12-15").click();
+  await day(page, "2032-12-20").click();
+  await apply(page).click();
+  await expect(page.getByTestId("applied")).toContainText(
+    '"from":"2032-12-15"',
+  );
+  await expect(page.getByTestId("applied")).toContainText('"to":"2032-12-20"');
 });
 
 test("popover: Escape discards drafts, dismissing keeps applicable drafts", async ({
@@ -264,9 +306,11 @@ test("320px layout and 200% zoom have no inner scrolling or native date inputs",
   await page.setViewportSize({ width: 320, height: 900 });
   await open(page, "menu");
   await expect(apply(page)).toBeInViewport();
-  for (const monthView of [false, true]) {
-    if (monthView)
+  for (const view of ["days", "years", "months"]) {
+    if (view === "years")
       await page.getByRole("button", { name: "Nov 2026", exact: true }).click();
+    if (view === "months")
+      await page.getByRole("button", { name: "2026", exact: true }).click();
     const layout = await page
       .locator('[data-slot="date-range-picker"]')
       .evaluate((root) => ({
@@ -284,7 +328,7 @@ test("320px layout and 200% zoom have no inner scrolling or native date inputs",
     expect(layout.scrollers).toBe(0);
     expect(layout.nativeDates).toBe(0);
     await page.screenshot({
-      path: test.info().outputPath(`320-${monthView ? "months" : "days"}.png`),
+      path: test.info().outputPath(`320-${view}.png`),
       animations: "disabled",
     });
   }
@@ -581,6 +625,7 @@ test("range text stays readable in both themes and month buttons mark today and 
     .getByRole("button", { name: "Previous month", exact: true })
     .click();
   await page.getByRole("button", { name: "Oct 2026", exact: true }).click();
+  await page.getByRole("button", { name: "2026", exact: true }).click();
   const november = page.getByRole("button", { name: "Nov", exact: true });
   await expect(november).toHaveAttribute("data-variant", "outline");
   await expect(november.locator('span[aria-hidden="true"]')).toHaveCount(1);
@@ -712,6 +757,15 @@ test("shared CARE input and button sizes are retained at mobile and desktop widt
     await expect(next).toHaveCSS("width", `${height}px`);
     await expect(next).toHaveCSS("height", `${height}px`);
     await caption.click();
+    const calendar = page.locator('[id$="-calendar"]');
+    // Three year rows and four month rows, with only the standard gaps and padding.
+    expect((await calendar.boundingBox())!.height).toBeLessThanOrEqual(
+      3 * (height + 8),
+    );
+    await page.getByRole("button", { name: "2026", exact: true }).click();
+    expect((await calendar.boundingBox())!.height).toBeLessThanOrEqual(
+      4 * (height + 8),
+    );
     const nextYear = page.getByRole("button", {
       name: "Next year",
       exact: true,
