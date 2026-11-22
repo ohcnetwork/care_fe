@@ -159,8 +159,12 @@ test.beforeEach(async ({ page, request }, testInfo) => {
     }),
   );
   await page.goto("/__fill_action_harness");
-  // The vite-modules project's expect timeout covers the cold dev server.
-  await expect(page.locator('[data-question-id="time"] input')).toBeVisible();
+  // The first load on a cold dev server pre-bundles dependencies and compiles
+  // the questionnaire module graph on demand, which takes longer than the
+  // default expect timeout on CI runners. Later loads are fast.
+  await expect(page.locator('[data-question-id="time"] input')).toBeVisible({
+    timeout: 45_000,
+  });
   await expect
     .poll(() =>
       page.evaluate(() => !!(window as HarnessWindow).fillActionHarness),
