@@ -22,13 +22,37 @@ const VITE_MODULE_SPECS = [
  * the dev server pre-bundles dependencies as soon as it starts, so only start
  * it when the run can include the vite-modules project.
  */
-const selectedProjects = process.argv.flatMap((arg, index, args) => {
-  if (arg.startsWith("--project=")) return [arg.slice("--project=".length)];
-  if (arg === "--project") return [args[index + 1]];
-  return [];
-});
+function readSelectedProjects(argv: string[]): string[] {
+  const names: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg.startsWith("--project=")) {
+      names.push(arg.slice("--project=".length));
+    } else if (arg === "--project") {
+      // Playwright declares --project as variadic: take values up to the next flag.
+      while (i + 1 < argv.length && !argv[i + 1].startsWith("-")) {
+        names.push(argv[++i]);
+      }
+    }
+  }
+  return names;
+}
+
+// Same matching as Playwright's filterProjects: case-insensitive, `*` wildcards.
+function projectNameMatches(pattern: string, name: string): boolean {
+  const escaped = pattern
+    .toLowerCase()
+    .split("*")
+    .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  return new RegExp(`^${escaped.join(".*")}$`).test(name.toLowerCase());
+}
+
+const selectedProjects = readSelectedProjects(process.argv);
 const runsViteModules =
-  selectedProjects.length === 0 || selectedProjects.includes("vite-modules");
+  selectedProjects.length === 0 ||
+  selectedProjects.some((pattern) =>
+    projectNameMatches(pattern, "vite-modules"),
+  );
 
 /**
  * See https://playwright.dev/docs/test-configuration.
