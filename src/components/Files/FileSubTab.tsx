@@ -273,17 +273,6 @@ export const FilesPage = ({
     );
   };
 
-  const FileUploadButtons = () => {
-    if (!canEdit) return <></>;
-    return (
-      <FileUploadDropdown
-        fileUpload={fileUpload}
-        buttonVariant="outline_primary"
-        buttonClassName="flex flex-row items-center mr-2"
-      />
-    );
-  };
-
   const RenderCard = () => (
     <div className="xl:hidden space-y-4 px-2">
       {files?.results && files?.results?.length > 0
@@ -565,7 +554,13 @@ export const FilesPage = ({
         </div>
 
         <div className="ml-auto">
-          <FileUploadButtons />
+          {canEdit && (
+            <FileUploadDropdown
+              fileUpload={fileUpload}
+              buttonVariant="outline_primary"
+              buttonClassName="flex flex-row items-center mr-2"
+            />
+          )}
         </div>
       </div>
       <FilterBadges
