@@ -163,7 +163,10 @@ test.describe("Supplier directory compatibility", () => {
   test("loads more suppliers and retries a failed page", async ({ page }) => {
     const suppliers = Array.from({ length: 25 }, (_, index) => ({
       id: faker.string.uuid(),
-      name: `Supplier ${String(index).padStart(2, "0")}`,
+      name:
+        index === 24
+          ? "A later supplier"
+          : `Supplier ${String(index).padStart(2, "0")}`,
       org_type: "product_supplier",
     }));
     let failNextPage = true;
@@ -202,10 +205,12 @@ test.describe("Supplier directory compatibility", () => {
     await expect(error).toBeVisible();
     failNextPage = false;
     await error.getByRole("button", { name: /retry/i }).click();
-    await page
-      .getByText("Supplier 24", { exact: true })
-      .scrollIntoViewIfNeeded();
-    await expect(page.getByText("Supplier 24", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("A later supplier", { exact: true }),
+    ).toBeVisible();
+    await expect(page.locator('[data-slot="supplier-row"] h2')).toHaveText(
+      suppliers.map((supplier) => supplier.name),
+    );
   });
 });
 

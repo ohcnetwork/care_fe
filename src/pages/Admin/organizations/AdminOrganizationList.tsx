@@ -511,9 +511,7 @@ function SupplierDirectory() {
     refetchOnWindowFocus: false,
   });
 
-  const organizations = (suppliers?.results || [])
-    .slice()
-    .sort((left, right) => left.name.localeCompare(right.name));
+  const organizations = suppliers?.results || [];
 
   return (
     <section
