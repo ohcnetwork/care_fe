@@ -23,7 +23,7 @@ function canRender(schema: JSONSchemaProperty): boolean {
     schema.else ||
     Array.isArray(schema.type) ||
     ["date", "date-time", "time"].includes(schema.format ?? "") ||
-    ["date", "datetime", "computed"].includes(schema["x-ui"]?.control ?? "")
+    ["date", "datetime"].includes(schema["x-ui"]?.control ?? "")
   )
     return false;
   if (schema.enum?.some((value) => value !== null && typeof value === "object"))

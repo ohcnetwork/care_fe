@@ -66,6 +66,7 @@ import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlugValue } from "@/Utils/slug";
+import { goBack } from "@/Utils/utils";
 
 export default function ActivityDefinitionForm({
   facilityId,
@@ -419,19 +420,12 @@ function ActivityDefinitionFormContent({
     }
   }
 
-  const handleCancel = () => {
-    if (categorySlug) {
-      navigate({
-        to: "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug",
-        params: { facilityId, categorySlug },
-      });
-    } else {
-      navigate({
-        to: "/facility/$facilityId/settings/activity_definitions",
-        params: { facilityId },
-      });
-    }
-  };
+  const handleCancel = () =>
+    goBack(
+      categorySlug
+        ? `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`
+        : `/facility/${facilityId}/settings/activity_definitions`,
+    );
 
   return (
     <Page

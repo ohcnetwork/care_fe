@@ -47,7 +47,6 @@ import {
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { HrefLink } from "@/lib/router/HrefLink";
 import { usePathname } from "@/lib/router/location";
-import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import UpsertLimitCallout from "@/pages/Facility/services/inventory/externalSupply/components/UpsertLimitCallout";
 import {
@@ -74,7 +73,7 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { ExtensionContexts } from "@/Utils/schema/types";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import { formatDateTime, formatName, goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
 
 interface Props {
@@ -445,8 +444,8 @@ export function DeliveryOrderShow({
               variant="outline"
               className="shrink-0"
               onClick={() =>
-                navigate({
-                  href: getInventoryBasePath(
+                goBack(
+                  getInventoryBasePath(
                     facilityId,
                     locationId,
                     internal,
@@ -454,7 +453,7 @@ export function DeliveryOrderShow({
                     isRequester,
                     "",
                   ),
-                })
+                )
               }
             >
               <ChevronLeft />
@@ -702,10 +701,6 @@ export function DeliveryOrderShow({
                 const value = getExtensionValue(
                   deliveryOrder.extensions as NamespacedExtensionData,
                   field,
-                  {
-                    delivery_order: deliveryOrder,
-                    supply_deliveries: supplyDeliveries,
-                  },
                 );
                 if (value === undefined || value === null) return null;
 

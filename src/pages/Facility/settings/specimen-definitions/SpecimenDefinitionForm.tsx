@@ -51,6 +51,7 @@ import { zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlugValue } from "@/Utils/slug";
+import { goBack } from "@/Utils/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const typeTestedSchema = z.object({
@@ -158,19 +159,12 @@ function SpecimenDefinitionFormContent({
   specimenSlug,
   initialData,
   onSuccess,
-  onCancel = () => {
-    if (specimenSlug) {
-      navigate({
-        to: "/facility/$facilityId/settings/specimen_definitions/$specimenSlug",
-        params: { facilityId, specimenSlug },
-      });
-    } else {
-      navigate({
-        to: "/facility/$facilityId/settings/specimen_definitions",
-        params: { facilityId },
-      });
-    }
-  },
+  onCancel = () =>
+    goBack(
+      specimenSlug
+        ? `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`
+        : `/facility/${facilityId}/settings/specimen_definitions`,
+    ),
 }: SpecimenDefinitionFormContentProps) {
   const { t } = useTranslation();
   const isEditMode = Boolean(specimenSlug);
@@ -309,6 +303,7 @@ function SpecimenDefinitionFormContent({
           navigate({
             to: "/facility/$facilityId/settings/specimen_definitions",
             params: { facilityId },
+            replace: true,
           });
         }
       },
@@ -330,6 +325,7 @@ function SpecimenDefinitionFormContent({
           navigate({
             to: "/facility/$facilityId/settings/specimen_definitions/$specimenSlug",
             params: { facilityId, specimenSlug: updated.slug },
+            replace: true,
           });
         }
       },

@@ -16,6 +16,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
@@ -209,10 +210,9 @@ export default function PatientSelect({
         <Button
           variant="outline"
           onClick={() =>
-            navigate({
-              to: "/facility/$facilityId/appointments/$staffId/book-appointment",
-              params: { facilityId, staffId },
-            })
+            goBack(
+              `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
+            )
           }
         >
           <ArrowLeft className="size-4" />

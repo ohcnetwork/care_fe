@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import {
   INVOICE_STATUS_COLORS,
@@ -96,7 +97,7 @@ import { add, multiply, round, subtract } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import { formatDateTime, formatName, goBack } from "@/Utils/utils";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -349,13 +350,13 @@ function InvoiceShow({
           <h2 className="text-2xl font-bold">{t("invoice_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("invoice_may_not_exist")}</p>
           <Button asChild className="mt-4">
-            <Link
-              to="/facility/$facilityId/billing/invoices"
-              params={{ facilityId }}
+            <HrefLink
+              href={`/facility/${facilityId}/billing/invoices`}
+              back
               data-shortcut-id="go-back"
             >
               {t("back_to_invoices")}
-            </Link>
+            </HrefLink>
           </Button>
         </div>
       </div>
@@ -1621,7 +1622,7 @@ function InvoiceShow({
               <div className="flex items-center bg-white rounded-r-lg p-2 pl-0">
                 <Button
                   variant="primary"
-                  onClick={() => navigate({ href: sourceUrl })}
+                  onClick={() => goBack(sourceUrl)}
                   className="shadow ml-2"
                 >
                   <CareIcon icon="l-arrow-left" className="mr-2 size-4" />

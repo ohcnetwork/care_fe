@@ -117,6 +117,7 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
           </p>
           <HrefLink
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents`}
+            back
             className="hover:underline flex items-center gap-2"
           >
             <ChevronLeft className="size-4" />
