@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { selectComboboxOption } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -107,34 +108,13 @@ async function fillAdditionalDetails(
       .getByRole("button", { name: /register patient/i })
       .scrollIntoViewIfNeeded();
 
-    // Geo org comboboxes are cascading — the next one only appears after selecting the previous
+    // Geo org levels cascade: selecting an organization with children adds
+    // the next level's combobox in the same render, so once a pick's popup
+    // has closed the count of comboboxes is final for that pick.
     const geoRegion = page.getByRole("region", { name: "Additional Details" });
-    let previousCount = 0;
-
-    while (true) {
-      const comboboxes = geoRegion.getByRole("combobox");
-      const count = await comboboxes.count();
-      if (count === previousCount) break;
-
-      const combobox = comboboxes.nth(count - 1);
-      await combobox.waitFor({ state: "visible" });
-      await combobox.click();
-
-      const option = page.getByRole("option").first();
-      await option.waitFor({ state: "visible" });
-      await option.click();
-
-      previousCount = count;
-      // Wait for either a new combobox to appear (more levels) or timeout (no more levels)
-      try {
-        await geoRegion
-          .getByRole("combobox")
-          .nth(count)
-          .waitFor({ state: "visible", timeout: 3000 });
-      } catch {
-        // No new combobox appeared — we've filled all required levels
-        break;
-      }
+    const comboboxes = geoRegion.getByRole("combobox");
+    for (let filled = 0; filled < (await comboboxes.count()); filled++) {
+      await selectComboboxOption(comboboxes.nth(filled));
     }
   });
 }
