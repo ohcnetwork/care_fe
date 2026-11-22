@@ -384,10 +384,9 @@ function SpecimenDefinitionFormContent({
       : undefined;
     const payload: SpecimenDefinitionCreate = {
       ...data,
-      collection:
-        collection && Object.values(collection).some(Boolean)
-          ? collection
-          : {},
+      collection: collection && Object.values(collection).some(Boolean)
+        ? collection
+        : {},
       patient_preparation:
         data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested
