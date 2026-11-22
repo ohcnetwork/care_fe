@@ -53,6 +53,11 @@ const runsViteModules =
   selectedProjects.some((pattern) =>
     projectNameMatches(pattern, "vite-modules"),
   );
+// The other projects use the preview build. Skip it only when every selected
+// name is exactly vite-modules (a wildcard may also select other projects).
+const runsPreviewProjects =
+  selectedProjects.length === 0 ||
+  selectedProjects.some((name) => name.toLowerCase() !== "vite-modules");
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -186,12 +191,16 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: [
-    {
-      command: "npm run preview",
-      url: "http://localhost:4000",
-      reuseExistingServer: !process.env.CI,
-      timeout: 120000,
-    },
+    ...(runsPreviewProjects
+      ? [
+          {
+            command: "npm run preview",
+            url: "http://localhost:4000",
+            reuseExistingServer: !process.env.CI,
+            timeout: 120000,
+          },
+        ]
+      : []),
     ...(runsViteModules
       ? [
           {
