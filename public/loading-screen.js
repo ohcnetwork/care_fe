@@ -7,6 +7,7 @@
  *
  * Lifecycle:
  *   0. If /runtime-env.js didn't load, shows a retry screen instead and stops.
+ *      src/index.tsx calls __showLoadingError() if its settings are invalid.
  *   1. Runs synchronously; injects SVG + text into <div id="app-loading">.
  *   2. Cycles heart ⇄ logo until React is ready.
  *   3. React's <Loading /> holds the screen via __holdLoadingScreen() while it
@@ -160,17 +161,20 @@
   var container = document.getElementById("app-loading");
   if (!container) return;
 
-  // runtime-env.js always sets this ({} when unused), so undefined means it
-  // didn't load: a network or server error, or an HTML page in its place.
-  // src/index.tsx then doesn't start the app, so offer a retry instead of the
-  // animation. i18n isn't available before the bundle loads.
-  if (window.__CARE_RUNTIME_ENV__ === undefined) {
+  // Replaces the screen with an error and a retry button, for when the app
+  // can't start (see docs/runtime-configuration.md). i18n isn't available.
+  function showError(text) {
+    mounted = false;
+    if (timers) timers.forEach(clearTimeout);
+    delete window.__removeLoadingScreen;
+    delete window.__holdLoadingScreen;
+    container.textContent = "";
+
     var message = document.createElement("p");
     message.setAttribute("role", "alert");
     message.style.cssText =
       "margin:0;padding:0 16px;text-align:center;font-size:14px;line-height:20px;color:#374151";
-    message.textContent =
-      "Couldn't load this site's settings. Check your connection and try again.";
+    message.textContent = text;
     var retry = document.createElement("button");
     retry.type = "button";
     retry.textContent = "Try again";
@@ -181,6 +185,16 @@
     });
     container.appendChild(message);
     container.appendChild(retry);
+  }
+
+  // runtime-env.js always sets this ({} when unused), so undefined means it
+  // didn't load: a network or server error, or an HTML page in its place.
+  // src/index.tsx then doesn't start the app, so offer a retry instead of the
+  // animation.
+  if (window.__CARE_RUNTIME_ENV__ === undefined) {
+    showError(
+      "Couldn't load this site's settings. Check your connection and try again.",
+    );
     return;
   }
 
@@ -379,6 +393,7 @@
     timers.clear();
     delete window.__removeLoadingScreen;
     delete window.__holdLoadingScreen;
+    delete window.__showLoadingError;
 
     container.style.pointerEvents = "none";
     container.style.transition = "opacity 150ms ease";
@@ -420,6 +435,9 @@
     }
     armSafetyTimeout();
   };
+
+  /** Called by src/index.tsx when runtime-env.js has invalid settings. */
+  window.__showLoadingError = showError;
 
   /**
    * Keeps the screen up while React is still only showing its own loader, so

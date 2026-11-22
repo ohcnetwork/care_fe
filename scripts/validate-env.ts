@@ -107,7 +107,8 @@ const apiUrlMapSchema = jsonAsStringSchema
     },
   );
 
-const envSchema = z
+// Also checks runtime-env.js overrides in the browser (src/index.tsx).
+export const envSchema = z
   .object({
     // An empty string is allowed and means "use relative, same-origin API requests".
     REACT_CARE_API_URL: z.url().or(z.literal("")).optional(),

@@ -36,6 +36,33 @@ test.describe("Runtime env overrides", () => {
     await expect(page.getByText(/patient sign-in/i)).toHaveCount(0);
   });
 
+  test("stops with an error when runtime-env.js has invalid values", async ({
+    page,
+  }) => {
+    await page.route("**/runtime-env.js", (route) =>
+      route.fulfill({
+        contentType: "text/javascript",
+        body: 'window.__CARE_RUNTIME_ENV__ = { REACT_CARE_API_URL: "not a url", REACT_CUSTOM_SHORTCUTS: "[" };',
+      }),
+    );
+    const apiRequests: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().includes("/api/")) apiRequests.push(request.url());
+    });
+    const stopped = page.waitForEvent("pageerror", (error) =>
+      error.message.includes("Invalid settings"),
+    );
+
+    await page.goto("/");
+
+    // The app names the invalid settings and stops before any API request.
+    await stopped;
+    await expect(page.getByRole("alert")).toHaveText(
+      /REACT_CARE_API_URL, REACT_CUSTOM_SHORTCUTS/,
+    );
+    expect(apiRequests).toEqual([]);
+  });
+
   test("stops with a retry screen when runtime-env.js doesn't load", async ({
     page,
   }) => {
