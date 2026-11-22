@@ -480,7 +480,12 @@ export async function expectToast(
 export async function expectAndDismissToast(page: Page, text: string | RegExp) {
   const toast = page.locator("li[data-sonner-toast]").filter({ hasText: text });
   await expect(toast).toBeVisible();
-  await toast.getByRole("button", { name: "Close toast", exact: true }).click();
+  // Best effort: the toast can auto-dismiss (4s) before the click lands.
+  // The count check below is the real postcondition.
+  await toast
+    .getByRole("button", { name: "Close toast", exact: true })
+    .click({ timeout: 2000 })
+    .catch(() => {});
   await expect(toast).toHaveCount(0);
 }
 
