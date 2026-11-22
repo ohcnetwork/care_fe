@@ -26,7 +26,6 @@ import {
   getConditionValue,
   getDefaultCondition,
   Metrics,
-  TagOperationValue,
 } from "@/types/base/condition/condition";
 import { ENCOUNTER_CLASS } from "@/types/emr/encounter/encounter";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
@@ -37,6 +36,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus, X } from "lucide-react";
 import { FieldPath, FieldValues, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+
+type ConditionInputValue = Condition["value"] | Partial<AgeOperationInRangeValue>;
 
 function RenderConditionInput<TFieldValues extends FieldValues = FieldValues>({
   condition,
@@ -49,14 +50,7 @@ function RenderConditionInput<TFieldValues extends FieldValues = FieldValues>({
 }: {
   condition: Condition;
   index: number;
-  handleSetValue: (
-    value:
-      | string
-      | ConditionOperationInRangeValue
-      | AgeOperationEqualityValue
-      | TagOperationValue,
-    index: number,
-  ) => void;
+  handleSetValue: (value: ConditionInputValue, index: number) => void;
   handleSetValueType: (value: string, index: number) => void;
   form: UseFormReturn<TFieldValues>;
   fieldName: string;
@@ -220,7 +214,7 @@ function RenderConditionInput<TFieldValues extends FieldValues = FieldValues>({
                                 : Number(e.target.value),
                             max: currentRange.max,
                             value_type: currentRange.value_type || "years",
-                          } as AgeOperationInRangeValue,
+                          },
                           index,
                         );
                       }}
@@ -251,7 +245,7 @@ function RenderConditionInput<TFieldValues extends FieldValues = FieldValues>({
                                 ? undefined
                                 : Number(e.target.value),
                             value_type: currentRange.value_type || "years",
-                          } as AgeOperationInRangeValue,
+                          },
                           index,
                         );
                       }}
@@ -510,14 +504,7 @@ export function ConditionEditor<
     );
   };
 
-  const handleSetValue = (
-    value:
-      | string
-      | ConditionOperationInRangeValue
-      | AgeOperationEqualityValue
-      | TagOperationValue,
-    index: number,
-  ) => {
+  const handleSetValue = (value: ConditionInputValue, index: number) => {
     let updatedCondition = conditions[index];
     updatedCondition = { ...updatedCondition, value: value } as Condition;
     setConditions(
