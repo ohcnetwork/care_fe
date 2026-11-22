@@ -58,7 +58,6 @@ import { dateQueryString, formatName } from "@/Utils/utils";
 import { Avatar } from "@/components/Common/Avatar";
 import { Code } from "@/types/base/code/code";
 import {
-  Onset,
   SYMPTOM_CLINICAL_STATUS,
   SYMPTOM_CLINICAL_STATUS_COLORS,
   SYMPTOM_SEVERITY,

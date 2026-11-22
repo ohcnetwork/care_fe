@@ -68,7 +68,6 @@ import {
   DiagnosisClinicalStatus,
   DiagnosisRequest,
   DiagnosisSeverity,
-  Onset,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import {

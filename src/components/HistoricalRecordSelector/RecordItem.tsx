@@ -30,6 +30,7 @@ export type DisplayField<T> =
 type RenderFn = (value: unknown) => React.ReactNode;
 
 function getFieldValue<T>(record: T, field: DisplayField<T>): unknown {
+  if (field.key === "") return record;
   return (record as Record<string, unknown>)[field.key];
 }
 
@@ -86,9 +87,7 @@ export function RecordItem<T>({
           const value = getFieldValue(record, field);
           const render = field.render as RenderFn | undefined;
           const displayValue = render
-            ? field.key == ""
-              ? render(record)
-              : render(value)
+            ? render(value)
             : String(value ?? "") || "-";
           const isHighlightedUser =
             field.key === "created_by" &&
