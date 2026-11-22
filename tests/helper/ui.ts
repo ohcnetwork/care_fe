@@ -44,6 +44,39 @@ export async function selectFromLocationMultiSelect(
   }
 }
 
+/**
+ * Opens a combobox and clicks an option inside the popup that it opened.
+ *
+ * `page.getByRole("option").first()` is unsafe right after another select
+ * closes: Radix keeps the closed listbox mounted while its exit animation
+ * runs, so the query can resolve to a stale option from the previous picker,
+ * which then unmounts and the click times out. Radix triggers point at their
+ * popup with `aria-controls`, so scope the option query to that popup, and
+ * wait for that popup to close before returning.
+ *
+ * @example
+ * await selectComboboxOption(page.getByRole("combobox", { name: "Facility" }));
+ * await selectComboboxOption(statusCombobox, { name: "Active", exact: true });
+ */
+export async function selectComboboxOption(
+  trigger: Locator,
+  { name, exact }: { name?: string | RegExp; exact?: boolean } = {},
+): Promise<void> {
+  await trigger.click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  const popupId = await trigger.getAttribute("aria-controls");
+  expect(popupId, "combobox trigger has no aria-controls").toBeTruthy();
+  const popup = trigger.page().locator(`[id="${popupId}"]`);
+  const options =
+    name === undefined
+      ? popup.getByRole("option")
+      : popup.getByRole("option", { name, exact });
+  await options.first().click();
+  // Wait on the popup, not the trigger: a trigger located by its placeholder
+  // text stops matching once it shows the selection.
+  await expect(popup).toBeHidden();
+}
+
 export async function closeAnyOpenPopovers(page: Page) {
   const poppers = page.locator("[data-radix-popper-content-wrapper]");
   for (let i = 0; i < 3; i += 1) {
