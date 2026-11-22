@@ -236,7 +236,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 - Regular dependency updates via Renovate
 - Snyk security scanning and vulnerability auditing
-- Security scanning with CodeQL and OSSAR
+- Security scanning with CodeQL
 - Audit vulnerabilities with `npm audit`
 
 ## Resources
