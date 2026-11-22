@@ -199,8 +199,9 @@ jobs:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
     needs: [changes, build, backend]
     timeout-minutes: 30
-    # Use both pools so a single run doesn't queue behind the larger-runner limit.
-    runs-on: ${{ matrix.shard <= 10 && 'ubuntu-latest-m' || 'ubuntu-latest' }}
+    # Give the slower shards the ten larger-runner slots; start the rest in
+    # the standard pool instead of waiting for a second wave of larger runners.
+    runs-on: ${{ contains(fromJSON('[8,11,15,17,18,19,20,25,27,32]'), matrix.shard) && 'ubuntu-latest-m' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
@@ -319,7 +320,7 @@ jobs:
         id: test
         run: npx playwright test --project=chromium --workers="$TEST_WORKERS" --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
         env:
-          TEST_WORKERS: ${{ matrix.shard <= 10 && 6 || 4 }}
+          TEST_WORKERS: ${{ startsWith(runner.name, 'ubuntu-latest-m-') && 6 || 4 }}
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
