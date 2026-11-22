@@ -18,6 +18,19 @@ const VITE_MODULE_SPECS = [
 ];
 
 /**
+ * Projects named with --project. Playwright starts every webServer entry, and
+ * the dev server pre-bundles dependencies as soon as it starts, so only start
+ * it when the run can include the vite-modules project.
+ */
+const selectedProjects = process.argv.flatMap((arg, index, args) => {
+  if (arg.startsWith("--project=")) return [arg.slice("--project=".length)];
+  if (arg === "--project") return [args[index + 1]];
+  return [];
+});
+const runsViteModules =
+  selectedProjects.length === 0 || selectedProjects.includes("vite-modules");
+
+/**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
@@ -155,14 +168,18 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 120000,
     },
-    {
-      command: `npm run dev -- --port ${VITE_DEV_PORT} --strictPort`,
-      url: VITE_DEV_URL,
-      // CI runs Playwright with NODE_ENV=production, which would put the dev
-      // server in production mode and flip import.meta.env.DEV for the specs.
-      env: { NODE_ENV: "development" },
-      reuseExistingServer: !process.env.CI,
-      timeout: 120000,
-    },
+    ...(runsViteModules
+      ? [
+          {
+            command: `npm run dev -- --port ${VITE_DEV_PORT} --strictPort`,
+            url: VITE_DEV_URL,
+            // CI runs Playwright with NODE_ENV=production, which would put the dev
+            // server in production mode and flip import.meta.env.DEV for the specs.
+            env: { NODE_ENV: "development" },
+            reuseExistingServer: !process.env.CI,
+            timeout: 120000,
+          },
+        ]
+      : []),
   ],
 });
