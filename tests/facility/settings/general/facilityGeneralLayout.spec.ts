@@ -170,7 +170,7 @@ test.describe("Facility general settings layout", () => {
 
     await header.getByRole("button", { name: "Configurations" }).click();
     await expect(
-      page.getByRole("button", { name: "Print Templates" }),
+      page.getByRole("menuitem", { name: "Print Templates" }),
     ).toBeVisible();
     await page.getByRole("menuitem", { name: "Edit Facility Details" }).click();
     const editSheet = page.getByRole("dialog", {
