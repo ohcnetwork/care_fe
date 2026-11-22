@@ -40,7 +40,6 @@ import { slugValueSchema } from "@/types/base/slug/schema";
 import {
   ContainerSpec,
   Preference,
-  QuantitySpec,
   RETENTION_TIME_UNITS,
   SPECIMEN_DEFINITION_UNITS_CODES,
   SpecimenDefinitionCreate,
@@ -227,17 +226,14 @@ function SpecimenDefinitionFormContent({
       .object({
         code: CodeSchema.nullish(),
         quantity: z
-          .transform((quantity: QuantitySpec, ctx) => {
-            const value = wholeSpecimenQuantity(quantity.value);
-            if (!value || !CodeSchema.safeParse(quantity.unit).success) {
-              ctx.issues.push({
-                code: "custom",
-                message: t("invalid_quantity"),
-                input: quantity,
-              });
-              return z.NEVER;
-            }
-            return { value, unit: quantity.unit };
+          .object({
+            value: z
+              .string()
+              .refine(
+                (value) => wholeSpecimenQuantity(value) !== undefined,
+                t("invalid_quantity"),
+              ),
+            unit: CodeSchema,
           })
           .nullish(),
         method: CodeSchema.nullish(),
@@ -373,11 +369,24 @@ function SpecimenDefinitionFormContent({
     });
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    const collection = data.collection
+      ? {
+          ...data.collection,
+          quantity: data.collection.quantity?.value
+            ? {
+                ...data.collection.quantity,
+                value:
+                  wholeSpecimenQuantity(data.collection.quantity.value) ??
+                  data.collection.quantity.value,
+              }
+            : data.collection.quantity,
+        }
+      : undefined;
     const payload: SpecimenDefinitionCreate = {
       ...data,
       collection:
-        data.collection && Object.values(data.collection).some(Boolean)
-          ? data.collection
+        collection && Object.values(collection).some(Boolean)
+          ? collection
           : {},
       patient_preparation:
         data.patient_preparation?.filter((item) => item && item.code) || [],
