@@ -1,6 +1,6 @@
 # Prebuilt bundles
 
-A build of CARE needs about 3 GB of memory. To deploy on a static host (S3 + CloudFront, Cloudflare Pages, Netlify, any web server) without building, download the `build/` folder that CI publishes as `care_fe-build.tar.gz`. The [Publish build bundle](../.github/workflows/publish-build.yml) workflow publishes it:
+To deploy CARE on a static host (S3 + CloudFront, Cloudflare Pages, Netlify, any web server) without building it, download the `build/` folder that CI publishes as `care_fe-build.tar.gz`. The [Publish build bundle](../.github/workflows/publish-build.yml) workflow publishes it:
 
 | Build of                         | Published as                                                                                             |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
