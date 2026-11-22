@@ -111,9 +111,14 @@ export default function EditFacilityUserRoleSheet({
     });
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) setSelectedRole(userRole.role);
+    setOpen(nextOpen);
+  };
+
   return (
     <>
-      <Sheet open={open} onOpenChange={setOpen}>
+      <Sheet open={open} onOpenChange={handleOpenChange}>
         <SheetTrigger asChild>
           {trigger || <Button variant="outline">{t("edit_role")}</Button>}
         </SheetTrigger>

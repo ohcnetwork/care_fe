@@ -78,11 +78,23 @@ test.describe("Department User Management", () => {
     await page.getByRole("button", { name: "Edit" }).first().click();
   }
 
-  async function updateRole(page: Page, newRole: string) {
-    await page.getByRole("combobox").filter({ hasText: "Select Role" }).click();
-    await page.getByPlaceholder("Search Roles").fill(newRole);
-    await page.getByRole("option", { name: newRole }).first().click();
-    await page.getByRole("button", { name: "Update Role" }).click();
+  async function updateRole(page: Page, initialRole: string, newRole: string) {
+    const sheet = page.getByRole("dialog", { name: "Edit User Role" });
+    const save = sheet.getByRole("button", { name: "Update Role" });
+    const pickNewRole = async () => {
+      const picker = sheet.getByRole("combobox");
+      await expect(picker).toHaveText(initialRole);
+      await picker.click();
+      await page.getByPlaceholder("Search Roles").fill(newRole);
+      await page.getByRole("option", { name: newRole }).first().click();
+    };
+    await expect(save).toBeDisabled();
+    await pickNewRole();
+    await sheet.getByRole("button", { name: "Close" }).click();
+    await openEditRoleDialog(page);
+    await expect(save).toBeDisabled();
+    await pickNewRole();
+    await save.click();
   }
 
   async function verifyRoleUpdateSuccess(page: Page) {
@@ -184,7 +196,7 @@ test.describe("Department User Management", () => {
 
     // Update user role
     await openEditRoleDialog(page);
-    await updateRole(page, updatedRole);
+    await updateRole(page, initialRole, updatedRole);
     await verifyRoleUpdateSuccess(page);
 
     // Verify role was updated

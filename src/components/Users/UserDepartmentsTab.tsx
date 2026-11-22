@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import SearchInput from "@/components/Common/SearchInput";
 import { userChildProps } from "@/components/Common/UserColumns";
 import LinkUserToDepartmentSheet from "@/components/Users/LinkUserToDepartmentSheet";
 
@@ -120,10 +121,8 @@ function DepartmentRow({
 export default function UserDepartmentsTab({ userData }: userChildProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
-  const { qParams, Pagination, resultsPerPage, updatePage } = useFilters({
-    schema: userDepartmentListSearch,
-    limit: 15,
-  });
+  const { qParams, Pagination, resultsPerPage, updatePage, updateQuery } =
+    useFilters({ schema: userDepartmentListSearch, limit: 15 });
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: [
       "facilityOrganizations",
@@ -131,12 +130,14 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
       facilityId,
       userData.id,
       qParams.page,
+      qParams.name,
       resultsPerPage,
     ],
-    queryFn: query(facilityOrganizationApi.list, {
+    queryFn: query.debounced(facilityOrganizationApi.list, {
       pathParams: { facilityId: facilityId! },
       queryParams: {
         containing_user: userData.id,
+        name: qParams.name || undefined,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
@@ -161,6 +162,21 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
           facilityId={facilityId}
         />
       </div>
+      <SearchInput
+        options={[
+          {
+            key: "name",
+            type: "text",
+            display: "name",
+            placeholder: t("search_departments_placeholder"),
+            value: qParams.name ?? "",
+          },
+        ]}
+        onSearch={(_, name) => updateQuery({ name: name || undefined })}
+        aria-label={t("search_departments_placeholder")}
+        className="w-full max-w-sm"
+        showSearchIcon
+      />
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }, (_, index) => (
@@ -182,11 +198,15 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
         <div className="flex flex-col items-center justify-center py-12 border border-dashed border-gray-300 rounded-lg">
           <CareIcon icon="l-building" className="h-12 w-12 text-gray-400" />
           <p className="mt-4 font-medium text-gray-600">
-            {t("no_departments_assigned")}
+            {qParams.name
+              ? t("no_departments_found")
+              : t("no_departments_assigned")}
           </p>
-          <p className="mt-2 text-sm text-gray-500">
-            {t("click_link_department_to_get_started")}
-          </p>
+          {!qParams.name && (
+            <p className="mt-2 text-sm text-gray-500">
+              {t("click_link_department_to_get_started")}
+            </p>
+          )}
         </div>
       ) : (
         <>

@@ -30,4 +30,5 @@ export const facilityUserListSearch = z.object({
 /** The departments tab of a user: `UserDepartmentsTab`. */
 export const userDepartmentListSearch = z.object({
   ...paginationSearch,
+  name: searchString(),
 });
