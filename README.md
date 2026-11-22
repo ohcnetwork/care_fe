@@ -287,6 +287,10 @@ npm run build
 
 Builds the app for production to the `build` folder. It correctly bundles React in production mode and optimizes the build for the best performance.
 
+#### Download a prebuilt build
+
+CI publishes the `build` folder of `develop`, `staging` and each release, so you can deploy CARE to a static host without building it. See [Prebuilt bundles](docs/prebuilt-bundles.md).
+
 #### Start a production `http-server`
 
 ```sh
