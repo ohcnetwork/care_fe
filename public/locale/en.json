@@ -5967,5 +5967,7 @@
   "you_cannot_change_once_submitted": "You cannot change once submitted.",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞"
+  "℞": "℞",
+  "collapse_organization": "Collapse {{name}}",
+  "expand_organization": "Expand {{name}}"
 }

@@ -9,8 +9,8 @@ import {
 import { Fragment, useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
 import { navigate } from "@/lib/router/navigate";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,11 +85,7 @@ export default function ResponsibilitiesIndex({ organizationId }: Props) {
   // On mobile, a selected responsibility takes over the screen (master-detail).
   if (isMobile && organizationId) {
     return (
-      <Page
-        title={t("responsibilities")}
-        hideTitleOnPage
-        className="p-0 pt-2"
-      >
+      <Page title={t("responsibilities")} hideTitleOnPage className="p-0 pt-2">
         <div className="container mx-auto pb-6">
           <DetailPanel
             organizationId={organizationId}
@@ -105,10 +101,7 @@ export default function ResponsibilitiesIndex({ organizationId }: Props) {
     <Page
       title={t("responsibilities")}
       hideTitleOnPage
-      className={cn(
-        "p-0 pt-2",
-        !isMobile && "flex min-h-0 flex-1 flex-col",
-      )}
+      className={cn("p-0 pt-2", !isMobile && "flex min-h-0 flex-1 flex-col")}
     >
       <div
         className={cn(
@@ -199,7 +192,12 @@ function DetailPanel({
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
 
-  const { data: org, isError, isFetching, refetch } = useQuery({
+  const {
+    data: org,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: ["organization", OrgType.ROLE, organizationId],
     queryFn: query(organizationApi.get, {
       pathParams: { id: organizationId! },
@@ -340,10 +338,7 @@ function ResponsibilityList({
   const searchInputId = useId();
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(
-      () => setDebouncedSearch(search),
-      500,
-    );
+    const timeoutId = window.setTimeout(() => setDebouncedSearch(search), 500);
     return () => window.clearTimeout(timeoutId);
   }, [search]);
 

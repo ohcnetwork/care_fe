@@ -266,9 +266,9 @@ export default function AdminOrganizationFormSheet({
                     ? isEditMode
                       ? t("update_role_organization")
                       : t("create_role_organization")
-                      : isEditMode
-                        ? t("update_organization")
-                        : t("create_organization")}
+                    : isEditMode
+                      ? t("update_organization")
+                      : t("create_organization")}
               </Button>
             </SheetFooter>
           </form>

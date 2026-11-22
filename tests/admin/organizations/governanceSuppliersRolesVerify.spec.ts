@@ -110,6 +110,105 @@ async function openGovtOrgDetailByName(
   return detailUrl;
 }
 
+test.describe("Supplier directory compatibility", () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("care_access_token", "supplier-directory-test");
+    });
+    await page.route(
+      (url) => url.pathname.startsWith("/api/"),
+      async (route) => {
+        const { pathname } = new URL(route.request().url());
+        if (pathname === "/api/v1/users/getcurrentuser/") {
+          await route.fulfill({
+            json: {
+              id: "00000000-0000-4000-8000-000000000001",
+              username: "test",
+              first_name: "Test",
+              last_name: "User",
+              user_type: "administrator",
+              is_superuser: true,
+              permissions: [],
+              facilities: [],
+              organizations: [],
+              preferences: {},
+              flags: [],
+            },
+          });
+        } else if (pathname === "/api/v1/plug_config/") {
+          await route.fulfill({ json: { configs: [] } });
+        } else if (route.request().method() === "GET") {
+          await route.fulfill({ json: { count: 0, results: [] } });
+        } else {
+          await route.abort();
+        }
+      },
+    );
+  });
+
+  test("redirects legacy supplier detail URLs to the directory", async ({
+    page,
+  }) => {
+    await page.goto(
+      `/admin/organizations/product_supplier/${faker.string.uuid()}`,
+    );
+    await expect(page).toHaveURL(/\/admin\/organizations\/product_supplier\/?$/);
+    await expect(
+      page.getByRole("heading", { name: /^suppliers$/i }),
+    ).toBeVisible();
+  });
+
+  test("loads more suppliers and retries a failed page", async ({ page }) => {
+    const suppliers = Array.from({ length: 25 }, (_, index) => ({
+      id: faker.string.uuid(),
+      name: `Supplier ${String(index).padStart(2, "0")}`,
+      org_type: "product_supplier",
+    }));
+    let failNextPage = true;
+
+    await page.route("**/api/v1/organization/**", async (route) => {
+      const url = new URL(route.request().url());
+      if (
+        url.pathname !== "/api/v1/organization/" ||
+        url.searchParams.get("org_type") !== "product_supplier"
+      ) {
+        await route.fallback();
+        return;
+      }
+
+      const offset = Number(url.searchParams.get("offset") || 0);
+      const limit = Number(url.searchParams.get("limit") || 20);
+      if (offset > 0 && failNextPage) {
+        await route.fulfill({ status: 503, json: { detail: "Unavailable" } });
+        return;
+      }
+      await route.fulfill({
+        json: {
+          count: suppliers.length,
+          results: suppliers.slice(offset, offset + limit),
+        },
+      });
+    });
+
+    await page.goto("/admin/organizations/product_supplier");
+    await page
+      .getByText("Supplier 19", { exact: true })
+      .scrollIntoViewIfNeeded();
+    const error = page.getByRole("alert").filter({
+      has: page.getByRole("button", { name: /retry/i }),
+    });
+    await expect(error).toBeVisible();
+    failNextPage = false;
+    await error.getByRole("button", { name: /retry/i }).click();
+    await page
+      .getByText("Supplier 24", { exact: true })
+      .scrollIntoViewIfNeeded();
+    await expect(page.getByText("Supplier 24", { exact: true })).toBeVisible();
+  });
+});
+
 test.describe("Admin organization lists", () => {
   let rootOrgName: string;
 

@@ -6,8 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { OrgSelect } from "@/components/Common/OrgSelect";
-import { cn } from "@/lib/utils";
 import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { cn } from "@/lib/utils";
 
 import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
@@ -59,13 +59,19 @@ function OrganizationTreeNode({
 
   return (
     <div className="space-y-1">
-      <div className="flex items-center gap-1" style={{ paddingLeft: `${level * 0.75}rem` }}>
+      <div
+        className="flex items-center gap-1"
+        style={{ paddingLeft: `${level * 0.75}rem` }}
+      >
         {organization.has_children ? (
           <Button
             variant="ghost"
             size="icon"
             className="size-7 shrink-0"
-            aria-label={`${t(isExpanded ? "collapse" : "expand")} ${organization.name}`}
+            aria-label={t(
+              isExpanded ? "collapse_organization" : "expand_organization",
+              { name: organization.name },
+            )}
             aria-expanded={isExpanded}
             onClick={(e) => {
               e.stopPropagation();
@@ -157,6 +163,7 @@ interface AdminOrganizationNavbarProps {
   selectedOrganizationId: string | null;
   expandedOrganizations: Set<string>;
   onToggleExpand: (organizationId: string) => void;
+  /** The search selector can clear the current selection when shown. */
   onOrganizationSelect: (organization?: Organization) => void;
   showSearch?: boolean;
 }

@@ -20,7 +20,6 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { OrgSelect } from "@/components/Common/OrgSelect";
@@ -32,7 +31,6 @@ import { useInfiniteList } from "@/hooks/useInfiniteList";
 import query from "@/Utils/request/query";
 import AdminOrganizationNavbar from "@/pages/Admin/organizations/components/AdminOrganizationNavbar";
 import { OrganizationReferralLinks } from "@/pages/Organization/components/OrganizationReferralLinks";
-import RoleOrganizationConnections from "@/pages/Organization/components/RoleOrganizationConnections";
 import {
   Organization,
   OrganizationParent,
@@ -48,19 +46,11 @@ interface Props {
   organizationType: string;
 }
 
-/** Org types that are flat (no hierarchy) and use sidebar layout */
-const FLAT_ORG_TYPES = new Set<string>([
-  OrgType.ROLE,
-  OrgType.PRODUCT_SUPPLIER,
-]);
-
 export default function AdminOrganizationList({
   organizationId,
   organizationType,
 }: Props) {
   const { t } = useTranslation();
-  const isFlatOrgType = FLAT_ORG_TYPES.has(organizationType);
-  const isRoleOrg = organizationType === OrgType.ROLE;
   const isGovernance = organizationType === OrgType.GOVT;
   const isSupplier = organizationType === OrgType.PRODUCT_SUPPLIER;
   const isMobile = useBreakpoints({ default: true, md: false });
@@ -202,105 +192,6 @@ export default function AdminOrganizationList({
               </main>
             </div>
           )}
-        </div>
-      </Page>
-    );
-  }
-
-  // Flat org types (role, supplier): sidebar list + detail panel
-  if (isFlatOrgType) {
-    return (
-      <Page title={t(organizationType)} hideTitleOnPage className="p-0">
-        <div className="container mx-auto space-y-4 md:flex md:h-[calc(100svh-6.75rem)] md:flex-col">
-          <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {isRoleOrg
-                  ? t("role_organizations_admin_title")
-                  : t("suppliers")}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {isRoleOrg
-                  ? t("role_organizations_admin_description")
-                  : t("manage_suppliers_description")}
-              </p>
-            </div>
-            <AdminOrganizationFormSheet organizationType={organizationType} />
-          </div>
-
-          {/* Mobile org selector */}
-          <div className="md:hidden">
-            <OrgSelect
-              value={organizationId}
-              onChange={handleOrganizationSelect}
-              orgType={organizationType as OrgType}
-              placeholder={
-                isRoleOrg
-                  ? t("select_role_organization")
-                  : t("select_organization")
-              }
-              inputPlaceholder={t("search")}
-            />
-          </div>
-
-          <ResizablePanelGroup
-            orientation="horizontal"
-            className="min-h-[calc(100vh-14rem)] rounded-lg md:min-h-0 md:flex-1"
-          >
-            <ResizablePanel
-              defaultSize="25%"
-              minSize="18%"
-              maxSize="35%"
-              className="h-full hidden md:block"
-            >
-              <FlatOrgSidebar
-                organizationType={organizationType}
-                selectedOrganizationId={organizationId || null}
-                onSelect={handleOrganizationSelect}
-              />
-            </ResizablePanel>
-
-            <ResizableHandle
-              withHandle
-              className="hidden md:flex items-center justify-center"
-            />
-
-            <ResizablePanel defaultSize="75%" className="pl-0 md:pl-4">
-              <div className="relative h-full overflow-y-auto rounded-lg bg-white md:shadow-lg">
-                {organizationId && org ? (
-                  <div className="space-y-6 p-5">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <h2 className="text-xl font-bold text-gray-900">
-                          {org.name}
-                        </h2>
-                        {org.description && (
-                          <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                            {org.description}
-                          </p>
-                        )}
-                      </div>
-                      <AdminOrganizationFormSheet
-                        organizationType={organizationType}
-                        org={org}
-                      />
-                    </div>
-                    <OrganizationReferralLinks organization={org} />
-                    {/* Role orgs show connections; suppliers just show the org info */}
-                    {isRoleOrg && (
-                      <RoleOrganizationConnections organization={org} />
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex h-full items-center justify-center p-8">
-                    <p className="text-sm text-gray-400">
-                      {t("select_organization_prompt_description")}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
         </div>
       </Page>
     );
@@ -586,21 +477,12 @@ function OrganizationDetailPanel({
   );
 }
 
-/** Flat sidebar list for role organizations */
-function FlatOrgSidebar({
-  organizationType,
-  selectedOrganizationId,
-  onSelect,
-}: {
-  organizationType: string;
-  selectedOrganizationId: string | null;
-  onSelect: (org: Organization) => void;
-}) {
+function SupplierDirectory() {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
 
   const {
-    data: allOrganizations,
+    data: suppliers,
     isLoading,
     isFetching,
     isError,
@@ -611,165 +493,19 @@ function FlatOrgSidebar({
     refetch,
     ref,
   } = useInfiniteList({
-    queryKey: ["organization", "list", organizationType, "all", searchTerm],
-    ...query.infinite(organizationApi.list, {
-      queryParams: {
-        parent: "",
-        org_type: organizationType,
-        name: searchTerm || undefined,
-      },
-      debounceInterval: 500,
-    }),
-    refetchOnWindowFocus: false,
-  });
-
-  const filtered = allOrganizations?.results ?? [];
-
-  return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
-      <div className="space-y-3 border-b border-gray-200 p-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-900">
-            {t("organizations")}
-          </h2>
-          {isFetching && (
-            <Loader2
-              className="size-4 animate-spin text-gray-500"
-              aria-label={t("loading")}
-            />
-          )}
-        </div>
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-400" />
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={t("search")}
-            aria-label={t("search")}
-            className="h-8 pl-8 text-sm"
-          />
-        </div>
-      </div>
-
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="p-2">
-          {isLoading || (isFetching && filtered.length === 0) ? (
-            <div className="space-y-2 p-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full rounded-md" />
-              ))}
-            </div>
-          ) : isError && filtered.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 p-4 text-center">
-              <p className="text-sm text-gray-600">
-                {t("something_went_wrong")}
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-              >
-                {t("retry")}
-              </Button>
-            </div>
-          ) : filtered.length > 0 ? (
-            <div className="space-y-1">
-              {filtered.map((org) => {
-                const isSelected = org.id === selectedOrganizationId;
-                return (
-                  <Button
-                    key={org.id}
-                    type="button"
-                    variant="ghost"
-                    onClick={() => onSelect(org)}
-                    aria-current={isSelected ? "page" : undefined}
-                    aria-pressed={isSelected}
-                    className={cn(
-                      "h-auto w-full justify-start whitespace-normal rounded-md px-3 py-2 text-left text-sm transition-colors",
-                      isSelected
-                        ? "bg-primary-100 font-medium text-primary-900 hover:bg-primary-100"
-                        : "text-gray-700 hover:bg-gray-50",
-                    )}
-                  >
-                    <span className="flex min-w-0 flex-1 flex-col items-start">
-                      <span className="block w-full truncate">{org.name}</span>
-                      {org.description && (
-                        <span
-                          className={cn(
-                            "block w-full truncate text-xs",
-                            isSelected ? "text-primary-700" : "text-gray-500",
-                          )}
-                        >
-                          {org.description}
-                        </span>
-                      )}
-                    </span>
-                  </Button>
-                );
-              })}
-              {hasNextPage &&
-                (isFetchNextPageError ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => fetchNextPage()}
-                  >
-                    {t("retry")}
-                  </Button>
-                ) : (
-                  <div ref={ref} />
-                ))}
-              {isFetchingNextPage && (
-                <Skeleton className="h-10 w-full rounded-md" />
-              )}
-            </div>
-          ) : (
-            <p className="px-3 py-6 text-center text-sm text-gray-500">
-              {t("no_organizations_found")}
-            </p>
-          )}
-        </div>
-      </ScrollArea>
-    </div>
-  );
-}
-
-function SupplierDirectory() {
-  const { t } = useTranslation();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(
-      () => setDebouncedSearchTerm(searchTerm),
-      300,
-    );
-    return () => window.clearTimeout(timeoutId);
-  }, [searchTerm]);
-
-  const {
-    data: suppliers,
-    isLoading,
-    isFetching,
-    isError,
-    refetch,
-  } = useQuery({
     queryKey: [
       "organization",
       "list",
       OrgType.PRODUCT_SUPPLIER,
       "directory",
-      debouncedSearchTerm,
+      searchTerm,
     ],
-    queryFn: query.paginated(organizationApi.list, {
-      pageSize: 100,
+    ...query.infinite(organizationApi.list, {
+      debounceInterval: 300,
       queryParams: {
         parent: "",
         org_type: OrgType.PRODUCT_SUPPLIER,
-        name: debouncedSearchTerm || undefined,
+        name: searchTerm || undefined,
       },
     }),
     refetchOnWindowFocus: false,
@@ -813,14 +549,12 @@ function SupplierDirectory() {
               <Skeleton key={index} className="h-16 w-full rounded-md" />
             ))}
           </div>
-        ) : isError && organizations.length === 0 ? (
+        ) : isError && !isFetchNextPageError ? (
           <div
             role="alert"
             className="flex flex-col items-center gap-3 p-8 text-center"
           >
-            <p className="text-sm text-gray-600">
-              {t("something_went_wrong")}
-            </p>
+            <p className="text-sm text-gray-600">{t("something_went_wrong")}</p>
             <Button
               type="button"
               variant="outline"
@@ -831,30 +565,53 @@ function SupplierDirectory() {
             </Button>
           </div>
         ) : organizations.length > 0 ? (
-          <ul className="divide-y divide-gray-100">
-            {organizations.map((supplier) => (
-              <li
-                key={supplier.id}
-                data-slot="supplier-row"
-                className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="min-w-0">
-                  <h2 className="truncate text-sm font-semibold text-gray-900">
-                    {supplier.name}
-                  </h2>
-                  {supplier.description && (
-                    <p className="mt-1 break-words text-sm text-gray-600">
-                      {supplier.description}
-                    </p>
-                  )}
+          <>
+            <ul className="divide-y divide-gray-100">
+              {organizations.map((supplier) => (
+                <li
+                  key={supplier.id}
+                  data-slot="supplier-row"
+                  className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <h2 className="truncate text-sm font-semibold text-gray-900">
+                      {supplier.name}
+                    </h2>
+                    {supplier.description && (
+                      <p className="mt-1 break-words text-sm text-gray-600">
+                        {supplier.description}
+                      </p>
+                    )}
+                  </div>
+                  <AdminOrganizationFormSheet
+                    organizationType={OrgType.PRODUCT_SUPPLIER}
+                    org={supplier}
+                  />
+                </li>
+              ))}
+            </ul>
+            {hasNextPage &&
+              (isFetchNextPageError ? (
+                <div role="alert" className="flex items-center gap-2 p-4">
+                  <p className="text-sm text-gray-600">
+                    {t("something_went_wrong")}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchNextPage()}
+                  >
+                    {t("retry")}
+                  </Button>
                 </div>
-                <AdminOrganizationFormSheet
-                  organizationType={OrgType.PRODUCT_SUPPLIER}
-                  org={supplier}
-                />
-              </li>
-            ))}
-          </ul>
+              ) : (
+                <div ref={ref} />
+              ))}
+            {isFetchingNextPage && (
+              <Skeleton className="m-4 h-16 rounded-md" />
+            )}
+          </>
         ) : (
           <div className="flex flex-col items-center gap-2 p-10 text-center">
             <Building2 className="size-7 text-gray-400" aria-hidden="true" />

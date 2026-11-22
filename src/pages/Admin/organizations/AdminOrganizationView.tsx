@@ -1,6 +1,6 @@
+import { HrefLink as Link } from "@/lib/router/HrefLink";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building2, MoreVertical } from "lucide-react";
-import { HrefLink as Link } from "@/lib/router/HrefLink";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -82,12 +82,7 @@ function OrganizationCard({
             org={org}
           />
 
-          <Button
-            variant="outline"
-            size="sm"
-            className="font-semibold"
-            asChild
-          >
+          <Button variant="outline" size="sm" className="font-semibold" asChild>
             <Link href={`/admin/organizations/${organizationType}/${org.id}`}>
               {t("see_details")}
             </Link>
@@ -192,7 +187,7 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
         <div className="grid grid-cols-1 gap-3">
           <CardListSkeleton count={4} />
         </div>
-      ) : isError && !children ? (
+      ) : isError ? (
         <div
           role="alert"
           className="flex flex-col items-center gap-3 rounded-lg border border-gray-200 bg-white p-8 text-center"
