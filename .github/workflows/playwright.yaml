@@ -297,14 +297,6 @@ jobs:
             exit 1
           fi
 
-      - name: Restore Playwright test timings
-        id: timing-cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ runner.temp }}/playwright-timings.json
-          key: playwright-timings-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: playwright-timings-
-
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
@@ -345,25 +337,9 @@ jobs:
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
-      - name: List Chromium tests
-        run: npx playwright test --list --project=chromium --reporter=json > "$RUNNER_TEMP/playwright-test-inventory.json"
-        env:
-          NODE_ENV: production
-          REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
-
-      - name: Plan duration-balanced shard
-        run: |
-          timings="$RUNNER_TEMP/playwright-timings.json"
-          node scripts/plan-playwright-shard.mjs \
-            "$RUNNER_TEMP/playwright-test-inventory.json" \
-            "$timings" \
-            "${{ matrix.shard }}" \
-            "$TEST_SHARDS" \
-            "$RUNNER_TEMP/playwright-shard.list"
-
       - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
         id: test
-        run: npx playwright test --project=chromium --workers="$TEST_WORKERS" --test-list="$RUNNER_TEMP/playwright-shard.list"
+        run: npx playwright test --project=chromium --workers="$TEST_WORKERS" --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
         env:
           TEST_WORKERS: ${{ env.TEST_WORKERS }}
           NODE_ENV: production
@@ -500,28 +476,6 @@ jobs:
           else
             echo "status=✅ Passed" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Restore previous Playwright timings
-        if: steps.skipped.outputs.skipped == 'false'
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ runner.temp }}/playwright-timings.json
-          key: playwright-timings-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: playwright-timings-
-
-      - name: Update Playwright timings
-        if: steps.skipped.outputs.skipped == 'false'
-        run: |
-          node scripts/update-playwright-timings.mjs \
-            all-results \
-            "$RUNNER_TEMP/playwright-timings.json"
-
-      - name: Save Playwright timings
-        if: steps.skipped.outputs.skipped == 'false'
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ runner.temp }}/playwright-timings.json
-          key: playwright-timings-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload final report
         if: steps.skipped.outputs.skipped == 'false'
