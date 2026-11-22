@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t as translate } from "i18next";
 import { AlertCircle, PlusCircle, Trash2 } from "lucide-react";
-import { useQueryParams } from "raviger";
 import {
   Ref,
   useCallback,
@@ -18,6 +17,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import careConfig from "@/../care.config";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
 
 import { DisablingCover } from "@/components/Common/DisablingCover";

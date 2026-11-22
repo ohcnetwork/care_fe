@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -11,6 +10,8 @@ import { useAppointmentReferral } from "@/components/Referral/useAppointmentRefe
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
@@ -100,13 +101,14 @@ export const BookAppointmentDetails = ({
           }
         }
         onSuccess?.();
-        const params = new URLSearchParams({
-          showSuccess: "true",
-          ...referralContext.successQueryParams,
+        navigate({
+          to: "/facility/$facilityId/patient/$patientId/appointments/$appointmentId",
+          params: { facilityId, patientId, appointmentId: data.id },
+          search: {
+            showSuccess: "true",
+            ...referralContext.successQueryParams,
+          },
         });
-        navigate(
-          `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}?${params}`,
-        );
       },
     },
   );
@@ -154,9 +156,13 @@ export const BookAppointmentDetails = ({
             </Button>
           )}
           {referralContext.returnUrl && (
-            <Link className="underline" href={referralContext.returnUrl}>
+            <HrefLink
+              className="underline"
+              href={referralContext.returnUrl}
+              back={referralContext.returnToReferral}
+            >
               {t("referral_return_to_referral")}
-            </Link>
+            </HrefLink>
           )}
         </div>
       )}

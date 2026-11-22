@@ -106,11 +106,7 @@ test.describe("Facility general settings layout", () => {
 
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 1000 });
-      for (const name of [
-        "Add cover photo",
-        "Edit Facility Details",
-        "Configurations",
-      ]) {
+      for (const name of ["Add cover photo", "Configurations"]) {
         const button = page.getByRole("button", { name, exact: true });
         await expect(button).toHaveCSS("height", width < 768 ? "48px" : "40px");
         await expect(button.locator("svg")).toHaveCSS("width", "16px");
@@ -126,11 +122,9 @@ test.describe("Facility general settings layout", () => {
     await page.goto(`/facility/${facility.id}/settings/general`);
     await expect(page.locator("#app-loading")).toBeHidden();
 
-    const sections = page.locator(
-      '[data-cy="facility-forms"], [data-cy="facility-quick-links"]',
-    );
+    const sections = page.locator('[data-cy="facility-forms"]');
     const actions = sections.getByRole("button").or(sections.getByRole("link"));
-    await expect(actions).toHaveCount(8);
+    await expect(actions).toHaveCount(2);
     for (const action of await actions.all()) {
       await expect(action).toHaveAttribute("data-variant", "ghost");
       // No local opt-out: "none" must come from the shared ghost variant.
@@ -146,7 +140,6 @@ test.describe("Facility general settings layout", () => {
       page.getByRole("button", { name: "Add cover photo" }),
       page.getByRole("link", { name: "Show on Map" }),
       page.getByRole("link", { name: "+91 98765 43210" }),
-      page.getByRole("button", { name: "Add a description" }),
     ]) {
       await expect(action).toHaveCSS("text-decoration-line", "underline");
     }
@@ -162,7 +155,8 @@ test.describe("Facility general settings layout", () => {
     await expect(
       header.getByRole("heading", { name: facility.name }),
     ).toBeVisible();
-    await expect(header.getByText("Part of Kerala")).toBeVisible();
+    // The geo organization is shown in the details card, not the header.
+    await expect(header.getByText(/^Part of/)).toHaveCount(0);
     await test.info().attach("desktop-empty-cover", {
       body: await page.screenshot({ fullPage: true }),
       contentType: "image/png",
@@ -174,17 +168,26 @@ test.describe("Facility general settings layout", () => {
       .getByRole("button", { name: "Cancel", exact: true })
       .click();
 
-    await page.getByRole("button", { name: "Add a description" }).click();
-    await expect(
-      page.getByRole("dialog", { name: "Edit Facility", exact: true }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Close", exact: true }).click();
-
     await header.getByRole("button", { name: "Configurations" }).click();
     await expect(
       page.getByRole("button", { name: "Print Templates" }),
     ).toBeVisible();
-    await page.keyboard.press("Escape");
+    await page.getByRole("menuitem", { name: "Edit Facility Details" }).click();
+    const editSheet = page.getByRole("dialog", {
+      name: "Edit Facility",
+      exact: true,
+    });
+    await expect(editSheet).toBeVisible();
+    // Description is a markdown editor, not a plain textarea.
+    const descriptionEditor = editSheet.getByRole("textbox", {
+      name: "Description",
+    });
+    await expect(descriptionEditor).toHaveAttribute("contenteditable", "true");
+    await expect(descriptionEditor).toHaveText("");
+    await descriptionEditor.fill("Open all day");
+    await expect(descriptionEditor).toHaveText("Open all day");
+    await page.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(editSheet).toBeHidden();
 
     const forms = page.locator('[data-cy="facility-forms"]');
     await expect(
@@ -201,11 +204,9 @@ test.describe("Facility general settings layout", () => {
     expect(formsBox).not.toBeNull();
     expect(formsBox!.x).toBeGreaterThan(detailsBox!.x + detailsBox!.width);
     expect(Math.abs(formsBox!.y - detailsBox!.y)).toBeLessThan(1);
-    await expect(
-      page
-        .getByRole("region", { name: "Quick links" })
-        .getByRole("link", { name: "Locations" }),
-    ).toHaveAttribute("href", `/facility/${facility.id}/settings/locations`);
+    await expect(page.getByRole("region", { name: "Quick links" })).toHaveCount(
+      0,
+    );
 
     const details = page.getByRole("region", { name: "Facility Details" });
     const mapLink = details.getByRole("link", { name: "Show on Map" });
@@ -217,7 +218,16 @@ test.describe("Facility general settings layout", () => {
     });
     await expect(phoneLink).toHaveText("+91 98765 43210");
     await expect(phoneLink).toHaveAttribute("href", "tel:+919876543210");
-    const valueStarts = await details.evaluate((section) => {
+    // Address, area and contact links form one condensed block: no
+    // label/value rows, no features list, no empty description section.
+    await expect(details.locator("dl")).toHaveCount(0);
+    await expect(details.getByText("Features")).toHaveCount(0);
+    await expect(
+      details.locator('[data-cy="facility-description"]'),
+    ).toHaveCount(0);
+    const contact = details.locator('[data-cy="facility-contact"]');
+    await expect(contact.getByText("Kerala", { exact: true })).toBeVisible();
+    const valueStarts = await contact.evaluate((block) => {
       const textStart = (element: Element | null | undefined) => {
         const text = [...(element?.childNodes ?? [])].find(
           (node) =>
@@ -228,141 +238,34 @@ test.describe("Facility general settings layout", () => {
         range.selectNodeContents(text);
         return range.getBoundingClientRect().left;
       };
-      const [address, phone] = section.querySelectorAll("dd");
+      const [address, area] = block.querySelectorAll("p");
+      const [phone, map] = block.querySelectorAll("a");
       return {
-        address: textStart(address.querySelector("p")),
-        map: textStart(address.querySelector("a")),
-        phoneIcon: phone.querySelector("a svg")!.getBoundingClientRect().left,
+        address: textStart(address),
+        area: textStart(area),
+        phoneIcon: phone.querySelector("svg")!.getBoundingClientRect().left,
+        phoneTop: phone.getBoundingClientRect().top,
+        mapTop: map.getBoundingClientRect().top,
       };
     });
-    expect(Math.abs(valueStarts.map - valueStarts.address)).toBeLessThan(1);
+    expect(Math.abs(valueStarts.area - valueStarts.address)).toBeLessThan(1);
     expect(Math.abs(valueStarts.phoneIcon - valueStarts.address)).toBeLessThan(
       1,
     );
+    // Phone and map links share one row.
+    expect(Math.abs(valueStarts.mapTop - valueStarts.phoneTop)).toBeLessThan(1);
 
-    const deleteSection = page.locator('[data-cy="facility-delete-section"]');
-    const deleteToggle = deleteSection.getByRole("button", {
-      name: "Delete facility",
-      exact: true,
-    });
-    const deleteButton = deleteSection.getByRole("button", {
-      name: "Delete Facility",
-      exact: true,
-    });
-    await expect(deleteToggle).toHaveAttribute("aria-expanded", "false");
-    await expect(deleteButton).toHaveCount(0);
+    // Delete is not a page-level action: it sits last in the Configurations
+    // menu, set apart by a separator.
     await expect(
-      deleteSection.getByText("Once you delete a facility"),
-    ).toBeHidden();
-    const deleteCard = deleteSection.locator('[data-slot="card"]');
-    const borderColor = await page
-      .locator('[data-cy="facility-forms"] [data-slot="card"]')
-      .evaluate((element) => getComputedStyle(element).borderTopColor);
-    await expect(deleteCard).toHaveCSS("border-top-color", borderColor);
-    const destructiveColor = await deleteToggle.evaluate((element) => {
-      const probe = document.createElement("span");
-      probe.style.color = "var(--destructive)";
-      element.appendChild(probe);
-      const color = getComputedStyle(probe).color;
-      probe.remove();
-      return color;
-    });
-    await expect(deleteToggle).toHaveCSS("color", destructiveColor);
-
-    const deleteBox = await deleteSection.boundingBox();
-    expect(deleteBox).not.toBeNull();
-    expect(Math.abs(deleteBox!.x - detailsBox!.x)).toBeLessThan(1);
-    expect(Math.abs(deleteBox!.width - detailsBox!.width)).toBeLessThan(1);
-    expect(
-      Math.abs(deleteBox!.y - (detailsBox!.y + detailsBox!.height + 24)),
-    ).toBeLessThan(1);
-    await test.info().attach("desktop-delete-collapsed", {
-      body: await page.screenshot({ fullPage: true }),
-      contentType: "image/png",
-    });
-
-    await deleteToggle.click();
-    await expect(deleteToggle).toHaveAttribute("aria-expanded", "true");
-    await expect(
-      page.getByRole("region", { name: "Delete facility", exact: true }),
-    ).toHaveCount(1);
-    await expect(
-      deleteSection.getByText(
-        "Once you delete a facility, there is no going back. Please be certain.",
-      ),
-    ).toBeVisible();
-    await expect(deleteButton).toBeVisible();
-    await deleteSection.evaluate((section) =>
-      Promise.all(
-        section
-          .getAnimations({ subtree: true })
-          .map((animation) => animation.finished),
-      ),
-    );
-    await deleteSection.scrollIntoViewIfNeeded();
-    await test.info().attach("desktop-delete-expanded", {
-      body: await page.screenshot({ fullPage: true }),
-      contentType: "image/png",
-    });
-
-    await page.setViewportSize({ width: 390, height: 1000 });
-    const quickLinksBox = await page
-      .locator('[data-cy="facility-quick-links"]')
-      .boundingBox();
-    const mobileDeleteBox = await deleteSection.boundingBox();
-    expect(quickLinksBox).not.toBeNull();
-    expect(mobileDeleteBox).not.toBeNull();
-    expect(mobileDeleteBox!.y).toBeGreaterThan(
-      quickLinksBox!.y + quickLinksBox!.height,
-    );
-    expect(
-      await deleteSection.evaluate((section) => {
-        const root = section.closest('[data-cy="facility-general-page"]');
-        const sections = [...(root?.querySelectorAll("section") ?? [])];
-        return sections.at(-1) === section;
-      }),
-    ).toBe(true);
-    await deleteSection.scrollIntoViewIfNeeded();
-    await test.info().attach("mobile-delete-last", {
-      body: await page.screenshot({ fullPage: true }),
-      contentType: "image/png",
-    });
-
-    // The warning must keep a gutter from the button and stay readable
-    // instead of collapsing into a narrow column beside it.
-    const deleteWarning = deleteSection.getByText("Once you delete a facility");
-    for (const width of [320, 360, 390, 768, 1024, 1440]) {
-      await page.setViewportSize({ width, height: 1000 });
-      const row = await deleteWarning.evaluate((warning) => {
-        const range = document.createRange();
-        range.selectNodeContents(warning);
-        const lines = [...range.getClientRects()];
-        const text = {
-          right: Math.max(...lines.map((line) => line.right)),
-          bottom: Math.max(...lines.map((line) => line.bottom)),
-        };
-        const button = warning
-          .parentElement!.querySelector("button")!
-          .getBoundingClientRect();
-        return {
-          sideGap: button.left - text.right,
-          stackGap: button.top - text.bottom,
-          warningWidth: warning.getBoundingClientRect().width,
-          overflows:
-            warning.parentElement!.scrollWidth >
-            warning.parentElement!.clientWidth,
-        };
-      });
-      expect(row.overflows, `${width}px`).toBe(false);
-      expect(row.warningWidth, `${width}px`).toBeGreaterThanOrEqual(160);
-      expect(
-        Math.max(row.sideGap, row.stackGap),
-        `${width}px`,
-      ).toBeGreaterThanOrEqual(12);
-    }
-    await page.setViewportSize({ width: 1440, height: 1000 });
-
-    await deleteButton.click();
+      page.locator('[data-cy="facility-delete-section"]'),
+    ).toHaveCount(0);
+    await header.getByRole("button", { name: "Configurations" }).click();
+    const menu = page.getByRole("menu");
+    await expect(menu.getByRole("separator")).toHaveCount(1);
+    const deleteItem = menu.getByRole("menuitem", { name: "Delete Facility" });
+    await expect(deleteItem).toHaveAttribute("data-variant", "destructive");
+    await deleteItem.click();
     const deleteDialog = page.getByRole("alertdialog", {
       name: "Delete Facility",
     });
@@ -385,13 +288,14 @@ test.describe("Facility general settings layout", () => {
       }
       await page.goto(`/facility/${facility.id}/settings/general`);
       await expect(page.locator("#app-loading")).toBeHidden();
-      const deleteSection = page.locator('[data-cy="facility-delete-section"]');
-      await deleteSection
-        .getByRole("button", { name: "Delete facility", exact: true })
-        .click();
-      await deleteSection
-        .getByRole("button", { name: "Delete Facility", exact: true })
-        .click();
+      const configurations = page.getByRole("button", {
+        name: "Configurations",
+      });
+      const openDeleteDialog = async () => {
+        await configurations.click();
+        await page.getByRole("menuitem", { name: "Delete Facility" }).click();
+      };
+      await openDeleteDialog();
 
       const dialog = page.getByRole("alertdialog", { name: "Delete Facility" });
       const input = dialog.getByRole("textbox", {
@@ -470,26 +374,17 @@ test.describe("Facility general settings layout", () => {
         .not.toContain("inset");
       await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
       await expect(dialog).toBeHidden();
-      await deleteSection
-        .getByRole("button", { name: "Delete Facility", exact: true })
-        .click();
+      await openDeleteDialog();
       await expect(input).toHaveValue("");
       await input.fill(`Delete ${facility.name} incorrect`);
       await expect(confirm).toBeDisabled();
       await page.keyboard.press("Escape");
       await expect(dialog).toBeHidden();
-      await expect(
-        deleteSection.getByRole("button", {
-          name: "Delete Facility",
-          exact: true,
-        }),
-      ).toBeFocused();
+      await expect(configurations).toBeFocused();
     });
   }
 
-  test("loading skeleton and delete trigger share the card corner radius", async ({
-    page,
-  }) => {
+  test("loading skeleton shares the card corner radius", async ({ page }) => {
     let releaseFacility!: () => void;
     const facilityHeld = new Promise<void>((resolve) => {
       releaseFacility = resolve;
@@ -518,11 +413,6 @@ test.describe("Facility general settings layout", () => {
       .locator('[data-cy="facility-forms"] [data-slot="card"]')
       .evaluate((card) => getComputedStyle(card).borderTopLeftRadius);
     expect(skeletonRadii).toEqual([cardRadius, cardRadius, cardRadius]);
-
-    const deleteToggle = page
-      .locator('[data-cy="facility-delete-section"]')
-      .getByRole("button", { name: "Delete facility", exact: true });
-    await expect(deleteToggle).toHaveCSS("border-top-left-radius", cardRadius);
   });
 
   test("keeps the compact banner and General page width stable while cropping uploads at 16:9", async ({
@@ -607,7 +497,36 @@ test.describe("Facility general settings layout", () => {
       .toBeCloseTo(16 / 9, 2);
   });
 
-  test("read-only users cannot edit covers, descriptions, or delete the facility", async ({
+  test("renders the description as full-width markdown below the contact block", async ({
+    page,
+  }) => {
+    facility.description = "Open **24 hours**\n\n- Casualty\n- Pharmacy";
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.goto(`/facility/${facility.id}/settings/general`);
+    await expect(page.locator("#app-loading")).toBeHidden();
+
+    const details = page.getByRole("region", { name: "Facility Details" });
+    const description = details.locator('[data-cy="facility-description"]');
+    await expect(
+      description.getByRole("heading", { name: "Description" }),
+    ).toBeVisible();
+    await expect(description.locator("strong")).toHaveText("24 hours");
+    await expect(description.getByRole("listitem")).toHaveCount(2);
+
+    const contactBox = await details
+      .locator('[data-cy="facility-contact"]')
+      .boundingBox();
+    const descriptionBox = await description.boundingBox();
+    expect(contactBox).not.toBeNull();
+    expect(descriptionBox).not.toBeNull();
+    expect(Math.abs(descriptionBox!.x - contactBox!.x)).toBeLessThan(1);
+    expect(Math.abs(descriptionBox!.width - contactBox!.width)).toBeLessThan(1);
+    expect(descriptionBox!.y).toBeGreaterThanOrEqual(
+      contactBox!.y + contactBox!.height,
+    );
+  });
+
+  test("read-only users cannot edit covers, details, or delete the facility", async ({
     page,
   }) => {
     user.is_superuser = false;
@@ -623,13 +542,7 @@ test.describe("Facility general settings layout", () => {
       page.getByRole("button", { name: /cover photo/i }),
     ).toHaveCount(0);
     await expect(
-      page.getByRole("button", { name: "Add a description" }),
-    ).toHaveCount(0);
-    await expect(
-      page.getByRole("button", { name: "Edit Facility Details" }),
-    ).toHaveCount(0);
-    await expect(
-      page.getByRole("button", { name: "Delete Facility" }),
+      page.getByRole("button", { name: "Configurations" }),
     ).toHaveCount(0);
     await expect(
       page
@@ -657,20 +570,16 @@ test.describe("Facility general settings layout", () => {
     await expect(addCover).toBeVisible();
     await expect(addCover).toHaveAttribute("data-variant", "ghost");
     await expect(addCover).toHaveCSS("text-decoration-line", "underline");
-    const edit = header.getByRole("button", {
-      name: "Edit Facility Details",
+    const configurations = header.getByRole("button", {
+      name: "Configurations",
     });
-    await expect(edit).toBeVisible();
-    await expect(edit).toHaveAttribute("data-variant", "outline");
-    await expect(edit.locator("svg")).toHaveClass(/lucide-square-pen/);
-    await expect(
-      page.getByRole("button", { name: "Delete Facility" }),
-    ).toHaveCount(0);
+    await expect(configurations).toBeVisible();
+    await expect(configurations).toHaveAttribute("data-variant", "outline");
     await expect(page.locator("html")).toHaveAttribute(
       "data-theme",
       "tritanopia",
     );
-    const themeColors = await edit.evaluate((button) => {
+    const themeColors = await configurations.evaluate((button) => {
       const probe = document.createElement("span");
       probe.style.backgroundColor = "var(--background)";
       button.appendChild(probe);
@@ -696,6 +605,12 @@ test.describe("Facility general settings layout", () => {
       .getByRole("button", { name: "Cancel", exact: true })
       .click();
     await expect(coverDialog).toBeHidden();
+    await configurations.click();
+    const edit = page.getByRole("menuitem", { name: "Edit Facility Details" });
+    await expect(edit.locator("svg")).toHaveClass(/lucide-square-pen/);
+    await expect(
+      page.getByRole("menuitem", { name: "Delete Facility" }),
+    ).toHaveCount(0);
     await edit.click();
     await expect(
       page.getByRole("dialog", { name: "Edit Facility", exact: true }),

@@ -6,7 +6,6 @@ import {
   ChevronUp,
   LockKeyhole,
 } from "lucide-react";
-import { Link, useQueryParams } from "raviger";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -47,6 +46,8 @@ import { useReferralPermissions } from "@/components/Referral/useReferralPermiss
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { useQueryParams } from "@/lib/router/queryParams";
 import referralApi from "@/types/emr/referral/referralApi";
 
 const REQUEST_RECORD_CATEGORIES = ["source", "metadata"] as const;
@@ -121,13 +122,14 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
           className="flex items-center justify-between gap-3"
           aria-label={t("referral_navigation")}
         >
-          <Link
+          <HrefLink
             href={backUrl}
+            back
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             <ArrowLeft className="size-4" />
             {t("back")}
-          </Link>
+          </HrefLink>
         </nav>
         {isLoading && (
           <div className="space-y-5" role="status" aria-label={t("loading")}>

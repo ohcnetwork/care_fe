@@ -74,3 +74,6 @@ public/_headers
 
 namespaceMapping.json
 dump.rdb
+
+# Local migration codemods (not shared)
+/scripts/codemods/

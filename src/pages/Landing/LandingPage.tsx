@@ -2,7 +2,6 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Search } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -34,6 +33,7 @@ import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { LocalStorageKeys } from "@/common/constants";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 import { TokenData } from "@/types/otp/otp";
@@ -72,11 +72,10 @@ export function LandingPage() {
     : "unknown";
 
   const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (selectedOrganization) {
-      params.append("organization", selectedOrganization.id.toString());
-    }
-    navigate(`/facilities?${params.toString()}`);
+    navigate({
+      to: "/facilities",
+      search: { organization: selectedOrganization?.id.toString() },
+    });
   };
 
   return (
@@ -95,7 +94,7 @@ export function LandingPage() {
                 <Button
                   variant="ghost"
                   className="text-sm font-medium hover:bg-accent px-6"
-                  onClick={() => navigate("/patient/home")}
+                  onClick={() => navigate({ to: "/patient/home" })}
                 >
                   {t("home")}
                 </Button>
@@ -245,7 +244,9 @@ export function LandingPage() {
                       <Button
                         variant="outline"
                         className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
-                        onClick={() => navigate(`/login?mode=staff`)}
+                        onClick={() =>
+                          navigate({ to: "/login", search: { mode: "staff" } })
+                        }
                       >
                         {t("staff_sign_in")}
                       </Button>
@@ -265,7 +266,12 @@ export function LandingPage() {
                       <Button
                         variant="outline"
                         className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
-                        onClick={() => navigate(`/login?mode=patient`)}
+                        onClick={() =>
+                          navigate({
+                            to: "/login",
+                            search: { mode: "patient" },
+                          })
+                        }
                       >
                         {t("patient_sign_in")}
                       </Button>

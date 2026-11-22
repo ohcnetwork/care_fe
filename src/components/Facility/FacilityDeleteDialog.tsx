@@ -17,16 +17,23 @@ interface FacilityDeleteDialogProps {
     name?: string;
   };
   trigger?: React.ReactNode;
+  /** Control the dialog from outside, e.g. when opened from a menu item. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const FacilityDeleteDialog = ({
   facility,
   trigger,
+  open: controlledOpen,
+  onOpenChange,
 }: FacilityDeleteDialogProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
 
   const confirmationText = `Delete ${facility.name}`;
 
@@ -81,7 +88,9 @@ const FacilityDeleteDialog = ({
 
   return (
     <CriticalActionConfirmationDialog
-      trigger={trigger ?? defaultTrigger}
+      trigger={
+        controlledOpen === undefined ? (trigger ?? defaultTrigger) : trigger
+      }
       title={t("delete_facility")}
       description={description}
       confirmationText={confirmationText}

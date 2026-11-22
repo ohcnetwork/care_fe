@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { ChevronRight } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
@@ -88,7 +88,12 @@ const AppointmentRow = ({
 
   return (
     <Link
-      href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`}
+      to="/facility/$facilityId/patient/$patientId/appointments/$appointmentId"
+      params={{
+        facilityId: appointment.facility.id,
+        patientId,
+        appointmentId: appointment.id,
+      }}
       className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 p-3 border-1 border-blue-500 rounded-lg bg-white hover:bg-gray-50 transition-colors"
     >
       <div className="flex flex-row items-center gap-2 sm:gap-4 flex-1 min-w-0 w-full">

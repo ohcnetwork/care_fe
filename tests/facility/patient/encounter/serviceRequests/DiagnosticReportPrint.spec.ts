@@ -69,6 +69,25 @@ test.describe("Diagnostic report printing", () => {
   let serviceRequestId: string;
   let printUrl: string;
 
+  async function readPrintedText(page: Page) {
+    const bytes = await page.evaluate(async () => {
+      const src = document.querySelector("iframe")!.src;
+      return Array.from(new Uint8Array(await (await fetch(src)).arrayBuffer()));
+    });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const pdf = await pdfjs.getDocument({ data: new Uint8Array(bytes) })
+      .promise;
+    let text = "";
+    for (let number = 1; number <= pdf.numPages; number++) {
+      const content = await (await pdf.getPage(number)).getTextContent();
+      text += content.items
+        .map((item) => ("str" in item ? item.str : ""))
+        .join(" ");
+      text += " ";
+    }
+    return text.replace(/\s+/g, " ");
+  }
+
   test.beforeEach(() => {
     patientId = getPatientId();
     serviceRequestId = faker.string.uuid();
@@ -161,71 +180,33 @@ test.describe("Diagnostic report printing", () => {
     await page.goto(printUrl);
 
     await expect(page.getByRole("button", { name: /^print/i })).toBeEnabled();
-    await expect(
-      page.getByRole("heading", { name: report.code.display }),
-    ).toBeVisible();
-    await expect(page.getByText(anotherRequestReport.code.display)).toHaveCount(
-      0,
-    );
-    await expect(page.getByText(preliminaryReport.code.display)).toHaveCount(0);
+    await expect(page.locator(".react-pdf__Page__canvas")).toHaveCount(1);
+    const text = await readPrintedText(page);
+    expect(text).toContain(report.code.display);
+    expect(text).not.toContain(anotherRequestReport.code.display);
+    expect(text).not.toContain(preliminaryReport.code.display);
     for (const identifier of [instanceIdentifier, facilityIdentifier]) {
-      await expect(
-        page.getByText(identifier.config.config.display, { exact: true }),
-      ).toBeVisible();
-      await expect(
-        page.getByText(identifier.value, { exact: true }),
-      ).toBeVisible();
+      expect(text).toContain(identifier.config.config.display);
+      expect(text).toContain(identifier.value);
     }
     for (const identifier of [
       automaticInstanceIdentifier,
       automaticFacilityIdentifier,
       secondaryIdentifier,
     ]) {
-      await expect(
-        page.getByText(identifier.config.config.display, { exact: true }),
-      ).toHaveCount(0);
-      await expect(
-        page.getByText(identifier.value, { exact: true }),
-      ).toHaveCount(0);
+      expect(text).not.toContain(identifier.config.config.display);
+      expect(text).not.toContain(identifier.value);
     }
-    await expect(
-      page.locator("strong", { hasText: "Clinical interpretation" }),
-    ).toBeVisible();
-    const conclusion = page
-      .getByRole("article")
-      .filter({ hasText: "Clinical interpretation" });
-    await expect(conclusion.getByRole("listitem")).toHaveText([
+    for (const line of [
+      "Clinical interpretation",
       "First finding",
       "Second finding",
       "Follow up",
       "Sample reviewed",
-    ]);
-    await expect(
-      conclusion.getByRole("heading", {
-        name: "Clinical interpretation",
-        level: 2,
-      }),
-    ).toBeVisible();
-    await expect(
-      conclusion.locator("u", { hasText: "Underlined detail" }),
-    ).toBeVisible();
-    await expect(
-      conclusion.locator("mark", { hasText: "Highlighted detail" }),
-    ).toBeVisible();
-    const checkboxes = conclusion.getByRole("checkbox");
-    await expect(checkboxes).toHaveCount(2);
-    await expect(checkboxes.nth(0)).toBeDisabled();
-    await expect(checkboxes.nth(0)).not.toBeChecked();
-    await expect(checkboxes.nth(1)).toBeDisabled();
-    await expect(checkboxes.nth(1)).toBeChecked();
-    await expect(
-      conclusion.getByText("Values <left> and <medication> remain visible.", {
-        exact: true,
-      }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("textbox", { name: "Conclusion", exact: true }),
-    ).toHaveCount(0);
+      "Values <left> and <medication> remain visible.",
+    ]) {
+      expect(text).toContain(line);
+    }
   });
 
   test("does not print a single report when its attachment list fails", async ({
@@ -301,7 +282,7 @@ test.describe("Diagnostic report printing", () => {
       await expect(printButton).toBeDisabled();
 
       releasePdf();
-      await expect(page.locator(".react-pdf__Page__canvas")).toHaveCount(2);
+      await expect(page.locator(".react-pdf__Page__canvas")).toHaveCount(3);
       await expect(printButton).toBeEnabled();
       for (const canvas of await page
         .locator(".react-pdf__Page__canvas")
@@ -311,5 +292,74 @@ test.describe("Diagnostic report printing", () => {
     } finally {
       releasePdf();
     }
+  });
+
+  test("shows the report but blocks printing when one attachment fails", async ({
+    page,
+  }) => {
+    const report = createReport(patientId, serviceRequestId);
+    const pdfFileId = faker.string.uuid();
+    const brokenFileId = faker.string.uuid();
+    const brokenFileName = `broken-scan-${faker.string.alphanumeric(6)}`;
+    const pdfUrl = `/print-test-${pdfFileId}.pdf`;
+    const brokenUrl = `/print-test-${brokenFileId}.png`;
+    const pdf = new jsPDF();
+    pdf.text("Attached diagnostic report page", 20, 20);
+
+    await page.route(
+      `**/api/v1/patient/${patientId}/diagnostic_report/?*`,
+      (route) => route.fulfill({ json: { count: 1, results: [report] } }),
+    );
+    await mockReport(page, patientId, report);
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({
+        json: {
+          count: 2,
+          results: [
+            {
+              id: pdfFileId,
+              name: "lab-result",
+              extension: "pdf",
+              is_archived: false,
+              upload_completed: true,
+            },
+            {
+              id: brokenFileId,
+              name: brokenFileName,
+              extension: "png",
+              is_archived: false,
+              upload_completed: true,
+            },
+          ],
+        },
+      }),
+    );
+    for (const [fileId, url] of [
+      [pdfFileId, pdfUrl],
+      [brokenFileId, brokenUrl],
+    ]) {
+      await page.route(`**/api/v1/files/${fileId}/?*`, (route) =>
+        route.fulfill({ json: { id: fileId, read_signed_url: url } }),
+      );
+    }
+    await page.route(`**${pdfUrl}`, (route) =>
+      route.fulfill({
+        contentType: "application/pdf",
+        body: Buffer.from(pdf.output("arraybuffer")),
+      }),
+    );
+    await page.route(`**${brokenUrl}`, (route) =>
+      route.fulfill({ status: 404, body: "" }),
+    );
+
+    await page.goto(printUrl);
+
+    const alert = page.getByRole("alert").filter({ hasText: LOAD_ERROR });
+    await expect(alert).toBeVisible();
+    await expect(alert).toContainText(brokenFileName);
+    // The report page and the attachment that did load are still shown.
+    await expect(page.locator(".react-pdf__Page__canvas")).toHaveCount(2);
+    expect(await readPrintedText(page)).toContain(report.code.display);
+    await expect(page.getByRole("button", { name: /^print/i })).toBeDisabled();
   });
 });

@@ -409,7 +409,7 @@ function PageSection({ template, onUpdate }: SectionProps) {
                     },
                   }));
                 }}
-                placeholder="0"
+                placeholder="10"
                 className="mt-1"
               />
             </div>

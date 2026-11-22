@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useFullPath } from "raviger";
 
 import query from "@/Utils/request/query";
+import { usePathname } from "@/lib/router/location";
 import facilityApi from "@/types/facility/facilityApi";
 
 /**
@@ -28,7 +28,7 @@ const extractFacilityId = (path: string) => {
  * @returns The current facility in context, if there is one.
  */
 export function useCurrentFacilitySilently() {
-  const path = useFullPath();
+  const path = usePathname();
   const facilityId = extractFacilityId(path);
 
   const { data: facility, isLoading: isFacilityLoading } = useQuery({

@@ -1,5 +1,4 @@
 import { Box, Eye } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -17,6 +16,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import { navigate } from "@/lib/router/navigate";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
@@ -117,8 +117,8 @@ export default function DeliveryOrderTable({
               <Button
                 variant="outline"
                 onClick={() =>
-                  navigate(
-                    getInventoryBasePath(
+                  navigate({
+                    href: getInventoryBasePath(
                       facilityId,
                       locationId,
                       internal,
@@ -126,7 +126,7 @@ export default function DeliveryOrderTable({
                       isRequester,
                       `${delivery.id}`,
                     ),
-                  )
+                  })
                 }
               >
                 <Eye />

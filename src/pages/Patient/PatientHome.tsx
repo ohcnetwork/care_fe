@@ -24,6 +24,8 @@ import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { UpcomingAppointmentCard } from "@/pages/Appointments/components/UpcomingAppointmentCard";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
@@ -34,8 +36,8 @@ import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
 import { goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
+import { Link } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
-import { Link, navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 interface QParams {
@@ -169,9 +171,15 @@ export default function PatientHome() {
                     disableRedirectOnSuccess={isDispenseFlow}
                     onSuccess={(encounter) => {
                       if (isDispenseFlow && pharmacyDispenseService) {
-                        navigate(
-                          `/facility/${facilityId}/locations/${pharmacyDispenseService.locationId}/medication_requests/patient/${patientData.id}/bill/dispense/${encounter.id}`,
-                        );
+                        navigate({
+                          to: "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/dispense/$encounterId",
+                          params: {
+                            facilityId,
+                            locationId: pharmacyDispenseService.locationId,
+                            patientId: patientData.id,
+                            encounterId: encounter.id,
+                          },
+                        });
                       }
                     }}
                   />
@@ -243,7 +251,13 @@ export default function PatientHome() {
                     {flow === "dispense" && pharmacyDispenseService && (
                       <Button variant="outline">
                         <Link
-                          href={`/facility/${facilityId}/locations/${pharmacyDispenseService.locationId}/medication_requests/patient/${patientData.id}/bill/dispense/${encounter.id}`}
+                          to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/dispense/$encounterId"
+                          params={{
+                            facilityId,
+                            locationId: pharmacyDispenseService.locationId,
+                            patientId: patientData.id,
+                            encounterId: encounter.id,
+                          }}
                           className="flex items-center gap-2"
                         >
                           <span>{t("dispense_medicine")}</span>

@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, RotateCcw, Wrench, X } from "lucide-react";
-import { Link } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +37,7 @@ import {
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { HrefLink } from "@/lib/router/HrefLink";
 import facilityApi from "@/types/facility/facilityApi";
 import careConfig from "@careConfig";
 
@@ -172,7 +172,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
             {shortcuts
               .filter((shortcut) => shortcut.visible)
               .map((shortcut) => (
-                <Link
+                <HrefLink
                   key={shortcut.href}
                   href={shortcut.href}
                   className="block h-full min-w-0 rounded-lg ring-primary-400 ring-offset-2 transition-all duration-200 hover:ring hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -198,7 +198,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                       </div>
                     </CardContent>
                   </Card>
-                </Link>
+                </HrefLink>
               ))}
           </div>
         </div>
@@ -241,7 +241,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   >
                     <X className="size-4" />
                   </Button>
-                  <Link
+                  <HrefLink
                     href={link.link}
                     className="block h-full rounded-xl ring-primary-400 ring-offset-2 transition-all duration-200 hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
                   >
@@ -260,7 +260,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                         <ArrowUpRight className="size-4 shrink-0 text-muted-foreground" />
                       </CardContent>
                     </Card>
-                  </Link>
+                  </HrefLink>
                 </div>
               ))}
             </div>

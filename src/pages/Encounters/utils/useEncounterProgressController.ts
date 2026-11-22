@@ -1,3 +1,4 @@
+import { navigate } from "@/lib/router/navigate";
 import {
   EncounterRead,
   EncounterStatus,
@@ -12,7 +13,6 @@ import { TokenActiveStatuses, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import { useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -112,9 +112,16 @@ export function useEncounterProgressController({
 
   const completeEverything = () => {
     if (encounterRequiresDischarge(encounter)) {
-      navigate(
-        `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
-      );
+      navigate({
+        to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId",
+        params: {
+          facilityId: encounter.facility.id,
+          patientId: encounter.patient.id,
+          encounterId: encounter.id,
+          questionnaireId: "encounter",
+        },
+        search: { toDischarge: "true" },
+      });
       return;
     }
     let requests: BatchRequestObject[] = [];
@@ -132,9 +139,16 @@ export function useEncounterProgressController({
 
   const completeEncounter = () => {
     if (encounterRequiresDischarge(encounter)) {
-      navigate(
-        `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
-      );
+      navigate({
+        to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId",
+        params: {
+          facilityId: encounter.facility.id,
+          patientId: encounter.patient.id,
+          encounterId: encounter.id,
+          questionnaireId: "encounter",
+        },
+        search: { toDischarge: "true" },
+      });
       return;
     }
     executeBatch([addEncounterCloseRequestToBatch()]);

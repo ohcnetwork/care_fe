@@ -411,7 +411,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
   }
   html {
     @apply font-sans;
@@ -815,10 +815,10 @@
     bottom: var(--hit-area-b, 0px);
     left: var(--hit-area-l, 0px);
     pointer-events: inherit;
-    @apply border border-blue-500 border-dashed bg-blue-500/10;
+    @apply border border-dashed border-blue-500 bg-blue-500/10;
   }
   &:hover::before {
-    @apply border border-green-500 border-dashed bg-green-500/10;
+    @apply border border-dashed border-green-500 bg-green-500/10;
   }
 }
 

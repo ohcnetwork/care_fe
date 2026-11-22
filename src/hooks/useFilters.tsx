@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { QueryParam, setQueryParamsOptions } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import {
+  type SetQueryParamsOptions,
+  type QueryParams as UrlQueryParams,
+} from "@/lib/router/queryParams";
 import { cn } from "@/lib/utils";
 
 import GenericFilterBadge from "@/CAREUI/display/FilterBadge";
@@ -26,7 +29,7 @@ interface FilterBadgeProps {
 }
 
 /**
- * A custom hook wrapped around raviger's `useQueryParams` hook to ease handling
+ * A custom hook wrapped around `useScopedQueryParams` to ease handling
  * of pagination and filters.
  */
 export default function useFilters({
@@ -50,15 +53,15 @@ export default function useFilters({
     params?: string[];
   }>({ value: false });
 
-  const updateCache = (query: QueryParam) => {
+  const updateCache = (query: UrlQueryParams) => {
     if (disableCache || scoped) return;
     const blacklist = FILTERS_CACHE_BLACKLIST.concat(cacheBlacklist);
     FiltersCache.set(query, blacklist);
   };
 
   const setQueryParams = (
-    query: QueryParam,
-    options?: setQueryParamsOptions,
+    query: UrlQueryParams,
+    options?: SetQueryParamsOptions,
   ) => {
     query = FiltersCache.utils.clean(query);
     _setQueryParams(query, { ...options, replace: true });

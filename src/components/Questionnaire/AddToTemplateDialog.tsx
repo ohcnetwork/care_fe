@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 import { QuestionnaireResponseTemplateReadSpec } from "@/types/questionnaire/questionnaireResponseTemplate";
 
 import { cn } from "@/lib/utils";
@@ -171,7 +171,8 @@ export function AddToTemplateDialog<T>({
             </div>
             {facilityId && onSelectedOrganizationsChange && (
               <div className="space-y-2">
-                <FacilityOrganizationSelector
+                <Label>{t("select_department")}</Label>
+                <FacilityOrganizationTreeSelect
                   key="new"
                   facilityId={facilityId}
                   value={selectedOrganizations}

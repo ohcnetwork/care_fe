@@ -2,7 +2,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isWithinInterval } from "date-fns";
 
-import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -25,6 +24,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName, goBack } from "@/Utils/utils";
+import { navigate } from "@/lib/router/navigate";
 import { TokenSlotButton } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
@@ -54,13 +54,20 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
 
-  if (!staffId) {
-    toast.error(t("staff_username_not_found"));
-    navigate(`/facility/${facilityId}`);
-  } else if (!tokenData) {
-    toast.error(t("phone_number_not_found"));
-    navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
-  }
+  // Side effects stay out of render: a toast during the router's transition
+  // render interrupts it, so the render would restart without end.
+  useEffect(() => {
+    if (!staffId) {
+      toast.error(t("staff_username_not_found"));
+      navigate({ to: "/facility/$id", params: { id: facilityId } });
+    } else if (!tokenData) {
+      toast.error(t("phone_number_not_found"));
+      navigate({
+        to: "/facility/$facilityId/appointments/$staffId/otp/$page",
+        params: { facilityId, staffId, page: "send" },
+      });
+    }
+  }, [facilityId, staffId, tokenData, t]);
 
   const { data: appointmentData } = useQuery({
     queryKey: ["appointment", tokenData?.phoneNumber],
@@ -167,7 +174,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
             ["appointment", tokenData.phoneNumber],
           ],
         });
-        navigate(`/facility/${facilityId}/appointments/${data.id}/success`, {
+        navigate({
+          to: "/facility/$facilityId/appointments/$appointmentId/success",
+          params: { facilityId, appointmentId: data.id },
           replace: true,
         });
       },
@@ -340,15 +349,14 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   if (appointmentId && appointment) {
                     handleRescheduleAppointment(appointment);
                   } else {
-                    navigate(
-                      `/facility/${facilityId}/appointments/${staffId}/patient-select`,
-                      {
-                        query: {
-                          slotId: selectedSlot?.id,
-                          reason: reason,
-                        },
+                    navigate({
+                      to: "/facility/$facilityId/appointments/$staffId/patient-select",
+                      params: { facilityId, staffId },
+                      search: {
+                        slotId: selectedSlot?.id,
+                        reason: reason,
                       },
-                    );
+                    });
                   }
                 }}
               >

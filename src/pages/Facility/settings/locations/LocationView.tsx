@@ -1,10 +1,8 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Hash } from "lucide-react";
-import { Link, navigate } from "raviger";
-import React, { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { MapPinOff, PenLine } from "lucide-react";
+import { Fragment, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,388 +10,258 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
-
-import { AnimatedWrapper } from "@/components/Common/AnimatedWrapper";
-import Page from "@/components/Common/Page";
-import Pagination from "@/components/Common/Pagination";
 import {
-  CardGridSkeleton,
-  TableSkeleton,
-} from "@/components/Common/SkeletonLoading";
-import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
-import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+  EyebrowTitle,
+  Muted,
+  SubsectionTitle,
+} from "@/components/ui/typography";
+
 import { TagBadges } from "@/components/Tags/TagBadges";
 
-import { useLocationManagement } from "@/hooks/useLocationManagement";
-
 import query from "@/Utils/request/query";
-import { LocationRead } from "@/types/location/location";
+import { HTTPError } from "@/Utils/request/types";
+import { navigate } from "@/lib/router/navigate";
+import { LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
+import { buildLocationPath } from "@/types/location/utils";
 
 import LocationSheet from "./LocationSheet";
-import { SettingsLocationCard as LocationCard } from "./components/LocationCard";
-import { LocationTable } from "./components/LocationTable";
+import { LocationChildren } from "./components/LocationChildren";
 
 interface Props {
   id: string;
   facilityId: string;
-  isNested?: boolean;
-  onBackToParent?: () => void;
-  onSelectLocation?: (location: LocationRead) => void;
 }
 
-export default function LocationView({
-  id,
-  facilityId,
-  isNested,
-  onBackToParent,
-  onSelectLocation,
-}: Props) {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const limit = 14;
+/** A label beside its values; on a phone the label sits above them. */
+const detailRow = "grid gap-1 sm:grid-cols-[7rem_1fr] sm:items-baseline";
 
-  const { data: location, isLoading: isLocationLoading } = useQuery({
+/**
+ * One location in settings: what it is and what it holds. Edit opens the
+ * sheet that manages everything about it, the same sheet a bed opens from
+ * its parent's page.
+ */
+export default function LocationView({ id, facilityId }: Props) {
+  const { t } = useTranslation();
+  const headingId = useId();
+  const [isManaging, setIsManaging] = useState(false);
+
+  const {
+    data: location,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["location", facilityId, id],
     queryFn: query(locationApi.get, {
       pathParams: { facility_id: facilityId, id },
     }),
   });
-
-  const { data: locationOrganizations } = useQuery({
+  const { data: organizations } = useQuery({
     queryKey: ["location", id, "organizations"],
     queryFn: query(locationApi.getOrganizations, {
       pathParams: { facility_id: facilityId, id },
     }),
   });
 
-  const {
-    page,
-    setPage,
-    searchQuery,
-    setSearchQuery,
-    selectedLocation,
-    isSheetOpen,
-    children,
-    isLoading,
-    currentPageItems,
-    handleMove,
-    handleAddLocation,
-    handleEditLocation,
-    handleSheetClose,
-    isLastPage,
-  } = useLocationManagement({
-    facilityId,
-    parentId: id,
-    itemsPerPage: limit,
-    isNested,
-  });
+  if (!location && error) {
+    // A deleted location or a stale link is told apart from a request that
+    // failed for another reason, which is worth trying again.
+    const isMissing = error instanceof HTTPError && error.status === 404;
+    return (
+      <EmptyState
+        className="rounded-xl border border-dashed"
+        icon={<MapPinOff className="size-6 text-muted-foreground" />}
+        title={t(isMissing ? "location_not_found" : "failed_to_load_location")}
+        action={
+          <div className="flex flex-wrap justify-center gap-2">
+            {!isMissing && (
+              <Button variant="outline" onClick={() => refetch()}>
+                {t("retry")}
+              </Button>
+            )}
+            <Button variant="outline" asChild>
+              <Link
+                to="/facility/$facilityId/settings/locations"
+                params={{ facilityId }}
+              >
+                {t("locations")}
+              </Link>
+            </Button>
+          </div>
+        }
+      />
+    );
+  }
 
-  useEffect(() => {
-    setPage(1);
-  }, [id, setPage]);
+  if (!location) {
+    return (
+      <div role="status" className="space-y-4">
+        <span className="sr-only">{t("loading")}</span>
+        <Skeleton className="h-5 w-64 max-w-full" />
+        <Skeleton className="h-36 w-full rounded-lg" />
+      </div>
+    );
+  }
 
-  const handleViewLocation = (location: LocationRead) => {
-    if (isNested && onSelectLocation) {
-      onSelectLocation(location);
-    } else {
-      navigate(`/facility/${facilityId}/settings/locations/${location.id}`);
-    }
-  };
-
-  const handleBreadcrumbClick = (breadcrumbId: string) => {
-    if (!isNested) return;
-
-    if (breadcrumbId === id) return;
-
-    if (onSelectLocation) {
-      const locationForNavigation = { id: breadcrumbId } as LocationRead;
-      onSelectLocation(locationForNavigation);
-    } else if (onBackToParent) {
-      onBackToParent();
-    }
-  };
-
-  const generateBreadcrumbs = (locationData: any) => {
-    const breadcrumbs = [];
-    let current = locationData;
-
-    breadcrumbs.unshift({
-      name: current.name,
-      id: current.id,
-    });
-
-    while (current?.parent?.id) {
-      breadcrumbs.unshift({
-        name: current.parent.name || "",
-        id: current.parent.id,
-      });
-      current = current.parent;
-    }
-
-    return breadcrumbs;
-  };
-
-  const breadcrumbs = location ? generateBreadcrumbs(location) : [];
-
-  const handleMoveUp = (location: LocationRead) => handleMove(location, "up");
-  const handleMoveDown = (location: LocationRead) =>
-    handleMove(location, "down");
+  const Icon = LocationTypeIcons[location.form];
+  const ancestors = buildLocationPath(location).slice(0, -1);
+  const parent = ancestors.at(-1);
+  const departments = organizations?.results ?? [];
 
   return (
-    <>
-      <Breadcrumb className="md:m-5">
+    <div className="space-y-4">
+      <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink
-              asChild={!isNested}
-              className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
-              onClick={isNested && onBackToParent ? onBackToParent : undefined}
-            >
-              {isNested ? (
-                <span>{t("home")}</span>
-              ) : (
-                <Link href={`/facility/${facilityId}/settings/locations`}>
-                  {t("home")}
-                </Link>
-              )}
+            <BreadcrumbLink asChild>
+              <Link
+                to="/facility/$facilityId/settings/locations"
+                params={{ facilityId }}
+              >
+                {t("locations")}
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          {breadcrumbs.map((breadcrumb, index) => (
-            <React.Fragment key={breadcrumb.id}>
+          {ancestors.map((ancestor) => (
+            <Fragment key={ancestor.id}>
+              <BreadcrumbSeparator />
               <BreadcrumbItem>
-                {index === breadcrumbs.length - 1 ? (
-                  <span className="font-semibold text-gray-900">
-                    {breadcrumb.name}
-                  </span>
-                ) : (
-                  <BreadcrumbLink
-                    asChild={!isNested}
-                    className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
-                    onClick={
-                      isNested
-                        ? () => handleBreadcrumbClick(breadcrumb.id)
-                        : undefined
-                    }
+                <BreadcrumbLink asChild>
+                  <Link
+                    to="/facility/$facilityId/settings/locations/$id"
+                    params={{ facilityId, id: ancestor.id }}
                   >
-                    {isNested ? (
-                      <span>{breadcrumb.name}</span>
-                    ) : (
-                      <Link
-                        href={`/facility/${facilityId}/settings/locations/${breadcrumb.id}`}
-                      >
-                        {breadcrumb.name}
-                      </Link>
-                    )}
-                  </BreadcrumbLink>
-                )}
+                    {ancestor.name}
+                  </Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
-              {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
-            </React.Fragment>
+            </Fragment>
           ))}
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{location.name}</BreadcrumbPage>
+          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <Page hideTitleOnPage title={location?.name || t("location")}>
-        <div className="space-y-6">
-          <div className="flex flex-col justify-between items-start gap-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              {isLocationLoading ? (
-                <>
-                  <Skeleton className="h-8 w-48" />
-                  <Skeleton className="h-6 w-24" />
-                  <Skeleton className="h-6 w-24" />
-                </>
-              ) : (
-                <>
-                  <h2 className="text-xl font-semibold">{location?.name}</h2>
-                  <Badge variant="outline" className="whitespace-nowrap">
-                    {t(`location_form__${location?.form}`)}
-                  </Badge>
-                  <Badge
-                    variant={
-                      location?.status === "active" ? "primary" : "secondary"
-                    }
-                    className="capitalize whitespace-nowrap"
-                  >
-                    {location?.status}
-                  </Badge>
-                  <TagBadges tags={location?.tags ?? []} size="xs" />
-                </>
-              )}
-            </div>
-            <div className="flex flex-col xl:flex-row justify-between items-start w-full gap-4">
-              <div className="w-full xl:w-72">
-                <Input
-                  placeholder={t("search_by_name")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-              <div className="flex flex-col lg:flex-row gap-2 w-full lg:w-auto justify-evenly">
-                {!isLocationLoading &&
-                  location &&
-                  "mode" in location &&
-                  location.mode === "kind" && (
-                    <Button
-                      variant="primary"
-                      onClick={handleAddLocation}
-                      className="w-full sm:w-auto"
-                    >
-                      <CareIcon icon="l-plus" className="size-4 mr-2" />
-                      {t("add_location")}
-                    </Button>
-                  )}
-                {!isLocationLoading && location && (
-                  <TagAssignmentSheet
-                    entityType="location"
-                    entityId={location.id}
-                    facilityId={facilityId}
-                    currentTags={location.tags ?? []}
-                    onUpdate={() => {
-                      queryClient.invalidateQueries({
-                        queryKey: ["location", facilityId, id],
-                      });
-                    }}
-                    trigger={
-                      <Button variant="outline" className="w-full md:w-auto">
-                        <Hash className="size-4 mr-2" />
-                        {(location.tags?.length ?? 0) > 0
-                          ? t("manage_tags")
-                          : t("add_tags")}
-                      </Button>
-                    }
-                  />
-                )}
-                {!isLocationLoading && locationOrganizations && (
-                  <LinkDepartmentsSheet
-                    entityType="location"
-                    entityId={id}
-                    currentOrganizations={locationOrganizations.results}
-                    facilityId={facilityId}
-                    trigger={
-                      <Button variant="outline" className="w-full md:w-auto">
-                        <CareIcon icon="l-building" className="size-4 mr-2" />
-                        {t("manage_organization", { count: 0 })}
-                      </Button>
-                    }
-                    onUpdate={() => {
-                      queryClient.invalidateQueries({
-                        queryKey: ["location", facilityId, id],
-                      });
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {isLoading ? (
-              <>
-                {/* Desktop view skeleton */}
-                <div className="hidden lg:block">
-                  <TableSkeleton count={5} />
-                </div>
-
-                {/* Mobile view skeleton */}
-                <div className="lg:hidden flex flex-col gap-4">
-                  <CardGridSkeleton count={3} />
-                </div>
-              </>
-            ) : (
-              <>
-                {/* Desktop table view */}
-                <div className="hidden lg:block">
-                  {currentPageItems?.length ? (
-                    <LocationTable
-                      locations={currentPageItems}
-                      onEdit={handleEditLocation}
-                      onView={handleViewLocation}
-                      onMoveUp={handleMoveUp}
-                      onMoveDown={handleMoveDown}
-                      facilityId={facilityId}
-                      isFirstPage={page === 1}
-                      isLastPage={isLastPage}
-                      currentPage={page}
-                      setPage={setPage}
-                    />
-                  ) : (
-                    <Card>
-                      <CardContent className="p-4 text-center text-gray-500">
-                        {searchQuery
-                          ? t("no_locations_found")
-                          : t("no_child_locations_found")}
-                      </CardContent>
-                    </Card>
+      <Card>
+        <CardContent className="space-y-6 p-4 md:p-6">
+          <section aria-labelledby={headingId} className="space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              {/* Eyebrow, title, then the description. */}
+              <div className="min-w-0 space-y-1">
+                <EyebrowTitle className="flex items-center gap-1.5 text-muted-foreground">
+                  <Icon className="size-4 shrink-0" aria-hidden="true" />
+                  {[
+                    t(`location_form__${location.form}`),
+                    // Only a bed has an operational status worth reading.
+                    location.mode === "instance" &&
+                      t(
+                        `location_operational_status__${location.operational_status}`,
+                      ),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </EyebrowTitle>
+                <div className="flex flex-wrap items-center gap-2">
+                  <SubsectionTitle id={headingId} className="break-words">
+                    {location.name}
+                  </SubsectionTitle>
+                  {location.status !== "active" && (
+                    <Badge variant="secondary">{t(location.status)}</Badge>
                   )}
                 </div>
+                {location.description && (
+                  <Muted className="max-w-prose whitespace-pre-wrap">
+                    {location.description}
+                  </Muted>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                className="shrink-0"
+                onClick={() => setIsManaging(true)}
+              >
+                <PenLine aria-hidden="true" />
+                {t("edit")}
+              </Button>
+            </div>
 
-                {/* Mobile and tablet card view */}
-                <div className="lg:hidden flex flex-col gap-4">
-                  {currentPageItems?.length ? (
-                    <div className="flex flex-col gap-4">
-                      {currentPageItems.map((child, index) => (
-                        <AnimatedWrapper key={child.id} keyValue={child.id}>
-                          <LocationCard
-                            location={child}
-                            onEdit={handleEditLocation}
-                            onView={handleViewLocation}
-                            onMoveUp={handleMoveUp}
-                            onMoveDown={handleMoveDown}
-                            facilityId={facilityId}
-                            index={index}
-                            totalCount={currentPageItems.length}
-                            isFirstPage={page === 1}
-                            isLastPage={isLastPage}
-                            currentPage={page}
-                            setPage={setPage}
-                          />
-                        </AnimatedWrapper>
+            {/* Who manages it and how it is tagged: read here, changed in Edit. */}
+            {(departments.length > 0 || !!location.tags?.length) && (
+              <dl className="space-y-2">
+                {departments.length > 0 && (
+                  <div className={detailRow}>
+                    <dt className="text-sm text-muted-foreground">
+                      {t("departments")}
+                    </dt>
+                    <dd className="flex flex-wrap gap-1.5">
+                      {departments.map((department) => (
+                        <Badge
+                          key={department.id}
+                          variant="secondary"
+                          size="sm"
+                        >
+                          {department.name}
+                        </Badge>
                       ))}
-                    </div>
-                  ) : (
-                    <Card>
-                      <CardContent className="p-4 text-center text-gray-500">
-                        {searchQuery
-                          ? t("no_locations_found")
-                          : t("no_child_locations_found")}
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-
-                {children && children.count > limit && (
-                  <div className="flex justify-center mt-4">
-                    <Pagination
-                      data={{ totalCount: children.count }}
-                      onChange={setPage}
-                      defaultPerPage={limit}
-                      cPage={page}
-                    />
+                    </dd>
                   </div>
                 )}
-              </>
+                {!!location.tags?.length && (
+                  <div className={detailRow}>
+                    <dt className="text-sm text-muted-foreground">
+                      {t("tags_proper")}
+                    </dt>
+                    <dd>
+                      <TagBadges
+                        tags={location.tags}
+                        size="sm"
+                        hierarchyDisplay
+                        className="gap-1.5"
+                      />
+                    </dd>
+                  </div>
+                )}
+              </dl>
             )}
-          </div>
-        </div>
-      </Page>
+          </section>
+
+          {/* A bed holds nothing, so only other locations list what is inside. */}
+          {location.mode === "kind" && (
+            <div className="border-t border-soft-border pt-6">
+              <LocationChildren facilityId={facilityId} parent={location} />
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <LocationSheet
-        open={isSheetOpen}
-        onOpenChange={handleSheetClose}
+        open={isManaging}
+        onOpenChange={setIsManaging}
         facilityId={facilityId}
-        location={selectedLocation || undefined}
-        parentId={id}
+        location={location}
+        parentId={parent?.id}
+        onDeleted={() =>
+          // The open location is gone: go up to where it was listed.
+          parent
+            ? navigate({
+                to: "/facility/$facilityId/settings/locations/$id",
+                params: { facilityId, id: parent.id },
+              })
+            : navigate({
+                to: "/facility/$facilityId/settings/locations",
+                params: { facilityId },
+              })
+        }
       />
-    </>
+    </div>
   );
 }

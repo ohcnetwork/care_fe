@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { FileText } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -103,7 +103,13 @@ export const SummaryPanelReportsTab = ({
             asChild
           >
             <Link
-              href={`/facility/${facilityId}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/report/template/${template.slug}`}
+              to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/template/$templateSlug"
+              params={{
+                facilityId,
+                patientId: selectedEncounter.patient.id,
+                encounterId: selectedEncounter.id,
+                templateSlug: template.slug,
+              }}
             >
               <FileText className="size-4 shrink-0" />
               <span className="min-w-0 text-left [overflow-wrap:anywhere]">

@@ -1,7 +1,6 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { useNavigationPrompt } from "raviger";
 import {
   ComponentProps,
   ReactNode,
@@ -52,6 +51,7 @@ import { ReferralSharedRecords } from "@/components/Referral/ReferralSharedRecor
 import { ReferralStatusBadge } from "@/components/Referral/ReferralStatusBadge";
 import { useReferralPermissions } from "@/components/Referral/useReferralPermissions";
 import useAuthUser from "@/hooks/useAuthUser";
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { Code } from "@/types/base/code/code";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import {
@@ -364,7 +364,7 @@ export function ReferralResponseEditor({
     busy ||
     responseSaved ||
     !!uncertainAttempt;
-  useNavigationPrompt(
+  useNavigationBlocker(
     page &&
       !leaving &&
       (busy ||
@@ -742,10 +742,11 @@ export function ReferralResponseEditor({
             }}
             className="min-h-0 flex-1 gap-0"
           >
-            <div className="shrink-0 border-b border-border px-4 pt-2 sm:px-5">
+            <div className="shrink-0 overflow-x-auto pt-2">
               <TabsList
                 variant="line"
                 aria-label={t("referral_response_context")}
+                className="px-4 sm:px-5"
               >
                 <TabsTrigger value="response">
                   {t(

@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { isPast } from "date-fns";
 import { List, Search } from "lucide-react";
-import { useNavigate, usePathParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,10 +17,13 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import { EmptyState } from "@/components/ui/empty-state";
+import { navigate } from "@/lib/router/navigate";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { buildEncounterUrl } from "@/pages/Encounters/utils/utils";
 import { ConsentModel } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
+
+import { useRouteParams } from "@/hooks/useRouteParams";
 
 const CONSENTS_PER_PAGE = 12;
 
@@ -33,8 +35,7 @@ function ConsentCard({
   patientId: string;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
+  const { facilityId } = useRouteParams("/facility/:facilityId");
   const encounterId = consent.encounter;
   const consentId = consent.id;
 
@@ -131,13 +132,13 @@ function ConsentCard({
           variant="ghost"
           className="w-full justify-center items-center gap-2 rounded-t-none"
           onClick={() =>
-            navigate(
-              buildEncounterUrl(
+            navigate({
+              href: buildEncounterUrl(
                 patientId,
                 `/encounter/${encounterId}/consents/${consentId}`,
                 facilityId,
               ),
-            )
+            })
           }
         >
           <List className="size-4" />

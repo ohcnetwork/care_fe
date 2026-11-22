@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -9,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import Loading from "@/components/Common/Loading";
 
 import query from "@/Utils/request/query";
+import { HrefLink } from "@/lib/router/HrefLink";
 import deviceApi from "@/types/device/deviceApi";
 
 import { goBack } from "@/Utils/utils";
@@ -57,9 +57,12 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
       ) : (
         <div className="flex flex-col items-center justify-center gap-4 py-16">
           <p className="text-gray-500">{t("device_not_found")}</p>
-          <Link href={`/facility/${facilityId}/settings/devices/${deviceId}`}>
+          <HrefLink
+            href={`/facility/${facilityId}/settings/devices/${deviceId}`}
+            back
+          >
             <Button variant="outline">{t("back")}</Button>
-          </Link>
+          </HrefLink>
         </div>
       )}
     </div>
