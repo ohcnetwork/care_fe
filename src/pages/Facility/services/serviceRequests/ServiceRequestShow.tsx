@@ -181,7 +181,7 @@ export default function ServiceRequestShow({
     <div className="min-h-screen bg-soft-background relative">
       <div
         className={cn(
-          "mx-auto w-full max-w-4xl",
+          "mx-auto w-full max-w-4xl pt-4",
           canShowMarkAsCompleteFootBar ? "pb-28" : "pb-5",
         )}
       >
