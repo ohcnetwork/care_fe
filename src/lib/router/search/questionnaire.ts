@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import {
   searchEnum,
-  searchInt,
+  searchPositiveInt,
   searchString,
 } from "@/lib/router/search/fields";
 import { QuestionnaireResponseStatus } from "@/types/questionnaire/questionnaireResponse";
@@ -27,7 +27,7 @@ export const questionnaireFillSearch = z.object({
 
 /** The responses of a facility, a location or a device. */
 export const resourceResponseListSearch = z.object({
-  page: searchInt(),
+  page: searchPositiveInt(),
   /** The id of the selected response. */
   response: searchString(),
   /** A questionnaire id. */

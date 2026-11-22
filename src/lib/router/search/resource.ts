@@ -4,7 +4,7 @@ import {
   paginationSearch,
   searchBoolean,
   searchEnum,
-  searchInt,
+  searchPositiveInt,
   searchString,
 } from "@/lib/router/search/fields";
 import { ResourceRequestStatus } from "@/types/resourceRequest/resourceRequest";
@@ -26,5 +26,5 @@ export const resourceFormSearch = z.object({
 
 /** The comments of a resource request, on its page. */
 export const resourceCommentListSearch = z.object({
-  page: searchInt(),
+  page: searchPositiveInt(),
 });

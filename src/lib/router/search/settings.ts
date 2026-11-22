@@ -3,7 +3,7 @@ import { z } from "zod";
 import {
   paginationSearch,
   searchEnum,
-  searchInt,
+  searchPositiveInt,
   searchString,
 } from "@/lib/router/search/fields";
 import { ChargeItemDefinitionStatus } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
@@ -85,7 +85,7 @@ export const deviceFormSearch = z.object({
 
 /** The device page: the page of its service history. */
 export const deviceShowSearch = z.object({
-  page: searchInt(),
+  page: searchPositiveInt(),
 });
 
 /** The healthcare service list. */

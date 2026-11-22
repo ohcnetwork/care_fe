@@ -6,9 +6,7 @@ import { resourceResponseListSearch } from "@/lib/router/search/questionnaire";
 /** Keep response selection, pagination and filter labels in the shareable URL. */
 export function useResourceResponseParams() {
   const [params, setParams] = useQueryParams(resourceResponseListSearch);
-  const parsedPage = Number(params.page);
-  const page =
-    Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const page = params.page ?? 1;
   const responseId = params.response || undefined;
   const filters: ResourceResponseFilterValues = {
     questionnaire: params.questionnaire || undefined,

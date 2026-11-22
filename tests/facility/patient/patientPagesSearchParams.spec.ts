@@ -89,6 +89,27 @@ test.describe("Patient pages search params", () => {
     ).toBeVisible();
   });
 
+  test("lists the first page of encounters for a page below 1", async ({
+    page,
+  }) => {
+    const request = page.waitForRequest((request) => {
+      const url = new URL(request.url());
+      return (
+        url.pathname === "/api/v1/encounter/" &&
+        url.searchParams.get("patient") === patientId &&
+        url.searchParams.get("limit") === "5"
+      );
+    });
+
+    await page.goto(
+      `/facility/${facilityId}/patient/${patientId}/encounters?page=-5`,
+    );
+
+    expect(new URL((await request).url()).searchParams.get("offset")).toBe("0");
+    // The router drops the invalid page when the page loads.
+    await expect(page).not.toHaveURL(/page=-5/);
+  });
+
   test("goes back to the source URL of the clinical history", async ({
     page,
   }) => {

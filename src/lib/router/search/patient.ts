@@ -5,7 +5,7 @@ import {
   searchAppPath,
   searchBoolean,
   searchEnum,
-  searchInt,
+  searchPositiveInt,
   searchString,
 } from "@/lib/router/search/fields";
 
@@ -59,7 +59,7 @@ export const patientShowSearch = z.object({
 
 /** The encounters tab of a patient. */
 export const patientEncounterListSearch = z.object({
-  page: searchInt(),
+  page: searchPositiveInt(),
 });
 
 /**
@@ -71,6 +71,10 @@ export const fileListSearch = z.object({
   /** The sub tab: `all`, `reports` or the name of a plugin tab. */
   file: searchString(),
   name: searchString(),
+  /**
+   * Text, not a boolean: the files and reports lists send it to the API as
+   * is. No code reads `include_archived` or sends it to the API.
+   */
   is_archived: searchEnum(["true", "false"]),
   /** Set with `is_archived` by the filter of the reports sub tab. */
   include_archived: searchBoolean(),

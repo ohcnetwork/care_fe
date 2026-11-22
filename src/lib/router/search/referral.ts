@@ -4,7 +4,7 @@ import {
   searchAppPath,
   searchBoolean,
   searchEnum,
-  searchInt,
+  searchPositiveInt,
   searchString,
 } from "@/lib/router/search/fields";
 import { REFERRAL_STATUSES } from "@/types/emr/referral/referral";
@@ -22,7 +22,7 @@ export const referralListSearch = z.object({
   referralDepartment: searchString(),
   /** `facility` lists the facility's referrals, not the department's. */
   referralDestination: searchEnum(["department", "facility"]),
-  referralPage: searchInt(),
+  referralPage: searchPositiveInt(),
   /**
    * The list that `referralPage` belongs to: `<entity type>:<id>`,
    * `encounter:<id>` or `patient:<id>`.
