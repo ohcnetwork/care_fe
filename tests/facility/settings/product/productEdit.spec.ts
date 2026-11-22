@@ -24,7 +24,8 @@ test.describe("Product Edit", () => {
 
     await expect(page.getByText("Back to list")).toBeVisible();
     const updatedToast = page.getByText("Product updated successfully");
-    await expect(updatedToast).toHaveCount(1);
+    await expect(updatedToast).toBeVisible();
+    await expect(updatedToast).toBeHidden();
 
     // Revert status to active as part of cleanup
     await page.getByRole("button", { name: "Edit" }).click();
@@ -32,7 +33,8 @@ test.describe("Product Edit", () => {
     await page.getByRole("option", { name: "Active", exact: true }).click();
     await page.getByRole("button", { name: "Update" }).click();
 
-    // The first update's toast can still be on screen alongside the revert's.
-    await expect(updatedToast.last()).toBeVisible();
+    await expect(updatedToast).toBeVisible();
+    await page.getByRole("button", { name: "Edit" }).click();
+    await expect(page.getByLabel("Status")).toHaveText("Active");
   });
 });

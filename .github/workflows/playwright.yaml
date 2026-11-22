@@ -201,6 +201,9 @@ jobs:
     needs: [changes, backend]
     timeout-minutes: 30
     runs-on: ubuntu-latest-m
+    permissions:
+      actions: read
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -250,39 +253,33 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           package-manager-cache: false
 
-      - name: Restore build cache
-        id: cache-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            build/
-            node_modules/
-          key: build-${{ github.sha }}
-
-      - name: Retry build cache restore after 15 seconds
-        if: steps.cache-restore.outputs.cache-hit != 'true'
-        id: cache-retry
+      - name: Wait for build cache producer
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          echo "Build is still running; retrying the cache restore shortly."
-          sleep 15
+          deadline=$((SECONDS + 960))
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            build_job=$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?per_page=100" \
+              --jq '.jobs[] | select(.name == "build") | [.status, (.conclusion // "")] | @tsv' \
+              || true)
+            read -r status conclusion <<< "$build_job" || true
 
-      - name: Restore build cache (retry 1)
-        if: steps.cache-restore.outputs.cache-hit != 'true'
-        id: cache-restore-retry
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            build/
-            node_modules/
-          key: build-${{ github.sha }}
+            if [ "$status" = "completed" ]; then
+              if [ "$conclusion" = "success" ]; then
+                exit 0
+              fi
+              echo "::error::Build job completed with conclusion: $conclusion"
+              exit 1
+            fi
 
-      - name: Retry build cache restore after another 15 seconds
-        if: steps.cache-restore.outputs.cache-hit != 'true' && steps.cache-restore-retry.outputs.cache-hit != 'true'
-        run: sleep 15
+            sleep 20
+          done
 
-      - name: Restore build cache (retry 2)
-        if: steps.cache-restore.outputs.cache-hit != 'true' && steps.cache-restore-retry.outputs.cache-hit != 'true'
-        id: cache-restore-retry-2
+          echo "::error::Timed out waiting for the build job to finish"
+          exit 1
+
+      - name: Restore build cache
         uses: actions/cache/restore@v4
         with:
           path: |
