@@ -167,7 +167,8 @@ const ScheduleTemplateEditor = ({
   });
   const savedOrganizations = templateDetail?.organizations ?? [];
   const savedCareTeam = templateDetail?.care_team ?? [];
-  const savedEncounterType = (templateDetail ?? template).encounter_type ?? null;
+  const savedEncounterType =
+    (templateDetail ?? template).encounter_type ?? null;
   // Keep the stored option available so an unsaved change can be undone.
   const encounterTypeOptions =
     savedEncounterType &&
