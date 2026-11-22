@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -190,6 +190,50 @@ export async function pickValuesetFromAutocomplete(
  * the block's count (`toHaveCount(1)`) before building any negative
  * assertion on it — a zero-match locator passes `.not.` checks vacuously.
  */
+/**
+ * Clicks a question label on the builder's edit canvas the way a pointer does.
+ *
+ * On the edit canvas every answer input sits inside an `inert` wrapper, and a
+ * click on the label selects the question. `locator.click()` cannot do this:
+ * Playwright runs its actionability checks on a `<label>`'s associated
+ * control, and since Playwright 1.65 it refuses to act on an inert target, so
+ * `label.click()` retries until the timeout even though the label itself is
+ * clickable. Wait for the label to be visible and still, then click its
+ * centre with the mouse. Callers assert the selection that follows.
+ */
+export async function clickCanvasLabel(label: Locator): Promise<void> {
+  const page = label.page();
+  await expect(label).toBeVisible();
+  await label.scrollIntoViewIfNeeded();
+  // A raw mouse click skips Playwright's stability check, so wait until the
+  // label has stopped moving (the canvas scrolls to the selected question).
+  let box: Awaited<ReturnType<Locator["boundingBox"]>> = null;
+  await expect
+    .poll(
+      async () => {
+        const before = await label.boundingBox();
+        await page.evaluate(
+          () =>
+            new Promise((resolve) =>
+              requestAnimationFrame(() => requestAnimationFrame(resolve)),
+            ),
+        );
+        box = await label.boundingBox();
+        return (
+          !!before &&
+          !!box &&
+          before.x === box.x &&
+          before.y === box.y &&
+          before.width === box.width &&
+          before.height === box.height
+        );
+      },
+      { message: "canvas label never settled into a stable position" },
+    )
+    .toBe(true);
+  await page.mouse.click(box!.x + box!.width / 2, box!.y + box!.height / 2);
+}
+
 export function questionBlock(page: Page, label: string) {
   return page
     .locator("[data-question-id]")
