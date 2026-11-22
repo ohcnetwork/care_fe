@@ -144,9 +144,11 @@ export default defineConfig({
       name: "vite-modules",
       testMatch: VITE_MODULE_SPECS,
       use: { ...devices["Desktop Chrome"], baseURL: VITE_DEV_URL },
-      // The first spec to load on a cold dev server waits up to 45s for
-      // dependency pre-bundling inside beforeEach, which counts against this.
+      // The first load on a cold dev server pre-bundles dependencies and
+      // compiles the questionnaire module graph on demand, which takes longer
+      // than the default timeouts on CI runners. Later loads are fast.
       timeout: 120000,
+      expect: { timeout: 45000 },
       // These specs answer every API call themselves, so they need neither a
       // signed-in user nor backend fixtures.
       dependencies: [],
