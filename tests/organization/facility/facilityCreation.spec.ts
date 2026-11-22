@@ -15,11 +15,15 @@ function facilityTypeLine(page: Page, facilityName: string) {
 /**
  * Answer the location picker's OpenStreetMap search with one result for the
  * query, so the tests don't depend on the public Nominatim service (which can
- * be slow or rate limited on CI).
+ * be slow or rate limited on CI). Any other Nominatim request is aborted, so a
+ * change to the picker's search URL fails the tests instead of falling back
+ * to the live service.
  */
 async function mockLocationSearch(page: Page) {
-  await page.route("https://nominatim.openstreetmap.org/search?**", (route) => {
-    const query = new URL(route.request().url()).searchParams.get("q") ?? "";
+  await page.route("https://nominatim.openstreetmap.org/**", (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname !== "/search") return route.abort();
+    const query = url.searchParams.get("q") ?? "";
     const place = query.charAt(0).toUpperCase() + query.slice(1);
     return route.fulfill({
       json: [
