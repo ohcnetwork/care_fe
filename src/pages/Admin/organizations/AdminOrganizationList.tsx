@@ -606,9 +606,7 @@ function SupplierDirectory() {
               ) : (
                 <div ref={ref} />
               ))}
-            {isFetchingNextPage && (
-              <Skeleton className="m-4 h-16 rounded-md" />
-            )}
+            {isFetchingNextPage && <Skeleton className="m-4 h-16 rounded-md" />}
           </>
         ) : (
           <div className="flex flex-col items-center gap-2 p-10 text-center">
