@@ -1,7 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
-import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import { openServiceLocation } from "tests/facility/services/helpers";
+import {
+  createQuestionnaireEncounter,
+  submitAndExpectSuccess,
+} from "tests/helper/questionnaire";
 import { filterSelectButton } from "tests/helper/searchParams";
-import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -12,42 +15,84 @@ test.use({ storageState: "tests/.auth/user.json" });
 test.describe("Prescriptions preview search params", () => {
   let previewUrl: string;
 
-  test.beforeAll(async ({ request }) => {
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext({
+      storageState: "tests/.auth/user.json",
+    });
+    const page = await context.newPage();
     const facilityId = getFacilityId();
-    const api = getApiUrl();
-    const headers = getApiHeaders();
-    const locations = await request.get(
-      `${api}/api/v1/facility/${facilityId}/location/`,
-      { headers, params: { mode: "kind", name: "Pharmacy" } },
-    );
-    await expect(locations).toBeOK();
-    const { results } = (await locations.json()) as {
-      results: { id: string; name: string }[];
-    };
-    const pharmacy = results.find(({ name }) => name === "Pharmacy");
-    if (!pharmacy) throw new Error("Seeded Pharmacy location not found");
-
     const { patientId, encounterId } =
       await createQuestionnaireEncounter(facilityId);
-    const user = await request.get(`${api}/api/v1/users/getcurrentuser/`, {
-      headers,
-    });
-    await expect(user).toBeOK();
-    const { id: prescriberId } = await user.json();
-    const prescription = await request.post(
-      `${api}/api/v1/patient/${patientId}/medication/prescription/`,
-      {
-        headers,
-        data: {
-          encounter: encounterId,
-          prescribed_by: prescriberId,
-          status: "active",
-        },
-      },
+    await page.goto(
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`,
     );
-    await expect(prescription).toBeOK();
-    const { id } = await prescription.json();
-    previewUrl = `/facility/${facilityId}/locations/${pharmacy.id}/medication_requests/patient/${patientId}/prescriptions/${id}`;
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: /Add Medication/i })
+      .click();
+    await page.getByRole("tab", { name: "Medication" }).click();
+    await page
+      .getByPlaceholder(/Search Medications/i)
+      .fill("Senna 15 mg oral tablet");
+    await page
+      .getByRole("option", { name: "Senna 15 mg oral tablet", exact: true })
+      .click();
+    await page
+      .locator('input[placeholder="Enter a number..."]:not([disabled])')
+      .fill("1");
+    await page.getByRole("option", { name: "1 tablets", exact: true }).click();
+    await page
+      .locator('button[role="combobox"]:not([disabled])')
+      .filter({ hasText: "eg. 1-0-1" })
+      .click();
+    await page.getByPlaceholder("Type eg. 1-0-1").fill("1-0-1");
+    await page.getByRole("option", { name: "1-0-1 (Twice a day)" }).click();
+    const duration = page.getByRole("textbox", { name: "Duration" });
+    await duration.click();
+    await duration.fill("2 days");
+    await page
+      .locator('[data-slot="popover-content"]')
+      .getByRole("button", { name: "2 days", exact: true })
+      .click();
+    await submitAndExpectSuccess(page);
+
+    const pharmacyPath = await openServiceLocation(
+      page,
+      facilityId,
+      "Main Pharmacy",
+      "Pharmacy",
+    );
+    const queueResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        response.request().method() === "GET" &&
+        url.pathname.endsWith("/medication_prescription/summary/") &&
+        url.searchParams.get("patient_external_id") === patientId
+      );
+    });
+    await page.goto(
+      `${pharmacyPath}/medication_requests?patient_external_id=${patientId}`,
+    );
+    const response = await queueResponse;
+    expect(response.ok()).toBe(true);
+    const queue = (await response.json()) as {
+      results: { id: string; encounter: { id: string } }[];
+    };
+    expect(queue.results).toHaveLength(1);
+    expect(queue.results[0].encounter.id).toBe(encounterId);
+    await expect(
+      page.getByRole("tab", { name: "Billing Pending", exact: true }),
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.locator('[data-slot="table-body"] [data-slot="table-row"]'),
+    ).toHaveCount(1);
+    const preview = page.getByRole("link", { name: "Preview Selected Rx" });
+    await expect(preview).toBeVisible();
+    previewUrl = (await preview.getAttribute("href"))!;
+    expect(previewUrl).toContain(
+      `${pharmacyPath}/medication_requests/patient/${patientId}/prescriptions/${queue.results[0].id}`,
+    );
+    await context.close();
   });
 
   const searchBox = (page: Page) => page.getByPlaceholder("Search Medications");
