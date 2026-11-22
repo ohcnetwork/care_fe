@@ -14,6 +14,7 @@ import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import useFilters from "@/hooks/useFilters";
+import { facilityDetailsPageSearch } from "@/lib/router/search/facility";
 
 import query from "@/Utils/request/query";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
@@ -37,6 +38,7 @@ export function FacilityDetailsPage({ id }: Props) {
   });
 
   const { Pagination } = useFilters({
+    schema: facilityDetailsPageSearch,
     limit: 18,
   });
 

@@ -1,5 +1,6 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 
+import { encounterListSearch } from "@/lib/router/search/encounter";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
 import type { EncounterClass } from "@/types/emr/encounter/encounter";
 
@@ -10,6 +11,7 @@ import type { EncounterClass } from "@/types/emr/encounter/encounter";
  * them, as with the legacy table.
  */
 export const Route = createFileRoute("/_app/facility/$facilityId/encounters")({
+  validateSearch: encounterListSearch,
   component: RouteComponent,
 });
 

@@ -106,6 +106,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { appointmentShowSearch } from "@/lib/router/search/appointments";
 import { cn } from "@/lib/utils";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
@@ -128,9 +129,9 @@ export default function AppointmentDetail(props: Props) {
   const queryClient = useQueryClient();
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
-  const [params, setQueryParams] = useQueryParams();
+  const [params, setQueryParams] = useQueryParams(appointmentShowSearch);
   const { showSuccess } = params;
-  const [{ from_queue }] = useQueryParams();
+  const [{ from_queue }] = useQueryParams(appointmentShowSearch);
 
   useShortcutSubContext("facility:appointment");
 
@@ -175,7 +176,7 @@ export default function AppointmentDetail(props: Props) {
     }
 
     // If facility is loaded but user doesn't have permission to view appointments
-    if (facility && !canViewAppointments) {
+    if (!canViewAppointments) {
       toast.error(t("no_permission_to_view_page"));
       goBack(`/facility/${facility.id}/overview`);
       return;
@@ -272,10 +273,7 @@ export default function AppointmentDetail(props: Props) {
                       strong: <strong className="font-semibold" />,
                     }}
                     values={{
-                      name:
-                        (appointment &&
-                          formatScheduleResourceName(appointment)) ||
-                        "",
+                      name: formatScheduleResourceName(appointment) || "",
                       date: format(
                         appointment.token_slot.start_datetime,
                         "do MMMM",
@@ -532,7 +530,7 @@ export default function AppointmentDetail(props: Props) {
                             appointment.token_slot.availability.schedule
                           }
                           redirectQueryParams={referralEncounterParams}
-                          defaultOpen={from_queue === "true"}
+                          defaultOpen={from_queue === true}
                           defaultStatus={EncounterStatus.IN_PROGRESS}
                           trigger={
                             <QuickAction

@@ -37,6 +37,7 @@ import Page from "@/components/Common/Page";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { roleListSearch } from "@/lib/router/search/admin";
 
 import query from "@/Utils/request/query";
 import RoleForm from "@/pages/Admin/Roles/RoleForm";
@@ -174,8 +175,8 @@ function RoleCard({
 export default function RolesIndex() {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: roleListSearch,
     limit: 15,
-    disableCache: true,
   });
 
   const [selectedRole, setSelectedRole] = React.useState<RoleRead | null>(null);
