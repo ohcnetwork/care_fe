@@ -1,5 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 import { openServiceLocation } from "tests/facility/services/helpers";
+import {
+  createQuestionnaireEncounter,
+  submitAndExpectSuccess,
+} from "tests/helper/questionnaire";
 import { filterSelectButton } from "tests/helper/searchParams";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -16,28 +20,78 @@ test.describe("Prescriptions preview search params", () => {
       storageState: "tests/.auth/user.json",
     });
     const page = await context.newPage();
+    const facilityId = getFacilityId();
+    const { patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId);
+    await page.goto(
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`,
+    );
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: /Add Medication/i })
+      .click();
+    await page.getByRole("tab", { name: "Medication" }).click();
+    await page
+      .getByPlaceholder(/Search Medications/i)
+      .fill("Senna 15 mg oral tablet");
+    await page
+      .getByRole("option", { name: "Senna 15 mg oral tablet", exact: true })
+      .click();
+    await page
+      .locator('input[placeholder="Enter a number..."]:not([disabled])')
+      .fill("1");
+    await page.getByRole("option", { name: "1 tablets", exact: true }).click();
+    await page
+      .locator('button[role="combobox"]:not([disabled])')
+      .filter({ hasText: "eg. 1-0-1" })
+      .click();
+    await page.getByPlaceholder("Type eg. 1-0-1").fill("1-0-1");
+    await page.getByRole("option", { name: "1-0-1 (Twice a day)" }).click();
+    const duration = page.getByRole("textbox", { name: "Duration" });
+    await duration.click();
+    await duration.fill("2 days");
+    await page
+      .locator('[data-slot="popover-content"]')
+      .getByRole("button", { name: "2 days", exact: true })
+      .click();
+    await submitAndExpectSuccess(page);
+
     const pharmacyPath = await openServiceLocation(
       page,
-      getFacilityId(),
+      facilityId,
       "Main Pharmacy",
       "Pharmacy",
     );
+    const queueResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        response.request().method() === "GET" &&
+        url.pathname.endsWith("/medication_prescription/summary/") &&
+        url.searchParams.get("patient_external_id") === patientId
+      );
+    });
+    await page.goto(
+      `${pharmacyPath}/medication_requests?patient_external_id=${patientId}`,
+    );
+    const response = await queueResponse;
+    expect(response.ok()).toBe(true);
+    const queue = (await response.json()) as {
+      results: { id: string; encounter: { id: string } }[];
+    };
+    expect(queue.results).toHaveLength(1);
+    expect(queue.results[0].encounter.id).toBe(encounterId);
     await expect(
       page.getByRole("tab", { name: "Billing Pending", exact: true }),
     ).toHaveAttribute("aria-selected", "true");
-    // The queue lists prescriptions to bill. Filter it by the first patient
-    // to select their prescriptions.
-    await page
-      .locator('[data-slot="table-body"] [data-slot="table-row"]')
-      .first()
-      .getByRole("cell")
-      .first()
-      .click();
-    await expect(page).toHaveURL(/[?&]patient_external_id=/);
+    await expect(
+      page.locator('[data-slot="table-body"] [data-slot="table-row"]'),
+    ).toHaveCount(1);
     const preview = page.getByRole("link", { name: "Preview Selected Rx" });
     await expect(preview).toBeVisible();
     previewUrl = (await preview.getAttribute("href"))!;
-    expect(previewUrl).toContain(`${pharmacyPath}/medication_requests/`);
+    expect(previewUrl).toContain(
+      `${pharmacyPath}/medication_requests/patient/${patientId}/prescriptions/${queue.results[0].id}`,
+    );
     await context.close();
   });
 

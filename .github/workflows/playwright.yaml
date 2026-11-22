@@ -10,9 +10,9 @@ name: Playwright Tests
 
 on:
   push:
-    branches: [main, develop, production, playwright-actions]
+    branches: [develop, "3.*"]
   pull_request:
-    branches: [develop, production]
+    branches: [develop, "3.*"]
   workflow_dispatch:
     inputs:
       backend_ref:
@@ -29,7 +29,7 @@ env:
   REACT_CARE_API_URL: http://localhost:9000
   REACT_ENABLE_QUESTIONNAIRE_DRAFT: "true"
   BACKEND_STARTUP_TIMEOUT: 120
-  TEST_SHARDS: 3
+  TEST_SHARDS: 8
   # care backend ref to test against. `develop` uses the published
   # ghcr.io/ohcnetwork/care:latest image; any other branch, tag or commit is
   # built from source. Override per run with the `backend_ref` input.
@@ -190,11 +190,11 @@ jobs:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
     needs: [changes, build, backend]
     timeout-minutes: 30
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-m
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
 
     steps:
       - name: Checkout

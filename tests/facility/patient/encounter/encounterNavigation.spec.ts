@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Request } from "@playwright/test";
+import { navigateInApp } from "tests/helper/history";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
@@ -748,7 +749,12 @@ test.describe("Encounter navigation", () => {
           const refetched = page.waitForResponse(
             (response) => new URL(response.url()).pathname === encounterPath,
           );
-          await page.goBack();
+          // Push the encounter from the filtered board. Browser Back would
+          // put the board ahead of us in history, not behind us.
+          await navigateInApp(
+            page,
+            `/facility/${facilityId}/patient/${patientId}/encounter/${primaryEncounterId}/updates`,
+          );
           await refetched;
           await expect(bar).toBeVisible();
           await page.getByRole("button", { name: "Back", exact: true }).click();

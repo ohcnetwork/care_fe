@@ -4,8 +4,8 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 2.x.x   | :white_check_mark: |
-| 1.0.x   | :white_check_mark: |
+| 3.x     | :white_check_mark: |
+| < 3.0   | :x:                |
 
 ## Supported Browsers
 
@@ -23,4 +23,6 @@
 
 ## Reporting a Vulnerability
 
-Please create an issue at https://github.com/ohcnetwork/care_fe/issues/new
+CARE handles sensitive patient data, so please do **not** report vulnerabilities in public issues, pull requests or discussions.
+
+Instead, report them privately through [GitHub's private vulnerability reporting](https://github.com/ohcnetwork/care_fe/security/advisories/new). Include a description of the issue, the steps to reproduce it, and the affected versions if you know them. Only you and the maintainers can see the report.
