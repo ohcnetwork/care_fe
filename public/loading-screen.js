@@ -6,6 +6,7 @@
  * `src/components/ui/loading-animation-svg.tsx` — keep the two in sync.
  *
  * Lifecycle:
+ *   0. If /runtime-env.js didn't load, shows a retry screen instead and stops.
  *   1. Runs synchronously; injects SVG + text into <div id="app-loading">.
  *   2. Cycles heart ⇄ logo until React is ready.
  *   3. React's <Loading /> holds the screen via __holdLoadingScreen() while it
@@ -158,6 +159,30 @@
 
   var container = document.getElementById("app-loading");
   if (!container) return;
+
+  // runtime-env.js always sets this ({} when unused), so undefined means it
+  // didn't load: a network or server error, or an HTML page in its place.
+  // src/index.tsx then doesn't start the app, so offer a retry instead of the
+  // animation. i18n isn't available before the bundle loads.
+  if (window.__CARE_RUNTIME_ENV__ === undefined) {
+    var message = document.createElement("p");
+    message.setAttribute("role", "alert");
+    message.style.cssText =
+      "margin:0;padding:0 16px;text-align:center;font-size:14px;line-height:20px;color:#374151";
+    message.textContent =
+      "Couldn't load this site's settings. Check your connection and try again.";
+    var retry = document.createElement("button");
+    retry.type = "button";
+    retry.textContent = "Try again";
+    retry.style.cssText =
+      "padding:8px 16px;border:0;border-radius:6px;background:#059669;color:#fff;font:inherit;font-size:14px;font-weight:500;cursor:pointer";
+    retry.addEventListener("click", function () {
+      location.reload();
+    });
+    container.appendChild(message);
+    container.appendChild(retry);
+    return;
+  }
 
   var svg = document.createElementNS(NS, "svg");
   svg.setAttribute("viewBox", "0 0 " + COLS + " " + ROWS);

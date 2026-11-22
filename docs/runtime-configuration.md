@@ -71,5 +71,5 @@ In the browser console, `window.__CARE_RUNTIME_ENV__` shows the overrides and `w
 
 - The values are visible to anyone who loads the app, as build-time values already are, so never put secrets in them.
 - They aren't validated like build-time values (`scripts/validate-env.ts`). A malformed JSON value, for example in `REACT_CUSTOM_SHORTCUTS`, stops the app from loading, so try changes on a staging site first.
-- If `runtime-env.js` can't be loaded, the app uses the build's values.
+- If `runtime-env.js` doesn't load (a network or server error, or the server returns `index.html` in its place), the app doesn't start. It shows an error with a **Try again** button rather than run with the build's values, which may point at another deployment's backend. This also happens on a device that is offline, because the service worker doesn't cache the file.
 - These settings are still applied only at build time: `REACT_APP_TITLE`, `REACT_APP_META_DESCRIPTION`, `REACT_APP_COVER_IMAGE`, `REACT_PUBLIC_URL`, `REACT_INJECTED_HEAD` and `REACT_INJECTED_HTML` (written into `index.html`), `REACT_CUSTOM_DESCRIPTION` and `REACT_MFE_REGISTERED_COMPONENTS`.

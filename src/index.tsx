@@ -24,6 +24,13 @@ declare global {
   }
 }
 
+// runtime-env.js always sets this, so undefined means it didn't load. Starting
+// with the build's values could send requests to another deployment's backend,
+// so stop here; public/loading-screen.js shows a retry screen.
+if (window.__CARE_RUNTIME_ENV__ === undefined) {
+  throw new Error("Couldn't load /runtime-env.js");
+}
+
 // Expose Environment variable to window object for use in plugins
 window.CARE_API_URL = careConfig.apiUrl;
 window.AuthUserContext = AuthUserContext;

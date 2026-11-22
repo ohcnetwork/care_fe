@@ -35,4 +35,31 @@ test.describe("Runtime env overrides", () => {
     ).toBeVisible();
     await expect(page.getByText(/patient sign-in/i)).toHaveCount(0);
   });
+
+  test("stops with a retry screen when runtime-env.js doesn't load", async ({
+    page,
+  }) => {
+    await page.route("**/runtime-env.js", (route) => route.abort());
+    const apiRequests: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().includes("/api/")) apiRequests.push(request.url());
+    });
+    const stopped = page.waitForEvent("pageerror", (error) =>
+      error.message.includes("runtime-env.js"),
+    );
+
+    await page.goto("/");
+
+    // The app stops instead of starting with the build's values.
+    await stopped;
+    await expect(page.getByRole("alert")).toHaveText(/couldn't load/i);
+    expect(apiRequests).toEqual([]);
+
+    // Once runtime-env.js loads again, "Try again" starts the app.
+    await page.unroute("**/runtime-env.js");
+    await page.getByRole("button", { name: "Try again" }).click();
+    await expect(
+      page.getByRole("button", { name: /patient sign-in/i }),
+    ).toBeVisible();
+  });
 });
