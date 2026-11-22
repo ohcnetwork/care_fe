@@ -3629,6 +3629,7 @@
   "print_images_unavailable_description": "Couldn't load the {{images}} for this document. The image's host may not allow CARE to use it. Ask an administrator to check the facility's print template.",
   "print_invoice": "Print Invoice",
   "print_invoices": "Print Invoices",
+  "print_paper_size_hint": "This document is {{size}}. Choose {{size}} in the print dialog.",
   "print_prescription": "Print Prescription",
   "print_qr_codes": "Print QR Codes",
   "print_receipt": "Print Receipt",

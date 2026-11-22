@@ -165,6 +165,8 @@ export function useTypstPdf<TContent>({
 
   return {
     pdf: pdf.data,
+    /** The paper the document is laid out for. */
+    paper: layout?.page.paper,
     error: pdf.error,
     isLoading: assets.isLoading || pdf.isLoading || content === undefined,
     isFetching: pdf.isFetching,

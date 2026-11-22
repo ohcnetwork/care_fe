@@ -27,6 +27,14 @@ const PAPERS: Record<NonNullable<PageConfig["size"]>, TypstPaper> = {
   Legal: "us-legal",
 };
 
+/** Translation keys for paper names, as the print dialog lists them. */
+export const PAPER_LABELS = {
+  a4: "page_size_a4",
+  a5: "page_size_a5",
+  "us-letter": "page_size_letter",
+  "us-legal": "page_size_legal",
+} as const satisfies Record<TypstPaper, string>;
+
 /** Used when a template sets no margins; configured values, even 0, win. */
 const DEFAULT_MARGIN_MM = 10;
 
