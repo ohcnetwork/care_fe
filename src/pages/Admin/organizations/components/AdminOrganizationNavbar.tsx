@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
@@ -30,18 +31,19 @@ function OrganizationTreeNode({
 }: OrganizationTreeNodeProps) {
   const isExpanded = expandedOrganizations.has(organization.id);
   const isSelected = organization.id === selectedOrganizationId;
+  const { data, isLoading, hasNextPage, isFetchingNextPage, ref } =
+    useInfiniteList({
+      queryKey: ["organization", "list", organizationType, organization.id],
+      ...query.infinite(organizationApi.list, {
+        queryParams: {
+          parent: organization.id || "",
+          org_type: organizationType,
+        },
+      }),
+      enabled: isExpanded,
+    });
 
-  const { data: children, isLoading } = useQuery({
-    queryKey: ["organization", "list", organizationType, organization.id],
-    queryFn: query(organizationApi.list, {
-      pathParams: { id: organization.id },
-      queryParams: {
-        parent: organization.id || "",
-        org_type: organizationType,
-      },
-    }),
-    enabled: isExpanded,
-  });
+  const children = data?.results ?? [];
 
   return (
     <div className="space-y-1">
@@ -84,9 +86,9 @@ function OrganizationTreeNode({
           <span className="truncate">{organization.name}</span>
         </Button>
       </div>
-      {isExpanded && children?.results && children.results.length > 0 && (
+      {isExpanded && children.length > 0 && (
         <div className="pl-2">
-          {children.results.map((child) => (
+          {children.map((child) => (
             <OrganizationTreeNode
               key={child.id}
               organization={child}
@@ -98,6 +100,8 @@ function OrganizationTreeNode({
               organizationType={organizationType}
             />
           ))}
+          {hasNextPage && <div ref={ref} />}
+          {isFetchingNextPage && <Skeleton className="h-8 w-full" />}
         </div>
       )}
     </div>
@@ -119,44 +123,50 @@ export default function AdminOrganizationNavbar({
   onToggleExpand,
   onOrganizationSelect,
 }: AdminOrganizationNavbarProps) {
-  const { data: allOrganizations, isLoading: isLoadingOrganizations } =
-    useQuery({
-      queryKey: ["organization", "list", organizationType],
-      queryFn: query(organizationApi.list, {
-        queryParams: {
-          parent: "",
-          org_type: organizationType,
-          limit: 100,
-        },
-      }),
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-    });
+  const {
+    data,
+    isLoading: isLoadingOrganizations,
+    hasNextPage,
+    isFetchingNextPage,
+    ref,
+  } = useInfiniteList({
+    queryKey: ["organization", "list", organizationType],
+    ...query.infinite(organizationApi.list, {
+      queryParams: {
+        parent: "",
+        org_type: organizationType,
+      },
+    }),
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
 
-  const topLevelOrganizations = (allOrganizations?.results || [])
-    .slice()
-    .sort((left, right) => left.name.localeCompare(right.name));
+  const topLevelOrganizations = data?.results ?? [];
 
   return (
     <div className="h-full bg-white rounded-lg shadow-lg min-w-64 hidden md:block">
-      <ScrollArea className="h-full min-h-[calc(100vh-14rem)]">
+      <ScrollArea className="h-full">
         <div className="p-4">
           {isLoadingOrganizations ? (
             <div className="p-4">
               <Skeleton className="h-8 w-full" />
             </div>
           ) : (
-            topLevelOrganizations.map((organization) => (
-              <OrganizationTreeNode
-                key={organization.id}
-                organization={organization}
-                selectedOrganizationId={selectedOrganizationId}
-                onSelect={onOrganizationSelect}
-                expandedOrganizations={expandedOrganizations}
-                onToggleExpand={onToggleExpand}
-                organizationType={organizationType}
-              />
-            ))
+            <>
+              {topLevelOrganizations.map((organization) => (
+                <OrganizationTreeNode
+                  key={organization.id}
+                  organization={organization}
+                  selectedOrganizationId={selectedOrganizationId}
+                  onSelect={onOrganizationSelect}
+                  expandedOrganizations={expandedOrganizations}
+                  onToggleExpand={onToggleExpand}
+                  organizationType={organizationType}
+                />
+              ))}
+              {hasNextPage && <div ref={ref} />}
+              {isFetchingNextPage && <Skeleton className="h-8 w-full" />}
+            </>
           )}
         </div>
       </ScrollArea>

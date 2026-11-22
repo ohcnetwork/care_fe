@@ -1,6 +1,7 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 
-import BedsList from "@/pages/Facility/locations/BedsList";
+import { navigate } from "@/lib/router/navigate";
+import { BedBoard } from "@/pages/Facility/locations/bed-board/BedBoard";
 
 export const Route = createFileRoute(
   "/_app/facility/$facilityId/locations/$locationId/beds",
@@ -12,5 +13,20 @@ function RouteComponent() {
   const { facilityId, locationId } = useParams({
     from: "/_app/facility/$facilityId/locations/$locationId/beds",
   });
-  return <BedsList facilityId={facilityId} locationId={locationId} />;
+  return (
+    <div className="py-4">
+      <BedBoard
+        key={locationId}
+        facilityId={facilityId}
+        locationId={locationId}
+        hideBreadcrumb
+        onOpenLocation={(location) =>
+          navigate({
+            to: "/facility/$facilityId/locations/$locationId/beds",
+            params: { facilityId, locationId: location.id },
+          })
+        }
+      />
+    </div>
+  );
 }
