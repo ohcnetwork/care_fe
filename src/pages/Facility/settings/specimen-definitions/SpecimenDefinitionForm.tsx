@@ -40,11 +40,13 @@ import { slugValueSchema } from "@/types/base/slug/schema";
 import {
   ContainerSpec,
   Preference,
+  QuantitySpec,
   RETENTION_TIME_UNITS,
   SPECIMEN_DEFINITION_UNITS_CODES,
   SpecimenDefinitionCreate,
   SpecimenDefinitionRead,
   SpecimenDefinitionStatus,
+  wholeSpecimenQuantity,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 import { zodDecimal } from "@/Utils/decimal";
@@ -154,6 +156,50 @@ interface SpecimenDefinitionFormContentProps {
   onCancel?: () => void;
 }
 
+function CollectionCodeField({
+  label,
+  placeholder,
+  system,
+  value,
+  onChange,
+}: {
+  label: string;
+  placeholder: string;
+  system: string;
+  value?: Code | null;
+  onChange: (code: Code | null) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <FormItem className="flex min-w-0 flex-col">
+      <FormLabel>{label}</FormLabel>
+      <div className="flex items-center gap-1">
+        <FormControl>
+          <ValueSetSelect
+            className="min-w-0 flex-1 justify-between font-normal"
+            system={system}
+            placeholder={placeholder}
+            value={value}
+            onSelect={onChange}
+          />
+        </FormControl>
+        {value && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={t("remove_name", { name: label })}
+            onClick={() => onChange(null)}
+          >
+            <XCircle />
+          </Button>
+        )}
+      </div>
+      <FormMessage />
+    </FormItem>
+  );
+}
+
 function SpecimenDefinitionFormContent({
   facilityId,
   specimenSlug,
@@ -179,24 +225,23 @@ function SpecimenDefinitionFormContent({
     patient_preparation: z.array(CodeSchema).min(0),
     collection: z
       .object({
-        code: CodeSchema.optional(),
+        code: CodeSchema.nullish(),
         quantity: z
-          .object({
-            // The backend takes whole numbers only; zodDecimal would round 1.999 to 2.
-            value: z
-              .string()
-              .refine(
-                (value) =>
-                  Number.isInteger(Number(value)) && Number(value) >= 1,
-                t("invalid_quantity"),
-              )
-              .transform((value) => String(Number(value))),
-            unit: CodeSchema,
+          .transform((quantity: QuantitySpec, ctx) => {
+            const value = wholeSpecimenQuantity(quantity.value);
+            if (!value || !CodeSchema.safeParse(quantity.unit).success) {
+              ctx.issues.push({
+                code: "custom",
+                message: t("invalid_quantity"),
+                input: quantity,
+              });
+              return z.NEVER;
+            }
+            return { value, unit: quantity.unit };
           })
-          .nullable()
-          .optional(),
-        method: CodeSchema.optional(),
-        body_site: CodeSchema.optional(),
+          .nullish(),
+        method: CodeSchema.nullish(),
+        body_site: CodeSchema.nullish(),
       })
       .optional(),
     type_tested: typeTestedSchema.optional(),
@@ -252,10 +297,6 @@ function SpecimenDefinitionFormContent({
 
   const handleTypeCollectedSelect = (code: Code) => {
     form.setValue("type_collected", code);
-  };
-
-  const handleCollectionCodeSelect = (code: Code) => {
-    form.setValue("collection.code", code);
   };
 
   const handleCapTypeSelect = (code: Code) => {
@@ -337,7 +378,7 @@ function SpecimenDefinitionFormContent({
       collection:
         data.collection && Object.values(data.collection).some(Boolean)
           ? data.collection
-          : undefined,
+          : {},
       patient_preparation:
         data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested
@@ -523,93 +564,60 @@ function SpecimenDefinitionFormContent({
                       control={form.control}
                       name="collection.code"
                       render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>{t("collection")}</FormLabel>
+                        <CollectionCodeField
+                          label={t("collection")}
+                          system="system-specimen_collection_code"
+                          placeholder={t("select_collection")}
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <FormField
+                      control={form.control}
+                      name="collection.quantity"
+                      render={({ field }) => (
+                        <FormItem className="flex min-w-0 flex-col">
+                          <FormLabel>{t("expected_quantity")}</FormLabel>
                           <FormControl>
-                            <ValueSetSelect
-                              {...field}
-                              system="system-specimen_collection_code"
-                              placeholder={t("select_collection")}
-                              onSelect={handleCollectionCodeSelect}
+                            <ComboboxQuantityInput
+                              quantity={field.value}
+                              onChange={field.onChange}
+                              placeholder={t("quantity")}
+                              units={SPECIMEN_DEFINITION_UNITS_CODES}
                             />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <div>
-                      <FormField
-                        control={form.control}
-                        name="collection.quantity"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col">
-                            <FormLabel>{t("expected_quantity")}</FormLabel>
-                            <FormControl>
-                              <ComboboxQuantityInput
-                                quantity={
-                                  field.value
-                                    ? {
-                                        value: field.value.value,
-                                        unit: field.value.unit,
-                                      }
-                                    : undefined
-                                }
-                                onChange={field.onChange}
-                                placeholder={t("quantity")}
-                                units={SPECIMEN_DEFINITION_UNITS_CODES}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormMessage>
-                        {
-                          form.formState.errors.collection?.quantity?.value
-                            ?.message
-                        }
-                      </FormMessage>
-                    </div>
                     <FormField
                       control={form.control}
                       name="collection.method"
                       render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>{t("collection_method")}</FormLabel>
-                          <FormControl>
-                            <ValueSetSelect
-                              {...field}
-                              system="system-collection-method-code"
-                              placeholder={t("select_method")}
-                              onSelect={(code) =>
-                                form.setValue("collection.method", code)
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                        <CollectionCodeField
+                          label={t("collection_method")}
+                          system="system-collection-method-code"
+                          placeholder={t("select_method")}
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
                       )}
                     />
                     <FormField
                       control={form.control}
                       name="collection.body_site"
                       render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>{t("body_site")}</FormLabel>
-                          <FormControl>
-                            <ValueSetSelect
-                              {...field}
-                              system="system-body-site"
-                              placeholder={t("select_body_site")}
-                              onSelect={(code) =>
-                                form.setValue("collection.body_site", code)
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                        <CollectionCodeField
+                          label={t("body_site")}
+                          system="system-body-site-observation"
+                          placeholder={t("select_body_site")}
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
                       )}
                     />
                   </div>

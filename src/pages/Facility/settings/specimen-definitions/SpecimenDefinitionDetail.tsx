@@ -20,6 +20,7 @@ import {
   DurationSpec,
   SPECIMEN_DEFINITION_STATUS_COLORS,
   SpecimenDefinitionStatus,
+  wholeSpecimenQuantity,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 import { round } from "@/Utils/decimal";
@@ -84,9 +85,10 @@ export function SpecimenDefinitionDetail({
 
   const formatQuantity = (
     quantity: { value: string | null; unit: Code | null } | null,
+    formatValue: (value: string) => string = round,
   ) => {
     if (!quantity?.value || !quantity?.unit?.display) return "-";
-    return `${round(quantity.value)} ${quantity.unit.display}`;
+    return `${formatValue(quantity.value)} ${quantity.unit.display}`;
   };
 
   const formatDuration = (duration: DurationSpec | null | undefined) => {
@@ -202,7 +204,10 @@ export function SpecimenDefinitionDetail({
                   [
                     t("expected_quantity"),
                     specimenDefinition.collection?.quantity &&
-                      `${specimenDefinition.collection.quantity.value} ${specimenDefinition.collection.quantity.unit.display}`,
+                      formatQuantity(
+                        specimenDefinition.collection.quantity,
+                        (value) => wholeSpecimenQuantity(value) ?? value,
+                      ),
                   ],
                   [
                     t("body_site"),

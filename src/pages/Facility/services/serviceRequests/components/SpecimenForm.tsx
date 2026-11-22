@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, Eye, QrCode, Scan /* User */ } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -43,9 +43,11 @@ import {
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import {
   SPECIMEN_DEFINITION_UNITS_CODES,
+  specimenCollectionDefaults,
   type SpecimenDefinitionRead,
+  wholeSpecimenQuantity,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
-import { isNegative, round } from "@/Utils/decimal";
+import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 
 interface SpecimenFormProps {
@@ -69,6 +71,8 @@ export function SpecimenForm({
   const authUser = useAuthUser();
   const currentUserId = authUser.id;
   const queryClient = useQueryClient();
+  const methodId = useId();
+  const bodySiteId = useId();
   const defaultUnit =
     specimenDefinition.type_tested?.container?.capacity?.unit ?? null;
 
@@ -97,19 +101,9 @@ export function SpecimenForm({
       accession_identifier: "",
       received_time: null,
       collection: {
-        method: specimenDefinition.collection?.method ?? null,
-        body_site: specimenDefinition.collection?.body_site ?? null,
+        ...specimenCollectionDefaults(specimenDefinition.collection),
         collector: currentUserId || null, // Use user ID, default to null if not available yet
         collected_date_time: new Date().toISOString(),
-        // Definitions store "3.00"; show it as 3.
-        quantity: specimenDefinition.collection?.quantity
-          ? {
-              ...specimenDefinition.collection.quantity,
-              value: String(
-                Number(specimenDefinition.collection.quantity.value),
-              ),
-            }
-          : null,
         procedure: null,
         fasting_status_codeable_concept: null,
         fasting_status_duration: null,
@@ -204,7 +198,7 @@ export function SpecimenForm({
       newErrors.quantityUnit = t("field_required");
     }
 
-    if (quantity?.value && isNegative(quantity.value)) {
+    if (quantity?.value && !wholeSpecimenQuantity(quantity.value)) {
       newErrors.quantityValue = t("invalid_quantity");
     }
 
@@ -463,14 +457,12 @@ export function SpecimenForm({
                       onChange={(e) =>
                         handleCollectionChange("quantity", {
                           ...(specimenData.specimen.collection?.quantity ?? {}),
-                          value: e.target.value
-                            ? parseFloat(e.target.value)
-                            : null,
+                          value: e.target.value,
                           unit: specimenData.specimen.collection?.quantity
                             ?.unit,
                         })
                       }
-                      step="any"
+                      step="1"
                       disabled={disableEdit}
                     />
                     {errors.quantityValue && (
@@ -522,19 +514,33 @@ export function SpecimenForm({
               </div>
             </div>
 
-            <div>
-              <Label className="text-sm text-muted-foreground mb-1">
-                {t("body_site")}
-              </Label>
-              <ValueSetSelect
-                system="system-body-site"
-                placeholder={t("select_body_site")}
-                onSelect={(code: Code | null) =>
-                  handleCollectionChange("body_site", code)
-                }
-                value={specimenData.specimen.collection?.body_site}
-                disabled={disableEdit}
-              />
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div>
+                <Label htmlFor={methodId} className="text-sm text-muted-foreground mb-1">
+                  {t("collection_method")}
+                </Label>
+                <ValueSetSelect
+                  id={methodId}
+                  system="system-collection-method-code"
+                  placeholder={t("select_method")}
+                  onSelect={(code) => handleCollectionChange("method", code)}
+                  value={specimenData.specimen.collection?.method}
+                  disabled={disableEdit}
+                />
+              </div>
+              <div>
+                <Label htmlFor={bodySiteId} className="text-sm text-muted-foreground mb-1">
+                  {t("body_site")}
+                </Label>
+                <ValueSetSelect
+                  id={bodySiteId}
+                  system="system-body-site-observation"
+                  placeholder={t("select_body_site")}
+                  onSelect={(code) => handleCollectionChange("body_site", code)}
+                  value={specimenData.specimen.collection?.body_site}
+                  disabled={disableEdit}
+                />
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
               <div className="col-span-1 md:col-span-4">

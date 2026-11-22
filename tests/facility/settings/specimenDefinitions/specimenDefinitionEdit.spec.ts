@@ -90,7 +90,7 @@ test.describe("Specimen Definitions Edit", () => {
       .fill(derivedFromURI);
 
     const collectionOption = faker.helpers.arrayElement(collectionOptions);
-    await page.getByRole("combobox", { name: "Collection" }).click();
+    await page.getByRole("combobox", { name: "Collection", exact: true }).click();
     await page.getByRole("option", { name: collectionOption }).click();
 
     const preparationOption = faker.helpers.arrayElement(preparationOptions);
@@ -114,7 +114,7 @@ test.describe("Specimen Definitions Edit", () => {
 
     const retentionTime = faker.number.int(INT_MAX);
     await page
-      .getByRole("combobox", { name: "Enter Retention Time" })
+      .getByRole("combobox", { name: "Retention Time", exact: true })
       .fill(retentionTime.toString());
     // Pick the unit to commit the quantity and close the suggestions.
     await page
@@ -136,7 +136,7 @@ test.describe("Specimen Definitions Edit", () => {
 
     const capacity = faker.number.int(INT_MAX);
     await page
-      .getByRole("combobox", { name: "Enter Capacity" })
+      .getByRole("combobox", { name: "Capacity", exact: true })
       .fill(capacity.toString());
     // Pick the unit to commit the quantity and close the suggestions.
     await page
@@ -197,6 +197,20 @@ test.describe("Specimen Definitions Edit", () => {
       ),
     ).toBeVisible();
     await expect(page.getByText(capOption)).toBeVisible();
-    await expect(page.getByText(minimumVolume.toString())).toBeVisible();
+    await expect(page.getByText(minimumVolume.toString(), { exact: true })).toBeVisible();
+
+    await page.getByRole("link", { name: "Edit", exact: true }).click();
+    await page.getByRole("button", { name: "Remove Collection", exact: true }).click();
+    const saved = page.waitForResponse((res) =>
+      res.url().includes("/specimen_definition/") && res.request().method() === "PUT",
+    );
+    await page.getByRole("button", { name: /save/i }).click();
+    const response = await saved;
+    expect(response.ok()).toBeTruthy();
+    expect(response.request().postDataJSON().collection).toEqual({});
+    await expect(page.getByRole("heading", { name: `${definitionTitle}-edited` })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole("heading", { name: `${definitionTitle}-edited` })).toBeVisible();
+    await expect(page.getByText(collectionOption, { exact: true })).toHaveCount(0);
   });
 });

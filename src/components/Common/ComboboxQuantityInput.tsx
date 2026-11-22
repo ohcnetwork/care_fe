@@ -18,7 +18,10 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { QuantitySpec } from "@/types/emr/specimenDefinition/specimenDefinition";
 
-interface Props {
+interface Props extends Pick<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "id" | "aria-describedby" | "aria-invalid"
+> {
   quantity?: DosageQuantity | QuantitySpec | null;
   onChange: (quantity: DosageQuantity | QuantitySpec | null) => void;
   disabled?: boolean;
@@ -36,6 +39,7 @@ export function ComboboxQuantityInput({
   autoFocus,
   units = DOSAGE_UNITS_CODES,
   className,
+  ...inputProps
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
@@ -85,6 +89,7 @@ export function ComboboxQuantityInput({
         }}
       >
         <ComboboxInput
+          {...inputProps}
           ref={inputRef}
           inputMode="decimal"
           pattern="\d*\.?\d*"
