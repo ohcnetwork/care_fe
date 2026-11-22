@@ -14,8 +14,9 @@ import { join, relative } from "node:path";
 import { before, test } from "node:test";
 
 import type { PrescriptionsPrintContent } from "@/components/Prescription/prescriptionsPrintData";
+import type { InvoicePrintContent } from "@/pages/Facility/billing/invoice/invoicePrintData";
 import type { DetailsTablePrintContent } from "@/print/detailsTable";
-import type { PrintLayout } from "@/print/types";
+import type { PrintLayout, TypstPaper } from "@/print/types";
 
 const PRINT_DIR = join(process.cwd(), "src/print");
 const MM = 72 / 25.4;
@@ -29,10 +30,10 @@ const LONG_LOT = "LOTBATCH20261120ABCDEF1234567890XYZ";
 const LONG_FREQUENCY =
   "Every 4 hours as needed for breakthrough pain, maximum 6 doses in 24 hours";
 
-const layout: PrintLayout = {
+const layoutFor = (paper: TypstPaper): PrintLayout => ({
   title: "Test",
   page: {
-    paper: "a4",
+    paper,
     flipped: false,
     margin: {
       top: MARGIN_MM,
@@ -41,12 +42,22 @@ const layout: PrintLayout = {
       left: MARGIN_MM,
     },
   },
-  header: null,
+  header: {
+    hidden: false,
+    image: null,
+    logo: null,
+    facility: {
+      name: "Sample District Multispeciality Charitable Hospital",
+      address:
+        "12 Example Road, Test Nagar, Sample Town, Test District, 600001\nDL No. : XYZ20AB2023000001,XYZ21AB2023000002, XYZ20AB2023000003\nGSTIN : 00AAAAA0000A1Z0",
+      phone: "+910000000000",
+    },
+  },
   footer_image: null,
   watermark: null,
   status_watermark: null,
   labels: { page_x_of_y: "Page {current} of {total}" },
-};
+});
 
 function filesUnder(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
@@ -81,10 +92,16 @@ before(async () => {
   }
 });
 
-async function compile(template: string, content: unknown) {
+async function compile(
+  template: string,
+  content: unknown,
+  paper: TypstPaper = "a4",
+) {
   compiler.mapShadow(
     "/data.json",
-    new TextEncoder().encode(JSON.stringify({ layout, content })),
+    new TextEncoder().encode(
+      JSON.stringify({ layout: layoutFor(paper), content }),
+    ),
   );
   try {
     const result = await compiler.runWithWorld(
@@ -238,6 +255,61 @@ test("details-table: rejects widths that don't match the header", async () => {
   );
 });
 
+test("details-table: Indian-script text prints with real letters", async () => {
+  const names = {
+    NotoSansMalayalam: "രാഹുൽ കൃഷ്ണൻ",
+    NotoSansDevanagari: "राहुल कुमार",
+    NotoSansTamil: "ராகுல் கிருஷ்ணன்",
+    NotoSansKannada: "ರಾಹುಲ್ ಕೃಷ್ಣ",
+  };
+  const bytes = await compile("details-table", {
+    ...detailsTable({
+      header: ["ഇനം", "ബാച്ച്", "അളവ്"],
+      widths: [2, 1, null],
+      rows: Object.values(names).map((name) => [name, "B12", "1.00"]),
+    }),
+    heading: "മരുന്ന് തിരികെ നൽകൽ",
+  });
+
+  // A missing letter prints as an empty box but keeps its character in the
+  // text, so check the fonts the PDF was drawn with instead.
+  const pdfSource = Buffer.from(bytes).toString("latin1");
+  for (const font of Object.keys(names)) {
+    assert.match(pdfSource, new RegExp(`/BaseFont /[A-Z]{6}\\+${font}-`));
+  }
+  assert.match(pdfSource, /\+NotoSansMalayalam-Bold/, "semibold heading");
+  assertReadable(await readPdf(bytes));
+});
+
+test("fit-words: never breaks a Kannada joined letter", async () => {
+  // Typst's clusters split ಸ್ವಾ into ಸ್ + ವಾ; a break there would print a
+  // half letter. Some of these widths break right at such a spot.
+  compiler.addSource(
+    "/templates/test-kannada.typ",
+    `#import "../typst/care.typ": *
+#set page(width: 400pt, height: auto, margin: 10pt)
+#set text(font: fonts, size: 10pt)
+#for w in range(20, 90, step: 2) {
+  block(width: w * 1pt, fit-words("ಲಕ್ಷ್ಮೀನಾರಾಯಣಕೃಷ್ಣಸ್ವಾಮಿಪ್ರಸಾದ"))
+}`,
+  );
+  const { pages } = await readPdf(await compile("test-kannada", null));
+
+  const lines = new Map<number, TextBox[]>();
+  for (const box of pages.flatMap((page) => page.boxes)) {
+    const y = Math.round(box.bottom);
+    lines.set(y, [...(lines.get(y) ?? []), box]);
+  }
+  for (const boxes of lines.values()) {
+    const line = boxes
+      .sort((a, b) => a.left - b.left)
+      .map((box) => box.text)
+      .join("")
+      .trim();
+    assert.ok(!line.endsWith("್"), `"${line}" ends in half a letter`);
+  }
+});
+
 test("prescriptions: a long medicine name or frequency keeps every column", async () => {
   const content: PrescriptionsPrintContent = {
     labels: {
@@ -319,4 +391,169 @@ test("prescriptions: a long medicine name or frequency keeps every column", asyn
   for (const value of [LONG_WORD, "RESISTANT),DOMPERIDONE"]) {
     assert.ok(pdf.text.includes(value), `"${value}" lost characters`);
   }
+});
+
+function pageWith(pdf: Awaited<ReturnType<typeof readPdf>>, text: string) {
+  const index = pdf.pages.findIndex((page) =>
+    page.boxes.some((box) => box.text.trim() === text),
+  );
+  return index === -1 ? null : index + 1;
+}
+
+const dispenseOrder = (note: string | null): DetailsTablePrintContent => ({
+  heading: "Dispense order",
+  patient: { name: "Test Patient", identifiers: [] },
+  patient_label: "Patient",
+  details: {
+    left: [
+      { label: "Patient", value: "Test Patient" },
+      { label: "Age / Sex", value: "25y, Male" },
+      { label: "Hospital ID", value: "1" },
+    ],
+    right: [
+      { label: "Date", value: "22 Nov 2026, Sunday" },
+      { label: "Mobile Number", value: "+91 00000 00000" },
+      { label: "Location", value: "Pharmacy" },
+    ],
+  },
+  title: null,
+  note,
+  table_title: "Medication Dispenses",
+  table: {
+    header: [
+      "Medicine",
+      "Dosage",
+      "Frequency",
+      "Quantity",
+      "Lot/Batch Number",
+      "Expiry Date",
+      "Prepared date",
+    ],
+    widths: [3, null, 2, null, 1.5, null, null],
+    rows: [
+      [
+        JOINED_NAME,
+        "1 tablets",
+        "0-0-1 (Night only)",
+        "1.00",
+        "9999",
+        "27/06/2030",
+        "11/20/2026",
+      ],
+      [
+        LONG_NAME,
+        "1 microgram",
+        "1-0-1 (Twice a day)",
+        "1.00",
+        "99998",
+        "27/06/2030",
+        "11/20/2026",
+      ],
+    ],
+  },
+  footer: { left: "Computer generated", right: "Generated today" },
+});
+
+test("details-table: on A5 the table starts on the first page", async () => {
+  const pdf = await readPdf(
+    await compile("details-table", dispenseOrder(null), "a5"),
+  );
+
+  assertReadable(pdf);
+  assert.equal(pageWith(pdf, "Medicine"), 1);
+  assert.ok(pdf.text.includes("RESISTANT),DOMPERIDONE"));
+});
+
+test("details-table: a table pushed to the next page takes its title along", async () => {
+  const note = Array(26)
+    .fill("A long note that pushes the table down the page.")
+    .join(" ");
+  const pdf = await readPdf(
+    await compile("details-table", dispenseOrder(note), "a5"),
+  );
+
+  assert.equal(
+    pageWith(pdf, "Medication Dispenses"),
+    pageWith(pdf, "Medicine"),
+  );
+});
+
+test("invoice: on A5 amounts stay whole and the Item column keeps its width", async () => {
+  const taxes = ["CGST", "SGST", "IGST"];
+  const labels = Object.fromEntries(
+    [
+      "patient",
+      "address",
+      "amount",
+      "bill_to",
+      "created_by",
+      "credit_notes_title",
+      "date_and_time",
+      "discount",
+      "grand_total",
+      "invoice",
+      "issue_date",
+      "item",
+      "location",
+      "net_amount",
+      "no_address_provided",
+      "no_charge_items",
+      "payment_method",
+      "payment_terms",
+      "qty",
+      "reference",
+      "total",
+      "total_credit_notes",
+      "total_received",
+      "unit_price",
+    ].map((key) => [key, key === "item" ? "Item" : key.replace(/_/g, " ")]),
+  );
+  const invoice: InvoicePrintContent = {
+    labels,
+    number: "INV/26-27/0003",
+    issue_date: "20 Nov, 2026 4:02 PM",
+    patient: {
+      name: "Test Patient",
+      gender_age: "Male, 25y",
+      identifiers: [],
+      address: null,
+    },
+    qr_code: null,
+    tax_columns: taxes,
+    items: [
+      {
+        index: 1,
+        title: LONG_NAME,
+        subtitle: "Lot: 99998 | Expiry: 27/06/2030",
+        unit_price: "1,25,000.00",
+        quantity: "1.00",
+        discount: { total: "23.00", parts: ["0.00", "23.00"] },
+        taxes: [
+          { total: "1.62", unit: "6.00%" },
+          { total: "2.43", unit: "9.00%" },
+          { total: "4.86", unit: "18.00%" },
+        ],
+        total: "1,25,035.91",
+      },
+    ],
+    totals: { components: [], net: "₹1,25,035.91", gross: "₹1,25,035.91" },
+    payments: null,
+    credit_notes: null,
+    payment_terms: null,
+    created_by: "Dr. Test",
+    location: null,
+  };
+
+  const pdf = await readPdf(await compile("invoice", invoice, "a5"));
+
+  assertReadable(pdf);
+  for (const amount of ["1,25,000.00", "1,25,035.91", "18.00%"]) {
+    assert.ok(
+      pdf.pages.some((page) =>
+        page.boxes.some((box) => box.text.includes(amount)),
+      ),
+      `"${amount}" was split`,
+    );
+  }
+  assert.notEqual(pageWith(pdf, "Item"), null, "the Item column collapsed");
 });

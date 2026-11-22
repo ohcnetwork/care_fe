@@ -60,7 +60,15 @@
   xxl: px(24),
 )
 
-#let fonts = ("Figtree",)
+// Typst can't use the computer's fonts, so a character Figtree lacks falls
+// back to the next font that has it (Hindi and Marathi share Devanagari).
+#let fonts = (
+  "Figtree",
+  "Noto Sans Malayalam",
+  "Noto Sans Devanagari",
+  "Noto Sans Tamil",
+  "Noto Sans Kannada",
+)
 #let mono-fonts = ("Geist Mono",) + fonts
 
 /// An image at most `max-width` wide and `max-height` tall, keeping its aspect
@@ -120,6 +128,21 @@
 )))
 
 #let _break-after = regex("[^-,;/)\\]]*[-,;/)\\]]?")
+#let _kannada-virama = regex("\u{0CCD}\u{200D}?$")
+
+// The letters of `s`. Typst keeps joined letters together, except Kannada's
+// (ಸ್ + ವಾ), so join those.
+#let _letters(s) = {
+  let units = ()
+  for c in s.clusters() {
+    if units.len() > 0 and units.last().ends-with(_kannada-virama) {
+      units.last() += c
+    } else {
+      units.push(c)
+    }
+  }
+  units
+}
 
 /// Breaks words wider than their cell, like CSS `overflow-wrap: anywhere`
 /// (Typst can't: typst/typst#674). Uses line breaks, not zero-width spaces,
@@ -130,7 +153,7 @@
     let lines = ()
     let line = ""
     for piece in word.text.matches(_break-after).map(m => m.text).filter(p => p != "") {
-      let units = if measure(text(piece)).width > size.width { piece.clusters() } else { (piece,) }
+      let units = if measure(text(piece)).width > size.width { _letters(piece) } else { (piece,) }
       for unit in units {
         if line != "" and measure(text(line + unit)).width > size.width {
           lines.push(line)
@@ -170,12 +193,34 @@
   rows: (),
   empty: none,
   outer: (stroke: (:), radius: px(6)),
-) = {
+) = layout(size => {
   let n = columns.len()
   let header-align = if header-align == none {
     range(n).map(_ => center)
   } else { header-align }
   let line = px(1) + border-color
+  // Narrow pages (A5 portrait) get smaller text and padding.
+  let narrow = size.width < 450pt
+  let inset = if narrow { (x: px(4), y: px(6)) } else { (x: px(8), y: px(8)) }
+  let font-size = if narrow { text-size.xs } else { text.size }
+
+  // If the `auto` columns would leave the `fr` ones under 40% of the width,
+  // size each to its widest value instead, so only its header wraps.
+  let sizes = columns
+  if rows.len() > 0 and rows.all(r => r.len() == n) and columns.any(c => type(c) == fraction) {
+    let content-of(c) = if type(c) == content and c.func() == table.cell { c.body } else { c }
+    let width(c) = measure(text(size: font-size, weight: "medium", content-of(c))).width
+    let longest-word(h) = if type(h) == str { calc.max(..h.split(" ").map(width)) } else { width(h) }
+    let fit = range(n).map(i => if columns.at(i) != auto { none } else {
+      calc.max(longest-word(header.at(i)), ..rows.map(r => width(r.at(i)))) + 2 * inset.x
+    })
+    let natural = range(n).map(i => if fit.at(i) == none { 0pt } else {
+      calc.max(fit.at(i), width(header.at(i)) + 2 * inset.x)
+    })
+    if size.width - natural.sum() < 0.4 * size.width {
+      sizes = range(n).map(i => if fit.at(i) == none { columns.at(i) } else { fit.at(i) })
+    }
+  }
 
   let body = if rows.len() == 0 and empty != none {
     (table.cell(colspan: n, align: center, text(fill: gray(500), empty)),)
@@ -190,11 +235,12 @@
     clip: true,
     {
     set text(weight: "medium", fill: gray(950))
+    set text(size: font-size) if narrow
     // Never split a row across pages.
     set table.cell(breakable: false)
     fit-cells(columns, table(
-      columns: columns,
-      inset: (x: px(8), y: px(8)),
+      columns: sizes,
+      inset: inset,
       align: (x, y) => if y == 0 { header-align.at(x) + horizon } else {
         align.at(x) + horizon
       },
@@ -208,7 +254,7 @@
     ))
     },
   )
-}
+})
 
 /// Small print at the end of a document ("Created by", "Location", ...).
 #let print-meta(left: none, right: none) = block(above: px(8), {

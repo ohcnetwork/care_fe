@@ -15,8 +15,9 @@ export interface DetailsTablePrintContent {
   table: {
     header: string[];
     rows: string[][];
-    /** Per column: a share of the free width, or `null` to fit short content. */
-    widths: (number | null)[];
+    widths: (
+      number | null
+    )[]; /** Per column: a share of the free width, or `null` to fit short content. */
   };
   footer: { left: string; right: string };
 }

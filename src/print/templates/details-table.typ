@@ -22,7 +22,7 @@
 }
 
 #if c.table_title != none {
-  block(below: px(8), text(size: text-size.base, weight: "semibold", c.table_title))
+  block(below: px(8), sticky: true, text(size: text-size.base, weight: "semibold", c.table_title))
 }
 #let widths = c.table.widths
 #assert(
