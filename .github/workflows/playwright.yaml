@@ -29,7 +29,7 @@ env:
   REACT_CARE_API_URL: http://localhost:9000
   REACT_ENABLE_QUESTIONNAIRE_DRAFT: "true"
   BACKEND_STARTUP_TIMEOUT: 120
-  TEST_SHARDS: 16
+  TEST_SHARDS: 32
   # care backend ref to test against. `develop` uses the published
   # ghcr.io/ohcnetwork/care:latest image; any other branch, tag or commit is
   # built from source. Override per run with the `backend_ref` input.
@@ -72,13 +72,22 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js
+        id: node
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
+      - name: Cache installed dependencies
+        id: modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules/
+          key: playwright-modules-${{ runner.os }}-${{ runner.arch }}-${{ steps.node.outputs.node-version }}-${{ hashFiles('package-lock.json', 'package.json', 'scripts/install-platform-deps.ts', '.npmrc') }}
+
       - name: Install dependencies
-        run: npm ci --prefer-offline
+        if: steps.modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit --no-fund
 
       - name: Build application
         run: npm run build
@@ -190,11 +199,12 @@ jobs:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
     needs: [changes, build, backend]
     timeout-minutes: 30
-    runs-on: ubuntu-latest-m
+    # Use both pools so a single run doesn't queue behind the larger-runner limit.
+    runs-on: ${{ matrix.shard <= 10 && 'ubuntu-latest-m' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
 
     steps:
       - name: Checkout
@@ -307,8 +317,9 @@ jobs:
 
       - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
         id: test
-        run: npx playwright test --project=chromium --workers=6 --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
+        run: npx playwright test --project=chromium --workers="$TEST_WORKERS" --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
         env:
+          TEST_WORKERS: ${{ matrix.shard <= 10 && 6 || 4 }}
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 

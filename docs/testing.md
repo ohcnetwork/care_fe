@@ -13,7 +13,7 @@ npm run playwright:test                                 # Run all tests
 npm run playwright:test -- tests/auth/login.spec.ts     # Run a single test file
 npm run playwright:test -- -g "test name"               # Run tests matching a pattern
 npm run playwright:test -- --workers=4                   # Run with 4 parallel workers
-npm run playwright:test -- --shard=1/16                  # Run the first of sixteen CI shards locally
+npm run playwright:test -- --shard=1/32                  # Run the first CI shard locally
 npm run playwright:test:ui                              # Interactive Playwright UI mode
 ```
 
@@ -27,7 +27,7 @@ npm run playwright:test:ui                              # Interactive Playwright
 
 ## Running tests efficiently
 
-- CI runs setup with 1 worker, then Chromium with 6 workers on each of 16 separate 8-core runners (96 browser workers total). The runner's **Maximum concurrency** in GitHub is a separate limit: one full run needs 16 slots to start all shards together, two overlapping runs need 32.
+- CI splits the full Chromium suite into 32 shards: 10 on `ubuntu-latest-m` (6 workers each) and 22 on `ubuntu-latest` (4 workers each). Setup runs serially on each runner. Both pools need available slots for all shards to start at once.
 - Use `--shard=N/TOTAL` to split across multiple processes
 - Run specific test directories to iterate faster: `npx playwright test tests/auth/`
 - The `setup` project runs first to authenticate test users and save storage state
