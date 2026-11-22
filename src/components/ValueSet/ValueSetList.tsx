@@ -38,6 +38,7 @@ import {
 } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { valueSetListSearch } from "@/lib/router/search/admin";
 
 import { HrefLink } from "@/lib/router/HrefLink";
 import {
@@ -220,8 +221,8 @@ export function ValueSetList({ scope }: { scope: ValueSetScope }) {
   const isFacility = scope.authContext === "facility";
   const { canWrite } = useCanWriteValueSet(scope);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: valueSetListSearch,
     limit: 15,
-    disableCache: true,
   });
 
   // The admin area only ever lists instance sets; inside a facility the

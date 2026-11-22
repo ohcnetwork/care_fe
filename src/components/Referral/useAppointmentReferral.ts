@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { useQueryParams } from "@/lib/router/queryParams";
+import { referralContextSearch } from "@/lib/router/search/referral";
 import referralApi from "@/types/emr/referral/referralApi";
 import { ReferralResource } from "@/types/emr/referral/referralResource";
 import referralResourceApi from "@/types/emr/referral/referralResourceApi";
@@ -59,10 +60,7 @@ export async function findAppointmentReferralAttachment(
 export function useAppointmentReferral(patientId: string) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [params] = useQueryParams<{
-    referralId?: string;
-    referralSourceUrl?: string;
-  }>();
+  const [params] = useQueryParams(referralContextSearch);
   const requested = params.referralId !== undefined;
   const referralId =
     typeof params.referralId === "string" &&

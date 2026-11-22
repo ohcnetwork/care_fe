@@ -24,6 +24,7 @@ import { useFillPageQueries } from "./useFillPageQueries";
 
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { questionnaireFillSearch } from "@/lib/router/search/questionnaire";
 
 interface FillPageProps {
   /** What this fill is FOR — the union carries exactly the ids the
@@ -61,7 +62,7 @@ export function QuestionnaireFillPage({
       toDischarge,
       return_page: requestedReturnPage,
     },
-  ] = useQueryParams();
+  ] = useQueryParams(questionnaireFillSearch);
   const patientBound = isPatientBound(subject) ? subject : undefined;
   // Server drafts are patient/encounter records — a resource subject can
   // only have local drafts, so the query param is ignored there.

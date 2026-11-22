@@ -19,6 +19,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { referralContextSearch } from "@/lib/router/search/referral";
 import { EncounterStatus } from "@/types/emr/encounter/encounter";
 import { ReferralRetrieve } from "@/types/emr/referral/referral";
 import { ReferralResource } from "@/types/emr/referral/referralResource";
@@ -50,7 +51,7 @@ function AppointmentSummary({
   resolved: ResolvedReferralResourceState;
 }) {
   const { t } = useTranslation();
-  const [{ sourceUrl }] = useQueryParams<{ sourceUrl?: string }>();
+  const [{ sourceUrl }] = useQueryParams(referralContextSearch);
   const link = useReferralResourceLink(attachment, referral.patient);
   const facilityId = attachment.metadata?.facility_id ?? destinationFacilityId;
   const visit = useReferralReceivingEncounter({
@@ -192,12 +193,7 @@ export function ReferralAppointments({
       referralEncounterId,
       referralFacilityId,
     },
-  ] = useQueryParams<{
-    sourceUrl?: string;
-    referralAppointmentId?: string;
-    referralEncounterId?: string;
-    referralFacilityId?: string;
-  }>();
+  ] = useQueryParams(referralContextSearch);
   const {
     canWrite,
     canWriteAtDestination,

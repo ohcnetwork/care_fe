@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
 import { useQueryParams } from "@/lib/router/queryParams";
+import { questionnaireStudioSearch } from "@/lib/router/search/admin";
 import { cn } from "@/lib/utils";
 import { goBack } from "@/Utils/utils";
 
@@ -106,7 +107,9 @@ export function QuestionnaireStudioPage({
     subjectType: questionnaire?.subject_type,
   });
 
-  const [queryParams, setQueryParams] = useQueryParams();
+  const [queryParams, setQueryParams] = useQueryParams(
+    questionnaireStudioSearch,
+  );
   const { mode, import: importParam, question: questionParam } = queryParams;
   const [requestedView, setView] = useState<"edit" | "preview">(
     mode === "preview" ? "preview" : "edit",

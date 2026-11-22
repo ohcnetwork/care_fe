@@ -25,6 +25,7 @@ import TagBadge from "@/components/Tags/TagBadge";
 import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
+import { activityDefinitionListSearch } from "@/lib/router/search/settings";
 
 import {
   ACTIVITY_DEFINITION_STATUS_COLORS,
@@ -178,8 +179,8 @@ export function ActivityDefinitionListContent({
 }: ActivityDefinitionListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: activityDefinitionListSearch,
     limit: 15,
-    disableCache: true,
     defaultQueryParams: {
       status: "active",
     },
@@ -207,7 +208,7 @@ export function ActivityDefinitionListContent({
   const activityDefinitions = activityDefinitionsResponse?.results || [];
 
   useEffect(() => {
-    if (!qParams.search && qParams.page === "1") {
+    if (!qParams.search && qParams.page === 1) {
       setAllowCategoryCreate(!activityDefinitionsResponse?.count);
     }
   }, [
