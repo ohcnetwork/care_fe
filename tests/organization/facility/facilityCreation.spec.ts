@@ -12,6 +12,23 @@ function facilityTypeLine(page: Page, facilityName: string) {
     .locator('[data-slot="badge"]');
 }
 
+/**
+ * Answer the location picker's OpenStreetMap search with one result for the
+ * query, so the tests don't depend on the public Nominatim service (which can
+ * be slow or rate limited on CI).
+ */
+async function mockLocationSearch(page: Page) {
+  await page.route("https://nominatim.openstreetmap.org/search?**", (route) => {
+    const query = new URL(route.request().url()).searchParams.get("q") ?? "";
+    const place = query.charAt(0).toUpperCase() + query.slice(1);
+    return route.fulfill({
+      json: [
+        { display_name: `${place}, Kerala, India`, lat: "9.98", lon: "76.28" },
+      ],
+    });
+  });
+}
+
 /** Edit and delete live in the facility's Configurations menu. */
 async function openConfigurationsItem(page: Page, item: string) {
   await page
@@ -119,6 +136,7 @@ test.describe("Facility Creation", () => {
     pinCode = `67${faker.string.numeric(4)}`;
     address = faker.location.streetAddress();
 
+    await mockLocationSearch(page);
     await page.goto("/");
     await page.getByRole("tab", { name: "Governance" }).click();
     await page
