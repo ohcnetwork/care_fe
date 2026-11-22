@@ -29,7 +29,8 @@ env:
   REACT_CARE_API_URL: http://localhost:9000
   REACT_ENABLE_QUESTIONNAIRE_DRAFT: "true"
   BACKEND_STARTUP_TIMEOUT: 120
-  TEST_SHARDS: 32
+  TEST_SHARDS: 8
+  TEST_WORKERS: 6
   # care backend ref to test against. `develop` uses the published
   # ghcr.io/ohcnetwork/care:latest image; any other branch, tag or commit is
   # built from source. Override per run with the `backend_ref` input.
@@ -197,15 +198,13 @@ jobs:
   # Run E2E tests with backend integration
   test:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
-    needs: [changes, build, backend]
+    needs: [changes, backend]
     timeout-minutes: 30
-    # Give the slower shards the ten larger-runner slots; start the rest in
-    # the standard pool instead of waiting for a second wave of larger runners.
-    runs-on: ${{ contains(fromJSON('[8,11,15,17,18,19,20,25,27,32]'), matrix.shard) && 'ubuntu-latest-m' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest-m
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
 
     steps:
       - name: Checkout
@@ -260,16 +259,30 @@ jobs:
             node_modules/
           key: build-${{ github.sha }}
 
-      - name: Retry cache restore after delay
+      - name: Retry build cache restore after 15 seconds
         if: steps.cache-restore.outputs.cache-hit != 'true'
         id: cache-retry
         run: |
-          echo "Cache miss on first attempt, waiting 30s for propagation..."
-          sleep 30
+          echo "Build is still running; retrying the cache restore shortly."
+          sleep 15
 
-      - name: Restore build cache (retry)
+      - name: Restore build cache (retry 1)
         if: steps.cache-restore.outputs.cache-hit != 'true'
         id: cache-restore-retry
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/
+            node_modules/
+          key: build-${{ github.sha }}
+
+      - name: Retry build cache restore after another 15 seconds
+        if: steps.cache-restore.outputs.cache-hit != 'true' && steps.cache-restore-retry.outputs.cache-hit != 'true'
+        run: sleep 15
+
+      - name: Restore build cache (retry 2)
+        if: steps.cache-restore.outputs.cache-hit != 'true' && steps.cache-restore-retry.outputs.cache-hit != 'true'
+        id: cache-restore-retry-2
         uses: actions/cache/restore@v4
         with:
           path: |
@@ -284,6 +297,14 @@ jobs:
             exit 1
           fi
 
+      - name: Restore Playwright test timings
+        id: timing-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/playwright-timings.json
+          key: playwright-timings-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: playwright-timings-
+
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
@@ -294,7 +315,7 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps --only-shell chromium
 
       - name: Wait for backend
         run: |
@@ -310,17 +331,44 @@ jobs:
             exit 1
           fi
 
-      - name: Run setup tests (serial)
-        run: npx playwright test --project=setup --workers=1
+      - name: Run setup tests (parallel where independent)
+        run: >-
+          npx playwright test
+          --project=setup-auth
+          --project=setup-facility
+          --project=setup-patient
+          --project=setup-account
+          --project=setup-data
+          --workers=4
+          --reporter=list
         env:
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
+      - name: List Chromium tests
+        run: npx playwright test --list --project=chromium --reporter=json > "$RUNNER_TEMP/playwright-test-inventory.json"
+        env:
+          NODE_ENV: production
+          REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
+
+      - name: Plan duration-balanced shard
+        run: |
+          timings="$RUNNER_TEMP/playwright-timings.json"
+          if [ ! -f "$timings" ]; then
+            timings=scripts/playwright-timings.json
+          fi
+          node scripts/plan-playwright-shard.mjs \
+            "$RUNNER_TEMP/playwright-test-inventory.json" \
+            "$timings" \
+            "${{ matrix.shard }}" \
+            "$TEST_SHARDS" \
+            "$RUNNER_TEMP/playwright-shard.list"
+
       - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
         id: test
-        run: npx playwright test --project=chromium --workers="$TEST_WORKERS" --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
+        run: npx playwright test --project=chromium --workers="$TEST_WORKERS" --test-list="$RUNNER_TEMP/playwright-shard.list"
         env:
-          TEST_WORKERS: ${{ startsWith(runner.name, 'ubuntu-latest-m-') && 6 || 4 }}
+          TEST_WORKERS: ${{ env.TEST_WORKERS }}
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
@@ -335,6 +383,7 @@ jobs:
         with:
           name: playwright-results-shard-${{ matrix.shard }}
           path: |
+            blob-report/
             playwright-report/
             test-results/
             test-results.json
@@ -343,7 +392,7 @@ jobs:
   # Aggregate results and create final report
   report:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe'"
-    needs: [changes, test]
+    needs: [changes, build, test]
     runs-on: ubuntu-latest
     steps:
       - name: Check if tests were skipped
@@ -380,6 +429,37 @@ jobs:
         with:
           pattern: playwright-results-shard-*
           path: all-results
+
+      - name: Checkout
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      - name: Restore build cache for report merge
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/
+            node_modules/
+          key: build-${{ github.sha }}
+
+      - name: Merge Playwright blob reports
+        if: steps.skipped.outputs.skipped == 'false'
+        run: |
+          mkdir -p all-blob-reports
+          find all-results -type f -name 'report-*.zip' -exec cp {} all-blob-reports/ \;
+          if find all-blob-reports -type f -name 'report-*.zip' -print -quit | grep -q .; then
+            npx playwright merge-reports --reporter=html all-blob-reports
+          else
+            echo "::warning::No Playwright blob reports were uploaded"
+          fi
 
       - name: Merge test results
         if: steps.skipped.outputs.skipped == 'false'
@@ -424,12 +504,37 @@ jobs:
             echo "status=✅ Passed" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Restore previous Playwright timings
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/playwright-timings.json
+          key: playwright-timings-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: playwright-timings-
+
+      - name: Update Playwright timings
+        if: steps.skipped.outputs.skipped == 'false'
+        run: |
+          node scripts/update-playwright-timings.mjs \
+            all-results \
+            "$RUNNER_TEMP/playwright-timings.json" \
+            scripts/playwright-timings.json
+
+      - name: Save Playwright timings
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/playwright-timings.json
+          key: playwright-timings-${{ github.run_id }}-${{ github.run_attempt }}
+
       - name: Upload final report
         if: steps.skipped.outputs.skipped == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-final-report
-          path: all-results/
+          path: |
+            all-results/
+            playwright-report/
           retention-days: 14
 
       - name: Generate PR comment
@@ -440,6 +545,7 @@ jobs:
 
           **Status:** ${{ steps.merge.outputs.status }}
           **Test Shards:** ${{ env.TEST_SHARDS }}
+          **Workers per Shard:** ${{ env.TEST_WORKERS }}
 
           | Metric | Count |
           |--------|-------|

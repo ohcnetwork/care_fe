@@ -37,6 +37,16 @@ x-care: &care
 
 services:
   db:
+    # This database is disposable on each shard, so trading crash durability
+    # for faster fixture loading and test writes is safe here.
+    command:
+      - postgres
+      - -c
+      - fsync=off
+      - -c
+      - synchronous_commit=off
+      - -c
+      - full_page_writes=off
     healthcheck:
       # Over TCP: during first-time init Postgres only listens on the socket,
       # so this does not pass until the server is really up.

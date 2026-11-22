@@ -36,7 +36,7 @@ export default defineConfig({
   workers: undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
-    ? [["html"], ["json", { outputFile: "test-results.json" }], ["list"]]
+    ? [["blob"], ["json", { outputFile: "test-results.json" }], ["list"]]
     : "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -54,15 +54,43 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
-    // Setup project — runs serially because setup specs have ordering dependencies
-    // (e.g., patient.setup.ts depends on facility.setup.ts for facilityId)
-    { name: "setup", testMatch: /.*\.setup\.ts/, fullyParallel: false },
+    {
+      name: "setup-auth",
+      testMatch: /(?:auth|staff|nurse|facilityAdmin)\.setup\.ts$/,
+      fullyParallel: true,
+    },
+    {
+      name: "setup-facility",
+      testMatch: /facility\.setup\.ts$/,
+      dependencies: ["setup-auth"],
+    },
+    {
+      name: "setup-patient",
+      testMatch: /patient\.setup\.ts$/,
+      dependencies: ["setup-facility"],
+    },
+    {
+      name: "setup-account",
+      testMatch: /patientAccount\.setup\.ts$/,
+      dependencies: ["setup-patient"],
+    },
+    {
+      name: "setup-data",
+      testMatch: /(?:locationInventory|questionnaire)\.setup\.ts$/,
+      dependencies: ["setup-auth", "setup-facility"],
+    },
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      // On CI, setup runs as a separate serial step before the Chromium shards.
-      // Locally, Playwright handles the dependency ordering automatically.
-      dependencies: process.env.CI ? [] : ["setup"],
+      dependencies: process.env.CI
+        ? []
+        : [
+            "setup-auth",
+            "setup-facility",
+            "setup-patient",
+            "setup-account",
+            "setup-data",
+          ],
     },
     // {
     //   name: "firefox",
