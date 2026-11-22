@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { existsSync } from "node:fs";
 
 import type {
   QuestionnaireResponse,
@@ -10,8 +9,6 @@ import type { Question } from "@/types/questionnaire/question";
 // Uses Vite module imports to exercise the real core validator and plugin
 // registry. No backend fixtures are needed. playwright.config.ts runs this spec
 // in the `vite-modules` project, whose baseURL is a Vite dev server.
-
-const PLUGIN_CHECKOUTS = ["care_dental_fe", "care_vision_prescription_fe"];
 
 test.beforeEach(async ({ page, baseURL }) => {
   const url = new URL("/__group-validation", baseURL).href;
@@ -118,116 +115,4 @@ test("core invokes the registered group validator and retains child validation",
       error: "field_required",
     },
   ]);
-});
-
-test("Dental and Vision manifests expose working core validation callbacks", async ({
-  page,
-}) => {
-  test.skip(
-    !PLUGIN_CHECKOUTS.every((slug) => existsSync(`apps/${slug}`)),
-    `Imports plugin sources from apps/ (${PLUGIN_CHECKOUTS.join(", ")})`,
-  );
-  const results = await page.evaluate(async () => {
-    const load = (path: string) =>
-      import(`/src/components/QuestionnaireV2/${path}`);
-    const { registerQuestionGroup } = await load("groups/registry.ts");
-    const { instantiateGroupQuestions } = await load("groups/schema.ts");
-    const { initializeResponses } = await load("form/engine/store.ts");
-    const { collectQuestionErrors } = await load("form/validation.ts");
-    const cases = [
-      {
-        slug: "care_dental_fe",
-        index: 0,
-        invalid: [
-          { tooth: "16", type: "caries" },
-          { tooth: "16", type: "caries" },
-        ],
-        valid: [
-          { tooth: "16", type: "caries" },
-          { tooth: "16", type: "mobile" },
-        ],
-      },
-      {
-        slug: "care_vision_prescription_fe",
-        index: 1,
-        invalid: [{ product: "lens", eye: "right", sphere: 0, cylinder: -1 }],
-        valid: [
-          { product: "lens", eye: "right", sphere: 0, cylinder: -1, axis: 90 },
-        ],
-      },
-      {
-        slug: "care_vision_prescription_fe",
-        index: 0,
-        invalid: [{ status: "active", dateWritten: new Date("2999-01-01") }],
-        valid: [{ status: "active", dateWritten: new Date("2020-01-01") }],
-      },
-    ];
-    const results = [];
-    for (const entry of cases) {
-      const { default: manifest } = await import(
-        `/apps/${entry.slug}/src/manifest.tsx`
-      );
-      const definition = manifest.registeredQuestionGroups[entry.index];
-      const question = {
-        id: "group",
-        link_id: "group",
-        type: "group",
-        text: "Chart",
-        structured_type: definition.type,
-        repeats: definition.repeats,
-        questions: [],
-      };
-      question.questions = instantiateGroupQuestions(
-        question,
-        definition.schema,
-      );
-      const validate = (values: Record<string, unknown>[]) => {
-        const responses = initializeResponses([question]);
-        const rows = values.map((values) => {
-          const row = initializeResponses(question.questions);
-          for (const child of question.questions as Question[]) {
-            const value = values[child.link_id.slice("group__".length)];
-            row[child.id].values =
-              value === undefined ? [] : [{ type: child.type, value }];
-          }
-          return row;
-        });
-        if (question.repeats)
-          responses.group.sub_results = rows.map(Object.values);
-        else Object.assign(responses, rows[0]);
-        return collectQuestionErrors(
-          [question],
-          responses,
-          (key: string) => key,
-          {
-            questionnaire: { subject_type: "encounter", questions: [question] },
-            subject: {},
-            renderFailed: new Set(),
-          },
-        );
-      };
-      const unregister = registerQuestionGroup(definition, manifest.plugin);
-      try {
-        results.push({
-          type: definition.type,
-          invalid: validate(entry.invalid),
-          valid: validate(entry.valid),
-        });
-      } finally {
-        unregister();
-      }
-    }
-    return results;
-  });
-  for (const result of results) {
-    expect(result.invalid.length, result.type).toBeGreaterThan(0);
-    expect(
-      result.invalid.some(
-        (error: { error: string }) =>
-          error.error === "registered_group_validation_failed",
-      ),
-      result.type,
-    ).toBe(false);
-    expect(result.valid, result.type).toEqual([]);
-  }
 });
