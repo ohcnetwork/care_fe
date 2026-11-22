@@ -1602,7 +1602,6 @@
   "email": "Email",
   "emergency": "Emergency",
   "emergency_contact": "Emergency Contact",
-  "emergency_contact_person_name": "Emergency Contact Person Name",
   "emergency_description": "Mark as emergency if immediate attention is required.",
   "emergency_phone_number": "Emergency Phone Number",
   "empty_template": "Empty template",
