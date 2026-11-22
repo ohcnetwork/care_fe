@@ -11,10 +11,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQueryParams } from "raviger";
 
 import { BookAppointmentDetails } from "./BookAppointmentDetails";
 import { BookingsList } from "./BookingsList";
+
+import { useQueryParams } from "@/lib/router/queryParams";
 
 interface Props {
   patientId: string;
@@ -57,7 +58,7 @@ export default function BookAppointmentSheet({
         </SheetHeader>
         <SheetBody>
           <Tabs defaultValue="appointment">
-            <div className="max-w-full overflow-x-auto pb-1">
+            <div className="max-w-full overflow-x-auto">
               <TabsList variant="line">
                 <TabsTrigger value="appointment">
                   {t("book_appointment")}

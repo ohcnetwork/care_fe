@@ -12,65 +12,40 @@ alwaysApply: false
 - Customize components using Tailwind CSS
 - Maintain consistent styling across components
 
-## Routing with Raviger
+## Routing with TanStack Router
 
 ### Route Definition
-```typescript
-// src/Routers/routes/FacilityRoutes.tsx
-const FacilityRoutes: AppRoutes = {
-  "/facility/:facilityId/overview": ({ facilityId }) => (
-    <FacilityOverview facilityId={facilityId} />
-  ),
-  "/facility/:facilityId/services/:serviceId": ({ facilityId, serviceId }) => (
-    <HealthcareServiceShow facilityId={facilityId} serviceId={serviceId} />
-  )
-};
+File routes live under `src/routes/`. The file name gives the path, and `src/routeTree.gen.ts` is generated.
+```tsx
+// src/routes/_app/facility.$facilityId.overview.tsx
+export const Route = createFileRoute("/_app/facility/$facilityId/overview")({
+  component: RouteComponent,
+});
 
-// Type-safe route parameters
-type RouteParams<T extends string> =
-  T extends `${string}:${infer Param}/${infer Rest}`
-    ? { [_ in Param | keyof RouteParams<Rest>]: string }
-    : T extends `${string}:${infer Param}`
-      ? { [_ in Param]: string }
-      : Record<string, never>;
+function RouteComponent() {
+  const { facilityId } = useParams({
+    from: "/_app/facility/$facilityId/overview",
+  });
+  return <FacilityOverview facilityId={facilityId} />;
+}
 ```
 
-### Navigation and Hooks
+### Navigation
 ```typescript
-// Navigation
-import { navigate, useRedirect } from "raviger";
+import { Link } from "@tanstack/react-router";
+import { navigate } from "@/lib/router/navigate";
 
-// Redirect from old to new route
-useRedirect("/user", "/users");
+// Programmatic navigation (type-checked against the route tree)
+navigate({ to: "/facility/$facilityId/services", params: { facilityId } });
 
-// Programmatic navigation
-navigate(`/facility/${facilityId}/services`);
-
-// Route matching
-const routes = useRoutes(Routes);
+// A URL built at runtime
+navigate({ href: redirectUrl, replace: true });
 ```
 
-### Route Organization
-- Define routes in dedicated files under `src/Routers/routes/`
-- Group related routes in feature-specific files (e.g., `FacilityRoutes.tsx`)
-- Combine routes in `AppRouter.tsx`
-- Use proper typing with `AppRoutes` type
-- Support plugin routes through `usePluginRoutes` hook
-
-### Layout and Navigation
-```typescript
-// Conditional sidebar rendering
-const PATHS_WITHOUT_SIDEBAR = [
-  "/",
-  "/session-expired",
-  /^\/facility\/[^/]+\/services_requests\/[^/]+$/,
-];
-
-// Route wrapper with error boundary
-<ErrorBoundary fallback={<ErrorPage />}>
-  {routes}
-</ErrorBoundary>
-```
+- Links: `<Link to params>`; for a URL built at runtime, `<HrefLink href>` from `@/lib/router/HrefLink`.
+- Query string: `useQueryParams()` from `@/lib/router/queryParams`, or `useSearch` from `@tanstack/react-router`.
+- Layout: set `staticData` flags (`sidebar`, `workspace`, …) on the route; read them with `useLayoutFlags()`. Do not test the URL to choose a layout.
+- See `docs/architecture.md` (Routing) for areas, plugin routes, back navigation and unsaved-changes blocking.
 
 ## Responsive Design
 - Use Tailwind's responsive classes

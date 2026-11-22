@@ -526,7 +526,7 @@ export function LocationSheet({
               value={activeTab}
               onValueChange={(value) => setTab(value as "assign" | "history")}
             >
-              <div className="max-w-full overflow-x-auto pb-1">
+              <div className="max-w-full overflow-x-auto">
                 <TabsList variant="line">
                   {!readOnly && (
                     <TabsTrigger value="assign">

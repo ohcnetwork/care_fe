@@ -1,8 +1,8 @@
 import { ChevronsDownUp, ChevronsUpDown, SquarePen } from "lucide-react";
-import { Link } from "raviger";
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -46,9 +46,9 @@ export function EncounterAccordionLayout({
         size="icon"
         className="hover:bg-transparent text-gray-500 hover:text-gray-500"
       >
-        <Link href={editLink} aria-label={t("edit")}>
+        <HrefLink href={editLink} aria-label={t("edit")}>
           <SquarePen className="size-4" />
-        </Link>
+        </HrefLink>
       </Button>
     </div>
   );

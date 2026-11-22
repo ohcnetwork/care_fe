@@ -11,9 +11,12 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
+import { Link } from "@tanstack/react-router";
 import { Phone } from "lucide-react";
-import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
+
+import { HrefLink } from "@/lib/router/HrefLink";
+import { usePathname } from "@/lib/router/location";
 
 export const PatientInfoHoverCard = ({
   patient,
@@ -24,7 +27,7 @@ export const PatientInfoHoverCard = ({
 }) => {
   const { t } = useTranslation();
 
-  const path = usePath();
+  const path = usePathname();
   const isPatientHomePage = path?.endsWith(
     `/facility/${facilityId}/patients/home`,
   );
@@ -60,14 +63,13 @@ export const PatientInfoHoverCard = ({
         {!isPatientHomePage && facilityId && (
           <Button variant="outline" className="text-gray-950" asChild>
             <Link
-              basePath="/"
-              href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
-                {
-                  phone_number: patient.phone_number,
-                  year_of_birth: patient.year_of_birth?.toString() ?? "",
-                  partial_id: patient.id.slice(0, 5),
-                },
-              ).toString()}`}
+              to="/facility/$facilityId/patients/home"
+              params={{ facilityId }}
+              search={{
+                phone_number: patient.phone_number,
+                year_of_birth: patient.year_of_birth?.toString() ?? "",
+                partial_id: patient.id.slice(0, 5),
+              }}
             >
               {t("patient_home")}
             </Link>
@@ -75,8 +77,7 @@ export const PatientInfoHoverCard = ({
         )}
 
         <Button variant="outline" className="text-gray-950" asChild>
-          <Link
-            basePath="/"
+          <HrefLink
             href={
               facilityId
                 ? `/facility/${facilityId}/patient/${patient.id}`
@@ -84,7 +85,7 @@ export const PatientInfoHoverCard = ({
             }
           >
             {t("view_profile")}
-          </Link>
+          </HrefLink>
         </Button>
       </div>
       <div className="flex flex-col gap-3">

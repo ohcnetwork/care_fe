@@ -5,8 +5,6 @@ import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { buttonVariants } from "@/components/ui/button";
-
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 
 import { UserBase } from "@/types/user/user";
@@ -45,11 +43,7 @@ const UserDeleteDialog = (props: ConfirmDialogProps) => {
     <CriticalActionConfirmationDialog
       trigger={
         props.trigger ?? (
-          <Button
-            variant="destructive"
-            type="button"
-            className={buttonVariants({ variant: "destructive" })}
-          >
+          <Button variant="destructive" type="button">
             <Trash2Icon />
             {t("delete_account")}
           </Button>

@@ -1,47 +1,58 @@
-import { navigate, RavigerLocation, useLocationChange } from "raviger";
+import { type ParsedLocation, useRouter } from "@tanstack/react-router";
 import { useLayoutEffect } from "react";
 
-/** In-app locations visited in this session, oldest first. */
-const trail: string[] = [];
+import { navigate } from "@/lib/router/navigate";
+import { getRouter } from "@/lib/router/routerRef";
 
-function recordLocation({ fullPath, search, initiatedBy }: RavigerLocation) {
-  const location = fullPath + search;
-  if (initiatedBy === "replace") trail.pop();
-  if (trail.at(-1) !== location) trail.push(location);
-  if (trail.length > 100) trail.shift();
+/**
+ * In-app locations of this session by history index (`__TSR_index`, kept by
+ * the router in `history.state`). Entries below the current index are the
+ * real entries the browser goes back to.
+ */
+const trail: (string | undefined)[] = [];
+
+function recordLocation(location: ParsedLocation) {
+  trail[location.state.__TSR_index] = location.href;
 }
 
 /**
- * Records in-app locations while mounted. Mount it in the signed-in router so
- * signing out (a client-side navigation) ends the trail with the session.
+ * Records in-app locations while mounted. Mount it in the signed-in shell so
+ * signing out ends the trail with the session.
  */
 export function useNavigationTrail() {
-  useLayoutEffect(
-    () => () => {
+  const router = useRouter();
+  useLayoutEffect(() => {
+    recordLocation(router.state.location);
+    const unsubscribe = router.subscribe("onResolved", ({ toLocation }) =>
+      recordLocation(toLocation),
+    );
+    return () => {
+      unsubscribe();
       trail.length = 0;
-    },
-    [],
-  );
-  useLocationChange(recordLocation, { onInitial: true });
+    };
+  }, [router]);
 }
 
 /**
- * Returns to the latest visited location whose path `isOutside` accepts,
- * skipping everything visited after it. Falls back when there is none: the
- * page was opened directly, reloaded, or reached from another site.
+ * Goes back to the latest history entry whose path `isOutside` accepts, as a
+ * real browser back (`history.go(-n)`). Replaces the current entry with
+ * `fallback` when this session has no such entry: the page was opened
+ * directly, reloaded, or reached from another site.
  */
 export function navigateBackFrom(
   isOutside: (pathname: string) => boolean,
   fallback: string,
 ) {
-  for (let index = trail.length - 1; index >= 0; index--) {
-    if (isOutside(trail[index].split("?")[0])) {
-      const target = trail[index];
-      // The navigation records the target again.
-      trail.length = index;
-      navigate(target);
+  const router = getRouter();
+  const current = router.history.location.state.__TSR_index;
+  for (let index = current - 1; index >= 0; index--) {
+    const href = trail[index];
+    // Unknown entries: before a reload or a sign-in.
+    if (href === undefined) break;
+    if (isOutside(href.split(/[?#]/)[0])) {
+      router.history.go(index - current);
       return;
     }
   }
-  navigate(fallback);
+  navigate({ href: fallback, replace: true });
 }

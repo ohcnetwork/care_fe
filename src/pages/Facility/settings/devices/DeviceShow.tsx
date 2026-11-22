@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { formatDate } from "date-fns";
 import { AlertCircle, ExternalLink, Pencil, Trash2 } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,6 +30,8 @@ import { ResourceFormPicker } from "@/components/Questionnaire/ResourceFormPicke
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import { usePluginDevice } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import { ContactPoint } from "@/types/common/contactPoint";
@@ -87,7 +89,10 @@ export default function DeviceShow({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
-      navigate(`/facility/${facilityId}/settings/devices`);
+      navigate({
+        to: "/facility/$facilityId/settings/devices",
+        params: { facilityId },
+      });
     },
   });
 
@@ -255,7 +260,12 @@ export default function DeviceShow({
           <Button
             variant="outline"
             className={buttonClassName}
-            onClick={() => navigate(`${baseUrl}/edit`)}
+            onClick={() =>
+              navigate({
+                to: "/facility/$facilityId/settings/devices/$id/edit",
+                params: { facilityId, id: deviceId },
+              })
+            }
           >
             <Pencil className="size-5" />
             {t("edit")}
@@ -267,7 +277,7 @@ export default function DeviceShow({
         <TabsList
           variant="browser"
           aria-label={t("device")}
-          className="overflow-x-auto"
+          className="overflow-x-auto overflow-y-hidden"
         >
           {(["overview", "responses"] as const).map((value) => {
             const href =
@@ -280,13 +290,11 @@ export default function DeviceShow({
                 onKeyDown={(event) => {
                   if (event.key === " ") {
                     event.preventDefault();
-                    navigate(href);
+                    navigate({ href });
                   }
                 }}
               >
-                <Link basePath="/" href={href}>
-                  {t(value)}
-                </Link>
+                <HrefLink href={href}>{t(value)}</HrefLink>
               </TabsTrigger>
             );
           })}
@@ -320,8 +328,8 @@ export default function DeviceShow({
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                   {device.current_location ? (
                     <Link
-                      basePath="/"
-                      href={`/facility/${facilityId}/settings/locations/${device.current_location.id}`}
+                      to="/facility/$facilityId/settings/locations/$id"
+                      params={{ facilityId, id: device.current_location.id }}
                       className={linkClassName}
                     >
                       <span className="break-words">
@@ -348,8 +356,13 @@ export default function DeviceShow({
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                   {device.current_encounter ? (
                     <Link
-                      basePath="/"
-                      href={`/facility/${device.current_encounter.facility.id}/patient/${device.current_encounter.patient.id}/encounter/${device.current_encounter.id}/updates`}
+                      to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
+                      params={{
+                        facilityId: device.current_encounter.facility.id,
+                        patientId: device.current_encounter.patient.id,
+                        encounterId: device.current_encounter.id,
+                        tab: "updates",
+                      }}
                       className={linkClassName}
                     >
                       <span className="break-words">
@@ -380,8 +393,12 @@ export default function DeviceShow({
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                   {device.managing_organization ? (
                     <Link
-                      basePath="/"
-                      href={`/facility/${facilityId}/settings/departments/${device.managing_organization.id}/departments`}
+                      to="/facility/$facilityId/settings/departments/$id/$tab"
+                      params={{
+                        facilityId,
+                        id: device.managing_organization.id,
+                        tab: "departments",
+                      }}
                       className={linkClassName}
                     >
                       <span className="break-words">

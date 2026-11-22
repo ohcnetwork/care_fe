@@ -34,6 +34,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
+import { navigate } from "@/lib/router/navigate";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import { slugValueSchema } from "@/types/base/slug/schema";
 import {
@@ -50,8 +51,8 @@ import { zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlugValue } from "@/Utils/slug";
+import { goBack } from "@/Utils/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
 
 const typeTestedSchema = z.object({
   is_derived: z.boolean(),
@@ -158,15 +159,12 @@ function SpecimenDefinitionFormContent({
   specimenSlug,
   initialData,
   onSuccess,
-  onCancel = () => {
-    if (specimenSlug) {
-      navigate(
-        `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`,
-      );
-    } else {
-      navigate(`/facility/${facilityId}/settings/specimen_definitions`);
-    }
-  },
+  onCancel = () =>
+    goBack(
+      specimenSlug
+        ? `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`
+        : `/facility/${facilityId}/settings/specimen_definitions`,
+    ),
 }: SpecimenDefinitionFormContentProps) {
   const { t } = useTranslation();
   const isEditMode = Boolean(specimenSlug);
@@ -281,7 +279,11 @@ function SpecimenDefinitionFormContent({
         if (onSuccess) {
           onSuccess();
         } else {
-          navigate(`/facility/${facilityId}/settings/specimen_definitions`);
+          navigate({
+            to: "/facility/$facilityId/settings/specimen_definitions",
+            params: { facilityId },
+            replace: true,
+          });
         }
       },
     });
@@ -299,9 +301,11 @@ function SpecimenDefinitionFormContent({
         if (onSuccess) {
           onSuccess();
         } else {
-          navigate(
-            `/facility/${facilityId}/settings/specimen_definitions/${updated.slug}`,
-          );
+          navigate({
+            to: "/facility/$facilityId/settings/specimen_definitions/$specimenSlug",
+            params: { facilityId, specimenSlug: updated.slug },
+            replace: true,
+          });
         }
       },
     });

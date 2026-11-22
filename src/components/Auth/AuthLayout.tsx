@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
+import { Link } from "@tanstack/react-router";
 import { Globe } from "lucide-react";
-import { Link } from "raviger";
 import { ReactNode, useEffect, useId } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -167,7 +167,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
             <div dangerouslySetInnerHTML={{ __html: customDescriptionHtml }} />
           )}
           <Link
-            href="/licenses"
+            to="/licenses"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs underline underline-offset-4 hover:text-foreground"
@@ -188,7 +188,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
               careConfig.customLogoAlt?.light ?? "/images/ohc_logo_light.svg"
             }
             alt={t("open_healthcare_network")}
-            className="h-auto w-24 mix-blend-overlay"
+            className="h-auto w-24"
           />
         </a>
         <Separator
@@ -199,7 +199,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
         <img
           src="/images/care_logo_on_dark_mono.svg"
           alt={t("care")}
-          className="h-auto w-20 mix-blend-overlay"
+          className="h-auto w-20"
         />
       </div>
     </div>

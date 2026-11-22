@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import Page from "@/components/Common/Page";
 import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
+import { navigate } from "@/lib/router/navigate";
 import { Code } from "@/types/base/code/code";
 import {
   DurationSpec,
@@ -24,6 +25,7 @@ import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefini
 import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 
 interface SpecimenDefinitionDetailProps {
   facilityId: string;
@@ -53,7 +55,10 @@ export function SpecimenDefinitionDetail({
       onSuccess: () => {
         toast.success(t("specimen_definition_retired_successfully"));
         queryClient.invalidateQueries({ queryKey: ["specimenDefinitions"] });
-        navigate(`/facility/${facilityId}/settings/specimen_definitions`);
+        navigate({
+          to: "/facility/$facilityId/settings/specimen_definitions",
+          params: { facilityId },
+        });
       },
       onError: () => {
         toast.error(t("error_retiring_specimen_definition"));
@@ -97,9 +102,7 @@ export function SpecimenDefinitionDetail({
           <div className="space-y-4">
             <Button
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/specimen_definitions`,
-                )
+                goBack(`/facility/${facilityId}/settings/specimen_definitions`)
               }
               variant="outline"
               className="text-destructive"
@@ -127,7 +130,10 @@ export function SpecimenDefinitionDetail({
                     {t("delete")}
                   </Button>
                 )}
-                <Link href={`/specimen_definitions/${specimenSlug}/edit`}>
+                <Link
+                  to="/facility/$facilityId/settings/specimen_definitions/$specimenSlug/edit"
+                  params={{ facilityId, specimenSlug }}
+                >
                   <Button variant="outline" size="sm">
                     <Pencil className="h-4 w-4 mr-2" />
                     {t("edit")}

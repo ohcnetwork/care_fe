@@ -1,5 +1,4 @@
 import careConfig from "@careConfig";
-import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,6 +10,8 @@ import { PatientLoginForm } from "@/components/Auth/PatientLoginForm";
 import { StaffLoginForm } from "@/components/Auth/StaffLoginForm";
 
 import { LocalStorageKeys } from "@/common/constants";
+
+import { useQueryParams } from "@/lib/router/queryParams";
 
 type LoginMode = "staff" | "patient";
 

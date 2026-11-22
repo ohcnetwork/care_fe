@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { formatDate } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -34,7 +35,6 @@ import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDisp
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { ArrowUpRightSquare } from "lucide-react";
-import { Link } from "raviger";
 
 interface DispensedItemsSheetProps {
   open: boolean;
@@ -134,7 +134,12 @@ export function DispensedItemsSheet({
                         </TableCell>
                         <TableCell>
                           <Link
-                            href={`/medication_dispense/order/${item.order.id}`}
+                            to="/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId"
+                            params={{
+                              facilityId,
+                              locationId,
+                              dispenseOrderId: item.order.id,
+                            }}
                             className="flex items-center gap-2 whitespace-nowrap"
                           >
                             {t("view_order")}

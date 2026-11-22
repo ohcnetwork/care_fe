@@ -1,4 +1,9 @@
 import { expect, test } from "@playwright/test";
+import {
+  departmentCards,
+  departmentTrigger,
+  selectDepartment,
+} from "tests/helper/departmentSelect";
 import { getFacilityId } from "tests/support/facilityId";
 
 import {
@@ -46,46 +51,31 @@ for (const preferred of [true, false]) {
 
     await openCreateEncounterDialog(page);
     const dialog = getEncounterCreateDialog(page);
+    const cards = departmentCards(dialog);
+    await expect(cards.filter({ hasText: department.name })).toHaveCount(1);
+
+    // Reopening the picker keeps the default selected.
+    await departmentTrigger(dialog).click();
     await expect(
-      dialog.getByText(department.name, { exact: true }),
-    ).toBeVisible();
-    await dialog
-      .getByRole("tab", { name: "All Organizations", exact: true })
-      .click();
-    await expect(
-      dialog.getByText(department.name, { exact: true }),
-    ).toHaveCount(1);
-    await dialog
-      .getByRole("tab", { name: "My Organizations", exact: true })
-      .click();
-    await expect(
-      dialog.getByText(department.name, { exact: true }),
-    ).toHaveCount(1);
+      page
+        .getByRole("checkbox", { name: department.name, exact: true })
+        .first(),
+    ).toBeChecked();
+    await page.getByRole("button", { name: /^Done\b/ }).click();
+    await expect(cards.filter({ hasText: department.name })).toHaveCount(1);
 
     if (preferred) {
-      await dialog
-        .getByRole("button", { name: "Remove organization", exact: true })
-        .click();
-      await expect(
-        dialog.getByText(department.name, { exact: true }),
-      ).toHaveCount(0);
-      await dialog
-        .getByRole("tab", { name: "All Organizations", exact: true })
+      await cards
+        .filter({ hasText: department.name })
+        .getByRole("button", { name: `Remove ${department.name}`, exact: true })
         .click();
       // A preference is an initial default, not a command to re-add a removed row.
-      await expect(
-        dialog.getByText(department.name, { exact: true }),
-      ).toHaveCount(0);
-      await dialog
-        .getByRole("combobox")
-        .filter({ hasText: "Select Department" })
-        .click();
-      await page
-        .getByRole("option", { name: alternative.name, exact: true })
-        .click();
-      await expect(
-        dialog.getByText(alternative.name, { exact: true }).first(),
-      ).toBeVisible();
+      await expect(cards).toHaveCount(0);
+      await selectDepartment(page, dialog, alternative.name, {
+        multiple: true,
+      });
+      await expect(cards.filter({ hasText: alternative.name })).toHaveCount(1);
+      await expect(cards.filter({ hasText: department.name })).toHaveCount(0);
     }
     await dialog.getByRole("button", { name: /^Cancel\b/ }).click();
     await expect(dialog).toHaveCount(0);

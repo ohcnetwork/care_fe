@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
-import { navigate } from "raviger";
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import {
@@ -25,6 +25,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { OrgSelect } from "@/components/Common/OrgSelect";
 import Page from "@/components/Common/Page";
+
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import query from "@/Utils/request/query";
 import AdminOrganizationNavbar from "@/pages/Admin/organizations/components/AdminOrganizationNavbar";
@@ -73,11 +75,11 @@ export default function AdminOrganizationList({
 
   const handleOrganizationSelect = useCallback(
     (organization?: Organization) => {
-      navigate(
-        organization
+      navigate({
+        href: organization
           ? `/admin/organizations/${organizationType}/${organization.id}`
           : `/admin/organizations/${organizationType}`,
-      );
+      });
     },
     [organizationType],
   );
@@ -110,7 +112,9 @@ export default function AdminOrganizationList({
 
   const handleParentClick = useCallback(
     (parentId: string) => {
-      navigate(`/admin/organizations/${organizationType}/${parentId}`);
+      navigate({
+        href: `/admin/organizations/${organizationType}/${parentId}`,
+      });
     },
     [organizationType],
   );
@@ -119,7 +123,7 @@ export default function AdminOrganizationList({
   if (isFlatOrgType) {
     return (
       <Page title={t(organizationType)} hideTitleOnPage className="p-0">
-        <div className="container mx-auto space-y-4">
+        <div className="container mx-auto space-y-4 md:flex md:h-[calc(100svh-6.75rem)] md:flex-col">
           <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
@@ -153,7 +157,7 @@ export default function AdminOrganizationList({
 
           <ResizablePanelGroup
             orientation="horizontal"
-            className="min-h-[calc(100vh-14rem)] rounded-lg"
+            className="min-h-[calc(100vh-14rem)] rounded-lg md:min-h-0 md:flex-1"
           >
             <ResizablePanel
               defaultSize="25%"
@@ -174,7 +178,7 @@ export default function AdminOrganizationList({
             />
 
             <ResizablePanel defaultSize="75%" className="pl-0 md:pl-4">
-              <div className="h-full rounded-lg bg-white md:shadow-lg">
+              <div className="relative h-full overflow-y-auto rounded-lg bg-white md:shadow-lg">
                 {organizationId && org ? (
                   <div className="space-y-6 p-5">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -226,14 +230,14 @@ export default function AdminOrganizationList({
 
   return (
     <Page title={t(organizationType)} hideTitleOnPage className="p-0">
-      <div className="container mx-auto space-y-4">
+      <div className="container mx-auto space-y-4 md:flex md:h-[calc(100svh-6.75rem)] md:flex-col">
         <div className="mb-2 flex flex-col items-start justify-between sm:mb-4 sm:flex-row">
           <h3>{t(organizationType)}</h3>
         </div>
 
         <ResizablePanelGroup
           orientation="horizontal"
-          className="min-h-[calc(100vh-14rem)] rounded-lg"
+          className="min-h-[calc(100vh-14rem)] rounded-lg md:min-h-0 md:flex-1"
         >
           <ResizablePanel
             defaultSize="20%"
@@ -256,7 +260,7 @@ export default function AdminOrganizationList({
           />
 
           <ResizablePanel defaultSize="80%" className="pl-0 md:pl-4">
-            <div className="space-y-3 overflow-hidden rounded-lg md:bg-white md:shadow-lg sm:space-y-4">
+            <div className="relative space-y-3 overflow-hidden rounded-lg sm:space-y-4 md:h-full md:overflow-y-auto md:bg-white md:shadow-lg">
               {organizationId && (
                 <div className="md:pt-4 flex items-center mx-auto max-w-4xl">
                   <Breadcrumb className="md:px-5 md:pt-5">
@@ -266,7 +270,9 @@ export default function AdminOrganizationList({
                           asChild
                           className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
                           onClick={() =>
-                            navigate(`/admin/organizations/${organizationType}`)
+                            navigate({
+                              href: `/admin/organizations/${organizationType}`,
+                            })
                           }
                         >
                           <Button
@@ -358,26 +364,21 @@ function FlatOrgSidebar({
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const {
-    data: allOrganizations,
-    isLoading,
-    isFetching,
-  } = useQuery({
-    queryKey: ["organization", "list", organizationType, searchTerm],
-    queryFn: query.debounced(organizationApi.list, {
-      queryParams: {
-        parent: "",
-        org_type: organizationType,
-        name: searchTerm || undefined,
-        limit: 100,
-      },
-    }),
-    refetchOnWindowFocus: false,
-  });
+  const { data, isLoading, isFetching, hasNextPage, isFetchingNextPage, ref } =
+    useInfiniteList({
+      queryKey: ["organization", "list", organizationType, searchTerm],
+      ...query.infinite(organizationApi.list, {
+        queryParams: {
+          parent: "",
+          org_type: organizationType,
+          name: searchTerm || undefined,
+        },
+        debounceInterval: 500,
+      }),
+      refetchOnWindowFocus: false,
+    });
 
-  const filtered = (allOrganizations?.results || [])
-    .slice()
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const filtered = data?.results ?? [];
 
   return (
     <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-lg">
@@ -393,7 +394,7 @@ function FlatOrgSidebar({
         </div>
       </div>
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="min-h-0 flex-1">
         <div className="p-2">
           {isLoading || (isFetching && filtered.length === 0) ? (
             <div className="space-y-1.5">
@@ -435,6 +436,10 @@ function FlatOrgSidebar({
                   </Button>
                 );
               })}
+              {hasNextPage && <div ref={ref} />}
+              {isFetchingNextPage && (
+                <Skeleton className="h-10 w-full rounded-md" />
+              )}
             </div>
           ) : (
             <p className="px-3 py-4 text-center text-sm text-gray-400">

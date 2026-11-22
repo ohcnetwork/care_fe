@@ -1,8 +1,8 @@
-import { useQueryParams } from "raviger";
-
 import { QuestionnaireResponseStatus } from "@/types/questionnaire/questionnaireResponse";
 
 import type { ResourceResponseFilterValues } from "./ResourceResponseFilters";
+
+import { useQueryParams } from "@/lib/router/queryParams";
 
 /** Keep response selection, pagination and filter labels in the shareable URL. */
 export function useResourceResponseParams() {

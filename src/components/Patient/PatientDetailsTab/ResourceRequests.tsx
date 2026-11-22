@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -50,7 +50,9 @@ export const ResourceRequests = (props: PatientProps) => {
         {facilityId && (
           <Button variant="outline_primary" asChild>
             <Link
-              href={`/facility/${facilityId}/resource/new?related_patient=${patientData.id}`}
+              to="/facility/$facilityId/resource/new"
+              params={{ facilityId }}
+              search={{ related_patient: patientData.id }}
             >
               <CareIcon icon="l-plus" className="mr-2" />
               {t("create_resource_request")}
@@ -104,7 +106,11 @@ export const ResourceRequests = (props: PatientProps) => {
                     <TableCell className="text-right">
                       <Button variant="outline" size="sm" asChild>
                         <Link
-                          href={`/facility/${request.origin_facility.id}/resource/${request.id}`}
+                          to="/facility/$facilityId/resource/$id"
+                          params={{
+                            facilityId: request.origin_facility.id,
+                            id: request.id,
+                          }}
                         >
                           <CareIcon icon="l-eye" className="mr-2" />
                           {t("view")}

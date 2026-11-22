@@ -14,7 +14,6 @@ import {
 } from "@/types/facility/facility";
 import { renderGeoOrganizations } from "@/types/organization/organization";
 
-import FacilityDeleteDialog from "./FacilityDeleteDialog";
 import { FacilityHomeCover } from "./FacilityHomeCover";
 import { FacilityMapsLink } from "./FacilityMapLink";
 
@@ -22,7 +21,6 @@ interface FacilityHomeOverviewProps {
   facility: FacilityRead;
   actions: ReactNode;
   canUpdateFacility: boolean;
-  canDelete: boolean;
   onEditCoverImage: () => void;
 }
 
@@ -30,7 +28,6 @@ export function FacilityHomeOverview({
   facility: facilityData,
   actions,
   canUpdateFacility,
-  canDelete,
   onEditCoverImage,
 }: FacilityHomeOverviewProps) {
   const { t } = useTranslation();
@@ -70,7 +67,8 @@ export function FacilityHomeOverview({
                       </span>
                       <span className="text-gray-700 truncate text-sm">
                         <ContactLink
-                          tel={formatPhoneNumberIntl(
+                          tel={String(facilityData.phone_number)}
+                          label={formatPhoneNumberIntl(
                             String(facilityData.phone_number),
                           )}
                         />
@@ -139,28 +137,6 @@ export function FacilityHomeOverview({
                     content={facilityData.description}
                     className="text-sm"
                   />
-                </CardContent>
-              </Card>
-            )}
-            {canDelete && (
-              <Card className="border-2 border-red-400">
-                <CardHeader className="pb-4">
-                  <CardTitle className="font-semibold text-lg">
-                    {t("danger_zone")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-3 border rounded-md border-gray-300">
-                    <div>
-                      <p className="text-sm font-medium">
-                        {t("delete_facility")}
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        {t("delete_facility_description")}
-                      </p>
-                    </div>
-                    <FacilityDeleteDialog facility={facilityData} />
-                  </div>
                 </CardContent>
               </Card>
             )}

@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -45,6 +44,7 @@ import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useQueryParams } from "@/lib/router/queryParams";
 import { ScheduleEncounterDefaultsFields } from "@/pages/Scheduling/components/ScheduleEncounterDefaultsFields";
 import {
   calculateSlotDuration,
@@ -142,14 +142,7 @@ export default function CreateScheduleTemplateSheet({
                     message: t("field_required"),
                   }),
                 is_auto_fill: z.boolean().optional(),
-                num_of_slots: z
-                  .union([
-                    z.number().min(1, t("number_min_error", { min: 1 })),
-                    z.undefined(),
-                  ])
-                  .refine((val) => val !== undefined, {
-                    message: t("field_required"),
-                  }),
+                num_of_slots: z.number().nullable(),
               }),
               // Schema for open and closed types
               z.object({
@@ -183,7 +176,26 @@ export default function CreateScheduleTemplateSheet({
                 message: t("start_time_must_be_before_end_time"),
                 path: ["start_time"], // This will show error at the start_time field
               },
-            ),
+            )
+            .superRefine((data, ctx) => {
+              // The slot count only drives auto-fill, so skip it when auto-fill is off
+              if (data.slot_type !== "appointment" || !data.is_auto_fill) {
+                return;
+              }
+              if (data.num_of_slots === null) {
+                ctx.addIssue({
+                  code: "custom",
+                  message: t("field_required"),
+                  path: ["num_of_slots"],
+                });
+              } else if (data.num_of_slots < 1) {
+                ctx.addIssue({
+                  code: "custom",
+                  message: t("number_min_error", { min: 1 }),
+                  path: ["num_of_slots"],
+                });
+              }
+            }),
         )
         .min(1, t("schedule_sessions_min_error")),
     })
@@ -253,6 +265,7 @@ export default function CreateScheduleTemplateSheet({
             slot_size_in_minutes: availability.slot_size_in_minutes,
             tokens_per_slot: availability.tokens_per_slot,
             reason: availability.reason,
+
             availability: values.weekdays.map((day) => ({
               day_of_week: day,
               start_time: availability.start_time,
@@ -311,9 +324,17 @@ export default function CreateScheduleTemplateSheet({
       const start = form.watch(`availabilities.${index}.start_time`);
       const end = form.watch(`availabilities.${index}.end_time`);
       const numOfSlots = form.watch(`availabilities.${index}.num_of_slots`);
-      if (!start || !end) return;
+      if (!start || !end || !numOfSlots) {
+        form.setValue(
+          `availabilities.${index}.slot_size_in_minutes`,
+          undefined,
+        );
+        return;
+      }
       const duration = calculateSlotDuration(start, end, numOfSlots);
-      form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
+      form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration, {
+        shouldValidate: true,
+      });
     }
   };
 
@@ -661,16 +682,14 @@ export default function CreateScheduleTemplateSheet({
                                               inputMode="numeric"
                                               pattern="[0-9]*"
                                               min={1}
-                                              defaultValue={1}
                                               {...field}
+                                              value={field.value ?? ""}
                                               className="shadow-none"
                                               onChange={(e) => {
                                                 const value =
                                                   e.target.valueAsNumber;
                                                 field.onChange(
-                                                  isNaN(value)
-                                                    ? undefined
-                                                    : value,
+                                                  isNaN(value) ? null : value,
                                                 );
                                                 updateSlotDuration(index);
                                               }}

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { navigateInApp } from "tests/helper/history";
 import {
   KITCHEN_SINK_FACILITY_SLUG,
   getQuestionnaireIdBySlug,
@@ -109,6 +110,7 @@ test.describe("Fill page shell", () => {
     // Close returns to the encounter updates tab, which is fullscreen too.
     await page.getByRole("button", { name: "Close", exact: true }).click();
     await page.waitForURL(/\/updates$/);
+    const encounterPath = new URL(page.url()).pathname;
     await expect(sidebar).toHaveCount(0);
     await expect(workspaceHeader).toHaveCount(0);
     await expect(sidebarState).toHaveAttribute(
@@ -129,7 +131,8 @@ test.describe("Fill page shell", () => {
           "data-app-sidebar-pinned",
           String(pinned),
         );
-        await page.goBack();
+        // Back replaced the encounter with the patient: open it again.
+        await navigateInApp(page, encounterPath);
         await page.waitForURL(/\/updates$/);
         await expect(sidebar).toHaveCount(0);
         await page

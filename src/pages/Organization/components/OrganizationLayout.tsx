@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, usePath } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { HrefLink } from "@/lib/router/HrefLink";
+import { usePathname } from "@/lib/router/location";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -12,6 +13,7 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -22,8 +24,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CareUIPageTitle } from "@/components/ui/typography";
 
 import Page from "@/components/Common/Page";
 
@@ -61,7 +64,7 @@ export default function OrganizationLayout({
   setOrganization,
   routeContext,
 }: Props) {
-  const path = usePath() || "";
+  const path = usePathname() || "";
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -179,78 +182,85 @@ export default function OrganizationLayout({
   ];
 
   const visibleNavItems = navItems.filter((item) => item.visibility);
-  const activeNavItem = visibleNavItems.find((item) => path === item.url);
-
+  const currentPath = path.replace(/\/+$/, "");
+  // /responsibilities/:id has no tab URL of its own; it renders the Users tab
+  const activeNavItem =
+    visibleNavItems.find((item) => currentPath === item.url) ??
+    (effectiveContext === "responsibility" && currentPath === `${baseUrl}/${id}`
+      ? visibleNavItems.find((item) => item.url === `${baseUrl}/${id}/users`)
+      : undefined);
   const orgParents: OrganizationParent[] = [];
   let currentParent = org.parent;
   while (currentParent) {
     if (currentParent.id) {
-      orgParents.push(currentParent);
+      orgParents.unshift(currentParent);
     }
     currentParent = currentParent.parent;
   }
 
+  const breadcrumbLinkClass =
+    "inline-flex min-h-8 items-center rounded-sm underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+
   return (
-    <Page title={`${org.name}`}>
+    <Page
+      title={
+        activeNavItem ? `${activeNavItem.name} · ${org.name}` : `${org.name}`
+      }
+      hideTitleOnPage
+    >
+      <CareUIPageTitle className="wrap-break-word">{org.name}</CareUIPageTitle>
       {orgParents.length > 0 && (
-        <div className="flex items-center gap-2 mt-4">
-          <Breadcrumb>
-            <BreadcrumbList>
-              {orgParents.reverse().map((parent) => (
-                <React.Fragment key={parent.id}>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink
-                      asChild
-                      className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+        <Breadcrumb>
+          <BreadcrumbList className="text-sm text-foreground">
+            {orgParents.map((parent) => (
+              <React.Fragment key={parent.id}>
+                <BreadcrumbItem className="min-w-0">
+                  <BreadcrumbLink asChild>
+                    <HrefLink
+                      href={currentPath.replace(
+                        `${baseUrl}/${id}`,
+                        `${baseUrl}/${parent.id}`,
+                      )}
+                      className={breadcrumbLinkClass}
                     >
-                      <Link href={path.replace(id, parent.id)}>
-                        {parent.name}
-                      </Link>
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                </React.Fragment>
-              ))}
-              <BreadcrumbItem key={org.id}>
-                <span className="text-sm font-semibold text-gray-900">
-                  {org.name}
-                </span>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
+                      {parent.name}
+                    </HrefLink>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+              </React.Fragment>
+            ))}
+            <BreadcrumbItem className="min-w-0">
+              <BreadcrumbPage className="font-medium text-foreground">
+                {org.name}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
       )}
 
       {/* Desktop Navigation — hide when only one tab visible */}
       {visibleNavItems.length > 1 && (
-        <div className="mt-4 min-w-0 hidden lg:block">
-          <Menubar className="w-full h-full overflow-x-auto">
-            {navItems
-              .filter((item) => item.visibility)
-              .map((item) => (
-                <MenubarMenu key={item.url}>
-                  <MenubarTrigger
-                    className={`${
-                      path === item.url
-                        ? "font-medium text-primary-700 bg-gray-100"
-                        : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
-                    }`}
-                    asChild
-                  >
-                    <Link href={item.url} className="cursor-pointer">
-                      <div className="mr-2">{item.icon}</div>
-                      {item.name}
-                    </Link>
-                  </MenubarTrigger>
-                </MenubarMenu>
+        <Tabs
+          value={activeNavItem?.url ?? null}
+          activationMode="manual"
+          className="mt-2 hidden lg:flex"
+        >
+          <div className="min-w-0 max-w-full overflow-x-auto">
+            <TabsList variant="line">
+              {visibleNavItems.map((item) => (
+                <TabsTrigger key={item.url} value={item.url} asChild>
+                  <HrefLink href={item.url}>{item.name}</HrefLink>
+                </TabsTrigger>
               ))}
-          </Menubar>
-        </div>
+            </TabsList>
+          </div>
+        </Tabs>
       )}
 
       {/* Mobile Navigation */}
       {visibleNavItems.length > 1 && (
-        <div className="mt-4">
+        <div>
           <div className="block lg:hidden">
             <DropdownMenu
               open={isMobileMenuOpen}
@@ -285,13 +295,13 @@ export default function OrganizationLayout({
                     key={item.url}
                     className={cn(
                       "flex justify-between items-center py-3",
-                      path === item.url
+                      activeNavItem?.url === item.url
                         ? "font-medium text-primary-700 bg-gray-100"
                         : "text-gray-700",
                     )}
                     asChild
                   >
-                    <Link
+                    <HrefLink
                       href={item.url}
                       className="flex items-center w-full"
                       onClick={() => setIsMobileMenuOpen(false)}
@@ -300,13 +310,13 @@ export default function OrganizationLayout({
                         <div className="mr-2">{item.icon}</div>
                         {item.name}
                       </div>
-                      {path === item.url && (
+                      {activeNavItem?.url === item.url && (
                         <DropdownMenuCheckboxItem
                           checked
                           className="pointer-events-none pr-1"
                         />
                       )}
-                    </Link>
+                    </HrefLink>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
