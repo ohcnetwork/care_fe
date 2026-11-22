@@ -226,16 +226,22 @@ function SpecimenDefinitionFormContent({
       .object({
         code: CodeSchema.nullish(),
         quantity: z
-          .object({
-            value: z
-              .string()
-              .refine(
-                (value) => wholeSpecimenQuantity(value) !== undefined,
-                t("invalid_quantity"),
-              ),
-            unit: CodeSchema,
-          })
-          .nullish(),
+          .object({ value: z.string(), unit: CodeSchema.optional() })
+          .nullish()
+          .superRefine((quantity, ctx) => {
+            if (!quantity) return;
+            if (!wholeSpecimenQuantity(quantity.value)) {
+              ctx.addIssue({
+                code: "custom",
+                message: t("invalid_quantity"),
+              });
+            } else if (!quantity.unit) {
+              ctx.addIssue({
+                code: "custom",
+                message: t("field_required"),
+              });
+            }
+          }),
         method: CodeSchema.nullish(),
         body_site: CodeSchema.nullish(),
       })
@@ -369,24 +375,33 @@ function SpecimenDefinitionFormContent({
     });
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    const quantity = data.collection?.quantity;
+    if (quantity && !quantity.unit) {
+      form.setError("collection.quantity", {
+        type: "validate",
+        message: t("field_required"),
+      });
+      return;
+    }
+
+    const normalizedQuantity = quantity?.unit
+      ? {
+          ...quantity,
+          unit: quantity.unit,
+          value: wholeSpecimenQuantity(quantity.value) ?? quantity.value,
+        }
+      : quantity
+        ? null
+        : quantity;
     const collection = data.collection
       ? {
           ...data.collection,
-          quantity: data.collection.quantity?.value
-            ? {
-                ...data.collection.quantity,
-                value:
-                  wholeSpecimenQuantity(data.collection.quantity.value) ??
-                  data.collection.quantity.value,
-              }
-            : data.collection.quantity,
+          quantity: normalizedQuantity,
         }
       : undefined;
     const payload: SpecimenDefinitionCreate = {
       ...data,
-      collection: collection && Object.values(collection).some(Boolean)
-        ? collection
-        : {},
+      collection: collection && Object.values(collection).some(Boolean) ? collection : {},
       patient_preparation:
         data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested
@@ -592,7 +607,14 @@ function SpecimenDefinitionFormContent({
                           <FormLabel>{t("expected_quantity")}</FormLabel>
                           <FormControl>
                             <ComboboxQuantityInput
-                              quantity={field.value}
+                              quantity={
+                                field.value?.unit
+                                  ? {
+                                      value: field.value.value,
+                                      unit: field.value.unit,
+                                    }
+                                  : undefined
+                              }
                               onChange={field.onChange}
                               placeholder={t("quantity")}
                               units={SPECIMEN_DEFINITION_UNITS_CODES}
