@@ -23,6 +23,8 @@ test.describe("Product Edit", () => {
     await expect(page).toHaveURL(/\/settings\/product\/[0-9a-fA-F-]{36}$/);
 
     await expect(page.getByText("Back to list")).toBeVisible();
+    const updatedToast = page.getByText("Product updated successfully");
+    await expect(updatedToast).toHaveCount(1);
 
     // Revert status to active as part of cleanup
     await page.getByRole("button", { name: "Edit" }).click();
@@ -30,6 +32,7 @@ test.describe("Product Edit", () => {
     await page.getByRole("option", { name: "Active", exact: true }).click();
     await page.getByRole("button", { name: "Update" }).click();
 
-    await expect(page.getByText("Product updated successfully")).toBeVisible();
+    // The first update's toast can still be on screen alongside the revert's.
+    await expect(updatedToast.last()).toBeVisible();
   });
 });
