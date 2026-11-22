@@ -968,7 +968,9 @@ export function MedicationRequestQuestion({
                       key: "",
                       label: t("medicine"),
                       render: (med) =>
-                        displayMedicationName(med as MedicationRequestRead),
+                        "dosage_instruction" in med
+                          ? displayMedicationName(med)
+                          : med.medication?.display || "",
                     },
                     {
                       key: "dosage_instruction",
