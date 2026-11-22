@@ -3,6 +3,7 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import { PluginPathNotFound } from "@/components/Common/PluginPathNotFound";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientProfile } from "@/components/Patient/PatientProfile";
+import { patientShowSearch } from "@/lib/router/search/patient";
 
 type PatientTab = React.ComponentProps<typeof PatientProfile>["page"];
 
@@ -15,6 +16,7 @@ type PatientTab = React.ComponentProps<typeof PatientProfile>["page"];
 export const Route = createFileRoute(
   "/_app/facility/$facilityId/patient/$patientId/{-$tab}",
 )({
+  validateSearch: patientShowSearch,
   component: RouteComponent,
 });
 

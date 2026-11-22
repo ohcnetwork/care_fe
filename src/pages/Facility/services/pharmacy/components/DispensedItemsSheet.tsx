@@ -24,6 +24,7 @@ import {
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { dispensedItemsSearch } from "@/lib/router/search/pharmacy";
 
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -52,8 +53,8 @@ export function DispensedItemsSheet({
   const { locationId } = useCurrentLocation();
 
   const { qParams, Pagination, resultsPerPage } = useFilters({
+    schema: dispensedItemsSearch,
     limit: 10,
-    disableCache: true,
   });
 
   const { data: dispensedItems, isLoading } = useQuery({

@@ -32,7 +32,12 @@ import { FILE_EXTENSIONS, FileReadMinimal } from "@/types/files/file";
 export interface UseReportManagerOptions {
   associatingId: string;
   enabled?: boolean;
-  qParams?: Record<string, string>;
+  /** The report list filters. Other keys of the page's search are not sent. */
+  qParams?: {
+    name?: string;
+    is_archived?: string;
+    limit?: number;
+  };
   reportType?: ReportType;
 }
 
@@ -74,15 +79,18 @@ export default function useReportManager({
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
 
   // Fetch reports
+  const { name, is_archived, limit } = qParams ?? {};
   const {
     data: reportsData,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["reports", associatingId, qParams],
+    queryKey: ["reports", associatingId, name, is_archived, limit],
     queryFn: query(reportApi.listReports, {
       queryParams: {
-        ...qParams,
+        name,
+        is_archived,
+        limit,
         associating_id: associatingId,
         upload_completed: "true",
         report_type: reportType,

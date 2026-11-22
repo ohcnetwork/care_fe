@@ -12,6 +12,7 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { UserCard } from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
+import { facilityOrganizationListSearch } from "@/lib/router/search/settings";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -47,8 +48,8 @@ export default function FacilityOrganizationUsers({
     username: "",
   });
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: facilityOrganizationListSearch,
     limit: 12,
-    disableCache: true,
   });
   const { t } = useTranslation();
 

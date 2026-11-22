@@ -37,6 +37,7 @@ import {
 } from "@/components/Common/Table";
 
 import useFilters from "@/hooks/useFilters";
+import { prescriptionQueueSearch } from "@/lib/router/search/pharmacy";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
@@ -87,7 +88,9 @@ export default function PrescriptionQueue({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: prescriptionQueueSearch,
     limit: 14,
+    cache: true,
     cacheBlacklist: ["patient_external_id", "patient_name", "status"],
   });
 
@@ -364,7 +367,7 @@ export default function PrescriptionQueue({
                   params={{
                     facilityId,
                     locationId,
-                    patientId: qParams.patient_external_id,
+                    patientId: qParams.patient_external_id ?? "",
                     prescriptionIds: selectedPrescriptionIds.join(","),
                   }}
                 >
@@ -377,7 +380,7 @@ export default function PrescriptionQueue({
                   params={{
                     facilityId,
                     locationId,
-                    patientId: qParams.patient_external_id,
+                    patientId: qParams.patient_external_id ?? "",
                     prescriptionIds: selectedPrescriptionIds.join(","),
                   }}
                   className="underline"
@@ -392,7 +395,7 @@ export default function PrescriptionQueue({
                   params={{
                     facilityId,
                     locationId,
-                    patientId: qParams.patient_external_id,
+                    patientId: qParams.patient_external_id ?? "",
                     prescriptionIds: selectedPrescriptionIds.join(","),
                   }}
                 >

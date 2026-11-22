@@ -25,6 +25,17 @@ export async function openMultiFilter(
   await page.getByRole("option", { name: filterName }).click();
 }
 
+/** Picks one option of a list filter (status, type, method) and closes it. */
+export async function applyOptionFilter(
+  page: Page,
+  filterName: RegExp,
+  optionName: RegExp,
+) {
+  await openMultiFilter(page, filterName);
+  await page.getByRole("option", { name: optionName }).click();
+  await page.keyboard.press("Escape");
+}
+
 export async function applyDateFilterPreset(
   page: Page,
   filterName: RegExp,
