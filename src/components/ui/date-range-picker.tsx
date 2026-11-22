@@ -555,7 +555,8 @@ function RangePanel({
           </div>
         ))}
       </div>
-      <div className="flex items-center px-3 pt-2">
+      {/* Paint above the calendar's positioned grid so focus outlines aren't clipped. */}
+      <div className="relative z-10 flex items-center px-3 pt-2">
         <Button
           ref={captionRef}
           type="button"

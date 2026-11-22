@@ -132,8 +132,9 @@ function Calendar({
     "mt-2 flex w-full items-start",
     props.weekClassName,
   );
+  // Raise the focused cell: later cells paint over its focus outline otherwise.
   const _dayClassName = cn(
-    "flex size-(--cell-size) min-w-0 flex-1 items-center justify-center p-0 text-sm",
+    "flex size-(--cell-size) min-w-0 flex-1 items-center justify-center p-0 text-sm has-focus-visible:relative has-focus-visible:z-10",
     props.dayClassName,
   );
   const _dayButtonClassName = cn(
