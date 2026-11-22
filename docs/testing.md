@@ -13,7 +13,7 @@ npm run playwright:test                                 # Run all tests
 npm run playwright:test -- tests/auth/login.spec.ts     # Run a single test file
 npm run playwright:test -- -g "test name"               # Run tests matching a pattern
 npm run playwright:test -- --workers=4                   # Run with 4 parallel workers
-npm run playwright:test -- --shard=1/8                   # Run the first of eight CI shards locally
+npm run playwright:test -- --shard=1/8                   # Run one equal-count shard locally
 npm run playwright:test:ui                              # Interactive Playwright UI mode
 ```
 
@@ -27,10 +27,13 @@ npm run playwright:test:ui                              # Interactive Playwright
 
 ## Running tests efficiently
 
-- Use `--workers=4` for parallel execution (CI runs setup with 1 worker, then chromium with 4 workers)
-- Use `--shard=N/TOTAL` to split across multiple processes
+- CI runs 8 shards on `ubuntu-latest-m`, with 6 Chromium workers per runner by default. Each shard pays its own backend and setup cost, so the workflow uses eight larger runners rather than splitting the suite across many smaller jobs.
+- CI uses Playwright's built-in `--shard=N/8` with `fullyParallel: true` to distribute tests across 8 runners. Each shard uses 6 Chromium workers by default.
+- The setup project runs independent login and fixture setup tasks in parallel while preserving facility → patient → account dependencies.
+- Shard artifacts use Playwright's blob reporter; the report job merges them into one HTML report.
+- Use `--shard=N/TOTAL` to split a local run across shards.
 - Run specific test directories to iterate faster: `npx playwright test tests/auth/`
-- The `setup` project runs first to authenticate test users and save storage state
+- The `setup-*` projects run before Chromium to authenticate test users and save storage state.
 
 ## Database management for re-runs
 
