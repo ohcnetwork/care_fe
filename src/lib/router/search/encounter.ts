@@ -11,8 +11,8 @@ import { WORKSPACE_STATUSES } from "@/types/workspace/workspace";
 /** The encounter list of the encounters overview (`EncounterList`). */
 export const encounterListSearch = z.object({
   ...paginationSearch,
-  name: searchString(),
-  external_identifier: searchString(),
+  search_by: searchEnum(["name", "external_identifier"]),
+  search_text: searchString(),
   /** Comma-separated `EncounterStatus` values, or `live` or `ended`. */
   status: searchString(),
   /** A lowercase `ENCOUNTER_PRIORITY` value. */
