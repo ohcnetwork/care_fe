@@ -55,6 +55,33 @@ async function createGovtOrganization(
   await expect(dialog).not.toBeVisible();
 }
 
+async function checkGovtChildSheetValidation(page: Page) {
+  const addOrgButton = page
+    .getByRole("button", { name: /add organization/i })
+    .last();
+  await expect(addOrgButton).toBeVisible();
+  await addOrgButton.click();
+
+  const dialog = page.getByRole("dialog");
+  await expect(
+    dialog.getByRole("heading", { name: /add organization/i }),
+  ).toBeVisible();
+  const nameInput = dialog.getByRole("textbox", { name: /name/i });
+  await expect(nameInput).toBeVisible();
+
+  const submitButton = dialog.getByRole("button", {
+    name: /create organization/i,
+  });
+  await expect(submitButton).toBeVisible();
+  await expect(submitButton).toBeDisabled();
+  await nameInput.fill("   ");
+  await expect(submitButton).toBeEnabled();
+  await submitButton.click();
+  await expect(nameInput).toHaveAttribute("aria-invalid", "true");
+  await dialog.getByRole("button", { name: /^close$/i }).click();
+  await expect(dialog).not.toBeVisible();
+}
+
 function governanceTree(page: Page) {
   return page.locator("aside").filter({ has: page.getByRole("combobox") });
 }
@@ -333,6 +360,7 @@ test.describe("Organization directory compatibility", () => {
 
     await gotoOrgTypeList(page, "govt");
     const parentUrl = await openGovtOrgDetailByName(page, root.name, "govt");
+    await checkGovtChildSheetValidation(page);
     await createGovtOrganization(page, "Child organization", true);
     const tree = governanceTree(page);
     await tree.getByRole("button", { name: `Expand ${root.name}` }).click();
@@ -605,25 +633,7 @@ test.describe("Admin organization lists", () => {
     await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
     await openGovtOrgDetailByName(page, rootOrgName, DEFAULT_ORG_TYPE);
 
-    const addOrgButton = page
-      .getByRole("button", { name: /add organization/i })
-      .last();
-    await expect(addOrgButton).toBeVisible();
-    await addOrgButton.click();
-
-    const dialog = page.getByRole("dialog");
-    await expect(
-      dialog.getByRole("heading", { name: /add organization/i }),
-    ).toBeVisible();
-    const nameInput = dialog.getByRole("textbox", { name: /name/i });
-    await expect(nameInput).toBeVisible();
-
-    const submitButton = dialog.getByRole("button", {
-      name: /create organization/i,
-    });
-    await expect(submitButton).toBeVisible();
-    await submitButton.click();
-    await expect(nameInput).toHaveAttribute("aria-invalid", "true");
+    await checkGovtChildSheetValidation(page);
   });
 
   test("should create a root organization accessible from the govt list", async ({
