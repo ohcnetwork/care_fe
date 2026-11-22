@@ -101,15 +101,11 @@ export function specimenCollectionDefaults(
   template: SpecimenCollectionTemplate | null | undefined,
 ) {
   const quantity = template?.quantity;
+  const value = quantity && wholeSpecimenQuantity(quantity.value);
   return {
     method: template?.method ?? null,
     body_site: template?.body_site ?? null,
-    quantity: quantity
-      ? {
-          ...quantity,
-          value: wholeSpecimenQuantity(quantity.value) ?? quantity.value,
-        }
-      : null,
+    quantity: value && quantity?.unit ? { value, unit: quantity.unit } : null,
   };
 }
 

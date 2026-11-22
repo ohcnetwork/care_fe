@@ -75,6 +75,7 @@ export function SpecimenForm({
   const bodySiteId = useId();
   const defaultUnit =
     specimenDefinition.type_tested?.container?.capacity?.unit ?? null;
+  const defaults = specimenCollectionDefaults(specimenDefinition.collection);
 
   const [identifierMode, setIdentifierMode] = useState<"scan" | "generate">(
     "generate",
@@ -101,7 +102,10 @@ export function SpecimenForm({
       accession_identifier: "",
       received_time: null,
       collection: {
-        ...specimenCollectionDefaults(specimenDefinition.collection),
+        ...defaults,
+        // Keep invalid template input editable, but never copy it into a draft.
+        quantity:
+          defaults.quantity ?? specimenDefinition.collection?.quantity ?? null,
         collector: currentUserId || null, // Use user ID, default to null if not available yet
         collected_date_time: new Date().toISOString(),
         procedure: null,
@@ -192,17 +196,19 @@ export function SpecimenForm({
     }
 
     const quantity = specimenData.specimen.collection?.quantity;
+    const value = quantity && wholeSpecimenQuantity(quantity.value);
+    const unit = quantity?.unit ?? defaultUnit;
     const newErrors: typeof errors = {};
 
-    if (quantity?.value && !quantity.unit && !defaultUnit) {
+    if (quantity?.value && !unit) {
       newErrors.quantityUnit = t("field_required");
     }
 
-    if (quantity?.value && !wholeSpecimenQuantity(quantity.value)) {
+    if (quantity?.value && !value) {
       newErrors.quantityValue = t("invalid_quantity");
     }
 
-    if ((quantity?.unit || defaultUnit) && !quantity?.value) {
+    if (unit && !quantity?.value) {
       newErrors.quantityValue = t("field_required");
     }
 
@@ -234,12 +240,7 @@ export function SpecimenForm({
         method: finalData.specimen.collection?.method ?? null,
         collected_date_time:
           finalData.specimen.collection?.collected_date_time ?? null,
-        quantity: finalData.specimen.collection?.quantity
-          ? {
-              ...finalData.specimen.collection.quantity,
-              unit: finalData.specimen.collection.quantity.unit ?? defaultUnit,
-            }
-          : null,
+        quantity: value && unit ? { value, unit } : null,
         procedure: finalData.specimen.collection?.procedure ?? null,
         body_site: finalData.specimen.collection?.body_site ?? null,
         fasting_status_codeable_concept:
