@@ -18,7 +18,6 @@ export {
   getActionsVersion,
   invokeAction,
   listActions,
-  registerAction,
   subscribeToActions,
 } from "./registry";
 export type {

@@ -31,7 +31,7 @@ async function imageToJpeg(url: string) {
 }
 
 async function pdfToJpegs(url: string) {
-  const document = await pdfjs.getDocument(url).promise;
+  const document = await pdfjs.getDocument({ url }).promise;
   const pages: Uint8Array[] = [];
   for (let number = 1; number <= document.numPages; number++) {
     const page = await document.getPage(number);
