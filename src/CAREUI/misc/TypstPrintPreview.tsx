@@ -19,6 +19,7 @@ import PageTitle from "@/components/Common/PageTitle";
 import PrintLoading from "@/CAREUI/misc/PrintLoading";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { PdfPages } from "@/print/PdfPages";
+import { PRINT_HTML_TYPE } from "@/print/printHtml";
 import {
   getPdfPrintMethod,
   sharePdf,
@@ -53,26 +54,44 @@ export default function TypstPrintPreview<TContent>({
   const router = useRouter();
   useShortcutSubContext();
 
-  const { pdf, error, isLoading, isFetching, retry, failedAssets, autoPrint } =
-    useTypstPdf(options);
+  const {
+    pdf,
+    printHtml,
+    error,
+    isLoading,
+    isFetching,
+    retry,
+    failedAssets,
+    autoPrint,
+  } = useTypstPdf(options);
 
-  const [url, setUrl] = useState<string>();
+  // `frame` is what the hidden frame prints: a web page that sets its own
+  // paper size, or the PDF if that page couldn't be built.
+  const [urls, setUrls] = useState<{ pdf: string; frame: string }>();
   useEffect(() => {
-    const objectUrl = pdf
-      ? URL.createObjectURL(
-          new Blob([pdf as BlobPart], { type: "application/pdf" }),
-        )
+    if (!pdf) {
+      setUrls(undefined);
+      return;
+    }
+    const pdfUrl = URL.createObjectURL(
+      new Blob([pdf as BlobPart], { type: "application/pdf" }),
+    );
+    const htmlUrl = printHtml
+      ? URL.createObjectURL(new Blob([printHtml], { type: PRINT_HTML_TYPE }))
       : undefined;
-    setUrl(objectUrl);
+    setUrls({ pdf: pdfUrl, frame: htmlUrl ?? pdfUrl });
     return () => {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      URL.revokeObjectURL(pdfUrl);
+      if (htmlUrl) URL.revokeObjectURL(htmlUrl);
     };
-  }, [pdf]);
+  }, [pdf, printHtml]);
+  const url = urls?.pdf;
+  const frameUrl = urls?.frame;
 
   const method = useMemo(() => getPdfPrintMethod(), []);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loadedUrl, setLoadedUrl] = useState<string>();
-  const iframeLoaded = !!url && loadedUrl === url;
+  const iframeLoaded = !!frameUrl && loadedUrl === frameUrl;
 
   const print = useCallback(() => {
     if (!url || printDisabled) return;
@@ -185,14 +204,14 @@ export default function TypstPrintPreview<TContent>({
           ) : (
             <>
               <PdfPages url={url} />
-              {method === "iframe" && (
+              {method === "iframe" && frameUrl && (
                 <iframe
                   ref={iframeRef}
-                  src={url}
+                  src={frameUrl}
                   title={options.title}
                   aria-hidden="true"
                   tabIndex={-1}
-                  onLoad={() => setLoadedUrl(url)}
+                  onLoad={() => setLoadedUrl(frameUrl)}
                   // Chrome doesn't load PDFs in display:none frames.
                   className="pointer-events-none fixed bottom-0 right-0 size-px opacity-0"
                 />

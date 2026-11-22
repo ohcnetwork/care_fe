@@ -1,14 +1,17 @@
+import rendererUrl from "@myriaddreamin/typst-ts-renderer/wasm?url";
 import compilerUrl from "virtual:typst-compiler-wasm";
 
 import type {
   TypstAssets,
   TypstCompileRequest,
+  TypstOutput,
   TypstWorkerRequest,
   TypstWorkerResponse,
 } from "@/print/typstWorker";
 
 const ASSETS: TypstAssets = {
   compilerUrl,
+  rendererUrl,
   fontUrls: Object.values(
     import.meta.glob<string>("./fonts/*.ttf", {
       query: "?url",
@@ -30,7 +33,7 @@ export class TypstCompileError extends Error {
 }
 
 interface Pending {
-  resolve: (pdf: Uint8Array) => void;
+  resolve: (output: TypstOutput) => void;
   reject: (error: Error) => void;
 }
 
@@ -49,8 +52,11 @@ function getWorker() {
     const request = pending.get(data.id);
     if (!request) return;
     pending.delete(data.id);
-    if ("pdf" in data) request.resolve(data.pdf);
-    else request.reject(new TypstCompileError(data.error, data.diagnostics));
+    if ("pdf" in data) {
+      request.resolve({ pdf: data.pdf, printHtml: data.printHtml });
+    } else {
+      request.reject(new TypstCompileError(data.error, data.diagnostics));
+    }
   };
   worker.onerror = (event) => {
     // The worker itself failed: fail everything in flight and start a new one.
@@ -70,7 +76,7 @@ function getWorker() {
 /** Compiles a print template to a PDF in a web worker; later calls reuse it. */
 export function compileTypstPdf(
   request: TypstCompileRequest,
-): Promise<Uint8Array> {
+): Promise<TypstOutput> {
   return new Promise((resolve, reject) => {
     const id = nextId++;
     pending.set(id, { resolve, reject });

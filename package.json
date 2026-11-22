@@ -70,6 +70,7 @@
     "@lexical/selection": "^0.48.0",
     "@mdxeditor/editor": "^4.2.5",
     "@mdxeditor/gurx": "^1.2.4",
+    "@myriaddreamin/typst-ts-renderer": "0.7.0",
     "@myriaddreamin/typst-ts-web-compiler": "0.7.0",
     "@myriaddreamin/typst.ts": "0.7.0",
     "@originjs/vite-plugin-federation": "^1.4.1",

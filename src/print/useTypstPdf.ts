@@ -13,6 +13,7 @@ import {
   getBrandingAssetUrls,
   isAutoPrintEnabled,
 } from "@/print/printLayout";
+import { getPdfPrintMethod } from "@/print/printPdf";
 import { resolvePrintTheme } from "@/print/printTheme";
 import type { PrintDocument, StatusWatermark } from "@/print/types";
 import { compileTypstPdf } from "@/print/typstClient";
@@ -155,6 +156,8 @@ export function useTypstPdf<TContent>({
         data: document,
         theme: resolvePrintTheme(),
         files: { ...assets.data!.files, ...files },
+        // Only the hidden print frame of desktop browsers uses it.
+        printHtml: getPdfPrintMethod() === "iframe",
       });
     },
     enabled: !!layout && content !== undefined,
@@ -164,7 +167,9 @@ export function useTypstPdf<TContent>({
   });
 
   return {
-    pdf: pdf.data,
+    pdf: pdf.data?.pdf,
+    /** Prints on the document's own paper; see `buildPrintHtml`. */
+    printHtml: pdf.data?.printHtml,
     error: pdf.error,
     isLoading: assets.isLoading || pdf.isLoading || content === undefined,
     isFetching: pdf.isFetching,
