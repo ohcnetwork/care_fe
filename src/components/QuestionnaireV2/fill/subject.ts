@@ -73,7 +73,10 @@ export function rendererSubjectOf(subject: FillSubject): RendererSubject {
   return { facilityId: subject.facilityId, resourceId };
 }
 
-/** Where Close/Cancel and a completed submission land. */
+/**
+ * Where Close/Cancel and a completed submission land. They replace the fill
+ * page, so going back does not reopen a finished session.
+ */
 export function exitTargetOf(subject: FillSubject): string {
   switch (subject.type) {
     case "encounter":

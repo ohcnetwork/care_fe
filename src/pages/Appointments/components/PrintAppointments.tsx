@@ -9,6 +9,7 @@ import TypstPrintPreview from "@/CAREUI/misc/TypstPrintPreview";
 import { Switch } from "@/components/ui/switch";
 
 import { useQueryParams } from "@/lib/router/queryParams";
+import { appointmentListSearch } from "@/lib/router/search/appointments";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import type { DetailsTablePrintContent } from "@/print/detailsTable";
 import { buildGeneratedFooter } from "@/print/patientDetails";
@@ -42,7 +43,7 @@ export function PrintAppointments({
 }: PrintAppointmentsProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
-  const [qParams] = useQueryParams();
+  const [qParams] = useQueryParams(appointmentListSearch);
 
   const practitioners = qParams.practitioners
     ? qParams.practitioners.split(",")

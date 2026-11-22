@@ -7,6 +7,7 @@ import {
 } from "tests/facility/patient/encounter/encounterFormHelpers";
 import { createPatient } from "tests/helper/patient";
 import { expectToast } from "tests/helper/ui";
+import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 
@@ -108,15 +109,11 @@ async function expectPersistedPeriod(
   )?.[1];
   expect(encounterId).toBeTruthy();
 
-  const [response] = await Promise.all([
-    page.waitForResponse(
-      (response) =>
-        new URL(response.url()).pathname ===
-          `/api/v1/encounter/${encounterId}/` &&
-        response.request().method() === "GET",
-    ),
-    page.reload(),
-  ]);
+  await page.reload();
+  const response = await page.request.get(
+    `${getApiUrl()}/api/v1/encounter/${encounterId}/`,
+    { headers: getApiHeaders() },
+  );
   expect(response.ok()).toBeTruthy();
   const encounter: EncounterRead = await response.json();
   expect(encounter.status).toBe(status);

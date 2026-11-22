@@ -278,7 +278,9 @@ export function WorkspaceForm({
         ),
       );
       toast.success(t(existing ? "workspace_updated" : "workspace_created"));
-      if (!existing) navigate({ href: `${scope.basePath}/${data.id}/edit` });
+      // Replace the create form, so going back from the editor skips it.
+      if (!existing)
+        navigate({ href: `${scope.basePath}/${data.id}/edit`, replace: true });
     },
   });
 
@@ -318,6 +320,7 @@ export function WorkspaceForm({
           >
             <HrefLink
               href={returnPath}
+              back
               onClick={(event) => {
                 if (busy) event.preventDefault();
               }}

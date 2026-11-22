@@ -11,14 +11,13 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireFormRenderer } from "@/components/QuestionnaireV2/form/FormCanvas";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
-import { navigate } from "@/lib/router/navigate";
 import {
   QuestionnaireScope,
   formatRevision,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
-import { relativeTime } from "@/Utils/utils";
+import { goBack, relativeTime } from "@/Utils/utils";
 
 /**
  * Full-page read-only viewer for a single past revision, mounted at
@@ -72,10 +71,7 @@ export function QuestionnaireRevisionPage({
           <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{t("no_data_found")}</AlertDescription>
         </Alert>
-        <Button
-          variant="outline"
-          onClick={() => navigate({ href: versionsPath })}
-        >
+        <Button variant="outline" onClick={() => goBack(versionsPath)}>
           <ArrowLeft className="mr-2 size-4" />
           {t("back")}
         </Button>
@@ -101,7 +97,7 @@ export function QuestionnaireRevisionPage({
           type="button"
           variant="outline"
           size="xs"
-          onClick={() => navigate({ href: versionsPath })}
+          onClick={() => goBack(versionsPath)}
         >
           <ArrowLeft className="size-4" />
           {t("back")}

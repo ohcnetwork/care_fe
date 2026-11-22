@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
+import { tagConfigListSearch } from "@/lib/router/search/admin";
 
 import query from "@/Utils/request/query";
 import { navigate } from "@/lib/router/navigate";
@@ -30,8 +31,8 @@ interface TagConfigListProps {
 export default function TagConfigList({ facilityId }: TagConfigListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: tagConfigListSearch,
     limit: 15,
-    disableCache: true,
     defaultQueryParams: {
       status: "active",
     },

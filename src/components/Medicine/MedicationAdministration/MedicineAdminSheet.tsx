@@ -212,7 +212,7 @@ export function MedicineAdminSheet({
     [medications, encounterId],
   );
 
-  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     const administrations = Array.from(selectedMedicines).map(
       (id) => administrationRequests[id],
@@ -302,7 +302,7 @@ export function MedicineAdminSheet({
               }
               onClick={(e) => {
                 e.preventDefault();
-                handleSubmit(e as any);
+                handleSubmit(e);
               }}
             >
               {isPending

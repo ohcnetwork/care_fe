@@ -33,6 +33,7 @@ import mutate from "@/Utils/request/mutate";
 import BackButton from "@/components/Common/BackButton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { deviceFormSearch } from "@/lib/router/search/settings";
 import {
   usePluginDevice,
   usePluginDevices,
@@ -56,7 +57,7 @@ interface Props {
 
 export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   const { t } = useTranslation();
-  const [qParams] = useQueryParams<{ type?: string }>();
+  const [qParams] = useQueryParams(deviceFormSearch);
 
   const queryClient = useQueryClient();
   const pluginDevices = usePluginDevices();

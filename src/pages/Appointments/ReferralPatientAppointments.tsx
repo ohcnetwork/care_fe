@@ -36,6 +36,7 @@ export function ReferralPatientAppointments({
         {context.returnUrl && (
           <HrefLink
             href={context.returnUrl}
+            back={context.returnToReferral}
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             {t("referral_return_to_referral")}

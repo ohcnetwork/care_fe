@@ -49,7 +49,7 @@ export function useFieldError(
 }
 
 export function validateFields(
-  value: any,
+  value: object | null | undefined,
   questionId: string,
   fields: FieldDefinitions,
   index?: number,
@@ -72,7 +72,7 @@ export function validateFields(
 
       // Check if the field exists and has a value
       const hasField = field.key in value;
-      const fieldValue = value[field.key];
+      const fieldValue = (value as Record<string, unknown>)[field.key];
 
       if (field.required && (!hasField || !fieldValue)) {
         errors.push({

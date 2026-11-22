@@ -20,6 +20,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { referralContextSearch } from "@/lib/router/search/referral";
 import referralApi from "@/types/emr/referral/referralApi";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
@@ -33,12 +34,7 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
       referralEncounterId,
       referralFacilityId,
     },
-  ] = useQueryParams<{
-    sourceUrl?: string;
-    referralAppointmentId?: string;
-    referralEncounterId?: string;
-    referralFacilityId?: string;
-  }>();
+  ] = useQueryParams(referralContextSearch);
   const hasVisitContext = [
     referralAppointmentId,
     referralEncounterId,
@@ -78,7 +74,8 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
     canShowCached ? data : undefined,
   );
   const readOnly = canShowCached && !permissionsLoading && !canWrite;
-  const close = () => navigate({ href: detailUrl });
+  // Replaces the response page, so going back does not reopen it.
+  const close = () => navigate({ href: detailUrl, replace: true });
 
   return (
     <Page title={t("referral_respond")} hideTitleOnPage>

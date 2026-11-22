@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -16,8 +17,8 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
@@ -108,7 +109,9 @@ export default function PatientSelect({
   staffId: string;
 }) {
   const { t } = useTranslation();
-  const [{ slotId, reason }] = useQueryParams();
+  const { slotId, reason } = useSearch({
+    from: "/_patient/facility/$facilityId/appointments/$staffId/patient-select",
+  });
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
   const patientUserContext = usePatientContext();
@@ -199,7 +202,7 @@ export default function PatientSelect({
 
     createAppointment({
       patient: selectedPatientData.id,
-      note: reason,
+      note: reason ?? "",
     });
   };
 
@@ -209,10 +212,9 @@ export default function PatientSelect({
         <Button
           variant="outline"
           onClick={() =>
-            navigate({
-              to: "/facility/$facilityId/appointments/$staffId/book-appointment",
-              params: { facilityId, staffId },
-            })
+            goBack(
+              `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
+            )
           }
         >
           <ArrowLeft className="size-4" />

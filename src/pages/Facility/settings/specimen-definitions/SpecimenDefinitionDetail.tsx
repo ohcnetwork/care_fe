@@ -20,11 +20,13 @@ import {
   DurationSpec,
   SPECIMEN_DEFINITION_STATUS_COLORS,
   SpecimenDefinitionStatus,
+  wholeSpecimenQuantity,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 
 interface SpecimenDefinitionDetailProps {
   facilityId: string;
@@ -83,9 +85,10 @@ export function SpecimenDefinitionDetail({
 
   const formatQuantity = (
     quantity: { value: string | null; unit: Code | null } | null,
+    formatValue: (value: string) => string = round,
   ) => {
     if (!quantity?.value || !quantity?.unit?.display) return "-";
-    return `${round(quantity.value)} ${quantity.unit.display}`;
+    return `${formatValue(quantity.value)} ${quantity.unit.display}`;
   };
 
   const formatDuration = (duration: DurationSpec | null | undefined) => {
@@ -101,10 +104,7 @@ export function SpecimenDefinitionDetail({
           <div className="space-y-4">
             <Button
               onClick={() =>
-                navigate({
-                  to: "/facility/$facilityId/settings/specimen_definitions",
-                  params: { facilityId },
-                })
+                goBack(`/facility/${facilityId}/settings/specimen_definitions`)
               }
               variant="outline"
               className="text-destructive"
@@ -192,13 +192,37 @@ export function SpecimenDefinitionDetail({
                   </div>
                 )}
 
-                {specimenDefinition.collection && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-400">
-                      {t("collection_method")}
-                    </p>
-                    <p>{specimenDefinition.collection.display}</p>
-                  </div>
+                {[
+                  [
+                    t("collection"),
+                    specimenDefinition.collection?.code?.display,
+                  ],
+                  [
+                    t("collection_method"),
+                    specimenDefinition.collection?.method?.display,
+                  ],
+                  [
+                    t("expected_quantity"),
+                    specimenDefinition.collection?.quantity &&
+                      formatQuantity(
+                        specimenDefinition.collection.quantity,
+                        (value) => wholeSpecimenQuantity(value) ?? value,
+                      ),
+                  ],
+                  [
+                    t("body_site"),
+                    specimenDefinition.collection?.body_site?.display,
+                  ],
+                ].map(
+                  ([label, value]) =>
+                    value && (
+                      <div key={label}>
+                        <p className="text-sm font-medium text-gray-400">
+                          {label}
+                        </p>
+                        <p>{value}</p>
+                      </div>
+                    ),
                 )}
               </div>
 

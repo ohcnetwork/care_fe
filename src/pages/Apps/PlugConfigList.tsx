@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { plugConfigListSearch } from "@/lib/router/search/admin";
 import { AppIcon } from "@/pages/Apps/AppIcon";
 import { AppStorePlugin } from "@/types/appStore/appStore";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
@@ -191,7 +192,7 @@ export function PlugConfigList() {
 
   const [searchValue, setSearchValue] = useState("");
   const [activeTag, setActiveTag] = useState<string>();
-  const [{ tab }, setQueryParams] = useQueryParams<{ tab?: string }>();
+  const [{ tab }, setQueryParams] = useQueryParams(plugConfigListSearch);
   const activeTab =
     tab === "available" && careConfig.appStore.apiUrl
       ? "available"

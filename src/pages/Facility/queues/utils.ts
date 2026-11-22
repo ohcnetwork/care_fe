@@ -1,4 +1,5 @@
 import { useQueryParams } from "@/lib/router/queryParams";
+import { queueBoardSearch } from "@/lib/router/search/queues";
 import { TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import { TokenQueueSummary } from "@/types/tokens/tokenQueue/tokenQueue";
@@ -52,7 +53,7 @@ export function useTokenListInfiniteQuery({
   queueId: string;
   qParams?: QueryParams;
 }) {
-  const [{ autoRefresh }] = useQueryParams();
+  const [{ autoRefresh }] = useQueryParams(queueBoardSearch);
   return useInfiniteQuery({
     queryKey: ["infinite-tokens", facilityId, queueId, qParams],
     ...query.infinite(tokenApi.list, {
@@ -61,7 +62,7 @@ export function useTokenListInfiniteQuery({
       queryParams: qParams,
     }),
     refetchInterval:
-      autoRefresh === "true"
+      autoRefresh === true
         ? careConfig.appointmentAndQueueRefreshInterval
         : false,
   });

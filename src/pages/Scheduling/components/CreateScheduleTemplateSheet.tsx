@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -45,6 +46,7 @@ import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
 import { ScheduleEncounterDefaultsFields } from "@/pages/Scheduling/components/ScheduleEncounterDefaultsFields";
 import {
   calculateSlotDuration,
@@ -80,7 +82,7 @@ export default function CreateScheduleTemplateSheet({
   const queryClient = useQueryClient();
 
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
-  const [qParams, _setQParams] = useQueryParams<QueryParams>();
+  const [qParams, _setQParams] = useQueryParams(scheduleHomeSearch);
   const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
 
   const weekdayFormat = useBreakpoints({
@@ -98,6 +100,7 @@ export default function CreateScheduleTemplateSheet({
         }),
       valid_to: z.date({ error: t("field_required") }),
       is_public: z.boolean(),
+      encounter_type: z.enum(careConfig.encounterClasses).nullable(),
       organizations: z.array(z.string()),
       care_team: z.array(z.custom<CareTeamResponse>()),
 
@@ -215,6 +218,7 @@ export default function CreateScheduleTemplateSheet({
       valid_to: undefined,
       weekdays: [],
       is_public: false,
+      encounter_type: null,
       organizations: [],
       care_team: [],
       availabilities: [
@@ -255,6 +259,7 @@ export default function CreateScheduleTemplateSheet({
       resource_type: resourceType,
       resource_id: resourceId,
       is_public: values.is_public,
+      encounter_type: values.encounter_type,
       organizations: values.organizations,
       care_team: toCareTeamMembers(values.care_team),
       availabilities: values.availabilities.map(
@@ -476,6 +481,12 @@ export default function CreateScheduleTemplateSheet({
                 />
                 <ScheduleEncounterDefaultsFields
                   facilityId={facilityId}
+                  encounterType={form.watch("encounter_type")}
+                  onEncounterTypeChange={(value) =>
+                    form.setValue("encounter_type", value, {
+                      shouldDirty: true,
+                    })
+                  }
                   organizations={form.watch("organizations")}
                   onOrganizationsChange={(value) =>
                     form.setValue("organizations", value, { shouldDirty: true })

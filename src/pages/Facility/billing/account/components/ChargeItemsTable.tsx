@@ -42,6 +42,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { chargeItemListSearch } from "@/lib/router/search/billing";
 
 import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
@@ -134,8 +135,8 @@ function ChargeItemsTable({
   // Register shortcuts for this table
   useShortcutSubContext("facility:billing");
   const { qParams, updateQuery } = useFilters({
+    schema: chargeItemListSearch,
     limit: 15,
-    disableCache: true,
   });
 
   // MultiFilter configuration

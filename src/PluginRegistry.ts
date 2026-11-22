@@ -10,9 +10,11 @@ export interface Plugin {
   component: React.ComponentType<MicroPluginProps>;
   routes: Array<{
     path: string;
-    component: React.ComponentType<any>;
+    component: React.ComponentType<Record<string, unknown>>;
   }>;
 }
+
+type PluginModule = Plugin & Record<string, unknown>;
 
 export interface PluginConfig {
   name: string;
@@ -30,12 +32,14 @@ class PluginRegistry {
   async loadPlugins(configs: PluginConfig[]) {
     for (const config of configs) {
       try {
+        const pluginWindow = window as unknown as Record<string, unknown>;
         // Provide React and ReactDOM to the plugin
-        (window as any).React = React;
-        (window as any).ReactDOM = ReactDOM;
+        pluginWindow.React = React;
+        pluginWindow.ReactDOM = ReactDOM;
 
         await this.loadScript(config.url);
-        const pluginModule = (window as any)[config.name];
+        const pluginModule = pluginWindow[config.name] as
+          PluginModule | undefined;
         if (!pluginModule) {
           throw new Error(
             `Plugin ${config.name} not found after loading script`,
@@ -44,7 +48,8 @@ class PluginRegistry {
         const plugin: Plugin = {
           ...pluginModule,
           routes: config.routes.map((route) => {
-            const component = pluginModule[route.component];
+            const component = pluginModule[route.component] as
+              Plugin["routes"][number]["component"] | undefined;
             if (!component) {
               throw new Error(
                 `Component ${route.component} not found in plugin ${config.name}`,
