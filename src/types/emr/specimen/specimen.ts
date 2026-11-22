@@ -1,4 +1,5 @@
 import { Code } from "@/types/base/code/code";
+import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import {
   DurationSpec,
   QuantitySpec,
@@ -97,6 +98,10 @@ export interface SpecimenRead extends SpecimenBase {
   updated_at: string;
   type_tested: TypeTestedSpec | null;
   specimen_definition: SpecimenDefinitionRead;
+}
+
+export interface SpecimenRetrieve extends SpecimenRead {
+  service_request: ServiceRequestReadSpec | null;
 }
 
 export function getActiveAndDraftSpecimens(

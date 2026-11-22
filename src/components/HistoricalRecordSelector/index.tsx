@@ -37,7 +37,6 @@ import { DisplayField, RecordItem } from "./RecordItem";
 
 interface BaseRecord {
   created_date?: string;
-  [key: string]: any;
 }
 
 interface StructuredTypeConfig<T extends BaseRecord> {
@@ -48,8 +47,9 @@ interface StructuredTypeConfig<T extends BaseRecord> {
     limit: number,
     offset: number,
     signal: AbortSignal,
-  ) => Promise<PaginatedResponse<any>>;
-  converter?: (item: any) => T;
+  ) => Promise<PaginatedResponse<unknown>>;
+  /** Maps a raw API result to a record. Method syntax lets callers type `item`. */
+  converter?(item: unknown): T;
   expandableFields?: DisplayField<T>[];
 }
 

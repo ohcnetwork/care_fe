@@ -30,6 +30,7 @@ env:
   REACT_ENABLE_QUESTIONNAIRE_DRAFT: "true"
   BACKEND_STARTUP_TIMEOUT: 120
   TEST_SHARDS: 8
+  TEST_WORKERS: 6
   # care backend ref to test against. `develop` uses the published
   # ghcr.io/ohcnetwork/care:latest image; any other branch, tag or commit is
   # built from source. Override per run with the `backend_ref` input.
@@ -72,13 +73,22 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js
+        id: node
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
+      - name: Cache installed dependencies
+        id: modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules/
+          key: playwright-modules-${{ runner.os }}-${{ runner.arch }}-${{ steps.node.outputs.node-version }}-${{ hashFiles('package-lock.json', 'package.json', 'scripts/install-platform-deps.ts', '.npmrc') }}
+
       - name: Install dependencies
-        run: npm ci --prefer-offline
+        if: steps.modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit --no-fund
 
       - name: Build application
         run: npm run build
@@ -188,9 +198,12 @@ jobs:
   # Run E2E tests with backend integration
   test:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
-    needs: [changes, build, backend]
+    needs: [changes, backend]
     timeout-minutes: 30
     runs-on: ubuntu-latest-m
+    permissions:
+      actions: read
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -238,27 +251,35 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
+          package-manager-cache: false
+
+      - name: Wait for build cache producer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          deadline=$((SECONDS + 960))
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            build_job=$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?per_page=100" \
+              --jq '.jobs[] | select(.name == "build") | [.status, (.conclusion // "")] | @tsv' \
+              || true)
+            read -r status conclusion <<< "$build_job" || true
+
+            if [ "$status" = "completed" ]; then
+              if [ "$conclusion" = "success" ]; then
+                exit 0
+              fi
+              echo "::error::Build job completed with conclusion: $conclusion"
+              exit 1
+            fi
+
+            sleep 20
+          done
+
+          echo "::error::Timed out waiting for the build job to finish"
+          exit 1
 
       - name: Restore build cache
-        id: cache-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            build/
-            node_modules/
-          key: build-${{ github.sha }}
-
-      - name: Retry cache restore after delay
-        if: steps.cache-restore.outputs.cache-hit != 'true'
-        id: cache-retry
-        run: |
-          echo "Cache miss on first attempt, waiting 30s for propagation..."
-          sleep 30
-
-      - name: Restore build cache (retry)
-        if: steps.cache-restore.outputs.cache-hit != 'true'
-        id: cache-restore-retry
         uses: actions/cache/restore@v4
         with:
           path: |
@@ -283,7 +304,7 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps --only-shell chromium
 
       - name: Wait for backend
         run: |
@@ -299,16 +320,25 @@ jobs:
             exit 1
           fi
 
-      - name: Run setup tests (serial)
-        run: npx playwright test --project=setup --workers=1
+      - name: Run setup tests (parallel where independent)
+        run: >-
+          npx playwright test
+          --project=setup-auth
+          --project=setup-facility
+          --project=setup-patient
+          --project=setup-account
+          --project=setup-data
+          --workers=4
+          --reporter=list
         env:
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
       - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
         id: test
-        run: npx playwright test --project=chromium --workers=4 --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
+        run: npx playwright test --project=chromium --workers="$TEST_WORKERS" --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
         env:
+          TEST_WORKERS: ${{ env.TEST_WORKERS }}
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
@@ -323,6 +353,7 @@ jobs:
         with:
           name: playwright-results-shard-${{ matrix.shard }}
           path: |
+            blob-report/
             playwright-report/
             test-results/
             test-results.json
@@ -331,7 +362,7 @@ jobs:
   # Aggregate results and create final report
   report:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe'"
-    needs: [changes, test]
+    needs: [changes, build, test]
     runs-on: ubuntu-latest
     steps:
       - name: Check if tests were skipped
@@ -362,12 +393,43 @@ jobs:
           <sub>Run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})</sub>
           EOF
 
+      - name: Checkout
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/checkout@v4
+
       - name: Download all test results
         if: steps.skipped.outputs.skipped == 'false'
         uses: actions/download-artifact@v4
         with:
           pattern: playwright-results-shard-*
           path: all-results
+
+      - name: Setup Node.js
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      - name: Restore build cache for report merge
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/
+            node_modules/
+          key: build-${{ github.sha }}
+
+      - name: Merge Playwright blob reports
+        if: steps.skipped.outputs.skipped == 'false'
+        run: |
+          mkdir -p all-blob-reports
+          find all-results -type f -name 'report-*.zip' -exec cp {} all-blob-reports/ \;
+          if find all-blob-reports -type f -name 'report-*.zip' -print -quit | grep -q .; then
+            npx playwright merge-reports --reporter=html all-blob-reports
+          else
+            echo "::warning::No Playwright blob reports were uploaded"
+          fi
 
       - name: Merge test results
         if: steps.skipped.outputs.skipped == 'false'
@@ -417,7 +479,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-final-report
-          path: all-results/
+          path: |
+            all-results/
+            playwright-report/
           retention-days: 14
 
       - name: Generate PR comment
@@ -428,6 +492,7 @@ jobs:
 
           **Status:** ${{ steps.merge.outputs.status }}
           **Test Shards:** ${{ env.TEST_SHARDS }}
+          **Workers per Shard:** ${{ env.TEST_WORKERS }}
 
           | Metric | Count |
           |--------|-------|

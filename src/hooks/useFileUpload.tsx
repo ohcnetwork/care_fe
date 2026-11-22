@@ -240,7 +240,7 @@ export default function useFileUpload(
             reject();
           }
         },
-        setProgress as any,
+        setProgress,
         () => {
           toast.error(t("file_error__network"));
           setProgress(null);
