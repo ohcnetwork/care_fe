@@ -4,6 +4,7 @@ import {
   ENCOUNTER_DISCHARGE_DISPOSITION,
   EncounterDischargeDisposition,
 } from "../src/types/emr/encounter/encounter";
+import { parseCareApp } from "../src/Utils/careApps";
 
 import { z } from "zod";
 
@@ -135,15 +136,19 @@ export const envSchema = z
     REACT_CUSTOM_DESCRIPTION: z.string().optional(),
     REACT_CUSTOM_LOGO_ALT: logoSchemaString.optional(),
     REACT_MAPS_FALLBACK_URL_TEMPLATE: z.url().optional(),
-    // Same rule as careApps in care.config.ts.
+    // Parsed the same way as careApps in care.config.ts.
     REACT_ENABLED_APPS: z
       .string()
       .refine(
         (val) =>
           !val ||
           val.split(",").every((app) => {
-            const [org, repo] = app.split("@")[0].split("/");
-            return !!org && !!repo;
+            try {
+              parseCareApp(app);
+              return true;
+            } catch {
+              return false;
+            }
           }),
         { message: "Each entry must be 'org/repo' or 'org/repo@url'" },
       )

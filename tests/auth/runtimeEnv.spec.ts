@@ -46,7 +46,8 @@ test.describe("Runtime env overrides", () => {
           REACT_CARE_API_URL: "not a url",
           REACT_CARE_URL_MAP: "null",
           REACT_CUSTOM_SHORTCUTS: "[",
-          REACT_ENABLED_APPS: "not-a-plugin",
+          // A valid org/repo with a URL that new URL() rejects (bad port).
+          REACT_ENABLED_APPS: "ohcnetwork/care_fe@care.example.org:99999",
         };`,
       }),
     );
