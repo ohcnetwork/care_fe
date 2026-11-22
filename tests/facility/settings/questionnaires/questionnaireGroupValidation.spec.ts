@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { existsSync } from "node:fs";
 
 import type {
   QuestionnaireResponse,
@@ -6,15 +7,14 @@ import type {
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
-// Uses Vite module imports to exercise the real core validator and plugin registry.
-// No backend fixtures are needed. Set CARE_GROUP_VALIDATION_URL to a local dev host.
-test.skip(!process.env.CARE_GROUP_VALIDATION_URL, "Requires a local Vite host");
+// Uses Vite module imports to exercise the real core validator and plugin
+// registry. No backend fixtures are needed. playwright.config.ts runs this spec
+// in the `vite-modules` project, whose baseURL is a Vite dev server.
 
-test.beforeEach(async ({ page }) => {
-  const url = new URL(
-    "/__group-validation",
-    process.env.CARE_GROUP_VALIDATION_URL,
-  ).href;
+const PLUGIN_CHECKOUTS = ["care_dental_fe", "care_vision_prescription_fe"];
+
+test.beforeEach(async ({ page, baseURL }) => {
+  const url = new URL("/__group-validation", baseURL).href;
   await page.route(url, (route) =>
     route.fulfill({
       contentType: "text/html",
@@ -123,6 +123,10 @@ test("core invokes the registered group validator and retains child validation",
 test("Dental and Vision manifests expose working core validation callbacks", async ({
   page,
 }) => {
+  test.skip(
+    !PLUGIN_CHECKOUTS.every((slug) => existsSync(`apps/${slug}`)),
+    `Imports plugin sources from apps/ (${PLUGIN_CHECKOUTS.join(", ")})`,
+  );
   const results = await page.evaluate(async () => {
     const load = (path: string) =>
       import(`/src/components/QuestionnaireV2/${path}`);

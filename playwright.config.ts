@@ -9,6 +9,14 @@ import path from "path";
 dotenv.config({ path: path.resolve(__dirname, ".env.local") });
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
+/** Dev server for the `vite-modules` project. */
+const VITE_DEV_PORT = 4100;
+const VITE_DEV_URL = `http://localhost:${VITE_DEV_PORT}`;
+const VITE_MODULE_SPECS = [
+  /fill\/fillScribeActions\.spec\.ts$/,
+  /questionnaires\/questionnaireGroupValidation\.spec\.ts$/,
+];
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -82,6 +90,23 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+      testIgnore: VITE_MODULE_SPECS,
+      dependencies: process.env.CI
+        ? []
+        : [
+            "setup-auth",
+            "setup-facility",
+            "setup-patient",
+            "setup-account",
+            "setup-data",
+          ],
+    },
+    // Specs that import source modules (`/src/...`) into the page. Only the
+    // Vite dev server serves those; the preview build does not.
+    {
+      name: "vite-modules",
+      testMatch: VITE_MODULE_SPECS,
+      use: { ...devices["Desktop Chrome"], baseURL: VITE_DEV_URL },
       dependencies: process.env.CI
         ? []
         : [
@@ -126,10 +151,18 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: "npm run preview",
-    url: "http://localhost:4000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
+  webServer: [
+    {
+      command: "npm run preview",
+      url: "http://localhost:4000",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120000,
+    },
+    {
+      command: `npx vite --port ${VITE_DEV_PORT} --strictPort`,
+      url: VITE_DEV_URL,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120000,
+    },
+  ],
 });

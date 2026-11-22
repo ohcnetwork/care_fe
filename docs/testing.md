@@ -34,6 +34,7 @@ npm run playwright:test:ui                              # Interactive Playwright
 - Use `--shard=N/TOTAL` to split a local run across shards.
 - Run specific test directories to iterate faster: `npx playwright test tests/auth/`
 - The `setup-*` projects run before Chromium to authenticate test users and save storage state.
+- The `vite-modules` project runs specs that import source modules (`/src/...`) into the page, such as `fillScribeActions.spec.ts`. Playwright starts a Vite dev server on port 4100 for it, because the preview build does not serve source modules. Add a spec to `VITE_MODULE_SPECS` in `playwright.config.ts` to run it there
 
 ## Database management for re-runs
 
