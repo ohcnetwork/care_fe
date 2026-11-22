@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Box, Eye } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
@@ -20,10 +19,12 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import useFilters from "@/hooks/useFilters";
+import { medicationReturnListSearch } from "@/lib/router/search/pharmacy";
 
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
+import { navigate } from "@/lib/router/navigate";
 import { CreateMedicationReturnSheet } from "@/pages/Facility/services/pharmacy/CreateMedicationReturnSheet";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
@@ -52,8 +53,8 @@ export default function MedicationReturnList({
   const { t } = useTranslation();
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: medicationReturnListSearch,
     limit: 14,
-    disableCache: true,
   });
 
   const currentStatus = qParams.status || "all";
@@ -97,10 +98,10 @@ export default function MedicationReturnList({
             onValueChange={(value) => updateQuery({ status: value, page: 1 })}
             className="w-full"
           >
-            <div className="w-full overflow-x-auto pb-1">
+            <div className="w-full overflow-x-auto">
               <TabsList
                 variant="line"
-                className="w-full justify-evenly border-b border-border sm:justify-start"
+                className="justify-evenly sm:justify-start"
               >
                 {STATUS_TABS.map((tab) => (
                   <TabsTrigger key={tab.value} value={tab.value}>
@@ -209,9 +210,14 @@ function MedicationReturnTable({
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/locations/${locationId}/medication_return/order/${delivery.id}`,
-                  )
+                  navigate({
+                    to: "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId",
+                    params: {
+                      facilityId,
+                      locationId,
+                      deliveryOrderId: delivery.id,
+                    },
+                  })
                 }
               >
                 <Eye className="mr-1 size-4" />

@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Settings } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -97,7 +97,10 @@ export function OrganizationFacilityCard({ facility, showSettings }: Props) {
           className={showSettings ? "" : "w-full"}
           asChild
         >
-          <Link href={`/facility/${facility.id}/settings/general`}>
+          <Link
+            to="/facility/$facilityId/settings/general"
+            params={{ facilityId: facility.id }}
+          >
             {t("view_facility")}
             <ArrowUpRight data-icon="inline-end" />
           </Link>
@@ -110,7 +113,10 @@ export function OrganizationFacilityCard({ facility, showSettings }: Props) {
             title={t("settings")}
             asChild
           >
-            <Link href={`/facility/${facility.id}/settings/departments`}>
+            <Link
+              to="/facility/$facilityId/settings/departments"
+              params={{ facilityId: facility.id }}
+            >
               <Settings data-icon="inline-start" />
               <span className="sr-only @2xs/facility-card:not-sr-only">
                 {t("settings")}

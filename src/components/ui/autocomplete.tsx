@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Combobox,
@@ -22,6 +21,12 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  fieldTriggerLayout,
+  fieldTriggerSurface,
+  invalidTriggerOutline,
+  triggerFocus,
+} from "@/components/ui/field-trigger-styles";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -95,17 +100,20 @@ export default function Autocomplete({
   };
 
   const triggerButton = (
-    <Button
+    <button
       {...props}
       ref={ref}
       type="button"
-      variant="outline"
       role="combobox"
       aria-expanded={open}
       disabled={disabled}
       title={displayText || undefined}
       data-shortcut-id={shortcutId}
       className={cn(
+        fieldTriggerLayout,
+        fieldTriggerSurface,
+        triggerFocus,
+        invalidTriggerOutline,
         "min-w-0 flex-1 justify-between font-normal",
         className,
         popoverClassName,
@@ -125,14 +133,19 @@ export default function Autocomplete({
           <ChevronDown className="size-4 text-muted-foreground" />
         )}
       </span>
-    </Button>
+    </button>
   );
 
   const clearButton = clearVisible && (
-    <Button
-      variant="outline"
-      size="icon"
+    <button
+      type="button"
+      data-slot="autocomplete-clear"
       aria-label={t("clear")}
+      className={cn(
+        fieldTriggerSurface,
+        triggerFocus,
+        "inline-flex size-12 shrink-0 items-center justify-center md:size-10",
+      )}
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -141,8 +154,8 @@ export default function Autocomplete({
         handleOpenChange(false);
       }}
     >
-      <X />
-    </Button>
+      <X aria-hidden="true" className="size-4" />
+    </button>
   );
 
   const content = (

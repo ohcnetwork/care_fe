@@ -1,8 +1,8 @@
 import { MessageSquare, Plus } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { navigate } from "@/lib/router/navigate";
 import { ReferralRetrieve } from "@/types/emr/referral/referral";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
@@ -59,7 +59,7 @@ export function ReferralResponsesSection({
           )}
         </div>
         {canWrite && (
-          <Button onClick={() => navigate(responseUrl)}>
+          <Button onClick={() => navigate({ href: responseUrl })}>
             {latestResponse ? (
               <Plus aria-hidden="true" className="size-4" />
             ) : (

@@ -1,9 +1,8 @@
-import { navigate } from "raviger";
-
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 
+import { navigate } from "@/lib/router/navigate";
 import { EncounterList } from "@/pages/Encounters/EncounterList";
-import LocationList from "@/pages/Facility/locations/LocationList";
+import BedBoardPage from "@/pages/Facility/locations/bed-board/BedBoardPage";
 import { EncounterClass } from "@/types/emr/encounter/encounter";
 
 interface EncountersOverviewProps {
@@ -25,7 +24,10 @@ export default function EncountersOverview({
         value={tab}
         className="h-full"
         onValueChange={(value) => {
-          navigate(`/facility/${facilityId}/encounters/${value}`);
+          navigate({
+            to: "/facility/$facilityId/encounters/$tab",
+            params: { facilityId, tab: value },
+          });
         }}
       >
         <TabsContent value="patients">
@@ -37,7 +39,7 @@ export default function EncountersOverview({
         </TabsContent>
 
         <TabsContent value="locations">
-          <LocationList facilityId={facilityId} locationId={locationId} />
+          <BedBoardPage facilityId={facilityId} locationId={locationId} />
         </TabsContent>
       </Tabs>
     </div>

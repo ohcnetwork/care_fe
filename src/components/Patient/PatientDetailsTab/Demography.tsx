@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { navigate } from "raviger";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -21,6 +20,7 @@ import { formatPatientAge } from "@/Utils/utils";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import usePatientExtensionData from "@/hooks/usePatientExtensionData";
+import { navigate } from "@/lib/router/navigate";
 import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 import {
   getOrgLabel,
@@ -59,25 +59,25 @@ export const Demography = (props: PatientProps) => {
 
   const handleEditClick = (sectionId: string) => {
     if (sectionId === "tags") {
-      navigate(`/patient/${patientId}/tags`);
+      navigate({ href: `/patient/${patientId}/tags` });
       return;
     }
     if (sectionId === "general-info" || sectionId === "additional-details") {
       if (facilityId) {
-        navigate(
-          `/facility/${facilityId}/patient/${patientId}/update?section=${sectionId}`,
-        );
+        navigate({
+          href: `/facility/${facilityId}/patient/${patientId}/update?section=${sectionId}`,
+        });
       } else {
-        navigate(`/patient/${patientId}/update?section=${sectionId}`);
+        navigate({ href: `/patient/${patientId}/update?section=${sectionId}` });
       }
     }
   };
 
-  const EmergencyContact = (props: { number?: string; name?: string }) => (
-    <div className="sm:col-span-2">
-      <div className="mr-6 flex flex-col items-start justify-between rounded-md border border-orange-300 bg-orange-50 p-4 sm:flex-row">
+  const EmergencyContact = (props: { number?: string }) => (
+    <div className="w-full">
+      <div className="mr-6 rounded-md border border-orange-300 bg-orange-50 p-4">
         {/* Emergency Contact Section */}
-        <div className="flex-1">
+        <div>
           <div className="text-sm font-normal leading-5 text-gray-600">
             {t("emergency_contact")}
           </div>
@@ -103,15 +103,6 @@ export const Demography = (props: PatientProps) => {
                 </a>
               </div>
             )}
-          </div>
-        </div>
-
-        <div className="ml-0 mt-4 flex-1 sm:ml-4 sm:mt-0">
-          <div className="text-sm font-normal leading-5 text-gray-600">
-            {t("emergency_contact_person_name")}
-          </div>
-          <div className="mt-1 text-sm font-semibold leading-5 text-gray-900">
-            -
           </div>
         </div>
       </div>
@@ -225,7 +216,6 @@ export const Demography = (props: PatientProps) => {
         <EmergencyContact
           key="emergency-contact"
           number={patientData.emergency_phone_number}
-          name={patientData.name}
         />,
         {
           label: t("current_address"),

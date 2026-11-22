@@ -1,4 +1,3 @@
-import { useQueryParams, type QueryParam } from "raviger";
 import {
   createContext,
   useCallback,
@@ -8,9 +7,18 @@ import {
   type ReactNode,
 } from "react";
 
-type QueryState<T extends QueryParam = QueryParam> = ReturnType<
-  typeof useQueryParams<T>
->;
+import {
+  useQueryParams,
+  type QueryParams,
+  type SetQueryParams,
+} from "@/lib/router/queryParams";
+import {
+  readSearch,
+  type SearchSchema,
+  type SearchValues,
+} from "@/lib/router/search/fields";
+
+type QueryState = [QueryParams, SetQueryParams];
 
 const QueryParamsContext = createContext<QueryState | null>(null);
 
@@ -20,7 +28,7 @@ export function ScopedQueryParamsProvider({
 }: {
   children: ReactNode;
 }) {
-  const [params, setParams] = useState<QueryParam>({});
+  const [params, setParams] = useState<QueryParams>({});
   const update = useCallback<QueryState[1]>((next, options) => {
     setParams((previous) =>
       Object.fromEntries(
@@ -39,12 +47,17 @@ export function ScopedQueryParamsProvider({
   );
 }
 
-export function useScopedQueryParams<
-  T extends QueryParam = QueryParam,
->(): QueryState<T> {
-  const routed = useQueryParams<T>();
+/**
+ * `useQueryParams(schema)`, or the params of the nearest
+ * `ScopedQueryParamsProvider`, parsed with the same schema.
+ */
+export function useScopedQueryParams<S extends SearchSchema>(
+  schema: S,
+): [SearchValues<S>, SetQueryParams] {
+  const routed = useQueryParams();
   const scoped = useContext(QueryParamsContext);
-  return scoped ? [scoped[0] as T, scoped[1]] : routed;
+  const [params, setParams] = scoped ?? routed;
+  return [readSearch(schema, params), setParams];
 }
 
 export function useIsScopedQueryParams() {

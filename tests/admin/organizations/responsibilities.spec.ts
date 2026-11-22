@@ -168,6 +168,10 @@ test.describe("Admin Responsibilities Page", () => {
       "aria-pressed",
       "true",
     );
+    await expect(listRow(page, name).first()).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
     await expect(detailDescription(page, name)).toHaveText(description);
   });
 

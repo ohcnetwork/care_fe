@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Plus, Zap } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -19,15 +19,15 @@ import {
 import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
+import { actionConfigurationListSearch } from "@/lib/router/search/admin";
 
+import { navigate } from "@/lib/router/navigate";
 import { isSupportedActionConfigurationContext } from "@/types/actions/actionConfiguration";
 import actionConfigurationApi from "@/types/actions/actionConfigurationApi";
 import query from "@/Utils/request/query";
 
 import { actionContextLabel } from "./labels";
 import { actionConfigurationKeys } from "./queryKeys";
-
-export const ADMIN_ACTIONS_PATH = "/admin/actions";
 
 /**
  * Instance-level action configurations: what runs when an appointment is
@@ -37,8 +37,8 @@ export const ADMIN_ACTIONS_PATH = "/admin/actions";
 export function ActionConfigurationList() {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage } = useFilters({
+    schema: actionConfigurationListSearch,
     limit: 15,
-    disableCache: true,
   });
 
   const { data: response, isLoading } = useQuery({
@@ -69,7 +69,7 @@ export function ActionConfigurationList() {
               {t("action_configurations_description")}
             </p>
           </div>
-          <Button onClick={() => navigate(`${ADMIN_ACTIONS_PATH}/new`)}>
+          <Button onClick={() => navigate({ to: "/admin/actions/new" })}>
             <Plus className="size-4" />
             {t("action_configuration_new")}
           </Button>
@@ -108,12 +108,16 @@ export function ActionConfigurationList() {
                     key={configuration.id}
                     className="cursor-pointer"
                     onClick={() =>
-                      navigate(`${ADMIN_ACTIONS_PATH}/${configuration.id}`)
+                      navigate({
+                        to: "/admin/actions/$id",
+                        params: { id: configuration.id },
+                      })
                     }
                   >
                     <TableCell className="py-2.5">
                       <Link
-                        href={`${ADMIN_ACTIONS_PATH}/${configuration.id}`}
+                        to="/admin/actions/$id"
+                        params={{ id: configuration.id }}
                         onClick={(event) => event.stopPropagation()}
                         onKeyDown={(event) => {
                           // Preserve native link activation before the global

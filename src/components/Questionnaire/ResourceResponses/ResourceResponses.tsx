@@ -7,7 +7,6 @@ import {
   Monitor,
   RefreshCw,
 } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -26,6 +25,8 @@ import { ResourceResponseTable } from "./ResourceResponseTable";
 import { ResourceResponsesEmptyState } from "./ResourceResponsesEmptyState";
 import { useResourceResponseParams } from "./useResourceResponseParams";
 import { useResourceResponseQueries } from "./useResourceResponseQueries";
+
+import { HrefLink } from "@/lib/router/HrefLink";
 
 interface ResourceResponsesProps {
   facilityId: string;
@@ -100,8 +101,7 @@ export function ResourceResponses({
       <div className="space-y-5" data-cy={`${subjectType}-responses-page`}>
         <div className="space-y-2">
           {contextHref && subjectQuery.data && (
-            <Link
-              basePath="/"
+            <HrefLink
               href={contextHref}
               className="inline-flex max-w-full items-center gap-1.5 rounded-sm text-sm font-medium text-neutral-700 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
             >
@@ -110,7 +110,7 @@ export function ResourceResponses({
                 aria-hidden="true"
               />
               <span className="break-words">{resolvedSubjectName}</span>
-            </Link>
+            </HrefLink>
           )}
           <p className="text-sm text-neutral-600">
             {t(`${subjectType}_responses_description`)}

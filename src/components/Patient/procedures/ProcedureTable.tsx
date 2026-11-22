@@ -1,8 +1,8 @@
 import { ExternalLink, File, X } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
@@ -170,15 +170,15 @@ export const ProcedureTable = ({
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
   const baseHeaderClasses =
-    "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
+    "text-center border-y border-l border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
   const viewEncounter = (procedure: Procedure) =>
     showViewEncounter
       ? () =>
-          navigate(
-            facilityId
+          navigate({
+            href: facilityId
               ? `/facility/${facilityId}/patient/${patientId}/encounter/${procedure.encounter}/updates`
               : `/organization/organizationId/patient/${patientId}/encounter/${procedure.encounter}/updates`,
-          )
+          })
       : undefined;
   return (
     <>
@@ -203,31 +203,37 @@ export const ProcedureTable = ({
       <div
         className={cn(
           "overflow-x-auto hidden",
-          compact ? "@3xl/clinical-widget:block" : "sm:block",
+          compact ? "-m-2.25 @3xl/clinical-widget:block" : "sm:block",
         )}
       >
         <div className={cn("min-w-2xl", !compact && "pb-2")}>
           <div
             className={cn(
               "grid grid-cols-[1fr_auto_auto_auto_auto]",
-              compact ? "gap-y-1" : "gap-y-2",
+              compact ? "gap-y-0" : "gap-y-2",
             )}
           >
-            <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
+            <div
+              className={cn(
+                "px-3 border border-r-0 border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm",
+                compact && "rounded-none",
+              )}
+            >
               {t("procedure")}
             </div>
 
             <div className={cn(baseHeaderClasses)}>{t("status")}</div>
 
-            <div className={cn(baseHeaderClasses, "border-x")}>
-              {t("outcome")}
-            </div>
+            <div className={cn(baseHeaderClasses)}>{t("outcome")}</div>
 
-            <div className={cn(baseHeaderClasses)}>{t("date_performed")}</div>
+            <div className={cn(baseHeaderClasses, "border-r")}>
+              {t("date_performed")}
+            </div>
 
             <div
               className={cn(
                 "text-center border border-l-0 border-gray-200 rounded-tr-lg bg-gray-50",
+                compact && "rounded-none",
               )}
             ></div>
 
@@ -261,7 +267,6 @@ export const ProcedureTable = ({
                   },
                   {
                     key: "date_performed",
-                    className: "bg-gray-100",
                     render: () =>
                       formatProcedureOccurrence(procedure.occurrence) || "-",
                   },

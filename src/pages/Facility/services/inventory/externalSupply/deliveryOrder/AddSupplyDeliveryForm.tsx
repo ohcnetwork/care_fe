@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t as translate } from "i18next";
 import { AlertCircle, PlusCircle, Trash2 } from "lucide-react";
-import { useQueryParams } from "raviger";
 import {
   Ref,
   useCallback,
@@ -18,6 +17,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import careConfig from "@/../care.config";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { deliveryOrderPageSearch } from "@/lib/router/search/inventory";
 import { cn } from "@/lib/utils";
 
 import { DisablingCover } from "@/components/Common/DisablingCover";
@@ -66,6 +67,7 @@ import { SmartExternalDeliveryRow } from "@/pages/Facility/services/inventory/ex
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { PLUGIN_Component } from "@/PluginEngine";
 import {
   MonetaryComponent,
   MonetaryComponentType,
@@ -233,7 +235,7 @@ export function AddSupplyDeliveryForm({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams, setQueryParams] = useQueryParams(deliveryOrderPageSearch);
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
   const [selectedRequestIds, setSelectedRequestIds] = useState<string[]>([]);
   const [requestOrderSearch, setRequestOrderSearch] = useState("");
@@ -955,6 +957,14 @@ export function AddSupplyDeliveryForm({
       <DisablingCover disabled={isProcessing} message={t("saving")}>
         <Card className="bg-gray-50 py-4 rounded-md">
           <CardContent className="space-y-4 px-2 sm:px-6">
+            {!origin && (
+              <PLUGIN_Component
+                __name="SupplyDeliveryFormActions"
+                facilityId={facilityId}
+                deliveryOrderId={deliveryOrderId}
+                form={form}
+              />
+            )}
             {fields.length > 0 ? (
               <Form {...form}>
                 <form

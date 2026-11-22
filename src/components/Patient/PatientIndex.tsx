@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { ChevronDown } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -45,6 +45,7 @@ import query from "@/Utils/request/query";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -80,7 +81,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     "schedule" | "create_encounter" | undefined
   >(undefined);
   const shortcuts = useShortcuts();
-  const [qParams] = useQueryParams();
+  const qParams = useSearch({ from: "/_app/facility/$facilityId/patients/" });
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -164,8 +165,10 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     yearOfBirth?: string,
     action?: "schedule" | "create_encounter",
   ) => {
-    navigate(`/facility/${facilityId}/patients/home`, {
-      query: {
+    navigate({
+      to: "/facility/$facilityId/patients/home",
+      params: { facilityId },
+      search: {
         config: identifierSearch.config,
         value: identifierSearch.value,
         phone_number: patient.phone_number,
@@ -782,8 +785,10 @@ function AddPatientButton({
       variant={outline ? "outline" : "primary_gradient"}
       className="gap-3 group"
       onClick={() =>
-        navigate(`/facility/${facilityId}/patient/create`, {
-          query: phoneNumber ? { phone_number: phoneNumber } : undefined,
+        navigate({
+          to: "/facility/$facilityId/patient/create",
+          params: { facilityId },
+          search: phoneNumber ? { phone_number: phoneNumber } : undefined,
         })
       }
       data-shortcut-id="submit-action"

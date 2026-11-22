@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +16,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   FacilityOrganizationParent,
@@ -54,9 +54,10 @@ export default function FacilityOrganizationList({
 
   const handleOrganizationSelect = useCallback(
     (organization: FacilityOrganizationRead) => {
-      navigate(
-        `/facility/${facilityId}/settings/departments/${organization.id}/${currentTab}`,
-      );
+      navigate({
+        to: "/facility/$facilityId/settings/departments/$id/$tab",
+        params: { facilityId, id: organization.id, tab: currentTab },
+      });
     },
     [facilityId, currentTab],
   );
@@ -115,11 +116,15 @@ export default function FacilityOrganizationList({
   const handleTabChange = useCallback(
     (tab: string) => {
       if (organizationId) {
-        navigate(
-          `/facility/${facilityId}/settings/departments/${organizationId}/${tab}`,
-        );
+        navigate({
+          to: "/facility/$facilityId/settings/departments/$id/$tab",
+          params: { facilityId, id: organizationId, tab },
+        });
       } else {
-        navigate(`/facility/${facilityId}/settings/departments`);
+        navigate({
+          to: "/facility/$facilityId/settings/departments",
+          params: { facilityId },
+        });
       }
     },
     [facilityId, organizationId],
@@ -127,9 +132,10 @@ export default function FacilityOrganizationList({
 
   const handleParentClick = useCallback(
     (parentId: string) => {
-      navigate(
-        `/facility/${facilityId}/settings/departments/${parentId}/${currentTab}`,
-      );
+      navigate({
+        to: "/facility/$facilityId/settings/departments/$id/$tab",
+        params: { facilityId, id: parentId, tab: currentTab },
+      });
     },
     [facilityId, currentTab],
   );
@@ -168,9 +174,10 @@ export default function FacilityOrganizationList({
                           asChild
                           className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
                           onClick={() =>
-                            navigate(
-                              `/facility/${facilityId}/settings/departments`,
-                            )
+                            navigate({
+                              to: "/facility/$facilityId/settings/departments",
+                              params: { facilityId },
+                            })
                           }
                         >
                           <Button
@@ -239,11 +246,8 @@ export default function FacilityOrganizationList({
                         value={currentTab}
                         onValueChange={handleTabChange}
                       >
-                        <div className="w-full overflow-x-auto pb-1">
-                          <TabsList
-                            variant="line"
-                            className="w-full border-b border-border"
-                          >
+                        <div className="w-full overflow-x-auto">
+                          <TabsList variant="line">
                             {navItems.map((item) => (
                               <TabsTrigger key={item.value} value={item.value}>
                                 {item.title}

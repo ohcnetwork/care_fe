@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -20,8 +19,10 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import BackButton from "@/components/Common/BackButton";
 import { getCurrencySymbol } from "@/components/ui/monetary-display";
+import { navigate } from "@/lib/router/navigate";
 import { ConditionOperationSummary } from "@/types/base/condition/condition";
 import {
   MonetaryComponent,
@@ -62,12 +63,12 @@ export function ChargeItemDefinitionDetail({
       onSuccess: () => {
         toast.success(t("definition_deleted_successfully"));
         queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
-        navigate(
-          `/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition?.category.slug}`,
-          {
-            replace: true,
-          },
-        );
+        if (!chargeItemDefinition) return;
+        navigate({
+          to: "/facility/$facilityId/settings/charge_item_definitions/categories/$slug",
+          params: { facilityId, slug: chargeItemDefinition.category.slug },
+          replace: true,
+        });
       },
     });
 
@@ -138,7 +139,7 @@ export function ChargeItemDefinitionDetail({
                 variant="outline"
                 className="mt-4"
                 onClick={() =>
-                  navigate(
+                  goBack(
                     `/facility/${facilityId}/settings/charge_item_definitions`,
                   )
                 }
@@ -195,9 +196,10 @@ export function ChargeItemDefinitionDetail({
               )}
               <Button
                 onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/charge_item_definitions/${slug}/edit`,
-                  )
+                  navigate({
+                    to: "/facility/$facilityId/settings/charge_item_definitions/$slug/edit",
+                    params: { facilityId, slug },
+                  })
                 }
               >
                 <CareIcon icon="l-pen" className="mr-2" />

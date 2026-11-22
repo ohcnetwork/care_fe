@@ -5,8 +5,6 @@ import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,9 +31,6 @@ interface FacilityHomeProps {
   appearance?: "default" | "settings";
   renderSettingsActions?: (disabled: boolean) => ReactNode;
 }
-
-const settingsButtonClassName =
-  "h-12 border-neutral-400 text-sm text-neutral-950 shadow-md hover:bg-neutral-200/75 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 md:h-10 [&_svg]:size-5";
 
 export const FacilityHome = ({
   facilityId,
@@ -122,16 +117,16 @@ export const FacilityHome = ({
     return isSettings ? (
       <div role="status" className="space-y-6">
         <span className="sr-only">{t("loading")}</span>
-        <div className="flex items-center gap-4 border-b border-neutral-200 pb-6">
-          <Skeleton className="size-16 rounded-[10px]" />
-          <div className="space-y-2">
-            <Skeleton className="h-7 w-56 max-w-[60vw]" />
-            <Skeleton className="h-4 w-32" />
+        <div className="overflow-hidden rounded-lg border border-border">
+          <Skeleton className="h-48 rounded-none sm:h-40" />
+          <div className="space-y-2 p-6">
+            <Skeleton className="h-7 w-56 max-w-full" />
+            <Skeleton className="h-4 w-40 max-w-full" />
           </div>
         </div>
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-          <Skeleton className="h-64 rounded-[10px]" />
-          <Skeleton className="h-48 rounded-[10px]" />
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <Skeleton className="h-64 rounded-lg" />
+          <Skeleton className="h-48 rounded-lg" />
         </div>
       </div>
     ) : (
@@ -148,7 +143,7 @@ export const FacilityHome = ({
         </p>
         <Button
           variant="outline"
-          className={cn("mt-3", settingsButtonClassName)}
+          className="mt-3"
           disabled={isFetching}
           onClick={() => void refetch()}
         >
@@ -193,8 +188,7 @@ export const FacilityHome = ({
     <FacilityHomeActions
       facility={facilityData}
       isSettings={isSettings}
-      buttonClassName={isSettings ? settingsButtonClassName : undefined}
-      onEditCoverImage={() => setEditCoverImage(true)}
+      canDelete={user.is_superuser}
     />
   ) : null;
 
@@ -207,7 +201,8 @@ export const FacilityHome = ({
           facility={facilityData}
           actions={facilityActions}
           settingsActions={renderSettingsActions?.(isError)}
-          canDelete={user.is_superuser}
+          canUpdateFacility={canUpdateFacility}
+          onEditCoverImage={() => setEditCoverImage(true)}
         />
       </>
     );
@@ -220,7 +215,6 @@ export const FacilityHome = ({
         facility={facilityData}
         actions={facilityActions}
         canUpdateFacility={canUpdateFacility}
-        canDelete={user.is_superuser}
         onEditCoverImage={() => setEditCoverImage(true)}
       />
     </div>

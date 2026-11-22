@@ -1,6 +1,6 @@
-import { Link } from "raviger";
 import { Fragment } from "react";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 
 import {
@@ -14,8 +14,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { AppSidebarToggle } from "@/components/ui/sidebar/sidebar-toggle";
 
-interface InnerPageBreadcrumb {
-  label: string;
+export interface InnerPageBreadcrumb {
+  label: React.ReactNode;
   href?: string;
   hideOnMobile?: boolean;
 }
@@ -37,19 +37,18 @@ export function InnerPageHeader({ breadcrumbs, dataCy }: InnerPageHeaderProps) {
       <Breadcrumb className="min-w-0">
         <BreadcrumbList className="flex-nowrap">
           {breadcrumbs.map((item, index) => (
-            <Fragment key={item.href ?? item.label}>
+            <Fragment key={item.href ?? index}>
               <BreadcrumbItem
                 className={cn("min-w-0", item.hideOnMobile && "hidden sm:flex")}
               >
                 {item.href ? (
                   <BreadcrumbLink asChild>
-                    <Link
-                      basePath="/"
+                    <HrefLink
                       href={item.href}
                       className="truncate rounded-sm underline underline-offset-4 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                     >
                       {item.label}
-                    </Link>
+                    </HrefLink>
                   </BreadcrumbLink>
                 ) : (
                   <BreadcrumbPage className="truncate text-foreground">

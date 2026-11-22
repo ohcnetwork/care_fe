@@ -17,6 +17,8 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 import query from "@/Utils/request/query";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { questionnaireFillSearch } from "@/lib/router/search/questionnaire";
 import { cn } from "@/lib/utils";
 import {
   ENCOUNTER_ADMIT_SOURCE,
@@ -45,7 +47,6 @@ import {
   validateFields,
 } from "@/types/questionnaire/validation";
 import careConfig from "@careConfig";
-import { useQueryParams } from "raviger";
 
 interface EncounterQuestionProps {
   question: Question;
@@ -122,7 +123,7 @@ export function EncounterQuestion({
     enabled: !!encounterId,
   });
   const { t } = useTranslation();
-  const [{ toDischarge }] = useQueryParams();
+  const [{ toDischarge }] = useQueryParams(questionnaireFillSearch);
   const { hasError, getError } = useFieldError(
     questionnaireResponse.question_id,
     errors,

@@ -19,6 +19,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { formatDateTime, formatName, properCase } from "@/Utils/utils";
 import React, { useEffect, useState } from "react";
 
@@ -26,7 +31,10 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { RegisteredGroupAnswerView } from "@/components/QuestionnaireV2/groups/RegisteredGroupAnswerView";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { usePathname } from "@/lib/router/location";
 import { cn } from "@/lib/utils";
+import { Code } from "@/types/base/code/code";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import {
@@ -42,8 +50,13 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { t } from "i18next";
-import { BanIcon, ChevronDown, MoreVertical, Printer } from "lucide-react";
-import { Link, useFullPath } from "raviger";
+import {
+  BanIcon,
+  ChevronDown,
+  InfoIcon,
+  MoreVertical,
+  Printer,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
@@ -106,6 +119,33 @@ export function formatValue(
   }
 }
 
+function CodingValue({ coding }: { coding: Code }) {
+  const { t } = useTranslation();
+
+  return (
+    <span className="ml-1 inline-flex items-center gap-1 font-normal text-gray-600">
+      {coding.display}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className="inline-flex shrink-0 rounded-full text-gray-400 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+            aria-label={`${t("system")}: ${coding.system}, ${t("code")}: ${coding.code}`}
+          >
+            <InfoIcon className="size-3.5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">
+          <span className="opacity-70">{t("system")}</span>
+          <span className="font-mono break-all">{coding.system}</span>
+          <span className="opacity-70">{t("code")}</span>
+          <span className="font-mono">{coding.code}</span>
+        </TooltipContent>
+      </Tooltip>
+    </span>
+  );
+}
+
 const hasResponseValue = (value: ResponseValue) =>
   (value.value != null && value.value !== "") || !!value.coding;
 
@@ -149,11 +189,7 @@ function ResponseRows({
                         {val.unit.code}
                       </span>
                     )}
-                    {val.coding && (
-                      <span className="ml-1 font-normal text-gray-600">
-                        {val.coding.display} ({val.coding.code})
-                      </span>
-                    )}
+                    {val.coding && <CodingValue coding={val.coding} />}
                   </React.Fragment>
                 ))}
                 {response.note && (
@@ -203,11 +239,7 @@ function ResponseRows({
                       {val.unit.code}
                     </span>
                   )}
-                  {val.coding && (
-                    <span className="ml-1 font-normal text-gray-600">
-                      {val.coding.display} ({val.coding.code})
-                    </span>
-                  )}
+                  {val.coding && <CodingValue coding={val.coding} />}
                 </React.Fragment>
               ))}
             </span>
@@ -333,11 +365,7 @@ function QuestionGroup({
     const response = responses.find((r) => r.question_id === question.id);
     const value = response?.values?.[0]?.value;
     const coding = response?.values?.[0]?.coding;
-    const text = [
-      value?.toString() || "",
-      coding?.display || "",
-      coding?.code || "",
-    ].join(" ");
+    const text = [value?.toString() || "", coding?.display || ""].join(" ");
     return text.length > 50;
   });
 
@@ -414,7 +442,7 @@ function ResponseActionsMenu({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const fullPath = useFullPath();
+  const fullPath = usePathname();
   const routeScope = fullPath.match(/^\/(facility|organization)\/[^/]+/)?.[0];
   const scope = facilityId ? `/facility/${facilityId}` : routeScope;
   const printEncounterId =
@@ -457,7 +485,7 @@ function ResponseActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <Link
+          <HrefLink
             href={`${printBase}/questionnaire_response/${item.id}/print`}
             target={embedded ? "_blank" : undefined}
             rel={embedded ? "noopener noreferrer" : undefined}
@@ -466,9 +494,9 @@ function ResponseActionsMenu({
               <Printer className="size-4" />
               {t("print_this_response")}
             </DropdownMenuItem>
-          </Link>
+          </HrefLink>
           {item.questionnaire && (
-            <Link
+            <HrefLink
               href={`${printBase}/questionnaire/${item.questionnaire.id}/responses/print`}
               target={embedded ? "_blank" : undefined}
               rel={embedded ? "noopener noreferrer" : undefined}
@@ -479,7 +507,7 @@ function ResponseActionsMenu({
                   title: item.questionnaire.title,
                 })}
               </DropdownMenuItem>
-            </Link>
+            </HrefLink>
           )}
           {isUnstructured && !readOnly && (
             <>

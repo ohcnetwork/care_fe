@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -20,6 +20,7 @@ import { userChildProps } from "@/components/Common/UserColumns";
 import LinkUserToDepartmentSheet from "@/components/Users/LinkUserToDepartmentSheet";
 
 import useFilters from "@/hooks/useFilters";
+import { userDepartmentListSearch } from "@/lib/router/search/facility";
 
 import query from "@/Utils/request/query";
 import EditFacilityUserRoleSheet from "@/pages/Facility/settings/organizations/components/EditFacilityUserRoleSheet";
@@ -67,7 +68,8 @@ function DepartmentRow({
     <TableRow>
       <TableCell className="whitespace-normal">
         <Link
-          href={`/facility/${facilityId}/settings/departments/${department.id}/departments`}
+          to="/facility/$facilityId/settings/departments/$id/$tab"
+          params={{ facilityId, id: department.id, tab: "departments" }}
           className="font-medium text-gray-900 underline underline-offset-4 break-words hover:text-primary-600"
         >
           {department.name}
@@ -119,8 +121,8 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
   const { qParams, Pagination, resultsPerPage, updatePage } = useFilters({
+    schema: userDepartmentListSearch,
     limit: 15,
-    disableCache: true,
   });
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: [

@@ -75,7 +75,7 @@ export default function MedicationRequestTable() {
     <div className="space-y-2 h-full">
       <Tabs defaultValue="prescriptions" className="h-full">
         <ScrollArea className="w-full">
-          <TabsList>
+          <TabsList variant="line">
             <TabsTrigger value="prescriptions">
               {t("prescriptions")}
             </TabsTrigger>

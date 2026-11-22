@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -7,8 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { OrgSelect } from "@/components/Common/OrgSelect";
-
 import { cn } from "@/lib/utils";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
@@ -36,23 +35,19 @@ function OrganizationTreeNode({
   const { t } = useTranslation();
   const isExpanded = expandedOrganizations.has(organization.id);
   const isSelected = organization.id === selectedOrganizationId;
-
   const {
-    data: children,
+    data,
     isLoading,
     isError,
+    isFetchNextPageError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
     refetch,
-  } = useQuery({
-    queryKey: [
-      "organization",
-      "list",
-      organizationType,
-      organization.id,
-      "children",
-    ],
-    queryFn: query.paginated(organizationApi.list, {
-      pageSize: 100,
-      pathParams: { id: organization.id },
+    ref,
+  } = useInfiniteList({
+    queryKey: ["organization", "list", organizationType, organization.id],
+    ...query.infinite(organizationApi.list, {
       queryParams: {
         parent: organization.id || "",
         org_type: organizationType,
@@ -60,6 +55,7 @@ function OrganizationTreeNode({
     }),
     enabled: isExpanded,
   });
+  const children = data?.results ?? [];
 
   return (
     <div className="space-y-1">
@@ -107,7 +103,7 @@ function OrganizationTreeNode({
           <span className="truncate">{organization.name}</span>
         </Button>
       </div>
-      {isExpanded && isError && (
+      {isExpanded && isError && children.length === 0 && (
         <div className="flex items-center gap-2 pl-8">
           <p className="text-xs text-gray-500">{t("something_went_wrong")}</p>
           <Button
@@ -121,9 +117,9 @@ function OrganizationTreeNode({
           </Button>
         </div>
       )}
-      {isExpanded && children?.results && children.results.length > 0 && (
+      {isExpanded && children.length > 0 && (
         <div className="space-y-1">
-          {children.results.map((child) => (
+          {children.map((child) => (
             <OrganizationTreeNode
               key={child.id}
               organization={child}
@@ -135,6 +131,21 @@ function OrganizationTreeNode({
               organizationType={organizationType}
             />
           ))}
+          {hasNextPage &&
+            (isFetchNextPageError ? (
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                className="ml-8 h-auto p-0 text-xs"
+                onClick={() => fetchNextPage()}
+              >
+                {t("retry")}
+              </Button>
+            ) : (
+              <div ref={ref} />
+            ))}
+          {isFetchingNextPage && <Skeleton className="h-8 w-full" />}
         </div>
       )}
     </div>
@@ -163,11 +174,15 @@ export default function AdminOrganizationNavbar({
     data: allOrganizations,
     isLoading: isLoadingOrganizations,
     isError,
+    isFetchNextPageError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
     refetch,
-  } = useQuery({
+    ref,
+  } = useInfiniteList({
     queryKey: ["organization", "list", organizationType, "roots"],
-    queryFn: query.paginated(organizationApi.list, {
-      pageSize: 100,
+    ...query.infinite(organizationApi.list, {
       queryParams: {
         parent: "",
         org_type: organizationType,
@@ -177,9 +192,7 @@ export default function AdminOrganizationNavbar({
     refetchOnMount: false,
   });
 
-  const topLevelOrganizations = (allOrganizations?.results || [])
-    .slice()
-    .sort((left, right) => left.name.localeCompare(right.name));
+  const topLevelOrganizations = allOrganizations?.results ?? [];
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
@@ -203,7 +216,7 @@ export default function AdminOrganizationNavbar({
                 <Skeleton key={index} className="h-9 w-full rounded-md" />
               ))}
             </div>
-          ) : isError ? (
+          ) : isError && topLevelOrganizations.length === 0 ? (
             <div className="flex flex-col items-center gap-2 p-4 text-center">
               <p className="text-sm text-gray-600">
                 {t("something_went_wrong")}
@@ -218,17 +231,34 @@ export default function AdminOrganizationNavbar({
               </Button>
             </div>
           ) : topLevelOrganizations.length > 0 ? (
-            topLevelOrganizations.map((organization) => (
-              <OrganizationTreeNode
-                key={organization.id}
-                organization={organization}
-                selectedOrganizationId={selectedOrganizationId}
-                onSelect={onOrganizationSelect}
-                expandedOrganizations={expandedOrganizations}
-                onToggleExpand={onToggleExpand}
-                organizationType={organizationType}
-              />
-            ))
+            <>
+              {topLevelOrganizations.map((organization) => (
+                <OrganizationTreeNode
+                  key={organization.id}
+                  organization={organization}
+                  selectedOrganizationId={selectedOrganizationId}
+                  onSelect={onOrganizationSelect}
+                  expandedOrganizations={expandedOrganizations}
+                  onToggleExpand={onToggleExpand}
+                  organizationType={organizationType}
+                />
+              ))}
+              {hasNextPage &&
+                (isFetchNextPageError ? (
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-xs"
+                    onClick={() => fetchNextPage()}
+                  >
+                    {t("retry")}
+                  </Button>
+                ) : (
+                  <div ref={ref} />
+                ))}
+              {isFetchingNextPage && <Skeleton className="h-8 w-full" />}
+            </>
           ) : (
             <p className="px-3 py-6 text-center text-sm text-gray-500">
               {t("no_organizations_found")}

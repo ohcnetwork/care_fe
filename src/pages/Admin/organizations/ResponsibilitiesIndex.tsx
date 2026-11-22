@@ -6,11 +6,11 @@ import {
   Search,
   SquarePen,
 } from "lucide-react";
-import { navigate } from "raviger";
 import { Fragment, useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
+import { navigate } from "@/lib/router/navigate";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,16 +64,19 @@ export default function ResponsibilitiesIndex({ organizationId }: Props) {
   const hasNoResponsibilities = !!listData && responsibilities.length === 0;
 
   const handleSelect = (id?: string) => {
-    navigate(
-      id ? `/admin/organizations/role/${id}` : `/admin/organizations/role`,
-    );
+    navigate({
+      href: id
+        ? `/admin/organizations/role/${id}`
+        : "/admin/organizations/role",
+    });
   };
 
   // On wide screens the detail panel is always visible, so default to the
   // first responsibility instead of leaving it empty.
   useEffect(() => {
     if (!isMobile && !organizationId && firstResponsibilityId) {
-      navigate(`/admin/organizations/role/${firstResponsibilityId}`, {
+      navigate({
+        href: `/admin/organizations/role/${firstResponsibilityId}`,
         replace: true,
       });
     }
@@ -383,6 +386,7 @@ function ResponsibilityList({
                 type="button"
                 data-slot="responsibility-row"
                 aria-pressed={isSelected}
+                aria-current={isSelected ? "true" : undefined}
                 onClick={() => onSelect(item.id)}
                 className={cn(
                   "group flex w-full items-center justify-between gap-3 text-left transition-colors",

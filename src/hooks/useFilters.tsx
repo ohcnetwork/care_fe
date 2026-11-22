@@ -1,8 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { QueryParam, setQueryParamsOptions } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import {
+  type SetQueryParams,
+  type SetQueryParamsOptions,
+} from "@/lib/router/queryParams";
+import {
+  type SearchSchema,
+  type SearchValues,
+} from "@/lib/router/search/fields";
 import { cn } from "@/lib/utils";
 
 import GenericFilterBadge from "@/CAREUI/display/FilterBadge";
@@ -25,40 +32,57 @@ interface FilterBadgeProps {
   paramKey: string | string[];
 }
 
+/** The filters as the hook handles them inside; pages get typed `qParams`. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type UrlQueryParams = Record<string, any>;
+
 /**
- * A custom hook wrapped around raviger's `useQueryParams` hook to ease handling
+ * A custom hook wrapped around `useScopedQueryParams` to ease handling
  * of pagination and filters.
  */
-export default function useFilters({
+export default function useFilters<S extends SearchSchema>({
+  schema,
   limit = 14,
+  cache = false,
   cacheBlacklist = [],
-  disableCache = false,
   defaultQueryParams = {},
 }: {
+  /**
+   * The search schema of the page (`src/lib/router/search/`). Give the
+   * routes that render the page the same schema in `validateSearch`.
+   */
+  schema: S;
   limit?: number;
+  /**
+   * Save the filters of the page (per path) and restore them when the page
+   * opens without a query string.
+   * @default false
+   */
+  cache?: boolean;
+  /** Keys that the cache does not save. Applies only with `cache`. */
   cacheBlacklist?: string[];
-  disableCache?: boolean;
   defaultQueryParams?: QueryParams;
 }) {
   const { t } = useTranslation();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
-  const [qParams, _setQueryParams] = useScopedQueryParams();
+  const [qParams, _setQueryParams]: [UrlQueryParams, SetQueryParams] =
+    useScopedQueryParams(schema);
   const scoped = useIsScopedQueryParams();
   const [clearSearch, setClearSearch] = useState<{
     value: boolean;
     params?: string[];
   }>({ value: false });
 
-  const updateCache = (query: QueryParam) => {
-    if (disableCache || scoped) return;
+  const updateCache = (query: UrlQueryParams) => {
+    if (!cache || scoped) return;
     const blacklist = FILTERS_CACHE_BLACKLIST.concat(cacheBlacklist);
     FiltersCache.set(query, blacklist);
   };
 
   const setQueryParams = (
-    query: QueryParam,
-    options?: setQueryParamsOptions,
+    query: UrlQueryParams,
+    options?: SetQueryParamsOptions,
   ) => {
     query = FiltersCache.utils.clean(query);
     _setQueryParams(query, { ...options, replace: true });
@@ -82,6 +106,8 @@ export default function useFilters({
   const removeFilter = (param: string) => removeFilters([param]);
 
   useEffect(() => {
+    // Defaults fill the keys that are missing, or invalid for the schema
+    // (read as `undefined`).
     const defaults = Object.fromEntries(
       Object.entries(defaultQueryParams).filter(
         ([key]) => qParams[key] === undefined,
@@ -90,16 +116,16 @@ export default function useFilters({
 
     if (scoped) {
       if (Object.keys(defaults).length > 0)
-        setQueryParams({ ...defaults, ...qParams });
+        setQueryParams({ ...qParams, ...defaults });
       return;
     }
-    if (disableCache) {
+    if (!cache) {
       // Clean-up any existing cache if present for this path.
       FiltersCache.invalidate();
 
       // Set default query params if they are not present, preserving existing params
       if (Object.keys(defaults).length > 0) {
-        setQueryParams({ ...defaults, ...qParams });
+        setQueryParams({ ...qParams, ...defaults });
       }
 
       // Skip cache restoration logic for this usage.
@@ -115,16 +141,16 @@ export default function useFilters({
       return;
     }
 
-    const cache = FiltersCache.get();
-    if (!cache) {
+    const cached = FiltersCache.get();
+    if (!cached) {
       if (Object.keys(defaults).length > 0) {
-        setQueryParams({ ...defaults, ...qParams });
+        setQueryParams({ ...qParams, ...defaults });
       }
       return;
     }
 
     // Restore cache
-    setQueryParams({ ...defaults, ...cache, ...qParams });
+    setQueryParams({ ...defaults, ...cached, ...qParams });
   }, []);
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
@@ -282,7 +308,7 @@ export default function useFilters({
   };
 
   return {
-    qParams,
+    qParams: qParams as SearchValues<S>,
     resultsPerPage: limit,
     /**
      * Updates the query params and resets to page 1.

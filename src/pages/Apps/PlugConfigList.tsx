@@ -4,8 +4,8 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { CircleCheck, Plus, Search, ShoppingBag, Store } from "lucide-react";
-import { Link, useNavigate, useQueryParams } from "raviger";
 import { type ReactNode, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -25,6 +25,9 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { plugConfigListSearch } from "@/lib/router/search/admin";
 import { AppIcon } from "@/pages/Apps/AppIcon";
 import { AppStorePlugin } from "@/types/appStore/appStore";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
@@ -131,7 +134,6 @@ function hasBlankConfigValues(plugin: AppStorePlugin) {
 
 function useQuickInstall() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -162,10 +164,18 @@ function useQuickInstall() {
     onError: (error, plugin) => {
       if (error instanceof ManualSetupRequiredError) {
         toast.info(t("app_requires_manual_setup"));
-        navigate(`/admin/apps/new?appId=${encodeURIComponent(plugin.id)}`);
+        navigate({
+          to: "/admin/apps/$slug",
+          params: { slug: "new" },
+          search: { appId: plugin.id },
+        });
       } else if (error instanceof HealthCheckError) {
         toast.error(t("health_check_unreachable_message"));
-        navigate(`/admin/apps/new?appId=${encodeURIComponent(plugin.id)}`);
+        navigate({
+          to: "/admin/apps/$slug",
+          params: { slug: "new" },
+          search: { appId: plugin.id },
+        });
       }
     },
   });
@@ -182,7 +192,7 @@ export function PlugConfigList() {
 
   const [searchValue, setSearchValue] = useState("");
   const [activeTag, setActiveTag] = useState<string>();
-  const [{ tab }, setQueryParams] = useQueryParams<{ tab?: string }>();
+  const [{ tab }, setQueryParams] = useQueryParams(plugConfigListSearch);
   const activeTab =
     tab === "available" && careConfig.appStore.apiUrl
       ? "available"
@@ -319,7 +329,7 @@ export function PlugConfigList() {
             )}
           </TabsList>
           <Button size="sm" variant="outline" asChild>
-            <Link href="/admin/apps/new">
+            <Link to="/admin/apps/$slug" params={{ slug: "new" }}>
               <Plus className="mr-1 size-4" />
               {t("manual_setup")}
             </Link>
@@ -363,11 +373,9 @@ export function PlugConfigList() {
                     actions={
                       <Button className="w-full" asChild>
                         <Link
-                          href={
-                            matchingApp
-                              ? `/admin/apps/${config.slug}?appId=${encodeURIComponent(matchingApp.id)}`
-                              : `/admin/apps/${config.slug}`
-                          }
+                          to="/admin/apps/$slug"
+                          params={{ slug: config.slug }}
+                          search={matchingApp ? { appId: matchingApp.id } : {}}
                         >
                           {config.isReadOnly
                             ? t("view_config")
@@ -463,7 +471,9 @@ export function PlugConfigList() {
                           installedConfig ? (
                             <Button className="w-full" asChild>
                               <Link
-                                href={`/admin/apps/${app.id}?appId=${encodeURIComponent(app.id)}`}
+                                to="/admin/apps/$slug"
+                                params={{ slug: app.id }}
+                                search={{ appId: app.id }}
                               >
                                 {installedConfig.isReadOnly
                                   ? t("view_config")
@@ -478,7 +488,9 @@ export function PlugConfigList() {
                                 asChild
                               >
                                 <Link
-                                  href={`/admin/apps/new?appId=${encodeURIComponent(app.id)}`}
+                                  to="/admin/apps/$slug"
+                                  params={{ slug: "new" }}
+                                  search={{ appId: app.id }}
                                 >
                                   {t("configure")}
                                 </Link>
