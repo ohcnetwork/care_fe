@@ -50,10 +50,11 @@ export function ComboboxQuantityInput({
 
   const handleInputChange = (value: string) => {
     if (disabled || (value !== "" && !/^\d*\.?\d*$/.test(value))) return;
-    setInputValue(value);
+    const nextValue = value === "." ? "0." : value;
+    setInputValue(nextValue);
     setOpen(true);
-    if (value === "") onChange(null);
-    else if (value !== ".") onChange({ value, unit: selectedUnit || units[0] });
+    if (nextValue === "") onChange(null);
+    else onChange({ value: nextValue, unit: selectedUnit || units[0] });
   };
 
   React.useEffect(() => {

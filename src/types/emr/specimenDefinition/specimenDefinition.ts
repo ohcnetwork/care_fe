@@ -105,7 +105,10 @@ export function specimenCollectionDefaults(
     method: template?.method ?? null,
     body_site: template?.body_site ?? null,
     quantity: quantity
-      ? { ...quantity, value: wholeSpecimenQuantity(quantity.value) ?? quantity.value }
+      ? {
+          ...quantity,
+          value: wholeSpecimenQuantity(quantity.value) ?? quantity.value,
+        }
       : null,
   };
 }

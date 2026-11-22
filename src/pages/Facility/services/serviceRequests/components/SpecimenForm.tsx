@@ -516,7 +516,10 @@ export function SpecimenForm({
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div>
-                <Label htmlFor={methodId} className="text-sm text-muted-foreground mb-1">
+                <Label
+                  htmlFor={methodId}
+                  className="text-sm text-muted-foreground mb-1"
+                >
                   {t("collection_method")}
                 </Label>
                 <ValueSetSelect
@@ -529,7 +532,10 @@ export function SpecimenForm({
                 />
               </div>
               <div>
-                <Label htmlFor={bodySiteId} className="text-sm text-muted-foreground mb-1">
+                <Label
+                  htmlFor={bodySiteId}
+                  className="text-sm text-muted-foreground mb-1"
+                >
                   {t("body_site")}
                 </Label>
                 <ValueSetSelect
