@@ -88,7 +88,8 @@
       "
     ></div>
     <div id="root"></div>
-    <!-- Runtime REACT_* overrides; must load before the app module runs. -->
+    <!-- Runtime REACT_* overrides, read by care.config.ts. Keep it a classic
+    script without async, so it always runs before the app module. -->
     <script src="/runtime-env.js"></script>
     <script src="/loading-screen.js"></script>
     <script type="module" src="/src/index.tsx"></script>

@@ -66,7 +66,16 @@ async function validateRuntimeEnv() {
     return;
   }
 
-  const { envSchema } = await import("../scripts/validate-env");
+  // The schema is a separate chunk. If it can't load, stop with a retry rather
+  // than leave the loading screen up.
+  const { envSchema } = await import("../scripts/validate-env").catch(
+    (error: unknown) => {
+      window.__showLoadingError?.(
+        "Couldn't check this site's settings. Check your connection and try again.",
+      );
+      throw error;
+    },
+  );
   const result = await envSchema.safeParseAsync(env);
   if (result.success) {
     return;

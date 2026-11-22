@@ -63,6 +63,24 @@ test.describe("Runtime env overrides", () => {
     expect(apiRequests).toEqual([]);
   });
 
+  test("stops with a retry screen when the settings check doesn't load", async ({
+    page,
+  }) => {
+    await page.route("**/runtime-env.js", (route) =>
+      route.fulfill({
+        contentType: "text/javascript",
+        body: 'window.__CARE_RUNTIME_ENV__ = { REACT_DISABLE_PATIENT_LOGIN: "true" };',
+      }),
+    );
+    // The schema that checks the overrides loads as its own chunk.
+    await page.route("**/validate-env*", (route) => route.abort());
+
+    await page.goto("/");
+
+    await expect(page.getByRole("alert")).toHaveText(/couldn't check/i);
+    await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
+  });
+
   test("stops with a retry screen when runtime-env.js doesn't load", async ({
     page,
   }) => {

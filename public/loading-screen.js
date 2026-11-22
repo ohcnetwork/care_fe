@@ -179,7 +179,7 @@
     retry.type = "button";
     retry.textContent = "Try again";
     retry.style.cssText =
-      "padding:8px 16px;border:0;border-radius:6px;background:#059669;color:#fff;font:inherit;font-size:14px;font-weight:500;cursor:pointer";
+      "min-height:44px;padding:8px 16px;border:0;border-radius:6px;background:#059669;color:#fff;font:inherit;font-size:14px;font-weight:500;cursor:pointer";
     retry.addEventListener("click", function () {
       location.reload();
     });
