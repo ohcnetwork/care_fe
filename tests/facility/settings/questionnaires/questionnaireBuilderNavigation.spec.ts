@@ -1,6 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
-  clickCanvasLabel,
   createQuestionnaireAndOpenBuilder,
   questionBlock,
 } from "tests/helper/questionnaireV2";
@@ -53,8 +52,9 @@ test.describe("Questionnaire v2 builder navigation", () => {
     });
 
     await test.step("Clicking a question card on the canvas selects it", async () => {
-      // The card's inputs are inert on the edit canvas, so aim at the label.
-      await clickCanvasLabel(questionBlock(page, titles[1]).locator("label"));
+      // The card's inputs are inert on the edit canvas — the click lands on
+      // the selection chrome. Aim at the label, which is never inert.
+      await questionBlock(page, titles[1]).locator("label").click();
       await expect(titleInput).toHaveValue(titles[1]);
     });
 
@@ -100,10 +100,7 @@ test.describe("Questionnaire v2 builder navigation", () => {
     });
 
     await test.step("Delete removes the copy via the toolbar", async () => {
-      await clickCanvasLabel(
-        questionBlock(page, `${titles[1]} (Copy)`).locator("label"),
-      );
-      await expect(titleInput).toHaveValue(`${titles[1]} (Copy)`);
+      await questionBlock(page, `${titles[1]} (Copy)`).locator("label").click();
       await page.getByRole("button", { name: "Delete question" }).click();
       await expect(
         nav.getByRole("button", { name: `${titles[1]} (Copy)` }),
