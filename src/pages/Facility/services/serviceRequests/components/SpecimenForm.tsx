@@ -75,7 +75,8 @@ export function SpecimenForm({
   const bodySiteId = useId();
   const defaultUnit =
     specimenDefinition.type_tested?.container?.capacity?.unit ?? null;
-  const defaults = specimenCollectionDefaults(specimenDefinition.collection);
+  const collection = draftSpecimen?.collection ?? specimenDefinition.collection;
+  const defaults = specimenCollectionDefaults(collection);
 
   const [identifierMode, setIdentifierMode] = useState<"scan" | "generate">(
     "generate",
@@ -104,8 +105,7 @@ export function SpecimenForm({
       collection: {
         ...defaults,
         // Keep invalid template input editable, but never copy it into a draft.
-        quantity:
-          defaults.quantity ?? specimenDefinition.collection?.quantity ?? null,
+        quantity: defaults.quantity ?? collection?.quantity ?? null,
         collector: currentUserId || null, // Use user ID, default to null if not available yet
         collected_date_time: new Date().toISOString(),
         procedure: null,

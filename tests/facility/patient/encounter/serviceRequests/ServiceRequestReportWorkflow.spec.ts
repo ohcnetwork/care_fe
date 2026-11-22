@@ -38,10 +38,10 @@ async function mockReportWorkflow(
     title: faker.word.words(3),
     type_collected: code,
     collection: {
-      quantity:
-        specimenScenario === "fractional-template"
-          ? { value: "0.5", unit: code }
-          : null,
+      quantity: {
+        value: specimenScenario === "fractional-template" ? "0.5" : "4",
+        unit: code,
+      },
     },
   };
   const draft = {
@@ -50,6 +50,7 @@ async function mockReportWorkflow(
     accession_identifier: faker.string.uuid(),
     specimen_definition: specimenDefinition,
     specimen_type: code,
+    collection: { quantity: null },
   };
   const activity = {
     id: faker.string.uuid(),
@@ -178,6 +179,8 @@ test.describe("Service request report workflow", () => {
     await page.goto(fixture.url);
     await page.getByRole("button", { name: "Collect Specimen" }).click();
     const value = page.getByPlaceholder("Value", { exact: true });
+    // Reopening the draft must not reapply the definition's quantity.
+    await expect(value).toHaveValue("");
     await value.fill("2");
     await value.fill("");
     const updated = page.waitForRequest(fixture.updateSpecimenUrl);

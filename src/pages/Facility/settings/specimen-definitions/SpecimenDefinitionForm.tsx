@@ -376,23 +376,12 @@ function SpecimenDefinitionFormContent({
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
     const quantity = data.collection?.quantity;
-    if (quantity && !quantity.unit) {
-      form.setError("collection.quantity", {
-        type: "validate",
-        message: t("field_required"),
-      });
-      return;
-    }
-
     const normalizedQuantity = quantity?.unit
       ? {
-          ...quantity,
           unit: quantity.unit,
           value: wholeSpecimenQuantity(quantity.value) ?? quantity.value,
         }
-      : quantity
-        ? null
-        : quantity;
+      : null;
     const collection = data.collection
       ? {
           ...data.collection,
