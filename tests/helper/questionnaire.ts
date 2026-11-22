@@ -23,15 +23,24 @@ import { expectToast } from "tests/helper/ui";
  */
 export async function createQuestionnaireEncounter(
   facilityId: string,
+  {
+    status = "in_progress",
+    encounterClass = "amb",
+    start = new Date(),
+  }: {
+    status?: "in_progress" | "planned";
+    encounterClass?: "amb" | "imp";
+    start?: Date;
+  } = {},
 ): Promise<{ patientId: string; encounterId: string }> {
   const headers = adminApiHeaders();
   const patientId = await createTestPatient("Questionnaire Test");
   const encounterBody = JSON.stringify({
     patient: patientId,
     facility: facilityId,
-    status: "in_progress",
-    encounter_class: "amb",
-    period: { start: new Date().toISOString() },
+    status,
+    encounter_class: encounterClass,
+    period: { start: start.toISOString() },
     priority: "routine",
     organizations: [],
   });

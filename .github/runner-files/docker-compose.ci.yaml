@@ -49,7 +49,7 @@ services:
 
   backend:
     <<: *care
-    # Runners have 4 vCPUs, shared with 4 Chromium workers.
+    # The backend shares the shard's 8 vCPUs with Chromium.
     command:
       - gunicorn
       - config.wsgi:application

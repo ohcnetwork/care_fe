@@ -31,7 +31,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
 
   retries: process.env.CI ? 2 : 0,
-  /* CI workers are controlled per-phase in the workflow (setup=1, chromium=4).
+  /* CI workers are controlled per-phase in the workflow.
    * Locally, use all available cores. */
   workers: undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -60,7 +60,7 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      // On CI, setup runs as a separate step (--workers=1) before chromium (--workers=4).
+      // On CI, setup runs as a separate serial step before the Chromium shards.
       // Locally, Playwright handles the dependency ordering automatically.
       dependencies: process.env.CI ? [] : ["setup"],
     },

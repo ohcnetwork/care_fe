@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
-import { openServiceLocation } from "tests/facility/services/helpers";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
 import { filterSelectButton } from "tests/helper/searchParams";
+import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -11,34 +12,42 @@ test.use({ storageState: "tests/.auth/user.json" });
 test.describe("Prescriptions preview search params", () => {
   let previewUrl: string;
 
-  test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext({
-      storageState: "tests/.auth/user.json",
-    });
-    const page = await context.newPage();
-    const pharmacyPath = await openServiceLocation(
-      page,
-      getFacilityId(),
-      "Main Pharmacy",
-      "Pharmacy",
+  test.beforeAll(async ({ request }) => {
+    const facilityId = getFacilityId();
+    const api = getApiUrl();
+    const headers = getApiHeaders();
+    const locations = await request.get(
+      `${api}/api/v1/facility/${facilityId}/location/`,
+      { headers, params: { mode: "kind", name: "Pharmacy" } },
     );
-    await expect(
-      page.getByRole("tab", { name: "Billing Pending", exact: true }),
-    ).toHaveAttribute("aria-selected", "true");
-    // The queue lists prescriptions to bill. Filter it by the first patient
-    // to select their prescriptions.
-    await page
-      .locator('[data-slot="table-body"] [data-slot="table-row"]')
-      .first()
-      .getByRole("cell")
-      .first()
-      .click();
-    await expect(page).toHaveURL(/[?&]patient_external_id=/);
-    const preview = page.getByRole("link", { name: "Preview Selected Rx" });
-    await expect(preview).toBeVisible();
-    previewUrl = (await preview.getAttribute("href"))!;
-    expect(previewUrl).toContain(`${pharmacyPath}/medication_requests/`);
-    await context.close();
+    await expect(locations).toBeOK();
+    const { results } = (await locations.json()) as {
+      results: { id: string; name: string }[];
+    };
+    const pharmacy = results.find(({ name }) => name === "Pharmacy");
+    if (!pharmacy) throw new Error("Seeded Pharmacy location not found");
+
+    const { patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId);
+    const user = await request.get(`${api}/api/v1/users/getcurrentuser/`, {
+      headers,
+    });
+    await expect(user).toBeOK();
+    const { id: prescriberId } = await user.json();
+    const prescription = await request.post(
+      `${api}/api/v1/patient/${patientId}/medication/prescription/`,
+      {
+        headers,
+        data: {
+          encounter: encounterId,
+          prescribed_by: prescriberId,
+          status: "active",
+        },
+      },
+    );
+    await expect(prescription).toBeOK();
+    const { id } = await prescription.json();
+    previewUrl = `/facility/${facilityId}/locations/${pharmacy.id}/medication_requests/patient/${patientId}/prescriptions/${id}`;
   });
 
   const searchBox = (page: Page) => page.getByPlaceholder("Search Medications");
