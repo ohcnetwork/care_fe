@@ -16,7 +16,7 @@ export function getAccountId(): string {
     console.warn("⚠️ Account meta missing — running account setup...");
     try {
       execSync(
-        "npx playwright test --project=setup tests/setup/patientAccount.setup.ts",
+        "npx playwright test --project=setup-account tests/setup/patientAccount.setup.ts",
         {
           stdio: "inherit",
           cwd: process.cwd(),

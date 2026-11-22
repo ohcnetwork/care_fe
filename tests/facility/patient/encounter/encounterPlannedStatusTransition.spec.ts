@@ -1,13 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
-import {
-  getEncounterCreateDialog,
-  openCalendarAndGetNextMonthButton,
-  openCreateEncounterDialog,
-  selectStatusInCreateDialog,
-} from "tests/facility/patient/encounter/encounterFormHelpers";
-import { createPatient } from "tests/helper/patient";
+import { addDays } from "date-fns";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
 import { expectToast } from "tests/helper/ui";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
+import { getFacilityId } from "tests/support/facilityId";
 
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 
@@ -21,31 +17,18 @@ async function createPlannedEncounter(
   start: "past" | "future",
   encounterClass: "Ambulatory" | "Inpatient" = "Ambulatory",
 ) {
-  await openCreateEncounterDialog(page, await createPatient("Encounter Test"));
-  const dialog = getEncounterCreateDialog(page);
-  await dialog
-    .getByRole("button", { name: new RegExp(`^${encounterClass}`) })
-    .click();
-  await selectStatusInCreateDialog(page, "Planned");
-  await openCalendarAndGetNextMonthButton(page);
-  await page
-    .getByRole("button", {
-      name: `Go to the ${start === "future" ? "Next" : "Previous"} Month`,
-    })
-    .click();
-  await page
-    .getByRole("gridcell")
-    .filter({ hasText: /^15$/ })
-    .getByRole("button")
-    .click();
-
-  await Promise.all([
-    page.waitForURL(/\/encounter\/[^/]+/),
-    dialog.getByRole("button", { name: /^Create Encounter/ }).click(),
-  ]);
-  await expect(
-    page.getByRole("button", { name: "Encounter Actions" }),
-  ).toBeVisible();
+  const facilityId = getFacilityId();
+  const { patientId, encounterId } = await createQuestionnaireEncounter(
+    facilityId,
+    {
+      status: "planned",
+      encounterClass: encounterClass === "Inpatient" ? "imp" : "amb",
+      start: addDays(new Date(), start === "future" ? 7 : -7),
+    },
+  );
+  await page.goto(
+    `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+  );
 }
 
 // The update form's label isn't associated with its SelectTrigger yet.
@@ -109,12 +92,11 @@ async function expectPersistedPeriod(
   )?.[1];
   expect(encounterId).toBeTruthy();
 
-  await page.reload();
   const response = await page.request.get(
     `${getApiUrl()}/api/v1/encounter/${encounterId}/`,
     { headers: getApiHeaders() },
   );
-  expect(response.ok()).toBeTruthy();
+  await expect(response).toBeOK();
   const encounter: EncounterRead = await response.json();
   expect(encounter.status).toBe(status);
   if (hasEnd) {
@@ -129,9 +111,6 @@ async function expectPersistedPeriod(
 }
 
 test.describe("Planned Encounter Status Transition", () => {
-  // Encounter creation takes a facility-wide lock, so run these one at a time.
-  test.describe.configure({ mode: "serial" });
-
   test.afterEach(async ({ page }, testInfo) => {
     if (testInfo.status === testInfo.expectedStatus) return;
     try {
