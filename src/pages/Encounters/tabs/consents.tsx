@@ -13,6 +13,7 @@ import Loading from "@/components/Common/Loading";
 import ConsentFormSheet from "@/components/Consent/ConsentFormSheet";
 
 import useFilters from "@/hooks/useFilters";
+import { consentListSearch } from "@/lib/router/search/encounter";
 
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
@@ -160,6 +161,7 @@ export const EncounterConsentsTab = () => {
   } = useEncounter();
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: consentListSearch,
     limit: CONSENTS_PER_PAGE,
   });
 

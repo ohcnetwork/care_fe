@@ -7,6 +7,7 @@ import SearchInput from "@/components/Common/SearchInput";
 import { SectionHeader } from "@/components/Common/SectionHeader";
 
 import useFilters from "@/hooks/useFilters";
+import { organizationFacilityListSearch } from "@/lib/router/search/organization";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -39,7 +40,10 @@ export default function OrganizationFacilities({
   );
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 12, disableCache: true });
+    useFilters({
+      schema: organizationFacilityListSearch,
+      limit: 12,
+    });
 
   const { data: facilities, isFetching } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
