@@ -91,7 +91,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "$GITHUB_TOKEN" | oras login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-          oras push "$BUNDLE:sha-${GITHUB_SHA::7},${GITHUB_REF_NAME//\//-}" \
+          oras push "$BUNDLE:sha-${GITHUB_SHA::7},${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}" \
             --artifact-type application/vnd.ohcnetwork.care-fe.build.v1 \
             --annotation "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
             --annotation "org.opencontainers.image.revision=$GITHUB_SHA" \
