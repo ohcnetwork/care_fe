@@ -30,7 +30,9 @@ function readReporterJson(filePath) {
 }
 
 const inventory = readReporterJson(inventoryPath);
-const timingData = JSON.parse(fs.readFileSync(timingsPath, "utf8"));
+const timingData = fs.existsSync(timingsPath)
+  ? JSON.parse(fs.readFileSync(timingsPath, "utf8"))
+  : {};
 const knownDurations = timingData.durations ?? {};
 const fallbackDuration =
   Object.values(knownDurations).reduce((sum, value) => sum + value, 0) /

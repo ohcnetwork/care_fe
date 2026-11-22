@@ -354,9 +354,6 @@ jobs:
       - name: Plan duration-balanced shard
         run: |
           timings="$RUNNER_TEMP/playwright-timings.json"
-          if [ ! -f "$timings" ]; then
-            timings=scripts/playwright-timings.json
-          fi
           node scripts/plan-playwright-shard.mjs \
             "$RUNNER_TEMP/playwright-test-inventory.json" \
             "$timings" \
@@ -517,8 +514,7 @@ jobs:
         run: |
           node scripts/update-playwright-timings.mjs \
             all-results \
-            "$RUNNER_TEMP/playwright-timings.json" \
-            scripts/playwright-timings.json
+            "$RUNNER_TEMP/playwright-timings.json"
 
       - name: Save Playwright timings
         if: steps.skipped.outputs.skipped == 'false'

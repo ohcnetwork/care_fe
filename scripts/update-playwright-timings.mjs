@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const [resultsDirectory, outputPath, fallbackPath] = process.argv.slice(2);
-if (!resultsDirectory || !outputPath || !fallbackPath) {
+const [resultsDirectory, outputPath] = process.argv.slice(2);
+if (!resultsDirectory || !outputPath) {
   throw new Error(
-    "Usage: node scripts/update-playwright-timings.mjs <results-directory> <output.json> <fallback.json>",
+    "Usage: node scripts/update-playwright-timings.mjs <results-directory> <output.json>",
   );
 }
 
@@ -50,7 +50,7 @@ function collectDurations(suite, durations, file = null, titlePath = []) {
 
 const previous = fs.existsSync(outputPath)
   ? JSON.parse(fs.readFileSync(outputPath, "utf8"))
-  : JSON.parse(fs.readFileSync(fallbackPath, "utf8"));
+  : {};
 const observations = new Map();
 for (const resultFile of findResultFiles(resultsDirectory)) {
   const report = JSON.parse(fs.readFileSync(resultFile, "utf8"));
