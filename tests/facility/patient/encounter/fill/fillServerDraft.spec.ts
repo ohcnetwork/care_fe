@@ -278,8 +278,16 @@ test.describe("Fill page server draft", () => {
     // PUT branch — saving a resumed draft updates that record instead of
     // creating a second one.
     await noteBox().fill(editedNote);
-    await page.getByRole("button", { name: SAVE_DRAFT }).click();
-    await expectToast(page, "Draft saved successfully");
+    const [updatedResponse] = await Promise.all([
+      page.waitForResponse(
+        (response) =>
+          response.request().method() === "PUT" &&
+          new URL(response.url()).pathname ===
+            `/api/v1/form_submission/${draftId}/`,
+      ),
+      page.getByRole("button", { name: SAVE_DRAFT }).click(),
+    ]);
+    expect(updatedResponse.ok()).toBe(true);
     await page.waitForURL(/\/updates$/);
     await expect(
       savedRow.getByRole("button", { name: /^Continue/ }),

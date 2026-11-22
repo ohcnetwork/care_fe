@@ -1855,6 +1855,7 @@
   "existing_batches": "Existing Batches",
   "exists": "Exists",
   "expand": "Expand",
+  "expected_quantity": "Expected Quantity",
   "expiration_date": "Expiration Date",
   "expiration_date_description": "The date after which this product should not be used",
   "expiration_date_must_be_after_manufacture_date": "Expiration date must be after manufacture date",

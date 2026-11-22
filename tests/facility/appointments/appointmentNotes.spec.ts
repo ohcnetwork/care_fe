@@ -97,8 +97,8 @@ test("appointment notes keep typed letters and save and render Markdown", async 
   const saved = page.waitForResponse(
     (response) =>
       response.request().method() === "POST" &&
-      response.url().endsWith("/api/v1/batch_requests/") &&
-      response.request().postData()?.includes(appointment.id),
+      new URL(response.url()).pathname ===
+        `/api/v1/facility/${facilityId}/appointments/${appointment.id}/cancel/`,
   );
   await dialog.getByRole("button", { name: "Confirm", exact: true }).click();
   const response = await saved;
