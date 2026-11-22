@@ -1,39 +1,16 @@
 import { faker } from "@faker-js/faker";
 import { type Page, expect, test } from "@playwright/test";
-import { getApiHeaders, getApiUrl } from "tests/helper/utils";
-import { getEncounterId } from "tests/support/encounterId";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import { firstValueSetDisplay } from "tests/helper/valueSet";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
-let facilityId: string;
-let patientId: string;
-let encounterId: string;
 let diagnosisName: string;
 let questionnaireUrl: string;
 let status: string;
 let verification: string;
 let severity: string;
-const usedDiagnoses = new Set<string>(); // To track used diagnoses across tests so we don't add duplicate diagnoses
-
-const diagnosisOptions = [
-  "Chronic nontraumatic intracranial subdural haematoma",
-  "Malignant melanoma of skin of left wrist",
-  "Born in Nauru",
-  "Chronic respiratory failure due to obstructive sleep apnoea",
-  "Difficulty controlling anger",
-  "Lack of trust",
-  "Acquired arteriovenous malformation of vascular structure of gastrointestinal tract",
-  "Venous ulcer of left ankle",
-  "Feeling angry",
-  "Fetal heart sounds quiet",
-  "Small bowel enteroscopy normal",
-  "Ear smelly",
-  "Cholera",
-  "Osteonecrosis",
-  "Chronic pain",
-];
 
 const DIAGNOSIS_CLINICAL_STATUS = [
   "Active",
@@ -54,36 +31,16 @@ const DIAGNOSIS_VERIFICATION_STATUS = [
 
 const DIAGNOSIS_SEVERITY = ["Mild", "Moderate", "Severe"];
 
-interface DiagnosisRecord {
-  code: { display: string };
-}
-
-/** The diagnoses truly on this encounter right now, by display text —
- *  read from the backend rather than trusted from an in-memory Set, which
- *  reflects only what THIS worker has picked and says nothing about a
- *  dirty encounter or what a sibling worker did under fullyParallel. */
-async function fetchExistingDiagnosisDisplays(
-  patientId: string,
-  encounterId: string,
-): Promise<Set<string>> {
-  const res = await fetch(
-    `${getApiUrl()}/api/v1/patient/${patientId}/diagnosis/?encounter=${encounterId}&limit=100`,
-    { headers: getApiHeaders() },
-  );
-  if (!res.ok) {
-    throw new Error(`Failed to list diagnoses: ${res.status}`);
-  }
-  const { results } = (await res.json()) as { results: DiagnosisRecord[] };
-  return new Set(results.map((d) => d.code.display));
-}
-
 async function addDiagnosis(page: Page, severity?: string) {
   await page
     .getByRole("combobox")
     .filter({ hasText: /Add (another )?Diagnosis/i })
     .click();
   await page.getByPlaceholder(/Add (another )?Diagnosis/i).fill(diagnosisName);
-  await page.getByRole("option", { name: diagnosisName, exact: true }).click();
+  await page
+    .getByTestId("valueset-search-results")
+    .getByRole("option", { name: diagnosisName, exact: true })
+    .click();
 
   const diagnosisRow = page.getByRole("row", { name: diagnosisName });
 
@@ -96,15 +53,13 @@ async function addDiagnosis(page: Page, severity?: string) {
 
 test.describe("Diagnosis", () => {
   test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
-    patientId = getPatientId();
-    encounterId = getEncounterId();
-
-    const availableDiagnosesOptions = diagnosisOptions.filter(
-      (d) => !usedDiagnoses.has(d),
+    const facilityId = getFacilityId();
+    const { patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId);
+    diagnosisName = await firstValueSetDisplay(
+      "system-condition-code",
+      facilityId,
     );
-    diagnosisName = faker.helpers.arrayElement(availableDiagnosesOptions);
-    usedDiagnoses.add(diagnosisName);
 
     status = faker.helpers.arrayElement(DIAGNOSIS_CLINICAL_STATUS);
     verification = faker.helpers.arrayElement(DIAGNOSIS_VERIFICATION_STATUS);
@@ -166,39 +121,7 @@ test.describe("Diagnosis", () => {
   test("verify duplicate diagnosis cannot be added", async ({ page }) => {
     await page.waitForLoadState("networkidle");
 
-    // Pick data-aware rather than trusting the module-level `usedDiagnoses`
-    // Set: that Set only reflects picks made by THIS worker, so it's blind
-    // to a dirty encounter (leftover diagnoses from an earlier run) and to
-    // whatever a sibling worker is doing under fullyParallel — either way
-    // it can hand back a name that's already on the encounter for the
-    // "add" step (turning it into an accidental duplicate) or a name that
-    // was never actually added (turning the "duplicate" step into a
-    // false negative). Ask the encounter itself instead.
-    const existingDisplays = await fetchExistingDiagnosisDisplays(
-      patientId,
-      encounterId,
-    );
-    const availableOptions = diagnosisOptions.filter(
-      (d) => !existingDisplays.has(d),
-    );
-    if (availableOptions.length === 0) {
-      throw new Error(
-        "No unused diagnosis option left to add — every candidate is already on this encounter",
-      );
-    }
-    const newDiagnosisName = faker.helpers.arrayElement(availableOptions);
-    usedDiagnoses.add(newDiagnosisName);
-
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Diagnosis/i })
-      .click();
-    await page
-      .getByPlaceholder(/Add (another )?Diagnosis/i)
-      .fill(newDiagnosisName);
-    await page
-      .getByRole("option", { name: newDiagnosisName, exact: true })
-      .click();
+    await addDiagnosis(page);
     await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
@@ -208,19 +131,7 @@ test.describe("Diagnosis", () => {
     await page.goto(questionnaireUrl);
     await page.waitForLoadState("networkidle");
 
-    // `newDiagnosisName` is now guaranteed present on the encounter — no
-    // need to guess a second one, and no reliance on any other test
-    // (in this worker or another) having run first.
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Diagnosis/i })
-      .click();
-    await page
-      .getByPlaceholder(/Add (another )?Diagnosis/i)
-      .fill(newDiagnosisName);
-    await page
-      .getByRole("option", { name: newDiagnosisName, exact: true })
-      .click();
+    await addDiagnosis(page);
 
     await expect(
       page
