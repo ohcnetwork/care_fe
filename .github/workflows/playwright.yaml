@@ -396,16 +396,16 @@ jobs:
           <sub>Run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})</sub>
           EOF
 
+      - name: Checkout
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/checkout@v4
+
       - name: Download all test results
         if: steps.skipped.outputs.skipped == 'false'
         uses: actions/download-artifact@v4
         with:
           pattern: playwright-results-shard-*
           path: all-results
-
-      - name: Checkout
-        if: steps.skipped.outputs.skipped == 'false'
-        uses: actions/checkout@v4
 
       - name: Setup Node.js
         if: steps.skipped.outputs.skipped == 'false'
