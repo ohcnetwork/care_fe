@@ -569,6 +569,7 @@ export function EncounterList({
                   <InputGroup>
                     <InputGroupInput
                       value={searchValue}
+                      aria-label={selectedSearchType.placeholder}
                       onChange={(event) => {
                         const value = event.target.value;
                         updateQuery({ search_text: value });
@@ -581,12 +582,14 @@ export function EncounterList({
                         }
                         if (event.key === "Enter" && !searchOptionsOpen) {
                           event.preventDefault();
-                          if (!searchValue.trim()) {
-                            updateQuery({
-                              search_by: undefined,
-                              search_text: undefined,
-                            });
-                          }
+                          updateQuery(
+                            searchValue.trim()
+                              ? { search_by: selectedSearchType.key }
+                              : {
+                                  search_by: undefined,
+                                  search_text: undefined,
+                                },
+                          );
                         }
                       }}
                       placeholder={selectedSearchType.placeholder}
