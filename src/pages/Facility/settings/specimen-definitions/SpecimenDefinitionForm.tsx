@@ -191,7 +191,7 @@ function SpecimenDefinitionFormContent({
       derived_from_uri: initialData?.derived_from_uri ?? undefined,
       type_collected: initialData?.type_collected,
       patient_preparation: initialData?.patient_preparation ?? [],
-      collection: initialData?.collection ?? undefined,
+      collection: initialData?.collection?.code ?? undefined,
       type_tested: initialData?.type_tested ?? {
         is_derived: false,
         preference: Preference.preferred,
@@ -313,6 +313,10 @@ function SpecimenDefinitionFormContent({
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
     const payload: SpecimenDefinitionCreate = {
       ...data,
+      collection:
+        data.collection || initialData?.collection
+          ? { ...initialData?.collection, code: data.collection }
+          : undefined,
       patient_preparation:
         data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested

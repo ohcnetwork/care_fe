@@ -69,6 +69,7 @@ export function SpecimenForm({
   const authUser = useAuthUser();
   const currentUserId = authUser.id;
   const queryClient = useQueryClient();
+  const collection = draftSpecimen?.collection ?? specimenDefinition.collection;
   const defaultUnit =
     specimenDefinition.type_tested?.container?.capacity?.unit ?? null;
 
@@ -97,11 +98,11 @@ export function SpecimenForm({
       accession_identifier: "",
       received_time: null,
       collection: {
-        method: specimenDefinition.collection || null,
-        body_site: null,
+        method: collection?.method ?? null,
+        body_site: collection?.body_site ?? null,
         collector: currentUserId || null, // Use user ID, default to null if not available yet
         collected_date_time: new Date().toISOString(),
-        quantity: null,
+        quantity: collection?.quantity ?? null,
         procedure: null,
         fasting_status_codeable_concept: null,
         fasting_status_duration: null,
