@@ -317,7 +317,7 @@ docker run -p 8080:80 care_fe
 ```
 
 > [!IMPORTANT]
-> Vite reads the `REACT_*` variables at build time, so set them before you build. To change a setting, build again. For the Docker image, put them in `.env.local` before you run `docker build`: the build reads the files in the repository, not the variables in your shell. When you upgrade an existing installation, check [UPGRADING.md](UPGRADING.md) for breaking changes.
+> Vite reads the `REACT_*` variables at build time, so set them before you build. For the Docker image, put them in `.env.local` before you run `docker build`: the build reads the files in the repository, not the variables in your shell. To change most settings without a rebuild, serve your own `/runtime-env.js` or pass them to the container with `docker run -e`: see [Runtime configuration](docs/runtime-configuration.md). When you upgrade an existing installation, check [UPGRADING.md](UPGRADING.md) for breaking changes.
 
 ## Documentation
 

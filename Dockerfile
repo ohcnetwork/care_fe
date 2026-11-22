@@ -25,6 +25,10 @@ COPY --from=build-stage /app/build /usr/share/nginx/html
 
 COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
+# Writes REACT_* env vars to runtime-env.js on container start, so they can be
+# changed without rebuilding the image.
+COPY --chmod=0755 ./nginx/runtime-env.sh /docker-entrypoint.d/40-care-runtime-env.sh
+
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]

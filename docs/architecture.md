@@ -144,4 +144,4 @@ JWT tokens in localStorage. `AuthUserProvider` (outside the router, in `src/App.
 
 ## Configuration
 
-`care.config.ts` centralizes runtime config (API URLs, feature flags, locale settings, plugin config). Environment variables prefixed with `REACT_`.
+`care.config.ts` centralizes runtime config (API URLs, feature flags, locale settings, plugin config). Environment variables prefixed with `REACT_`. A deployment can override them without a rebuild through `/runtime-env.js`; see [Runtime configuration](runtime-configuration.md).
