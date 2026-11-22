@@ -110,15 +110,9 @@ export default defineConfig({
       // The first spec to load on a cold dev server waits up to 45s for
       // dependency pre-bundling inside beforeEach, which counts against this.
       timeout: 120000,
-      dependencies: process.env.CI
-        ? []
-        : [
-            "setup-auth",
-            "setup-facility",
-            "setup-patient",
-            "setup-account",
-            "setup-data",
-          ],
+      // These specs answer every API call themselves, so they need neither a
+      // signed-in user nor backend fixtures.
+      dependencies: [],
     },
     // {
     //   name: "firefox",
