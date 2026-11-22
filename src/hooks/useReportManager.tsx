@@ -94,10 +94,9 @@ export default function useReportManager({
   const retrieveReport = async (reportId: string) => {
     return queryClient.fetchQuery({
       queryKey: ["report", reportId],
-      queryFn: () =>
-        query(reportApi.retrieveReport, {
-          pathParams: { id: reportId },
-        })({} as any),
+      queryFn: query(reportApi.retrieveReport, {
+        pathParams: { id: reportId },
+      }),
     });
   };
 

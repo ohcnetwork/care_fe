@@ -19,13 +19,14 @@ const formatKey = (key: string) => {
     .join(" ");
 };
 
-const notifyError = (error: any) => {
+const notifyError = (error: unknown) => {
   let errorMsg = "";
-  if (typeof error === "string" || !error) {
-    errorMsg =
-      !error || error.length > 100 ? "Something went wrong...!" : error;
-  } else if (error.detail) {
-    errorMsg = error.detail;
+  if (!error) {
+    errorMsg = "Something went wrong...!";
+  } else if (typeof error === "string") {
+    errorMsg = error.length > 100 ? "Something went wrong...!" : error;
+  } else if (typeof error === "object" && "detail" in error && error.detail) {
+    errorMsg = String(error.detail);
   } else {
     for (const [key, value] of Object.entries(error)) {
       const keyName = formatKey(key);
@@ -47,7 +48,7 @@ const notifyError = (error: any) => {
  * 400 Bad Request handler
  * @deprecated TODO: add a better error handler
  */
-export const BadRequest = ({ errs }: { errs: any }) => {
+export const BadRequest = ({ errs }: { errs: unknown }) => {
   if (Array.isArray(errs)) {
     errs.forEach((error) => notifyError(error));
   } else {

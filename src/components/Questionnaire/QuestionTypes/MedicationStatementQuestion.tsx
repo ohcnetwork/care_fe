@@ -342,7 +342,8 @@ export function MedicationStatementQuestion({
                 {
                   key: "",
                   label: t("medicine"),
-                  render: (med) => displayMedicationName(med),
+                  render: (med) =>
+                    displayMedicationName(med as MedicationRequestRead),
                 },
                 {
                   key: "dosage_instruction",

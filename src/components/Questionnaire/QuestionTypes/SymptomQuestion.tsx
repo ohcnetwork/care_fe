@@ -881,7 +881,7 @@ export function SymptomQuestion({
                 {
                   key: "onset",
                   label: t("onset_date"),
-                  render: (onset: Onset) =>
+                  render: (onset?: Onset) =>
                     onset?.onset_datetime
                       ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
                       : "",

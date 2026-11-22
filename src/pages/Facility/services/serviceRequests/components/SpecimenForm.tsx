@@ -138,7 +138,10 @@ export function SpecimenForm({
     setIsScanDialogOpen(false);
   };
 
-  const handleCollectionChange = (field: keyof CollectionSpec, value: any) => {
+  const handleCollectionChange = (
+    field: keyof CollectionSpec,
+    value: unknown,
+  ) => {
     setSpecimenData((prev) => ({
       ...prev,
       specimen: {
@@ -155,16 +158,19 @@ export function SpecimenForm({
     if (field === "quantity") {
       setErrors((prev) => {
         const newErrors = { ...prev };
-        if (value?.value) delete newErrors.quantityValue;
-        if (value?.unit) delete newErrors.quantityUnit;
+        const quantity = value as { value?: unknown; unit?: unknown } | null;
+        if (quantity?.value) delete newErrors.quantityValue;
+        if (quantity?.unit) delete newErrors.quantityUnit;
         return newErrors;
       });
     }
   };
 
-  const handleSpecimenChange = (
-    field: keyof SpecimenFromDefinitionCreate["specimen"],
-    value: any,
+  const handleSpecimenChange = <
+    K extends keyof SpecimenFromDefinitionCreate["specimen"],
+  >(
+    field: K,
+    value: SpecimenFromDefinitionCreate["specimen"][K],
   ) => {
     setSpecimenData((prev) => ({
       ...prev,
