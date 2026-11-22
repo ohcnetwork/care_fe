@@ -50,6 +50,7 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
 import useFilters from "@/hooks/useFilters";
+import { encounterListSearch } from "@/lib/router/search/encounter";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import {
@@ -152,8 +153,8 @@ export function EncounterList({
   encounterClass,
 }: EncounterListProps) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: encounterListSearch,
     limit: 15,
-    disableCache: true,
     cacheBlacklist: [
       "name",
       "encounter_id",
@@ -396,7 +397,7 @@ export function EncounterList({
   const { data: queryEncounter } = useQuery({
     queryKey: ["encounter", encounter_id],
     queryFn: query(encounterApi.get, {
-      pathParams: { id: encounter_id },
+      pathParams: { id: encounter_id ?? "" },
       queryParams: {
         facility: facilityId,
       },

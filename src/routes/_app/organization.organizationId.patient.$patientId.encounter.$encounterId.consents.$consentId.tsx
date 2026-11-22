@@ -1,5 +1,6 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 
+import { encounterShowSearch } from "@/lib/router/search/encounter";
 import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 
@@ -11,6 +12,7 @@ import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 export const Route = createFileRoute(
   "/_app/organization/organizationId/patient/$patientId/encounter/$encounterId/consents/$consentId",
 )({
+  validateSearch: encounterShowSearch,
   component: RouteComponent,
 });
 

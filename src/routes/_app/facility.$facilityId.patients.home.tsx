@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { patientHomePageSearch } from "@/lib/router/search/patient";
 import PatientHome from "@/pages/Patient/PatientHome";
 
 export const Route = createFileRoute(
   "/_app/facility/$facilityId/patients/home",
-)({ component: PatientHome });
+)({ validateSearch: patientHomePageSearch, component: PatientHome });

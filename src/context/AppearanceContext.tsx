@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { MotionConfig } from "framer-motion";
+import { MotionConfig } from "motion/react";
 import {
   createContext,
   ReactNode,

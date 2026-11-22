@@ -314,8 +314,24 @@ test.describe("Schedule Template Management", () => {
 
     const slotDuration = await formPage.getAutoFilledSlotDuration();
 
+    const encounterType = page.getByRole("combobox", {
+      name: /type of encounter/i,
+    });
+    await expect(encounterType).toHaveText(/not specified/i);
+    await encounterType.click();
+    await page.getByRole("option", { name: "Ambulatory", exact: true }).click();
+
     // Submit and verify success
-    await formPage.submitTemplate();
+    const [create] = await Promise.all([
+      page.waitForRequest(
+        (request) =>
+          request.method() === "POST" &&
+          new URL(request.url()).pathname ===
+            `/api/v1/facility/${facilityId}/schedule/`,
+      ),
+      formPage.submitTemplate(),
+    ]);
+    expect(create.postDataJSON()).toHaveProperty("encounter_type", "amb");
     await expect(
       page
         .getByRole("region", { name: "Notifications alt+T" })

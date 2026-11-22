@@ -19,6 +19,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import useFilters from "@/hooks/useFilters";
+import { medicationReturnListSearch } from "@/lib/router/search/pharmacy";
 
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
@@ -52,8 +53,8 @@ export default function MedicationReturnList({
   const { t } = useTranslation();
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: medicationReturnListSearch,
     limit: 14,
-    disableCache: true,
   });
 
   const currentStatus = qParams.status || "all";

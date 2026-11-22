@@ -158,7 +158,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - i18next for internationalization
 - date-fns for date handling
 - zod for schema validation
-- framer-motion for animations
+- motion (`motion/react`) for animations
 
 ### Development Tools
 
@@ -236,7 +236,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 - Regular dependency updates via Renovate
 - Snyk security scanning and vulnerability auditing
-- Security scanning with CodeQL and OSSAR
+- Security scanning with CodeQL
 - Audit vulnerabilities with `npm audit`
 
 ## Resources

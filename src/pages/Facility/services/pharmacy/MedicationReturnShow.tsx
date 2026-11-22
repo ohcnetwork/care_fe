@@ -4,7 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
 import {
   ChevronLeft,
   EllipsisVertical,
@@ -43,7 +43,6 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { AddMedicationReturnItemForm } from "@/pages/Facility/services/pharmacy/components/AddMedicationReturnItemForm";
 import { MedicationReturnItemsTable } from "@/pages/Facility/services/pharmacy/components/MedicationReturnItemsTable";
 import { MEDICATION_DISPENSE_CANCELLED_STATUSES } from "@/types/emr/medicationDispense/medicationDispense";
@@ -85,9 +84,9 @@ export default function MedicationReturnShow({
   });
   const [enteredInErrorDialogOpen, setEnteredInErrorDialogOpen] =
     useState(false);
-  const [{ dispenseOrderIds: dispenseOrderIdsParam }] = useQueryParams<{
-    dispenseOrderIds?: string;
-  }>();
+  const { dispenseOrderIds: dispenseOrderIdsParam } = useSearch({
+    from: "/_app/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/",
+  });
 
   const dispenseOrderIds =
     dispenseOrderIdsParam?.split(",").filter(Boolean) || [];

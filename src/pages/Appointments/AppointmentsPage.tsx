@@ -56,6 +56,7 @@ import {
 } from "@/components/Common/SkeletonLoading";
 
 import useFilters, { FilterState } from "@/hooks/useFilters";
+import { appointmentListSearch } from "@/lib/router/search/appointments";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -78,7 +79,6 @@ import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
 import { dateQueryString, formatDateTime, goBack } from "@/Utils/utils";
 
-import { booleanFromString } from "@/common/utils";
 import { PatientAge } from "@/components/Patient/PatientAge";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import {
@@ -187,7 +187,9 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     resourceType === SchedulableResourceType.Practitioner && !resourceId;
 
   const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
+    schema: appointmentListSearch,
     limit: 15,
+    cache: true,
     defaultQueryParams: {
       ...(practitionerFilterEnabled ? { practitioners: authUser.id } : {}),
       ...getDefaultDateFilter(),
@@ -332,10 +334,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     return <Loading />;
   }
 
-  const shouldAutoRefresh = booleanFromString(
-    qParams.autoRefresh ?? "",
-    careConfig.enableAutoRefresh,
-  );
+  const shouldAutoRefresh = qParams.autoRefresh ?? careConfig.enableAutoRefresh;
 
   return (
     <Page
@@ -532,8 +531,8 @@ function AppointmentColumn(props: {
   slot?: string | null;
   tags?: string[];
   tags_behavior?: string;
-  date_from: string | null;
-  date_to: string | null;
+  date_from?: string;
+  date_to?: string;
   canViewAppointments: boolean;
   patient?: string;
   resourceType: SchedulableResourceType;
@@ -800,7 +799,7 @@ function AppointmentCard({
 }
 
 function AppointmentRow(props: {
-  page: number | null;
+  page?: number;
   practitioners: string | null;
   Pagination: ({
     totalCount,
@@ -811,10 +810,10 @@ function AppointmentRow(props: {
   }) => React.ReactNode;
   updateQuery: (filter: FilterState) => void;
   resultsPerPage: number;
-  slot: string | null;
-  status: AppointmentStatus;
-  date_from: string | null;
-  date_to: string | null;
+  slot?: string;
+  status?: string;
+  date_from?: string;
+  date_to?: string;
   canViewAppointments: boolean;
   tags?: string[];
   tags_behavior?: string;

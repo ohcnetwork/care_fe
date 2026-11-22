@@ -24,6 +24,7 @@ import { useReferralReceivingEncounter } from "./useReferralReceivingEncounter";
 
 import { HrefLink } from "@/lib/router/HrefLink";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { referralContextSearch } from "@/lib/router/search/referral";
 
 export function ReferralEncounterContext({
   encounter,
@@ -31,10 +32,7 @@ export function ReferralEncounterContext({
   encounter: EncounterRead;
 }) {
   const { t } = useTranslation();
-  const [requested] = useQueryParams<{
-    referralAppointmentId?: string;
-    referralEncounterId?: string;
-  }>();
+  const [requested] = useQueryParams(referralContextSearch);
   const params = referralNativeQueryParams(window.location.search);
   const appointmentContext = requested.referralAppointmentId !== undefined;
   const contextMatches = appointmentContext
