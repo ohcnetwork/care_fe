@@ -35,6 +35,7 @@ import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -61,7 +62,7 @@ export default function CreateScheduleExceptionSheet({
   const queryClient = useQueryClient();
 
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
-  const [qParams, _setQParams] = useQueryParams<QueryParams>();
+  const [qParams, _setQParams] = useQueryParams(scheduleHomeSearch);
   const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
 
   const formSchema = z

@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { useQueryParams } from "@/lib/router/queryParams";
+import { questionnaireFillSearch } from "@/lib/router/search/questionnaire";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -358,9 +359,9 @@ export function MedicationRequestQuestion({
   const { facilityId } = useCurrentFacilitySilently();
   const currentUser = useAuthUser() as UserReadMinimal;
   const isPreview = patientId === "preview";
-  const [{ prescription: prescriptionId }] = useQueryParams<{
-    prescription?: string;
-  }>();
+  const [{ prescription: prescriptionId }] = useQueryParams(
+    questionnaireFillSearch,
+  );
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequestCreate[]) ||
     [];

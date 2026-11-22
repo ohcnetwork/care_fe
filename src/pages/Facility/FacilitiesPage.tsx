@@ -10,6 +10,7 @@ import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { facilitiesPageSearch } from "@/lib/router/search/facility";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
@@ -22,7 +23,9 @@ import { FacilityCard } from "./components/FacilityCard";
 export function FacilitiesPage() {
   const { mainLogo } = careConfig;
   const { qParams, updateQuery, advancedFilter, Pagination } = useFilters({
+    schema: facilitiesPageSearch,
     limit: RESULTS_PER_PAGE_LIMIT,
+    cache: true,
   });
 
   const { t } = useTranslation();

@@ -33,6 +33,7 @@ import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import useFilters from "@/hooks/useFilters";
+import { questionnaireListSearch } from "@/lib/router/search/admin";
 
 import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
@@ -71,8 +72,8 @@ export function QuestionnaireListPage({
   const { canWrite: canWriteQuestionnaire, isLoading: isPermissionLoading } =
     useCanWriteQuestionnaire(scope);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: questionnaireListSearch,
     limit: 15,
-    disableCache: true,
     defaultQueryParams: { status: "active" },
   });
 

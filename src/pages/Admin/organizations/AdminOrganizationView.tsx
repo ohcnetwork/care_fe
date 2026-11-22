@@ -20,6 +20,7 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { adminOrganizationListSearch } from "@/lib/router/search/admin";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -130,8 +131,8 @@ function OrganizationCard({
 export default function AdminOrganizationView({ id, organizationType }: Props) {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
+    schema: adminOrganizationListSearch,
     limit: 12,
-    disableCache: true,
   });
   const isFlatOrgType =
     organizationType === OrgType.ROLE ||

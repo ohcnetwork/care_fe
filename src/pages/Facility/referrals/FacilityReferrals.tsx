@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
@@ -8,7 +9,6 @@ import {
   CareUIPageTitle as PageTitle,
 } from "@/components/ui/typography";
 
-import { useQueryParams } from "@/lib/router/queryParams";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import query from "@/Utils/request/query";
 
@@ -20,7 +20,9 @@ export default function FacilityReferrals({
   facilityId,
 }: FacilityReferralsProps) {
   const { t } = useTranslation();
-  const [queryParams] = useQueryParams();
+  const queryParams = useSearch({
+    from: "/_app/facility/$facilityId/referrals",
+  });
   const departmentId =
     queryParams.referralDestination === "facility"
       ? null

@@ -56,6 +56,7 @@ import { ReferralStatusBadge } from "@/components/Referral/ReferralStatusBadge";
 import { HrefLink } from "@/lib/router/HrefLink";
 import { usePathname } from "@/lib/router/location";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { referralListSearch } from "@/lib/router/search/referral";
 import {
   REFERRAL_STATUSES,
   ReferralDestinationType,
@@ -102,14 +103,7 @@ export function ReferralList({
 }: ReferralListProps) {
   const { t } = useTranslation();
   const path = usePathname();
-  const [filters, setFilters] = useQueryParams<{
-    referralDepartment?: string;
-    referralDestination?: string;
-    referralStatus?: string;
-    referralAssignedToMe?: string;
-    referralPage?: string;
-    referralScope?: string;
-  }>();
+  const [filters, setFilters] = useQueryParams(referralListSearch);
   const isWidget = variant === "widget";
   // A saved page belongs to one destination/patient/encounter. Changing the
   // selected encounter must not carry an out-of-range page into its list.
@@ -130,7 +124,7 @@ export function ReferralList({
   const status =
     REFERRAL_STATUSES.find((value) => value === filters.referralStatus) ??
     "all";
-  const assignedToMe = filters.referralAssignedToMe === "true";
+  const assignedToMe = filters.referralAssignedToMe === true;
   const setPage = (page: number) =>
     setFilters(
       { referralPage: String(page), referralScope: scopeKey },
