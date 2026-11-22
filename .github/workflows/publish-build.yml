@@ -50,11 +50,7 @@ jobs:
           NODE_OPTIONS: "--max-old-space-size=4096"
 
       - name: Package build
-        run: |
-          jq -n --arg commit "$GITHUB_SHA" --arg ref "$GITHUB_REF" \
-            --arg built_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            '{commit: $commit, ref: $ref, built_at: $built_at}' > build/build-info.json
-          tar -czf care_fe-build.tar.gz -C build .
+        run: tar -czf care_fe-build.tar.gz -C build .
 
       - name: Upload bundle
         uses: actions/upload-artifact@v4

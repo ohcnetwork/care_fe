@@ -36,12 +36,14 @@ Each bundle has a signed build provenance attestation. To check that a bundle wa
 gh attestation verify care_fe-build.tar.gz --repo ohcnetwork/care_fe
 ```
 
-The bundle's `build-info.json` has the commit, the Git ref and the build time. A deployment serves it at `/build-info.json`.
+The bundle's `build-meta.json` has the commit, the Git ref and the build time (`commit`, `ref`, `built_at`). A deployment serves it at `/build-meta.json`.
 
 ## Configure the bundle
 
 The bundle has the values of [`.env`](../.env), so it connects to `https://careapi.ohc.network` until you configure it. Before you serve it, replace its `runtime-env.js` with your deployment's settings, at least `REACT_CARE_API_URL`. See [Runtime configuration](runtime-configuration.md).
 
 These settings are read only at build time, so the bundle always has the values CI built it with (those of `.env`, the rest unset): the page title and meta tags (`REACT_APP_TITLE`, `REACT_APP_META_DESCRIPTION`, `REACT_APP_COVER_IMAGE`, `REACT_PUBLIC_URL`), `REACT_INJECTED_HEAD`, `REACT_INJECTED_HTML`, `REACT_CUSTOM_DESCRIPTION` and `REACT_MFE_REGISTERED_COMPONENTS`. To change them, build the app yourself (`npm run build`).
+
+The bundle also has a `_headers` file with ohc.network's response headers (`HEADERS` in `.env`), which Cloudflare Pages and Netlify apply. It includes `Strict-Transport-Security` with `includeSubDomains` for a year, so edit or delete the file before you deploy if that doesn't suit your domain.
 
 [releases]: https://github.com/ohcnetwork/care_fe/releases

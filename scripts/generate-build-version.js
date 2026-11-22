@@ -8,6 +8,9 @@ const appVersion = uuidv4();
 const jsonData = {
   version: appVersion,
   built_at: new Date().toISOString(),
+  // Set in GitHub Actions; omitted elsewhere
+  commit: process.env.GITHUB_SHA,
+  ref: process.env.GITHUB_REF,
 };
 
 const jsonContent = JSON.stringify(jsonData);
