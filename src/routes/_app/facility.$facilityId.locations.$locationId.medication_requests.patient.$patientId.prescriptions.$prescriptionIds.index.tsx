@@ -1,10 +1,12 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 
+import { prescriptionsPreviewSearch } from "@/lib/router/search/pharmacy";
 import PrescriptionsPreviewPage from "@/pages/Facility/services/pharmacy/PrescriptionsPreviewPage";
 
 export const Route = createFileRoute(
   "/_app/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds/",
 )({
+  validateSearch: prescriptionsPreviewSearch,
   component: RouteComponent,
 });
 

@@ -1,5 +1,4 @@
 import "@/style/index.css";
-import "reactflow/dist/style.css";
 
 import App from "@/App";
 import { AuthContextType, AuthUserContext } from "@/hooks/useAuthUser";

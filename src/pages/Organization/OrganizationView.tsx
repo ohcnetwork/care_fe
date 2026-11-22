@@ -20,6 +20,7 @@ import SearchInput from "@/components/Common/SearchInput";
 import { SectionHeader } from "@/components/Common/SectionHeader";
 
 import useFilters from "@/hooks/useFilters";
+import { organizationViewSearch } from "@/lib/router/search/organization";
 
 import query from "@/Utils/request/query";
 import { navigate } from "@/lib/router/navigate";
@@ -44,8 +45,8 @@ export default function OrganizationView({
   const { t } = useTranslation();
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: organizationViewSearch,
     limit: 15,
-    disableCache: true,
   });
 
   const { data: children, isFetching } = useQuery({
