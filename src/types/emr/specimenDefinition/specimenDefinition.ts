@@ -84,11 +84,29 @@ export interface TypeTestedSpec {
   single_use?: boolean | null;
 }
 
-export interface CollectionTemplate {
+/** Defaults applied to a specimen when it is collected. */
+export interface SpecimenCollectionTemplate {
   code?: Code | null;
+  quantity?: QuantitySpec | null;
   method?: Code | null;
   body_site?: Code | null;
-  quantity?: QuantitySpec | null;
+}
+
+// The API uses a decimal string with at most 20 whole digits, beyond JS number precision.
+export function wholeSpecimenQuantity(value: string) {
+  return /^0*([1-9]\d{0,19})(?:\.0*)?$/.exec(value)?.[1];
+}
+
+export function specimenCollectionDefaults(
+  template: SpecimenCollectionTemplate | null | undefined,
+) {
+  const quantity = template?.quantity;
+  const value = quantity && wholeSpecimenQuantity(quantity.value);
+  return {
+    method: template?.method ?? null,
+    body_site: template?.body_site ?? null,
+    quantity: value && quantity?.unit ? { value, unit: quantity.unit } : null,
+  };
 }
 
 export interface SpecimenDefinition {
@@ -100,7 +118,7 @@ export interface SpecimenDefinition {
   description: string;
   type_collected: Code;
   patient_preparation?: Code[];
-  collection?: CollectionTemplate | null;
+  collection?: SpecimenCollectionTemplate | null;
   slug_config: SlugConfig;
 }
 
