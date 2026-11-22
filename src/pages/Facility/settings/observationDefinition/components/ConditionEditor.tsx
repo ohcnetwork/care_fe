@@ -37,7 +37,8 @@ import { Plus, X } from "lucide-react";
 import { FieldPath, FieldValues, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-type ConditionInputValue = Condition["value"] | Partial<AgeOperationInRangeValue>;
+type ConditionInputValue =
+  Condition["value"] | Partial<AgeOperationInRangeValue>;
 
 function RenderConditionInput<TFieldValues extends FieldValues = FieldValues>({
   condition,
