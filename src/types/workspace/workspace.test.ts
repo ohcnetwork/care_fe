@@ -1,5 +1,6 @@
 import i18next from "i18next";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { before, test } from "node:test";
 
 import { visibleWorkspaceColumns } from "@/components/Workspace/visibleWorkspaceColumns";
@@ -9,6 +10,7 @@ import {
   standardWorkspaceTemplate,
   WORKSPACE_STARTERS,
 } from "@/components/Workspace/workspacePresets";
+import { TAB_ICONS } from "@/components/Workspace/workspaceTabIcons";
 import {
   widgetConfigConsistencyIssues,
   workspaceWidgetIssues,
@@ -788,4 +790,39 @@ test("standard pages stay system pages instead of full-page sections", () => {
       .filter((page) => page.kind === "custom"),
     [],
   );
+});
+
+test("example encounter workspace and starter presets only reference supported tab icons", () => {
+  const examplePath = new URL(
+    "../../../docs/examples/encounter-workspace.json",
+    import.meta.url,
+  );
+  const exampleTemplate = JSON.parse(readFileSync(examplePath, "utf8"));
+  const parsed = createEncounterWorkspaceSchema().safeParse(exampleTemplate);
+  assert.equal(parsed.success, true);
+
+  const checkPages = (
+    pages: { kind: string; key: string; icon?: string }[],
+    source: string,
+  ) => {
+    for (const page of pages) {
+      if (page.kind === "custom" && page.icon) {
+        assert.equal(
+          Object.hasOwn(TAB_ICONS, page.icon),
+          true,
+          `${source} page "${page.key}" uses unsupported icon "${page.icon}"`,
+        );
+      }
+    }
+  };
+
+  if (parsed.success) {
+    checkPages(parsed.data.pages, "docs/examples/encounter-workspace.json");
+  }
+  for (const starter of WORKSPACE_STARTERS) {
+    checkPages(starter.build(i18next.t, []).pages, `starter:${starter.id}`);
+  }
+  for (const starter of HISTORY_STARTERS) {
+    checkPages(starter.build(i18next.t, []), `history_starter:${starter.id}`);
+  }
 });
