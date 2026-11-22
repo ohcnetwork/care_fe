@@ -16,7 +16,9 @@ oras pull ghcr.io/ohcnetwork/care_fe-build:develop # or :staging, :sha-<short sh
 mkdir build && tar -xzf care_fe-build.tar.gz -C build
 ```
 
-`:develop` and `:staging` move to each new build. To deploy the same bundle again later, pull it by its `sha-` tag or by digest.
+If `oras pull` fails with `unauthorized`, the package isn't public yet: sign in first with `oras login ghcr.io` and a GitHub token that has the `read:packages` scope.
+
+`:develop` and `:staging` move to each new build, and a rebuild of a commit replaces its `sha-` tag. To deploy the exact same bundle again later, pull it by the digest that `oras pull` prints (`ghcr.io/ohcnetwork/care_fe-build@sha256:<digest>`).
 
 From a GitHub release, with any HTTP client:
 

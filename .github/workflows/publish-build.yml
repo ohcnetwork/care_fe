@@ -22,18 +22,18 @@ env:
   BUNDLE: ghcr.io/ohcnetwork/care_fe-build
 
 jobs:
-  publish:
+  # npm install and build scripts run here, without publishing permissions
+  build:
     if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
-      contents: write
-      packages: write
-      id-token: write
-      attestations: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -56,6 +56,28 @@ jobs:
             '{commit: $commit, ref: $ref, built_at: $built_at}' > build/build-info.json
           tar -czf care_fe-build.tar.gz -C build .
 
+      - name: Upload bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: care_fe-build
+          path: care_fe-build.tar.gz
+          retention-days: 1
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - name: Download bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: care_fe-build
+
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v4
         with:
@@ -69,12 +91,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "$GITHUB_TOKEN" | oras login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-          oras push "$BUNDLE:sha-${GITHUB_SHA::7}" \
+          oras push "$BUNDLE:sha-${GITHUB_SHA::7},${GITHUB_REF_NAME//\//-}" \
             --artifact-type application/vnd.ohcnetwork.care-fe.build.v1 \
             --annotation "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
             --annotation "org.opencontainers.image.revision=$GITHUB_SHA" \
             care_fe-build.tar.gz:application/vnd.oci.image.layer.v1.tar+gzip
-          oras tag "$BUNDLE:sha-${GITHUB_SHA::7}" "${GITHUB_REF_NAME//\//-}"
 
       - name: Upload to release
         if: github.ref_type == 'tag'
