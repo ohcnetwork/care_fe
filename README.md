@@ -97,6 +97,8 @@ By default the app talks to the hosted staging API at `careapi.ohc.network` (set
 
 3. Restart the dev server and sign in with one of the accounts below.
 
+   In a dev container or Codespace, `REACT_CARE_API_URL` is already set in the environment, and it takes priority over `.env.local`. Stop the dev server that started with the container, and start it with `REACT_CARE_API_URL=http://127.0.0.1:9000 npm run dev` instead.
+
 **Demo accounts.** These come from the backend fixtures. Use them only on your local setup.
 
 | Role               | Username            | Password   |
@@ -244,7 +246,7 @@ REACT_CUSTOM_REMOTE_I18N_URL=https://cdn.example.com/i18n
 
 **Unit tests** run with the Node test runner: `npm run test:unit`.
 
-**End-to-end tests** use [Playwright](https://playwright.dev). They run against a production build and a local backend on port `9000` with the fixtures loaded (see [Run against a local backend](#run-against-a-local-backend)).
+**End-to-end tests** use [Playwright](https://playwright.dev). They run against a production build and a local backend on port `9000` with the fixtures loaded (see [Run against a local backend](#run-against-a-local-backend)). Stop the dev server first: Playwright serves the build on port `4000`, and if a dev server is already running there, it tests the dev server instead.
 
 ```sh
 npm run playwright:install   # Install the browsers (first time only)
@@ -263,6 +265,9 @@ npm run playwright:test      # Run all tests
 
 Tests create data, so re-runs can collide. Set `CARE_BACKEND_DIR` to your backend checkout and run `npm run playwright:db-reset` once. After that, each local run restores the clean snapshot first.
 
+> [!WARNING]
+> `npm run playwright:db-reset` deletes and recreates the backend database (`care`, or the one named in `POSTGRES_DB`), and each local test run restores the snapshot over it. Back up any local data you want to keep first.
+
 Read [`docs/testing.md`](docs/testing.md) for the full setup, and [`tests/PLAYWRIGHT_GUIDE.md`](tests/PLAYWRIGHT_GUIDE.md) before you write a test.
 
 ## Care Apps (plugins)
@@ -270,7 +275,7 @@ Read [`docs/testing.md`](docs/testing.md) for the full setup, and [`tests/PLAYWR
 Care Apps are micro-frontends that add pages, tabs and components to CARE at runtime, through Module Federation. List the apps to load in `REACT_ENABLED_APPS`, as `org/repo` (served from GitHub Pages) or `org/repo@host/path/to/remoteEntry.js`:
 
 ```env
-REACT_ENABLED_APPS="ohcnetwork/care_scribe_fe@localhost:4173"
+REACT_ENABLED_APPS="ohcnetwork/care_scribe_fe@localhost:4173/assets/remoteEntry.js"
 ```
 
 To build or debug one, see [`docs/care-apps-local-dev.md`](docs/care-apps-local-dev.md) and [`docs/care-apps-plugin-overrides.md`](docs/care-apps-plugin-overrides.md).
@@ -312,7 +317,7 @@ docker run -p 8080:80 care_fe
 ```
 
 > [!IMPORTANT]
-> Vite reads the `REACT_*` variables at build time, so set them before you build. To change a setting, build again. When you upgrade an existing installation, check [UPGRADING.md](UPGRADING.md) for breaking changes.
+> Vite reads the `REACT_*` variables at build time, so set them before you build. To change a setting, build again. For the Docker image, put them in `.env.local` before you run `docker build`: the build reads the files in the repository, not the variables in your shell. When you upgrade an existing installation, check [UPGRADING.md](UPGRADING.md) for breaking changes.
 
 ## Documentation
 
