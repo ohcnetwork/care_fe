@@ -91,13 +91,13 @@ async function selectResultAction(
   action: "Add Another Result" | "Remove observation",
   resultNumber = 1,
 ) {
-  await observationGroup
-    .getByRole("button", {
-      name: `Result actions ${resultNumber}`,
-      exact: true,
-    })
-    .click();
-  await page.getByRole("menuitem", { name: action, exact: true }).click();
+  const name = `Result actions ${resultNumber}`;
+  await observationGroup.getByRole("button", { name, exact: true }).click();
+  // Scope to this result's menu: the menu of the previous action can still be
+  // mounted while it animates out, and it has the same items.
+  const menu = page.getByRole("menu", { name, exact: true });
+  await menu.getByRole("menuitem", { name: action, exact: true }).click();
+  await expect(menu).toBeHidden();
 }
 
 async function saveResults(page: Page, entry: Locator) {
