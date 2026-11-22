@@ -7,6 +7,14 @@ set -eu
 
 out="${CARE_RUNTIME_ENV_FILE:-/usr/share/nginx/html/runtime-env.js}"
 
+# Without REACT_* variables, keep the file as it is: the build's empty one, or
+# one mounted in its place. Containers with a read-only root filesystem then
+# still start.
+if ! env | grep -q '^REACT_[A-Z0-9_][A-Z0-9_]*='; then
+  echo "$0: no REACT_* environment variables, so $out is left as it is"
+  exit 0
+fi
+
 # Escapes one character at a time: gsub() replacements that contain
 # backslashes behave differently in BusyBox awk and mawk.
 awk '

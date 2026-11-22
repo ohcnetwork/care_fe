@@ -218,31 +218,40 @@ const careConfig = {
     return defaultPosition;
   })(),
 
+  // An invalid entry is left out instead of thrown, so this module still loads
+  // and src/index.tsx can report the setting.
   careApps: env.REACT_ENABLED_APPS
-    ? env.REACT_ENABLED_APPS.split(",").map((app) => {
-        const [module, cdn] = app.split("@");
-        const [org, repo] = module.split("/");
+    ? env.REACT_ENABLED_APPS.split(",").flatMap((app) => {
+        try {
+          const [module, cdn] = app.split("@");
+          const [org, repo] = module.split("/");
 
-        if (!org || !repo) {
-          throw new Error(
-            `Invalid plug configuration: ${module}. Expected 'org/repo@url'.`,
-          );
+          if (!org || !repo) {
+            throw new Error(
+              `Invalid plug configuration: ${module}. Expected 'org/repo@url'.`,
+            );
+          }
+
+          let url = "";
+          if (!cdn) {
+            url = `https://${org}.github.io/${repo}`;
+          }
+
+          if (!url.startsWith("http")) {
+            url = `${cdn.includes("localhost") ? "http" : "https"}://${cdn}`;
+          }
+
+          return [
+            {
+              url: new URL(url).toString(),
+              name: repo,
+              package: module,
+            },
+          ];
+        } catch (error) {
+          console.error(error);
+          return [];
         }
-
-        let url = "";
-        if (!cdn) {
-          url = `https://${org}.github.io/${repo}`;
-        }
-
-        if (!url.startsWith("http")) {
-          url = `${cdn.includes("localhost") ? "http" : "https"}://${cdn}`;
-        }
-
-        return {
-          url: new URL(url).toString(),
-          name: repo,
-          package: module,
-        };
       })
     : [],
 

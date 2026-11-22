@@ -88,7 +88,9 @@ const VALID_TOAST_POSITIONS = [
  * and all values are valid URLs
  */
 const apiUrlMapSchema = jsonAsStringSchema
-  .transform((val) => JSON.parse(val) as Record<string, string>)
+  .transform((val) => JSON.parse(val))
+  // Requires an object: Object.entries() below throws on null.
+  .pipe(z.record(z.string(), z.string()))
   .refine(
     (map) => {
       return Object.entries(map).every(([origin, url]) => {
@@ -133,7 +135,19 @@ export const envSchema = z
     REACT_CUSTOM_DESCRIPTION: z.string().optional(),
     REACT_CUSTOM_LOGO_ALT: logoSchemaString.optional(),
     REACT_MAPS_FALLBACK_URL_TEMPLATE: z.url().optional(),
-    REACT_ENABLED_APPS: z.string().optional(),
+    // Same rule as careApps in care.config.ts.
+    REACT_ENABLED_APPS: z
+      .string()
+      .refine(
+        (val) =>
+          !val ||
+          val.split(",").every((app) => {
+            const [org, repo] = app.split("@")[0].split("/");
+            return !!org && !!repo;
+          }),
+        { message: "Each entry must be 'org/repo' or 'org/repo@url'" },
+      )
+      .optional(),
     REACT_MFE_REGISTERED_COMPONENTS: z
       .string()
       .optional()

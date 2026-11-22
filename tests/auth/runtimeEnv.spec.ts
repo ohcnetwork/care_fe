@@ -42,7 +42,12 @@ test.describe("Runtime env overrides", () => {
     await page.route("**/runtime-env.js", (route) =>
       route.fulfill({
         contentType: "text/javascript",
-        body: 'window.__CARE_RUNTIME_ENV__ = { REACT_CARE_API_URL: "not a url", REACT_CUSTOM_SHORTCUTS: "[" };',
+        body: `window.__CARE_RUNTIME_ENV__ = {
+          REACT_CARE_API_URL: "not a url",
+          REACT_CARE_URL_MAP: "null",
+          REACT_CUSTOM_SHORTCUTS: "[",
+          REACT_ENABLED_APPS: "not-a-plugin",
+        };`,
       }),
     );
     const apiRequests: string[] = [];
@@ -57,9 +62,15 @@ test.describe("Runtime env overrides", () => {
 
     // The app names the invalid settings and stops before any API request.
     await stopped;
-    await expect(page.getByRole("alert")).toHaveText(
-      /REACT_CARE_API_URL, REACT_CUSTOM_SHORTCUTS/,
-    );
+    const alert = page.getByRole("alert");
+    for (const name of [
+      "REACT_CARE_API_URL",
+      "REACT_CARE_URL_MAP",
+      "REACT_CUSTOM_SHORTCUTS",
+      "REACT_ENABLED_APPS",
+    ]) {
+      await expect(alert).toContainText(name);
+    }
     expect(apiRequests).toEqual([]);
   });
 
