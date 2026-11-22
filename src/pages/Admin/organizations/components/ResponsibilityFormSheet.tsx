@@ -1,31 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
-import { ReactNode, useEffect, useId, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import {
   Form,
   FormControl,
@@ -35,9 +17,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-
-import { useIsMobile } from "@/hooks/use-mobile";
 
 import mutate from "@/Utils/request/mutate";
 import {
@@ -49,18 +39,16 @@ import {
 import organizationApi from "@/types/organization/organizationApi";
 
 interface Props {
-  /** When provided, the dialog edits this responsibility; otherwise it creates a new one. */
+  /** When provided, the sheet edits this responsibility; otherwise it creates a new one. */
   org?: Organization;
   trigger: ReactNode;
 }
 
-export default function ResponsibilityFormDialog({ org, trigger }: Props) {
+export default function ResponsibilityFormSheet({ org, trigger }: Props) {
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
   const isEditMode = !!org;
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const formId = useId();
 
   const formSchema = useMemo(
     () =>
@@ -138,51 +126,6 @@ export default function ResponsibilityFormDialog({ org, trigger }: Props) {
     ? t("responsibility_form_edit_description")
     : t("responsibility_form_create_description");
 
-  const formBody = (
-    <Form {...form}>
-      <form
-        id={formId}
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
-      >
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel>{t("title")}</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  aria-required
-                  placeholder={t("responsibility_form_name_placeholder")}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel>{t("description")}</FormLabel>
-              <FormControl>
-                <Textarea
-                  {...field}
-                  placeholder={t("responsibility_form_description_placeholder")}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
-  );
-
   const cancelButton = (
     <Button
       type="button"
@@ -195,7 +138,7 @@ export default function ResponsibilityFormDialog({ org, trigger }: Props) {
   );
 
   const submitButton = (
-    <Button type="submit" form={formId} disabled={isPending}>
+    <Button type="submit" disabled={isPending}>
       <Check className="mr-1.5 size-4" />
       {isPending
         ? isEditMode
@@ -207,39 +150,70 @@ export default function ResponsibilityFormDialog({ org, trigger }: Props) {
     </Button>
   );
 
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent>
-          <DrawerHeader className="px-4 pt-4 text-left">
-            <DrawerTitle>{title}</DrawerTitle>
-            <DrawerDescription>{description}</DrawerDescription>
-          </DrawerHeader>
-          <div className="px-4">{formBody}</div>
-          <DrawerFooter>
-            {submitButton}
-            {cancelButton}
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
+  const formBody = (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex min-h-0 flex-1 flex-col"
+      >
+        <SheetBody>
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>{t("title")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      aria-required
+                      placeholder={t("responsibility_form_name_placeholder")}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        {formBody}
-        <DialogFooter>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>{t("description")}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder={t(
+                        "responsibility_form_description_placeholder",
+                      )}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </SheetBody>
+        <SheetFooter>
           {cancelButton}
           {submitButton}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </form>
+    </Form>
+  );
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
+      <SheetContent size="md" className="overflow-hidden">
+        <SheetHeader>
+          <SheetTitle>{title}</SheetTitle>
+          <SheetDescription>{description}</SheetDescription>
+        </SheetHeader>
+        {formBody}
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { OrgSelect } from "@/components/Common/OrgSelect";
 
 import {
@@ -19,7 +20,7 @@ import {
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import ResponsibilityFormDialog from "@/pages/Admin/organizations/components/ResponsibilityFormDialog";
+import ResponsibilityFormSheet from "@/pages/Admin/organizations/components/ResponsibilityFormSheet";
 import {
   Organization,
   OrganizationParent,
@@ -52,47 +53,69 @@ function ConnectionCard({
   removeLabel: string;
 }) {
   const { t } = useTranslation();
+  const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5">
-      <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-gray-900">
-          {organization.name}
-        </p>
-        {organization.description && (
-          <p className="truncate text-xs text-gray-700">
-            {organization.description}
+    <>
+      <div className="flex items-center justify-between gap-3 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-gray-900">
+            {organization.name}
           </p>
-        )}
+          {organization.description && (
+            <p className="truncate text-xs text-gray-700">
+              {organization.description}
+            </p>
+          )}
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href={`/admin/organizations/role/${organization.id}`}
+            className="text-xs font-medium text-gray-900 underline underline-offset-2 hover:text-gray-600"
+            aria-label={organization.name}
+          >
+            {t("view")}
+          </Link>
+          {canManageOrganization && (
+            <>
+              <span className="ml-2 h-7 w-px bg-gray-300" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7 text-gray-400 hover:text-red-600"
+                onClick={() => setShowRemoveDialog(true)}
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <X className="size-3.5" />
+                )}
+                <span className="sr-only">{removeLabel}</span>
+              </Button>
+            </>
+          )}
+        </div>
       </div>
-      <div className="flex shrink-0 items-center gap-2">
-        <Link
-          href={`/admin/organizations/role/${organization.id}`}
-          className="text-xs font-medium text-gray-900 underline underline-offset-2 hover:text-gray-600"
-          aria-label={organization.name}
-        >
-          {t("view")}
-        </Link>
-        {canManageOrganization && (
-          <>
-            <span className="ml-2 h-7 w-px bg-gray-300" />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 text-gray-400 hover:text-red-600"
-              onClick={onRemove}
-              disabled={isPending}
-            >
-              {isPending ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <X className="size-3.5" />
-              )}
-              <span className="sr-only">{removeLabel}</span>
-            </Button>
-          </>
-        )}
-      </div>
-    </div>
+      <ConfirmActionDialog
+        open={showRemoveDialog}
+        onOpenChange={setShowRemoveDialog}
+        title={t("remove_name", { name: organization.name })}
+        description={
+          <Trans
+            i18nKey="are_you_sure_want_to_remove"
+            values={{ name: organization.name }}
+            components={{
+              strong: <strong className="font-semibold" />,
+            }}
+          />
+        }
+        onConfirm={onRemove}
+        confirmText={t("remove")}
+        variant="destructive"
+        disabled={isPending}
+      />
+    </>
   );
 }
 
@@ -172,7 +195,7 @@ export default function RoleOrganizationConnections({ organization }: Props) {
         {t("responsibility_none_available")}
       </p>
       {canCreateOrganization && (
-        <ResponsibilityFormDialog
+        <ResponsibilityFormSheet
           trigger={
             <button
               type="button"

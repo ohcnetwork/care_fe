@@ -28,7 +28,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import ResponsibilityFormDialog from "@/pages/Admin/organizations/components/ResponsibilityFormDialog";
+import ResponsibilityFormSheet from "@/pages/Admin/organizations/components/ResponsibilityFormSheet";
 import RoleOrganizationConnections from "@/pages/Organization/components/RoleOrganizationConnections";
 import { OrgType } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -47,11 +47,11 @@ export default function ResponsibilitiesIndex({ organizationId }: Props) {
 
   const { data: listData } = useQuery({
     queryKey: ["organization", "list", OrgType.ROLE, ""],
-    queryFn: query(organizationApi.list, {
+    queryFn: query.paginated(organizationApi.list, {
+      pageSize: PAGE_LIMIT,
       queryParams: {
         parent: "",
         org_type: OrgType.ROLE,
-        limit: PAGE_LIMIT,
       },
     }),
     refetchOnWindowFocus: false,
@@ -129,7 +129,7 @@ export default function ResponsibilitiesIndex({ organizationId }: Props) {
             </p>
           </div>
           {canCreateResponsibility && (
-            <ResponsibilityFormDialog
+            <ResponsibilityFormSheet
               trigger={
                 <Button className="hidden md:inline-flex">
                   <Plus className="mr-2 size-4" />
@@ -167,7 +167,7 @@ export default function ResponsibilitiesIndex({ organizationId }: Props) {
       {/* Mobile sticky create button */}
       {canCreateResponsibility && (
         <div className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-200 bg-white p-3 md:hidden">
-          <ResponsibilityFormDialog
+          <ResponsibilityFormSheet
             trigger={
               <Button className="w-full">
                 <Plus className="mr-2 size-4" />
@@ -196,7 +196,7 @@ function DetailPanel({
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
 
-  const { data: org } = useQuery({
+  const { data: org, isError, isFetching, refetch } = useQuery({
     queryKey: ["organization", OrgType.ROLE, organizationId],
     queryFn: query(organizationApi.get, {
       pathParams: { id: organizationId! },
@@ -219,7 +219,7 @@ function DetailPanel({
           )}
         </div>
         {canManageOrganization && (
-          <ResponsibilityFormDialog
+          <ResponsibilityFormSheet
             org={org}
             trigger={
               <Button
@@ -238,6 +238,37 @@ function DetailPanel({
     </div>
   );
 
+  const detailLoading = (
+    <div className="space-y-6">
+      <Skeleton className="h-7 w-48" />
+      <Skeleton className="h-4 w-72" />
+      <div className="space-y-3 pt-4">
+        <Skeleton className="h-16 w-full rounded-lg" />
+        <Skeleton className="h-16 w-full rounded-lg" />
+        <Skeleton className="h-16 w-full rounded-lg" />
+      </div>
+    </div>
+  );
+
+  const detailError = (
+    <div
+      role="alert"
+      data-slot="responsibility-detail-error"
+      className="flex flex-col items-center justify-center gap-3 p-8 text-center"
+    >
+      <p className="text-sm text-gray-600">{t("something_went_wrong")}</p>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => refetch()}
+        disabled={isFetching}
+      >
+        {isFetching ? t("loading") : t("retry")}
+      </Button>
+    </div>
+  );
+
   if (mobile) {
     return (
       <div className="space-y-4">
@@ -251,9 +282,17 @@ function DetailPanel({
             {t("all_role_organizations")}
           </button>
         )}
-        {detail && (
+        {org ? (
           <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
             {detail}
+          </div>
+        ) : isError ? (
+          <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+            {detailError}
+          </div>
+        ) : (
+          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+            {detailLoading}
           </div>
         )}
       </div>
@@ -262,8 +301,10 @@ function DetailPanel({
 
   return (
     <div className="h-full overflow-y-auto rounded-lg bg-white md:border md:border-gray-200 md:shadow-sm">
-      {organizationId && org ? (
+      {org ? (
         <div className="p-5">{detail}</div>
+      ) : organizationId && isError ? (
+        <div className="p-5">{detailError}</div>
       ) : isEmpty ? (
         <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center">
           <h3 className="text-base font-semibold text-gray-700">
@@ -274,15 +315,7 @@ function DetailPanel({
           </p>
         </div>
       ) : (
-        <div className="space-y-6 p-5">
-          <Skeleton className="h-7 w-48" />
-          <Skeleton className="h-4 w-72" />
-          <div className="space-y-3 pt-4">
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-16 w-full rounded-lg" />
-          </div>
-        </div>
+        <div className="p-5">{detailLoading}</div>
       )}
     </div>
   );
@@ -300,16 +333,25 @@ function ResponsibilityList({
 }) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const searchInputId = useId();
 
+  useEffect(() => {
+    const timeoutId = window.setTimeout(
+      () => setDebouncedSearch(search),
+      500,
+    );
+    return () => window.clearTimeout(timeoutId);
+  }, [search]);
+
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["organization", "list", OrgType.ROLE, search],
-    queryFn: query.debounced(organizationApi.list, {
+    queryKey: ["organization", "list", OrgType.ROLE, debouncedSearch],
+    queryFn: query.paginated(organizationApi.list, {
+      pageSize: PAGE_LIMIT,
       queryParams: {
         parent: "",
         org_type: OrgType.ROLE,
-        name: search || undefined,
-        limit: PAGE_LIMIT,
+        name: debouncedSearch || undefined,
       },
     }),
     refetchOnWindowFocus: false,
@@ -340,6 +382,7 @@ function ResponsibilityList({
               <button
                 type="button"
                 data-slot="responsibility-row"
+                aria-pressed={isSelected}
                 onClick={() => onSelect(item.id)}
                 className={cn(
                   "group flex w-full items-center justify-between gap-3 text-left transition-colors",

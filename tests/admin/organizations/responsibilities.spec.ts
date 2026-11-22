@@ -36,6 +36,7 @@ async function createResponsibility(
   await page.getByRole("button", { name: /new responsibility/i }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByText(/create responsibility/i)).toBeVisible();
+  await expect(page.locator('[data-slot="sheet-content"]')).toBeVisible();
 
   await dialog.getByRole("textbox", { name: /title/i }).fill(name);
   if (description) {
@@ -93,6 +94,52 @@ test.describe("Admin Responsibilities Page", () => {
     await expect(listRow(page, name)).toBeVisible();
   });
 
+  test("should load responsibilities beyond the first API page", async ({
+    page,
+  }) => {
+    const responsibilities = Array.from({ length: 101 }, (_, index) => ({
+      id: faker.string.uuid(),
+      name: `Responsibility ${index}`,
+      description: "",
+    }));
+    const requestedOffsets: number[] = [];
+
+    await page.route("**/api/v1/organization/**", async (route) => {
+      const url = new URL(route.request().url());
+      if (
+        url.pathname !== "/api/v1/organization/" ||
+        url.searchParams.get("org_type") !== "role"
+      ) {
+        await route.continue();
+        return;
+      }
+
+      const search = url.searchParams.get("name")?.toLowerCase();
+      const filteredResponsibilities = responsibilities.filter(
+        (responsibility) =>
+          !search || responsibility.name.toLowerCase().includes(search),
+      );
+      const offset = Number(url.searchParams.get("offset") || 0);
+      requestedOffsets.push(offset);
+
+      await route.fulfill({
+        json: {
+          count: filteredResponsibilities.length,
+          results: filteredResponsibilities.slice(offset, offset + 100),
+        },
+      });
+    });
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.reload();
+
+    await expect(
+      page.locator('[data-slot="responsibility-row"]'),
+    ).toHaveCount(101);
+    await expect(listRow(page, "Responsibility 100")).toBeVisible();
+    expect(requestedOffsets).toContain(100);
+  });
+
   test("keeps the desktop page from scrolling as a whole", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await gotoResponsibilities(page);
@@ -110,13 +157,56 @@ test.describe("Admin Responsibilities Page", () => {
   test("should create a new responsibility and view its details", async ({
     page,
   }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
     const name = faker.word.words(3);
     const description = faker.lorem.sentence();
 
     await createResponsibility(page, { name, description });
     await selectResponsibility(page, name);
 
+    await expect(listRow(page, name).first()).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     await expect(detailDescription(page, name)).toHaveText(description);
+  });
+
+  test("should offer a retry when responsibility details fail to load", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const name = faker.word.words(3);
+
+    await createResponsibility(page, { name });
+    await selectResponsibility(page, name);
+
+    let allowDetailLoads = false;
+    await page.route(
+      /\/api\/v1\/organization\/[^/?]+\/(?:\?.*)?$/,
+      async (route) => {
+        if (route.request().method() !== "GET" || allowDetailLoads) {
+          await route.continue();
+          return;
+        }
+
+        await route.fulfill({
+          status: 503,
+          json: { detail: "Temporarily unavailable" },
+        });
+      },
+    );
+
+    await page.reload();
+    const detailError = page.locator(
+      '[data-slot="responsibility-detail-error"]',
+    );
+    await expect(detailError).toBeVisible();
+
+    allowDetailLoads = true;
+    await detailError.getByRole("button", { name: /retry/i }).click();
+    await expect(
+      page.getByRole("heading", { name, exact: true }),
+    ).toBeVisible();
   });
 
   test("should edit an existing responsibility", async ({ page }) => {
@@ -184,6 +274,16 @@ test.describe("Admin Responsibilities Page", () => {
     await expect(manageSection.getByText(managedName)).toBeVisible();
 
     await manageSection.getByRole("button", { name: /remove/i }).click();
+    const confirmationDialog = page.getByRole("alertdialog");
+    await expect(confirmationDialog).toBeVisible();
+    await confirmationDialog.getByRole("button", { name: /cancel/i }).click();
+    await expect(manageSection.getByText(managedName)).toBeVisible();
+
+    await manageSection.getByRole("button", { name: /remove/i }).click();
+    await expect(confirmationDialog).toBeVisible();
+    await confirmationDialog
+      .getByRole("button", { name: /remove/i })
+      .click();
     await expectToast(page, /managed responsibility removed successfully/i);
     await expect(manageSection.getByText(managedName)).not.toBeVisible();
   });

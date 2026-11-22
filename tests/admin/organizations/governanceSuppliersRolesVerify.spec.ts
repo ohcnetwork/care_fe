@@ -173,14 +173,71 @@ test.describe("Admin organization lists", () => {
         continue;
       }
 
-      const sidebar = firstResizablePanel(page);
-      const orgRow = sidebar.getByRole("button").first();
+      const orgRow = page.locator('[data-slot="supplier-row"]').first();
       const emptyState = page.getByText(/no organizations found/i);
       await expect(orgRow.or(emptyState)).toBeVisible();
 
       const createCta = page.getByRole("button", { name: /add organization/i });
       await expect(createCta).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: /referrals|referral availability/i }),
+      ).toHaveCount(0);
     }
+  });
+
+  test("should create and edit suppliers from the flat directory", async ({
+    page,
+  }) => {
+    await gotoOrgTypeList(page, "product_supplier");
+
+    const name = faker.company.name();
+    const updatedName = `${name} updated`;
+    const description = faker.lorem.sentence();
+
+    await page.getByRole("button", { name: /add organization/i }).click();
+    const createDialog = page.getByRole("dialog");
+    await createDialog.getByRole("textbox", { name: /name/i }).fill(name);
+    await createDialog
+      .getByRole("textbox", { name: /description/i })
+      .fill(description);
+    await createDialog
+      .getByRole("button", { name: /create organization/i })
+      .click();
+
+    await expect(
+      page
+        .locator("li[data-sonner-toast]")
+        .getByText(/organization created successfully/i),
+    ).toBeVisible();
+
+    const supplierRow = page
+      .locator('[data-slot="supplier-row"]')
+      .filter({ hasText: name });
+    await expect(supplierRow).toBeVisible();
+    await expect(supplierRow.getByText(description)).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /referrals|referral availability/i }),
+    ).toHaveCount(0);
+
+    await supplierRow.getByRole("button", { name: /^edit$/i }).click();
+    const editDialog = page.getByRole("dialog");
+    const nameInput = editDialog.getByRole("textbox", { name: /name/i });
+    await expect(nameInput).toHaveValue(name);
+    await nameInput.fill(updatedName);
+    await editDialog
+      .getByRole("button", { name: /update organization/i })
+      .click();
+
+    await expect(
+      page
+        .locator("li[data-sonner-toast]")
+        .getByText(/organizations updated successfully/i),
+    ).toBeVisible();
+    await expect(
+      page.locator('[data-slot="supplier-row"]').filter({
+        hasText: updatedName,
+      }),
+    ).toBeVisible();
   });
 
   test("should open govt org detail via see details", async ({ page }) => {
