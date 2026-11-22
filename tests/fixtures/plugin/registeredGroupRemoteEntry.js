@@ -73,7 +73,8 @@ function validate(question, responses, path) {
       row.find((answer) => answer.question_id === children[key]?.id)?.values[0]
         ?.value;
     const identity = JSON.stringify([value("slot"), value("type")]);
-    if (value("slot") && seen.has(identity)) {
+    if (!value("slot")) continue;
+    if (seen.has(identity)) {
       errors.push({
         question_id: question.id,
         response_path: path,

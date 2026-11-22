@@ -107,6 +107,9 @@ export default defineConfig({
       name: "vite-modules",
       testMatch: VITE_MODULE_SPECS,
       use: { ...devices["Desktop Chrome"], baseURL: VITE_DEV_URL },
+      // The first spec to load on a cold dev server waits up to 45s for
+      // dependency pre-bundling inside beforeEach, which counts against this.
+      timeout: 120000,
       dependencies: process.env.CI
         ? []
         : [
@@ -159,8 +162,11 @@ export default defineConfig({
       timeout: 120000,
     },
     {
-      command: `npx vite --port ${VITE_DEV_PORT} --strictPort`,
+      command: `npm run dev -- --port ${VITE_DEV_PORT} --strictPort`,
       url: VITE_DEV_URL,
+      // CI runs Playwright with NODE_ENV=production, which would put the dev
+      // server in production mode and flip import.meta.env.DEV for the specs.
+      env: { NODE_ENV: "development" },
       reuseExistingServer: !process.env.CI,
       timeout: 120000,
     },

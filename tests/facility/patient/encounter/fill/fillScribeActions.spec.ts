@@ -6,8 +6,8 @@ import path from "node:path";
 // integration harness mounts the real hook and questionnaire renderer, with
 // fixture clinical API responses. Preview builds intentionally do not expose
 // their source modules, so playwright.config.ts runs this spec in the
-// `vite-modules` project against a Vite dev server.
-test.use({ storageState: "tests/.auth/user.json" });
+// `vite-modules` project against a Vite dev server. The harness answers every
+// API call itself, so it needs no signed-in user.
 
 const harnessFilename = `fillActionHarness-${crypto.randomUUID()}.tsx`;
 const clinicalTypes = ["diagnosis", "symptom", "allergy_intolerance"] as const;
