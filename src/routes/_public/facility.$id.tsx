@@ -2,6 +2,7 @@ import careConfig from "@careConfig";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 
 import { redirectKeepingQuery } from "@/lib/router/auth";
+import { facilityDetailsPageSearch } from "@/lib/router/search/facility";
 import { FacilityDetailsPage } from "@/pages/Facility/FacilityDetailsPage";
 
 export const Route = createFileRoute("/_public/facility/$id")({
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/_public/facility/$id")({
       throw redirectKeepingQuery("/login", location);
     }
   },
+  validateSearch: facilityDetailsPageSearch,
   component: RouteComponent,
 });
 

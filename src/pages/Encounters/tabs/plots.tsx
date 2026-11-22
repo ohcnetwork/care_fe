@@ -8,18 +8,14 @@ import Loading from "@/components/Common/Loading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useScopedQueryParams } from "@/hooks/useScopedQueryParams";
+import { plotsSearch } from "@/lib/router/search/encounter";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { plotsConfigQueryOptions } from "@/pages/Encounters/utils/plotsConfigQuery";
-import { ObservationPlotConfig } from "@/types/emr/observation/observation";
-
-type QueryParams = {
-  plot: ObservationPlotConfig[number]["id"];
-};
 
 export const EncounterPlotsTab = () => {
   const { t } = useTranslation();
-  const [qParams, setQParams] = useScopedQueryParams<QueryParams>();
+  const [qParams, setQParams] = useScopedQueryParams(plotsSearch);
 
   const { patientId, selectedEncounterId: encounterId } = useEncounter();
 

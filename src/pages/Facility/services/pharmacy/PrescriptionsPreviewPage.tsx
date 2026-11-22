@@ -6,6 +6,7 @@ import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { prescriptionsPreviewSearch } from "@/lib/router/search/pharmacy";
 import UnbilledPrescriptionsCard from "@/pages/Facility/services/pharmacy/billMedications/UnbilledPrescriptionsCard";
 import PrescriptionsPreviewTable from "@/pages/Facility/services/pharmacy/components/PrescriptionsPreviewTable";
 import { MedicationRequestDispenseStatus } from "@/types/emr/medicationRequest/medicationRequest";
@@ -28,11 +29,6 @@ interface Props {
   prescriptionIds: string[];
 }
 
-interface QParams {
-  search?: string;
-  status?: MedicationRequestDispenseStatus | "all";
-}
-
 export default function PrescriptionsPreviewPage({
   facilityId,
   locationId,
@@ -42,7 +38,7 @@ export default function PrescriptionsPreviewPage({
   const { t } = useTranslation();
   useShortcutSubContext("facility:pharmacy");
 
-  const [qParams, setQParams] = useQueryParams<QParams>();
+  const [qParams, setQParams] = useQueryParams(prescriptionsPreviewSearch);
 
   const { prescriptions, anyEncounter, activePrescriptionIds } = useQueries({
     queries: prescriptionIds.map((prescriptionId) => ({

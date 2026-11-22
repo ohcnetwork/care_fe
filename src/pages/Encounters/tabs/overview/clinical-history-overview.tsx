@@ -13,7 +13,7 @@ export const ClinicalHistoryOverview = () => {
   const { t } = useTranslation();
   const { facilityId, patientId } = useEncounter();
   const path = usePathname();
-  const [queryParams] = useQueryParams<Record<string, string>>();
+  const [queryParams] = useQueryParams();
   const search = new URLSearchParams(queryParams).toString();
   const sourceUrl = search ? `${path}?${search}` : path;
   const patientPath = facilityId
