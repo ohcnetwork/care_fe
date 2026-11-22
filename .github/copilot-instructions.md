@@ -158,7 +158,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - i18next for internationalization
 - date-fns for date handling
 - zod for schema validation
-- framer-motion for animations
+- motion (`motion/react`) for animations
 
 ### Development Tools
 
