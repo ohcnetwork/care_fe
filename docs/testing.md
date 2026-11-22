@@ -13,7 +13,7 @@ npm run playwright:test                                 # Run all tests
 npm run playwright:test -- tests/auth/login.spec.ts     # Run a single test file
 npm run playwright:test -- -g "test name"               # Run tests matching a pattern
 npm run playwright:test -- --workers=4                   # Run with 4 parallel workers
-npm run playwright:test -- --shard=1/3                   # Run shard 1 of 3
+npm run playwright:test -- --shard=1/8                   # Run the first of eight CI shards locally
 npm run playwright:test:ui                              # Interactive Playwright UI mode
 ```
 
