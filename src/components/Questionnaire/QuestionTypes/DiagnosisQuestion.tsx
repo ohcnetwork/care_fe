@@ -68,7 +68,6 @@ import {
   DiagnosisClinicalStatus,
   DiagnosisRequest,
   DiagnosisSeverity,
-  Onset,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import {
@@ -623,7 +622,7 @@ export function DiagnosisQuestion({
                 {
                   key: "onset",
                   label: t("onset_date"),
-                  render: (onset: Onset) =>
+                  render: (onset) =>
                     onset?.onset_datetime
                       ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
                       : "",

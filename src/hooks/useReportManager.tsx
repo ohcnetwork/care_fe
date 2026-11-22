@@ -105,7 +105,7 @@ export default function useReportManager({
       queryFn: () =>
         query(reportApi.retrieveReport, {
           pathParams: { id: reportId },
-        })({} as any),
+        })({ signal: new AbortController().signal }),
     });
   };
 
