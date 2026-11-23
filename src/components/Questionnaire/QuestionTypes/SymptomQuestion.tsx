@@ -1,12 +1,13 @@
-import {
-  DotsVerticalIcon,
-  MinusCircledIcon,
-  Pencil2Icon,
-} from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import {
+  ChevronsDownUp,
+  ChevronsUpDown,
+  EllipsisVertical as DotsVerticalIcon,
+  CircleMinus as MinusCircledIcon,
+  Pencil as Pencil2Icon,
+} from "lucide-react";
+import React, { useCallback, useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -47,7 +48,7 @@ import {
 
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
+import { hasDuplicateClinicalCode } from "@/components/Questionnaire/QuestionTypes/conditionValidation";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -57,7 +58,6 @@ import { dateQueryString, formatName } from "@/Utils/utils";
 import { Avatar } from "@/components/Common/Avatar";
 import { Code } from "@/types/base/code/code";
 import {
-  Onset,
   SYMPTOM_CLINICAL_STATUS,
   SYMPTOM_CLINICAL_STATUS_COLORS,
   SYMPTOM_SEVERITY,
@@ -83,6 +83,7 @@ interface SymptomQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   question: Question;
 }
@@ -635,12 +636,7 @@ function checkForDuplicateSymptom(
   const codeValue =
     typeof codeToCheck === "string" ? codeToCheck : codeToCheck.code;
 
-  const isDuplicate = existingSymptoms.some(
-    (symptom) =>
-      symptom.code.code === codeValue &&
-      symptom.verification_status !== "entered_in_error",
-  );
-  if (isDuplicate) {
+  if (hasDuplicateClinicalCode(existingSymptoms, codeValue)) {
     toast.warning(t("symptom_already_exist_warning"));
     return true;
   }
@@ -651,9 +647,9 @@ export function SymptomQuestion({
   patientId,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   encounterId,
-  question,
 }: SymptomQuestionProps) {
   const { t } = useTranslation();
 
@@ -679,9 +675,14 @@ export function SymptomQuestion({
     enabled: !isPreview,
   });
 
-  useEffect(() => {
-    if (patientSymptoms?.results) {
-      updateQuestionnaireResponseCB(
+  // Reconcile fresh server data without reinitializing on clinician edits.
+  const initializeResponse = useEffectEvent(() => {
+    if (
+      patientSymptoms?.results &&
+      (initializeQuestionnaireResponseCB ||
+        questionnaireResponse.values.length === 0)
+    ) {
+      (initializeQuestionnaireResponseCB ?? updateQuestionnaireResponseCB)(
         [
           {
             type: "symptom",
@@ -691,6 +692,10 @@ export function SymptomQuestion({
         questionnaireResponse.question_id,
       );
     }
+  });
+
+  useEffect(() => {
+    initializeResponse();
   }, [patientSymptoms]);
 
   const handleCodeSelect = (code: Code) => {
@@ -799,8 +804,7 @@ export function SymptomQuestion({
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-between items-center flex-wrap">
-        <QuestionLabel question={question} />
+      <div className="flex flex-wrap items-center justify-end">
         <HistoricalRecordSelector<SymptomRequest>
           title={t("past_symptoms")}
           structuredTypes={[
@@ -876,7 +880,7 @@ export function SymptomQuestion({
                 {
                   key: "onset",
                   label: t("onset_date"),
-                  render: (onset: Onset) =>
+                  render: (onset) =>
                     onset?.onset_datetime
                       ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
                       : "",
@@ -911,13 +915,14 @@ export function SymptomQuestion({
           buttonLabel={t("symptom_history")}
           onAddSelected={handleAddHistoricalSymptoms}
           disableAPI={isPreview}
+          disabled={disabled}
         />
       </div>
       {symptoms.length > 0 && (
         <>
           {/* Desktop View - Table */}
           {!isMobile && (
-            <div className="rounded-lg border border-gray-200">
+            <div>
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50">
@@ -983,7 +988,7 @@ export function SymptomQuestion({
         <EntitySelectionDrawer
           open={showSymptomSelection}
           onOpenChange={setShowSymptomSelection}
-          system="system-condition-code"
+          system="system-symptom-code"
           entityType="symptom"
           disabled={disabled}
           onEntitySelected={handleCodeSelect}
@@ -1002,7 +1007,7 @@ export function SymptomQuestion({
         </EntitySelectionDrawer>
       ) : (
         <ValueSetSelect
-          system="system-condition-code"
+          system="system-symptom-code"
           placeholder={addSymptomPlaceholder}
           onSelect={handleCodeSelect}
           disabled={disabled}

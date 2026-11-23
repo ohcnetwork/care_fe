@@ -1,13 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
 import { ChargeItemDefinitionForm } from "./ChargeItemDefinitionForm";
@@ -58,16 +60,14 @@ export function UpdateChargeItemDefinition({
             </AlertDescription>
           </Alert>
           <div className="flex justify-end">
-            <button
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/charge_item_definitions`,
-                )
-              }
-              className="text-sm text-blue-600 hover:underline"
-            >
-              {t("return_to_list")}
-            </button>
+            <Button variant="link" asChild>
+              <HrefLink
+                href={`/facility/${facilityId}/settings/charge_item_definitions`}
+                back
+              >
+                {t("return_to_list")}
+              </HrefLink>
+            </Button>
           </div>
         </div>
       </Page>
@@ -76,17 +76,20 @@ export function UpdateChargeItemDefinition({
 
   if (!chargeItemDefinition) {
     console.warn("No charge item definition found with ID:", slug);
-    navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+    navigate({
+      to: "/facility/$facilityId/settings/charge_item_definitions",
+      params: { facilityId },
+      replace: true,
+    });
     return null;
   }
 
   const handleSuccess = () => {
-    navigate(
-      `/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition.category.slug}`,
-      {
-        replace: true,
-      },
-    );
+    navigate({
+      to: "/facility/$facilityId/settings/charge_item_definitions/categories/$slug",
+      params: { facilityId, slug: chargeItemDefinition.category.slug },
+      replace: true,
+    });
   };
 
   return (

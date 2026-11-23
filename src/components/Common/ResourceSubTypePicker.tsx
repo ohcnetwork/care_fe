@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { ChevronRight, Folder, FolderOpen, Home } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -152,17 +153,19 @@ export function ResourceSubTypePicker({
         {breadcrumbs.length > 0 && (
           <div className="px-4 py-2 border-b bg-gray-100">
             <div className="flex items-center gap-1 text-xs">
-              <button
+              <Button
+                variant="ghost"
                 type="button"
                 className="h-6 px-2 rounded hover:bg-white text-gray-700"
                 onClick={handleBackToRoot}
               >
                 {t("root")}
-              </button>
+              </Button>
               {breadcrumbs.map((bc, idx) => (
                 <div key={bc.value} className="flex items-center">
                   <ChevronRight className="size-3 mx-1 text-gray-500" />
-                  <button
+                  <Button
+                    variant="ghost"
                     type="button"
                     className="h-6 px-2 rounded hover:bg-white text-gray-700"
                     onClick={() =>
@@ -170,7 +173,7 @@ export function ResourceSubTypePicker({
                     }
                   >
                     {t(bc.title)}
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
@@ -182,11 +185,16 @@ export function ResourceSubTypePicker({
           {currentNodes
             ?.filter((n) => n.children && n.children.length > 0)
             .map((node) => (
-              <div
+              <Button
+                type="button"
+                variant="ghost"
                 key={node.value}
                 className={cn(
-                  "flex items-center justify-between p-3 cursor-pointer",
-                  "hover:bg-gray-50 hover:text-gray-900 transition-colors border-b border-gray-200",
+                  "h-auto w-full justify-start whitespace-normal",
+                  cn(
+                    "flex items-center justify-between p-3 cursor-pointer",
+                    "hover:bg-gray-50 hover:text-gray-900 transition-colors border-b border-gray-200",
+                  ),
                 )}
                 onClick={() => handleNavigate(node)}
               >
@@ -197,7 +205,7 @@ export function ResourceSubTypePicker({
                   </div>
                 </div>
                 <ChevronRight className="size-4 text-gray-500" />
-              </div>
+              </Button>
             ))}
 
           {/* Leaf nodes (selectable) */}

@@ -1,10 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
-import {
-  getEncounterCreateDialog,
-  openCalendarAndGetNextMonthButton,
-  openCreateEncounterDialog,
-  selectStatusInCreateDialog,
-} from "tests/facility/patient/encounter/encounterFormHelpers";
+import { addDays } from "date-fns";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import { expectAndDismissToast, expectToast } from "tests/helper/ui";
+import { getApiHeaders, getApiUrl } from "tests/helper/utils";
+import { getFacilityId } from "tests/support/facilityId";
 
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 
@@ -18,31 +17,18 @@ async function createPlannedEncounter(
   start: "past" | "future",
   encounterClass: "Ambulatory" | "Inpatient" = "Ambulatory",
 ) {
-  await openCreateEncounterDialog(page);
-  const dialog = getEncounterCreateDialog(page);
-  await dialog
-    .getByRole("button", { name: new RegExp(`^${encounterClass}`) })
-    .click();
-  await selectStatusInCreateDialog(page, "Planned");
-  await openCalendarAndGetNextMonthButton(page);
-  await page
-    .getByRole("button", {
-      name: `Go to the ${start === "future" ? "Next" : "Previous"} Month`,
-    })
-    .click();
-  await page
-    .getByRole("gridcell")
-    .filter({ hasText: /^15$/ })
-    .getByRole("button")
-    .click();
-
-  await Promise.all([
-    page.waitForURL(/\/encounter\/[^/]+/),
-    dialog.getByRole("button", { name: /^Create Encounter/ }).click(),
-  ]);
-  await expect(
-    page.getByRole("button", { name: "Encounter Actions" }),
-  ).toBeVisible();
+  const facilityId = getFacilityId();
+  const { patientId, encounterId } = await createQuestionnaireEncounter(
+    facilityId,
+    {
+      status: "planned",
+      encounterClass: encounterClass === "Inpatient" ? "imp" : "amb",
+      start: addDays(new Date(), start === "future" ? 7 : -7),
+    },
+  );
+  await page.goto(
+    `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+  );
 }
 
 // The update form's label isn't associated with its SelectTrigger yet.
@@ -55,8 +41,8 @@ function encounterStatusCombobox(page: Page) {
 }
 
 async function openEncounterUpdateForm(page: Page) {
-  await page.getByRole("tab", { name: "Details" }).click();
-  await page.getByRole("link", { name: "Update Encounter" }).click();
+  // The encounter header's edit link opens the encounter update form.
+  await page.getByRole("link", { name: "Edit encounter", exact: true }).click();
   await expect(encounterStatusCombobox(page)).toBeVisible();
 }
 
@@ -81,13 +67,13 @@ async function selectClosingStatus(page: Page, status: string) {
 }
 
 async function submitQuestionnaire(page: Page) {
-  await page.getByRole("button", { name: "Submit", exact: true }).click();
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
 }
 
+// Closes the toast too: a test that saves the form again (the cleanup
+// steps) must see that save's own toast, not this one.
 async function expectSubmissionSuccess(page: Page) {
-  await expect(
-    page.getByText("Questionnaire submitted successfully"),
-  ).toBeVisible();
+  await expectAndDismissToast(page, "Questionnaire submitted successfully");
 }
 
 async function cancelEncounterFromCurrentForm(page: Page) {
@@ -106,16 +92,11 @@ async function expectPersistedPeriod(
   )?.[1];
   expect(encounterId).toBeTruthy();
 
-  const [response] = await Promise.all([
-    page.waitForResponse(
-      (response) =>
-        new URL(response.url()).pathname ===
-          `/api/v1/encounter/${encounterId}/` &&
-        response.request().method() === "GET",
-    ),
-    page.reload(),
-  ]);
-  expect(response.ok()).toBeTruthy();
+  const response = await page.request.get(
+    `${getApiUrl()}/api/v1/encounter/${encounterId}/`,
+    { headers: getApiHeaders() },
+  );
+  await expect(response).toBeOK();
   const encounter: EncounterRead = await response.json();
   expect(encounter.status).toBe(status);
   if (hasEnd) {
@@ -130,9 +111,6 @@ async function expectPersistedPeriod(
 }
 
 test.describe("Planned Encounter Status Transition", () => {
-  // Tests share a patient with a limit of five live encounters.
-  test.describe.configure({ mode: "serial" });
-
   test.afterEach(async ({ page }, testInfo) => {
     if (testInfo.status === testInfo.expectedStatus) return;
     try {
@@ -219,7 +197,12 @@ test.describe("Planned Encounter Status Transition", () => {
       if (status === "discharged") {
         await test.step("Complete the discharged encounter without changing its end date", async () => {
           await page.getByRole("tab", { name: "Actions", exact: true }).click();
-          await page.getByRole("button", { name: "Mark as Completed" }).click();
+          // The page also renders an sr-only "Mark as Completed" button as
+          // its keyboard-shortcut target; click the one in the Actions tab.
+          await page
+            .getByRole("tabpanel", { name: "Actions", exact: true })
+            .getByRole("button", { name: "Mark as Completed" })
+            .click();
           await page
             .getByRole("alertdialog", { name: "Mark as Complete" })
             .getByRole("button", { name: /^Mark as Complete/ })
@@ -251,15 +234,21 @@ test.describe("Planned Encounter Status Transition", () => {
         await openEncounterUpdateForm(page);
         await selectClosingStatus(page, status);
         await submitQuestionnaire(page);
+        await expectToast(page, "Failed to submit questionnaire");
         await expect(
-          page.getByText("Failed to submit questionnaire"),
+          page.locator('[data-slot="alert"]').getByText(VALIDATION_ERROR_TEXT),
         ).toBeVisible();
-        await expect(page.getByText(VALIDATION_ERROR_TEXT)).toBeVisible();
       });
 
       await test.step("Cleanup: cancel the unchanged planned encounter", async () => {
-        // Discharged disables the status picker. Reload the unchanged backend state.
+        // Discharged disables the status picker. Reload the unchanged backend
+        // state, then discard the failed attempt's local draft: saving is
+        // blocked until a restored draft is resumed or discarded.
         await page.reload();
+        await page
+          .getByRole("button", { name: "Discard", exact: true })
+          .click();
+        await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
         await expect(encounterStatusCombobox(page)).toContainText("Planned");
         await cancelEncounterFromCurrentForm(page);
       });

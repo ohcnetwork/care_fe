@@ -4,12 +4,13 @@ import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
+import { navigate } from "@/lib/router/navigate";
+import { getRouter } from "@/lib/router/routerRef";
 import {
   PatientListRead,
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import { navigate } from "raviger";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -111,9 +112,7 @@ export const dateTimeQueryString = (date: DateLike, isEndDate = false) => {
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export const isIOSDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-export const isMacDevice = /Mac/i.test(navigator.userAgent);
-export const isAppleDevice = isIOSDevice || isMacDevice;
+export const isAppleDevice = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 function hasTouch() {
   try {
@@ -161,11 +160,13 @@ export const formatPatientAge = (
   obj: PatientRead | PatientListRead | PublicPatientRead,
   abbreviated = false,
 ) => {
-  const start = dayjs(
-    obj.date_of_birth
-      ? new Date(obj.date_of_birth)
-      : new Date(obj.year_of_birth!, 0, 1),
-  );
+  // date_of_birth is date-only ("YYYY-MM-DD"). new Date() reads that as UTC
+  // midnight, which lands on the previous day in any timezone behind UTC and
+  // shifts the age by a day; dayjs parses it as local midnight, which is what
+  // formatPatientAgeBreakdown already does.
+  const start = obj.date_of_birth
+    ? dayjs(obj.date_of_birth)
+    : dayjs(new Date(obj.year_of_birth!, 0, 1));
   const end =
     "deceased_datetime" in obj && obj.deceased_datetime
       ? dayjs(obj.deceased_datetime)
@@ -376,71 +377,6 @@ export const readFileAsDataURL = async (file: File) => {
   return result_base64 as string;
 };
 
-/**
- * Generates a URL-safe slug from a given string.
- *
- * @param title - The string to convert to a slug
- * @param maxLength - Maximum length of the slug (default: 50)
- * @returns A URL-safe slug string
- *
- * @example
- * generateSlug("Hello World!") // "hello-world"
- * generateSlug("Café & Résumé") // "cafe-resume"
- * generateSlug("Special @#$% Characters") // "special-characters"
- */
-export function generateSlug(title: string, maxLength: number = 50): string {
-  if (!title || typeof title !== "string") {
-    return "";
-  }
-
-  return (
-    title
-      // Convert to lowercase
-      .toLowerCase()
-      // Normalize unicode characters (handles accented characters)
-      .normalize("NFD")
-      // Remove diacritics (accents, umlauts, etc.)
-      .replace(/[\u0300-\u036f]/g, "")
-      // Replace special characters and spaces with hyphens
-      .replace(/[^\w\s-]/g, "")
-      // Replace multiple spaces or hyphens with single hyphen
-      .replace(/[\s-]+/g, "-")
-      // Remove leading and trailing hyphens
-      .replace(/^-+|-+$/g, "")
-      // Limit length
-      .slice(0, maxLength)
-      // Remove trailing hyphens after truncation
-      .replace(/-+$/, "")
-  );
-}
-
-/**
- * Returns a formatted string of items, truncated if longer than maxItems
- * Eg.Formatted string like "item1, item2 ... +{count} more"
- * @param items Array of items to format
- * @param maxItems Maximum number of items to show before truncating
- * @param getDisplayValue Function to get display value from each item
- * @param moreText Text to show for additional items (e.g. "more" default is more)
- * @returns Formatted string like "item1, item2 ... +{count} more"
- */
-export function formatTruncatedList<T>(
-  items: T[],
-  maxItems: number,
-  getDisplayValue: (item: T) => string,
-  moreText?: string,
-): string {
-  if (!items?.length) return "";
-
-  if (items.length <= maxItems) {
-    return items.map(getDisplayValue).join(", ");
-  }
-
-  const displayedItems = items.slice(0, maxItems);
-  const remainingCount = items.length - maxItems;
-
-  return `${displayedItems.map(getDisplayValue).join(", ")} ... +${remainingCount} ${t("more") || moreText}`;
-}
-
 export function deepFreeze<T>(obj: T): T {
   if (!obj || typeof obj !== "object") return obj;
 
@@ -449,11 +385,31 @@ export function deepFreeze<T>(obj: T): T {
   return obj;
 }
 
+/**
+ * Goes back in the browser history when the previous entry belongs to this
+ * app. Otherwise it replaces the current entry with `fallback`, or with the
+ * nearest parent route, so the user never leaves the app.
+ */
 export const goBack = (fallback?: string) => {
-  if (window.history.length > 1) {
-    return history.back();
-  } else if (fallback) {
-    return navigate(fallback);
+  const router = getRouter();
+  if (router.history.canGoBack()) {
+    router.history.back();
+    return;
   }
-  history.back();
+  const matches = router.state.matches;
+  const current = matches.at(-1)?.pathname;
+  const parent = matches
+    .slice()
+    .reverse()
+    .find((match) => match.pathname !== current)?.pathname;
+  navigate({ href: fallback ?? parent ?? "/", replace: true });
 };
+
+/**
+ * Generates a timestamp-suffixed alternate identifier, e.g. for grouping
+ * resources (prescriptions, dispense orders) created in a single submission.
+ *
+ * @example generateAlternateIdentifier(encounterId) // "<id>-2025-01-01T10-00-00-000Z"
+ */
+export const generateAlternateIdentifier = (prefix?: string) =>
+  `${prefix}-${new Date().toISOString().replace(/[:.]/g, "-")}`;

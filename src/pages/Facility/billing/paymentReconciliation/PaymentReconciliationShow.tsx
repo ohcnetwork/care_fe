@@ -1,4 +1,6 @@
+import { HrefLink } from "@/lib/router/HrefLink";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -8,7 +10,6 @@ import {
   PrinterIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { Link } from "raviger";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -111,9 +112,9 @@ function PaymentReconciliationShow({
           <h2 className="text-2xl font-bold">{t("payment_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("payment_may_not_exist")}</p>
           <Button asChild className="mt-4">
-            <Link href={`/facility/${facilityId}/billing/payments`}>
+            <HrefLink href={`/facility/${facilityId}/billing/payments`} back>
               {t("back_to_payments")}
-            </Link>
+            </HrefLink>
           </Button>
         </div>
       </div>
@@ -158,7 +159,8 @@ function PaymentReconciliationShow({
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link
-              href={`/facility/${facilityId}/billing/payments/${paymentReconciliationId}/print`}
+              to="/facility/$facilityId/billing/payments/$paymentReconciliationId/print"
+              params={{ facilityId, paymentReconciliationId }}
             >
               <PrinterIcon className="size-4" />
               {t("print_receipt")}
@@ -357,7 +359,11 @@ function PaymentReconciliationShow({
                   <div>
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
+                        to="/facility/$facilityId/billing/invoices/$invoiceId"
+                        params={{
+                          facilityId,
+                          invoiceId: payment.target_invoice.id,
+                        }}
                         className="text-lg font-medium text-primary hover:underline"
                       >
                         {t("view_invoice")}
@@ -386,7 +392,11 @@ function PaymentReconciliationShow({
                 <div className="mt-4 flex justify-end flex-col sm:flex-row gap-2">
                   <Button variant="outline" size="sm" asChild>
                     <Link
-                      href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
+                      to="/facility/$facilityId/billing/invoices/$invoiceId"
+                      params={{
+                        facilityId,
+                        invoiceId: payment.target_invoice.id,
+                      }}
                     >
                       <Eye className="size-4" />
                       {t("view_invoice")}
@@ -394,7 +404,11 @@ function PaymentReconciliationShow({
                   </Button>
                   <Button variant="outline" size="sm" asChild>
                     <Link
-                      href={`/facility/${facilityId}/billing/invoice/${payment.target_invoice.id}/print`}
+                      to="/facility/$facilityId/billing/invoice/$invoiceId/print"
+                      params={{
+                        facilityId,
+                        invoiceId: payment.target_invoice.id,
+                      }}
                     >
                       <PrinterIcon className="size-4" />
                       {t("print_invoice")}
@@ -446,7 +460,8 @@ function PaymentReconciliationShow({
               <div className="space-y-2">
                 <Button className="w-full" variant="outline" asChild>
                   <Link
-                    href={`/facility/${facilityId}/billing/payments/${paymentReconciliationId}/print`}
+                    to="/facility/$facilityId/billing/payments/$paymentReconciliationId/print"
+                    params={{ facilityId, paymentReconciliationId }}
                     className="flex items-center w-full relative"
                   >
                     <PrinterIcon className="size-4" />
@@ -456,7 +471,11 @@ function PaymentReconciliationShow({
                 {payment.target_invoice && (
                   <Button className="w-full" variant="outline" asChild>
                     <Link
-                      href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
+                      to="/facility/$facilityId/billing/invoices/$invoiceId"
+                      params={{
+                        facilityId,
+                        invoiceId: payment.target_invoice.id,
+                      }}
                       className="flex items-center w-full relative"
                     >
                       <Eye className="size-4" />
@@ -546,7 +565,8 @@ function PaymentReconciliationShow({
                 </Button>
                 <Button variant="outline" className="w-full" asChild>
                   <Link
-                    href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}
+                    to="/facility/$facilityId/billing/account/$accountId"
+                    params={{ facilityId, accountId: payment.account?.id }}
                   >
                     <ExternalLink className="size-4" />
                     {t("view_account")}

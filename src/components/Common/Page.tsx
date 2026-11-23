@@ -17,16 +17,16 @@ export default function Page(props: PageProps) {
   useShortcutSubContext(props.shortCutContext);
 
   return (
-    <div className={cn("md:px-6 py-0", props.className)} style={props.style}>
-      <div className="flex flex-col justify-between gap-2 px-3 md:flex-row md:items-center md:gap-6 md:px-0">
+    <div className={cn("py-4", props.className)} style={props.style}>
+      <div>
         <PageTitle
           changePageMetadata={props.changePageMetadata}
           title={props.title}
           componentRight={props.componentRight}
+          actions={props.options}
           isInsidePage={true}
           hideTitleOnPage={props.hideTitleOnPage}
         />
-        {props.options}
       </div>
       {props.children}
     </div>

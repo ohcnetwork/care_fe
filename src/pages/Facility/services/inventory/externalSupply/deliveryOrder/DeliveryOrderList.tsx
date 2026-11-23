@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -13,6 +12,9 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { externalSupplyListSearch } from "@/lib/router/search/inventory";
 import query from "@/Utils/request/query";
 
 import DeliveryOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/DeliveryOrderTable";
@@ -35,7 +37,7 @@ export function DeliveryOrderList({
 }: Props) {
   const { t } = useTranslation();
 
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams, setQueryParams] = useQueryParams(externalSupplyListSearch);
 
   const TABS_CONFIG = internal
     ? isRequester
@@ -62,10 +64,13 @@ export function DeliveryOrderList({
       ] as const);
 
   type Tab = (typeof TABS_CONFIG)[number]["value"];
-  const currentTab = (qParams.tab as Tab) || TABS_CONFIG[0].value;
+  // An unknown `tab` selects the first tab, as the request does.
+  const currentTab: Tab =
+    TABS_CONFIG.find((tab) => tab.value === qParams.tab)?.value ??
+    TABS_CONFIG[0].value;
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: externalSupplyListSearch,
     limit: 14,
-    disableCache: true,
   });
 
   const handleTabChange = (value: string) => {
@@ -146,8 +151,8 @@ export function DeliveryOrderList({
               <Button
                 variant="primary"
                 onClick={() =>
-                  navigate(
-                    getInventoryBasePath(
+                  navigate({
+                    href: getInventoryBasePath(
                       facilityId,
                       locationId,
                       internal,
@@ -155,7 +160,7 @@ export function DeliveryOrderList({
                       isRequester,
                       "new",
                     ),
-                  )
+                  })
                 }
               >
                 <CareIcon icon="l-plus" />
@@ -167,17 +172,18 @@ export function DeliveryOrderList({
         </div>
 
         <Tabs value={currentTab} onValueChange={handleTabChange}>
-          <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-            {TABS_CONFIG.map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className="border-b-3 px-2.5 py-1 font-semibold text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t(tab.label)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="w-full overflow-x-auto">
+            <TabsList
+              variant="line"
+              className="justify-evenly sm:justify-start"
+            >
+              {TABS_CONFIG.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value}>
+                  {t(tab.label)}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
           {TABS_CONFIG.map((tab) => (
             <TabsContent

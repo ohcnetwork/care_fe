@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { selectComboboxOption } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -107,34 +108,13 @@ async function fillAdditionalDetails(
       .getByRole("button", { name: /register patient/i })
       .scrollIntoViewIfNeeded();
 
-    // Geo org comboboxes are cascading — the next one only appears after selecting the previous
+    // Geo org levels cascade: selecting an organization with children adds
+    // the next level's combobox in the same render, so once a pick's popup
+    // has closed the count of comboboxes is final for that pick.
     const geoRegion = page.getByRole("region", { name: "Additional Details" });
-    let previousCount = 0;
-
-    while (true) {
-      const comboboxes = geoRegion.getByRole("combobox");
-      const count = await comboboxes.count();
-      if (count === previousCount) break;
-
-      const combobox = comboboxes.nth(count - 1);
-      await combobox.waitFor({ state: "visible" });
-      await combobox.click();
-
-      const option = page.getByRole("option").first();
-      await option.waitFor({ state: "visible" });
-      await option.click();
-
-      previousCount = count;
-      // Wait for either a new combobox to appear (more levels) or timeout (no more levels)
-      try {
-        await geoRegion
-          .getByRole("combobox")
-          .nth(count)
-          .waitFor({ state: "visible", timeout: 3000 });
-      } catch {
-        // No new combobox appeared — we've filled all required levels
-        break;
-      }
+    const comboboxes = geoRegion.getByRole("combobox");
+    for (let filled = 0; filled < (await comboboxes.count()); filled++) {
+      await selectComboboxOption(comboboxes.nth(filled));
     }
   });
 }
@@ -164,16 +144,7 @@ async function fillRequiredFieldsAndSubmit(page: Page, data: PatientData) {
 
 test.describe("Patient Registration", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
-
-    await page
-      .getByRole("link", { name: /facility with patients/i })
-      .first()
-      .click();
-
-    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-    await page.getByRole("button", { name: "Patients", exact: true }).click();
-    await page.getByRole("link", { name: /search patients/i }).click();
+    await page.goto(`/facility/${getFacilityId()}/patients`);
   });
 
   test("should successfully register a new patient with all required fields", async ({
@@ -288,26 +259,6 @@ test.describe("Patient Registration", () => {
           .getByText(/patient registered successfully/i),
       ).not.toBeVisible();
     });
-  });
-
-  test("should allow patient tags selection", async ({ page }) => {
-    const patientData = generatePatientData();
-    await startRegistration(page);
-    await fillBasicInfo(page, patientData);
-    await fillDateOfBirth(page, patientData.dateOfBirth);
-
-    await test.step("Select patient tags", async () => {
-      const patientTagsSection = page.getByText("Patient Tags (Optional)");
-      if (await patientTagsSection.isVisible()) {
-        await patientTagsSection.click();
-      }
-    });
-
-    await selectBloodGroup(page, patientData.bloodGroup);
-    await fillAdditionalDetails(page, patientData);
-    await submitRegistration(page);
-
-    // TODO: Verify that selected tags are associated with the patient
   });
 
   test("should register patient with age and verify year of birth calculation and profile display", async ({

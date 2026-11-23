@@ -12,6 +12,7 @@ import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -34,6 +35,7 @@ import {
 } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { patientIdentifierConfigListSearch } from "@/lib/router/search/admin";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -111,8 +113,8 @@ export default function PatientIdentifierConfigList({
   // reachable by superusers; facility-level configs follow facility permissions.
   const canWrite = !facilityId || canWritePatientIdentifierConfig;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: patientIdentifierConfigListSearch,
     limit: 15,
-    disableCache: true,
     defaultQueryParams: {
       status: PatientIdentifierConfigStatus.active,
     },
@@ -202,7 +204,7 @@ export default function PatientIdentifierConfigList({
                     {t("add_patient_identifier_config")}
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="overflow-y-auto">
+                <SheetContent size="md" className="overflow-hidden">
                   <SheetHeader>
                     <SheetTitle>
                       {selectedConfig && "id" in selectedConfig
@@ -215,7 +217,7 @@ export default function PatientIdentifierConfigList({
                         : t("manage_instance_patient_identifier_config")}
                     </SheetDescription>
                   </SheetHeader>
-                  <div className="mt-6 pb-6">
+                  <SheetBody>
                     <PatientIdentifierConfigForm
                       facilityId={facilityId}
                       configId={
@@ -225,7 +227,7 @@ export default function PatientIdentifierConfigList({
                       }
                       onSuccess={handleSheetClose}
                     />
-                  </div>
+                  </SheetBody>
                 </SheetContent>
               </Sheet>
             )}
@@ -293,7 +295,7 @@ export default function PatientIdentifierConfigList({
             </div>
             {/* Desktop Table View */}
             <div className="hidden md:block">
-              <div className="rounded-lg border">
+              <div>
                 <Table>
                   <TableHeader className="bg-gray-100">
                     <TableRow>

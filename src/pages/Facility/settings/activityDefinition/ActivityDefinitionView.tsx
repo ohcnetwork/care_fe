@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -28,6 +28,7 @@ import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading"
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import { Code } from "@/types/base/code/code";
 import {
   ACTIVITY_DEFINITION_STATUS_COLORS,
@@ -35,7 +36,6 @@ import {
 } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { ArrowLeft, ExternalLinkIcon } from "lucide-react";
-import { Link } from "raviger";
 
 type DuoToneIconName = keyof typeof duoToneIcons;
 
@@ -88,7 +88,9 @@ export default function ActivityDefinitionView({
         queryClient.invalidateQueries({
           queryKey: ["activityDefinition", activityDefinitionSlug],
         });
-        navigate(`/facility/${facilityId}/settings/activity_definitions`, {
+        navigate({
+          to: "/facility/$facilityId/settings/activity_definitions",
+          params: { facilityId },
           replace: true,
         });
       },
@@ -176,9 +178,13 @@ export default function ActivityDefinitionView({
             <Button
               variant="outline"
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/activity_definitions/${definition.slug}/edit`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/settings/activity_definitions/$activityDefinitionSlug/edit",
+                  params: {
+                    facilityId,
+                    activityDefinitionSlug: definition.slug,
+                  },
+                })
               }
             >
               <CareIcon icon="l-pen" className=" size-4" />
@@ -274,8 +280,8 @@ export default function ActivityDefinitionView({
                       <div className="flex items-center gap-1">
                         <p className="font-medium">{specimen.title}</p>
                         <Link
-                          basePath="/"
-                          href={`/facility/${facilityId}/settings/specimen_definitions/${specimen.slug}`}
+                          to="/facility/$facilityId/settings/specimen_definitions/$specimenSlug"
+                          params={{ facilityId, specimenSlug: specimen.slug }}
                           className="flex items-center gap-1"
                         >
                           <ExternalLinkIcon className="size-3" />
@@ -312,8 +318,11 @@ export default function ActivityDefinitionView({
                         <div className="flex items-center gap-1">
                           <p className="font-medium">{observation.title}</p>
                           <Link
-                            basePath="/"
-                            href={`/facility/${facilityId}/settings/observation_definitions/${observation.slug}`}
+                            to="/facility/$facilityId/settings/observation_definitions/$observationSlug"
+                            params={{
+                              facilityId,
+                              observationSlug: observation.slug,
+                            }}
                             className="flex items-center gap-1"
                           >
                             <ExternalLinkIcon className="size-3" />
@@ -356,8 +365,8 @@ export default function ActivityDefinitionView({
                         <div className="flex items-center gap-1">
                           <p className="font-medium">{chargeItem.title}</p>
                           <Link
-                            basePath="/"
-                            href={`/facility/${facilityId}/settings/charge_item_definitions/${chargeItem.slug}`}
+                            to="/facility/$facilityId/settings/charge_item_definitions/$slug"
+                            params={{ facilityId, slug: chargeItem.slug }}
                             className="flex items-center gap-1"
                           >
                             <ExternalLinkIcon className="size-3" />
