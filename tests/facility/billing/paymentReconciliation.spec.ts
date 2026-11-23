@@ -145,22 +145,25 @@ test.describe("Payment Reconciliation", () => {
     ).not.toBeVisible();
   });
 
-  test("should show validation error when submitting empty payment", async ({
+  test("only enables recording a payment for a positive amount", async ({
     page,
   }) => {
-    // Open Record Payment
     await page.getByRole("button", { name: /advance/i }).click();
+    const amount = page.getByRole("textbox", { name: "Amount Paid" });
+    const recordPayment = page.getByRole("button", {
+      name: /record payment/i,
+    });
 
-    // Click Record Payment without filling anything
-    await page.getByRole("button", { name: /record payment/i }).click();
+    await expect(recordPayment).toBeDisabled();
+    for (const value of ["0", "0.00"]) {
+      await amount.fill(value);
+      await expect(recordPayment).toBeDisabled();
+    }
 
-    // Verify validation error is shown
-    const paymentAmountSection = page
-      .locator("div")
-      .filter({ hasText: /^Amount Paid/ })
-      .filter({ hasText: /Must be a valid number$/ });
-
-    await expect(paymentAmountSection).toBeVisible();
+    await amount.fill("0.01");
+    await expect(recordPayment).toBeEnabled();
+    await amount.clear();
+    await expect(recordPayment).toBeDisabled();
   });
 
   test("should record payment twice without refreshing page with location cache", async ({

@@ -91,7 +91,10 @@ export default function LocationForm({
     bedNames: z
       .array(
         z.object({
-          name: z.string().min(1, { message: t("field_required") }),
+          name: z
+            .string()
+            .trim()
+            .min(1, { message: t("field_required") }),
         }),
       )
       .default([]),

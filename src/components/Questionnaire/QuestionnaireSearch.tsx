@@ -43,6 +43,7 @@ interface QuestionnaireSearchProps {
   onSelect?: (questionnaire: QuestionnaireRead) => void;
   subjectType?: string;
   facilityId?: string;
+  excludeIds?: readonly string[];
 
   disabled?: boolean;
   size?: React.ComponentProps<typeof Button>["size"];
@@ -55,6 +56,7 @@ export function QuestionnaireSearch({
   onSelect = (selected) => navigate({ href: `questionnaire/${selected.id}` }),
   subjectType,
   facilityId,
+  excludeIds = [],
 
   disabled,
 }: QuestionnaireSearchProps) {
@@ -90,7 +92,9 @@ export function QuestionnaireSearch({
     }),
     enabled: isOpen && !disabled,
   });
-  const questionnaires = data?.results ?? [];
+  const questionnaires = (data?.results ?? []).filter(
+    (questionnaire) => !excludeIds.includes(questionnaire.id),
+  );
 
   const handleOpenChange = (open: boolean) => {
     if (open && disabled) return;

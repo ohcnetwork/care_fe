@@ -172,7 +172,7 @@ export default function ReferralAvailabilitySettings({
         entity_id: scope.entityId,
         name: search || undefined,
         status: status === "all" ? undefined : status,
-        ordering: "name",
+        ordering: "-created_date",
         limit: PAGE_SIZE,
         offset: (page - 1) * PAGE_SIZE,
       },

@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { PlusIcon, SearchIcon } from "lucide-react";
+import { ClipboardListIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
@@ -162,9 +163,15 @@ export const EncounterServiceRequestTab = () => {
               readOnly={!canWriteClinicalData}
             />
           ) : (
-            <div className="p-6 text-center text-muted-foreground">
-              {t("no_service_requests_found")}
-            </div>
+            <EmptyState
+              icon={<ClipboardListIcon aria-hidden="true" />}
+              title={t("no_service_requests_found")}
+              description={
+                qParams.search || qParams.status || qParams.priority
+                  ? t("adjust_service_request_filters")
+                  : undefined
+              }
+            />
           )}
         </FramePanel>
 

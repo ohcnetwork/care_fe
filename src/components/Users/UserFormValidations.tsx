@@ -1,8 +1,7 @@
-import { Trans } from "react-i18next";
+import { Circle, CircleCheck, CircleX } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 export type Gender = "male" | "female" | "non_binary" | "transgender";
 
@@ -16,41 +15,51 @@ type ValidationHelperProps = {
   successMessage: string;
   isInputEmpty: boolean;
 };
+
+const hintIconClassName = "mt-0.5 size-4 shrink-0";
+
 export const ValidationHelper = ({
   validations,
   successMessage,
   isInputEmpty,
 }: ValidationHelperProps) => {
-  const unfulfilledValidations = validations.filter(
-    (validation) => !validation.fulfilled,
-  );
+  const { t } = useTranslation();
+  const allValid =
+    !isInputEmpty && validations.every((validation) => validation.fulfilled);
 
-  const allValid = unfulfilledValidations.length === 0 && !isInputEmpty;
+  if (allValid) {
+    return (
+      <p className="flex items-start gap-1.5 text-sm text-primary">
+        <CircleCheck aria-hidden="true" className={hintIconClassName} />
+        {successMessage}
+      </p>
+    );
+  }
 
   return (
-    <div>
-      {isInputEmpty &&
-        validations.map((validation, index) => (
-          <div key={index} className="text-gray-500 mb-2 text-sm">
-            <Trans i18nKey={validation.description} />
-          </div>
-        ))}
-      {!isInputEmpty &&
-        !allValid &&
-        unfulfilledValidations.map((validation, index) => (
-          <div key={index} className="text-gray-500 mb-2 text-sm">
-            <Trans i18nKey={validation.description} />
-          </div>
-        ))}
-      {allValid && (
-        <>
-          <CareIcon icon="l-check-circle" className="text-sm text-green-500" />
-          <span className="text-green-600 mt-3 ml-1 text-sm">
-            {successMessage}
-          </span>
-        </>
-      )}
-    </div>
+    <ul className="flex flex-col gap-1 text-sm text-pretty text-soft-foreground">
+      {validations.map((validation) => {
+        const met = !isInputEmpty && validation.fulfilled;
+        const Icon = met ? CircleCheck : Circle;
+        return (
+          <li
+            key={validation.description}
+            className={cn(
+              "flex items-start gap-1.5 [&_strong]:font-medium",
+              met && "text-primary",
+            )}
+          >
+            <Icon aria-hidden="true" className={hintIconClassName} />
+            <span>
+              <span className="sr-only">
+                {t(met ? "completed" : "incomplete")}:{" "}
+              </span>
+              <Trans i18nKey={validation.description} />
+            </span>
+          </li>
+        );
+      })}
+    </ul>
   );
 };
 
@@ -60,30 +69,24 @@ export const validateRule = (
   isInitialRender: boolean = false,
   successMessage: React.ReactNode,
 ) => {
+  const Icon = isInitialRender
+    ? Circle
+    : isConditionMet
+      ? CircleCheck
+      : CircleX;
   return (
-    <div>
-      {isInitialRender ? (
-        <CareIcon icon="l-circle" className="text-sm text-gray-500" />
-      ) : isConditionMet ? (
-        <CareIcon icon="l-check-circle" className="text-sm text-green-500" />
-      ) : (
-        <CareIcon icon="l-times-circle" className="text-sm text-red-500" />
-      )}{" "}
-      <span
-        className={cn(
-          isInitialRender
-            ? "text-black text-sm"
-            : isConditionMet
-              ? "text-primary-500 text-sm"
-              : "text-red-500 text-sm",
-        )}
-      >
-        {isInitialRender
-          ? initialMessage
+    <p
+      className={cn(
+        "flex items-start gap-1.5 text-sm",
+        isInitialRender
+          ? "text-soft-foreground"
           : isConditionMet
-            ? successMessage
-            : initialMessage}
-      </span>
-    </div>
+            ? "text-primary"
+            : "text-destructive",
+      )}
+    >
+      <Icon aria-hidden="true" className={hintIconClassName} />
+      {isInitialRender || !isConditionMet ? initialMessage : successMessage}
+    </p>
   );
 };

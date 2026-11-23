@@ -24,7 +24,7 @@ import {
 import {
   fieldTriggerLayout,
   fieldTriggerSurface,
-  invalidTriggerOutline,
+  invalidTriggerRing,
   triggerFocus,
 } from "@/components/ui/field-trigger-styles";
 
@@ -74,7 +74,7 @@ export default function Autocomplete({
   inputPlaceholder,
   noOptionsMessage,
   disabled,
-  align = "center",
+  align = "start",
   className,
   popoverClassName,
   popoverContentClassName,
@@ -88,6 +88,7 @@ export default function Autocomplete({
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
+  const controlRef = React.useRef<HTMLDivElement>(null);
   const isMobile = useBreakpoints({ default: true, sm: false });
   const selectedOption = options.find((option) => option.value === value);
   const displayText = selectedOption?.label || (freeInput ? value : "");
@@ -113,7 +114,7 @@ export default function Autocomplete({
         fieldTriggerLayout,
         fieldTriggerSurface,
         triggerFocus,
-        invalidTriggerOutline,
+        invalidTriggerRing,
         "min-w-0 flex-1 justify-between font-normal",
         className,
         popoverClassName,
@@ -247,14 +248,19 @@ export default function Autocomplete({
         </Drawer>
       ) : (
         <>
-          <ButtonGroup className="w-full min-w-0">
+          <ButtonGroup ref={controlRef} className="w-full min-w-0">
             <ComboboxTrigger render={triggerButton} showChevron={false} />
             {clearButton}
           </ButtonGroup>
+          {/* Anchored to the whole control (trigger + clear) and start-aligned; narrow
+              triggers get the standard popover width so options don't wrap.
+              `data-chips={false}`: a custom anchor here is not a chips input. */}
           <ComboboxContent
+            anchor={controlRef}
+            data-chips={false}
             align={align}
             className={cn(
-              "flex w-(--anchor-width) min-h-40 flex-col",
+              "flex w-(--anchor-width) min-w-[max(var(--anchor-width),--spacing(72))] min-h-40 flex-col",
               popoverContentClassName,
             )}
           >

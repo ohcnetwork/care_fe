@@ -31,6 +31,7 @@ interface ImportMetaEnv {
   readonly REACT_OBSERVATION_PLOTS_CONFIG_URL?: string;
   readonly REACT_APP_RESEND_OTP_TIMEOUT?: string;
   readonly REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB?: string;
+  readonly REACT_APP_MAX_FILE_UPLOAD_SIZE_MB?: string;
   readonly REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT?: string;
   readonly REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED?: string;
   readonly REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG?: string;

@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -9,15 +8,25 @@ import {
   FormControl,
   FormDescription,
   FormField,
-  FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { SubsectionTitle } from "@/components/ui/typography";
+import {
+  UserFormList,
+  UserFormListHeader,
+  UserFormListHeaderCell,
+  UserFormListRow,
+} from "@/components/Users/UserFormRow";
+import {
+  UserFormItem,
+  useMobileAddUser,
+} from "@/components/Users/UserFormSection";
 import { UserQualification } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 import query from "@/Utils/request/query";
+
+const COLUMNS = "sm:grid-cols-[--spacing(36)_1.3fr_1fr_var(--row-action)]";
 
 interface QualificationFields {
   qualification: UserQualification[];
@@ -25,6 +34,7 @@ interface QualificationFields {
 
 export function UserQualificationFields() {
   const { t } = useTranslation();
+  const mobile = useMobileAddUser();
   const { control } = useFormContext<QualificationFields>();
   const { fields, append, remove } = useFieldArray({
     control,
@@ -44,156 +54,167 @@ export function UserQualificationFields() {
     JSON.stringify([degree.system, degree.code]);
 
   return (
-    <section className="space-y-4 border-t border-border pt-6">
-      <div>
-        <SubsectionTitle>{t("profile_qualifications")}</SubsectionTitle>
-        <p className="text-sm text-muted-foreground">
-          {t("profile_qualifications_description")}
-        </p>
-      </div>
-      {isError && (
-        <div role="alert" className="text-sm text-destructive">
-          {t("profile_degrees_load_error")}
-          <Button type="button" variant="link" onClick={() => refetch()}>
-            {t("retry")}
-          </Button>
-        </div>
-      )}
-      {degrees?.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          {t("profile_no_degrees_available")}
-        </p>
-      )}
-      {fields.map((item, index) => (
-        <fieldset
-          key={item.id}
-          className="space-y-3 rounded-lg border border-border p-4"
-        >
-          <legend className="px-1 text-sm font-medium">
-            {t("profile_qualification_number", { number: index + 1 })}
-          </legend>
-          <FormField
-            control={control}
-            name={`qualification.${index}.degree`}
-            render={({ field, fieldState }) => {
-              const options = (degrees || []).map((degree) => ({
-                value: degreeKey(degree),
-                label: degree.display || degree.code,
-              }));
-              const unavailable =
-                degrees &&
-                field.value.code &&
-                !options.some(
-                  (option) => option.value === degreeKey(field.value),
-                );
-              // Existing credentials can refer to degrees removed from the catalogue.
-              if (
-                field.value.code &&
-                !options.some(
-                  (option) => option.value === degreeKey(field.value),
-                )
-              ) {
-                options.unshift({
-                  value: degreeKey(field.value),
-                  label: field.value.code,
-                });
-              }
-              return (
-                <FormItem>
-                  <FormLabel aria-required>{t("profile_degree")}</FormLabel>
-                  <FormControl>
-                    <Autocomplete
-                      ref={field.ref}
-                      options={options}
-                      value={field.value.code ? degreeKey(field.value) : ""}
-                      onChange={(value) => {
-                        if (!value) {
-                          field.onChange({ code: "", system: "" });
-                          return;
-                        }
-                        if (value === degreeKey(field.value)) return;
-                        const degree = degrees?.find(
-                          (degree) => degreeKey(degree) === value,
-                        );
-                        if (degree) {
-                          field.onChange({
-                            code: degree.code,
-                            system: degree.system,
-                          });
-                        }
-                      }}
-                      isLoading={isLoading}
-                      disabled={isError}
-                      placeholder={t("profile_select_degree")}
-                      inputPlaceholder={t("profile_search_degrees")}
-                      className="w-full"
-                    />
-                  </FormControl>
-                  {unavailable && !fieldState.error && (
-                    <FormDescription>
-                      {t("profile_degree_unavailable")}
-                    </FormDescription>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
-          <FormField
-            control={control}
-            name={`qualification.${index}.issuer`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("profile_issuer")}</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`qualification.${index}.registration_number`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("registration_number")}</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex justify-end">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => remove(index)}
-            >
-              <Trash2 className="size-4" />
-              {t("profile_remove_qualification", { number: index + 1 })}
-            </Button>
-          </div>
-        </fieldset>
-      ))}
-      <Button
-        type="button"
-        variant="outline"
-        disabled={isLoading || isError || !degrees?.length}
-        onClick={() =>
-          append({
+    <UserFormList
+      title={t("profile_qualifications")}
+      description={t("profile_qualifications_description")}
+      addLabel={t("profile_add_qualification")}
+      addDisabled={isLoading || isError || !degrees?.length}
+      count={fields.length}
+      onRemove={remove}
+      onAdd={() =>
+        append(
+          {
             degree: { code: "", system: "" },
             issuer: "",
             registration_number: "",
             meta: {},
-          })
-        }
-      >
-        <Plus className="size-4" />
-        {t("profile_add_qualification")}
-      </Button>
-    </section>
+          },
+          { shouldFocus: !mobile },
+        )
+      }
+      notice={
+        <>
+          {isError && (
+            <div role="alert" className="text-sm text-destructive">
+              {t("profile_degrees_load_error")}
+              <Button type="button" variant="link" onClick={() => refetch()}>
+                {t("retry")}
+              </Button>
+            </div>
+          )}
+          {degrees?.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              {t("profile_no_degrees_available")}
+            </p>
+          )}
+        </>
+      }
+      headers={
+        <UserFormListHeader columns={COLUMNS}>
+          <UserFormListHeaderCell required>
+            {t("profile_degree")}
+          </UserFormListHeaderCell>
+          <UserFormListHeaderCell>{t("profile_issuer")}</UserFormListHeaderCell>
+          <UserFormListHeaderCell>
+            {t("registration_number")}
+          </UserFormListHeaderCell>
+          <span />
+        </UserFormListHeader>
+      }
+    >
+      {(removeAt) =>
+        fields.map((item, index) => (
+          <UserFormListRow
+            key={item.id}
+            columns={COLUMNS}
+            title={t("profile_qualification_number", { number: index + 1 })}
+            removeLabel={t("profile_remove_qualification", {
+              number: index + 1,
+            })}
+            onRemove={() => removeAt(index)}
+          >
+            <FormField
+              control={control}
+              name={`qualification.${index}.degree`}
+              render={({ field, fieldState }) => {
+                const options = (degrees || []).map((degree) => ({
+                  value: degreeKey(degree),
+                  label: degree.display || degree.code,
+                }));
+                const unavailable =
+                  degrees &&
+                  field.value.code &&
+                  !options.some(
+                    (option) => option.value === degreeKey(field.value),
+                  );
+                // Existing credentials can refer to degrees removed from the catalogue.
+                if (
+                  field.value.code &&
+                  !options.some(
+                    (option) => option.value === degreeKey(field.value),
+                  )
+                ) {
+                  options.unshift({
+                    value: degreeKey(field.value),
+                    label: field.value.code,
+                  });
+                }
+                return (
+                  <UserFormItem>
+                    <FormLabel aria-required className="sm:sr-only">
+                      {t("profile_degree")}
+                    </FormLabel>
+                    <FormControl>
+                      <Autocomplete
+                        ref={field.ref}
+                        options={options}
+                        value={field.value.code ? degreeKey(field.value) : ""}
+                        onChange={(value) => {
+                          if (!value) {
+                            field.onChange({ code: "", system: "" });
+                            return;
+                          }
+                          if (value === degreeKey(field.value)) return;
+                          const degree = degrees?.find(
+                            (degree) => degreeKey(degree) === value,
+                          );
+                          if (degree) {
+                            field.onChange({
+                              code: degree.code,
+                              system: degree.system,
+                            });
+                          }
+                        }}
+                        isLoading={isLoading}
+                        disabled={isError}
+                        placeholder={t("profile_select_degree")}
+                        inputPlaceholder={t("profile_search_degrees")}
+                        className="w-full"
+                      />
+                    </FormControl>
+                    {unavailable && !fieldState.error && (
+                      <FormDescription>
+                        {t("profile_degree_unavailable")}
+                      </FormDescription>
+                    )}
+                    <FormMessage />
+                  </UserFormItem>
+                );
+              }}
+            />
+            <FormField
+              control={control}
+              name={`qualification.${index}.issuer`}
+              render={({ field }) => (
+                <UserFormItem>
+                  <FormLabel className="sm:sr-only">
+                    {t("profile_issuer")}
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </UserFormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name={`qualification.${index}.registration_number`}
+              render={({ field }) => (
+                <UserFormItem>
+                  <FormLabel className="sm:sr-only">
+                    {t("registration_number")}
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </UserFormItem>
+              )}
+            />
+          </UserFormListRow>
+        ))
+      }
+    </UserFormList>
   );
 }

@@ -305,6 +305,44 @@ test.describe("Facility Location Creation", () => {
     });
   });
 
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    const bedBaseName = faker.word.words(1);
+
+    await test.step("Open parent location", async () => {
+      await page.locator('[data-slot="table-body"] tr').first().click();
+    });
+
+    await test.step("Set up bulk beds with customized names", async () => {
+      await page.getByRole("button", { name: "Add Location" }).click();
+      await page.getByRole("combobox", { name: "Location Form" }).click();
+      await page.getByRole("option", { name: "Bed" }).click();
+      await page.getByRole("textbox", { name: "Name" }).fill(bedBaseName);
+      await page
+        .getByRole("checkbox", { name: "Create Multiple Beds" })
+        .click();
+      await page
+        .getByRole("checkbox", { name: "Customize individual bed names" })
+        .click();
+    });
+
+    const bedNameInput = page.getByRole("textbox", {
+      name: /^Bed Number 1\b/i,
+    });
+    const createButton = page.getByRole("button", { name: "Create" });
+
+    await test.step("Whitespace-only bed name blocks creation", async () => {
+      await bedNameInput.fill("   ");
+      await expect(createButton).toBeDisabled();
+    });
+
+    await test.step("A real bed name allows creation again", async () => {
+      await bedNameInput.fill(`${bedBaseName} 1`);
+      await expect(createButton).toBeEnabled();
+    });
+  });
+
   test("Verify error when creating bed in root location", async ({ page }) => {
     await test.step("Attempt to create bed at root", async () => {
       await page.getByRole("button", { name: "Add Location" }).click();
