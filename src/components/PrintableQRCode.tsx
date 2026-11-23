@@ -55,7 +55,7 @@ export function PrintableQRCode({
               <div className="text-sm text-gray-600">{subtitle}</div>
             )}
             {value && (
-              <div className="font-semibold uppercase text-sm text-gray-700">
+              <div className="font-semibold uppercase text-sm text-gray-700 break-all">
                 {value}
               </div>
             )}

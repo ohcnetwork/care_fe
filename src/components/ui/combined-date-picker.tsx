@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { useState } from "react";
-import "react-day-picker/style.css";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -28,6 +27,7 @@ interface CombinedDatePickerProps {
   dateFormat?: string;
   disabled?: boolean;
   blockDate?: (date: Date) => boolean;
+  allowClear?: boolean;
 }
 
 export function CombinedDatePicker({
@@ -41,6 +41,7 @@ export function CombinedDatePicker({
   classes,
   dateFormat = "PPP",
   blockDate,
+  allowClear = false,
 }: CombinedDatePickerProps) {
   const { t } = useTranslation();
 
@@ -51,7 +52,7 @@ export function CombinedDatePicker({
   );
 
   const handleSelect = (date: Date | undefined) => {
-    if (!date) return;
+    if (!date && !allowClear) return;
     onChange(date);
   };
 
@@ -66,7 +67,7 @@ export function CombinedDatePicker({
           <Button
             variant="outline"
             className={cn(
-              "flex-1 justify-start text-left font-normal",
+              "flex-1 justify-start border-gray-300 text-left font-normal shadow-xs",
               !value && "text-gray-500",
               classes,
               buttonClassName,

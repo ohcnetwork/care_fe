@@ -1,38 +1,16 @@
 import { faker } from "@faker-js/faker";
 import { type Page, expect, test } from "@playwright/test";
-import { getEncounterId } from "tests/support/encounterId";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import { firstValueSetDisplay } from "tests/helper/valueSet";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
-let facilityId: string;
-let patientId: string;
-let encounterId: string;
 let diagnosisName: string;
 let questionnaireUrl: string;
 let status: string;
 let verification: string;
 let severity: string;
-const usedDiagnoses = new Set<string>(); // To track used diagnoses across tests so we don't add duplicate diagnoses
-
-const diagnosisOptions = [
-  "Chronic nontraumatic intracranial subdural haematoma",
-  "Malignant melanoma of skin of left wrist",
-  "Born in Nauru",
-  "Chronic respiratory failure due to obstructive sleep apnoea",
-  "Difficulty controlling anger",
-  "Lack of trust",
-  "Acquired arteriovenous malformation of vascular structure of gastrointestinal tract",
-  "Venous ulcer of left ankle",
-  "Feeling angry",
-  "Fetal heart sounds quiet",
-  "Small bowel enteroscopy normal",
-  "Ear smelly",
-  "Cholera",
-  "Osteonecrosis",
-  "Chronic pain",
-];
 
 const DIAGNOSIS_CLINICAL_STATUS = [
   "Active",
@@ -59,28 +37,29 @@ async function addDiagnosis(page: Page, severity?: string) {
     .filter({ hasText: /Add (another )?Diagnosis/i })
     .click();
   await page.getByPlaceholder(/Add (another )?Diagnosis/i).fill(diagnosisName);
-  await page.getByRole("option", { name: diagnosisName, exact: true }).click();
+  await page
+    .getByTestId("valueset-search-results")
+    .getByRole("option", { name: diagnosisName, exact: true })
+    .click();
 
   const diagnosisRow = page.getByRole("row", { name: diagnosisName });
 
   if (severity) {
     await diagnosisRow.getByRole("cell").nth(3).click();
     await page.getByRole("option", { name: severity }).click();
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
   }
 }
 
 test.describe("Diagnosis", () => {
   test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
-    patientId = getPatientId();
-    encounterId = getEncounterId();
-
-    const availableDiagnosesOptions = diagnosisOptions.filter(
-      (d) => !usedDiagnoses.has(d),
+    const facilityId = getFacilityId();
+    const { patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId);
+    diagnosisName = await firstValueSetDisplay(
+      "system-condition-code",
+      facilityId,
     );
-    diagnosisName = faker.helpers.arrayElement(availableDiagnosesOptions);
-    usedDiagnoses.add(diagnosisName);
 
     status = faker.helpers.arrayElement(DIAGNOSIS_CLINICAL_STATUS);
     verification = faker.helpers.arrayElement(DIAGNOSIS_VERIFICATION_STATUS);
@@ -107,8 +86,11 @@ test.describe("Diagnosis", () => {
 
     await diagnosisRow.getByRole("cell").nth(4).click();
     await page.getByRole("option", { name: verification, exact: true }).click();
+    await expect(diagnosisRow.getByRole("cell").nth(4)).toContainText(
+      verification,
+    );
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -120,14 +102,17 @@ test.describe("Diagnosis", () => {
     const historyDialog = page.getByRole("dialog", { name: "Past Diagnoses" });
     await historyDialog.waitFor({ state: "visible" });
 
-    const tableBody = historyDialog.locator('[data-slot="table-body"]');
-    await expect(tableBody).toContainText(diagnosisName);
-
+    // Each date group renders its OWN <tbody data-slot="table-body">
+    // (HistoricalRecordSelector/index.tsx) — a locator over that selector
+    // alone strict-mode-violates the moment records span more than one
+    // day. Target the specific row for the diagnosis JUST added instead.
     const diagnosisHistoryRow = historyDialog
-      .locator('[data-slot="table-body"] tr')
+      .locator("tr")
       .filter({ hasText: diagnosisName })
       .filter({ hasText: status });
 
+    await expect(diagnosisHistoryRow.first()).toBeVisible();
+    await expect(diagnosisHistoryRow.first()).toContainText(diagnosisName);
     await expect(diagnosisHistoryRow.first()).toContainText(status);
     await expect(diagnosisHistoryRow.first()).toContainText(severity);
     await expect(diagnosisHistoryRow.first()).toContainText(verification);
@@ -136,17 +121,8 @@ test.describe("Diagnosis", () => {
   test("verify duplicate diagnosis cannot be added", async ({ page }) => {
     await page.waitForLoadState("networkidle");
 
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Diagnosis/i })
-      .click();
-    await page
-      .getByPlaceholder(/Add (another )?Diagnosis/i)
-      .fill(diagnosisName);
-    await page
-      .getByRole("option", { name: diagnosisName, exact: true })
-      .click();
-    await page.getByRole("button", { name: "Submit" }).click();
+    await addDiagnosis(page);
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -155,20 +131,7 @@ test.describe("Diagnosis", () => {
     await page.goto(questionnaireUrl);
     await page.waitForLoadState("networkidle");
 
-    const duplicateDiagnosisName = faker.helpers.arrayElement([
-      ...usedDiagnoses,
-    ]);
-
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Diagnosis/i })
-      .click();
-    await page
-      .getByPlaceholder(/Add (another )?Diagnosis/i)
-      .fill(duplicateDiagnosisName);
-    await page
-      .getByRole("option", { name: duplicateDiagnosisName, exact: true })
-      .click();
+    await addDiagnosis(page);
 
     await expect(
       page
@@ -181,16 +144,25 @@ test.describe("Diagnosis", () => {
   test("add and display diagnosis with severity", async ({ page }) => {
     await addDiagnosis(page, "severe");
 
-    const diagnosisRow = page
-      .locator("div")
-      .filter({ hasText: /^DiagnosisStatusSeverityVerificationOnset/ })
-      .nth(1);
-    await expect(diagnosisRow).toBeVisible();
-    await expect(diagnosisRow.getByText("Status")).toBeVisible();
-    await expect(diagnosisRow.getByText("Severity")).toBeVisible();
-    await expect(diagnosisRow.getByText("Verification")).toBeVisible();
-    await expect(diagnosisRow.getByText("Onset")).toBeVisible();
+    const diagnosisSummary = page
+      .getByRole("region", { name: "Diagnoses", exact: true })
+      .getByRole("listitem")
+      .filter({ has: page.getByText(diagnosisName, { exact: true }) });
+    await expect(diagnosisSummary).toBeVisible();
+    await expect(
+      diagnosisSummary.getByText("Severe", { exact: true }),
+    ).toBeVisible();
+    await expect(diagnosisSummary.getByText(/^Onset\b/)).toBeVisible();
 
-    await expect(diagnosisRow.getByText(diagnosisName)).toBeVisible();
+    await page.goto(questionnaireUrl);
+    await page.getByRole("button", { name: "Diagnosis History" }).click();
+    const historyRow = page
+      .getByRole("dialog", { name: "Past Diagnoses" })
+      .getByRole("row")
+      .filter({ has: page.getByText(diagnosisName, { exact: true }) });
+    await expect(historyRow.getByText("Severe", { exact: true })).toBeVisible();
+    await expect(
+      historyRow.getByText("Confirmed", { exact: true }),
+    ).toBeVisible();
   });
 });

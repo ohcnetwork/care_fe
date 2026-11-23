@@ -1,86 +1,84 @@
 import { expect, test, type Page } from "@playwright/test";
-import { format, subDays } from "date-fns";
+import { selectFirstAvailableDepartment } from "tests/helper/departmentSelect";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import { adminApiHeaders, apiBaseUrl } from "tests/helper/questionnaireV2";
+import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Manage departments/teams association to an encounter", () => {
   let facilityId: string;
+  let patientId: string;
+  let encounterId: string;
 
-  test.beforeEach(async ({ page }) => {
+  // Each test gets its own encounter. Other specs create in-progress
+  // encounters without departments, so "the first encounter in the list"
+  // may have nothing to remove.
+  test.beforeEach(async () => {
     facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
-    );
-    await page.getByText("View Encounter").first().click();
-    await openDepartmentsDialog(page);
+    ({ patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId));
   });
 
+  const dialog = (page: Page) =>
+    page.getByRole("dialog", { name: "Manage Organizations" });
+
   async function openDepartmentsDialog(page: Page) {
+    await page.goto(
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+    );
     await page.getByRole("tab", { name: "Actions" }).click();
-    await page.getByRole("button", { name: "Update Department" }).click();
-  }
-
-  async function deleteOrganization(page: Page) {
     await page
-      .locator("button")
-      .filter({ has: page.locator(".lucide-trash-2") })
-      .first()
+      .getByRole("tabpanel", { name: "Actions" })
+      .getByRole("button", { name: "Update Department" })
       .click();
+    await expect(dialog(page)).toBeVisible();
   }
 
-  async function verifyDeleteSuccess(page: Page) {
+  test("Delete organization from encounter", async ({ page, request }) => {
+    const name = `Encounter department ${Date.now()}`;
+    const created = await request.post(
+      `${apiBaseUrl()}/api/v1/facility/${facilityId}/organizations/`,
+      {
+        headers: adminApiHeaders(),
+        data: { name, org_type: "dept", facility: facilityId },
+      },
+    );
+    expect(created.ok(), await created.text()).toBe(true);
+    const organization = (await created.json()) as { id: string };
+    const linked = await request.post(
+      `${apiBaseUrl()}/api/v1/encounter/${encounterId}/organizations_add/`,
+      {
+        headers: adminApiHeaders(),
+        data: { organization: organization.id },
+      },
+    );
+    expect(linked.ok(), await linked.text()).toBe(true);
+
+    await openDepartmentsDialog(page);
+    // The current departments list renders each one as a row with its name
+    // and a trash button.
+    const row = dialog(page)
+      .locator("div")
+      .filter({ has: page.getByText(name, { exact: true }) })
+      .filter({ has: page.locator(".lucide-trash-2") });
+    await row.last().getByRole("button").click();
+    await expectToast(page, "Organization removed successfully");
+    await expect(row).toHaveCount(0);
     await expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText("Organization removed successfully"),
-    ).toBeVisible({ timeout: 10000 });
-  }
-
-  async function selectAllOrganizationsTab(page: Page) {
-    await page.getByRole("tab", { name: "All Organizations" }).click();
-    await page.getByRole("combobox").click();
-  }
-
-  async function selectDepartment(page: Page, departmentName?: string) {
-    // Select specific department or first available department from dropdown
-    if (departmentName) {
-      await page.getByRole("option", { name: departmentName }).click();
-    } else {
-      await page.getByRole("option").first().click();
-    }
-  }
-
-  async function submitAddOrganization(page: Page) {
-    await page.getByRole("button", { name: "Add Organizations" }).click();
-  }
-
-  async function verifyOrganizationAdded(page: Page) {
-    await expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText("Organization added successfully"),
-    ).toBeVisible({ timeout: 10000 });
-  }
-
-  test("Delete organization from encounter", async ({ page }) => {
-    // Delete the organization
-    await deleteOrganization(page);
-    await verifyDeleteSuccess(page);
+      dialog(page).getByText("No organizations added yet"),
+    ).toBeVisible();
   });
 
   test("Add additional organization to existing encounter", async ({
     page,
   }) => {
-    // Select all organizations tab and open dropdown
-    await selectAllOrganizationsTab(page);
-
-    // Select department from dropdown
-    await selectDepartment(page);
-
-    await submitAddOrganization(page);
-    await verifyOrganizationAdded(page);
+    await openDepartmentsDialog(page);
+    await selectFirstAvailableDepartment(page, dialog(page));
+    await dialog(page)
+      .getByRole("button", { name: "Add Organizations" })
+      .click();
+    await expectToast(page, "Organization added successfully");
   });
 });

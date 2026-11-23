@@ -1,5 +1,5 @@
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +16,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   FacilityOrganizationParent,
@@ -53,9 +54,10 @@ export default function FacilityOrganizationList({
 
   const handleOrganizationSelect = useCallback(
     (organization: FacilityOrganizationRead) => {
-      navigate(
-        `/facility/${facilityId}/settings/departments/${organization.id}/${currentTab}`,
-      );
+      navigate({
+        to: "/facility/$facilityId/settings/departments/$id/$tab",
+        params: { facilityId, id: organization.id, tab: currentTab },
+      });
     },
     [facilityId, currentTab],
   );
@@ -114,11 +116,15 @@ export default function FacilityOrganizationList({
   const handleTabChange = useCallback(
     (tab: string) => {
       if (organizationId) {
-        navigate(
-          `/facility/${facilityId}/settings/departments/${organizationId}/${tab}`,
-        );
+        navigate({
+          to: "/facility/$facilityId/settings/departments/$id/$tab",
+          params: { facilityId, id: organizationId, tab },
+        });
       } else {
-        navigate(`/facility/${facilityId}/settings/departments`);
+        navigate({
+          to: "/facility/$facilityId/settings/departments",
+          params: { facilityId },
+        });
       }
     },
     [facilityId, organizationId],
@@ -126,9 +132,10 @@ export default function FacilityOrganizationList({
 
   const handleParentClick = useCallback(
     (parentId: string) => {
-      navigate(
-        `/facility/${facilityId}/settings/departments/${parentId}/${currentTab}`,
-      );
+      navigate({
+        to: "/facility/$facilityId/settings/departments/$id/$tab",
+        params: { facilityId, id: parentId, tab: currentTab },
+      });
     },
     [facilityId, currentTab],
   );
@@ -146,7 +153,7 @@ export default function FacilityOrganizationList({
     <>
       <Page title={t("departments_or_teams")} hideTitleOnPage className="p-0">
         <div className="container mx-auto">
-          <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4">
+          <div className="flex flex-col sm:flex-row items-start justify-between pb-2 pt-4">
             <h3>{t("departments_or_teams")}</h3>
           </div>
           <div className="flex">
@@ -167,12 +174,19 @@ export default function FacilityOrganizationList({
                           asChild
                           className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
                           onClick={() =>
-                            navigate(
-                              `/facility/${facilityId}/settings/departments`,
-                            )
+                            navigate({
+                              to: "/facility/$facilityId/settings/departments",
+                              params: { facilityId },
+                            })
                           }
                         >
-                          <button type="button">{t("departments")}</button>
+                          <Button
+                            variant="link"
+                            type="button"
+                            className="h-auto p-0"
+                          >
+                            {t("departments")}
+                          </Button>
                         </BreadcrumbLink>
                       </BreadcrumbItem>
                       <BreadcrumbSeparator />
@@ -184,7 +198,13 @@ export default function FacilityOrganizationList({
                               className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
                               onClick={() => handleParentClick(parent.id)}
                             >
-                              <button type="button">{parent.name}</button>
+                              <Button
+                                variant="link"
+                                type="button"
+                                className="h-auto p-0"
+                              >
+                                {parent.name}
+                              </Button>
                             </BreadcrumbLink>
                           </BreadcrumbItem>
                           <BreadcrumbSeparator />
@@ -226,17 +246,15 @@ export default function FacilityOrganizationList({
                         value={currentTab}
                         onValueChange={handleTabChange}
                       >
-                        <TabsList className="w-full justify-start border-b border-gray-300 bg-transparent p-0 h-auto rounded-none">
-                          {navItems.map((item) => (
-                            <TabsTrigger
-                              key={item.value}
-                              value={item.value}
-                              className="border-0 border-b-2 border-transparent px-2 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-                            >
-                              {item.title}
-                            </TabsTrigger>
-                          ))}
-                        </TabsList>
+                        <div className="w-full overflow-x-auto">
+                          <TabsList variant="line">
+                            {navItems.map((item) => (
+                              <TabsTrigger key={item.value} value={item.value}>
+                                {item.title}
+                              </TabsTrigger>
+                            ))}
+                          </TabsList>
+                        </div>
                       </Tabs>
                     </div>
                   </>

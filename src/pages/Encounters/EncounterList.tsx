@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { Check } from "lucide-react";
+import { Check, Search } from "lucide-react";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { encounterListFiltersAtom } from "@/atoms/encounterFilterAtom";
+import {
+  encounterFilterStorageKey,
+  encounterListFiltersAtom,
+} from "@/atoms/encounterFilterAtom";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -17,9 +20,15 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import {
   careTeamFilter,
   dateFilter,
   departmentFilter,
+  encounterClassFilter,
   encounterPriorityFilter,
   encounterStatusFilter,
   tagFilter,
@@ -32,16 +41,17 @@ import {
 } from "@/components/ui/multi-filter/utils/Utils";
 import {
   Popover,
+  PopoverAnchor,
   PopoverContent,
-  PopoverTrigger,
 } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
+import useAuthUser from "@/hooks/useAuthUser";
 
 import Page from "@/components/Common/Page";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
 import useFilters from "@/hooks/useFilters";
+import { encounterListSearch } from "@/lib/router/search/encounter";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import {
@@ -56,7 +66,11 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
-import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  parseLocalDate,
+} from "@/Utils/utils";
 import careConfig from "@careConfig";
 import { subDays } from "date-fns";
 
@@ -71,6 +85,10 @@ const SEARCH_WITH_EXTERNAL_IDENTIFIER = "external_identifier" as const;
 
 type SearchWith =
   typeof SEARCH_WITH_NAME | typeof SEARCH_WITH_EXTERNAL_IDENTIFIER;
+
+// URL calendar dates are local days; timestamps retain their explicit offset.
+const parseDateFilterValue = (value: string) =>
+  /^\d{4}-\d{2}-\d{2}$/.test(value) ? parseLocalDate(value) : new Date(value);
 
 const buildQueryParams = (
   facilityId: string,
@@ -96,13 +114,13 @@ const buildQueryParams = (
   if (created_date_after) {
     // Convert date string to datetime for API call
     params.created_date_after = dateTimeQueryString(
-      new Date(created_date_after),
+      parseDateFilterValue(created_date_after),
     );
   }
   if (created_date_before) {
     // Convert date string to datetime for API call (end of day)
     params.created_date_before = dateTimeQueryString(
-      new Date(created_date_before),
+      parseDateFilterValue(created_date_before),
       true,
     );
   }
@@ -136,8 +154,8 @@ export function EncounterList({
   encounterClass,
 }: EncounterListProps) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: encounterListSearch,
     limit: 15,
-    disableCache: true,
     cacheBlacklist: [
       "name",
       "encounter_id",
@@ -147,8 +165,11 @@ export function EncounterList({
     ],
   });
   const { t } = useTranslation();
-  const [, setSavedFilters] = useAtom(encounterListFiltersAtom);
-  const hasRestoredFilters = useRef(false);
+  const user = useAuthUser();
+  const filterScope = `${user.id}:${facilityId}`;
+  const storageKey = encounterFilterStorageKey("list", filterScope);
+  const [, setSavedFilters] = useAtom(encounterListFiltersAtom(filterScope));
+  const hasRestoredFilters = useRef<string | null>(null);
   const hasAppliedDefaultStatus = useRef(false);
   const [searchWith, setSearchWith] = useState<SearchWith>(
     qParams.external_identifier
@@ -172,6 +193,11 @@ export function EncounterList({
     organization,
     care_team_user,
   } = qParams;
+
+  // Class-specific lists fix the class in the route, so only the All list
+  // filters by, saves and restores an encounter class. A stray
+  // ?encounter_class= on a class-specific list is ignored.
+  const filtersByEncounterClass = !encounterClass;
 
   const getDefaultDateRange = () => {
     const today = new Date();
@@ -284,8 +310,8 @@ export function EncounterList({
 
   // Restore filters from sessionStorage on mount AND set default dates if needed
   useEffect(() => {
-    if (hasRestoredFilters.current) return;
-    hasRestoredFilters.current = true;
+    if (hasRestoredFilters.current === storageKey) return;
+    hasRestoredFilters.current = storageKey;
 
     const urlParams = new URLSearchParams(window.location.search);
     const restoredParams: Record<string, string | undefined> = {};
@@ -294,6 +320,7 @@ export function EncounterList({
     const hasUrlFilters =
       status ||
       priority ||
+      (filtersByEncounterClass && qParams.encounter_class) ||
       organization ||
       care_team_user ||
       qParams.tags ||
@@ -301,11 +328,13 @@ export function EncounterList({
 
     if (!hasUrlFilters) {
       try {
-        const stored = sessionStorage.getItem("encounter_list_filters");
+        const stored = sessionStorage.getItem(storageKey);
         if (stored) {
           const filters = JSON.parse(stored);
           if (filters.status) restoredParams.status = filters.status;
           if (filters.priority) restoredParams.priority = filters.priority;
+          if (filtersByEncounterClass && filters.encounterClass)
+            restoredParams.encounter_class = filters.encounterClass;
           if (filters.selectedOrg)
             restoredParams.organization = filters.selectedOrg.id;
           if (filters.selectedCareTeamMember)
@@ -346,7 +375,7 @@ export function EncounterList({
       updateQuery(restoredParams);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [storageKey]);
 
   const { data: queryEncounters, isFetching } = useQuery({
     queryKey: ["encounters", facilityId, qParams, encounterClass],
@@ -361,7 +390,9 @@ export function EncounterList({
           organization,
           care_team_user,
         ),
-        encounter_class: encounterClass,
+        encounter_class: filtersByEncounterClass
+          ? qParams.encounter_class
+          : encounterClass,
         external_identifier: searchQueryParams.external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
@@ -377,7 +408,7 @@ export function EncounterList({
   const { data: queryEncounter } = useQuery({
     queryKey: ["encounter", encounter_id],
     queryFn: query(encounterApi.get, {
-      pathParams: { id: encounter_id },
+      pathParams: { id: encounter_id ?? "" },
       queryParams: {
         facility: facilityId,
       },
@@ -431,6 +462,9 @@ export function EncounterList({
   const filters = [
     encounterStatusFilter("status", "multi"),
     encounterPriorityFilter("priority"),
+    ...(filtersByEncounterClass
+      ? [encounterClassFilter("encounter_class")]
+      : []),
     departmentFilter("organization"),
     careTeamFilter("care_team"),
     tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
@@ -450,6 +484,9 @@ export function EncounterList({
             break;
           case "priority":
             updates.priority = (value as string) || undefined;
+            break;
+          case "encounter_class":
+            updates.encounterClass = (value as string) || undefined;
             break;
           case "tags":
             updates.selectedTags = (value as TagConfig[]) ?? [];
@@ -545,8 +582,12 @@ export function EncounterList({
     created_date:
       created_date_after || created_date_before
         ? {
-            from: created_date_after ? new Date(created_date_after) : undefined,
-            to: created_date_before ? new Date(created_date_before) : undefined,
+            from: created_date_after
+              ? parseDateFilterValue(created_date_after)
+              : undefined,
+            to: created_date_before
+              ? parseDateFilterValue(created_date_before)
+              : undefined,
           }
         : undefined,
   });
@@ -608,7 +649,7 @@ export function EncounterList({
           : t("all"),
       })}
       componentRight={
-        <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">
+        <Badge variant="neutral" className="ml-2 w-max">
           {isFetching
             ? t("loading")
             : t("entity_count", {
@@ -619,114 +660,108 @@ export function EncounterList({
       }
     >
       <div className="space-y-4 mt-4 flex flex-col">
-        <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col overflow-visible">
-          <div className="flex flex-col overflow-visible">
-            <div className="flex flex-wrap items-center justify-between gap-2 p-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="relative w-full sm:w-auto sm:min-w-60">
-                  <Popover
-                    open={searchOptionsOpen && showSearchOptions}
-                    onOpenChange={setSearchOptionsOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <div className="relative">
-                        <input
-                          ref={searchInputRef}
-                          value={searchText}
-                          onChange={(event) => {
-                            const value = event.target.value;
-                            setSearchText(value);
-                            setSearchOptionsOpen(value.trim() !== "");
-                            setActiveSearchOptionIndex(0);
-                          }}
-                          onFocus={() => {
-                            if (showSearchOptions) {
-                              setSearchOptionsOpen(true);
-                            }
-                          }}
-                          onKeyDown={handleSearchInputKeyDown}
-                          placeholder={selectedSearchType.placeholder}
-                          className="h-9 w-full rounded-md border bg-white px-2 text-sm shadow-sm focus-visible:outline-none"
-                        />
-                      </div>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-(--radix-popover-trigger-width) p-0"
-                      align="start"
-                      onOpenAutoFocus={(event) => {
-                        event.preventDefault();
-                        searchInputRef.current?.focus();
-                      }}
-                    >
-                      <Command>
-                        <CommandList>
-                          <CommandGroup>
-                            {searchWithOptions.map((option, index) => (
-                              <CommandItem
-                                key={option.key}
-                                value={option.key}
-                                onSelect={() =>
-                                  handleSearchWithChange(option.key)
-                                }
-                                className={`flex items-center gap-2 ${
-                                  activeSearchOptionIndex === index
-                                    ? "bg-gray-100"
-                                    : ""
-                                }`}
-                                onMouseEnter={() =>
-                                  setActiveSearchOptionIndex(index)
-                                }
-                              >
-                                <div>
-                                  {searchText}{" "}
-                                  <span className="text-gray-500">
-                                    {option.label}
-                                  </span>
-                                </div>
-                                <Check
-                                  className={`ml-auto size-4 ${
-                                    option.key === searchWith
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  }`}
-                                />
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <PatientIdentifierFilter
-                  onSelect={(patientId, patientName) =>
-                    updateQuery({
-                      patient_filter: patientId,
-                      patient_name: patientName,
-                      created_date_after: undefined,
-                      created_date_before: undefined,
-                    })
-                  }
-                  placeholder={t("filter_by_identifier")}
-                  className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
-                  patientId={qParams.patient_filter}
-                  patientName={qParams.patient_name}
-                />
-                <MultiFilter
-                  selectedFilters={displaySelectedFilters}
-                  onFilterChange={handleFilterChange}
-                  onOperationChange={handleOperationChange}
-                  onClearAll={handleClearAll}
-                  onClearFilter={handleClearFilter}
-                  className="flex sm:flex-row flex-wrap sm:items-center"
-                  triggerButtonClassName="self-start sm:self-center"
-                  clearAllButtonClassName="self-center"
-                  facilityId={facilityId}
-                />
-              </div>
-            </div>
-
-            <Separator className="hidden md:block" />
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2.5">
+          <div className="relative w-full sm:w-auto sm:min-w-60">
+            <Popover
+              open={searchOptionsOpen && showSearchOptions}
+              onOpenChange={setSearchOptionsOpen}
+            >
+              <PopoverAnchor asChild>
+                <InputGroup>
+                  <InputGroupInput
+                    ref={searchInputRef}
+                    value={searchText}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      setSearchText(value);
+                      setSearchOptionsOpen(value.trim() !== "");
+                      setActiveSearchOptionIndex(0);
+                    }}
+                    onFocus={() => {
+                      if (showSearchOptions) {
+                        setSearchOptionsOpen(true);
+                      }
+                    }}
+                    onKeyDown={handleSearchInputKeyDown}
+                    placeholder={selectedSearchType.placeholder}
+                  />
+                  <InputGroupAddon>
+                    <Search aria-hidden="true" />
+                  </InputGroupAddon>
+                </InputGroup>
+              </PopoverAnchor>
+              <PopoverContent
+                className="w-(--anchor-width) p-0"
+                align="start"
+                onOpenAutoFocus={(event) => {
+                  event.preventDefault();
+                  searchInputRef.current?.focus();
+                }}
+                onCloseAutoFocus={(event) => {
+                  event.preventDefault();
+                }}
+              >
+                <Command>
+                  <CommandList>
+                    <CommandGroup>
+                      {searchWithOptions.map((option, index) => (
+                        <CommandItem
+                          key={option.key}
+                          value={option.key}
+                          onSelect={() => handleSearchWithChange(option.key)}
+                          className={`flex items-center gap-2 ${
+                            activeSearchOptionIndex === index ? "bg-accent" : ""
+                          }`}
+                          onMouseEnter={() => setActiveSearchOptionIndex(index)}
+                        >
+                          <div>
+                            {searchText}{" "}
+                            <span className="text-muted-foreground">
+                              {option.label}
+                            </span>
+                          </div>
+                          <Check
+                            className={`ml-auto size-4 ${
+                              option.key === searchWith
+                                ? "opacity-100"
+                                : "opacity-0"
+                            }`}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+          <PatientIdentifierFilter
+            onSelect={(patientId, patientName) =>
+              updateQuery({
+                patient_filter: patientId,
+                patient_name: patientName,
+                created_date_after: undefined,
+                created_date_before: undefined,
+              })
+            }
+            placeholder={t("filter_by_identifier")}
+            size="default"
+            className="w-full sm:w-auto"
+            patientId={qParams.patient_filter}
+            patientName={qParams.patient_name}
+          />
+          <div className="w-full min-w-0 sm:w-auto">
+            <MultiFilter
+              selectedFilters={displaySelectedFilters}
+              onFilterChange={handleFilterChange}
+              onOperationChange={handleOperationChange}
+              onClearAll={handleClearAll}
+              onClearFilter={handleClearFilter}
+              className="w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
+              triggerButtonClassName="self-start sm:self-center"
+              clearAllButtonClassName="self-center"
+              facilityId={facilityId}
+            />
           </div>
         </div>
 

@@ -24,6 +24,7 @@ const osmSearchLocationApi = {
   baseUrl: "https://nominatim.openstreetmap.org",
   path: "/search",
   method: HttpMethod.GET,
+  noAuth: true,
   TRes: [] as { display_name: string; lat: string; lon: string }[],
 } as const;
 

@@ -16,7 +16,9 @@ const getKey = () => {
  */
 const clean = (filters: Filters, blacklist?: string[]) => {
   const reducer = (cleaned: Filters, key: string) => {
-    const valueAllowed = (filters[key] ?? "") != "";
+    // Keep `false` and `0`: a search schema reads booleans and numbers.
+    const value = filters[key];
+    const valueAllowed = value !== undefined && value !== null && value !== "";
     if (valueAllowed && !blacklist?.includes(key)) {
       cleaned[key] = filters[key];
     }

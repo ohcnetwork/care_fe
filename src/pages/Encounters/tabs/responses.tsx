@@ -1,3 +1,4 @@
+import { AuthorRoleFilter } from "@/components/Facility/ConsultationDetails/AuthorRoleFilter";
 import QuestionnaireResponsesList, {
   ResponseCard,
 } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
@@ -7,12 +8,16 @@ import { Card } from "@/components/ui/card";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import {
+  useIsScopedQueryParams,
+  useScopedQueryParams,
+} from "@/hooks/useScopedQueryParams";
+import { responseListSearch } from "@/lib/router/search/encounter";
 import { cn } from "@/lib/utils";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
-import { useQueryParams } from "raviger";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface LeftCardProps {
@@ -66,6 +71,8 @@ interface LeftPanelProps {
   responseId?: string;
   questionnaireTitle: string;
   questionnaireSlug?: string;
+  authorRoleId?: string;
+  onAuthorRoleChange: (roleId?: string) => void;
   handleQuestionnaireChange: (
     questionnaireSlug?: string,
     questionnaireTitle?: string,
@@ -80,6 +87,8 @@ function LeftPanel({
   responseId,
   questionnaireTitle,
   questionnaireSlug,
+  authorRoleId,
+  onAuthorRoleChange,
   handleQuestionnaireChange,
   onResponseClick,
 }: LeftPanelProps) {
@@ -100,7 +109,7 @@ function LeftPanel({
             <Button
               variant="outline"
               role="combobox"
-              className="w-full border border-primary-600 justify-between h-auto min-h-[2.5rem] py-2"
+              className="w-full border shadow-xs border-primary-600 justify-between h-auto min-h-[2.5rem] py-2"
             >
               <div className="flex justify-start items-center gap-2 text-primary-800 flex-1">
                 <span className="text-left whitespace-normal break-words">
@@ -129,12 +138,18 @@ function LeftPanel({
           }
         />
       </div>
+      <AuthorRoleFilter
+        value={authorRoleId}
+        onChange={onAuthorRoleChange}
+        disabled={!canAccess}
+      />
       <div className="flex-1 overflow-y-auto">
         <QuestionnaireResponsesList
           encounterId={encounterId}
           patientId={patientId}
           canAccess={canAccess}
           questionnaireSlug={questionnaireSlug}
+          authorRoleId={authorRoleId}
           renderItem={(response: QuestionnaireResponse) => (
             <LeftCard
               response={response}
@@ -153,28 +168,38 @@ interface EncounterResponsesTabProps {
   patientId: string;
   encounterId?: string;
   canAccess?: boolean;
+  readOnly?: boolean;
+  embedded?: boolean;
 }
 
 export const EncounterResponsesTab = ({
   patientId,
   encounterId,
   canAccess = true,
+  readOnly = false,
+  embedded = false,
 }: EncounterResponsesTabProps) => {
   const { t } = useTranslation();
-  const [qParams, setQueryParams] = useQueryParams<{
-    questionnaireSlug?: string;
-    questionnaireTitle?: string;
-    responseId?: string;
-  }>();
+  const scoped = useIsScopedQueryParams();
+  const id = useId();
+  const [qParams, setQueryParams] = useScopedQueryParams(responseListSearch);
 
-  const { questionnaireSlug, questionnaireTitle, responseId } = qParams;
+  const { questionnaireSlug, questionnaireTitle, responseId, role } = qParams;
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isMobile = useBreakpoints({ default: true, md: false });
 
   const handleResponseClick = (response: QuestionnaireResponse) => {
     setQueryParams({ ...qParams, responseId: response.id });
-    window.location.hash = `#response-${response.id}`;
+    if (scoped) {
+      // Several browsers can share one page, so scroll this instance's card
+      // instead of changing the URL hash.
+      document
+        .getElementById(`${id}-${response.id}`)
+        ?.scrollIntoView({ block: "start", behavior: "smooth" });
+    } else {
+      window.location.hash = `#response-${response.id}`;
+    }
     if (isMobile) setIsDrawerOpen(false);
   };
 
@@ -194,6 +219,17 @@ export const EncounterResponsesTab = ({
     }
   };
 
+  const handleAuthorRoleChange = (roleId?: string) => {
+    const { responseId: _responseId, role: _role, ...rest } = qParams;
+    setQueryParams(roleId ? { ...rest, role: roleId } : rest);
+    if (!scoped)
+      window.history.replaceState(
+        window.history.state,
+        "",
+        window.location.href.split("#")[0],
+      );
+  };
+
   return (
     <div className="flex flex-col md:flex-row h-full">
       <div className="hidden md:flex md:w-1/5 flex flex-col gap-3 pt-1 md:h-full md:overflow-y-auto">
@@ -203,6 +239,8 @@ export const EncounterResponsesTab = ({
           canAccess={canAccess}
           responseId={responseId}
           questionnaireSlug={questionnaireSlug}
+          authorRoleId={role}
+          onAuthorRoleChange={handleAuthorRoleChange}
           questionnaireTitle={questionnaireTitle || ""}
           handleQuestionnaireChange={handleQuestionnaireChange}
           onResponseClick={handleResponseClick}
@@ -218,40 +256,48 @@ export const EncounterResponsesTab = ({
               </Button>
             </DrawerTrigger>
             <DrawerContent
-              className="h-[85vh]"
+              aria-describedby={undefined}
+              height="fixed"
+              className="p-1.5"
               onCloseAutoFocus={(e) => e.preventDefault()}
             >
-              <ScrollArea className="h-full">
-                <div className="p-3 h-full">
-                  <LeftPanel
-                    encounterId={encounterId}
-                    patientId={patientId}
-                    canAccess={canAccess}
-                    responseId={responseId}
-                    questionnaireSlug={questionnaireSlug}
-                    questionnaireTitle={questionnaireTitle || ""}
-                    handleQuestionnaireChange={handleQuestionnaireChange}
-                    onResponseClick={handleResponseClick}
-                  />
-                </div>
-              </ScrollArea>
+              <div className="flex min-h-0 flex-1 flex-col pt-3 pb-[env(safe-area-inset-bottom)]">
+                <LeftPanel
+                  encounterId={encounterId}
+                  patientId={patientId}
+                  canAccess={canAccess}
+                  responseId={responseId}
+                  questionnaireSlug={questionnaireSlug}
+                  authorRoleId={role}
+                  onAuthorRoleChange={handleAuthorRoleChange}
+                  questionnaireTitle={questionnaireTitle || ""}
+                  handleQuestionnaireChange={handleQuestionnaireChange}
+                  onResponseClick={handleResponseClick}
+                />
+              </div>
             </DrawerContent>
           </Drawer>
         </div>
       )}
       <div className="flex-1 h-full overflow-y-auto">
-        <ScrollArea key={questionnaireSlug} className="h-full">
+        <ScrollArea
+          key={`${questionnaireSlug ?? ""}:${role ?? ""}`}
+          className="h-full"
+        >
           <div className="space-y-4 p-3 overflow-anchor-auto">
             <QuestionnaireResponsesList
               encounterId={encounterId}
               patientId={patientId}
+              embedded={embedded}
               canAccess={canAccess}
+              readOnly={readOnly}
               questionnaireSlug={questionnaireSlug}
+              authorRoleId={role}
               renderItem={(response: QuestionnaireResponse) => {
                 return (
                   <div
                     key={response.id}
-                    id={`response-${response.id}`}
+                    id={`${scoped ? id : "response"}-${response.id}`}
                     className="scroll-mt-24 [overflow-anchor:auto]"
                   >
                     <Card
@@ -263,6 +309,9 @@ export const EncounterResponsesTab = ({
                       <ResponseCard
                         item={response}
                         patientId={patientId}
+                        encounterId={encounterId}
+                        readOnly={readOnly}
+                        embedded={embedded}
                         showTitle={!questionnaireSlug}
                         onTitleClick={() => {
                           setQueryParams({

@@ -59,19 +59,29 @@ test.describe("Facility Location Creation", () => {
         .fill(locationName);
       const tableBody = page.locator('[data-slot="table-body"]');
       await expect(tableBody).toContainText(locationName);
-      await expect(tableBody).toContainText(status);
+      // The list names a status only when it is not the usual "Active".
+      if (status === "Active") {
+        await expect(tableBody).not.toContainText("Active");
+      } else {
+        await expect(tableBody).toContainText(status);
+      }
       await expect(tableBody).toContainText(location);
     });
 
     await test.step("Verify location in edit form", async () => {
       await page.locator("button[title='Edit Location']").first().click();
 
+      // What a location is cannot change: the sheet names it, with no field.
+      const sheet = page.getByRole("dialog", {
+        name: "Edit Location",
+        exact: true,
+      });
       await expect(
-        page.getByRole("combobox", { name: "Location Form" }),
-      ).toBeDisabled();
-      await expect(
-        page.getByRole("combobox", { name: "Location Form" }),
-      ).toContainText(location);
+        sheet.getByRole("combobox", { name: "Location Form" }),
+      ).toHaveCount(0);
+      await expect(sheet.locator('[data-slot="sheet-description"]')).toHaveText(
+        location,
+      );
       await expect(page.getByRole("textbox", { name: "Name" })).toHaveValue(
         locationName,
       );
@@ -120,19 +130,29 @@ test.describe("Facility Location Creation", () => {
         .fill(locationName);
       const tableBody = page.locator('[data-slot="table-body"]');
       await expect(tableBody).toContainText(locationName);
-      await expect(tableBody).toContainText(status);
+      // The list names a status only when it is not the usual "Active".
+      if (status === "Active") {
+        await expect(tableBody).not.toContainText("Active");
+      } else {
+        await expect(tableBody).toContainText(status);
+      }
       await expect(tableBody).toContainText(location);
     });
 
     await test.step("Verify location in edit form", async () => {
       await page.locator("button[title='Edit Location']").first().click();
 
+      // What a location is cannot change: the sheet names it, with no field.
+      const sheet = page.getByRole("dialog", {
+        name: "Edit Location",
+        exact: true,
+      });
       await expect(
-        page.getByRole("combobox", { name: "Location Form" }),
-      ).toBeDisabled();
-      await expect(
-        page.getByRole("combobox", { name: "Location Form" }),
-      ).toContainText(location);
+        sheet.getByRole("combobox", { name: "Location Form" }),
+      ).toHaveCount(0);
+      await expect(sheet.locator('[data-slot="sheet-description"]')).toHaveText(
+        location,
+      );
       await expect(page.getByRole("textbox", { name: "Name" })).toHaveValue(
         locationName,
       );
@@ -182,14 +202,16 @@ test.describe("Facility Location Creation", () => {
       ).toBeVisible();
     });
 
-    await test.step("Verify bed in child table", async () => {
+    await test.step("Verify bed in the beds grid", async () => {
       await page
         .getByRole("textbox", { name: "Search by name" })
         .last()
         .fill(bedName);
-      const tableBody = page.locator('[data-slot="table-body"]').last();
-      await expect(tableBody).toContainText(bedName);
-      await expect(tableBody).toContainText("Bed");
+      await expect(
+        page
+          .locator('[data-cy="location-beds"]')
+          .getByRole("button", { name: bedName, exact: true }),
+      ).toBeVisible();
     });
   });
 
@@ -226,15 +248,20 @@ test.describe("Facility Location Creation", () => {
       ).toBeVisible();
     });
 
-    await test.step("Verify each bed in child table", async () => {
+    await test.step("Verify each bed in the beds grid", async () => {
       const childSearchBox = page
         .getByRole("textbox", { name: "Search by name" })
         .last();
-      const childTableBody = page.locator('[data-slot="table-body"]').last();
+      const beds = page.locator('[data-cy="location-beds"]');
 
       for (let i = 1; i <= bedCount; i++) {
         await childSearchBox.fill(`${bedBaseName} ${i}`);
-        await expect(childTableBody).toContainText(`${bedBaseName} ${i}`);
+        await expect(
+          beds.getByRole("button", {
+            name: `${bedBaseName} ${i}`,
+            exact: true,
+          }),
+        ).toBeVisible();
       }
     });
   });
@@ -275,6 +302,44 @@ test.describe("Facility Location Creation", () => {
       await expect(
         page.getByRole("textbox", { name: /^Bed Number 1\b/i }),
       ).toHaveValue(customBedName);
+    });
+  });
+
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    const bedBaseName = faker.word.words(1);
+
+    await test.step("Open parent location", async () => {
+      await page.locator('[data-slot="table-body"] tr').first().click();
+    });
+
+    await test.step("Set up bulk beds with customized names", async () => {
+      await page.getByRole("button", { name: "Add Location" }).click();
+      await page.getByRole("combobox", { name: "Location Form" }).click();
+      await page.getByRole("option", { name: "Bed" }).click();
+      await page.getByRole("textbox", { name: "Name" }).fill(bedBaseName);
+      await page
+        .getByRole("checkbox", { name: "Create Multiple Beds" })
+        .click();
+      await page
+        .getByRole("checkbox", { name: "Customize individual bed names" })
+        .click();
+    });
+
+    const bedNameInput = page.getByRole("textbox", {
+      name: /^Bed Number 1\b/i,
+    });
+    const createButton = page.getByRole("button", { name: "Create" });
+
+    await test.step("Whitespace-only bed name blocks creation", async () => {
+      await bedNameInput.fill("   ");
+      await expect(createButton).toBeDisabled();
+    });
+
+    await test.step("A real bed name allows creation again", async () => {
+      await bedNameInput.fill(`${bedBaseName} 1`);
+      await expect(createButton).toBeEnabled();
     });
   });
 

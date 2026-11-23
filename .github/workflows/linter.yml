@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - develop
+      - "3.1/**"
   merge_group:
 
 jobs:
@@ -16,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -25,6 +26,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Run type check
+        run: npm run typecheck
 
       - name: Run lint
         run: npm run lint -- --quiet

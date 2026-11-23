@@ -1,8 +1,20 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { expectedSlug } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+/** A tax-rate radio is named by its formatted percentage (e.g. "9.00%"). */
+function taxRateOption(rate: string) {
+  return new RegExp(`^${rate}(?:\\.0+)?%$`);
+}
+
+const formatCurrency = (val: string | number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+  }).format(Number(val));
 
 test.describe("Charge Item Definition Creation", () => {
   let facilityId: string;
@@ -20,7 +32,7 @@ test.describe("Charge Item Definition Creation", () => {
     facilityId = getFacilityId();
     const chargeItemName = faker.string.alphanumeric(10);
     title = chargeItemName;
-    slug = chargeItemName.replace(/\s+/g, "-").slice(0, 25);
+    slug = expectedSlug(chargeItemName);
     basePrice = faker.commerce.price({ dec: 0 });
     mrp = faker.commerce.price({ dec: 0 });
     purchasePrice = faker.commerce.price({ dec: 0 });
@@ -43,7 +55,7 @@ test.describe("Charge Item Definition Creation", () => {
     // Title required
     await expect(page.getByText(/title.*required/i)).toBeVisible();
     // Slug required/length
-    await expect(page.getByText(/slug.*atleast 5.*atmost 25/i)).toBeVisible();
+    await expect(page.getByText(/slug.*at least 5.*at most 50/i)).toBeVisible();
     // Base Price required/invalid
     await expect(page.getByText(/base price.*required/i)).toBeVisible();
   });
@@ -62,6 +74,78 @@ test.describe("Charge Item Definition Creation", () => {
     await expect(
       page.getByText(/charge item definition.*created successfully/i),
     ).toHaveCount(0);
+  });
+
+  test("keeps the form usable while a partial base price is typed", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: /add definition/i }).click();
+    const basePriceInput = page.getByRole("textbox", { name: /base price/i });
+    const summaryBasePrice = page
+      .locator("div")
+      .filter({ has: page.getByRole("heading", { name: /price summary/i }) })
+      .last()
+      .locator("div")
+      .filter({ hasText: /^Base Price/ })
+      .last();
+
+    // Type one key at a time. Partial input ("-", ".", "-.") is not a number
+    // yet, so the summary shows "-" and the page must not crash.
+    const sequences: { keys: string; summaries: (number | null)[] }[] = [
+      { keys: "-12.5", summaries: [null, -1, -12, -12, -12.5] },
+      { keys: "-.5", summaries: [null, null, -0.5] },
+      { keys: ".5", summaries: [null, 0.5] },
+    ];
+    for (const { keys, summaries } of sequences) {
+      await basePriceInput.clear();
+      for (const [index, key] of [...keys].entries()) {
+        await basePriceInput.pressSequentially(key);
+        await expect(basePriceInput).toHaveValue(keys.slice(0, index + 1));
+        const amount = summaries[index];
+        await expect(summaryBasePrice).toHaveText(
+          `Base Price${amount === null ? "-" : formatCurrency(amount)}`,
+        );
+      }
+    }
+
+    // Submit with partial input: show the validation error, do not crash.
+    await basePriceInput.clear();
+    await basePriceInput.pressSequentially("-");
+    await page.getByRole("button", { name: /create/i }).click();
+    await expect(page.getByText(/base price.*required/i)).toBeVisible();
+    await expect(basePriceInput).toHaveValue("-");
+  });
+
+  test("create charge item definition with a negative base price", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: /add definition/i }).click();
+    await page.getByRole("textbox", { name: /title/i }).fill(title);
+    await page.getByRole("textbox", { name: /slug/i }).fill(slug);
+    await page
+      .getByRole("textbox", { name: /base price/i })
+      .pressSequentially("-25.5");
+
+    await page.getByRole("button", { name: /create/i }).click();
+
+    await expect(
+      page.getByText(/charge item definition.*created successfully/i),
+    ).toBeVisible();
+
+    await expect(async () => {
+      await page.getByRole("textbox", { name: /search/i }).clear();
+      await page.getByRole("textbox", { name: /search/i }).fill(title);
+      await expect(page.getByRole("table").getByText(title)).toBeVisible();
+    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
+
+    await page.getByRole("link", { name: "View" }).click();
+    await page.waitForURL("**/charge_item_definitions/**");
+    await expect(page.getByRole("heading", { name: title })).toBeVisible();
+
+    await page.getByRole("button", { name: "Edit" }).first().click();
+    await expect(
+      page.getByRole("textbox", { name: /base price/i }),
+    ).toHaveValue("-25.50");
   });
 
   test("create charge item definition with required fields only", async ({
@@ -130,7 +214,7 @@ test.describe("Charge Item Definition Creation", () => {
     await page
       .getByText("cgst", { exact: true })
       .locator("../..")
-      .locator(`button[role="radio"][value="${cgstRate}"]`)
+      .getByRole("radio", { name: taxRateOption(cgstRate) })
       .click();
 
     await page
@@ -141,7 +225,7 @@ test.describe("Charge Item Definition Creation", () => {
     await page
       .getByText("sgst", { exact: true })
       .locator("../..")
-      .locator(`button[role="radio"][value="${sgstRate}"]`)
+      .getByRole("radio", { name: taxRateOption(sgstRate) })
       .click();
     const doneButton = page.getByRole("button", { name: "Done" });
     await doneButton.scrollIntoViewIfNeeded();
@@ -152,7 +236,9 @@ test.describe("Charge Item Definition Creation", () => {
       .filter({ hasText: /^Add Discount$/ })
       .first()
       .click();
-    await page.getByRole("checkbox").first().click();
+    // Pick the first discount in the opened picker (not a form checkbox
+    // behind its modal backdrop).
+    await page.getByRole("dialog").getByRole("checkbox").first().click();
     await page.getByRole("button", { name: "Done" }).click();
     const switchElement = page.getByRole("switch", {
       name: "Use facility global value",
@@ -193,11 +279,6 @@ test.describe("Charge Item Definition Creation", () => {
     await expect(page.getByText(description)).toBeVisible();
     await expect(page.getByText(purpose).last()).toBeVisible();
     await expect(page.getByText(url)).toBeVisible();
-    const formatCurrency = (val: string) =>
-      new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR",
-      }).format(Number(val));
     await expect(page.getByText(formatCurrency(mrp))).toBeVisible();
     await expect(page.getByText(formatCurrency(purchasePrice))).toBeVisible();
     await expect(page.getByText("9.00%")).toBeVisible();

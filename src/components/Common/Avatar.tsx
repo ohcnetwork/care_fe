@@ -1,4 +1,8 @@
-import * as AvatarPrimitive from "@radix-ui/react-avatar";
+import {
+  AvatarFallback,
+  AvatarImage,
+  Avatar as AvatarRoot,
+} from "@/components/ui/avatar";
 import React from "react";
 
 import { cn } from "@/lib/utils";
@@ -43,7 +47,7 @@ function Avatar({
   imageUrl,
   className,
   ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root> & {
+}: React.ComponentProps<typeof AvatarRoot> & {
   colors?: [string, string];
   name: string;
   imageUrl?: string;
@@ -60,7 +64,8 @@ function Avatar({
   const shouldShowFallback = !imageUrl || hasImageError;
 
   return (
-    <AvatarPrimitive.Root
+    <AvatarRoot
+      shape="rounded"
       data-slot="avatar"
       className={cn("aspect-square size-full rounded-md", className)}
       style={{
@@ -68,7 +73,7 @@ function Avatar({
       }}
       {...props}
     >
-      <AvatarPrimitive.Image
+      <AvatarImage
         data-slot="avatar-image"
         src={imageUrl}
         alt={name}
@@ -81,9 +86,9 @@ function Avatar({
           if (status === "loaded") setHasImageError(false);
         }}
       />
-      <AvatarPrimitive.Fallback
+      <AvatarFallback
         data-slot="avatar-fallback"
-        className="flex h-full w-full select-none items-center justify-center text-center"
+        className="bg-transparent flex h-full w-full select-none items-center justify-center text-center"
       >
         {shouldShowFallback && (
           <svg
@@ -107,8 +112,8 @@ function Avatar({
             </text>
           </svg>
         )}
-      </AvatarPrimitive.Fallback>
-    </AvatarPrimitive.Root>
+      </AvatarFallback>
+    </AvatarRoot>
   );
 }
 

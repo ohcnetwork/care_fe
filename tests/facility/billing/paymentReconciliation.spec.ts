@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { createLocationHierarchy } from "tests/helper/locations";
 import { getAccountId } from "tests/support/accountId";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -98,12 +99,12 @@ test.describe("Payment Reconciliation", () => {
     await expect(successMessage).toBeVisible();
   });
 
-  test("should open record payment dialog using keyboard shortcut R", async ({
+  test("should open record payment dialog using keyboard shortcut C", async ({
     page,
   }) => {
+    // "R" is bound only to the lg:hidden mobile button; desktop uses "C"
     await expect(page.getByRole("button", { name: /advance/i })).toBeVisible();
-    // Press 'R' to open Record Payment
-    await page.keyboard.press("r");
+    await page.keyboard.press("c");
 
     // Verify Record Payment sheet is open by checking for the sheet heading
     const sheet = page.locator("[role='dialog']").filter({
@@ -112,22 +113,116 @@ test.describe("Payment Reconciliation", () => {
     await expect(sheet).toBeVisible();
   });
 
-  test("should show validation error when submitting empty payment", async ({
+  test("selects a ward with beds without opening an empty sub-location list", async ({
+    page,
+    request,
+  }) => {
+    const { root, ward, rootBed } = await createLocationHierarchy(
+      request,
+      getFacilityId(),
+    );
+    await page.getByRole("button", { name: /advance/i }).click();
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Select Location" })
+      .click();
+    await page.getByPlaceholder("Search locations...").fill(root.name);
+    await page.getByRole("option", { name: root.name, exact: true }).click();
+
+    await expect(
+      page.getByRole("option", { name: ward.name, exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("option", { name: rootBed.name, exact: true }),
+    ).toHaveCount(0);
+    await page.getByRole("option", { name: ward.name, exact: true }).click();
+
+    await expect(
+      page.getByRole("combobox").filter({ hasText: ward.name }),
+    ).toHaveAttribute("aria-expanded", "false");
+    await expect(
+      page.getByPlaceholder("Search locations..."),
+    ).not.toBeVisible();
+  });
+
+  test("only enables recording a payment for a positive amount", async ({
     page,
   }) => {
-    // Open Record Payment
     await page.getByRole("button", { name: /advance/i }).click();
+    const amount = page.getByRole("textbox", { name: "Amount Paid" });
+    const recordPayment = page.getByRole("button", {
+      name: /record payment/i,
+    });
 
-    // Click Record Payment without filling anything
-    await page.getByRole("button", { name: /record payment/i }).click();
+    await expect(recordPayment).toBeDisabled();
+    for (const value of ["0", "0.00"]) {
+      await amount.fill(value);
+      await expect(recordPayment).toBeDisabled();
+    }
 
-    // Verify validation error is shown
-    const paymentAmountSection = page
-      .locator("div")
-      .filter({ hasText: /^Amount Paid/ })
-      .filter({ hasText: /Must be a valid number$/ });
+    await amount.fill("0.01");
+    await expect(recordPayment).toBeEnabled();
+    await amount.clear();
+    await expect(recordPayment).toBeDisabled();
+  });
 
-    await expect(paymentAmountSection).toBeVisible();
+  test("keeps the cash payment sheet usable while an amount is partial input", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: /advance/i }).click();
+    await page.locator("label").filter({ hasText: "Cash" }).click();
+    // Without a location, Zod skips the object-level tender check on submit.
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Select Location" })
+      .click();
+    await page
+      .locator('[data-slot="command-item"]')
+      .filter({ hasText: "Bio-Chemistry Lab" })
+      .click();
+    const amountPaid = page.getByRole("textbox", { name: "Amount Paid" });
+    const amountReceived = page.getByRole("textbox", {
+      name: "Amount Received",
+    });
+    const recordPayment = page.getByRole("button", {
+      name: /record payment/i,
+    });
+
+    // A lone "." is not a number yet. The change calculation must not crash.
+    await amountPaid.pressSequentially(".");
+    await expect(amountPaid).toHaveValue(".");
+    await expect(recordPayment).toBeDisabled();
+    await amountPaid.pressSequentially("5");
+    await expect(amountPaid).toHaveValue(".5");
+    await expect(recordPayment).toBeEnabled();
+
+    await amountPaid.fill("100");
+    await amountReceived.clear();
+    await amountReceived.pressSequentially(".");
+    await expect(amountReceived).toHaveValue(".");
+
+    // Submit with a partial amount received: show the error, do not crash.
+    await recordPayment.click();
+    await expect(page.getByText("Must be a valid number")).toBeVisible();
+    await expect(
+      page.getByText(/payment.*recorded.*successfully/i),
+    ).toHaveCount(0);
+
+    const changeToReturn = page.getByText(/change to return/i);
+    const formatCurrency = (value: number) =>
+      new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+      }).format(value);
+
+    await amountReceived.fill("150");
+    await expect(changeToReturn).toContainText(formatCurrency(50));
+
+    // After a submit, the form validates on each change. A partial amount paid
+    // must show its error, and the change counts it as 0.
+    await amountPaid.fill(".");
+    await expect(page.getByText("Must be a valid number")).toBeVisible();
+    await expect(changeToReturn).toContainText(formatCurrency(150));
   });
 
   test("should record payment twice without refreshing page with location cache", async ({

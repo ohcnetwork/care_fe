@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
@@ -17,6 +17,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import query from "@/Utils/request/query";
 import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
 import BackButton from "@/components/Common/BackButton";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { InternalType } from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 import { useAtom } from "jotai";
@@ -76,7 +77,7 @@ function LocationCard({
   );
 
   return (
-    <Link href={link} basePath="/" className="block" onClick={onClick}>
+    <HrefLink href={link} className="block" onClick={onClick}>
       <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
         <CardContent className="flex items-start gap-3 py-3 px-4">
           <div className="shrink-0 relative size-10 rounded-sm flex p-4 items-center justify-center">
@@ -103,7 +104,7 @@ function LocationCard({
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </HrefLink>
   );
 }
 
@@ -127,7 +128,7 @@ export default function HealthcareServiceShow({
   });
 
   return (
-    <div className="container px-4 mx-auto max-w-4xl space-y-6">
+    <div className="container p-4 mx-auto max-w-4xl space-y-6">
       <BackButton>
         <ArrowLeft />
         <span>{t("back_to_services")}</span>
@@ -140,24 +141,25 @@ export default function HealthcareServiceShow({
               title: t("schedule"),
               description: t("schedule_information"),
               icon: Calendar,
-              href: `/schedule`,
+              to: "/facility/$facilityId/services/$serviceId/schedule",
             },
             {
               title: t("appointments"),
               description: t("view_appointments"),
               icon: CalendarDays,
-              href: `/appointments`,
+              to: "/facility/$facilityId/services/$serviceId/appointments",
             },
             {
               title: t("queues"),
               description: t("manage_token_queues_for_facility"),
               icon: Logs,
-              href: `/queues`,
+              to: "/facility/$facilityId/services/$serviceId/queues",
             },
           ].map((shortcut) => (
             <Link
-              key={shortcut.href}
-              href={shortcut.href}
+              key={shortcut.to}
+              to={shortcut.to}
+              params={{ facilityId, serviceId }}
               className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-lg ring-offset-2"
             >
               <Card className="h-full border-0 shadow rounded-lg p-3">

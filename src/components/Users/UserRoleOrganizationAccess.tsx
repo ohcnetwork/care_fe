@@ -1,14 +1,17 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { Building2, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -18,10 +21,20 @@ import {
 
 import { AccessibleRoleOrgSelect } from "@/components/Common/AccessibleRoleOrgSelect";
 import { RoleSelect } from "@/components/Common/RoleSelect";
+import {
+  UserFormList,
+  UserFormListHeader,
+  UserFormListHeaderCell,
+  UserFormListRow,
+} from "@/components/Users/UserFormRow";
+import { useMobileAddUser } from "@/components/Users/UserFormSection";
+import { UserProfileSection } from "@/components/Users/UserProfileSection";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 import mutate from "@/Utils/request/mutate";
+
+const ROLE_ORG_COLUMNS = "sm:grid-cols-[1fr_1fr_var(--row-action)]";
 
 export interface RoleOrgFormValue {
   organization: string;
@@ -51,6 +64,8 @@ export function RoleOrgAccessEditor({
   disabled = false,
 }: RoleOrgAccessEditorProps) {
   const { t } = useTranslation();
+  const mobile = useMobileAddUser();
+  const EntryField = mobile ? Field : "div";
 
   const entries = value.length > 0 ? value : [{ ...EMPTY_ROLE_ORG }];
 
@@ -72,21 +87,42 @@ export function RoleOrgAccessEditor({
   };
 
   return (
-    <div className="space-y-2">
-      <Label className="text-sm font-medium text-gray-900">
-        {t("role_organizations")}
-      </Label>
-
-      <div className="space-y-2">
-        {entries.map((entry, index) => (
-          <div
+    <UserFormList
+      title={t("role_organizations")}
+      count={entries.length}
+      addLabel={t("add_another")}
+      addDisabled={disabled}
+      onAdd={addEntry}
+      onRemove={removeEntry}
+      headers={
+        <UserFormListHeader columns={ROLE_ORG_COLUMNS}>
+          <UserFormListHeaderCell>
+            {t("role_organization")}
+          </UserFormListHeaderCell>
+          <UserFormListHeaderCell>{t("designation")}</UserFormListHeaderCell>
+          <span />
+        </UserFormListHeader>
+      }
+    >
+      {(removeAt) =>
+        entries.map((entry, index) => (
+          <UserFormListRow
             key={`${entry.organization || "new"}-${index}`}
-            className="grid gap-2 rounded-lg border border-gray-200 bg-white p-3 md:grid-cols-[1fr_1fr_auto] md:items-end"
+            columns={ROLE_ORG_COLUMNS}
+            title={t("profile_responsibility_number", { number: index + 1 })}
+            removeLabel={
+              mobile
+                ? t("profile_remove_responsibility", { number: index + 1 })
+                : t("remove")
+            }
+            onlyEntry={entries.length <= 1}
+            removeDisabled={disabled}
+            onRemove={() => removeAt(index)}
           >
-            <div className="space-y-1">
-              <Label className="text-xs text-gray-500">
-                {t("role_organization")}
-              </Label>
+            <EntryField
+              className={mobile ? undefined : "flex flex-col gap-1.5"}
+            >
+              <Label className="sm:sr-only">{t("role_organization")}</Label>
               <AccessibleRoleOrgSelect
                 value={entry.organization || undefined}
                 onChange={(selectedOrganization) =>
@@ -98,12 +134,13 @@ export function RoleOrgAccessEditor({
                 inputPlaceholder={t("search_organization")}
                 disabled={disabled}
               />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs text-gray-500">
-                {t("designation")}
-              </Label>
+            </EntryField>
+            <EntryField
+              className={mobile ? undefined : "flex flex-col gap-1.5"}
+            >
+              <Label className="sm:sr-only">{t("designation")}</Label>
               <RoleSelect
+                appearance="field"
                 value={
                   entry.role
                     ? ({
@@ -124,36 +161,11 @@ export function RoleOrgAccessEditor({
                 disabled={disabled}
                 placeholder={t("select_designation")}
               />
-            </div>
-            <div className="flex justify-end md:pb-0.5">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-8 text-gray-400 hover:text-red-600"
-                onClick={() => removeEntry(index)}
-                disabled={disabled || entries.length <= 1}
-              >
-                <Trash2 className="size-3.5" />
-                <span className="sr-only">{t("remove")}</span>
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="text-xs text-gray-500"
-        onClick={addEntry}
-        disabled={disabled}
-      >
-        <Plus className="mr-1 size-3.5" />
-        {t("add_another")}
-      </Button>
-    </div>
+            </EntryField>
+          </UserFormListRow>
+        ))
+      }
+    </UserFormList>
   );
 }
 
@@ -208,138 +220,142 @@ export function RoleOrgAccessSummary({
   const isPending = isAssigning || isRemoving;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white">
-      <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <div className="flex size-6 items-center justify-center rounded bg-gray-100 text-gray-600">
-            <ShieldCheck className="size-3.5" />
-          </div>
-          <h3 className="text-sm font-semibold text-gray-900">
-            {t("role_organizations")}
-          </h3>
-        </div>
+    <UserProfileSection
+      title={t("role_organizations")}
+      icon={ShieldCheck}
+      action={
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="sm">
-              {t("manage_access")}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="-mr-2 shrink-0"
+              aria-label={t("manage_access")}
+            >
+              {t("manage")}
             </Button>
           </SheetTrigger>
-          <SheetContent>
+          <SheetContent className="overflow-hidden">
             <SheetHeader>
               <SheetTitle>{t("role_organizations")}</SheetTitle>
               <SheetDescription>
                 {t("role_organization_access_summary_description")}
               </SheetDescription>
             </SheetHeader>
-            <div className="mt-4 space-y-4">
-              {/* Existing assignments */}
-              {memberships.map((membership) => (
-                <div
-                  key={membership.id}
-                  className="flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-2.5"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-gray-900">
-                      {membership.organization.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {membership.role.name}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-7 shrink-0 text-gray-400 hover:text-red-600"
-                    onClick={() =>
-                      removeRole({
-                        orgId: membership.organization.id,
-                        userRoleId: membership.id,
-                      })
-                    }
-                    disabled={isPending}
+            <SheetBody>
+              <div className="space-y-4">
+                {/* Existing assignments */}
+                {memberships.map((membership) => (
+                  <div
+                    key={membership.id}
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-2.5"
                   >
-                    {isRemoving ? (
-                      <Loader2 className="size-3.5 animate-spin" />
-                    ) : (
-                      <Trash2 className="size-3.5" />
-                    )}
-                  </Button>
-                </div>
-              ))}
-
-              {memberships.length === 0 && (
-                <p className="py-4 text-center text-sm text-gray-400">
-                  {t("no_role_organizations_assigned")}
-                </p>
-              )}
-
-              {/* Add new assignment */}
-              <div className="space-y-3 rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-3">
-                <p className="text-xs font-medium text-gray-600">
-                  {t("add_access")}
-                </p>
-                <div className="space-y-2">
-                  <AccessibleRoleOrgSelect
-                    value={newOrg?.id}
-                    onChange={setNewOrg}
-                    placeholder={t("select_role_organization")}
-                    inputPlaceholder={t("search_organization")}
-                  />
-                  <RoleSelect
-                    value={newRole}
-                    onChange={setNewRole}
-                    context={RoleContext.ROLE_ORG}
-                    placeholder={t("select_designation")}
-                  />
-                  <Button
-                    className="w-full"
-                    size="sm"
-                    onClick={() => {
-                      if (newOrg && newRole) {
-                        assignUser({ orgId: newOrg.id, role: newRole.id });
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-gray-900">
+                        {membership.organization.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {membership.role.name}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 shrink-0 text-gray-400 hover:text-red-600"
+                      onClick={() =>
+                        removeRole({
+                          orgId: membership.organization.id,
+                          userRoleId: membership.id,
+                        })
                       }
-                    }}
-                    disabled={isPending || !newOrg || !newRole}
-                  >
-                    {isAssigning ? (
-                      <Loader2 className="mr-1.5 size-3.5 animate-spin" />
-                    ) : (
-                      <Plus className="mr-1.5 size-3.5" />
-                    )}
+                      disabled={isPending}
+                    >
+                      {isRemoving ? (
+                        <Spinner className="size-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="size-3.5" />
+                      )}
+                    </Button>
+                  </div>
+                ))}
+
+                {memberships.length === 0 && (
+                  <p className="py-4 text-center text-sm text-gray-400">
+                    {t("no_role_organizations_assigned")}
+                  </p>
+                )}
+
+                {/* Add new assignment */}
+                <div className="space-y-3 rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-3">
+                  <p className="text-xs font-medium text-gray-600">
                     {t("add_access")}
-                  </Button>
+                  </p>
+                  <div className="space-y-2">
+                    <AccessibleRoleOrgSelect
+                      value={newOrg?.id}
+                      onChange={setNewOrg}
+                      placeholder={t("select_role_organization")}
+                      inputPlaceholder={t("search_organization")}
+                    />
+                    <RoleSelect
+                      value={newRole}
+                      onChange={setNewRole}
+                      context={RoleContext.ROLE_ORG}
+                      placeholder={t("select_designation")}
+                    />
+                    <Button
+                      className="w-full"
+                      size="sm"
+                      onClick={() => {
+                        if (newOrg && newRole) {
+                          assignUser({ orgId: newOrg.id, role: newRole.id });
+                        }
+                      }}
+                      disabled={isPending || !newOrg || !newRole}
+                    >
+                      {isAssigning ? (
+                        <Spinner className="mr-1.5 size-3.5 animate-spin" />
+                      ) : (
+                        <Plus className="mr-1.5 size-3.5" />
+                      )}
+                      {t("add_access")}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </SheetBody>
           </SheetContent>
         </Sheet>
-      </div>
-
-      <div className="p-3">
-        {memberships.length === 0 ? (
-          <p className="py-4 text-center text-sm text-gray-400">
-            {t("no_role_organizations_assigned")}
-          </p>
-        ) : (
-          <div className="grid gap-2 md:grid-cols-2">
-            {memberships.map((membership) => (
-              <div
-                key={membership.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-gray-900">
-                    {membership.organization.name}
-                  </p>
-                  <Badge variant="secondary" className="mt-0.5 text-[10px]">
-                    {membership.role.name}
-                  </Badge>
-                </div>
+      }
+    >
+      {memberships.length === 0 ? (
+        <p className="rounded-lg bg-soft-background px-4 py-6 text-center text-sm text-soft-foreground">
+          {t("no_role_organizations_assigned")}
+        </p>
+      ) : (
+        <ul className="divide-y divide-border/60">
+          {memberships.map((membership) => (
+            <li
+              key={membership.id}
+              className="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0"
+            >
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-soft-background text-soft-foreground">
+                <Building2
+                  className="size-4"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+              <p className="min-w-0 flex-1 break-words text-sm font-medium">
+                {membership.organization.name}
+              </p>
+              <Badge variant="secondary" className="text-xs font-normal">
+                {membership.role.name}
+              </Badge>
+            </li>
+          ))}
+        </ul>
+      )}
+    </UserProfileSection>
   );
 }

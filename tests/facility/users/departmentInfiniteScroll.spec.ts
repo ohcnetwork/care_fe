@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { departmentTrigger } from "tests/helper/departmentSelect";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -73,22 +74,17 @@ test.describe("Department Selector Infinite Scroll", () => {
       await page.waitForLoadState("networkidle");
     });
 
-    await test.step("Open Link Department sheet and switch to All Organizations", async () => {
+    await test.step("Open Link Department sheet", async () => {
       await page.getByRole("button", { name: "Link Department" }).click();
       await expect(page.getByText("Link User to Department")).toBeVisible();
-      // Switch tab before opening dropdown (clicking tab would close popover)
-      await page.getByRole("tab", { name: "All Organizations" }).click();
       await page.waitForLoadState("networkidle");
     });
 
     await test.step("Open department dropdown", async () => {
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Select Department" })
-        .click();
+      await departmentTrigger(page).click();
     });
 
-    const items = page.getByRole("option");
+    const items = page.getByRole("treeitem");
 
     await test.step("Verify first page of departments loads", async () => {
       await expect(items.first()).toBeVisible();
@@ -107,9 +103,9 @@ test.describe("Department Selector Infinite Scroll", () => {
           resp.status() === 200,
       );
 
-      // Scroll the command list to the bottom to trigger the sentinel
-      const commandList = page.locator("[cmdk-list]");
-      await commandList.evaluate((el) => {
+      // Scroll the list to the bottom to trigger the sentinel
+      const list = page.locator('[data-slot="tree-select-list"]');
+      await list.evaluate((el) => {
         el.scrollTop = el.scrollHeight;
       });
 

@@ -1,197 +1,32 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
-import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import PrintLoading from "@/CAREUI/misc/PrintLoading";
+import TypstPrintPreview from "@/CAREUI/misc/TypstPrintPreview";
 
-import Loading from "@/components/Common/Loading";
-import PrintFooter from "@/components/Common/PrintFooter";
-import PrintTable from "@/components/Common/PrintTable";
-
-import { Badge } from "@/components/ui/badge";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { PrintTemplateType } from "@/types/facility/printTemplate";
 import {
-  DELIVERY_ORDER_STATUS_COLORS,
-  DeliveryOrderRetrieve,
-} from "@/types/inventory/deliveryOrder/deliveryOrder";
+  getExtensionFieldsWithName,
+  getExtensionValue,
+  NamespacedExtensionData,
+} from "@/hooks/useExtensions";
+import useExtensionSchemas from "@/hooks/useExtensionSchemas";
+import { buildDeliveryOrderPrintContent } from "@/pages/Facility/services/inventory/externalSupply/orderPrintData";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { ExtensionEntityType } from "@/types/extensions/extensions";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
-import { SupplyDeliveryRead } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
-import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { ExtensionContexts } from "@/Utils/schema/types";
+import { formatDateTime } from "@/Utils/utils";
 
-interface DetailRowProps {
-  label: string;
-  value?: string | null;
-  isStrong?: boolean;
+function formatExtensionValue(value: unknown, fieldFormat?: string) {
+  if (typeof value === "number") return value.toFixed(2);
+  if (fieldFormat === "date" || fieldFormat === "date-time") {
+    return formatDateTime(value as string);
+  }
+  return String(value);
 }
-
-const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
-  return (
-    <div className="flex">
-      <span className="text-gray-600 w-32">{label}</span>
-      <span className="text-gray-600">: </span>
-      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
-        {value || "-"}
-      </span>
-    </div>
-  );
-};
-
-interface DeliveryOrderContentProps {
-  deliveryOrder: DeliveryOrderRetrieve;
-  supplyDeliveries: SupplyDeliveryRead[];
-  internal: boolean;
-}
-
-const DeliveryOrderContent = ({
-  deliveryOrder,
-  supplyDeliveries,
-  internal,
-}: DeliveryOrderContentProps) => {
-  const { t } = useTranslation();
-
-  return (
-    <div>
-      {/* Delivery Order Header */}
-      <div className="mb-4">
-        <div className="text-2xl font-semibold mb-2 flex items-end gap-4">
-          <p>{deliveryOrder.name}</p>
-        </div>
-        {deliveryOrder.note && (
-          <p className="text-sm text-gray-600">{deliveryOrder.note}</p>
-        )}
-      </div>
-
-      {/* Supply Deliveries Table */}
-      {supplyDeliveries && supplyDeliveries.length > 0 && (
-        <div className="mt-4">
-          <p className="text-base font-semibold mb-2">
-            {t("supply_deliveries")}
-          </p>
-          <PrintTable
-            headers={[
-              { key: "product" },
-              { key: "quantity" },
-              { key: "status" },
-              { key: "condition" },
-              ...(internal
-                ? [{ key: "lot_batch_number" }, { key: "expiry_date" }]
-                : []),
-            ]}
-            rows={supplyDeliveries.map((delivery) => {
-              const productName = internal
-                ? delivery.supplied_inventory_item?.product?.product_knowledge
-                    ?.name
-                : delivery.supplied_item?.product_knowledge?.name;
-
-              const batchNumber = internal
-                ? delivery.supplied_inventory_item?.product?.batch?.lot_number
-                : undefined;
-
-              const expiryDate = internal
-                ? delivery.supplied_inventory_item?.product?.expiration_date
-                : undefined;
-
-              return {
-                product: productName || "-",
-                quantity: round(delivery.supplied_item_quantity),
-                status: t(delivery.status),
-                condition: t(delivery.supplied_item_condition || "normal"),
-                lot_batch_number: batchNumber || "-",
-                expiry_date: expiryDate
-                  ? format(new Date(expiryDate), "dd/MM/yyyy")
-                  : "-",
-              };
-            })}
-          />
-        </div>
-      )}
-    </div>
-  );
-};
-
-interface DeliveryOrderPreviewProps {
-  deliveryOrder: DeliveryOrderRetrieve;
-  supplyDeliveries: SupplyDeliveryRead[];
-  internal: boolean;
-}
-
-const DeliveryOrderPreview = ({
-  deliveryOrder,
-  supplyDeliveries,
-  internal,
-}: DeliveryOrderPreviewProps) => {
-  const { t } = useTranslation();
-  const { facility } = useCurrentFacility();
-
-  return (
-    <PrintPreview
-      title={`${t("delivery_order")} - ${deliveryOrder.name}`}
-      disabled={!supplyDeliveries?.length}
-      facility={facility}
-      templateSlug={PrintTemplateType.delivery_order}
-    >
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mb-2">
-          {t("delivery_order")}
-        </h2>
-
-        {/* Delivery Order Details */}
-        <div className="grid md:grid-cols-2 print:grid-cols-2 gap-6 border-t border-gray-200 pt-2">
-          <div className="space-y-2">
-            <DetailRow
-              label={t("deliver_to")}
-              value={deliveryOrder.destination?.name}
-              isStrong
-            />
-            {deliveryOrder.origin && (
-              <DetailRow
-                label={t("origin")}
-                value={deliveryOrder.origin.name}
-                isStrong
-              />
-            )}
-            {deliveryOrder.supplier && (
-              <DetailRow
-                label={t("supplier")}
-                value={deliveryOrder.supplier.name}
-                isStrong
-              />
-            )}
-          </div>
-          <div className="space-y-2">
-            <DetailRow
-              label={t("date")}
-              value={format(new Date(), "dd MMM yyyy, EEEE")}
-              isStrong
-            />
-            <div className="flex">
-              <span className="text-gray-600 w-32">{t("status")}</span>
-              <span className="text-gray-600">: </span>
-              <Badge
-                className="rounded-sm ml-1"
-                variant={DELIVERY_ORDER_STATUS_COLORS[deliveryOrder.status]}
-              >
-                {t(deliveryOrder.status)}
-              </Badge>
-            </div>
-          </div>
-        </div>
-
-        <DeliveryOrderContent
-          deliveryOrder={deliveryOrder}
-          supplyDeliveries={supplyDeliveries}
-          internal={internal}
-        />
-
-        {/* Footer */}
-        <PrintFooter leftContent={t("computer_generated_document")} />
-      </div>
-    </PrintPreview>
-  );
-};
 
 interface PrintDeliveryOrderProps {
   facilityId: string;
@@ -207,7 +42,8 @@ export const PrintDeliveryOrder = ({
   internal,
 }: PrintDeliveryOrderProps) => {
   const { t } = useTranslation();
-
+  const { facility } = useCurrentFacility();
+  const { getExtensions } = useExtensionSchemas();
   const { data: deliveryOrder, isLoading: isLoadingOrder } = useQuery({
     queryKey: ["deliveryOrders", deliveryOrderId],
     queryFn: query(deliveryOrderApi.retrieveDeliveryOrder, {
@@ -231,7 +67,7 @@ export const PrintDeliveryOrder = ({
   });
 
   if (isLoadingOrder || isLoadingDeliveries) {
-    return <Loading />;
+    return <PrintLoading />;
   }
 
   if (!deliveryOrder) {
@@ -250,11 +86,33 @@ export const PrintDeliveryOrder = ({
     );
   }
 
+  const extensionRows = getExtensionFieldsWithName(
+    getExtensions(ExtensionEntityType.supply_delivery_order, "retrieve"),
+    ExtensionContexts.supply_delivery_order_summary,
+  ).flatMap((field) => {
+    const value = getExtensionValue(
+      deliveryOrder.extensions as NamespacedExtensionData,
+      field,
+    );
+    if (value === undefined || value === null) return [];
+    return [
+      { label: field.label, value: formatExtensionValue(value, field.format) },
+    ];
+  });
+
   return (
-    <DeliveryOrderPreview
-      deliveryOrder={deliveryOrder}
-      supplyDeliveries={supplyDeliveries.results}
-      internal={internal}
+    <TypstPrintPreview
+      template="details-table"
+      title={`${t("delivery_order")} - ${deliveryOrder.name}`}
+      content={buildDeliveryOrderPrintContent({
+        deliveryOrder,
+        supplyDeliveries: supplyDeliveries.results,
+        internal,
+        extensionRows,
+        t,
+      })}
+      facility={facility}
+      templateSlug={PrintTemplateType.delivery_order}
     />
   );
 };
