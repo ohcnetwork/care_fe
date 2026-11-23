@@ -17,7 +17,6 @@ import WeekdayCheckbox, {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -48,6 +47,7 @@ import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScheduleEncounterDefaultsFields } from "@/pages/Scheduling/components/ScheduleEncounterDefaultsFields";
+import { ScheduleValidityField } from "@/pages/Scheduling/components/ScheduleValidityField";
 import {
   calculateSlotDuration,
   formatAvailabilityTime,
@@ -302,37 +302,7 @@ const ScheduleTemplateEditor = ({
             )}
           />
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="valid_from"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel aria-required>{t("valid_from")}</FormLabel>
-                  <DatePicker
-                    date={field.value}
-                    onChange={(date) => field.onChange(date)}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="valid_to"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel aria-required>{t("valid_to")}</FormLabel>
-                  <DatePicker
-                    date={field.value}
-                    onChange={(date) => field.onChange(date)}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <ScheduleValidityField />
 
           <FormField
             control={form.control}

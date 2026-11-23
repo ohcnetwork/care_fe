@@ -36,6 +36,16 @@ npm run playwright:test:ui                              # Interactive Playwright
 - The `setup-*` projects run before Chromium to authenticate test users and save storage state.
 - The `vite-modules` project runs specs that import source modules (`/src/...`) into the page, such as `fillScribeActions.spec.ts`. Playwright starts a Vite dev server on port 4100 for it, because the preview build does not serve source modules. The dev server starts only when the run can include this project (no `--project`, or a `--project` that matches `vite-modules`), and a run of only `--project=vite-modules` skips the preview server. These specs answer their own API calls, so they need no backend or setup projects. CI runs them once, on shard 1, in their own step. Add a spec to `VITE_MODULE_SPECS` in `playwright.config.ts` to run it there
 
+## Isolated component checks
+
+The date-range picker suite builds its fixture in memory with the existing Vite dependencies and serves it through Playwright request interception. It exercises the real picker, popover and date multi-filter without backend data or saved authentication:
+
+```bash
+npx playwright test tests/components/dateRangePicker.spec.ts --project=chromium --no-deps --workers=1 --reporter=line
+```
+
+Keep a frontend server running at the configured base URL, or provide a production build so Playwright can start its preview server. The suite covers typed and clicked ranges, validation, bounds, keyboard focus, draft cancellation, month navigation, a 320px viewport and CSS 200% zoom. It also checks segment selection/stepping/replacement, leap-year clamping, T/Escape shortcuts, side-by-side field layout and the actual shared input/button dimensions at mobile and desktop widths. It does not replace authenticated list-page or mobile-device QA.
+
 ## Database management for re-runs
 
 Tests create data (patients, roles, locations, etc.) that can cause conflicts on re-run. Use the DB snapshot system:

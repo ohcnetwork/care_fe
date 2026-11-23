@@ -1,4 +1,5 @@
 import { ChevronLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
@@ -9,15 +10,17 @@ function FilterHeader({
   label: string;
   onBack: () => void;
 }) {
+  const { t } = useTranslation();
   return (
-    <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200">
+    <div className="flex items-center gap-1 border-b border-gray-200 p-1">
       <Button
+        type="button"
         variant="ghost"
-        size="sm"
+        size="icon"
+        aria-label={t("back")}
         onClick={onBack}
-        className="h-6 w-6 p-0"
       >
-        <ChevronLeft className="h-4 w-4" />
+        <ChevronLeft aria-hidden="true" />
       </Button>
       <span className="text-sm font-medium">{label}</span>
     </div>
