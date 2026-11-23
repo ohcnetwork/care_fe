@@ -1,46 +1,24 @@
 import { expect, test, type Page } from "@playwright/test";
+import {
+  assignUserToPatientViaUi,
+  openAssignUserDialog,
+  openPatientUsersTab,
+  selectUserToAssign,
+} from "tests/helper/patient";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Assign users to a patient", () => {
+  let facilityId: string;
+  let patientId: string;
+
   test.beforeEach(async ({ page }) => {
-    const facilityId = getFacilityId();
-    const { patientId } = await createQuestionnaireEncounter(facilityId);
+    facilityId = getFacilityId();
+    ({ patientId } = await createQuestionnaireEncounter(facilityId));
     await page.goto(`/facility/${facilityId}/patient/${patientId}`);
   });
-
-  async function openUsersTab(page: Page) {
-    await page.getByRole("tab", { name: "Users" }).click();
-  }
-
-  async function openAssignUserDialog(page: Page) {
-    await page.getByRole("button", { name: "Assign User" }).click();
-  }
-
-  async function selectUser(page: Page, userName: string) {
-    await page.getByRole("combobox").first().click();
-    await page.locator("[cmdk-input]").fill(userName);
-    await page.getByRole("option", { name: userName }).first().click();
-  }
-
-  async function selectRole(page: Page, role: string) {
-    await page.getByRole("combobox").filter({ hasText: "Select Role" }).click();
-    await page.getByRole("option", { name: role }).first().click();
-  }
-
-  async function submitAssignUser(page: Page) {
-    await page.getByRole("button", { name: "Assign to Patient" }).click();
-  }
-
-  async function verifyUserAssignmentSuccess(page: Page) {
-    await expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText("User added to patient successfully"),
-    ).toBeVisible({ timeout: 10000 });
-  }
 
   async function verifyUserInList(page: Page, userName: string) {
     await expect(page.getByText(userName).first()).toBeVisible();
@@ -70,41 +48,49 @@ test.describe("Assign users to a patient", () => {
     ).toBeVisible();
   }
 
-  test("Assign user to patient", async ({ page }) => {
-    const userName = "Admin User";
-    const userRole = "Nurse";
+  test(
+    "Assign user to patient",
+    { tag: ["@atomic", "@cap:patient.user.assign"] },
+    async ({ page }) => {
+      const userName = "Admin User";
+      const userRole = "Nurse";
 
-    // Navigate to users tab and assign user
-    await openUsersTab(page);
-    await openAssignUserDialog(page);
-    await selectUser(page, userName);
-    await selectRole(page, userRole);
-    await submitAssignUser(page);
-    await verifyUserAssignmentSuccess(page);
+      // Navigate to users tab and assign user
+      await assignUserToPatientViaUi(page, {
+        facilityId,
+        patientId,
+        userName,
+        role: userRole,
+      });
 
-    // Verify user is in the list
-    await verifyUserInList(page, userName);
+      // Verify user is in the list
+      await verifyUserInList(page, userName);
 
-    // Cleanup: Remove user
-    await removeUser(page);
-    await verifyUserRemovalSuccess(page);
+      // Cleanup: Remove user
+      await removeUser(page);
+      await verifyUserRemovalSuccess(page);
 
-    // Verify no users assigned message is visible
-    await verifyNoUsersAssigned(page);
-  });
+      // Verify no users assigned message is visible
+      await verifyNoUsersAssigned(page);
+    },
+  );
 
-  test("Cancel user assignment without selecting role", async ({ page }) => {
-    const userName = "care-doctor";
+  test(
+    "Cancel user assignment without selecting role",
+    { tag: ["@atomic", "@cap:patient.user.assign"] },
+    async ({ page }) => {
+      const userName = "care-doctor";
 
-    // Navigate to users tab and open assign dialog
-    await openUsersTab(page);
-    await openAssignUserDialog(page);
-    await selectUser(page, userName);
+      // Navigate to users tab and open assign dialog
+      await openPatientUsersTab(page);
+      await openAssignUserDialog(page);
+      await selectUserToAssign(page, userName);
 
-    // Close dialog without selecting role by clicking the X button
-    await page.getByRole("button", { name: "Close" }).click();
+      // Close dialog without selecting role by clicking the X button
+      await page.getByRole("button", { name: "Close" }).click();
 
-    // Verify no users assigned message is still visible (user was not added)
-    await verifyNoUsersAssigned(page);
-  });
+      // Verify no users assigned message is still visible (user was not added)
+      await verifyNoUsersAssigned(page);
+    },
+  );
 });

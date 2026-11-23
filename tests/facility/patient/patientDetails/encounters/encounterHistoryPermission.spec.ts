@@ -118,31 +118,53 @@ test.describe("Encounter history create button permission", () => {
     return { context, page };
   }
 
-  test("shows the create encounter button for a nurse", async ({ browser }) => {
-    const { context, page } = await openEncountersTab(
-      browser,
-      "tests/.auth/nurse.json",
-    );
+  test(
+    "shows the create encounter button for a nurse",
+    {
+      tag: ["@coupled", "@cap:encounter.create"],
+      annotation: {
+        type: "coupled",
+        description:
+          "Serial; beforeAll grants care-nurse/care-staff roles on the shared first govt organization (shared user roles)",
+      },
+    },
+    async ({ browser }) => {
+      const { context, page } = await openEncountersTab(
+        browser,
+        "tests/.auth/nurse.json",
+      );
 
-    await expect(page.getByText("No active encounters found")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Create Encounter" }),
-    ).toBeVisible();
+      await expect(page.getByText("No active encounters found")).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Create Encounter" }),
+      ).toBeVisible();
 
-    await context.close();
-  });
+      await context.close();
+    },
+  );
 
-  test("hides the create encounter button for staff", async ({ browser }) => {
-    const { context, page } = await openEncountersTab(
-      browser,
-      "tests/.auth/staff.json",
-    );
+  test(
+    "hides the create encounter button for staff",
+    {
+      tag: ["@coupled", "@cap:encounter.create"],
+      annotation: {
+        type: "coupled",
+        description:
+          "Serial; beforeAll grants care-nurse/care-staff roles on the shared first govt organization (shared user roles)",
+      },
+    },
+    async ({ browser }) => {
+      const { context, page } = await openEncountersTab(
+        browser,
+        "tests/.auth/staff.json",
+      );
 
-    await expect(page.getByText("No active encounters found")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Create Encounter" }),
-    ).toHaveCount(0);
+      await expect(page.getByText("No active encounters found")).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Create Encounter" }),
+      ).toHaveCount(0);
 
-    await context.close();
-  });
+      await context.close();
+    },
+  );
 });

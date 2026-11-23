@@ -9,25 +9,29 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
     await page.goto(`/facility/${facilityId}/encounters/patients/all`);
   });
 
-  test("should not show Patient Home button on patient home page", async ({
-    page,
-  }) => {
-    await page.getByRole("link", { name: "Patient Home" }).first().click();
+  test(
+    "should not show Patient Home button on patient home page",
+    { tag: ["@atomic", "@cap:patient.infocard.view"] },
+    async ({ page }) => {
+      await page.getByRole("link", { name: "Patient Home" }).first().click();
 
-    // Wait for patient info hover card trigger
-    await page
-      .locator("[data-slot='patient-info-hover-card-trigger']")
-      .last()
-      .click();
+      // Wait for patient info hover card trigger
+      await page
+        .locator("[data-slot='patient-info-hover-card-trigger']")
+        .last()
+        .click();
 
-    // Verify that Patient Home button is NOT visible (because its home page)
-    await expect(
-      page.getByRole("link", { name: "Patient Home" }),
-    ).not.toBeVisible();
+      // Verify that Patient Home button is NOT visible (because its home page)
+      await expect(
+        page.getByRole("link", { name: "Patient Home" }),
+      ).toBeHidden();
 
-    // But View Profile button should still be visible
-    await expect(page.getByRole("link", { name: "View Profile" })).toBeVisible({
-      timeout: 5000,
-    });
-  });
+      // But View Profile button should still be visible
+      await expect(
+        page.getByRole("link", { name: "View Profile" }),
+      ).toBeVisible({
+        timeout: 5000,
+      });
+    },
+  );
 });

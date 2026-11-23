@@ -1,8 +1,6 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
-import { format, subDays } from "date-fns";
-import { submitAndExpectSuccess } from "tests/helper/questionnaire";
-import { getFacilityId } from "tests/support/facilityId";
+import { prescribeMedicationViaUi } from "tests/helper/encounterCare";
+import { expect, test } from "tests/support/test";
 import {
   frequencies,
   instructions,
@@ -11,206 +9,118 @@ import {
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+// Each test prescribes on a throwaway in-progress encounter of its own (the
+// isolatedEncounter fixture), not on the first one in a shared list.
 test.describe("Create Patient Prescription", () => {
-  test.describe.configure({ mode: "serial" });
-  let facilityId: string;
+  test(
+    "Add medication to patient prescription",
+    { tag: ["@atomic", "@cap:encounter.medication.prescribe"] },
+    async ({ page, facilityId, isolatedEncounter }) => {
+      const medicineName = faker.helpers.arrayElement(medicineNames);
+      // Use a non-unit dose (value !== 1) so the dosage is highlighted
+      const dosage = faker.number.int({ min: 2, max: 100 }).toString();
+      const frequency = faker.helpers.arrayElement(frequencies);
+      const selectedInstruction = faker.helpers.arrayElement(instructions);
+      // Identify this attempt's medication even when the encounter contains
+      // prescriptions for the same medicine from retries.
+      const notes = `Highlighted dosage ${faker.string.uuid()}`;
 
-  test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
-    );
-    await page.getByText("View Encounter").first().click();
-    await page.getByRole("tab", { name: "Medications" }).click();
-  });
+      await prescribeMedicationViaUi(page, {
+        facilityId,
+        ...isolatedEncounter,
+        medicineName,
+        dosage,
+        frequency,
+        instruction: selectedInstruction,
+        notes,
+      });
 
-  test("Add medication to patient prescription", async ({ page }) => {
-    const medicineName = faker.helpers.arrayElement(medicineNames);
-    // Use a non-unit dose (value !== 1) so the dosage is highlighted
-    const dosage = faker.number.int({ min: 2, max: 100 }).toString();
-    const frequency = faker.helpers.arrayElement(frequencies);
-    const selectedInstruction = faker.helpers.arrayElement(instructions);
-    // Identify this attempt's medication even when the encounter contains
-    // prescriptions for the same medicine from other tests or retries.
-    const notes = `Highlighted dosage ${faker.string.uuid()}`;
+      await test.step("Verify medication in table", async () => {
+        // Wait for prescriptions API to respond after clicking tab
+        await Promise.all([
+          page.getByRole("tab", { name: "Medications" }).click(),
+          page.waitForResponse(
+            (resp) =>
+              resp.url().includes("/medication/prescription/") &&
+              resp.status() === 200,
+          ),
+        ]);
+        // Click "All Prescriptions" sidebar card to see all medicines
+        await page
+          .locator("[data-slot='card']")
+          .filter({ hasText: "View all medications" })
+          .click();
+        const table = page.getByRole("table");
+        await expect(table).toBeVisible();
+        const medicationRow = table
+          .getByRole("row")
+          .filter({ has: page.getByText(notes, { exact: true }) });
+        await expect(medicationRow).toHaveCount(1);
+        await expect(medicationRow).toBeVisible();
+        await expect(medicationRow).toContainText(medicineName);
+        await expect(medicationRow).toContainText(frequency.display);
+        await expect(medicationRow).toContainText(selectedInstruction);
+        const dosageCell = medicationRow.getByRole("cell").nth(1);
+        await expect(dosageCell).toHaveText(new RegExp(`^${dosage} `));
+        // Non-unit dosages (value !== 1) are visually highlighted
+        const highlightedDosage = dosageCell.locator(".bg-yellow-100");
+        await expect(highlightedDosage).toHaveCount(1);
+        await expect(highlightedDosage).toBeVisible();
+      });
+    },
+  );
 
-    await test.step("Open prescription form", async () => {
-      await page.getByRole("link", { name: /Create/i }).click();
-      // Wait for the "Add Medication" button to be visible instead of networkidle
-      await expect(
-        page.getByText(/Add Medication|Add another Medication/i),
-      ).toBeVisible();
-    });
+  test(
+    "Unit dosage is not highlighted in patient prescription",
+    { tag: ["@atomic", "@cap:encounter.medication.prescribe"] },
+    async ({ page, facilityId, isolatedEncounter }) => {
+      const medicineName = faker.helpers.arrayElement(medicineNames);
+      // Use a unit dose (value === 1) so the dosage is NOT highlighted
+      const dosage = "1";
+      const frequency = faker.helpers.arrayElement(frequencies);
+      const selectedInstruction = faker.helpers.arrayElement(instructions);
+      const notes = `Unit dosage ${faker.string.uuid()}`;
 
-    await test.step("Add medication", async () => {
-      await page.getByText(/Add Medication|Add another Medication/i).click();
-    });
+      await prescribeMedicationViaUi(page, {
+        facilityId,
+        ...isolatedEncounter,
+        medicineName,
+        dosage,
+        frequency,
+        instruction: selectedInstruction,
+        notes,
+      });
 
-    await test.step("Select medicine from list", async () => {
-      await page.getByRole("tab", { name: "Medication" }).click();
-      await page.locator("input[data-slot='command-input']").fill(medicineName);
-      await page.getByRole("option", { name: medicineName }).first().click();
-      await expect(page.getByText(medicineName).first()).toBeVisible();
-    });
-
-    await test.step("Fill medication details", async () => {
-      await page.getByPlaceholder("Enter a number...").first().click();
-      await page.getByPlaceholder("Enter a number...").first().fill(dosage);
-      await page.keyboard.press("Enter");
-
-      await page.getByText("eg. 1-0-1").first().click();
-      await page.getByPlaceholder("Type eg. 1-0-1").fill(frequency.input);
-      await page
-        .getByRole("option", { name: frequency.display })
-        .nth(0)
-        .click();
-
-      // expand
-      await page.getByTitle("Show Advanced Fields").first().click();
-
-      await page
-        .getByRole("button", { name: "No instructions selected" })
-        .last()
-        .click();
-      await page.getByRole("option", { name: selectedInstruction }).click();
-
-      await page
-        .getByPlaceholder("Enter additional notes", { exact: true })
-        .fill(notes);
-    });
-
-    await test.step("Submit prescription", async () => {
-      // Prescriptions are authored on the v2 fill page — its primary action
-      // is "Save Changes" (see fill/FillHeader.tsx).
-      await submitAndExpectSuccess(page);
-    });
-
-    await test.step("Verify medication in table", async () => {
-      // Wait for prescriptions API to respond after clicking tab
-      await Promise.all([
-        page.getByRole("tab", { name: "Medications" }).click(),
-        page.waitForResponse(
-          (resp) =>
-            resp.url().includes("/medication/prescription/") &&
-            resp.status() === 200,
-        ),
-      ]);
-      // Click "All Prescriptions" sidebar card to see all medicines
-      await page
-        .locator("[data-slot='card']")
-        .filter({ hasText: "View all medications" })
-        .click();
-      const table = page.getByRole("table");
-      await expect(table).toBeVisible();
-      const medicationRow = table
-        .getByRole("row")
-        .filter({ has: page.getByText(notes, { exact: true }) });
-      await expect(medicationRow).toHaveCount(1);
-      await expect(medicationRow).toBeVisible();
-      await expect(medicationRow).toContainText(medicineName);
-      await expect(medicationRow).toContainText(frequency.display);
-      await expect(medicationRow).toContainText(selectedInstruction);
-      const dosageCell = medicationRow.getByRole("cell").nth(1);
-      await expect(dosageCell).toHaveText(new RegExp(`^${dosage} `));
-      // Non-unit dosages (value !== 1) are visually highlighted
-      const highlightedDosage = dosageCell.locator(".bg-yellow-100");
-      await expect(highlightedDosage).toHaveCount(1);
-      await expect(highlightedDosage).toBeVisible();
-    });
-  });
-
-  test("Unit dosage is not highlighted in patient prescription", async ({
-    page,
-  }) => {
-    const medicineName = faker.helpers.arrayElement(medicineNames);
-    // Use a unit dose (value === 1) so the dosage is NOT highlighted
-    const dosage = "1";
-    const frequency = faker.helpers.arrayElement(frequencies);
-    const selectedInstruction = faker.helpers.arrayElement(instructions);
-    const notes = `Unit dosage ${faker.string.uuid()}`;
-
-    await test.step("Open prescription form", async () => {
-      await page.getByRole("link", { name: /Create/i }).click();
-      // Wait for the "Add Medication" button to be visible instead of networkidle
-      await expect(
-        page.getByText(/Add Medication|Add another Medication/i),
-      ).toBeVisible();
-    });
-
-    await test.step("Add medication", async () => {
-      await page.getByText(/Add Medication|Add another Medication/i).click();
-    });
-
-    await test.step("Select medicine from list", async () => {
-      await page.getByRole("tab", { name: "Medication" }).click();
-      await page.locator("input[data-slot='command-input']").fill(medicineName);
-      await page.getByRole("option", { name: medicineName }).first().click();
-      await expect(page.getByText(medicineName).first()).toBeVisible();
-    });
-
-    await test.step("Fill medication details", async () => {
-      await page.getByPlaceholder("Enter a number...").first().click();
-      await page.getByPlaceholder("Enter a number...").first().fill(dosage);
-      await page.keyboard.press("Enter");
-
-      await page.getByText("eg. 1-0-1").first().click();
-      await page.getByPlaceholder("Type eg. 1-0-1").fill(frequency.input);
-      await page
-        .getByRole("option", { name: frequency.display })
-        .nth(0)
-        .click();
-
-      // expand
-      await page.getByTitle("Show Advanced Fields").first().click();
-
-      await page
-        .getByRole("button", { name: "No instructions selected" })
-        .last()
-        .click();
-      await page.getByRole("option", { name: selectedInstruction }).click();
-
-      await page
-        .getByPlaceholder("Enter additional notes", { exact: true })
-        .fill(notes);
-    });
-
-    await test.step("Submit prescription", async () => {
-      // Prescriptions are authored on the v2 fill page — its primary action
-      // is "Save Changes" (see fill/FillHeader.tsx).
-      await submitAndExpectSuccess(page);
-    });
-
-    await test.step("Verify medication is not highlighted in table", async () => {
-      // Wait for prescriptions API to respond after clicking tab
-      await Promise.all([
-        page.getByRole("tab", { name: "Medications" }).click(),
-        page.waitForResponse(
-          (resp) =>
-            resp.url().includes("/medication/prescription/") &&
-            resp.status() === 200,
-        ),
-      ]);
-      // Click "All Prescriptions" sidebar card to see all medicines
-      await page
-        .locator("[data-slot='card']")
-        .filter({ hasText: "View all medications" })
-        .click();
-      const table = page.getByRole("table");
-      await expect(table).toBeVisible();
-      const medicationRow = table
-        .getByRole("row")
-        .filter({ has: page.getByText(notes, { exact: true }) });
-      await expect(medicationRow).toHaveCount(1);
-      await expect(medicationRow).toBeVisible();
-      await expect(medicationRow).toContainText(medicineName);
-      await expect(medicationRow).toContainText(frequency.display);
-      await expect(medicationRow).toContainText(selectedInstruction);
-      const dosageCell = medicationRow.getByRole("cell").nth(1);
-      await expect(dosageCell).toHaveText(new RegExp(`^${dosage} `));
-      // Unit dosages (value === 1) are NOT visually highlighted
-      await expect(dosageCell.locator(".bg-yellow-100")).toHaveCount(0);
-    });
-  });
+      await test.step("Verify medication is not highlighted in table", async () => {
+        // Wait for prescriptions API to respond after clicking tab
+        await Promise.all([
+          page.getByRole("tab", { name: "Medications" }).click(),
+          page.waitForResponse(
+            (resp) =>
+              resp.url().includes("/medication/prescription/") &&
+              resp.status() === 200,
+          ),
+        ]);
+        // Click "All Prescriptions" sidebar card to see all medicines
+        await page
+          .locator("[data-slot='card']")
+          .filter({ hasText: "View all medications" })
+          .click();
+        const table = page.getByRole("table");
+        await expect(table).toBeVisible();
+        const medicationRow = table
+          .getByRole("row")
+          .filter({ has: page.getByText(notes, { exact: true }) });
+        await expect(medicationRow).toHaveCount(1);
+        await expect(medicationRow).toBeVisible();
+        await expect(medicationRow).toContainText(medicineName);
+        await expect(medicationRow).toContainText(frequency.display);
+        await expect(medicationRow).toContainText(selectedInstruction);
+        const dosageCell = medicationRow.getByRole("cell").nth(1);
+        await expect(dosageCell).toHaveText(new RegExp(`^${dosage} `));
+        // Unit dosages (value === 1) are NOT visually highlighted
+        await expect(dosageCell.locator(".bg-yellow-100")).toHaveCount(0);
+      });
+    },
+  );
 });

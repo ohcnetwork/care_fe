@@ -1,309 +1,198 @@
-import { faker } from "@faker-js/faker";
-import { expect, Page, test } from "@playwright/test";
-import { selectComboboxOption } from "tests/helper/ui";
+import { expect, test } from "@playwright/test";
+import {
+  fillPatientAdditionalDetails,
+  fillPatientBasicInfo,
+  fillPatientDateOfBirth,
+  generatePatientRegistrationData,
+  registerPatientViaUi,
+  selectPatientBloodGroup,
+  startPatientRegistration,
+  submitPatientRegistration,
+} from "tests/helper/patient";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
-
-/**
- * Test data generator for patient registration
- */
-function generatePatientData() {
-  return {
-    name: faker.person.fullName(),
-    phoneNumber: `${faker.helpers.arrayElement([7, 8, 9])}${faker.string.numeric(9)}`,
-    gender: faker.helpers.arrayElement([
-      "Male",
-      "Female",
-      "Transgender",
-      "Non-binary",
-    ]),
-    dateOfBirth: {
-      day: faker.number.int({ min: 1, max: 28 }).toString().padStart(2, "0"),
-      month: faker.number.int({ min: 1, max: 12 }).toString().padStart(2, "0"),
-      year: faker.number.int({ min: 1950, max: 2009 }).toString(),
-    },
-    bloodGroup: faker.helpers.arrayElement([
-      "A+",
-      "A-",
-      "B+",
-      "B-",
-      "O+",
-      "O-",
-      "AB+",
-      "AB-",
-    ]),
-    pincode: `${faker.number.int({ min: 1, max: 9 })}${faker.string.numeric(5)}`,
-    address: faker.location.streetAddress({ useFullAddress: true }),
-    emergencyContact: {
-      name: faker.person.fullName(),
-      phoneNumber: `${faker.helpers.arrayElement([7, 8, 9])}${faker.string.numeric(9)}`,
-    },
-  };
-}
-
-type PatientData = ReturnType<typeof generatePatientData>;
-
-async function startRegistration(page: Page) {
-  await page
-    .getByRole("textbox", { name: /search by patient phone number/i })
-    .press("Shift+Enter");
-}
-
-async function fillBasicInfo(
-  page: Page,
-  data: { name: string; phoneNumber: string; gender: string },
-) {
-  await test.step("Fill patient basic information", async () => {
-    await page.getByRole("textbox", { name: /name.*\*/i }).fill(data.name);
-    await page
-      .getByRole("textbox", { name: /phone number.*\*/i })
-      .fill(data.phoneNumber);
-    await page.getByRole("radio", { name: data.gender, exact: true }).click();
-  });
-}
-
-async function fillDateOfBirth(
-  page: Page,
-  dob: { day: string; month: string; year: string },
-) {
-  await test.step("Fill date of birth", async () => {
-    await page.getByPlaceholder("DD", { exact: true }).fill(dob.day);
-    await page.getByPlaceholder("MM", { exact: true }).fill(dob.month);
-    await page.getByPlaceholder("YYYY", { exact: true }).fill(dob.year);
-  });
-}
-
-async function selectBloodGroup(page: Page, bloodGroup: string) {
-  await test.step("Select blood group", async () => {
-    await page.getByRole("combobox", { name: /blood group/i }).click();
-    await page.getByRole("option", { name: bloodGroup, exact: true }).click();
-  });
-}
-
-/**
- * Fills the "Additional Details" section: address, PIN code, and state.
- * TODO: Update state selection to a specific state once fixtures support it.
- */
-async function fillAdditionalDetails(
-  page: Page,
-  data: { address: string; pincode: string },
-) {
-  await test.step("Fill additional details", async () => {
-    const additionalDetailsSection = page.getByRole("button", {
-      name: "Additional Details",
-    });
-    const additionalDetailsSectionText =
-      await additionalDetailsSection.textContent();
-
-    if (additionalDetailsSectionText?.toLowerCase().includes("optional")) {
-      await additionalDetailsSection.click();
-    }
-
-    await page.getByRole("textbox", { name: "Address" }).fill(data.address);
-    await page.getByRole("spinbutton", { name: "PIN Code" }).fill(data.pincode);
-
-    await page
-      .getByRole("button", { name: /register patient/i })
-      .scrollIntoViewIfNeeded();
-
-    // Geo org levels cascade: selecting an organization with children adds
-    // the next level's combobox in the same render, so once a pick's popup
-    // has closed the count of comboboxes is final for that pick.
-    const geoRegion = page.getByRole("region", { name: "Additional Details" });
-    const comboboxes = geoRegion.getByRole("combobox");
-    for (let filled = 0; filled < (await comboboxes.count()); filled++) {
-      await selectComboboxOption(comboboxes.nth(filled));
-    }
-  });
-}
-
-async function submitRegistration(page: Page) {
-  await test.step("Submit patient registration", async () => {
-    await page.getByRole("button", { name: /register patient/i }).click();
-    await expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText(/patient registered successfully/i),
-    ).toBeVisible({ timeout: 15000 });
-  });
-}
-
-/**
- * Fills all standard required fields and submits.
- * Useful for tests where registration is setup, not the focus.
- */
-async function fillRequiredFieldsAndSubmit(page: Page, data: PatientData) {
-  await fillBasicInfo(page, data);
-  await fillDateOfBirth(page, data.dateOfBirth);
-  await selectBloodGroup(page, data.bloodGroup);
-  await fillAdditionalDetails(page, data);
-  await submitRegistration(page);
-}
 
 test.describe("Patient Registration", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`/facility/${getFacilityId()}/patients`);
   });
 
-  test("should successfully register a new patient with all required fields", async ({
-    page,
-  }) => {
-    const patientData = generatePatientData();
-    await startRegistration(page);
-    await fillRequiredFieldsAndSubmit(page, patientData);
-  });
-
-  test("should handle emergency contact information", async ({ page }) => {
-    const patientData = generatePatientData();
-    await startRegistration(page);
-    await fillBasicInfo(page, patientData);
-    await fillDateOfBirth(page, patientData.dateOfBirth);
-
-    await test.step("Configure emergency contact", async () => {
-      const emergencyCheckbox = page.getByRole("checkbox", {
-        name: /use a different emergency/i,
+  test(
+    "should successfully register a new patient with all required fields",
+    { tag: ["@atomic", "@cap:patient.register"] },
+    async ({ page }) => {
+      const { patientId } = await registerPatientViaUi(page, {
+        facilityId: getFacilityId(),
       });
-      if (await emergencyCheckbox.isVisible()) {
-        await emergencyCheckbox.check();
-      }
-    });
+      expect(patientId).toBeTruthy();
+    },
+  );
 
-    await selectBloodGroup(page, patientData.bloodGroup);
-    await fillAdditionalDetails(page, patientData);
-    await submitRegistration(page);
-  });
+  test(
+    "should handle emergency contact information",
+    { tag: ["@atomic", "@cap:patient.register"] },
+    async ({ page }) => {
+      const patientData = generatePatientRegistrationData();
+      await startPatientRegistration(page);
+      await fillPatientBasicInfo(page, patientData);
+      await fillPatientDateOfBirth(page, patientData.dateOfBirth);
 
-  test("should validate phone number format", async ({ page }) => {
-    await startRegistration(page);
+      await test.step("Configure emergency contact", async () => {
+        const emergencyCheckbox = page.getByRole("checkbox", {
+          name: /use a different emergency/i,
+        });
+        if (await emergencyCheckbox.isVisible()) {
+          await emergencyCheckbox.check();
+        }
+      });
 
-    await test.step("Test invalid phone number", async () => {
-      await page
-        .getByRole("textbox", { name: /name.*\*/i })
-        .fill("Test Patient");
+      await selectPatientBloodGroup(page, patientData.bloodGroup);
+      await fillPatientAdditionalDetails(page, patientData);
+      await submitPatientRegistration(page);
+    },
+  );
+
+  test(
+    "should validate phone number format",
+    { tag: ["@atomic", "@cap:patient.register"] },
+    async ({ page }) => {
+      await startPatientRegistration(page);
+
+      await test.step("Test invalid phone number", async () => {
+        await page
+          .getByRole("textbox", { name: /name.*\*/i })
+          .fill("Test Patient");
+        await page
+          .getByRole("textbox", { name: /phone number.*\*/i })
+          .fill("123");
+        await page.getByRole("radio", { name: "Male", exact: true }).click();
+
+        await page.getByPlaceholder("DD", { exact: true }).fill("16");
+        await page.getByPlaceholder("MM", { exact: true }).fill("06");
+        await page.getByPlaceholder("YYYY", { exact: true }).fill("2009");
+
+        await page.getByRole("button", { name: /register patient/i }).click();
+
+        await expect(
+          page.getByText(/entered phone number is not valid/i).first(),
+        ).toBeVisible();
+      });
+    },
+  );
+
+  test(
+    "should show validation error when only first geo org level is selected",
+    { tag: ["@atomic", "@cap:patient.register"] },
+    async ({ page }) => {
+      const patientData = generatePatientRegistrationData();
+      await startPatientRegistration(page);
+      await fillPatientBasicInfo(page, patientData);
+      await fillPatientDateOfBirth(page, patientData.dateOfBirth);
+      await selectPatientBloodGroup(page, patientData.bloodGroup);
+
+      await test.step("Open additional details and fill only first state", async () => {
+        const additionalDetailsSection = page.getByRole("button", {
+          name: "Additional Details",
+        });
+        const additionalDetailsSectionText =
+          await additionalDetailsSection.textContent();
+
+        if (additionalDetailsSectionText?.toLowerCase().includes("optional")) {
+          await additionalDetailsSection.click();
+        }
+
+        await page
+          .getByRole("textbox", { name: "Address" })
+          .fill(patientData.address);
+        await page
+          .getByRole("spinbutton", { name: "PIN Code" })
+          .fill(patientData.pincode);
+
+        await page
+          .getByRole("button", { name: /register patient/i })
+          .scrollIntoViewIfNeeded();
+
+        // Select only the first geo org level
+        const geoRegion = page.getByRole("region", {
+          name: "Additional Details",
+        });
+        const firstCombobox = geoRegion.getByRole("combobox").first();
+        await firstCombobox.waitFor({ state: "visible" });
+        await firstCombobox.click();
+
+        const option = page.getByRole("option").first();
+        await option.waitFor({ state: "visible" });
+        await option.click();
+      });
+
+      await test.step("Submit and verify validation error", async () => {
+        await page.getByRole("button", { name: /register patient/i }).click();
+
+        await expect(
+          page
+            .getByText(
+              /geo organization is required when nationality is india/i,
+            )
+            .first(),
+        ).toBeVisible();
+
+        // Should NOT show success toast
+        await expect(
+          page
+            .locator("li[data-sonner-toast]")
+            .getByText(/patient registered successfully/i),
+        ).toBeHidden();
+      });
+    },
+  );
+
+  test(
+    "should register patient with age and verify year of birth calculation and profile display",
+    { tag: ["@atomic", "@cap:patient.register"] },
+    async ({ page }) => {
+      const currentYear = new Date().getFullYear();
+      const patientAge = 25;
+      const expectedYearOfBirth = currentYear - patientAge;
+
+      const timestamp = Date.now();
+      const patientName = `Age Test Patient ${timestamp}`;
+      const phoneNumber = `9${Math.floor(Math.random() * 1000000000)
+        .toString()
+        .padStart(9, "0")}`;
+
+      await startPatientRegistration(page);
+
+      await page.getByRole("textbox", { name: /name.*\*/i }).fill(patientName);
       await page
         .getByRole("textbox", { name: /phone number.*\*/i })
-        .fill("123");
+        .fill(phoneNumber);
       await page.getByRole("radio", { name: "Male", exact: true }).click();
 
-      await page.getByPlaceholder("DD", { exact: true }).fill("16");
-      await page.getByPlaceholder("MM", { exact: true }).fill("06");
-      await page.getByPlaceholder("YYYY", { exact: true }).fill("2009");
-
-      await page.getByRole("button", { name: /register patient/i }).click();
+      await page.getByRole("tab", { name: "Age" }).click();
+      await page.getByPlaceholder("Age").fill(patientAge.toString());
 
       await expect(
-        page.getByText(/entered phone number is not valid/i).first(),
-      ).toBeVisible();
-    });
-  });
-
-  test("should show validation error when only first geo org level is selected", async ({
-    page,
-  }) => {
-    const patientData = generatePatientData();
-    await startRegistration(page);
-    await fillBasicInfo(page, patientData);
-    await fillDateOfBirth(page, patientData.dateOfBirth);
-    await selectBloodGroup(page, patientData.bloodGroup);
-
-    await test.step("Open additional details and fill only first state", async () => {
-      const additionalDetailsSection = page.getByRole("button", {
-        name: "Additional Details",
-      });
-      const additionalDetailsSectionText =
-        await additionalDetailsSection.textContent();
-
-      if (additionalDetailsSectionText?.toLowerCase().includes("optional")) {
-        await additionalDetailsSection.click();
-      }
-
-      await page
-        .getByRole("textbox", { name: "Address" })
-        .fill(patientData.address);
-      await page
-        .getByRole("spinbutton", { name: "PIN Code" })
-        .fill(patientData.pincode);
-
-      await page
-        .getByRole("button", { name: /register patient/i })
-        .scrollIntoViewIfNeeded();
-
-      // Select only the first geo org level
-      const geoRegion = page.getByRole("region", {
-        name: "Additional Details",
-      });
-      const firstCombobox = geoRegion.getByRole("combobox").first();
-      await firstCombobox.waitFor({ state: "visible" });
-      await firstCombobox.click();
-
-      const option = page.getByRole("option").first();
-      await option.waitFor({ state: "visible" });
-      await option.click();
-    });
-
-    await test.step("Submit and verify validation error", async () => {
-      await page.getByRole("button", { name: /register patient/i }).click();
-
-      await expect(
-        page
-          .getByText(/geo organization is required when nationality is india/i)
-          .first(),
+        page.locator(`text=Year of Birth: ${expectedYearOfBirth}`),
       ).toBeVisible();
 
-      // Should NOT show success toast
-      await expect(
-        page
-          .locator("li[data-sonner-toast]")
-          .getByText(/patient registered successfully/i),
-      ).not.toBeVisible();
-    });
-  });
+      await selectPatientBloodGroup(page, "A+");
+      await fillPatientAdditionalDetails(page, {
+        address: "123 Test Street",
+        pincode: "302020",
+      });
 
-  test("should register patient with age and verify year of birth calculation and profile display", async ({
-    page,
-  }) => {
-    const currentYear = new Date().getFullYear();
-    const patientAge = 25;
-    const expectedYearOfBirth = currentYear - patientAge;
+      await submitPatientRegistration(page);
 
-    const timestamp = Date.now();
-    const patientName = `Age Test Patient ${timestamp}`;
-    const phoneNumber = `9${Math.floor(Math.random() * 1000000000)
-      .toString()
-      .padStart(9, "0")}`;
+      await page.waitForURL("**/patients/**");
 
-    await startRegistration(page);
-
-    await page.getByRole("textbox", { name: /name.*\*/i }).fill(patientName);
-    await page
-      .getByRole("textbox", { name: /phone number.*\*/i })
-      .fill(phoneNumber);
-    await page.getByRole("radio", { name: "Male", exact: true }).click();
-
-    await page.getByRole("tab", { name: "Age" }).click();
-    await page.getByPlaceholder("Age").fill(patientAge.toString());
-
-    await expect(
-      page.locator(`text=Year of Birth: ${expectedYearOfBirth}`),
-    ).toBeVisible();
-
-    await selectBloodGroup(page, "A+");
-    await fillAdditionalDetails(page, {
-      address: "123 Test Street",
-      pincode: "302020",
-    });
-
-    await submitRegistration(page);
-
-    await page.waitForURL("**/patients/**");
-
-    const selector = page.getByRole("button", { name: patientName });
-    await expect(selector).toContainText(
-      `${expectedYearOfBirth} (${patientAge}y), Male`,
-    );
-  });
+      const selector = page.getByRole("button", { name: patientName });
+      await expect(selector).toContainText(
+        `${expectedYearOfBirth} (${patientAge}y), Male`,
+      );
+    },
+  );
 });
 
 test.describe("DOB timezone validation", () => {
@@ -325,39 +214,43 @@ test.describe("DOB timezone validation", () => {
     await page.goto(`/facility/${facilityId}/patient/create`);
   });
 
-  test("allows registering a newborn with today's DOB in the IST early-morning window", async ({
-    page,
-  }) => {
-    const patientData = generatePatientData();
-    await fillBasicInfo(page, patientData);
-    await fillDateOfBirth(page, TODAY_IST);
-    await selectBloodGroup(page, patientData.bloodGroup);
-    await fillAdditionalDetails(page, patientData);
-    // Resume clock before submit so API calls and toast timers work normally
-    await page.clock.resume();
-    await submitRegistration(page);
-  });
+  test(
+    "allows registering a newborn with today's DOB in the IST early-morning window",
+    { tag: ["@atomic", "@cap:patient.register"] },
+    async ({ page }) => {
+      const patientData = generatePatientRegistrationData();
+      await fillPatientBasicInfo(page, patientData);
+      await fillPatientDateOfBirth(page, TODAY_IST);
+      await selectPatientBloodGroup(page, patientData.bloodGroup);
+      await fillPatientAdditionalDetails(page, patientData);
+      // Resume clock before submit so API calls and toast timers work normally
+      await page.clock.resume();
+      await submitPatientRegistration(page);
+    },
+  );
 
-  test("rejects a DOB that is in the future in local time", async ({
-    page,
-  }) => {
-    const patientData = generatePatientData();
-    await fillBasicInfo(page, patientData);
-    await fillDateOfBirth(page, TOMORROW_IST);
-    await selectBloodGroup(page, patientData.bloodGroup);
-    await fillAdditionalDetails(page, patientData);
-    // Resume clock before submit so form submission and toast work
-    await page.clock.resume();
+  test(
+    "rejects a DOB that is in the future in local time",
+    { tag: ["@atomic", "@cap:patient.register"] },
+    async ({ page }) => {
+      const patientData = generatePatientRegistrationData();
+      await fillPatientBasicInfo(page, patientData);
+      await fillPatientDateOfBirth(page, TOMORROW_IST);
+      await selectPatientBloodGroup(page, patientData.bloodGroup);
+      await fillPatientAdditionalDetails(page, patientData);
+      // Resume clock before submit so form submission and toast work
+      await page.clock.resume();
 
-    await page.getByRole("button", { name: /register patient/i }).click();
+      await page.getByRole("button", { name: /register patient/i }).click();
 
-    await expect(
-      page.getByText(/date cannot be in the future/i).first(),
-    ).toBeVisible();
-    await expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText(/patient registered successfully/i),
-    ).not.toBeVisible();
-  });
+      await expect(
+        page.getByText(/date cannot be in the future/i).first(),
+      ).toBeVisible();
+      await expect(
+        page
+          .locator("li[data-sonner-toast]")
+          .getByText(/patient registered successfully/i),
+      ).toBeHidden();
+    },
+  );
 });
