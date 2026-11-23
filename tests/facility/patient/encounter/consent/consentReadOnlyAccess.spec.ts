@@ -225,7 +225,9 @@ test.describe("Consent access for a read-only user", () => {
   test("consent detail page does not show the upload file button", async () => {
     await openConsentDetail();
 
-    await expect(page.getByText("Supporting Documents")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Supporting Documents" }),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "Add Files" })).toHaveCount(
       0,
     );
