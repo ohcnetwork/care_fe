@@ -40,7 +40,9 @@ test("marks a service request as completed from the actions menu", async ({
 
   await test.step("Complete it from the actions menu with a note", async () => {
     await page.getByRole("button", { name: "More Actions" }).click();
-    await page.getByRole("menuitem", { name: "Mark as Completed" }).click();
+    await page
+      .getByRole("menuitem", { name: "Mark as Complete", exact: true })
+      .click();
     const dialog = page.getByRole("dialog", { name: "Add Completion Note" });
     await dialog
       .getByRole("textbox", { name: "Completion Note", exact: true })

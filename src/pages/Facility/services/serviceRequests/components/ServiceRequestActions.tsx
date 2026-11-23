@@ -8,7 +8,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  EDITABLE_SERVICE_REQUEST_STATUSES,
   ServiceRequestReadSpec,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
@@ -40,9 +39,7 @@ export function ServiceRequestActions({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
-  const canComplete = EDITABLE_SERVICE_REQUEST_STATUSES.includes(
-    request.status,
-  );
+  const canComplete = request.status === Status.active;
   const {
     mutate: cancelServiceRequest,
     isPending: isCancellingServiceRequest,
