@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { navigate } from "@/lib/router/navigate";
 import {
+  EDITABLE_SERVICE_REQUEST_STATUSES,
   ServiceRequestReadSpec,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
@@ -14,15 +15,19 @@ import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Ban, CircleAlert, MoreVertical } from "lucide-react";
+import { Ban, CircleAlert, CircleCheck, MoreVertical } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+
+import { ServiceRequestCompleteDialog } from "./ServiceRequestCompleteDialog";
 
 interface ServiceRequestActionsProps {
   request: ServiceRequestReadSpec;
   facilityId: string;
   serviceRequestId: string;
   hasFinalizedReport: boolean;
+  hasPendingReports: boolean;
 }
 
 export function ServiceRequestActions({
@@ -30,9 +35,14 @@ export function ServiceRequestActions({
   facilityId,
   serviceRequestId,
   hasFinalizedReport,
+  hasPendingReports,
 }: ServiceRequestActionsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
+  const canComplete = EDITABLE_SERVICE_REQUEST_STATUSES.includes(
+    request.status,
+  );
   const {
     mutate: cancelServiceRequest,
     isPending: isCancellingServiceRequest,
@@ -89,6 +99,16 @@ export function ServiceRequestActions({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {canComplete && (
+              // Like the completion bar, it waits for reports to be final
+              <DropdownMenuItem
+                onSelect={() => setIsCompleteDialogOpen(true)}
+                disabled={hasPendingReports}
+              >
+                <CircleCheck className="size-4" />
+                {t("mark_as_completed")}
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               onSelect={() =>
                 cancelServiceRequest({ status: Status.entered_in_error })
@@ -105,6 +125,15 @@ export function ServiceRequestActions({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      )}
+      {canComplete && (
+        <ServiceRequestCompleteDialog
+          request={request}
+          facilityId={facilityId}
+          serviceRequestId={serviceRequestId}
+          open={isCompleteDialogOpen}
+          onOpenChange={setIsCompleteDialogOpen}
+        />
       )}
     </div>
   );
