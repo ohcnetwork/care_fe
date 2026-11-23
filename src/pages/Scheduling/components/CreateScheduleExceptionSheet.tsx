@@ -135,15 +135,18 @@ export default function CreateScheduleExceptionSheet({
     },
   });
 
+  // The URL holds local calendar dates (YYYY-MM-DD). `new Date()` would read
+  // them as UTC midnight, the previous day west of UTC; dayjs reads them as
+  // local midnight.
   useEffect(() => {
     if (qParams.valid_from) {
-      form.setValue("valid_from", new Date(qParams.valid_from));
+      form.setValue("valid_from", dayjs(qParams.valid_from).toDate());
     }
   }, [qParams.valid_from, form]);
 
   useEffect(() => {
     if (qParams.valid_to) {
-      form.setValue("valid_to", new Date(qParams.valid_to));
+      form.setValue("valid_to", dayjs(qParams.valid_to).toDate());
     }
   }, [qParams.valid_to, form]);
 
