@@ -22,7 +22,8 @@
   "ignore": [
     ".opencode/**",
     "tests/fixtures/plugin/remoteEntry.js",
-    "tests/fixtures/plugin/registeredGroupRemoteEntry.js"
+    "tests/fixtures/plugin/registeredGroupRemoteEntry.js",
+    "tests/fixtures/date-range-picker/main.tsx"
   ],
   "ignoreUnresolved": ["__federation__"],
   "ignoreDependencies": ["workbox-core", "workbox-precaching", "pdfjs-dist"]
