@@ -1,5 +1,7 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import { getFieldErrorMessage } from "tests/helper/error";
+import { selectComboboxOption } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -176,6 +178,54 @@ test.describe("Facility Devices Management", () => {
     ).toHaveValue(partNumber);
   });
 
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    const whitespace = "   ";
+    const addContactPoint = async (system: string) => {
+      await page.getByRole("button", { name: "Add Contact Point" }).click();
+      // A new contact point row defaults to the "Phone" system.
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: /^Phone$/ })
+        .click();
+      await page.getByRole("option", { name: system, exact: true }).click();
+      // Let the list close fully so the next row's list is the only one.
+      await expect(page.getByRole("listbox")).toHaveCount(0);
+    };
+
+    await page.getByRole("link", { name: "Add Device" }).click();
+    await page
+      .getByRole("textbox", { name: "Registered Name *" })
+      .fill(deviceName);
+
+    await test.step("Add a pager contact point", async () => {
+      await addContactPoint("Pager");
+      await page.getByPlaceholder("Enter pager number").fill(whitespace);
+    });
+
+    await test.step("Add an other contact point", async () => {
+      await addContactPoint("Other");
+      await page.getByPlaceholder("Enter contact value").fill(whitespace);
+    });
+
+    await page.getByRole("button", { name: "Save" }).click();
+
+    const pagerError = getFieldErrorMessage(
+      page.getByPlaceholder("Enter pager number"),
+    );
+    await expect(pagerError).toBeVisible();
+    await expect(pagerError).toHaveText(
+      "Must be at least 1 characters and at most 20 characters",
+    );
+
+    const otherError = getFieldErrorMessage(
+      page.getByPlaceholder("Enter contact value"),
+    );
+    await expect(otherError).toBeVisible();
+    await expect(otherError).toHaveText("Required");
+  });
+
   test("Show validation error when clicking Save without filling required field", async ({
     page,
   }) => {
@@ -203,5 +253,129 @@ test.describe("Facility Devices Management", () => {
       .filter({ has: registeredNameLabel })
       .getByText("This field is required");
     await expect(registeredNameError).toBeVisible();
+  });
+
+  test.describe("Contact type switching", () => {
+    // Contact type selects have no label, so match them by the selected type.
+    const contactType = (page: Page, index: number) =>
+      page
+        .getByRole("combobox")
+        .filter({ hasText: /^(Phone|Fax|Email|Pager|URL|SMS|Other)$/ })
+        .nth(index);
+    const contactRow = (page: Page, index: number) =>
+      contactType(page, index).locator("../..");
+    const contactValue = (page: Page, index: number) =>
+      contactRow(page, index).getByRole("textbox");
+    const contactError = (page: Page, index: number) =>
+      contactRow(page, index).locator('[data-slot="form-message"]');
+
+    const selectContactType = async (
+      page: Page,
+      index: number,
+      type: string,
+    ) => {
+      await selectComboboxOption(contactType(page, index), {
+        name: type,
+        exact: true,
+      });
+      await expect(contactType(page, index)).toHaveText(type);
+    };
+
+    const addContact = async (
+      page: Page,
+      index: number,
+      type: string,
+      value: string,
+    ) => {
+      await page.getByRole("button", { name: "Add Contact Point" }).click();
+      await selectContactType(page, index, type);
+      await contactValue(page, index).fill(value);
+    };
+
+    test.beforeEach(async ({ page }) => {
+      await page.getByRole("link", { name: "Add Device" }).click();
+    });
+
+    test("Clear the value and error when switching between phone and non-phone types", async ({
+      page,
+    }) => {
+      await addContact(page, 0, "Email", "invalid-email");
+      await expect(contactError(page, 0)).toHaveText("Invalid email address");
+
+      await selectContactType(page, 0, "Phone");
+      await expect(contactValue(page, 0)).toHaveValue("");
+      await expect(contactError(page, 0)).toBeHidden();
+
+      await contactValue(page, 0).fill("123");
+      await expect(contactError(page, 0)).toHaveText(
+        "Entered phone number is not valid",
+      );
+
+      await selectContactType(page, 0, "Email");
+      await expect(contactValue(page, 0)).toHaveValue("");
+      await expect(contactError(page, 0)).toBeHidden();
+    });
+
+    test("Validate a kept value against the new contact type", async ({
+      page,
+    }) => {
+      await test.step("Email to URL shows the URL error", async () => {
+        await addContact(page, 0, "Email", "invalid-email");
+        await expect(contactError(page, 0)).toHaveText("Invalid email address");
+
+        await selectContactType(page, 0, "URL");
+        await expect(contactValue(page, 0)).toHaveValue("invalid-email");
+        await expect(contactError(page, 0)).toHaveText("Invalid URL");
+      });
+
+      await test.step("URL to Other clears the error for a valid value", async () => {
+        await selectContactType(page, 0, "Other");
+        await expect(contactValue(page, 0)).toHaveValue("invalid-email");
+        await expect(contactError(page, 0)).toBeHidden();
+      });
+
+      await test.step("Phone to SMS keeps the phone error", async () => {
+        await selectContactType(page, 0, "Phone");
+        await contactValue(page, 0).fill("123");
+        await expect(contactError(page, 0)).toHaveText(
+          "Entered phone number is not valid",
+        );
+
+        await selectContactType(page, 0, "SMS");
+        await expect(contactError(page, 0)).toHaveText(
+          "Entered phone number is not valid",
+        );
+      });
+    });
+
+    test("Keep the duplicate error when switching contact type", async ({
+      page,
+    }) => {
+      const email = "duplicate@example.com";
+      await addContact(page, 0, "Email", email);
+      await addContact(page, 1, "Email", email);
+      await expect(contactError(page, 1)).toHaveText(
+        "Duplicate contact values are not allowed across different contact types",
+      );
+
+      await selectContactType(page, 1, "Other");
+      await expect(contactValue(page, 1)).toHaveValue(email);
+      await expect(contactError(page, 1)).toHaveText(
+        "Duplicate contact values are not allowed across different contact types",
+      );
+    });
+
+    test("Keep other contact rows' errors when switching one row's type", async ({
+      page,
+    }) => {
+      await addContact(page, 0, "Email", "invalid-email-1");
+      await addContact(page, 1, "Email", "invalid-email-2");
+      await expect(contactError(page, 0)).toHaveText("Invalid email address");
+      await expect(contactError(page, 1)).toHaveText("Invalid email address");
+
+      await selectContactType(page, 0, "Phone");
+      await expect(contactError(page, 0)).toBeHidden();
+      await expect(contactError(page, 1)).toHaveText("Invalid email address");
+    });
   });
 });

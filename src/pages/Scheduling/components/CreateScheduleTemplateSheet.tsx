@@ -14,7 +14,6 @@ import WeekdayCheckbox, {
 } from "@/CAREUI/interactive/WeekdayCheckbox";
 
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -48,6 +47,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useQueryParams } from "@/lib/router/queryParams";
 import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
 import { ScheduleEncounterDefaultsFields } from "@/pages/Scheduling/components/ScheduleEncounterDefaultsFields";
+import { ScheduleValidityField } from "@/pages/Scheduling/components/ScheduleValidityField";
 import {
   calculateSlotDuration,
   getSlotsPerSession,
@@ -391,43 +391,7 @@ export default function CreateScheduleTemplateSheet({
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="valid_from"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel aria-required>{t("valid_from")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
-                          }
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="valid_to"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel aria-required>{t("valid_to")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
-                          }
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <ScheduleValidityField disablePast />
 
                 <div>
                   <FormLabel className="text-lg font-semibold">

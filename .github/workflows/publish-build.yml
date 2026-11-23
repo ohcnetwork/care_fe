@@ -1,0 +1,100 @@
+name: Publish build bundle
+
+# Publishes the prebuilt `build/` folder as care_fe-build.tar.gz, so static
+# hosts can deploy CARE without building it (see docs/prebuilt-bundles.md):
+# - ghcr.io/ohcnetwork/care_fe-build:sha-<short sha>, and the branch or tag name
+# - an asset of the GitHub release, for tags
+
+on:
+  push:
+    branches:
+      - develop
+      - "3.*"
+    tags:
+      - v*
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+env:
+  NODE_VERSION: "24"
+  BUNDLE: ghcr.io/ohcnetwork/care_fe-build
+
+jobs:
+  # npm install and build scripts run here, without publishing permissions
+  build:
+    if: github.repository == 'ohcnetwork/care_fe'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+
+      - name: Package build
+        run: tar -czf care_fe-build.tar.gz -C build .
+
+      - name: Upload bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: care_fe-build
+          path: care_fe-build.tar.gz
+          retention-days: 1
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - name: Download bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: care_fe-build
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: care_fe-build.tar.gz
+
+      - name: Setup ORAS
+        uses: oras-project/setup-oras@v2
+
+      - name: Push to GHCR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GITHUB_TOKEN" | oras login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          oras push "$BUNDLE:sha-${GITHUB_SHA::7},${GITHUB_REF_NAME//[^A-Za-z0-9._-]/-}" \
+            --artifact-type application/vnd.ohcnetwork.care-fe.build.v1 \
+            --annotation "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
+            --annotation "org.opencontainers.image.revision=$GITHUB_SHA" \
+            care_fe-build.tar.gz:application/vnd.oci.image.layer.v1.tar+gzip
+
+      - name: Upload to release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$GITHUB_REF_NAME" care_fe-build.tar.gz --clobber --repo "$GITHUB_REPOSITORY"

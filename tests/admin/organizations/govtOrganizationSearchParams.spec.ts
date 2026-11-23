@@ -20,17 +20,31 @@ const searchBox = (page: Page) =>
 test.describe("Government organization search params", () => {
   const listPath = "/admin/organizations/govt";
 
-  test("writes the search to the URL and the API request", async ({ page }) => {
-    const searchText = faker.string.alpha({ length: 8, casing: "lower" });
+  async function firstOrganizationId(page: Page) {
+    const list = waitForApiList(
+      page,
+      "/organization/",
+      (params) => params.get("org_type") === "govt" && params.has("offset"),
+    );
     await page.goto(listPath);
-    await expect(
-      page.getByRole("heading", { name: "Governance" }),
-    ).toBeVisible();
+    const { results } = (await (await list).json()) as {
+      results: { id: string }[];
+    };
+    expect(results.length).toBeGreaterThan(0);
+    return results[0].id;
+  }
 
+  test("writes the search to the URL and the API request", async ({ page }) => {
+    const organizationId = await firstOrganizationId(page);
+    const searchText = faker.string.alpha({ length: 8, casing: "lower" });
+    await page.goto(`${listPath}/${organizationId}`);
+    await expect(searchBox(page)).toBeVisible();
     const request = waitForApiList(
       page,
       "/organization/",
-      (params) => params.get("name") === searchText,
+      (params) =>
+        params.get("parent") === organizationId &&
+        params.get("name") === searchText,
     );
     await searchBox(page).fill(searchText);
     await request;
@@ -41,16 +55,7 @@ test.describe("Government organization search params", () => {
   test("restores the search of an organization from a bookmarked URL", async ({
     page,
   }) => {
-    const list = waitForApiList(
-      page,
-      "/organization/",
-      (params) => params.get("org_type") === "govt" && params.has("offset"),
-    );
-    await page.goto(listPath);
-    const { results } = (await (await list).json()) as {
-      results: { id: string }[];
-    };
-    const organizationId = results[0].id;
+    const organizationId = await firstOrganizationId(page);
 
     const searchText = faker.string.alpha({ length: 8, casing: "lower" });
     const api = recordApiQueries(page);

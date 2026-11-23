@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { addMonths, format, setDate } from "date-fns";
 import { getFieldErrorMessage } from "tests/helper/error";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
@@ -39,34 +40,27 @@ class ScheduleFormPage {
       .fill(name);
   }
 
-  async selectMidMonthDate(
-    datePickerIndex: "first" | "second",
-    monthsToNavigate: number,
+  async selectValidPeriod(
+    startMonthOffset: number,
+    endMonthOffset: number,
   ): Promise<void> {
-    const pickerButton =
-      datePickerIndex === "first"
-        ? this.page.getByRole("button", { name: "Pick a date" }).first()
-        : this.page
-            .locator('label:has-text("Valid Till")')
-            .locator("..")
-            .locator('button[data-slot="popover-trigger"]');
+    const midMonth = (offset: number) =>
+      format(
+        addMonths(
+          setDate(new Date(), SCHEDULE_CONSTANTS.MID_MONTH_DAY),
+          offset,
+        ),
+        "dd/MM/yyyy",
+      );
 
-    await pickerButton.click();
-
-    const nextMonthBtn = this.page.getByRole("button", {
-      name: "Go to the Next Month",
-    });
-    await expect(nextMonthBtn).toBeVisible();
-
-    for (let i = 0; i < monthsToNavigate; i++) {
-      await nextMonthBtn.click({ force: true });
-    }
-
+    await this.page.getByRole("button", { name: /^Valid Period/ }).click();
     await this.page
-      .getByRole("gridcell")
-      .filter({ hasText: /^15$/ })
-      .getByRole("button")
-      .click();
+      .getByRole("textbox", { name: "Start date", exact: true })
+      .fill(midMonth(startMonthOffset));
+    await this.page
+      .getByRole("textbox", { name: "End date", exact: true })
+      .fill(midMonth(endMonthOffset));
+    await this.page.getByRole("button", { name: "Apply", exact: true }).click();
   }
 
   async selectWeekdays(weekdays: readonly string[]): Promise<void> {
@@ -199,7 +193,7 @@ class ScheduleEditSheetPage {
       data.templateName,
     );
 
-    await this.verifyDateFieldsPresent();
+    await this.verifyValidPeriodPresent();
 
     await expect(this.sheet.getByText(data.sessionTitle)).toBeVisible();
 
@@ -214,20 +208,12 @@ class ScheduleEditSheetPage {
     await this.verifyWeekdaySchedules(data.weekdays, data.displayTime);
   }
 
-  private async verifyDateFieldsPresent(): Promise<void> {
-    const validFromButton = this.sheet
-      .locator("label", { hasText: "Valid From" })
-      .locator("..")
-      .locator('button[data-slot="popover-trigger"]');
-    await expect(validFromButton).toBeVisible();
-    await expect(validFromButton).not.toBeEmpty();
-
-    const validTillButton = this.sheet
-      .locator("label", { hasText: "Valid Till" })
-      .locator("..")
-      .locator('button[data-slot="popover-trigger"]');
-    await expect(validTillButton).toBeVisible();
-    await expect(validTillButton).not.toBeEmpty();
+  private async verifyValidPeriodPresent(): Promise<void> {
+    const validPeriod = this.sheet.getByRole("button", {
+      name: /^Valid Period/,
+    });
+    await expect(validPeriod).toBeVisible();
+    await expect(validPeriod).toHaveText(/\d{4}$/);
   }
 
   private async verifySlotConfiguration(
@@ -316,9 +302,8 @@ test.describe("Schedule Template Management", () => {
 
     // Fill template form
     await formPage.fillTemplateName(testData.templateName);
-    await formPage.selectMidMonthDate("first", 1);
+    await formPage.selectValidPeriod(1, 2);
     await formPage.selectWeekdays(testData.weekdays);
-    await formPage.selectMidMonthDate("second", 2);
 
     await formPage.fillSessionDetails({
       title: testData.sessionTitle,
@@ -395,9 +380,8 @@ test.describe("Schedule Template Management", () => {
     await test.step("Fill the template form with auto-fill enabled", async () => {
       await page.getByRole("button", { name: "Create Template" }).click();
       await formPage.fillTemplateName(testData.templateName);
-      await formPage.selectMidMonthDate("first", 1);
+      await formPage.selectValidPeriod(1, 2);
       await formPage.selectWeekdays(testData.weekdays);
-      await formPage.selectMidMonthDate("second", 2);
       await formPage.fillSessionDetails({
         title: testData.sessionTitle,
         startTime: testData.startTime,
@@ -459,9 +443,8 @@ test.describe("Schedule Template Management", () => {
     await test.step("Fill the template form with auto-fill enabled", async () => {
       await page.getByRole("button", { name: "Create Template" }).click();
       await formPage.fillTemplateName(testData.templateName);
-      await formPage.selectMidMonthDate("first", 1);
+      await formPage.selectValidPeriod(1, 2);
       await formPage.selectWeekdays(testData.weekdays);
-      await formPage.selectMidMonthDate("second", 2);
       await formPage.fillSessionDetails({
         title: testData.sessionTitle,
         startTime: testData.startTime,
@@ -498,6 +481,95 @@ test.describe("Schedule Template Management", () => {
         displayTime: testData.displayTime,
         slotDuration: "60",
         numberOfSlots: 5,
+      });
+    });
+  });
+
+  test.describe("Schedule exception form", () => {
+    test("should reject whitespace-only input in required text fields", async ({
+      page,
+    }) => {
+      await page
+        .getByRole("button", { name: "Exceptions", exact: true })
+        .click();
+      await page
+        .getByRole("button", { name: "Add Exception", exact: true })
+        .click();
+
+      const sheet = page
+        .getByRole("dialog")
+        .filter({ hasText: "Add Schedule Exceptions" });
+      const reasonInput = sheet.getByRole("textbox", { name: "Reason *" });
+      await reasonInput.fill("   ");
+
+      await sheet
+        .getByRole("button", { name: "Confirm Unavailability" })
+        .click();
+
+      const errorMessage = getFieldErrorMessage(reasonInput);
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("This field is required");
+    });
+  });
+
+  test.describe("Edit schedule template form", () => {
+    test("should reject whitespace-only input in required text fields", async ({
+      page,
+    }) => {
+      const testData = ScheduleTestDataFactory.createWeekdaySchedule();
+      const formPage = new ScheduleFormPage(page);
+      const cardPage = new ScheduleCardPage(page);
+      const editSheetPage = new ScheduleEditSheetPage(page);
+      const sheet = page
+        .getByRole("dialog")
+        .filter({ hasText: "Edit Schedule Template" });
+
+      await test.step("Create a template and open its edit sheet", async () => {
+        await page.getByRole("button", { name: "Create Template" }).click();
+        await formPage.fillTemplateName(testData.templateName);
+        await formPage.selectValidPeriod(1, 2);
+        await formPage.selectWeekdays(testData.weekdays);
+        await formPage.fillSessionDetails({
+          title: testData.sessionTitle,
+          startTime: testData.startTime,
+          endTime: testData.endTime,
+          patientsPerSlot: testData.patientsPerSlot,
+        });
+        await formPage.submitTemplate();
+        await expectToast(page, "Schedule template created successfully");
+        await page.getByRole("button", { name: "Next Month" }).click();
+        await cardPage.openEditForm(testData.templateName);
+        await editSheetPage.verifySheetVisible();
+      });
+
+      await test.step("Template name rejects only spaces", async () => {
+        const templateNameInput = sheet.getByRole("textbox", {
+          name: "Template Name *",
+        });
+        await expect(templateNameInput).toHaveValue(testData.templateName);
+        await templateNameInput.fill("   ");
+        await sheet.getByRole("button", { name: "Save", exact: true }).click();
+
+        const errorMessage = getFieldErrorMessage(templateNameInput);
+        await expect(errorMessage).toBeVisible();
+        await expect(errorMessage).toHaveText("This field is required");
+      });
+
+      await test.step("New session title rejects only spaces", async () => {
+        await sheet
+          .getByRole("button", { name: "Add another session" })
+          .click();
+        const sessionTitleInput = sheet.getByRole("textbox", {
+          name: "Session Title *",
+        });
+        await sessionTitleInput.fill("   ");
+        await sheet
+          .getByRole("button", { name: "Create", exact: true })
+          .click();
+
+        const errorMessage = getFieldErrorMessage(sessionTitleInput);
+        await expect(errorMessage).toBeVisible();
+        await expect(errorMessage).toHaveText("This field is required");
       });
     });
   });

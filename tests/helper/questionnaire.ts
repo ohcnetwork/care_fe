@@ -19,9 +19,25 @@ import { expectToast } from "tests/helper/ui";
  */
 export async function createQuestionnaireEncounter(
   facilityId: string,
+  {
+    status = "in_progress",
+    encounterClass = "amb",
+    start = new Date(),
+    organizations = [],
+  }: {
+    status?: "in_progress" | "planned";
+    encounterClass?: "amb" | "imp";
+    start?: Date;
+    organizations?: string[];
+  } = {},
 ): Promise<{ patientId: string; encounterId: string }> {
   const patientId = await createTestPatient("Questionnaire Test");
-  const encounterId = await createTestEncounter(facilityId, patientId);
+  const encounterId = await createTestEncounter(facilityId, patientId, {
+    status,
+    encounterClass,
+    period: { start: start.toISOString() },
+    organizations,
+  });
   return { patientId, encounterId };
 }
 

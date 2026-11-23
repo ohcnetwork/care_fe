@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import {
   fieldTriggerLayout,
   fieldTriggerSurface,
-  invalidTriggerOutline,
+  invalidTriggerRing,
   triggerFocus,
 } from "@/components/ui/field-trigger-styles";
 import {
@@ -62,7 +62,7 @@ function ComboboxTrigger({
                   fieldTriggerLayout,
                   fieldTriggerSurface,
                   triggerFocus,
-                  invalidTriggerOutline,
+                  invalidTriggerRing,
                   "justify-between",
                 )
               : "inline-flex size-10 shrink-0 items-center justify-center rounded-md hover:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring disabled:opacity-50 md:size-9"),

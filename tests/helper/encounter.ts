@@ -5,6 +5,7 @@ interface TestEncounterOptions {
   status?: string;
   encounterClass?: string;
   period?: { start: string; end?: string };
+  organizations?: string[];
 }
 
 /**
@@ -18,6 +19,7 @@ export async function createTestEncounter(
     status = "in_progress",
     encounterClass = "amb",
     period = { start: new Date().toISOString() },
+    organizations = [],
   }: TestEncounterOptions = {},
 ): Promise<string> {
   const headers = adminApiHeaders();
@@ -28,7 +30,7 @@ export async function createTestEncounter(
     encounter_class: encounterClass,
     period,
     priority: "routine",
-    organizations: [],
+    organizations,
   });
   for (let attempt = 0; ; attempt++) {
     const response = await fetch(`${apiBaseUrl()}/api/v1/encounter/`, {

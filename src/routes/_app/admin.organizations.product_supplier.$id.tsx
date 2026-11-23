@@ -1,21 +1,12 @@
-import { createFileRoute, useParams } from "@tanstack/react-router";
-
-import AdminOrganizationList from "@/pages/Admin/organizations/AdminOrganizationList";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute(
   "/_app/admin/organizations/product_supplier/$id",
 )({
-  component: RouteComponent,
+  beforeLoad: () => {
+    throw redirect({
+      to: "/admin/organizations/product_supplier",
+      replace: true,
+    });
+  },
 });
-
-function RouteComponent() {
-  const { id } = useParams({
-    from: "/_app/admin/organizations/product_supplier/$id",
-  });
-  return (
-    <AdminOrganizationList
-      organizationType="product_supplier"
-      organizationId={id}
-    />
-  );
-}

@@ -1,104 +1,42 @@
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import { FilterSelect } from "@/components/ui/filter-select";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+type ArchiveStatus = "active" | "archived";
 
-interface FilterButtonProps {
-  onFilterChange: (filter: {
-    is_archived: string;
-    include_archived?: boolean;
-  }) => void;
-  activeLabel: string;
-  archivedLabel: string;
-  includeArchivedParam?: boolean;
+interface ArchiveStatusFilterProps {
+  /** Raw `is_archived` query param: "true", "false" or undefined (all). */
+  value?: string;
+  onChange: (isArchived: "true" | "false" | undefined) => void;
 }
 
-export function FilterButton({
-  onFilterChange,
-  activeLabel,
-  archivedLabel,
-  includeArchivedParam = false,
-}: FilterButtonProps) {
+const STATUS_TO_PARAM: Record<ArchiveStatus, "true" | "false"> = {
+  active: "false",
+  archived: "true",
+};
+
+/**
+ * Filters a file/report list by archive status. Leaving it cleared lists
+ * both active and archived entries.
+ */
+export function ArchiveStatusFilter({
+  value,
+  onChange,
+}: ArchiveStatusFilterProps) {
   const { t } = useTranslation();
 
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="secondary" className="text-sm text-secondary-800">
-          <span className="flex flex-row items-center gap-1">
-            <CareIcon icon="l-filter" />
-            <span>{t("filter")}</span>
-          </span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        className="w-[calc(100vw-2.5rem)] sm:w-[calc(100%-2rem)]"
-      >
-        <DropdownMenuItem
-          className="text-primary-900"
-          onClick={() => {
-            onFilterChange(
-              includeArchivedParam
-                ? { is_archived: "false", include_archived: false }
-                : { is_archived: "false" },
-            );
-          }}
-        >
-          <span>{activeLabel}</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          className="text-primary-900"
-          onClick={() => {
-            onFilterChange(
-              includeArchivedParam
-                ? { is_archived: "true", include_archived: true }
-                : { is_archived: "true" },
-            );
-          }}
-        >
-          <span>{archivedLabel}</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-interface FilterBadgesProps {
-  isArchived?: string;
-  onClearFilter: () => void;
-  activeLabel: string;
-  archivedLabel: string;
-}
-
-export function FilterBadges({
-  isArchived,
-  onClearFilter,
-  activeLabel,
-  archivedLabel,
-}: FilterBadgesProps) {
-  const { t } = useTranslation();
-
-  if (typeof isArchived === "undefined") return null;
+  const selected =
+    value === "true" ? "archived" : value === "false" ? "active" : "";
 
   return (
-    <div className="flex flex-row gap-2 mt-2 mx-2">
-      <Badge
-        variant="outline"
-        className="cursor-pointer"
-        onClick={onClearFilter}
-      >
-        {t(isArchived === "false" ? activeLabel : archivedLabel)}
-        <CareIcon icon="l-times-circle" className="ml-1" />
-      </Badge>
-    </div>
+    <FilterSelect
+      value={selected}
+      label={t("status")}
+      options={Object.keys(STATUS_TO_PARAM)}
+      onValueChange={(status) =>
+        onChange(status ? STATUS_TO_PARAM[status as ArchiveStatus] : undefined)
+      }
+      onClear={() => onChange(undefined)}
+    />
   );
 }

@@ -11,7 +11,7 @@ import * as React from "react";
 import {
   fieldTriggerLayout,
   fieldTriggerSurface,
-  invalidTriggerOutline,
+  invalidTriggerRing,
   triggerFocus,
 } from "@/components/ui/field-trigger-styles";
 import {
@@ -97,7 +97,7 @@ function PopoverTrigger({
                 fieldTriggerLayout,
                 fieldTriggerSurface,
                 triggerFocus,
-                invalidTriggerOutline,
+                invalidTriggerRing,
                 "justify-between transition-colors",
                 typeof className === "function" ? className(state) : className,
               )

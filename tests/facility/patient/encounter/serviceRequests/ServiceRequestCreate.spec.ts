@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
-import { clickTabOrMenuItem, expectToast } from "tests/helper/ui";
+import {
+  clickTabOrMenuItem,
+  expectToast,
+  selectComboboxOption,
+} from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 import { createServiceRequest, reportTypeCombobox } from "./serviceRequest";
 
@@ -169,8 +173,7 @@ test.describe("Patient Service Request Tab", () => {
       specimenResponse,
       specimenCollectedToast,
     ]);
-    await reportTypeCombobox(page).click();
-    await page.getByRole("option").first().click();
+    await selectComboboxOption(reportTypeCombobox(page));
     await page.getByRole("button", { name: "Create Report" }).click();
     const observationGroup = page.getByRole("group", {
       name: observationDefinitionTitle,
@@ -229,8 +232,7 @@ test("should fill result value, capture a photo and save results", async ({
   await Promise.all([collectButton.click(), specimenCollectedToast]);
 
   // Create the diagnostic report
-  await reportTypeCombobox(page).click();
-  await page.getByRole("option").first().click();
+  await selectComboboxOption(reportTypeCombobox(page));
   await page.getByRole("button", { name: "Create Report" }).click();
 
   // Fill the result value
@@ -244,9 +246,12 @@ test("should fill result value, capture a photo and save results", async ({
   const cameraSheet = page.getByRole("dialog", { name: "Camera", exact: true });
   await expect
     .poll(() =>
-      cameraSheet.locator("video").evaluate(
-        (video: HTMLVideoElement) => video.readyState >= video.HAVE_CURRENT_DATA,
-      ),
+      cameraSheet
+        .locator("video")
+        .evaluate(
+          (video: HTMLVideoElement) =>
+            video.readyState >= video.HAVE_CURRENT_DATA,
+        ),
     )
     .toBe(true);
 
