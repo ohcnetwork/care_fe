@@ -16,6 +16,18 @@ function FilterFooter({
   onDone: () => void;
 }) {
   const { t } = useTranslation();
+  // Keep Done at the trailing edge, but first in the multi-select tab order.
+  const doneButton = (
+    <Button
+      type="button"
+      variant="primary"
+      size="sm"
+      className="order-last"
+      onClick={onDone}
+    >
+      {t("done")}
+    </Button>
+  );
   return (
     <div
       data-slot="filter-footer"
@@ -29,6 +41,7 @@ function FilterFooter({
           ? t("selected_count", { count: selectedCount })
           : t("filter_pick_one")}
       </span>
+      {multiple && doneButton}
       {onClear && (
         <Button
           type="button"
@@ -43,9 +56,7 @@ function FilterFooter({
           {t("clear")}
         </Button>
       )}
-      <Button type="button" variant="primary" size="sm" onClick={onDone}>
-        {t("done")}
-      </Button>
+      {!multiple && doneButton}
     </div>
   );
 }

@@ -304,7 +304,8 @@ export function EncounterList({
       return;
     }
 
-    if (event.key === "Escape") {
+    // Dismiss suggestions before the browser moves focus to the next toolbar control.
+    if (event.key === "Tab" || event.key === "Escape") {
       setSearchOptionsOpen(false);
     }
   };

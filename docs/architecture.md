@@ -137,7 +137,9 @@ The encounter list opts into a single-line filter toolbar. **Add filter** uses t
 
 Editing a row from **Active filters** replaces the summary list in place. **Back** returns to the list; **Done** or **Escape** returns focus to **Active filters**. Clearing the last active field dismisses the picker and returns focus to **Add filter**.
 
-Status, Priority, and Encounter Class group matching choices under **Selected** at the top of the picker. Unchecked choices follow in their configured order. Searching narrows both sections without changing the selection.
+In encounter patient search, Tab dismisses suggestions without choosing one, then moves to **Scan QR**. The next Tab reaches **Filter by Identifier**; Shift+Tab follows the same controls in reverse.
+
+Status, Priority, and Encounter Class group matching choices under **Selected** at the top of the picker. Unchecked choices follow in their configured order. Searching narrows both sections without changing the selection. In checkbox pickers, Tab from search focuses **Done** first; another Tab reaches **Clear**.
 
 Questionnaire visibility evaluates root answers and controller ancestry. Circular dependencies (including a group depending on its own descendant) are configuration errors: the builder blocks saving them, and previously saved forms display an alert and disable the circular questions. Submission is blocked for the entire fill session if any form has circular conditions, preserving every form's draft rather than silently omitting affected answers. Cycle detection runs when the link index is built; per-evaluation memoization then keeps overlapping conditional dependencies bounded without reusing stale answers.
 

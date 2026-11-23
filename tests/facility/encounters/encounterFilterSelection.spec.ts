@@ -186,8 +186,20 @@ test("navigates tags from the open search field without focusing a row", async (
   );
   await expect(search).toBeFocused();
   await expect(childRow).toBeChecked();
-  await page.keyboard.press("Escape");
+  await page.keyboard.press("Tab");
+  const done = page.getByRole("button", { name: "Done", exact: true });
+  await expect(done).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(
+    page.getByRole("button", { name: "Clear", exact: true }),
+  ).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(done).toBeFocused();
+  await page.keyboard.press("Enter");
   await expect(search).toBeHidden();
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get("tags") === child.id,
+  );
   await expect(
     page.getByRole("button", { name: /^add filter$/i }),
   ).toBeFocused();
@@ -480,6 +492,12 @@ test("picker footer counts multi-select values but not radio choices", async ({
   await expect(statusPicker.locator('[data-slot="kbd"]')).toHaveCount(0);
   const clear = footer.getByRole("button", { name: "Clear", exact: true });
   await expect(clear).toBeDisabled();
+  const search = statusPicker.getByRole("searchbox");
+  await expect(search).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(footer.getByRole("button", { name: "Done" })).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(search).toBeFocused();
 
   const completed = statusPicker.getByRole("menuitemcheckbox", {
     name: /^completed$/i,
@@ -489,7 +507,6 @@ test("picker footer counts multi-select values but not radio choices", async ({
     (url) => url.searchParams.get("status") === "completed",
   );
   await expect(count).toHaveText("1 selected");
-  const search = statusPicker.getByRole("searchbox");
   await search.fill("planned");
   await statusPicker.getByRole("menuitemcheckbox", { name: "Planned" }).click();
   await expect(count).toHaveText("2 selected");
@@ -518,6 +535,37 @@ test("picker footer counts multi-select values but not radio choices", async ({
 });
 
 for (const layout of ["desktop", "mobile"] as const) {
+  test(`tabs from patient search through both identifier actions on ${layout}`, async ({
+    page,
+  }) => {
+    if (layout === "mobile")
+      await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/facility/${facility.id}/encounters/patients/all`);
+    const search = page.getByPlaceholder(/search by patient name/i);
+    const group = page.getByRole("group", { name: /^filter by identifier$/i });
+    const scan = group.getByRole("button", { name: /scan/i });
+    const identifier = group.getByRole("combobox");
+    await search.fill("Taylor");
+    const suggestions = page.getByRole("listbox").filter({ hasText: "Taylor" });
+    await expect(suggestions).toBeVisible();
+    await page.keyboard.press("Tab");
+    await expect(scan).toBeFocused();
+    await expect(suggestions).toHaveCount(0);
+    await page.keyboard.press("Tab");
+    await expect(identifier).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(
+      page.getByRole("button", { name: /^add filter$/i }),
+    ).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(identifier).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(scan).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(search).toBeFocused();
+    await expect(search).toHaveValue("Taylor");
+  });
+
   test(`keeps the toolbar on one line and preserves Date on ${layout}`, async ({
     page,
   }) => {
