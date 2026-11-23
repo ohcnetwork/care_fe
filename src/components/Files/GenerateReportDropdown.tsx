@@ -1,7 +1,5 @@
-import { FileText, Plus, SearchIcon } from "lucide-react";
+import { FileText, Loader2, Plus, SearchIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +8,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import NavigationHelper from "@/components/ui/multi-filter/utils/navigation-helper";
 
 import {
@@ -43,21 +45,22 @@ export function ReportTemplateSearchList({
 
   return (
     <div className="px-2 pt-2">
-      <div className="relative mb-2">
-        <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-gray-400" />
-        <Input
-          type="search"
+      <InputGroup className="mb-2">
+        <InputGroupInput
+          aria-label={t("search_templates")}
           placeholder={t("search_templates")}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           onKeyDown={(e) => e.stopPropagation()}
-          className="pl-8 h-8"
         />
-      </div>
+        <InputGroupAddon>
+          <SearchIcon />
+        </InputGroupAddon>
+      </InputGroup>
       <div className="max-h-[30vh] overflow-y-auto pb-2">
         {isLoading ? (
           <div className="flex items-center justify-center gap-2 py-3 text-sm text-gray-500">
-            <CareIcon icon="l-spinner" className="size-4 animate-spin" />
+            <Loader2 className="size-4 animate-spin" />
             {t("loading")}
           </div>
         ) : templates.length === 0 ? (
@@ -122,7 +125,7 @@ export function GenerateReportDropdown({
         }
       >
         {isLoading ? (
-          <CareIcon icon="l-spinner" className="size-4 animate-spin" />
+          <Loader2 className="size-4 animate-spin" />
         ) : (
           <Plus className="size-4" />
         )}

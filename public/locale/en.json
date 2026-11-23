@@ -2196,6 +2196,8 @@
   "hour": "hour",
   "hours": "Hours",
   "how_would_you_like_to_finish_this_visit": "How would you like to finish this visit?",
+  "html_preview_not_supported": "HTML preview not available",
+  "html_preview_not_supported_description": "This report is an HTML file and can't be previewed here. Download it to view.",
   "icon": "Icon",
   "id": "ID",
   "identifier": "Identifier",

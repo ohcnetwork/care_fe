@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   Dot,
   Download,
+  ExternalLink,
   FileText,
   History,
   Loader,
@@ -180,6 +181,11 @@ export default function ReportViewer({
       setPdfUrl(reportDetail.read_signed_url);
     }
   }, [selectedReportId, reportDetail, reportMismatch]);
+
+  const reportExtension = reportDetail?.extension?.replace(/^\./, "");
+  const isHtmlReport =
+    reportExtension?.toLowerCase() === "html" ||
+    !!reportDetail?.mime_type?.startsWith("text/html");
 
   const stopPolling = useCallback(() => {
     if (pollIntervalRef.current) {
@@ -357,7 +363,12 @@ export default function ReportViewer({
         const url = window.URL.createObjectURL(blob);
         const anchor = document.createElement("a");
         anchor.href = url;
-        anchor.download = report.name || report.report_type || "report";
+        anchor.download = [
+          report.name || report.report_type || "report",
+          report.extension?.replace(/^\./, ""),
+        ]
+          .filter(Boolean)
+          .join(".");
         anchor.click();
         window.URL.revokeObjectURL(url);
         toast.success(t("file_download_completed"));
@@ -450,7 +461,7 @@ export default function ReportViewer({
               variant="outline"
               onClick={handlePrint}
               aria-label={t("print")}
-              disabled={!pdfUrl}
+              disabled={!pdfUrl || isHtmlReport}
             >
               <Printer className="size-4" />
               <span className="hidden md:inline">{t("print")}</span>
@@ -612,7 +623,28 @@ export default function ReportViewer({
                 />
               )}
 
-            {pdfUrl && !isLoadingDetail && !isGenerating && (
+            {isHtmlReport && pdfUrl && !isLoadingDetail && !isGenerating && (
+              <EmptyState
+                icon={<FileText className="size-6 text-gray-400" />}
+                title={t("html_preview_not_supported")}
+                description={t("html_preview_not_supported_description")}
+                action={
+                  selectedReport ? (
+                    <Button
+                      variant="primary"
+                      onClick={() => handleDownload(selectedReport)}
+                      aria-label={t("download")}
+                    >
+                      <Download className="size-4" />
+                      {t("download")}
+                    </Button>
+                  ) : undefined
+                }
+                className="size-full"
+              />
+            )}
+
+            {pdfUrl && !isLoadingDetail && !isGenerating && !isHtmlReport && (
               <object
                 key={selectedReportId}
                 data={pdfUrl}
@@ -627,10 +659,12 @@ export default function ReportViewer({
                   action={
                     <Button
                       variant="primary"
-                      onClick={() => window.open(pdfUrl, "_blank")}
+                      onClick={() =>
+                        window.open(pdfUrl, "_blank", "noopener,noreferrer")
+                      }
                       aria-label={t("open_pdf")}
                     >
-                      <Download className="size-4" />
+                      <ExternalLink className="size-4" />
                       {t("open_pdf")}
                     </Button>
                   }
