@@ -107,7 +107,7 @@ export function ServiceRequestActions({
                       className="w-full flex flex-row justify-stretch items-center"
                     >
                       <CareIcon icon="l-check-circle" className="mr-1" />
-                      {t("mark_as_completed")}
+                      {t("mark_as_complete")}
                     </Button>
                   </DropdownMenuItem>
                 )}
