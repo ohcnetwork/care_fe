@@ -169,9 +169,10 @@ test.describe("Facility general settings layout", () => {
       .click();
 
     await header.getByRole("button", { name: "Configurations" }).click();
+    // Print templates have their own settings page, not a menu item.
     await expect(
-      page.getByRole("button", { name: "Print Templates" }),
-    ).toBeVisible();
+      page.getByRole("menuitem", { name: "Print Templates" }),
+    ).toHaveCount(0);
     await page.getByRole("menuitem", { name: "Edit Facility Details" }).click();
     const editSheet = page.getByRole("dialog", {
       name: "Edit Facility",

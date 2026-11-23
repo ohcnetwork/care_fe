@@ -14,6 +14,18 @@ export const API = <TResponse, TBody = undefined>(
   };
 };
 
+/**
+ * Encodes a path param as exactly one path segment, so that its value can
+ * never add or remove segments, or start a query string or fragment.
+ */
+function encodePathSegment(value: string | number) {
+  const segment = `${value}`;
+  if (segment === "." || segment === "..") {
+    throw new Error(`Invalid path parameter: "${segment}"`);
+  }
+  return encodeURIComponent(segment);
+}
+
 export function makeUrl(
   path: string,
   query?: QueryParams,
@@ -21,7 +33,7 @@ export function makeUrl(
 ) {
   if (pathParams) {
     path = Object.entries(pathParams).reduce(
-      (acc, [key, value]) => acc.replace(`{${key}}`, `${value}`),
+      (acc, [key, value]) => acc.replace(`{${key}}`, encodePathSegment(value)),
       path,
     );
   }

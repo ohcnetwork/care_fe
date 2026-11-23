@@ -112,12 +112,12 @@ test.describe("Facility Creation", () => {
       .fill(phoneNumber);
     await page.getByRole("spinbutton", { name: "PIN Code *" }).fill(pinCode);
 
-    // Select the State in the government organization selector
-    const stateCombobox = page
-      .getByRole("combobox")
-      .filter({ hasText: "Select..." });
-    await stateCombobox.click();
-    await page.getByRole("option").first().click();
+    // The form starts in the state the facilities list belongs to; pick a
+    // district below it, and wait for its option list to close.
+    await page.getByRole("combobox").filter({ hasText: "Select..." }).click();
+    const districtList = page.getByRole("listbox");
+    await districtList.getByRole("option").first().click();
+    await expect(districtList).toBeHidden();
 
     await page.getByRole("textbox", { name: "Address *" }).fill(address);
     await page.getByRole("button", { name: "Create Facility" }).click();
@@ -189,18 +189,21 @@ test.describe("Facility Creation", () => {
       .fill(phoneNumber);
     await page.getByRole("spinbutton", { name: "PIN Code *" }).fill(pinCode);
 
-    // Select the State in the government organization selector
-    const stateCombobox = page
-      .getByRole("combobox")
-      .filter({ hasText: "Select..." });
-    await stateCombobox.click();
-    await page.getByRole("option").first().click();
+    // The form starts in the state the facilities list belongs to, so the
+    // first empty level of the government organization picker is the
+    // district. Its option list drops down over the fields below it: wait for
+    // it to close before opening the location picker.
+    await page.getByRole("combobox").filter({ hasText: "Select..." }).click();
+    const districtList = page.getByRole("listbox");
+    await districtList.getByRole("option").first().click();
+    await expect(districtList).toBeHidden();
 
     await page.getByRole("textbox", { name: "Address *" }).fill(address);
-    await page
+    const locationPicker = page
       .getByRole("combobox")
-      .filter({ hasText: "Search for a location" })
-      .click();
+      .filter({ hasText: "Search for a location" });
+    await locationPicker.click();
+    await expect(locationPicker).toHaveAttribute("aria-expanded", "true");
     await page.getByPlaceholder("Search option...").fill("ernakulam");
     const locationOption = page.getByRole("option", {
       name: "Ernakulam, Kerala, India",

@@ -1,8 +1,6 @@
-import { ChevronDown, Printer, SquarePen, Trash2 } from "lucide-react";
+import { ChevronDown, SquarePen, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,8 +17,6 @@ import FacilityDeleteDialog from "@/components/Facility/FacilityDeleteDialog";
 import { PLUGIN_Component } from "@/PluginEngine";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import type { FacilityRead } from "@/types/facility/facility";
-
-import PrintTemplateSheet from "./PrintTemplateSheet";
 
 interface FacilityHomeActionsProps {
   facility: FacilityRead;
@@ -61,25 +57,6 @@ export function FacilityHomeActions({
               />
               {t("edit_facility_details")}
             </DropdownMenuItem>
-            <PrintTemplateSheet
-              facility={facilityData}
-              trigger={
-                <Button
-                  variant="ghost"
-                  type="button"
-                  className={cn(
-                    "h-auto w-full justify-start gap-2 rounded-sm px-2 py-1.5 text-sm font-normal tracking-normal whitespace-normal",
-                    isSettings && "min-h-12 md:min-h-10",
-                  )}
-                >
-                  <Printer
-                    className="size-4 text-muted-foreground"
-                    aria-hidden="true"
-                  />
-                  {t("print_templates")}
-                </Button>
-              }
-            />
             <PLUGIN_Component
               __name="FacilityHomeActions"
               facility={facilityData}

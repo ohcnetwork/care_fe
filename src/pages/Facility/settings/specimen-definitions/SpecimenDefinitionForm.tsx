@@ -219,7 +219,10 @@ function SpecimenDefinitionFormContent({
     slug_value: slugValueSchema(),
     status: z.enum(SpecimenDefinitionStatus),
     description: z.string().trim().min(1, t("field_required")),
-    derived_from_uri: z.url({ message: t("field_required") }).optional(),
+    derived_from_uri: z
+      .url({ message: t("invalid_url") })
+      .or(z.literal(""))
+      .optional(),
     type_collected: CodeSchema,
     patient_preparation: z.array(CodeSchema).min(0),
     collection: z

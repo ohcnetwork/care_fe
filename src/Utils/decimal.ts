@@ -22,6 +22,21 @@ export function decimal(value: string | number | Decimal): Decimal {
 }
 
 /**
+ * Check if value parses to a finite Decimal.
+ * Rejects partial input from MonetaryAmountInput (e.g. "", "-", ".", "-."),
+ * which makes the Decimal constructor throw.
+ */
+export function isValidDecimal(
+  value: unknown,
+): value is string | number | Decimal {
+  try {
+    return new Decimal(value as Decimal.Value).isFinite();
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Add multiple decimal values
  */
 export function add(...values: (string | number | Decimal)[]): Decimal {

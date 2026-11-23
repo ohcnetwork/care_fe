@@ -31,12 +31,12 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
@@ -53,34 +53,53 @@ jobs:
         run: tar -czf care_fe-build.tar.gz -C build .
 
       - name: Upload bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: care_fe-build
           path: care_fe-build.tar.gz
           retention-days: 1
 
-  publish:
+  # Signs the bundle with GitHub's own actions only, before publish runs ORAS
+  attest:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write
-      packages: write
+      contents: read
       id-token: write
       attestations: write
+    outputs:
+      sha256: ${{ steps.digest.outputs.sha256 }}
     steps:
       - name: Download bundle
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: care_fe-build
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: care_fe-build.tar.gz
 
+      - name: Record digest
+        id: digest
+        run: echo "sha256=$(sha256sum care_fe-build.tar.gz | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: attest
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download bundle
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: care_fe-build
+
       - name: Setup ORAS
-        uses: oras-project/setup-oras@v2
+        uses: oras-project/setup-oras@ac735097e22fe643015b0d19645f7c9a69942128 # v2.0.4
 
       - name: Push to GHCR
         env:
@@ -93,8 +112,25 @@ jobs:
             --annotation "org.opencontainers.image.revision=$GITHUB_SHA" \
             care_fe-build.tar.gz:application/vnd.oci.image.layer.v1.tar+gzip
 
+  release:
+    needs: [attest, publish]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download bundle
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: care_fe-build
+
+      - name: Check digest
+        env:
+          SHA256: ${{ needs.attest.outputs.sha256 }}
+        run: echo "$SHA256  care_fe-build.tar.gz" | sha256sum -c -
+
       - name: Upload to release
-        if: github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload "$GITHUB_REF_NAME" care_fe-build.tar.gz --clobber --repo "$GITHUB_REPOSITORY"
