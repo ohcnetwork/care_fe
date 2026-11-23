@@ -1,8 +1,6 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +16,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import {
   ObservationDefinitionRead,
@@ -42,48 +42,32 @@ export function DiagnosticReportObservationPicker({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const { ref, inView } = useInView();
   const {
     data,
     isLoading,
     isError,
     refetch,
-    fetchNextPage,
+    ref,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery({
+  } = useInfiniteList({
     queryKey: ["diagnostic-report-observation-options", facilityId, search],
-    queryFn: ({ signal, pageParam }) =>
-      query.debounced(observationDefinitionApi.list, {
-        queryParams: {
-          facility: facilityId,
-          title: search,
-          status: ObservationDefinitionStatus.ACTIVE,
-          limit: 50,
-          offset: pageParam,
-        },
-      })({ signal }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, pages) => {
-      const loaded = pages.reduce(
-        (count, page) => count + page.results.length,
-        0,
-      );
-      return loaded < lastPage.count && lastPage.results.length > 0
-        ? loaded
-        : undefined;
-    },
+    ...query.infinite(observationDefinitionApi.list, {
+      queryParams: {
+        facility: facilityId,
+        title: search,
+        status: ObservationDefinitionStatus.ACTIVE,
+      },
+      pageSize: 50,
+      debounceInterval: 500,
+    }),
     enabled: open && !disabled,
   });
 
-  useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage();
-  }, [inView, hasNextPage, fetchNextPage]);
-
   const selectedIdSet = new Set(selectedIds);
-  const options = data?.pages
-    .flatMap((page) => page.results)
-    .filter((definition) => !selectedIdSet.has(definition.id));
+  const options = data?.results.filter(
+    (definition) => !selectedIdSet.has(definition.id),
+  );
 
   return (
     <Popover open={open && !disabled} onOpenChange={setOpen}>
@@ -112,12 +96,8 @@ export function DiagnosticReportObservationPicker({
           }
         }}
       >
-        <Command
-          shouldFilter={false}
-          className="**:data-[slot=command-input-wrapper]:focus-within:border-gray-500"
-        >
+        <Command shouldFilter={false}>
           <CommandInput
-            className="border-0 focus:ring-0"
             value={search}
             onValueChange={setSearch}
             placeholder={t("search_observations")}
@@ -125,7 +105,7 @@ export function DiagnosticReportObservationPicker({
           />
           <CommandList>
             {isLoading ? (
-              <div role="status" className="p-4 text-sm text-gray-500">
+              <div role="status" className="p-4 text-sm text-muted-foreground">
                 {t("loading")}
               </div>
             ) : isError ? (
@@ -147,11 +127,13 @@ export function DiagnosticReportObservationPicker({
                       value={definition.id}
                       onSelect={() => {
                         onSelect(definition);
+                        setOpen(false);
+                        setSearch("");
                       }}
                     >
                       <div className="min-w-0">
                         <p className="font-medium">{definition.title}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {definition.code.display || definition.code.code}
                         </p>
                       </div>
@@ -159,7 +141,7 @@ export function DiagnosticReportObservationPicker({
                   ))}
                   {hasNextPage && <div ref={ref} aria-hidden="true" />}
                   {isFetchingNextPage && (
-                    <div className="text-center text-sm py-2 text-gray-500">
+                    <div className="text-center text-sm py-2 text-muted-foreground">
                       {t("loading")}
                     </div>
                   )}

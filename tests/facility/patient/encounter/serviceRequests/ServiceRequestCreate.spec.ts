@@ -1,8 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { clickTabOrMenuItem, expectToast } from "tests/helper/ui";
-import { getEncounterId } from "tests/support/encounterId";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import {
+  clickTabOrMenuItem,
+  expectToast,
+  selectComboboxOption,
+} from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
 import { createServiceRequest, reportTypeCombobox } from "./serviceRequest";
 
 test.use({
@@ -22,10 +25,9 @@ let facilityId: string;
 let patientId: string;
 let encounterId: string;
 
-test.beforeAll(async () => {
-  encounterId = getEncounterId();
+test.beforeEach(async () => {
   facilityId = getFacilityId();
-  patientId = getPatientId();
+  ({ patientId, encounterId } = await createQuestionnaireEncounter(facilityId));
 });
 
 test.describe("Patient Service Request Tab", () => {
@@ -111,7 +113,6 @@ test.describe("Patient Service Request Tab", () => {
     page,
   }) => {
     await page.goto(`/facility/${facilityId}/settings/observation_definitions`);
-    // Use fixed pair to avoid collisions with tests 1 & 2 which randomly pick definitions
     const observationDefinitionTitle = "Urinalysis Observation";
     await page
       .getByRole("textbox", { name: "Search definitions" })
@@ -157,6 +158,7 @@ test.describe("Patient Service Request Tab", () => {
       .fill("Test Notes");
     const collectButton = page.getByRole("button", {
       name: "Mark as collected",
+      exact: true,
     });
     await expect(collectButton).toBeEnabled();
     const specimenResponse = page.waitForResponse(
@@ -171,20 +173,21 @@ test.describe("Patient Service Request Tab", () => {
       specimenResponse,
       specimenCollectedToast,
     ]);
-    const reportTypeSelect = reportTypeCombobox(page);
-
-    if (!(await reportTypeSelect.isVisible())) {
-      await page.getByText("Test Results Entry").click();
-    }
-    await reportTypeSelect.click();
-    await page.getByRole("option").first().click();
+    await selectComboboxOption(reportTypeCombobox(page));
     await page.getByRole("button", { name: "Create Report" }).click();
-    // The unit is shown as text beside the result input and describes it.
-    const observationInput = page
-      .getByRole("group", { name: observationDefinitionTitle, exact: true })
-      .getByRole("textbox", { name: observationDefinitionTitle, exact: true });
-    await observationInput.scrollIntoViewIfNeeded();
-    await expect(observationInput).toHaveAccessibleDescription("mg");
+    const observationGroup = page.getByRole("group", {
+      name: observationDefinitionTitle,
+      exact: true,
+    });
+    const result = observationGroup.getByRole("textbox", {
+      name: observationDefinitionTitle,
+      exact: true,
+    });
+    await result.scrollIntoViewIfNeeded();
+    await expect(
+      observationGroup.getByText("mg", { exact: true }),
+    ).toBeVisible();
+    await expect(result).toHaveAccessibleDescription("mg");
   });
 });
 
@@ -222,14 +225,14 @@ test("should fill result value, capture a photo and save results", async ({
     .fill("Test Notes");
   const collectButton = page.getByRole("button", {
     name: "Mark as collected",
+    exact: true,
   });
   await expect(collectButton).toBeEnabled();
   const specimenCollectedToast = expectToast(page, /specimen collected/i);
   await Promise.all([collectButton.click(), specimenCollectedToast]);
 
   // Create the diagnostic report
-  await reportTypeCombobox(page).click();
-  await page.getByRole("option").first().click();
+  await selectComboboxOption(reportTypeCombobox(page));
   await page.getByRole("button", { name: "Create Report" }).click();
 
   // Fill the result value
@@ -240,8 +243,17 @@ test("should fill result value, capture a photo and save results", async ({
 
   // Take a photo using the in-browser camera
   await page.getByRole("button", { name: "Take Photo" }).click();
-  const cameraSheet = page.locator('[data-slot="sheet-content"]');
-  await expect(cameraSheet).toBeVisible();
+  const cameraSheet = page.getByRole("dialog", { name: "Camera", exact: true });
+  await expect
+    .poll(() =>
+      cameraSheet
+        .locator("video")
+        .evaluate(
+          (video: HTMLVideoElement) =>
+            video.readyState >= video.HAVE_CURRENT_DATA,
+        ),
+    )
+    .toBe(true);
 
   // Capture button (the large circular shutter)
   const captureButton = cameraSheet.locator("button", {

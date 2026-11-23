@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { useQueryParams } from "@/lib/router/queryParams";
+import { patientEncounterListSearch } from "@/lib/router/search/patient";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ const EncounterHistory = (props: PatientProps) => {
 
   const { t } = useTranslation();
 
-  const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
+  const [qParams, setQueryParams] = useQueryParams(patientEncounterListSearch);
   const { hasPermission } = usePermissions();
   const { canViewPatients } = getPermissions(
     hasPermission,

@@ -87,16 +87,16 @@ npm run playwright:test                                 # Run all tests
 npm run playwright:test -- tests/auth/login.spec.ts     # Run a single test file
 npm run playwright:test -- -g "test name"               # Run tests matching a pattern
 npm run playwright:test -- --workers=4                   # Run with 4 parallel workers
-npm run playwright:test -- --shard=1/3                   # Run shard 1 of 3
+npm run playwright:test -- --shard=1/8                   # Run one equal-count shard locally
 npm run playwright:test:ui                              # Interactive Playwright UI mode
 ```
 
 **Running tests efficiently:**
 
-- Use `--workers=4` for parallel execution (CI runs setup with 1 worker, then chromium with 4 workers)
+- CI runs 8 Playwright shards on `ubuntu-latest-m`, with 6 Chromium workers per shard by default (see `docs/testing.md`).
 - Use `--shard=N/TOTAL` to split across multiple processes
 - Run specific test directories to iterate faster: `npx playwright test tests/auth/`
-- The `setup` project runs first to authenticate test users and save storage state
+- The `setup-*` projects run first to authenticate test users and save storage state, parallelizing independent setup tasks while preserving data dependencies.
 
 **Database management for re-runs:**
 
@@ -148,17 +148,25 @@ npm run playwright:test           # Tests run against clean DB, auto-restores on
 
 ## Architecture
 
-### Routing (Raviger)
+### Routing (TanStack Router)
 
-Routes defined in `src/Routers/routes/` (e.g., `FacilityRoutes.tsx`, `PatientRoutes.tsx`). Combined in `src/Routers/AppRouter.tsx`. Three routers: `PublicRouter`, `PatientRouter`, `AppRouter` — selected by auth state. Plugin routes injected via `usePluginRoutes()`.
+File routes live under `src/routes/` (`@tanstack/router-plugin` generates `src/routeTree.gen.ts`). The pathless layouts `_public`, `_patient` and `_app` guard each area in `beforeLoad`. Plugin manifest routes attach to the tree at runtime (`src/lib/router/pluginRoutes.tsx`). See [`docs/architecture.md`](docs/architecture.md#routing-tanstack-router).
 
-```typescript
-const FacilityRoutes: AppRoutes = {
-  "/facility/:facilityId/overview": ({ facilityId }) => <FacilityOverview facilityId={facilityId} />,
-};
+```tsx
+// src/routes/_app/facility.$facilityId.overview.tsx
+export const Route = createFileRoute("/_app/facility/$facilityId/overview")({
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  const { facilityId } = useParams({
+    from: "/_app/facility/$facilityId/overview",
+  });
+  return <FacilityOverview facilityId={facilityId} />;
+}
 ```
 
-Use `navigate()` from raviger for programmatic navigation.
+Use `<Link to params>` from `@tanstack/react-router` and `navigate({ to, params })` from `@/lib/router/navigate` (both type-checked). For a URL built at runtime, use `<HrefLink href>` (`@/lib/router/HrefLink`) and `navigate({ href })`.
 
 ### API Layer (TanStack Query + custom wrappers)
 
@@ -266,4 +274,5 @@ npx tsc --noEmit
 # 3. Run related tests (requires backend + build)
 npx playwright test tests/path/to/related/
 ```
+
 @AGENTS.md

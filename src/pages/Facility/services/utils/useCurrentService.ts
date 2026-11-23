@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useFullPath } from "raviger";
 
 import query from "@/Utils/request/query";
+import { usePathname } from "@/lib/router/location";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 const extractFacilityServiceId = (path: string) => {
@@ -22,7 +22,7 @@ const extractFacilityServiceId = (path: string) => {
 };
 
 export default function useCurrentService() {
-  const path = useFullPath();
+  const path = usePathname();
   const [facilityId, serviceId] = extractFacilityServiceId(path);
 
   const { data: service } = useQuery({

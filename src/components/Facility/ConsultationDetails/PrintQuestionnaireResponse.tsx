@@ -1,26 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import PrintLoading from "@/CAREUI/misc/PrintLoading";
+import TypstPrintPreview from "@/CAREUI/misc/TypstPrintPreview";
 
-import PatientPrintPageHeader from "@/components/Common/PatientPrintPageHeader";
-import {
-  PrintableEncounterDetails as EncounterDetails,
-  PrintableResponseCard as ResponseCard,
-} from "@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses";
-
-import query from "@/Utils/request/query";
+import { buildQuestionnaireResponsePrintContent } from "@/components/Facility/ConsultationDetails/questionnaireResponsePrintData";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
+import query from "@/Utils/request/query";
 
 type PrintQuestionnaireResponseProps = {
   questionnaireResponseId: string;
-  encounterId: string;
+  encounterId?: string;
   patientId: string;
-  facilityId: string;
+  facilityId?: string;
 };
 
 export function PrintQuestionnaireResponse({
@@ -63,45 +59,23 @@ export function PrintQuestionnaireResponse({
     }),
   });
 
-  const questionnaire = questionnaireResponse?.questionnaire;
-  const headerPatient = encounter?.patient ?? patient;
+  if (!questionnaireResponse || isLoadingEncounter || isLoadingPatient) {
+    return <PrintLoading />;
+  }
 
   return (
-    <PrintPreview
+    <TypstPrintPreview
+      template="questionnaire-response"
       title={t("questionnaire_response_logs")}
-      disabled={
-        !questionnaireResponse || isLoadingEncounter || isLoadingPatient
-      }
+      content={buildQuestionnaireResponsePrintContent({
+        encounter,
+        patient: encounter?.patient ?? patient,
+        questionnaire: questionnaireResponse.questionnaire,
+        responses: [questionnaireResponse],
+        t,
+      })}
       facility={facility}
       templateSlug={PrintTemplateType.questionnaire_response_logs}
-      pageHeader={
-        headerPatient && <PatientPrintPageHeader patient={headerPatient} />
-      }
-    >
-      <div className="max-w-5xl mx-auto">
-        <div>
-          <div className="text-center sm:text-left sm:order-1 print:text-left mb-4 pb-2 border-b border-gray-200">
-            <h2 className="text-gray-500 uppercase text-sm tracking-wide mt-1 font-semibold">
-              {t("questionnaire_response_logs")}
-            </h2>
-          </div>
-
-          <EncounterDetails encounter={encounter} patient={headerPatient} />
-
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
-            <div className="text-center sm:text-left sm:order-1">
-              <h3 className="text-lg font-semibold">{questionnaire?.title}</h3>
-              <p className="text-gray-500 text-sm tracking-wide mt-1">
-                {questionnaire?.description}
-              </p>
-            </div>
-          </div>
-
-          <div className="w-full">
-            <ResponseCard item={questionnaireResponse} />
-          </div>
-        </div>
-      </div>
-    </PrintPreview>
+    />
   );
 }

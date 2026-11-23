@@ -12,9 +12,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -26,10 +25,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Spinner } from "@/components/ui/spinner";
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
@@ -48,30 +50,28 @@ import {
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { hasMarkdownContent } from "@/Utils/markdown";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName, getReadableDuration, goBack } from "@/Utils/utils";
-import {
-  AvatarIcon,
-  CalendarIcon,
-  CheckCircledIcon,
-  ClockIcon,
-  DotsVerticalIcon,
-  DrawingPinIcon,
-  EnterIcon,
-  EyeNoneIcon,
-  MobileIcon,
-  PersonIcon,
-  PlusCircledIcon,
-} from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, format, isBefore, isWithinInterval, subDays } from "date-fns";
 import {
+  CircleUserRound as AvatarIcon,
   BanIcon,
+  Calendar as CalendarIcon,
   CheckCircle2Icon,
+  CircleCheck as CheckCircledIcon,
   ChevronLeft,
+  Clock as ClockIcon,
+  EllipsisVertical as DotsVerticalIcon,
+  Pin as DrawingPinIcon,
+  LogIn as EnterIcon,
   EyeIcon,
-  Loader2,
+  EyeOff as EyeNoneIcon,
+  Smartphone as MobileIcon,
+  UserRound as PersonIcon,
+  CirclePlus as PlusCircledIcon,
   PlusSquare,
   PrinterIcon,
   ReceiptText,
@@ -79,7 +79,6 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -89,19 +88,25 @@ import { Avatar } from "@/components/Common/Avatar";
 import BackButton from "@/components/Common/BackButton";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import { RichTextEditor } from "@/components/Common/RichTextEditor";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import { PatientDeceasedInfo } from "@/components/Patient/PatientHeader";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import { formatPatientAddress } from "@/components/Patient/utils";
+import { ReferralAppointmentContext } from "@/components/Referral/ReferralAppointmentContext";
+import { useAppointmentReferral } from "@/components/Referral/useAppointmentReferral";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Markdown } from "@/components/ui/markdown";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { appointmentShowSearch } from "@/lib/router/search/appointments";
 import { cn } from "@/lib/utils";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
@@ -111,10 +116,7 @@ import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import { FacilityRead } from "@/types/facility/facility";
-import { TokenFinalStatuses, TokenStatus } from "@/types/tokens/token/token";
-import tokenApi from "@/types/tokens/token/tokenApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
@@ -127,9 +129,9 @@ export default function AppointmentDetail(props: Props) {
   const queryClient = useQueryClient();
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
-  const [params, setQueryParams] = useQueryParams();
+  const [params, setQueryParams] = useQueryParams(appointmentShowSearch);
   const { showSuccess } = params;
-  const [{ from_queue }] = useQueryParams();
+  const [{ from_queue }] = useQueryParams(appointmentShowSearch);
 
   useShortcutSubContext("facility:appointment");
 
@@ -150,6 +152,15 @@ export default function AppointmentDetail(props: Props) {
     }),
     enabled: canViewAppointments && !!facility,
   });
+  const referralContext = useAppointmentReferral(appointment?.patient.id ?? "");
+  const referralContextLoading =
+    referralContext.requested && referralContext.isLoading;
+  const referralEncounterParams = referralContext.referral
+    ? {
+        ...referralContext.successQueryParams,
+        referralAppointmentId: appointment?.id,
+      }
+    : undefined;
 
   useEffect(() => {
     // Don't redirect while facility is still loading
@@ -165,7 +176,7 @@ export default function AppointmentDetail(props: Props) {
     }
 
     // If facility is loaded but user doesn't have permission to view appointments
-    if (facility && !canViewAppointments) {
+    if (!canViewAppointments) {
       toast.error(t("no_permission_to_view_page"));
       goBack(`/facility/${facility.id}/overview`);
       return;
@@ -192,6 +203,22 @@ export default function AppointmentDetail(props: Props) {
     return <Loading />;
   }
   const currentStatus = appointment.status;
+  const goToEncounter = (encounterId: string) => {
+    navigate({
+      to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
+      params: {
+        facilityId,
+        patientId: appointment.patient.id,
+        encounterId,
+        tab: "updates",
+      },
+      search: Object.fromEntries(
+        Object.entries(referralEncounterParams ?? {}).filter(
+          (entry): entry is [string, string] => entry[1] !== undefined,
+        ),
+      ),
+    });
+  };
 
   const canCheckIn = isWithinInterval(new Date(), {
     start: subDays(appointment.token_slot.start_datetime, 1),
@@ -216,6 +243,9 @@ export default function AppointmentDetail(props: Props) {
             {t("appointment_details")}
           </h4>
         </div>
+        {params.referralId && (
+          <ReferralAppointmentContext appointment={appointment} />
+        )}
         {showSuccess && (
           <div className="mb-4 flex flex-col gap-2">
             <Alert className="bg-green-50 border-green-400 items-center">
@@ -225,7 +255,10 @@ export default function AppointmentDetail(props: Props) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setQueryParams({})}
+                  onClick={() => {
+                    const { showSuccess: _, ...remainingParams } = params;
+                    setQueryParams(remainingParams);
+                  }}
                   className="self-end"
                   aria-label={t("close")}
                 >
@@ -240,10 +273,7 @@ export default function AppointmentDetail(props: Props) {
                       strong: <strong className="font-semibold" />,
                     }}
                     values={{
-                      name:
-                        (appointment &&
-                          formatScheduleResourceName(appointment)) ||
-                        "",
+                      name: formatScheduleResourceName(appointment) || "",
                       date: format(
                         appointment.token_slot.start_datetime,
                         "do MMMM",
@@ -277,7 +307,7 @@ export default function AppointmentDetail(props: Props) {
             tagEntityId={appointment.id}
             children={
               canWriteAppointment && (
-                <div className="md:mx-4">
+                <div className="w-full min-w-0 sm:w-auto sm:shrink-0">
                   <AppointmentActions
                     facilityId={facilityId}
                     appointment={appointment}
@@ -434,10 +464,9 @@ export default function AppointmentDetail(props: Props) {
                     <Button
                       variant="outline"
                       size="sm"
+                      disabled={referralContextLoading}
                       onClick={() =>
-                        navigate(
-                          `/facility/${facility.id}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
-                        )
+                        goToEncounter(appointment.associated_encounter!.id)
                       }
                       className="flex items-center gap-2"
                     >
@@ -448,9 +477,13 @@ export default function AppointmentDetail(props: Props) {
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        navigate(
-                          `/facility/${facility.id}/patient/${appointment.patient.id}`,
-                        )
+                        navigate({
+                          to: "/facility/$facilityId/patient/$patientId/{-$tab}",
+                          params: {
+                            facilityId: facility.id,
+                            patientId: appointment.patient.id,
+                          },
+                        })
                       }
                       className="flex items-center gap-2"
                     >
@@ -477,14 +510,13 @@ export default function AppointmentDetail(props: Props) {
                           icon={<PlusSquare className="text-primary-500" />}
                           title={t("start_consultation")}
                           actionId="start-consultation"
+                          disabled={referralContextLoading}
                           onClick={() => {
                             updateAppointment({
                               status: AppointmentStatus.IN_CONSULTATION,
                               note: appointment.note,
                             });
-                            navigate(
-                              `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
-                            );
+                            goToEncounter(appointment.associated_encounter!.id);
                           }}
                         />
                       ) : (
@@ -494,13 +526,18 @@ export default function AppointmentDetail(props: Props) {
                           facilityId={facilityId}
                           patientName={appointment.patient.name}
                           appointment={appointment.id}
-                          defaultOpen={from_queue === "true"}
+                          scheduleDefaults={
+                            appointment.token_slot.availability.schedule
+                          }
+                          redirectQueryParams={referralEncounterParams}
+                          defaultOpen={from_queue === true}
                           defaultStatus={EncounterStatus.IN_PROGRESS}
                           trigger={
                             <QuickAction
                               icon={<PlusSquare className="text-primary-500" />}
                               title={t("start_consultation")}
                               actionId="start-consultation"
+                              disabled={referralContextLoading}
                             />
                           }
                           onSuccess={() => {
@@ -518,6 +555,9 @@ export default function AppointmentDetail(props: Props) {
                         facilityId={facilityId}
                         patientName={appointment.patient.name}
                         appointment={appointment.id}
+                        scheduleDefaults={
+                          appointment.token_slot.availability.schedule
+                        }
                         disableRedirectOnSuccess={true}
                         trigger={
                           <QuickAction
@@ -542,7 +582,6 @@ export default function AppointmentDetail(props: Props) {
                     icon={<PrinterIcon className="size-4" />}
                     title={t("print_appointment")}
                     actionId="print-appointment"
-                    basePath="/"
                     href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
                   />
                 )}
@@ -550,7 +589,6 @@ export default function AppointmentDetail(props: Props) {
                   icon={<Wallet className="size-4" />}
                   title={t("accounts")}
                   actionId="goto-account"
-                  basePath="/"
                   href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${appointment.patient.id}&patient_name=${encodeURIComponent(appointment.patient.name || "")}`}
                 />
               </div>
@@ -753,9 +791,15 @@ const AppointmentDetailsContent = ({
           <CardTitle>{t("note")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 p-2">
-          <p className="text-sm text-gray-600 whitespace-pre-wrap">
-            {appointment.note || t("no_note_provided")}
-          </p>
+          {appointment.note ? (
+            <Markdown
+              content={appointment.note}
+              richText
+              className="prose-sm text-sm"
+            />
+          ) : (
+            <p className="text-sm text-gray-600">{t("no_note_provided")}</p>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -788,6 +832,9 @@ const AppointmentActions = ({
 
   const [selectedResource, setSelectedResource] =
     useState<ScheduleResourceFormState>(appointment);
+  const [isNoShowOpen, setIsNoShowOpen] = useState(false);
+  const [isCancelOpen, setIsCancelOpen] = useState(false);
+  const [isErrorOpen, setIsErrorOpen] = useState(false);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
   const [newNote, setNewVisitReason] = useState(appointment.note);
@@ -798,144 +845,49 @@ const AppointmentActions = ({
 
   const [note, setNote] = useState(appointment.note);
 
-  const { mutate: executeBatch, isPending: isPending } = useBatchRequest({
-    onSuccess: ({ results }) => {
-      if (
-        results.find((result) => result.reference_id === "cancel-appointment")
-      ) {
-        queryClient.invalidateQueries({
-          queryKey: ["appointment", appointment.id],
-        });
-        toast.success(t("appointment_cancelled"));
-      }
-      if (results.find((result) => result.reference_id === "token-cancelled")) {
-        queryClient.invalidateQueries({
-          queryKey: [
-            "infinite-tokens",
-            facilityId,
-            appointment.token?.queue.id || "",
-          ],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [
-            "token-queue-summary",
-            facilityId,
-            appointment.token?.queue.id || "",
-          ],
-        });
-      }
-      if (
-        results.find(
-          (result) => result.reference_id === "reschedule-appointment",
-        )
-      ) {
+  const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
+    mutationFn: mutate(scheduleApis.appointments.cancel, {
+      pathParams: { facilityId, id: appointment.id },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["appointment", appointment.id],
+      });
+      toast.success(t("appointment_cancelled"));
+    },
+  });
+
+  const { mutate: rescheduleAppointment, isPending: isRescheduling } =
+    useMutation({
+      mutationFn: mutate(scheduleApis.appointments.reschedule, {
+        pathParams: { facilityId, id: appointment.id },
+      }),
+      onSuccess: (newAppointment: Appointment) => {
         queryClient.invalidateQueries({
           queryKey: ["appointment", appointment.id],
         });
         setIsRescheduleOpen(false);
         setSelectedSlotId(undefined);
         setRescheduleReason("");
-        const result = results.find(
-          (result) => result.reference_id === "reschedule-appointment",
-        );
-        const newAppointment = result?.data as Appointment;
-        if (newAppointment) {
-          navigate(
-            `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
-          );
-        }
-      }
-      if (results.find((result) => result.reference_id === "token-cancelled")) {
-        queryClient.invalidateQueries({
-          queryKey: [
-            "infinite-tokens",
+        navigate({
+          to: "/facility/$facilityId/patient/$patientId/appointments/$appointmentId",
+          params: {
             facilityId,
-            appointment.token?.queue.id || "",
-          ],
+            patientId: appointment.patient.id,
+            appointmentId: newAppointment.id,
+          },
         });
-        queryClient.invalidateQueries({
-          queryKey: [
-            "token-queue-summary",
-            facilityId,
-            appointment.token?.queue.id || "",
-          ],
-        });
-      }
-    },
-  });
-
-  const addCancelAppointment = (reason: string, note?: string) => {
-    let requests: BatchRequestObject[] = [];
-    requests.push({
-      api: scheduleApis.appointments.cancel,
-      pathParams: {
-        facilityId,
-        id: appointment.id,
-      },
-      referenceId: "cancel-appointment",
-      body: {
-        reason: reason,
-        note: note,
       },
     });
-    if (
-      appointment.token &&
-      !TokenFinalStatuses.includes(appointment.token.status)
-    ) {
-      requests.push({
-        api: tokenApi.update,
-        pathParams: {
-          facility_id: facilityId,
-          queue_id: appointment.token.queue.id,
-          id: appointment.token.id,
-        },
-        referenceId: "token-cancelled",
-        body: {
-          note: appointment.token.note,
-          sub_queue: appointment.token.sub_queue?.id || null,
-          status: TokenStatus.CANCELLED,
-        },
-      });
-    }
-    executeBatch(requests);
-  };
 
-  const addRescheduleAppointment = () => {
-    let requests: BatchRequestObject[] = [];
-    requests.push({
-      api: scheduleApis.appointments.reschedule,
-      pathParams: {
-        facilityId,
-        id: appointment.id,
-      },
-      referenceId: "reschedule-appointment",
-      body: {
-        new_slot: selectedSlotId || "",
-        previous_booking_note: oldNote,
-        new_booking_note: newNote,
-        tags: appointment.tags.map((tag) => tag.id),
-      },
+  const handleReschedule = () => {
+    if (!selectedSlotId) return;
+    rescheduleAppointment({
+      new_slot: selectedSlotId,
+      previous_booking_note: oldNote,
+      new_booking_note: newNote,
+      tags: appointment.tags.map((tag) => ({ tag: tag.id })),
     });
-    if (
-      appointment.token &&
-      !TokenFinalStatuses.includes(appointment.token.status)
-    ) {
-      requests.push({
-        api: tokenApi.update,
-        referenceId: "token-cancelled",
-        pathParams: {
-          facility_id: facilityId,
-          queue_id: appointment.token.queue.id,
-          id: appointment.token.id,
-        },
-        body: {
-          note: appointment.token.note,
-          sub_queue: appointment.token.sub_queue?.id || null,
-          status: TokenStatus.CANCELLED,
-        },
-      });
-    }
-    executeBatch(requests);
   };
 
   if (AppointmentFinalStatuses.includes(currentStatus)) {
@@ -943,9 +895,9 @@ const AppointmentActions = ({
   }
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-4">
+    <div className="w-full min-w-0 sm:w-auto">
       {/* Primary Actions */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex min-w-0 items-center justify-end gap-2">
         {/* Check In - Only for booked appointments */}
         {currentStatus && currentStatus === AppointmentStatus.BOOKED && (
           <Button
@@ -957,11 +909,10 @@ const AppointmentActions = ({
                 note: appointment.note,
               })
             }
-            size="lg"
-            className="w-full justify-start"
+            className="min-w-0 flex-1 sm:flex-none"
           >
             <EnterIcon className="size-4" />
-            {t("check_in")}
+            <span className="truncate">{t("check_in")}</span>
             <ShortcutBadge actionId="check-in-action" />
           </Button>
         )}
@@ -969,7 +920,7 @@ const AppointmentActions = ({
         {/* Actions Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" aria-label={t("actions")}>
               <DotsVerticalIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -993,310 +944,286 @@ const AppointmentActions = ({
 
             <DropdownMenuSeparator />
 
-            {/* Reschedule */}
             {appointment.status !== AppointmentStatus.IN_CONSULTATION &&
               canRescheduleAppointment && (
-                <>
-                  <AlertDialog
-                    open={isRescheduleReasonOpen}
-                    onOpenChange={setIsRescheduleReasonOpen}
-                  >
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <CalendarIcon className="size-4 mr-2" />
-                        {t("reschedule")}
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t("reschedule_appointment")}
-                        </AlertDialogTitle>
-                        <Label>{t("note")}</Label>
-                        <Textarea
-                          value={oldNote}
-                          onChange={(e) => setRescheduleReason(e.target.value)}
-                        />
-                        <AlertDialogDescription>
-                          <Alert variant="destructive">
-                            <AlertTitle>{t("warning")}</AlertTitle>
-                            <AlertDescription>
-                              {t("reschedule_appointment_warning")}
-                            </AlertDescription>
-                          </Alert>
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel
-                          onClick={() => setIsRescheduleReasonOpen(false)}
-                        >
-                          {t("cancel")}
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => {
-                            setIsRescheduleReasonOpen(false);
-                            setIsRescheduleOpen(true);
-                          }}
-                          disabled={!oldNote.trim()}
-                        >
-                          {t("continue")}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-
-                  <Sheet
-                    open={isRescheduleOpen}
-                    onOpenChange={setIsRescheduleOpen}
-                  >
-                    <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
-                      <SheetHeader>
-                        <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
-                      </SheetHeader>
-
-                      <div className="mt-6 flex-1">
-                        <div className="text-sm">
-                          <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                            <Label className="font-medium">
-                              {t("tags", { count: 2 })}
-                            </Label>
-                            <TagAssignmentSheet
-                              entityType="appointment"
-                              entityId={appointment.id}
-                              facilityId={facilityId}
-                              currentTags={appointment.tags}
-                              onUpdate={() => {
-                                queryClient.invalidateQueries({
-                                  queryKey: ["appointment", appointment.id],
-                                });
-                              }}
-                              canWrite={true}
-                            />
-                          </div>
-                          {appointment.tags?.length > 0 ? (
-                            <p className="text-gray-600 flex flex-wrap gap-1">
-                              {appointment.tags.map((tag) => (
-                                <TagBadge
-                                  key={tag.id}
-                                  tag={tag}
-                                  hierarchyDisplay
-                                />
-                              ))}
-                            </p>
-                          ) : (
-                            <p className="text-gray-600 md:-mt-2">
-                              {t("no_tags_assigned")}
-                            </p>
-                          )}
-                        </div>
-                        <Label className="mb-2 aria-required mt-8">
-                          {t("note")}
-                        </Label>
-                        <Textarea
-                          placeholder={t("appointment_note")}
-                          value={newNote}
-                          onChange={(e) => setNewVisitReason(e.target.value)}
-                        />
-                        <div className="my-4 space-y-4">
-                          <div className="flex flex-col">
-                            <Label className="mb-2 text-sm font-medium text-gray-950">
-                              {t(
-                                `schedulable_resource__${selectedResource.resource_type}`,
-                              )}
-                            </Label>
-                            <ScheduleResourceSelector
-                              selectedResource={selectedResource}
-                              facilityId={facilityId}
-                              setSelectedResource={setSelectedResource}
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-4">
-                          <AppointmentDateSelection
-                            facilityId={facilityId}
-                            resourceId={selectedResource.resource?.id}
-                            resourceType={selectedResource.resource_type}
-                            currentAppointment={appointment}
-                            setSelectedDate={setSelectedDate}
-                            selectedDate={selectedDate}
-                          />
-                          <AppointmentSlotPicker
-                            selectedDate={selectedDate}
-                            facilityId={facilityId}
-                            resourceId={selectedResource.resource?.id}
-                            resourceType={selectedResource.resource_type}
-                            selectedSlotId={selectedSlotId}
-                            onSlotSelect={setSelectedSlotId}
-                            currentAppointment={appointment}
-                          />
-                        </div>
-
-                        <div className="flex justify-end gap-2 mt-6">
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setIsRescheduleOpen(false);
-                              setSelectedSlotId(undefined);
-                            }}
-                          >
-                            {t("cancel")}
-                          </Button>
-                          <Button
-                            variant="default"
-                            disabled={!selectedSlotId || isPending}
-                            onClick={addRescheduleAppointment}
-                          >
-                            {isPending ? t("rescheduling") : t("reschedule")}
-                          </Button>
-                        </div>
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                </>
+                <DropdownMenuItem
+                  onSelect={() => setIsRescheduleReasonOpen(true)}
+                >
+                  <CalendarIcon className="size-4 mr-2" />
+                  {t("reschedule")}
+                </DropdownMenuItem>
               )}
-
-            {/* Mark as No Show */}
             {[AppointmentStatus.BOOKED, AppointmentStatus.CHECKED_IN].includes(
               currentStatus,
             ) && (
-              <AlertDialog>
-                <AlertDialogTrigger
-                  asChild
-                  disabled={!canMarkFulfilledOrNoShow}
-                >
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <EyeNoneIcon className="size-4 mr-2" />
-                    {t("mark_as_noshow")}
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("mark_as_noshow")}</AlertDialogTitle>
-                    <Label>{t("note")}</Label>
-                    <Textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                    />
-                    <AlertDialogDescription>
-                      <Alert variant="destructive">
-                        <AlertTitle>{t("warning")}</AlertTitle>
-                        <AlertDescription>
-                          {t("mark_as_noshow_warning")}
-                        </AlertDescription>
-                      </Alert>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() =>
-                        updateAppointment({
-                          status: AppointmentStatus.NO_SHOW,
-                          note,
-                        })
-                      }
-                      className={cn(buttonVariants({ variant: "destructive" }))}
-                      disabled={!note.trim()}
-                    >
-                      {isUpdating ? (
-                        <Loader2 className="size-4 animate-spin mr-2" />
-                      ) : (
-                        t("confirm")
-                      )}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <DropdownMenuItem
+                disabled={!canMarkFulfilledOrNoShow}
+                onSelect={() => setIsNoShowOpen(true)}
+              >
+                <EyeNoneIcon className="size-4 mr-2" />
+                {t("mark_as_noshow")}
+              </DropdownMenuItem>
             )}
-
-            {/* Cancel Appointment */}
             {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <BanIcon className="size-4 mr-2" />
-                    {t("cancel_appointment")}
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {t("cancel_appointment")}
-                    </AlertDialogTitle>
-                    <Label>{t("note")}</Label>
-                    <Textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                    />
-                    <AlertDialogDescription>
-                      <Alert variant="destructive">
-                        <AlertTitle>{t("warning")}</AlertTitle>
-                        <AlertDescription>
-                          {t("cancel_appointment_warning")}
-                        </AlertDescription>
-                      </Alert>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => addCancelAppointment("cancelled", note)}
-                      className={cn(buttonVariants({ variant: "destructive" }))}
-                      disabled={!note.trim()}
-                    >
-                      {isPending ? (
-                        <Loader2 className="size-4 animate-spin mr-2" />
-                      ) : (
-                        t("confirm")
-                      )}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <DropdownMenuItem onSelect={() => setIsCancelOpen(true)}>
+                <BanIcon className="size-4 mr-2" />
+                {t("cancel_appointment")}
+              </DropdownMenuItem>
             )}
-
-            {/* Mark as Entered in Error */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <BanIcon className="size-4 mr-2" />
-                  {t("mark_as_entered_in_error")}
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
+            <DropdownMenuItem onSelect={() => setIsErrorOpen(true)}>
+              <BanIcon className="size-4 mr-2" />
+              {t("mark_as_entered_in_error")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      {/* Reschedule */}
+      {appointment.status !== AppointmentStatus.IN_CONSULTATION &&
+        canRescheduleAppointment && (
+          <>
+            <AlertDialog
+              open={isRescheduleReasonOpen}
+              onOpenChange={setIsRescheduleReasonOpen}
+            >
+              <AlertDialogContent className="max-h-[90dvh] overflow-y-auto">
+                <AlertDialogHeader className="min-w-0 place-items-stretch text-left sm:group-data-[size=default]/alert-dialog-content:place-items-stretch">
                   <AlertDialogTitle>
-                    {t("mark_as_entered_in_error")}
+                    {t("reschedule_appointment")}
                   </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    <Alert variant="destructive" className="mt-4">
+                  <Label>{t("note")}</Label>
+                  <RichTextEditor
+                    label={t("note")}
+                    value={oldNote}
+                    onChange={setRescheduleReason}
+                  />
+                  <AlertDialogDescription asChild>
+                    <Alert variant="destructive">
                       <AlertTitle>{t("warning")}</AlertTitle>
                       <AlertDescription>
-                        {t("entered_in_error_warning")}
+                        {t("reschedule_appointment_warning")}
                       </AlertDescription>
                     </Alert>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() =>
-                      addCancelAppointment("entered_in_error", note)
-                    }
-                    className={cn(buttonVariants({ variant: "destructive" }))}
+                  <AlertDialogCancel
+                    onClick={() => setIsRescheduleReasonOpen(false)}
                   >
-                    {isPending ? (
-                      <Loader2 className="size-4 animate-spin mr-2" />
-                    ) : (
-                      t("confirm")
-                    )}
+                    {t("cancel")}
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      setIsRescheduleReasonOpen(false);
+                      setIsRescheduleOpen(true);
+                    }}
+                    disabled={!hasMarkdownContent(oldNote)}
+                  >
+                    {t("continue")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+
+            <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
+              <SheetContent size="lg" className="overflow-hidden">
+                <SheetHeader>
+                  <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
+                </SheetHeader>
+
+                <SheetBody>
+                  <Label className="pb-2">{t("tags", { count: 2 })}</Label>
+                  <TagAssignmentSheet
+                    entityType="appointment"
+                    entityId={appointment.id}
+                    facilityId={facilityId}
+                    currentTags={appointment.tags}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["appointment", appointment.id],
+                      });
+                    }}
+                    canWrite={true}
+                  />
+                  <Label className="pt-4 mb-2">{t("note")}</Label>
+                  <RichTextEditor
+                    label={t("note")}
+                    placeholder={t("appointment_note")}
+                    value={newNote}
+                    onChange={setNewVisitReason}
+                  />
+                  <div className="my-4 space-y-4">
+                    <div className="flex flex-col">
+                      <Label className="mb-2 text-sm font-medium text-gray-950">
+                        {t(
+                          `schedulable_resource__${selectedResource.resource_type}`,
+                        )}
+                      </Label>
+                      <ScheduleResourceSelector
+                        selectedResource={selectedResource}
+                        facilityId={facilityId}
+                        setSelectedResource={setSelectedResource}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <AppointmentDateSelection
+                      facilityId={facilityId}
+                      resourceId={selectedResource.resource?.id}
+                      resourceType={selectedResource.resource_type}
+                      currentAppointment={appointment}
+                      setSelectedDate={setSelectedDate}
+                      selectedDate={selectedDate}
+                    />
+                    <AppointmentSlotPicker
+                      selectedDate={selectedDate}
+                      facilityId={facilityId}
+                      resourceId={selectedResource.resource?.id}
+                      resourceType={selectedResource.resource_type}
+                      selectedSlotId={selectedSlotId}
+                      onSlotSelect={setSelectedSlotId}
+                      currentAppointment={appointment}
+                    />
+                  </div>
+                </SheetBody>
+                <SheetFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsRescheduleOpen(false);
+                      setSelectedSlotId(undefined);
+                    }}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    variant="default"
+                    disabled={!selectedSlotId || isRescheduling}
+                    onClick={handleReschedule}
+                  >
+                    {isRescheduling ? t("rescheduling") : t("reschedule")}
+                  </Button>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
+          </>
+        )}
+
+      {/* Mark as No Show */}
+      {[AppointmentStatus.BOOKED, AppointmentStatus.CHECKED_IN].includes(
+        currentStatus,
+      ) && (
+        <AlertDialog open={isNoShowOpen} onOpenChange={setIsNoShowOpen}>
+          <AlertDialogContent className="max-h-[90dvh] overflow-y-auto">
+            <AlertDialogHeader className="min-w-0 place-items-stretch text-left sm:group-data-[size=default]/alert-dialog-content:place-items-stretch">
+              <AlertDialogTitle>{t("mark_as_noshow")}</AlertDialogTitle>
+              <Label>{t("note")}</Label>
+              <RichTextEditor
+                label={t("note")}
+                value={note}
+                onChange={setNote}
+              />
+              <AlertDialogDescription asChild>
+                <Alert variant="destructive">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t("mark_as_noshow_warning")}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() =>
+                  updateAppointment({
+                    status: AppointmentStatus.NO_SHOW,
+                    note,
+                  })
+                }
+                variant="destructive"
+                disabled={!hasMarkdownContent(note)}
+              >
+                {isUpdating ? (
+                  <Spinner className="size-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {/* Cancel Appointment */}
+      {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
+        <AlertDialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+          <AlertDialogContent className="max-h-[90dvh] overflow-y-auto">
+            <AlertDialogHeader className="min-w-0 place-items-stretch text-left sm:group-data-[size=default]/alert-dialog-content:place-items-stretch">
+              <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
+              <Label>{t("note")}</Label>
+              <RichTextEditor
+                label={t("note")}
+                value={note}
+                onChange={setNote}
+              />
+              <AlertDialogDescription asChild>
+                <Alert variant="destructive">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t("cancel_appointment_warning")}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => cancelAppointment({ reason: "cancelled", note })}
+                variant="destructive"
+                disabled={!hasMarkdownContent(note)}
+              >
+                {isCancelling ? (
+                  <Spinner className="size-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {/* Mark as Entered in Error */}
+      <AlertDialog open={isErrorOpen} onOpenChange={setIsErrorOpen}>
+        <AlertDialogContent className="max-h-[90dvh] overflow-y-auto">
+          <AlertDialogHeader className="min-w-0 place-items-stretch text-left sm:group-data-[size=default]/alert-dialog-content:place-items-stretch">
+            <AlertDialogTitle>{t("mark_as_entered_in_error")}</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <Alert variant="destructive" className="mt-4">
+                <AlertTitle>{t("warning")}</AlertTitle>
+                <AlertDescription>
+                  {t("entered_in_error_warning")}
+                </AlertDescription>
+              </Alert>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() =>
+                cancelAppointment({ reason: "entered_in_error", note })
+              }
+              variant="destructive"
+            >
+              {isCancelling ? (
+                <Spinner className="size-4 animate-spin mr-2" />
+              ) : (
+                t("confirm")
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

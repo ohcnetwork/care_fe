@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,7 +66,7 @@ function ViewAction({ file, fileManager, associatingId }: FileActionProps) {
   return (
     <Button
       variant="link"
-      className="h-auto text-gray-950"
+      className="h-auto text-foreground"
       onClick={() => fileManager.viewFile(file, associatingId)}
     >
       <span className="flex flex-row items-center gap-1 underline">
@@ -87,45 +88,30 @@ function ActionsMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="actions">
+        <Button variant="ghost" size="icon" aria-label={t("actions")}>
           <MoreHorizontal />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem asChild className="text-primary-900">
-          <Button
-            size="sm"
-            onClick={() => fileManager.downloadFile(file, associatingId)}
-            variant="ghost"
-            className="w-full flex flex-row justify-stretch items-center"
-          >
-            <ArrowDownCircle className="mr-1" />
-            <span>{t("download")}</span>
-          </Button>
+        <DropdownMenuItem
+          onClick={() => fileManager.downloadFile(file, associatingId)}
+        >
+          <ArrowDownCircle />
+          {t("download")}
         </DropdownMenuItem>
         {canEdit && (
           <>
-            <DropdownMenuItem asChild className="text-primary-900">
-              <Button
-                size="sm"
-                onClick={() => fileManager.archiveFile(file, associatingId)}
-                variant="ghost"
-                className="w-full flex flex-row justify-stretch items-center"
-              >
-                <Archive className="mr-1" />
-                <span>{t("archive")}</span>
-              </Button>
+            <DropdownMenuItem
+              onClick={() => fileManager.archiveFile(file, associatingId)}
+            >
+              <Archive />
+              {t("archive")}
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="text-primary-900">
-              <Button
-                size="sm"
-                onClick={() => fileManager.editFile(file, associatingId)}
-                variant="ghost"
-                className="w-full flex flex-row justify-stretch items-center"
-              >
-                <Pencil className="mr-1" />
-                <span>{t("rename")}</span>
-              </Button>
+            <DropdownMenuItem
+              onClick={() => fileManager.editFile(file, associatingId)}
+            >
+              <Pencil />
+              {t("rename")}
             </DropdownMenuItem>
           </>
         )}
@@ -143,7 +129,6 @@ export function FileListTable({
   const { t } = useTranslation();
   const [selectedArchivedFile, setSelectedArchivedFile] =
     useState<FileReadMinimal | null>(null);
-  useState<FileReadMinimal | null>(null);
   const [openArchivedFileDialog, setOpenArchivedFileDialog] = useState(false);
 
   const fileManager = useFileManager({
@@ -191,11 +176,11 @@ export function FileListTable({
           const FileIcon = icons[filetype];
 
           return (
-            <div
+            <Card
               key={file.id}
-              className="flex items-stretch overflow-hidden rounded-md border border-blue-300 bg-gray-100"
+              className="flex items-stretch overflow-hidden rounded-md"
             >
-              <div className="flex min-w-0 flex-1 flex-col gap-3 p-1 sm:flex-row sm:items-center sm:justify-between bg-white rounded-sm shadow-xs m-0.5">
+              <div className="flex min-w-0 flex-1 flex-col gap-3 p-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-start sm:items-center gap-3">
                   <span
                     className={cn(
@@ -207,12 +192,12 @@ export function FileListTable({
                   >
                     <FileIcon className="size-4" strokeWidth={1.5} />
                   </span>
-                  <div className="flex flex-col">
-                    <span className="text-wrap font-medium text-gray-950">
+                  <div className="flex min-w-0 flex-col">
+                    <span className="break-all font-medium text-foreground">
                       {fileName}
                     </span>
 
-                    <span className="flex items-center text-xs text-gray-700">
+                    <span className="flex flex-wrap items-center text-xs text-muted-foreground">
                       {formatDate(new Date(file.created_date), "dd MMM yyyy")}
                       <Dot size={9} className="mx-1 shrink-0" />
                       {formatName(file.uploaded_by)}
@@ -232,7 +217,7 @@ export function FileListTable({
                 </div>
               </div>
               {!file.is_archived && (
-                <div className="flex shrink-0 items-center justify-center px-2">
+                <div className="flex shrink-0 items-center justify-center border-l border-border bg-muted/30 px-2">
                   <ActionsMenu
                     file={file}
                     fileManager={fileManager}
@@ -241,11 +226,11 @@ export function FileListTable({
                   />
                 </div>
               )}
-            </div>
+            </Card>
           );
         })
       ) : (
-        <div className="text-center py-4 text-gray-500">
+        <div className="text-center py-4 text-muted-foreground">
           {t("no_files_found")}
         </div>
       )}

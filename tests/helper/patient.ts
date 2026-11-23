@@ -1,56 +1,86 @@
 import { faker } from "@faker-js/faker";
-import { getApiHeaders, getApiUrl } from "tests/helper/utils";
+import { setTimeout as delay } from "node:timers/promises";
+import { adminApiHeaders, apiBaseUrl } from "tests/helper/questionnaireV2";
 
-async function getGovtOrganizationId(): Promise<string> {
-  const response = await fetch(
-    `${getApiUrl()}/api/v1/organization/?org_type=govt&limit=1`,
-    { headers: getApiHeaders() },
+async function getGovtOrganizationId(
+  headers: Record<string, string>,
+): Promise<string> {
+  const organizationsResponse = await fetch(
+    `${apiBaseUrl()}/api/v1/organization/?org_type=govt&limit=1`,
+    { headers },
   );
-  if (!response.ok) {
-    throw new Error(`Failed to fetch organizations: ${response.status}`);
+  if (!organizationsResponse.ok) {
+    throw new Error(
+      `Failed to fetch test patient organizations: ${organizationsResponse.status}`,
+    );
   }
-  const { results } = (await response.json()) as {
+  const organizations = (await organizationsResponse.json()) as {
     results: { id: string }[];
   };
-  const id = results[0]?.id;
-  if (!id) throw new Error("No govt organization found");
-  return id;
+  const geoOrganization = organizations.results[0]?.id;
+  if (!geoOrganization) {
+    throw new Error("No government organization for the test patient");
+  }
+  return geoOrganization;
 }
 
 /**
- * Create a patient through the API and return its id.
- *
- * Use this when a test needs a patient of its own, for example because a
- * patient can have only five active encounters in a facility.
+ * Creates a throwaway patient through the API. Specs that create encounters
+ * use one each: the backend caps a patient's active encounters per facility,
+ * so creating them for a shared patient eventually rejects every new one.
+ * Without a geo organization, the patient goes in the first government one.
  */
-export async function createPatient(
-  namePrefix: string,
+export async function createTestPatient(
+  namePrefix = "E2E Patient",
   geoOrganizationId?: string,
 ): Promise<string> {
-  const geoOrganization = geoOrganizationId ?? (await getGovtOrganizationId());
-
-  // Patient creation takes a global lock, so parallel workers can collide.
-  // The backend reports this as a 400, like a validation error, so match the
-  // lock message to decide whether to retry.
-  let error = "";
-  for (let attempt = 1; attempt <= 5; attempt++) {
-    const response = await fetch(`${getApiUrl()}/api/v1/patient/`, {
+  const headers = adminApiHeaders();
+  const geoOrganization =
+    geoOrganizationId ?? (await getGovtOrganizationId(headers));
+  const body = JSON.stringify({
+    name: `${namePrefix} ${faker.string.alphanumeric(12)}`,
+    gender: "male",
+    phone_number: `+91${faker.helpers.fromRegExp(/[6-9][0-9]{9}/)}`,
+    date_of_birth: "1990-01-15",
+    geo_organization: geoOrganization,
+    identifiers: [],
+  });
+  for (let attempt = 0; ; attempt++) {
+    const response = await fetch(`${apiBaseUrl()}/api/v1/patient/`, {
       method: "POST",
-      headers: getApiHeaders(),
-      body: JSON.stringify({
-        name: `${namePrefix} ${faker.string.alphanumeric(6)}`,
-        gender: "male",
-        phone_number: `+91${faker.helpers.fromRegExp(/[6-9][0-9]{9}/)}`,
-        date_of_birth: "1990-01-15",
-        geo_organization: geoOrganization,
-        identifiers: [],
-      }),
+      headers,
+      body,
     });
-    if (response.ok) return ((await response.json()) as { id: string }).id;
-
-    error = `${response.status} — ${await response.text()}`;
-    if (!error.includes("try again after a while")) break;
-    await new Promise((resolve) => setTimeout(resolve, attempt * 500));
+    if (response.ok) {
+      return ((await response.json()) as { id: string }).id;
+    }
+    const error = await response.text();
+    // The backend serializes patient creation with a global lock. Only
+    // retry its explicit pre-create rejection, never an ambiguous failure.
+    if (
+      attempt >= 4 ||
+      response.status !== 400 ||
+      !error.includes("Patient creation failed, try again after a while")
+    ) {
+      throw new Error(
+        `Failed to create test patient: ${response.status} — ${error}`,
+      );
+    }
+    await delay(250 * (attempt + 1));
   }
-  throw new Error(`Failed to create patient: ${error}`);
+}
+
+/** Same as {@link createTestPatient}. */
+export const createPatient = createTestPatient;
+
+const GENDER_LABELS: Record<string, string> = {
+  male: "Male",
+  female: "Female",
+  transgender: "Transgender",
+  non_binary: "Non-binary",
+};
+
+/** The label the UI shows for an API gender value (the GENDER__* strings). */
+export function genderLabel(gender: string): string {
+  return GENDER_LABELS[gender] ?? gender;
 }

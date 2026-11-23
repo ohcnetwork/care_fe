@@ -8,9 +8,11 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Command,
   CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -22,7 +24,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import {
@@ -60,6 +68,7 @@ interface Props {
   onSelect: (patientId: string | undefined, patientName?: string) => void;
   placeholder?: string;
   className?: string;
+  size?: "sm" | "default";
   patientId?: string;
   patientName?: string;
   align?: "start" | "center" | "end";
@@ -140,7 +149,7 @@ function PatientSearchSelector({
 
   return (
     <Command shouldFilter={false} className="border-none">
-      <div className="flex flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
         {allIdentifierConfigs.length > 2 ? (
           <div className="p-2">
             <label className="text-xs text-gray-600 mb-1.5 ml-1 block">
@@ -168,12 +177,12 @@ function PatientSearchSelector({
             }}
             className="w-full p-2"
           >
-            <TabsList className="w-full h-auto p-0.5 shadow-inner rounded-md">
+            <TabsList className="w-full">
               {allIdentifierConfigs.map((config) => (
                 <TabsTrigger
                   key={config.id}
                   value={config.id}
-                  className="flex-1 rounded-sm truncate"
+                  className="min-w-0 flex-1"
                 >
                   <span className="truncate">{config.config.display}</span>
                 </TabsTrigger>
@@ -188,35 +197,33 @@ function PatientSearchSelector({
           </div>
         ) : null}
 
-        <div className="relative px-2">
+        <div className="relative border-b border-gray-100 shadow-xs">
           {isPhoneNumberConfig ? (
-            <PhoneInput
-              ref={inputRef}
-              placeholder={selectedConfig?.config.display || t("search")}
-              value={searchTerm}
-              onChange={(value) => setSearchTerm(value || "")}
-              className="border-none focus:ring-0 focus:outline-none flex-1"
-              autoFocus
-            />
-          ) : (
-            <>
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
-              <Input
+            <div className="p-2 pt-0">
+              <PhoneInput
                 ref={inputRef}
-                type="text"
+                data-autofocus
                 placeholder={selectedConfig?.config.display || t("search")}
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-                autoFocus
+                onChange={(value) => setSearchTerm(value || "")}
               />
-            </>
+            </div>
+          ) : (
+            <CommandInput
+              ref={inputRef}
+              placeholder={selectedConfig?.config.display || t("search")}
+              aria-label={selectedConfig?.config.display || t("search")}
+              value={searchTerm}
+              onValueChange={setSearchTerm}
+              wrapperClassName="p-2 pt-0 md:pt-0"
+              className="pr-8 text-base sm:text-sm"
+            />
           )}
           {searchTerm && (
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-5 top-1/2 -translate-y-1/2 size-6 text-gray-400 hover:bg-transparent"
+              className="absolute right-4 top-1/2 size-6 -translate-y-1/2 text-gray-400 hover:bg-transparent"
               onClick={() => setSearchTerm("")}
               aria-label="Clear search input"
             >
@@ -247,7 +254,7 @@ function PatientSearchSelector({
                 }}
               />
             </div>
-            <CommandList className="max-h-[calc(50vh-12rem)] overflow-y-auto">
+            <CommandList className="scrollbar-gutter-auto sm:max-h-[calc(50vh-12rem)]">
               <CommandGroup className="p-0">
                 {patientList?.results.map((patient) => (
                   <CommandItem
@@ -278,6 +285,7 @@ export default function PatientIdentifierFilter({
   patientName,
   align = "start",
   hideScanButton = false,
+  size = "sm",
   open: externalOpen = false,
 }: Props) {
   const { t } = useTranslation();
@@ -468,14 +476,17 @@ export default function PatientIdentifierFilter({
   const triggerButton = (
     <Button
       variant="outline"
+      size={size}
       role="combobox"
       aria-expanded={open}
-      className="flex-1 justify-between bg-white border-none rounded-none font-normal"
+      className="min-w-0 flex-1 justify-between font-normal"
     >
       {selectedPatient && !verificationOpen ? (
-        <span className="text-primary-500 text-sm">{selectedPatient.name}</span>
+        <span className="truncate text-primary-500 text-sm">
+          {selectedPatient.name}
+        </span>
       ) : (
-        <span className="text-sm text-gray-900">
+        <span className="truncate text-sm text-foreground">
           {placeholder || t("filter_by_identifier")}
         </span>
       )}
@@ -485,17 +496,16 @@ export default function PatientIdentifierFilter({
 
   return (
     <>
-      <div
-        className={cn(
-          "flex overflow-hidden border-gray-400 rounded-lg border",
-          className,
-        )}
+      <ButtonGroup
+        className={cn("w-auto", className)}
+        aria-label={placeholder || t("filter_by_identifier")}
       >
         {!hideScanButton && (
           <Button
-            variant="ghost"
+            variant="outline"
+            size={size}
             onClick={() => setScanDialogOpen(true)}
-            className="shrink-0 text-gray-950 px-2 border-r rounded-r-none bg-white"
+            className="shrink-0 text-foreground"
             aria-label={t("scan_patient_qr")}
             data-shortcut-id="scan-patient"
           >
@@ -506,19 +516,28 @@ export default function PatientIdentifierFilter({
         {isMobile ? (
           <Drawer open={open} onOpenChange={setOpen}>
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-            <DrawerContent className="min-h-[50vh] max-h-[85vh]">
-              <PatientSearchSelector
-                allIdentifierConfigs={allIdentifierConfigs}
-                searchType={searchType}
-                setSearchType={setSearchType}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                isPhoneNumberConfig={isPhoneNumberConfig}
-                selectedConfig={selectedConfig}
-                handlePatientSelect={handlePatientSelect}
-                patientList={patientList}
-                isPatientFetching={isPatientFetching}
-              />
+            <DrawerContent
+              aria-describedby={undefined}
+              height="fixed"
+              className="p-1.5"
+            >
+              <DrawerHeader className="border-b" showCloseButton>
+                <DrawerTitle>{t("search_patients")}</DrawerTitle>
+              </DrawerHeader>
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
+                <PatientSearchSelector
+                  allIdentifierConfigs={allIdentifierConfigs}
+                  searchType={searchType}
+                  setSearchType={setSearchType}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  isPhoneNumberConfig={isPhoneNumberConfig}
+                  selectedConfig={selectedConfig}
+                  handlePatientSelect={handlePatientSelect}
+                  patientList={patientList}
+                  isPatientFetching={isPatientFetching}
+                />
+              </div>
             </DrawerContent>
           </Drawer>
         ) : (
@@ -545,15 +564,16 @@ export default function PatientIdentifierFilter({
         )}
         {selectedPatient && !verificationOpen && (
           <Button
-            variant="ghost"
-            size="sm"
+            variant="outline"
+            size={size === "sm" ? "icon-sm" : "icon"}
             onClick={handleClear}
-            className="h-auto border-l px-2 hover:bg-transparent w-8 mr-3 pr-px rounded-none border-gray-400 text-gray-950"
+            aria-label={t("clear")}
+            className="text-foreground"
           >
             <X className="size-4" />
           </Button>
         )}
-      </div>
+      </ButtonGroup>
 
       <PatientIDScanDialog
         open={scanDialogOpen}

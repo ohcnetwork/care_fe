@@ -5,8 +5,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-
-import { navigate } from "raviger";
+import { navigate } from "@/lib/router/navigate";
 
 type ErrorType = "PAGE_NOT_FOUND" | "PAGE_LOAD_ERROR" | "CUSTOM_ERROR";
 
@@ -175,7 +174,7 @@ export default function ErrorPage({
         <div className="mt-6">
           <Button
             onClick={() => {
-              navigate("/", { replace: true });
+              navigate({ to: "/", replace: true });
               window.location.reload();
             }}
             className="rounded-md bg-primary-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-800"

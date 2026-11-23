@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -16,29 +17,39 @@ interface Props {
   organizationId?: string;
   facilityId: string;
   trigger?: React.ReactNode;
+  /** Control the sheet from outside, e.g. when opened from a menu item. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export default function EditFacilitySheet({ facilityId, trigger }: Props) {
+export default function EditFacilitySheet({
+  facilityId,
+  trigger,
+  open: controlledOpen,
+  onOpenChange,
+}: Props) {
   const { t } = useTranslation();
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      {trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("edit_facility")}</SheetTitle>
           <SheetDescription>{t("update_existing_facility")}</SheetDescription>
         </SheetHeader>
-        <div className="mt-6">
+        <SheetBody>
           <FacilityForm
             facilityId={facilityId}
             onSubmitSuccess={() => {
               setOpen(false);
             }}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

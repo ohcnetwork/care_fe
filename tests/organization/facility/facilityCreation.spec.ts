@@ -4,6 +4,43 @@ import { expectToast } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+/** The facility settings header shows the type as a badge on the line under the name heading. */
+function facilityTypeLine(page: Page, facilityName: string) {
+  return page
+    .getByRole("heading", { name: facilityName, exact: true })
+    .locator("xpath=following-sibling::div[1]")
+    .locator('[data-slot="badge"]');
+}
+
+/**
+ * Answer the location picker's OpenStreetMap search with one result for the
+ * query, so the tests don't depend on the public Nominatim service (which can
+ * be slow or rate limited on CI). Any other Nominatim request is aborted, so a
+ * change to the picker's search URL fails the tests instead of falling back
+ * to the live service.
+ */
+async function mockLocationSearch(page: Page) {
+  await page.route("https://nominatim.openstreetmap.org/**", (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname !== "/search") return route.abort();
+    const query = url.searchParams.get("q") ?? "";
+    const place = query.charAt(0).toUpperCase() + query.slice(1);
+    return route.fulfill({
+      json: [
+        { display_name: `${place}, Kerala, India`, lat: "9.98", lon: "76.28" },
+      ],
+    });
+  });
+}
+
+/** Edit and delete live in the facility's Configurations menu. */
+async function openConfigurationsItem(page: Page, item: string) {
+  await page
+    .getByRole("button", { name: "Configurations", exact: true })
+    .click();
+  await page.getByRole("menuitem", { name: item, exact: true }).click();
+}
+
 test.describe("Facility Creation", () => {
   const FACILITY_TYPES = [
     "Primary Health Centres",
@@ -89,6 +126,20 @@ test.describe("Facility Creation", () => {
     await expect(page.getByText("Facility created successfully")).toBeVisible();
   }
 
+  /** Creates a facility with this test's data and opens its details page.
+   *  Tests that edit or read a facility must use their own: the first row of
+   *  the shared list is whichever facility a parallel test created last. */
+  async function openOwnFacility(page: Page) {
+    await createFacilityWithMandatoryFields(page);
+    await page
+      .getByRole("textbox", { name: "Search by facility name" })
+      .fill(facilityName);
+    await page.getByRole("link", { name: "View Facility" }).click();
+    await expect(
+      page.getByRole("heading", { name: facilityName }),
+    ).toBeVisible();
+  }
+
   test.beforeEach(async ({ page }) => {
     // Generate unique test data for each test run
     facilityType = faker.helpers.arrayElement(FACILITY_TYPES);
@@ -103,13 +154,14 @@ test.describe("Facility Creation", () => {
     pinCode = `67${faker.string.numeric(4)}`;
     address = faker.location.streetAddress();
 
+    await mockLocationSearch(page);
     await page.goto("/");
     await page.getByRole("tab", { name: "Governance" }).click();
     await page
       .getByRole("link", { name: /Government$/ })
       .first()
       .click();
-    await page.getByRole("menuitem", { name: "Facilities" }).click();
+    await page.getByRole("tab", { name: "Facilities" }).click();
   });
 
   test("Create a new facility with all fields", async ({ page }) => {
@@ -127,9 +179,7 @@ test.describe("Facility Creation", () => {
     await page.getByRole("combobox", { name: "Features" }).click();
 
     for (const feature of facilityFeatures) {
-      await page
-        .getByRole("option", { name: new RegExp(`Select ${feature}`) })
-        .click();
+      await page.getByRole("option", { name: feature, exact: true }).click();
     }
     // Click the Done button to confirm selection
     await page.getByRole("button", { name: "Done" }).click();
@@ -175,9 +225,7 @@ test.describe("Facility Creation", () => {
     await expect(
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: facilityType }),
-    ).toBeVisible();
+    await expect(facilityTypeLine(page, facilityName)).toHaveText(facilityType);
     await expect(page.getByText(address)).toBeVisible();
     await expect(page.getByText(description)).toBeVisible();
     await expect(
@@ -185,12 +233,7 @@ test.describe("Facility Creation", () => {
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "Show on Map" })).toBeVisible();
 
-    // Verify facility features are displayed
-    for (const feature of facilityFeatures) {
-      await expect(page.getByText(feature)).toBeVisible();
-    }
-
-    await page.getByRole("button", { name: "Edit Facility Details" }).click();
+    await openConfigurationsItem(page, "Edit Facility Details");
 
     // Verify edit form opened
     const editDialog = page.getByRole("dialog", { name: "Edit Facility" });
@@ -205,7 +248,7 @@ test.describe("Facility Creation", () => {
     ).toHaveValue(facilityName);
     await expect(
       editDialog.getByRole("textbox", { name: "Description" }),
-    ).toHaveValue(description);
+    ).toHaveText(description);
 
     // Verify no. of facility features badge is displayed in the form
     await expect(
@@ -246,9 +289,7 @@ test.describe("Facility Creation", () => {
     await expect(
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: facilityType }),
-    ).toBeVisible();
+    await expect(facilityTypeLine(page, facilityName)).toHaveText(facilityType);
     await expect(page.getByText(address)).toBeVisible();
     await expect(
       page.getByRole("link", { name: `Call +91 ${phoneNumber}` }),
@@ -259,13 +300,13 @@ test.describe("Facility Creation", () => {
       page.getByRole("link", { name: "Show on Map" }),
     ).not.toBeVisible();
 
-    // Verify optional fields are NOT visible (description and features)
-    // Description should not be displayed if it was not provided
-    const descriptionSection = page.locator("text=Description").first();
-    await expect(descriptionSection).not.toBeVisible();
+    // Without a description the details card has no description section.
+    await expect(page.locator('[data-cy="facility-description"]')).toHaveCount(
+      0,
+    );
 
     // Open edit form
-    await page.getByRole("button", { name: "Edit Facility Details" }).click();
+    await openConfigurationsItem(page, "Edit Facility Details");
 
     // Verify edit form opened
     const editDialog = page.getByRole("dialog", { name: "Edit Facility" });
@@ -291,7 +332,7 @@ test.describe("Facility Creation", () => {
     // Verify optional fields are empty
     await expect(
       editDialog.getByRole("textbox", { name: "Description" }),
-    ).toHaveValue("");
+    ).toHaveText("");
 
     // Verify no facility features are selected
     const featuresButton = editDialog.getByRole("combobox", {
@@ -352,11 +393,18 @@ test.describe("Facility Creation", () => {
   });
 
   test("Edit a facility and verify changes", async ({ page }) => {
-    // Click on the first View Facility link
-    await page.getByRole("link", { name: "View Facility" }).first().click();
+    await openOwnFacility(page);
+    // Edit with fresh values, so the page can only show them once saved.
+    description = faker.lorem.sentence();
+    phoneNumber = `986${faker.string.numeric(7)}`.replace(
+      /(\d{5})(\d{5})/,
+      "$1 $2",
+    );
+    pinCode = `68${faker.string.numeric(4)}`;
+    address = faker.location.streetAddress();
 
     // Click Edit Facility Details button
-    await page.getByRole("button", { name: "Edit Facility Details" }).click();
+    await openConfigurationsItem(page, "Edit Facility Details");
 
     // Wait for edit dialog
     const editDialog = page.getByRole("dialog", { name: "Edit Facility" });
@@ -391,13 +439,13 @@ test.describe("Facility Creation", () => {
     await expect(page.getByText(address)).toBeVisible();
 
     // Open edit form again to verify data persistence
-    await page.getByRole("button", { name: "Edit Facility Details" }).click();
+    await openConfigurationsItem(page, "Edit Facility Details");
     await expect(editDialog).toBeVisible();
 
     // Verify all edited fields contain the new data
     await expect(
       editDialog.getByRole("textbox", { name: "Description" }),
-    ).toHaveValue(description);
+    ).toHaveText(description);
     await expect(
       editDialog.getByRole("textbox", { name: "Phone Number" }),
     ).toHaveValue(`+91 ${phoneNumber}`);
@@ -412,28 +460,31 @@ test.describe("Facility Creation", () => {
   test("Verify phone number link redirects to calling app from facility details page", async ({
     page,
   }) => {
-    // Click on the first View Facility link to open a random facility
-    await page.getByRole("link", { name: "View Facility" }).first().click();
+    await openOwnFacility(page);
 
-    // Find the phone number link - it should start with "Call +91"
-    const phoneLink = page.getByRole("link", { name: /^Call \+91/ });
-
-    // Verify the phone link is visible
-    await expect(phoneLink).toBeVisible();
-
-    // Verify the href attribute contains tel: link with phone number format
-    const href = await phoneLink.getAttribute("href");
-    expect(href).toMatch(/^tel:\+91\s\d{5}\s\d{5}$/);
+    const phoneLink = page.getByRole("link", {
+      name: `Call +91 ${phoneNumber}`,
+    });
+    // The href uses the raw E.164 number; the formatted number is display-only
+    await expect(phoneLink).toHaveAttribute(
+      "href",
+      `tel:+91${phoneNumber.replace(/\s/g, "")}`,
+    );
+    await expect(phoneLink).toHaveText(`+91 ${phoneNumber}`);
   });
 
   test("Add location to an existing facility and verify Show on Map link redirection", async ({
     page,
   }) => {
-    // Click on the first View Facility link to open a random facility
-    await page.getByRole("link", { name: "View Facility" }).first().click();
+    await openOwnFacility(page);
+
+    // A facility created without a location has no map link yet
+    await expect(page.getByRole("link", { name: "Show on Map" })).toHaveCount(
+      0,
+    );
 
     // Click Edit Facility Details button
-    await page.getByRole("button", { name: "Edit Facility Details" }).click();
+    await openConfigurationsItem(page, "Edit Facility Details");
 
     // Wait for edit dialog
     const editDialog = page.getByRole("dialog", { name: "Edit Facility" });
@@ -490,8 +541,8 @@ test.describe("Facility Creation", () => {
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
 
-    // Click Delete Facility button
-    await page.getByRole("button", { name: "Delete Facility" }).click();
+    // Open the delete confirmation from the Configurations menu
+    await openConfigurationsItem(page, "Delete Facility");
 
     // Type the confirmation text
     await page

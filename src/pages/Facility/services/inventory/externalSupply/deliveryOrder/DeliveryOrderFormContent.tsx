@@ -1,5 +1,4 @@
 import { X } from "lucide-react";
-import { navigate } from "raviger";
 import { ReactNode, SubmitEventHandler } from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -29,6 +28,7 @@ import {
   DeliveryOrderStatus,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { goBack } from "@/Utils/utils";
 
 import { DeliveryOrderRoutingField } from "./DeliveryOrderRoutingField";
 
@@ -86,8 +86,8 @@ export function DeliveryOrderFormContent({
       shortCutContext="facility:inventory:delivery"
     >
       <div className="container mx-auto max-w-5xl">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+        <div className="mb-6 flex items-start justify-between gap-3">
+          <h1 className="flex min-w-0 flex-wrap items-center gap-2 text-xl font-semibold text-foreground">
             {title}
             <Badge variant={DELIVERY_ORDER_STATUS_COLORS[status]}>
               {t(status)}
@@ -100,7 +100,7 @@ export function DeliveryOrderFormContent({
         </div>
         <form onSubmit={onSubmit} className="space-y-6">
           <input type="submit" hidden />
-          <Card className="p-0 bg-gray-50">
+          <Card className="p-0">
             <CardContent className="space-y-4 p-4 rounded-md">
               <div className="grid sm:grid-cols-2 gap-4 items-start">
                 <FormField
@@ -137,7 +137,7 @@ export function DeliveryOrderFormContent({
                   <FormItem>
                     <FormLabel>
                       {t("note")}
-                      <span className="text-gray-500 text-sm italic">
+                      <span className="text-muted-foreground text-sm italic">
                         {" "}
                         ({t("optional")})
                       </span>
@@ -175,11 +175,11 @@ export function DeliveryOrderFormContent({
             </CardContent>
           </Card>
 
-          <div className="flex justify-end space-x-3">
+          <div className="flex flex-wrap justify-end gap-3">
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(returnPath)}
+              onClick={() => goBack(returnPath)}
             >
               {t("cancel")}
               <ShortcutBadge actionId="cancel-action" />
