@@ -27,7 +27,6 @@ interface ServiceRequestActionsProps {
   facilityId: string;
   serviceRequestId: string;
   hasFinalizedReport: boolean;
-  hasPendingReports: boolean;
 }
 
 export function ServiceRequestActions({
@@ -35,7 +34,6 @@ export function ServiceRequestActions({
   facilityId,
   serviceRequestId,
   hasFinalizedReport,
-  hasPendingReports,
 }: ServiceRequestActionsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -100,11 +98,7 @@ export function ServiceRequestActions({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {canComplete && (
-              // Like the completion bar, it waits for reports to be final
-              <DropdownMenuItem
-                onSelect={() => setIsCompleteDialogOpen(true)}
-                disabled={hasPendingReports}
-              >
+              <DropdownMenuItem onSelect={() => setIsCompleteDialogOpen(true)}>
                 <CircleCheck className="size-4" />
                 {t("mark_as_completed")}
               </DropdownMenuItem>
