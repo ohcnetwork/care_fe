@@ -1,8 +1,8 @@
-import { Plus, Trash2 } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { Field, FieldSeparator } from "@/components/ui/field";
 import {
   FormControl,
   FormField,
@@ -18,7 +18,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { SubsectionTitle } from "@/components/ui/typography";
+import {
+  UserFormList,
+  UserFormListHeader,
+  UserFormListHeaderCell,
+  UserFormListRow,
+} from "@/components/Users/UserFormRow";
+import {
+  UserFormItem,
+  useMobileAddUser,
+} from "@/components/Users/UserFormSection";
 import {
   UserLanguageSelect,
   useUserLanguages,
@@ -29,12 +38,15 @@ import {
   UserCommunication,
 } from "@/types/user/user";
 
+const COLUMNS = "sm:grid-cols-[1fr_1fr_--spacing(26)_var(--row-action)]";
+
 interface CommunicationFields {
   communication: UserCommunication[];
 }
 
 export function UserCommunicationFields() {
   const { t } = useTranslation();
+  const mobile = useMobileAddUser();
   const { control } = useFormContext<CommunicationFields>();
   const { fields, append, remove } = useFieldArray({
     control,
@@ -43,49 +55,79 @@ export function UserCommunicationFields() {
   const { isError, refetch } = useUserLanguages();
 
   return (
-    <section className="space-y-4 border-t border-border pt-6">
-      <div>
-        <SubsectionTitle>{t("profile_communication")}</SubsectionTitle>
-        <p className="text-sm text-muted-foreground">
-          {t("profile_communication_description")}
-        </p>
-      </div>
-      {isError && (
-        <div role="alert" className="text-sm text-destructive">
-          {t("profile_languages_load_error")}
-          <Button type="button" variant="link" onClick={() => refetch()}>
-            {t("retry")}
-          </Button>
-        </div>
-      )}
-      {fields.map((item, index) => (
-        <fieldset
-          key={item.id}
-          className="space-y-3 rounded-lg border border-border p-4"
-        >
-          <legend className="px-1 text-sm font-medium">
-            {t("profile_language_number", { number: index + 1 })}
-          </legend>
-          <div className="grid gap-3 sm:grid-cols-2">
+    <UserFormList
+      title={t("profile_communication")}
+      description={t("profile_communication_description")}
+      count={fields.length}
+      addLabel={t("profile_add_language")}
+      onAdd={() =>
+        append(
+          {
+            language: { code: "", system: USER_LANGUAGE_SYSTEM },
+            preferred: false,
+            proficiency: null,
+          },
+          { shouldFocus: !mobile },
+        )
+      }
+      onRemove={remove}
+      notice={
+        isError && (
+          <div role="alert" className="text-sm text-destructive">
+            {t("profile_languages_load_error")}
+            <Button type="button" variant="link" onClick={() => refetch()}>
+              {t("retry")}
+            </Button>
+          </div>
+        )
+      }
+      headers={
+        <UserFormListHeader columns={COLUMNS}>
+          <UserFormListHeaderCell required>
+            {t("language")}
+          </UserFormListHeaderCell>
+          <UserFormListHeaderCell>
+            {t("profile_proficiency")}
+          </UserFormListHeaderCell>
+          <UserFormListHeaderCell>
+            {t("profile_preferred")}
+          </UserFormListHeaderCell>
+          <span />
+        </UserFormListHeader>
+      }
+    >
+      {(removeAt) =>
+        fields.map((item, index) => (
+          <UserFormListRow
+            key={item.id}
+            columns={COLUMNS}
+            title={t("profile_language_number", { number: index + 1 })}
+            removeLabel={t("profile_remove_language", { number: index + 1 })}
+            onRemove={() => removeAt(index)}
+          >
             <FormField
               control={control}
               name={`communication.${index}.language.code`}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel aria-required>{t("language")}</FormLabel>
+                <UserFormItem>
+                  <FormLabel aria-required className="sm:sr-only">
+                    {t("language")}
+                  </FormLabel>
                   <FormControl>
                     <UserLanguageSelect {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
+                </UserFormItem>
               )}
             />
             <FormField
               control={control}
               name={`communication.${index}.proficiency`}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("profile_proficiency")}</FormLabel>
+                <UserFormItem>
+                  <FormLabel className="sm:sr-only">
+                    {t("profile_proficiency")}
+                  </FormLabel>
                   <Select
                     value={field.value || "unspecified"}
                     onValueChange={(value) =>
@@ -109,52 +151,45 @@ export function UserCommunicationFields() {
                     </SelectContent>
                   </Select>
                   <FormMessage />
-                </FormItem>
+                </UserFormItem>
               )}
             />
-          </div>
-          <div className="flex items-center justify-between gap-3">
+            {mobile && <FieldSeparator />}
             <FormField
               control={control}
               name={`communication.${index}.preferred`}
-              render={({ field }) => (
-                <FormItem className="flex items-center gap-2">
+              render={({ field }) => {
+                const toggle = (
                   <FormControl>
                     <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
-                  <FormLabel>{t("profile_preferred_language")}</FormLabel>
-                </FormItem>
-              )}
+                );
+                const label = (
+                  <FormLabel className="sm:sr-only">
+                    {t("profile_preferred_language")}
+                  </FormLabel>
+                );
+                return mobile ? (
+                  <FormItem>
+                    <Field orientation="horizontal" className="justify-between">
+                      {label}
+                      {toggle}
+                    </Field>
+                  </FormItem>
+                ) : (
+                  <FormItem className="flex h-12 flex-row items-center gap-2 md:h-10">
+                    {toggle}
+                    {label}
+                  </FormItem>
+                );
+              }}
             />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label={t("profile_remove_language", { number: index + 1 })}
-              onClick={() => remove(index)}
-            >
-              <Trash2 className="size-4" />
-            </Button>
-          </div>
-        </fieldset>
-      ))}
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() =>
-          append({
-            language: { code: "", system: USER_LANGUAGE_SYSTEM },
-            preferred: false,
-            proficiency: null,
-          })
-        }
-      >
-        <Plus className="size-4" />
-        {t("profile_add_language")}
-      </Button>
-    </section>
+          </UserFormListRow>
+        ))
+      }
+    </UserFormList>
   );
 }

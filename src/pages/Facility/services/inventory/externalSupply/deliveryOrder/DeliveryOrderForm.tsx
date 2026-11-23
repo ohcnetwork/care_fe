@@ -19,6 +19,7 @@ import {
 } from "@/hooks/useExtensions";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { deliveryOrderPageSearch } from "@/lib/router/search/inventory";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import {
   DeliveryOrderRetrieve,
@@ -34,7 +35,7 @@ import { DeliveryOrderFormContent } from "./DeliveryOrderFormContent";
 
 const createBaseSchema = (t: (key: string) => string, internal: boolean) =>
   z.object({
-    name: z.string().min(1, t("name_is_required")),
+    name: z.string().trim().min(1, t("name_is_required")),
     note: z.string().optional(),
     supplier: internal
       ? z.string().optional()
@@ -63,7 +64,7 @@ export default function DeliveryOrderForm({
   const { getExtensions, isLoading: isExtensionsLoading } =
     useExtensionSchemas();
   const isEditMode = Boolean(deliveryOrderId);
-  const [qParams] = useQueryParams();
+  const [qParams] = useQueryParams(deliveryOrderPageSearch);
   const supplyOrderId = qParams.supplyOrder;
   const queryClient = useQueryClient();
 

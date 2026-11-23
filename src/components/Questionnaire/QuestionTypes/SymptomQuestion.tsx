@@ -58,7 +58,6 @@ import { dateQueryString, formatName } from "@/Utils/utils";
 import { Avatar } from "@/components/Common/Avatar";
 import { Code } from "@/types/base/code/code";
 import {
-  Onset,
   SYMPTOM_CLINICAL_STATUS,
   SYMPTOM_CLINICAL_STATUS_COLORS,
   SYMPTOM_SEVERITY,
@@ -881,7 +880,7 @@ export function SymptomQuestion({
                 {
                   key: "onset",
                   label: t("onset_date"),
-                  render: (onset: Onset) =>
+                  render: (onset) =>
                     onset?.onset_datetime
                       ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
                       : "",

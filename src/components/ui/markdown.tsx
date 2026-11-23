@@ -13,6 +13,9 @@ const md = new MarkdownIt({
   typographer: true,
   quotes: "“”‘’",
 });
+// linkify-it 6 (markdown-it 15) disabled fuzzy links by default; keep linking
+// bare domains like "www.example.com" as before.
+md.linkify.set({ fuzzyLink: true });
 
 export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
   content: string;

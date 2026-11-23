@@ -120,7 +120,7 @@
       "key": "request-queues",
       "kind": "custom",
       "title": "Request queues",
-      "icon": "list-checks",
+      "icon": "activity",
       "columns": [
         {
           "span": 2,
@@ -178,7 +178,7 @@
       "key": "encounter-details",
       "kind": "custom",
       "title": "Encounter details",
-      "icon": "info",
+      "icon": "panels-top-left",
       "columns": [
         {
           "span": 1,

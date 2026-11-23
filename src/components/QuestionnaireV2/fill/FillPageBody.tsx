@@ -494,6 +494,7 @@ export function FillPageBody({
                   <QuestionnaireSearch
                     subjectType={pickerSubjectType}
                     facilityId={facilityId}
+                    excludeIds={forms.map((form) => form.questionnaire.id)}
                     onSelect={addQuestionnaireFromPicker}
                     // The default trigger is a `role="combobox"` button,
                     // and combobox takes no name from its contents — it

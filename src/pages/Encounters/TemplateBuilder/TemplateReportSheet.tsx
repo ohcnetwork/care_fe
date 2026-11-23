@@ -11,6 +11,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { ScopedQueryParamsProvider } from "@/hooks/useScopedQueryParams";
+
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
@@ -73,16 +75,19 @@ export default function TemplateReportSheet({
               </Button>
             )}
           </div>
-          <TemplateList
-            facilityId={facilityId}
-            associatingId={associatingId}
-            permissions={permissions}
-            enabled={open}
-            onSuccess={handleSuccess}
-            showFilters={false}
-            reportType={reportType}
-            className="flex flex-col"
-          />
+          {/* The sheet's filters must not read or write the host page's URL. */}
+          <ScopedQueryParamsProvider>
+            <TemplateList
+              facilityId={facilityId}
+              associatingId={associatingId}
+              permissions={permissions}
+              enabled={open}
+              onSuccess={handleSuccess}
+              showFilters={false}
+              reportType={reportType}
+              className="flex flex-col"
+            />
+          </ScopedQueryParamsProvider>
         </SheetBody>
       </SheetContent>
     </Sheet>

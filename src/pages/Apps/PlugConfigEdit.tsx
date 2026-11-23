@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -22,9 +23,9 @@ import { Textarea } from "@/components/ui/textarea";
 import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Loading from "@/components/Common/Loading";
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { AppIcon } from "@/pages/Apps/AppIcon";
 import { AppStorePlugin } from "@/types/appStore/appStore";
 import { PlugConfig } from "@/types/plugConfig";
@@ -49,9 +50,15 @@ interface Props {
   slug: string;
 }
 
+// A plug config slug is a single path segment: no separators, query or
+// fragment delimiters, percent-escapes, or dot-only (".", "..") values.
+const isValidPlugConfigSlug = (slug: string) =>
+  slug.length > 0 && !/[/\\?#%]/.test(slug) && !/^\.+$/.test(slug);
+
 export function PlugConfigEdit({ slug }: Props) {
   const isNew = slug === "new";
-  const [{ appId }] = useQueryParams<{ appId?: string }>();
+  const isValidSlug = isNew || isValidPlugConfigSlug(slug);
+  const { appId } = useSearch({ from: "/_app/admin/apps/$slug" });
   const isAppStoreConfigured = Boolean(careConfig.appStore.apiUrl);
 
   const buildTimeConfig = useMemo(
@@ -63,7 +70,7 @@ export function PlugConfigEdit({ slug }: Props) {
   const { data: existingConfig, isLoading } = useQuery({
     queryKey: ["plug-config", slug],
     queryFn: query(plugConfigApi.get, { pathParams: { slug } }),
-    enabled: !isNew && !isReadOnly,
+    enabled: isValidSlug && !isNew && !isReadOnly,
   });
 
   const { data: manifest, isLoading: isManifestLoading } = useQuery({
@@ -83,6 +90,10 @@ export function PlugConfigEdit({ slug }: Props) {
         (config) => config.slug === slug,
       )
     : buildTimeConfig;
+
+  if (!isValidSlug) {
+    return <ErrorPage />;
+  }
 
   if (isLoading || isManifestLoading || isReadOnlyLoading) {
     return <Loading />;
@@ -119,6 +130,8 @@ function PlugConfigForm({
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  // Only modify a config that was actually loaded for this exact slug.
+  const canModify = !isNew && !isReadOnly && existingConfig?.slug === slug;
 
   const [configSlug, setConfigSlug] = useState(
     () => manifest?.id ?? buildTimeConfig?.slug ?? existingConfig?.slug ?? "",
@@ -190,7 +203,7 @@ function PlugConfigForm({
 
   const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
-    if (isReadOnly) {
+    if (isReadOnly || (!isNew && !canModify)) {
       return;
     }
 
@@ -227,7 +240,9 @@ function PlugConfigForm({
     }
   };
 
-  const canSave = !isNew || !healthCheckUrl || healthStatus === "success";
+  const canSave = isNew
+    ? !healthCheckUrl || healthStatus === "success"
+    : canModify;
   const iconUrl = manifest ? resolveAppIconUrl(manifest) : undefined;
   const configKeys = Object.keys(manifest?.frontend.config ?? {});
 
@@ -253,7 +268,7 @@ function PlugConfigForm({
             </>
           )}
         </div>
-        {!isNew && !isReadOnly && (
+        {canModify && (
           <Button
             variant="destructive"
             onClick={() => setShowDeleteDialog(true)}
@@ -436,7 +451,7 @@ function PlugConfigForm({
         description={
           <Trans
             i18nKey="delete_config_description"
-            values={{ slug: configSlug }}
+            values={{ slug }}
             components={{ strong: <strong /> }}
           />
         }

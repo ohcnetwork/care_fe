@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getFieldErrorMessage } from "tests/helper/error";
 import { expectedSlug } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -83,6 +84,45 @@ test.describe("Product Knowledge Creation", () => {
     await expect(page.getByText("name is required")).toBeVisible();
     await expect(page.getByText(/note.*required/i)).toBeVisible();
     await expect(page.getByText(/duration value.*required/i)).toBeVisible();
+  });
+
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: /add product/i }).click();
+
+    await test.step("Add an alternate name row and a storage guideline row", async () => {
+      await page.getByRole("button", { name: "Add Name" }).click();
+      await page.getByRole("button", { name: "Add Guideline" }).click();
+    });
+
+    const whitespace = "   ";
+    const fields = [
+      {
+        input: page.locator('input[name="name"]'),
+        error: "Name is required",
+      },
+      {
+        input: page.locator('input[name="names.0.name"]'),
+        error: "Name is required",
+      },
+      {
+        input: page.locator('textarea[name="storage_guidelines.0.note"]'),
+        error: "This field is required",
+      },
+    ];
+
+    for (const { input } of fields) {
+      await input.fill(whitespace);
+    }
+
+    await page.getByRole("button", { name: /create/i }).click();
+
+    for (const { input, error } of fields) {
+      const errorMessage = getFieldErrorMessage(input);
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText(error);
+    }
   });
 
   test("create a product knowledge with required fields only", async ({

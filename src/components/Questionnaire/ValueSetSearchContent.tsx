@@ -289,15 +289,7 @@ export default function ValueSetSearchContent({
       >
         {!searchQuery.isFetching && (
           <CommandEmpty>
-            {search.length < 3 ? (
-              <p className="p-4 text-sm text-gray-500">
-                {t("min_char_length_error", { min_length: 3 })}
-              </p>
-            ) : (
-              <p className="p-4 text-sm text-gray-500">
-                {t("no_results_found")}
-              </p>
-            )}
+            <p className="p-4 text-sm text-gray-500">{t("no_results_found")}</p>
           </CommandEmpty>
         )}
         <div className={cn("flex", !isMobile && "min-h-40")}>

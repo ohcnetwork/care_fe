@@ -115,6 +115,11 @@
   [data-slot="textarea"]:disabled {
     cursor: not-allowed;
   }
+
+  /* The group owns the surface behind both its control and its addons. */
+  .group\/input-group {
+    @apply bg-background;
+  }
 }
 
 @theme {
@@ -594,6 +599,27 @@
     @apply -ml-1 text-red-500 content-['*'];
   }
 
+  /* Match default Button sizing on the clickable card, not the radio dot. */
+  [role="radiogroup"] > label[data-slot="field-label"]:has(
+    > [data-orientation="horizontal"] > [role="radio"]
+  ):not(:has([data-slot="field-description"])) {
+    @apply min-h-12 justify-center md:min-h-10;
+
+    > [data-slot="field"] {
+      @apply items-center px-4.5 py-2 md:px-3.5;
+    }
+  }
+
+  /* Replace CareUI's transparent default, not a caller's custom field color. */
+  .bg-transparent:where(
+    input[data-slot="input"],
+    textarea[data-slot="textarea"],
+    input[data-slot="form-control"],
+    textarea[data-slot="form-control"]
+  ):not(:where(.group\/input-group *)) {
+    @apply bg-background;
+  }
+
   /* Styling for input otp */
   [data-slot="input-otp-slot"] {
     @apply data-[active=true]:ring-primary-500 data-[active=true]:border-primary-500 data-[active=true]:ring-1 not-first:data-[active=true]:border-x;
@@ -602,6 +628,15 @@
   /* Styling fix for Select for backwards compatibility */
   button[role="combobox"] {
     @apply w-full;
+  }
+
+  /* Mobile user sheets grow their triggers for long degree and organization names. */
+  [data-mobile-add-user] button[role="combobox"] {
+    @apply h-auto min-h-12 py-2 whitespace-normal;
+
+    > :is(.truncate, [data-slot="select-value"]) {
+      @apply line-clamp-none min-w-0 text-left whitespace-normal wrap-anywhere;
+    }
   }
 
   /* Styling for command input */

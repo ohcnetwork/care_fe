@@ -62,7 +62,7 @@ export function ClinicalListPanel({
 }: ClinicalListPanelProps) {
   const { t } = useTranslation();
   const fullPath = usePathname();
-  const [queryParams] = useQueryParams<Record<string, string>>();
+  const [queryParams] = useQueryParams();
   const search = new URLSearchParams(queryParams).toString();
   const sourceUrl = search ? `${fullPath}?${search}` : fullPath;
   const editSearch = new URLSearchParams({

@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, Eye, QrCode, Scan /* User */ } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -43,9 +43,11 @@ import {
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import {
   SPECIMEN_DEFINITION_UNITS_CODES,
+  specimenCollectionDefaults,
   type SpecimenDefinitionRead,
+  wholeSpecimenQuantity,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
-import { isNegative, round } from "@/Utils/decimal";
+import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 
 interface SpecimenFormProps {
@@ -69,8 +71,12 @@ export function SpecimenForm({
   const authUser = useAuthUser();
   const currentUserId = authUser.id;
   const queryClient = useQueryClient();
+  const methodId = useId();
+  const bodySiteId = useId();
   const defaultUnit =
     specimenDefinition.type_tested?.container?.capacity?.unit ?? null;
+  const collection = draftSpecimen?.collection ?? specimenDefinition.collection;
+  const defaults = specimenCollectionDefaults(collection);
 
   const [identifierMode, setIdentifierMode] = useState<"scan" | "generate">(
     "generate",
@@ -97,11 +103,11 @@ export function SpecimenForm({
       accession_identifier: "",
       received_time: null,
       collection: {
-        method: specimenDefinition.collection || null,
-        body_site: null,
+        ...defaults,
+        // Keep invalid template input editable, but never copy it into a draft.
+        quantity: defaults.quantity ?? collection?.quantity ?? null,
         collector: currentUserId || null, // Use user ID, default to null if not available yet
         collected_date_time: new Date().toISOString(),
-        quantity: null,
         procedure: null,
         fasting_status_codeable_concept: null,
         fasting_status_duration: null,
@@ -138,7 +144,10 @@ export function SpecimenForm({
     setIsScanDialogOpen(false);
   };
 
-  const handleCollectionChange = (field: keyof CollectionSpec, value: any) => {
+  const handleCollectionChange = (
+    field: keyof CollectionSpec,
+    value: unknown,
+  ) => {
     setSpecimenData((prev) => ({
       ...prev,
       specimen: {
@@ -155,16 +164,19 @@ export function SpecimenForm({
     if (field === "quantity") {
       setErrors((prev) => {
         const newErrors = { ...prev };
-        if (value?.value) delete newErrors.quantityValue;
-        if (value?.unit) delete newErrors.quantityUnit;
+        const quantity = value as { value?: unknown; unit?: unknown } | null;
+        if (quantity?.value) delete newErrors.quantityValue;
+        if (quantity?.unit) delete newErrors.quantityUnit;
         return newErrors;
       });
     }
   };
 
-  const handleSpecimenChange = (
-    field: keyof SpecimenFromDefinitionCreate["specimen"],
-    value: any,
+  const handleSpecimenChange = <
+    K extends keyof SpecimenFromDefinitionCreate["specimen"],
+  >(
+    field: K,
+    value: SpecimenFromDefinitionCreate["specimen"][K],
   ) => {
     setSpecimenData((prev) => ({
       ...prev,
@@ -190,17 +202,19 @@ export function SpecimenForm({
     }
 
     const quantity = specimenData.specimen.collection?.quantity;
+    const value = quantity && wholeSpecimenQuantity(quantity.value);
+    const unit = quantity?.unit ?? defaultUnit;
     const newErrors: typeof errors = {};
 
-    if (quantity?.value && !quantity.unit && !defaultUnit) {
+    if (quantity?.value && !unit) {
       newErrors.quantityUnit = t("field_required");
     }
 
-    if (quantity?.value && isNegative(quantity.value)) {
+    if (quantity?.value && !value) {
       newErrors.quantityValue = t("invalid_quantity");
     }
 
-    if ((quantity?.unit || defaultUnit) && !quantity?.value) {
+    if (unit && !quantity?.value) {
       newErrors.quantityValue = t("field_required");
     }
 
@@ -232,12 +246,7 @@ export function SpecimenForm({
         method: finalData.specimen.collection?.method ?? null,
         collected_date_time:
           finalData.specimen.collection?.collected_date_time ?? null,
-        quantity: finalData.specimen.collection?.quantity
-          ? {
-              ...finalData.specimen.collection.quantity,
-              unit: finalData.specimen.collection.quantity.unit ?? defaultUnit,
-            }
-          : null,
+        quantity: value && unit ? { value, unit } : null,
         procedure: finalData.specimen.collection?.procedure ?? null,
         body_site: finalData.specimen.collection?.body_site ?? null,
         fasting_status_codeable_concept:
@@ -317,9 +326,7 @@ export function SpecimenForm({
                 <div className="rounded-lg border-2 border-dashed p-4 text-center bg-soft-background">
                   <QrCode className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
-                    {draftSpecimen
-                      ? t("generating_qr")
-                      : t("generate_qr_failed")}
+                    {t("generate_qr_failed")}
                   </p>
                 </div>
               )}
@@ -457,14 +464,12 @@ export function SpecimenForm({
                       onChange={(e) =>
                         handleCollectionChange("quantity", {
                           ...(specimenData.specimen.collection?.quantity ?? {}),
-                          value: e.target.value
-                            ? parseFloat(e.target.value)
-                            : null,
+                          value: e.target.value,
                           unit: specimenData.specimen.collection?.quantity
                             ?.unit,
                         })
                       }
-                      step="any"
+                      step="1"
                       disabled={disableEdit}
                     />
                     {errors.quantityValue && (
@@ -516,19 +521,39 @@ export function SpecimenForm({
               </div>
             </div>
 
-            <div>
-              <Label className="text-sm text-muted-foreground mb-1">
-                {t("body_site")}
-              </Label>
-              <ValueSetSelect
-                system="system-body-site"
-                placeholder={t("select_body_site")}
-                onSelect={(code: Code | null) =>
-                  handleCollectionChange("body_site", code)
-                }
-                value={specimenData.specimen.collection?.body_site}
-                disabled={disableEdit}
-              />
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div>
+                <Label
+                  htmlFor={methodId}
+                  className="text-sm text-muted-foreground mb-1"
+                >
+                  {t("collection_method")}
+                </Label>
+                <ValueSetSelect
+                  id={methodId}
+                  system="system-collection-method-code"
+                  placeholder={t("select_method")}
+                  onSelect={(code) => handleCollectionChange("method", code)}
+                  value={specimenData.specimen.collection?.method}
+                  disabled={disableEdit}
+                />
+              </div>
+              <div>
+                <Label
+                  htmlFor={bodySiteId}
+                  className="text-sm text-muted-foreground mb-1"
+                >
+                  {t("body_site")}
+                </Label>
+                <ValueSetSelect
+                  id={bodySiteId}
+                  system="system-body-site-observation"
+                  placeholder={t("select_body_site")}
+                  onSelect={(code) => handleCollectionChange("body_site", code)}
+                  value={specimenData.specimen.collection?.body_site}
+                  disabled={disableEdit}
+                />
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
               <div className="col-span-1 md:col-span-4">

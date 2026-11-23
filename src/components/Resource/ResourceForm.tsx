@@ -47,6 +47,7 @@ import validators from "@/Utils/validators";
 import BackButton from "@/components/Common/BackButton";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { resourceFormSearch } from "@/lib/router/search/resource";
 import patientApi from "@/types/emr/patient/patientApi";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
@@ -67,7 +68,7 @@ interface ResourceProps {
 export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const [facilitySearch, setFacilitySearch] = useState("");
   const { t } = useTranslation();
-  const [{ related_patient }] = useQueryParams();
+  const [{ related_patient }] = useQueryParams(resourceFormSearch);
   const [assignedToUser, setAssignedToUser] = useState<UserReadMinimal>();
   const authUser = useAuthUser();
 
@@ -81,13 +82,17 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       })
       .nullable(),
     emergency: z.enum(["true", "false"]),
-    title: z.string().min(1, { message: t("field_required") }),
+    title: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
     reason: z
       .string()
       .trim()
       .min(1, { message: t("field_required") }),
     referring_facility_contact_name: z
       .string()
+      .trim()
       .min(1, { message: t("field_required") }),
     referring_facility_contact_number: validators().phoneNumber.required,
     priority: z.number().default(1),
@@ -189,7 +194,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       reason: data.reason,
       referring_facility_contact_name: data.referring_facility_contact_name,
       referring_facility_contact_number: data.referring_facility_contact_number,
-      related_patient: related_patient,
+      // Without a patient in the URL, the body leaves the key out.
+      related_patient: related_patient as string | null,
       priority: data.priority,
     };
 
@@ -559,17 +565,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
             <Button
               type="submit"
               variant="primary"
-              disabled={
-                id ? isUpdatePending || !form.formState.isDirty : isPending
-              }
+              disabled={!!id && !form.formState.isDirty}
             >
-              {isPending && (
-                <CareIcon
-                  icon="l-spinner"
-                  className="mr-2 size-4 animate-spin"
-                />
-              )}
-              {isPending ? t("submitting") : t("submit")}
+              {t("submit")}
             </Button>
           </div>
         </form>

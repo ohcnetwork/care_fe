@@ -1,6 +1,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { TFunction } from "i18next";
 import { CheckIcon } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -122,9 +123,7 @@ export function ChargeItemDefinitionForm({
     queryFn: query(chargeItemDefinitionApi.listMetrics),
   });
 
-  const createFormSchema = (
-    t: (key: string, options?: Record<string, unknown>) => string,
-  ) =>
+  const createFormSchema = (t: TFunction) =>
     z.object({
       title: z
         .string()

@@ -15,6 +15,7 @@ import ScheduleChargeItemDefinitionSelector from "@/pages/Scheduling/components/
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
 import { getPermissions } from "@/common/Permissions";
@@ -91,7 +92,7 @@ const ScheduleTemplateItem = ({
   resourceId: string;
 }) => {
   const { t } = useTranslation();
-  const [qParams, setQParams] = useQueryParams<{ edit: string | null }>();
+  const [qParams, setQParams] = useQueryParams(scheduleHomeSearch);
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(facilityApi.get, {

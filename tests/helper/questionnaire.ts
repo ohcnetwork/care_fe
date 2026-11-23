@@ -1,11 +1,7 @@
 import { type Page, expect } from "@playwright/test";
-import { setTimeout as delay } from "node:timers/promises";
+import { createTestEncounter } from "tests/helper/encounter";
 import { createTestPatient } from "tests/helper/patient";
-import {
-  adminApiHeaders,
-  apiBaseUrl,
-  questionBlock,
-} from "tests/helper/questionnaireV2";
+import { questionBlock } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 
 /**
@@ -23,42 +19,26 @@ import { expectToast } from "tests/helper/ui";
  */
 export async function createQuestionnaireEncounter(
   facilityId: string,
+  {
+    status = "in_progress",
+    encounterClass = "amb",
+    start = new Date(),
+    organizations = [],
+  }: {
+    status?: "in_progress" | "planned";
+    encounterClass?: "amb" | "imp";
+    start?: Date;
+    organizations?: string[];
+  } = {},
 ): Promise<{ patientId: string; encounterId: string }> {
-  const headers = adminApiHeaders();
   const patientId = await createTestPatient("Questionnaire Test");
-  const encounterBody = JSON.stringify({
-    patient: patientId,
-    facility: facilityId,
-    status: "in_progress",
-    encounter_class: "amb",
-    period: { start: new Date().toISOString() },
-    priority: "routine",
-    organizations: [],
+  const encounterId = await createTestEncounter(facilityId, patientId, {
+    status,
+    encounterClass,
+    period: { start: start.toISOString() },
+    organizations,
   });
-  for (let attempt = 0; ; attempt++) {
-    const response = await fetch(`${apiBaseUrl()}/api/v1/encounter/`, {
-      method: "POST",
-      headers,
-      body: encounterBody,
-    });
-    if (response.ok) {
-      const encounterId = ((await response.json()) as { id: string }).id;
-      return { patientId, encounterId };
-    }
-    const error = await response.text();
-    // The backend serializes encounter creation per facility with a lock
-    // (the rejected create is rolled back), so retry only that rejection.
-    if (
-      attempt >= 4 ||
-      response.status !== 400 ||
-      !error.includes("Encounter creation failed, try again after a while")
-    ) {
-      throw new Error(
-        `Failed to create questionnaire encounter: ${response.status} — ${error}`,
-      );
-    }
-    await delay(250 * (attempt + 1));
-  }
+  return { patientId, encounterId };
 }
 
 /**

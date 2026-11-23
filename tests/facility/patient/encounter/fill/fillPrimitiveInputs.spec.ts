@@ -130,6 +130,7 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
     .click();
   await questionBlock(page, "single_dropdown").getByRole("combobox").click();
   await page.getByRole("option", { name: "Option 1", exact: true }).click();
+  await expect(page.getByRole("listbox")).toBeHidden();
   const multiSelect = questionBlock(page, "multiple_dropdown").getByRole(
     "combobox",
   );
@@ -151,13 +152,16 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
     })
     .toEqual(variants.map(() => coding));
 
-  // A reload round-trips the same coded entries, rather than rebuilding
-  // them from display strings when the controls mount again.
+  // Resume keeps the coding for choices still in the definition and
+  // discards the removed choice, even when its draft entry has a code.
   removeFirstOption = true;
   await page.reload();
   await page.getByRole("button", { name: "Resume", exact: true }).click();
+  await expect(multiSelect.getByText("Option 1", { exact: true })).toHaveCount(
+    0,
+  );
   await expect(
-    multiSelect.getByText("Option 1", { exact: true }),
+    multiSelect.getByText("Option 2", { exact: true }),
   ).toBeVisible();
   await expect(
     questionBlock(page, "single_chips").getByRole("radio", {
@@ -170,7 +174,12 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
       const values = await draftValues(page, questionnaireId);
       return variants.map(({ id }) => values?.[id]?.[0]?.coding);
     })
-    .toEqual(variants.map(() => coding));
+    .toEqual([
+      coding,
+      coding,
+      coding,
+      { ...coding, code: "2", display: "Option 2" },
+    ]);
 });
 
 test("decimal answers remain browser-valid and optional dates can be cleared", async ({

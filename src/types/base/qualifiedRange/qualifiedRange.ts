@@ -41,7 +41,7 @@ export interface QualifiedRange {
 }
 //To do: Translations not being loaded for playwright tests, need to debug and fix
 const interpretationSchema = z.object({
-  display: z.string().min(1, "Display is required"),
+  display: z.string().trim().min(1, "Display is required"),
   highlight: z.boolean().optional(),
   code: z.object({ code: z.string(), display: z.string() }).optional(),
 });

@@ -1,8 +1,10 @@
 import type { ResponseValue } from "@/types/questionnaire/form";
 
-/** Whether an entry carries a non-empty scalar or structured row array. */
+/** Whether an entry carries a non-empty scalar or structured row array.
+ *  A whitespace-only string is empty. */
 export function entryHasContent(entry: ResponseValue): boolean {
-  if (entry.value === undefined || entry.value === null || entry.value === "")
+  if (entry.value === undefined || entry.value === null) return false;
+  if (typeof entry.value === "string" && entry.value.trim() === "")
     return false;
   return !Array.isArray(entry.value) || entry.value.length > 0;
 }

@@ -51,7 +51,7 @@ function buildOrderContent({
       ],
       right: [
         buildDateRow(t),
-        { label: t("status"), value: t(order.status) },
+        { label: t("status"), value: t(String(order.status)) },
         ...extensionRows.filter((_, index) => index % 2 === 1),
       ],
     },
@@ -124,7 +124,7 @@ export function buildDeliveryOrderPrintContent({
         productName || "-",
         String(round(delivery.supplied_item_quantity)),
         t(delivery.status),
-        t(delivery.supplied_item_condition || "normal"),
+        t(String(delivery.supplied_item_condition || "normal")),
         ...(internal
           ? [
               inventoryProduct?.batch?.lot_number || "-",

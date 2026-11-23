@@ -1,5 +1,6 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 
+import { encounterShowSearch } from "@/lib/router/search/encounter";
 import { fullScreenPage } from "@/lib/router/staticData";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
@@ -8,6 +9,7 @@ import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 export const Route = createFileRoute(
   "/_app/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
 )({
+  validateSearch: encounterShowSearch,
   component: RouteComponent,
   staticData: fullScreenPage,
 });
