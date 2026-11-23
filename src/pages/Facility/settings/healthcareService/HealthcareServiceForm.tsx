@@ -44,7 +44,7 @@ import {
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().trim().min(1, "Name is required"),
   //   service_type: z.object({
   //     code: z.string().min(1, "Code is required"),
   //     display: z.string().min(1, "Display name is required"),

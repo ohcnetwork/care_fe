@@ -29,7 +29,8 @@ export function formatKeyboardShortcut(key: string): string {
         if (lower === "alt") {
           return isAppleDevice ? "⌥" : "ALT";
         }
-        return k.toUpperCase();
+        // Format the key itself like a single key (arrowLeft -> ←)
+        return formatKeyboardShortcut(k);
       })
       .join(" + ");
   } else if (key.includes(" ")) {

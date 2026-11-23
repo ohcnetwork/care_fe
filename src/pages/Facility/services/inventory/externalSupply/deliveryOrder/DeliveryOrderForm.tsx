@@ -35,7 +35,7 @@ import { DeliveryOrderFormContent } from "./DeliveryOrderFormContent";
 
 const createBaseSchema = (t: (key: string) => string, internal: boolean) =>
   z.object({
-    name: z.string().min(1, t("name_is_required")),
+    name: z.string().trim().min(1, t("name_is_required")),
     note: z.string().optional(),
     supplier: internal
       ? z.string().optional()
