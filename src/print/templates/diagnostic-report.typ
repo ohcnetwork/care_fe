@@ -48,6 +48,12 @@
   item.text
 })
 
+// Markdown from the rich-text editor, as blocks: see `rich-text`.
+#let labelled-rich-text(item) = block(above: px(12), width: 100%, {
+  text(weight: "medium", fill: gray(700), item.label)
+  rich-text(item.blocks)
+})
+
 #for report in c.reports {
   block(
     above: px(24),
@@ -66,7 +72,7 @@
   v(px(16))
   if report.results != none { results-table(report.results) }
   if report.note != none { labelled-text(report.note) }
-  if report.conclusion != none { labelled-text(report.conclusion) }
+  if report.conclusion != none { labelled-rich-text(report.conclusion) }
 }
 
 #print-meta(left: c.footer.left, right: c.footer.right)

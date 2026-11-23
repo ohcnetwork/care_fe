@@ -27,6 +27,7 @@
   "red-600": "#dc2626",
   "red-50": "#fef2f2",
   "red-700": "#b91c1c",
+  "yellow-200": "#fef08a",
   "yellow-600": "#ca8a04",
   "pink-50": "#fdf2f8",
   "pink-700": "#be185d",
@@ -188,6 +189,83 @@
   }
   body
 })
+
+// A task list's checkbox, drawn: Figtree and Noto have no ☐ or ☑.
+#let _checkbox(checked) = box(
+  width: 0.75em,
+  height: 0.75em,
+  baseline: 0.1em,
+  stroke: 0.06em + gray(700),
+  radius: 0.12em,
+  if checked {
+    let tick = 0.1em + gray(900)
+    place(line(start: (18%, 52%), end: (42%, 76%), stroke: tick))
+    place(line(start: (42%, 76%), end: (82%, 26%), stroke: tick))
+  },
+)
+
+#let _rich-run(run) = {
+  if run.kind == "break" { return linebreak() }
+  let body = if "code" in run.marks { text(font: mono-fonts, run.text) } else { text(run.text) }
+  if "bold" in run.marks { body = strong(body) }
+  if "italic" in run.marks { body = emph(body) }
+  if "underline" in run.marks { body = underline(body) }
+  if "strike" in run.marks { body = strike(body) }
+  if "highlight" in run.marks { body = highlight(fill: palette("yellow", 200), body) }
+  if run.link != none and run.link != "" {
+    body = link(run.link, if "underline" in run.marks { body } else { underline(body) })
+  }
+  body
+}
+
+#let _rich-blocks(nodes, lead: none) = {
+  let parts = ()
+  let lead-left = lead != none
+  for node in nodes {
+    let body = if node.kind == "paragraph" {
+      node.runs.map(_rich-run).join()
+    } else if node.kind == "heading" {
+      let size = (1.4em, 1.25em, 1.1em).at(node.level - 1, default: 1em)
+      text(size: size, weight: "semibold", node.runs.map(_rich-run).join())
+    } else if node.kind == "list" {
+      let item-body(item) = {
+        let body = _rich-blocks(item.blocks)
+        if item.checked == none { body } else {
+          grid(columns: (auto, 1fr), column-gutter: 0.4em, _checkbox(item.checked), body)
+        }
+      }
+      // A checklist shows checkboxes in place of bullets, as on screen.
+      if node.items.all(item => item.checked != none) {
+        stack(spacing: px(4), ..node.items.map(item-body))
+      } else if node.ordered {
+        enum(start: node.start, ..node.items.map(item-body))
+      } else {
+        // Typst's default second-level marker (‣) isn't in Figtree.
+        list(marker: ([•], [–]), ..node.items.map(item-body))
+      }
+    } else if node.kind == "quote" {
+      block(
+        inset: (left: px(8)),
+        stroke: (left: px(2) + gray(300)),
+        text(fill: gray(600), _rich-blocks(node.blocks)),
+      )
+    } else if node.kind == "rule" {
+      line(length: 100%, stroke: px(1) + border-color)
+    }
+    if lead-left {
+      lead-left = false
+      if node.kind == "paragraph" { body = [#lead #body] } else { parts.push(lead) }
+    }
+    parts.push(body)
+  }
+  if lead-left { parts.push(lead) }
+  stack(spacing: px(6), ..parts)
+}
+
+/// Markdown from the rich-text editor, as blocks from src/print/richText.ts.
+/// The text is only drawn, never evaluated. `lead` (e.g. "Note:") goes before
+/// the first paragraph.
+#let rich-text(blocks, lead: none) = fit-words(_rich-blocks(blocks, lead: lead))
 
 /// Applies `fit-words` to a table's cells, except in `auto` columns, where it
 /// would split values that should fit (amounts, "6.00%").

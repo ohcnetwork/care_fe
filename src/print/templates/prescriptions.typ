@@ -101,8 +101,7 @@
       text(weight: "medium", fill: gray(700), l.prescribed_by + ": ")
       text(weight: "semibold", fill: gray(950), rx.prescribed_by)
       if rx.note != none {
-        linebreak()
-        text(size: text-size.xs, fill: gray(700), l.note + ": " + rx.note)
+        text(size: text-size.xs, fill: gray(700), rich-text(rx.note, lead: l.note + ":"))
       }
     })
     if rx.medications.len() > 0 {

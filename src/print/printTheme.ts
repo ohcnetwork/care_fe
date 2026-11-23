@@ -14,6 +14,7 @@ const PRINT_COLORS = [
   "red-600",
   "red-50",
   "red-700",
+  "yellow-200",
   "yellow-600",
   "pink-50",
   "pink-700",

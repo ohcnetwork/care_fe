@@ -14,8 +14,11 @@ import { join, relative } from "node:path";
 import { before, test } from "node:test";
 
 import type { PrescriptionsPrintContent } from "@/components/Prescription/prescriptionsPrintData";
+import type { AppointmentPrintContent } from "@/pages/Appointments/appointmentPrintData";
 import type { InvoicePrintContent } from "@/pages/Facility/billing/invoice/invoicePrintData";
+import type { DiagnosticReportPrintContent } from "@/pages/Facility/services/diagnosticReports/diagnosticReportPrintData";
 import type { DetailsTablePrintContent } from "@/print/detailsTable";
+import { richTextToPrint } from "@/print/richText";
 import type { PrintLayout, TypstPaper } from "@/print/types";
 
 const PRINT_DIR = join(process.cwd(), "src/print");
@@ -716,4 +719,98 @@ test("invoice: on A5 amounts stay whole and the Item column keeps its width", as
     );
   }
   assert.notEqual(pageWith(pdf, "Item"), null, "the Item column collapsed");
+});
+
+// As the rich-text editor saves it (see richText.test.ts): underlined bold
+// italic, an entity for a trailing space, a setext heading and a checklist.
+const EDITOR_MARKDOWN =
+  "<u>***dfsh usdujhfjasjfd hdsj fhjsd fjdhfajs***</u>\n\n*dvsdadsfs*&#x20;\n\nddsfdsfs\n========\n\n- [x] done task";
+
+function assertFormatted({ text }: Awaited<ReturnType<typeof readPdf>>) {
+  for (const words of [
+    "dfsh usdujhfjasjfd hdsj fhjsd fjdhfajs",
+    "dvsdadsfs",
+    "ddsfdsfs",
+    "done task",
+  ]) {
+    assert.ok(text.includes(words), `"${words}" is missing`);
+  }
+  for (const symbol of ["***", "<u>", "&#x20;", "====", "[x]"]) {
+    assert.ok(!text.includes(symbol), `"${symbol}" printed as written`);
+  }
+}
+
+test("diagnostic report: the conclusion's Markdown prints as formatting", async () => {
+  const content: DiagnosticReportPrintContent = {
+    heading: "Diagnostic report",
+    patient: { name: "Test Patient", identifiers: [] },
+    patient_label: "Patient",
+    patient_rows: [{ label: "Patient", value: "Test Patient" }],
+    reports: [
+      {
+        title: "Sugar test",
+        rows: [],
+        results: null,
+        note: null,
+        conclusion: {
+          label: "Conclusion",
+          blocks: richTextToPrint(EDITOR_MARKDOWN),
+        },
+        attachments: [],
+      },
+    ],
+    footer: { left: "Printed by Dr. Test", right: "Generated today" },
+  };
+  const bytes = await compile("diagnostic-report", content);
+
+  assertFormatted(await readPdf(bytes));
+  // Typst doesn't slant upright letters: italics need Figtree's italic faces.
+  const pdfSource = Buffer.from(bytes).toString("latin1");
+  assert.match(pdfSource, /\/BaseFont \/[A-Z]{6}\+Figtree-Italic\b/, "italic");
+  assert.match(
+    pdfSource,
+    /\/BaseFont \/[A-Z]{6}\+Figtree-SemiBoldItalic\b/,
+    "bold italic",
+  );
+});
+
+test("prescriptions: the prescription note's Markdown prints as formatting", async () => {
+  const content = prescriptionsContent([
+    {
+      index: "1",
+      name: "Paracetamol 500 mg oral tablet",
+      instructions: [
+        {
+          dosage: "1 tablets",
+          frequency: "1-0-1 (Twice a day)",
+          duration: "5 days",
+          text: "After food",
+        },
+      ],
+      note: null,
+    },
+  ]);
+  content.prescriptions[0].note = richTextToPrint(EDITOR_MARKDOWN);
+  const pdf = await readPdf(await compile("prescriptions", content));
+
+  assertFormatted(pdf);
+  assert.ok(pdf.text.includes("Note:"), "the note's label is missing");
+});
+
+test("appointment: the note's Markdown prints as formatting", async () => {
+  const content: AppointmentPrintContent = {
+    title: "Appointment details",
+    date: "24 Nov 2026",
+    resource: "Dr. Test",
+    patient_rows: [{ label: "Patient", value: "Test Patient" }],
+    token: null,
+    qr_code: null,
+    tags: null,
+    charges: null,
+    payments: null,
+    note: { label: "Note", blocks: richTextToPrint(EDITOR_MARKDOWN) },
+    footer: { left: "Created by Dr. Test", right: "Generated today" },
+  };
+
+  assertFormatted(await readPdf(await compile("appointment", content)));
 });

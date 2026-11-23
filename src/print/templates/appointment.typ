@@ -99,7 +99,7 @@
     stroke: (bottom: px(1) + gray(200)),
     text(weight: "semibold", fill: gray(700), c.note.label),
   )
-  block(width: 100%, fill: soft-background, inset: px(6), radius: px(4), c.note.text)
+  block(width: 100%, fill: soft-background, inset: px(6), radius: px(4), rich-text(c.note.blocks))
 }
 
 #print-meta(left: c.footer.left, right: c.footer.right)
