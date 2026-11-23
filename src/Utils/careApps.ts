@@ -13,6 +13,11 @@ export function parseCareApp(app: string) {
     );
   }
 
+  // Relative URLs are resolved against the page origin at load time.
+  if (cdn?.startsWith("/")) {
+    return { url: cdn, name: repo, package: module };
+  }
+
   let url = "";
   if (!cdn) {
     url = `https://${org}.github.io/${repo}`;
