@@ -62,8 +62,8 @@
   },
   "dependencies": {
     "@base-ui/react": "1.9.0",
-    "@fontsource-variable/figtree": "5.2.10",
-    "@fontsource-variable/geist-mono": "5.2.8",
+    "@fontsource-variable/figtree": "5.3.0",
+    "@fontsource-variable/geist-mono": "5.3.0",
     "@fontsource/libre-barcode-128-text": "^5.2.8",
     "@hookform/resolvers": "^5.4.0",
     "@lexical/rich-text": "^0.48.0",
