@@ -246,8 +246,13 @@ const ICON: Record<TestClass, string> = {
   "@journey": "⛓",
   "@workflow": "🔗",
 };
+/** Escapes text for a Markdown table cell: backslashes first, then `<` and `|`. */
 const esc = (s: string) =>
-  s.replace(/</g, "&lt;").replace(/\|/g, "\\|").replace(/\n/g, " ");
+  s
+    .replace(/\\/g, "\\\\")
+    .replace(/</g, "&lt;")
+    .replace(/\|/g, "\\|")
+    .replace(/\n/g, " ");
 const short = (s: string, n: number) =>
   s.length > n ? `${s.slice(0, n - 1)}…` : s;
 const fileLink = (t: TestEntry, text: string) => `[${esc(text)}](${t.file})`;

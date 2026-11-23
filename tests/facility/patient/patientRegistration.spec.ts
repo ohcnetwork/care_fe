@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import {
   fillPatientAdditionalDetails,
@@ -158,9 +159,7 @@ test.describe("Patient Registration", () => {
 
       const timestamp = Date.now();
       const patientName = `Age Test Patient ${timestamp}`;
-      const phoneNumber = `9${Math.floor(Math.random() * 1000000000)
-        .toString()
-        .padStart(9, "0")}`;
+      const phoneNumber = `9${faker.string.numeric(9)}`;
 
       await startPatientRegistration(page);
 
