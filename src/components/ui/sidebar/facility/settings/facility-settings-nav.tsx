@@ -169,7 +169,7 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
     ],
   },
   {
-    label: "Advanced",
+    label: "advanced",
     pages: [
       {
         path: "settings/workspaces",
