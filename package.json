@@ -53,6 +53,8 @@
     "playwright:db-restore": "bash scripts/playwright-db.sh restore",
     "playwright:db-reset": "bash scripts/playwright-db.sh reset",
     "playwright:db-status": "bash scripts/playwright-db.sh status",
+    "playwright:index": "tsx scripts/generate-test-index.ts",
+    "playwright:index:check": "tsx scripts/generate-test-index.ts --check",
     "prepare": "husky",
     "lint": "eslint ./src ./tests ./playwright.config.ts",
     "typecheck": "tsc --noEmit",

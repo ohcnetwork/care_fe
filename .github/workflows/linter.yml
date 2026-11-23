@@ -35,3 +35,6 @@ jobs:
 
       - name: Run knip
         run: npm run knip
+
+      - name: Check Playwright test tags and index
+        run: npm run playwright:index:check

@@ -82,4 +82,6 @@ npm run playwright:test           # Tests run against clean DB, auto-restores on
 - Use `faker` for data generation — avoid hardcoded names/slugs that collide on re-run
 - Use `Date.now()` or `faker.string.alphanumeric()` for unique identifiers
 - Don't rely on cleanup — the DB snapshot system handles state reset
-- Use `getFacilityId()`, `getPatientId()`, `getEncounterId()` from `tests/support/` for fixture IDs
+- Use `getFacilityId()`, `getPatientId()`, `getEncounterId()` from `tests/support/` for fixture IDs; for data a test writes, use the per-test fixtures in `tests/support/test.ts` (`isolatedPatient`, `isolatedEncounter`)
+- Tag every test with one `@cap:<capability>` and one of `@atomic` / `@coupled` / `@journey` / `@workflow`, then run `npm run playwright:index` (CI runs `npm run playwright:index:check`). See "Tags, capabilities and step functions" in [`tests/PLAYWRIGHT_GUIDE.md`](../tests/PLAYWRIGHT_GUIDE.md)
+- Put reusable actions in `tests/helper/<domain>.ts` as step functions and compose them into workflow tests under `tests/workflows/`. [`tests/ATOMIC_TEST_INDEX.md`](../tests/ATOMIC_TEST_INDEX.md) lists every capability with its step

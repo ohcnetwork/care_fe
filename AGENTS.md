@@ -38,7 +38,8 @@ Detailed guidance is split into focused files so agents only load what's relevan
 - [`docs/testing.md`](docs/testing.md) — Playwright E2E setup, commands, DB snapshot workflow, and writing tests.
 - [`docs/architecture.md`](docs/architecture.md) — Routing (TanStack Router), API layer, state management, UI components, plugins, auth, key directories, and config. For a quick start on routes, see [Routing](#routing-tanstack-router) below.
 - [`docs/care-apps-architecture-note.md`](docs/care-apps-architecture-note.md), [`docs/care-apps-local-dev.md`](docs/care-apps-local-dev.md), [`docs/care-apps-override-architecture.md`](docs/care-apps-override-architecture.md), [`docs/care-apps-plugin-overrides.md`](docs/care-apps-plugin-overrides.md) — Plugin system deep dives.
-- [`tests/PLAYWRIGHT_GUIDE.md`](tests/PLAYWRIGHT_GUIDE.md) — Complete Playwright patterns for form interactions, selectors, assertions, and helpers.
+- [`tests/PLAYWRIGHT_GUIDE.md`](tests/PLAYWRIGHT_GUIDE.md) — Complete Playwright patterns for form interactions, selectors, assertions, and helpers, plus the tag and step-function conventions.
+- [`tests/ATOMIC_TEST_INDEX.md`](tests/ATOMIC_TEST_INDEX.md) — Generated map of every test by capability, with the reusable step function for each; start here when composing a workflow test.
 
 ## Quick Commands
 

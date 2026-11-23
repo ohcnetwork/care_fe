@@ -38,15 +38,89 @@ test.describe("Feature Name", () => {
     await page.goto(`/facility/${facilityId}/settings/locations`);
   });
 
-  test("descriptive test name", async ({ page }) => {
-    await test.step("Step 1: Fill form", async () => {
-      // actions
-    });
+  test(
+    "descriptive test name",
+    { tag: ["@atomic", "@cap:location.create"] },
+    async ({ page }) => {
+      await test.step("Step 1: Fill form", async () => {
+        // actions
+      });
 
-    await test.step("Step 2: Verify result", async () => {
-      // assertions
-    });
-  });
+      await test.step("Step 2: Verify result", async () => {
+        // assertions
+      });
+    },
+  );
+});
+```
+
+## Tags, capabilities and step functions
+
+Every test is tagged with the **capability** it verifies and its **class**. The tags drive [`ATOMIC_TEST_INDEX.md`](ATOMIC_TEST_INDEX.md), which maps each capability to its tests and its reusable step, and let you run slices of the suite (`npx playwright test --grep @workflow`, `--grep @cap:billing`).
+
+```typescript
+test(
+  "should register a new patient",
+  { tag: ["@atomic", "@cap:patient.register"] },
+  async ({ page }) => { … },
+);
+
+test(
+  "keeps the chosen encounter across sections",
+  {
+    tag: ["@coupled", "@cap:encounter.navigate"],
+    annotation: { type: "coupled", description: "Serial describe sharing one encounter" },
+  },
+  async ({ page }) => { … },
+);
+```
+
+| Tag                 | Meaning                                                                                                                                   |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `@cap:<domain>.<…>` | Exactly one per test: the user intent under test, e.g. `@cap:encounter.create`. Register new ids in [`capabilities.ts`](capabilities.ts). |
+| `@atomic`           | One capability; runs alone with only setup fixtures plus its own arrange.                                                                 |
+| `@coupled`          | One capability, but depends on order, shared state or the environment. Needs `annotation: { type: "coupled", description }`.              |
+| `@journey`          | Verifies two or more capabilities in one test. Needs `annotation: { type: "journey", description }` listing what it chains.               |
+| `@workflow`         | A test in `tests/workflows/` composed from step functions.                                                                                |
+| `@mocked` / `@unit` | Optional: the behaviour under test runs on stubbed API responses, so nothing persists / no browser at all.                                |
+
+Tags must be string literals; the index generator reads them from the source. After adding, removing, renaming or retagging a test, run `npm run playwright:index` and commit `ATOMIC_TEST_INDEX.md`. CI runs `npm run playwright:index:check`, which fails on a missing or unregistered tag or a stale index.
+
+**Step functions.** An action a workflow may reuse (register a patient, create an encounter, record a payment) belongs in `tests/helper/<domain>.ts`, not inside a spec:
+
+- Name UI steps `<verb><Entity>ViaUi(page, input)` and API seeders `<verb><Entity>ViaApi(input)`.
+- Take one options object, and return the ids it produced (`Promise<{ encounterId: string }>`).
+- Wrap the body in `test.step("<capability>", …, { box: true })` so reports show the step name.
+- Wait only for proof the action succeeded (toast, URL, response); keep content assertions in the test.
+- Record the step in the capability's `step` field in `capabilities.ts`.
+
+**Isolated data.** Tests that write data should not touch the shared fixture patient, encounter or account, or "the first in-progress encounter in the list". Import `test` from `tests/support/test` to get per-test fixtures:
+
+```typescript
+import { expect, test } from "tests/support/test";
+
+test(
+  "…",
+  { tag: ["@atomic", "@cap:encounter.consent.create"] },
+  async ({ page, facilityId, isolatedEncounter }) => {
+    const { patientId, encounterId } = isolatedEncounter; // fresh API patient with an in-progress encounter
+  },
+);
+```
+
+**Workflow tests** live in `tests/workflows/` and chain step functions, passing each step's output to the next:
+
+```typescript
+const { patientId } = await registerPatientViaUi(page, { facilityId });
+const { encounterId } = await createEncounterViaUi(page, {
+  facilityId,
+  patientId,
+});
+await changeEncounterStatusViaUi(page, {
+  facilityId,
+  patientId,
+  encounterId,
+  status: "Completed",
 });
 ```
 

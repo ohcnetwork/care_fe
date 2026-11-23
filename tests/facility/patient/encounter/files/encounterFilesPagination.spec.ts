@@ -1,9 +1,7 @@
 import { faker } from "@faker-js/faker";
-import { expect, test, type Request } from "@playwright/test";
+import { type Request } from "@playwright/test";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
-import { getEncounterId } from "tests/support/encounterId";
-import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
+import { expect, test } from "tests/support/test";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -26,111 +24,112 @@ const fileLabel = (file: { name: string; extension: string }) =>
   `${file.name}${file.extension}`;
 
 test.describe("Encounter Files Pagination", () => {
-  test("sends a numeric offset and paginates encounter files", async ({
-    page,
-    request,
-  }) => {
-    const facilityId = getFacilityId();
-    const patientId = getPatientId();
-    const encounterId = getEncounterId();
-    const namePrefix = `pagination-${faker.string.alphanumeric(8)}`;
+  test(
+    "sends a numeric offset and paginates encounter files",
+    { tag: ["@atomic", "@cap:encounter.files.list"] },
+    async ({ page, request, facilityId, isolatedEncounter }) => {
+      // A throwaway encounter of this test's own, so the 16 file records it
+      // adds don't pile up on the shared fixture encounter.
+      const { patientId, encounterId } = isolatedEncounter;
+      const namePrefix = `pagination-${faker.string.alphanumeric(8)}`;
 
-    // Create more files than one page holds, so that a second page exists.
-    // The list only shows records with a completed upload, so mark each
-    // record complete. The test does not need the file content.
-    for (let i = 0; i < FILES_TO_CREATE; i++) {
-      const createResponse = await request.post(
-        `${getApiUrl()}/api/v1/files/`,
-        {
-          headers: getApiHeaders(),
-          data: {
-            original_name: "sample_img1.png",
-            name: `${namePrefix}-${i}`,
-            file_type: "encounter",
-            file_category: "unspecified",
-            associating_id: encounterId,
-            mime_type: "image/png",
+      // Create more files than one page holds, so that a second page exists.
+      // The list only shows records with a completed upload, so mark each
+      // record complete. The test does not need the file content.
+      for (let i = 0; i < FILES_TO_CREATE; i++) {
+        const createResponse = await request.post(
+          `${getApiUrl()}/api/v1/files/`,
+          {
+            headers: getApiHeaders(),
+            data: {
+              original_name: "sample_img1.png",
+              name: `${namePrefix}-${i}`,
+              file_type: "encounter",
+              file_category: "unspecified",
+              associating_id: encounterId,
+              mime_type: "image/png",
+            },
           },
-        },
-      );
-      expect(createResponse.ok()).toBeTruthy();
-      const { id } = await createResponse.json();
+        );
+        expect(createResponse.ok()).toBeTruthy();
+        const { id } = await createResponse.json();
 
-      const completeResponse = await request.post(
-        `${getApiUrl()}/api/v1/files/${id}/mark_upload_completed/`,
-        { headers: getApiHeaders() },
-      );
-      expect(completeResponse.ok()).toBeTruthy();
-    }
-
-    // Record every list request so that no request can send a bad offset.
-    const listRequests: URL[] = [];
-    page.on("request", (req) => {
-      if (isEncounterFilesListRequest(req, encounterId)) {
-        listRequests.push(new URL(req.url()));
+        const completeResponse = await request.post(
+          `${getApiUrl()}/api/v1/files/${id}/mark_upload_completed/`,
+          { headers: getApiHeaders() },
+        );
+        expect(completeResponse.ok()).toBeTruthy();
       }
-    });
 
-    // Page 1
-    const firstPageResponsePromise = page.waitForResponse((response) =>
-      isEncounterFilesListRequest(response.request(), encounterId),
-    );
-    await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/files`,
-    );
-    const firstPageResponse = await firstPageResponsePromise;
-    expect(firstPageResponse.status()).toBe(200);
+      // Record every list request so that no request can send a bad offset.
+      const listRequests: URL[] = [];
+      page.on("request", (req) => {
+        if (isEncounterFilesListRequest(req, encounterId)) {
+          listRequests.push(new URL(req.url()));
+        }
+      });
 
-    const firstPageUrl = new URL(firstPageResponse.url());
-    expect(firstPageUrl.searchParams.get("limit")).toBe(String(PAGE_SIZE));
-    expect(firstPageUrl.searchParams.get("offset")).toBe("0");
+      // Page 1
+      const firstPageResponsePromise = page.waitForResponse((response) =>
+        isEncounterFilesListRequest(response.request(), encounterId),
+      );
+      await page.goto(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/files`,
+      );
+      const firstPageResponse = await firstPageResponsePromise;
+      expect(firstPageResponse.status()).toBe(200);
 
-    const firstPage = await firstPageResponse.json();
-    expect(firstPage.count).toBeGreaterThanOrEqual(FILES_TO_CREATE);
-    expect(firstPage.results).toHaveLength(PAGE_SIZE);
-    await expect(
-      page
-        .getByRole("row")
-        .filter({ hasText: fileLabel(firstPage.results[0]) }),
-    ).toBeVisible();
+      const firstPageUrl = new URL(firstPageResponse.url());
+      expect(firstPageUrl.searchParams.get("limit")).toBe(String(PAGE_SIZE));
+      expect(firstPageUrl.searchParams.get("offset")).toBe("0");
 
-    // Page 2
-    const secondPageResponsePromise = page.waitForResponse(
-      (response) =>
-        isEncounterFilesListRequest(response.request(), encounterId) &&
-        new URL(response.url()).searchParams.get("offset") ===
-          String(PAGE_SIZE),
-    );
-    await page.locator("#page-2").click();
-    const secondPageResponse = await secondPageResponsePromise;
-    expect(secondPageResponse.status()).toBe(200);
+      const firstPage = await firstPageResponse.json();
+      expect(firstPage.count).toBeGreaterThanOrEqual(FILES_TO_CREATE);
+      expect(firstPage.results).toHaveLength(PAGE_SIZE);
+      await expect(
+        page
+          .getByRole("row")
+          .filter({ hasText: fileLabel(firstPage.results[0]) }),
+      ).toBeVisible();
 
-    const secondPageUrl = new URL(secondPageResponse.url());
-    expect(secondPageUrl.searchParams.get("limit")).toBe(String(PAGE_SIZE));
+      // Page 2
+      const secondPageResponsePromise = page.waitForResponse(
+        (response) =>
+          isEncounterFilesListRequest(response.request(), encounterId) &&
+          new URL(response.url()).searchParams.get("offset") ===
+            String(PAGE_SIZE),
+      );
+      await page.locator("#page-2").click();
+      const secondPageResponse = await secondPageResponsePromise;
+      expect(secondPageResponse.status()).toBe(200);
 
-    const secondPage = await secondPageResponse.json();
-    expect(secondPage.results).toHaveLength(
-      Math.min(PAGE_SIZE, secondPage.count - PAGE_SIZE),
-    );
+      const secondPageUrl = new URL(secondPageResponse.url());
+      expect(secondPageUrl.searchParams.get("limit")).toBe(String(PAGE_SIZE));
 
-    // Page 2 must show different files than page 1.
-    const firstPageIds = new Set(
-      firstPage.results.map((file: { id: string }) => file.id),
-    );
-    for (const file of secondPage.results) {
-      expect(firstPageIds.has(file.id)).toBe(false);
-    }
-    await expect(
-      page
-        .getByRole("row")
-        .filter({ hasText: fileLabel(secondPage.results[0]) }),
-    ).toBeVisible();
+      const secondPage = await secondPageResponse.json();
+      expect(secondPage.results).toHaveLength(
+        Math.min(PAGE_SIZE, secondPage.count - PAGE_SIZE),
+      );
 
-    // No list request can send a missing or non-numeric offset.
-    expect(listRequests.length).toBeGreaterThan(0);
-    for (const url of listRequests) {
-      const offset = url.searchParams.get("offset");
-      expect(offset, `offset in ${url.search}`).toMatch(/^\d+$/);
-    }
-  });
+      // Page 2 must show different files than page 1.
+      const firstPageIds = new Set(
+        firstPage.results.map((file: { id: string }) => file.id),
+      );
+      for (const file of secondPage.results) {
+        expect(firstPageIds.has(file.id)).toBe(false);
+      }
+      await expect(
+        page
+          .getByRole("row")
+          .filter({ hasText: fileLabel(secondPage.results[0]) }),
+      ).toBeVisible();
+
+      // No list request can send a missing or non-numeric offset.
+      expect(listRequests.length).toBeGreaterThan(0);
+      for (const url of listRequests) {
+        const offset = url.searchParams.get("offset");
+        expect(offset, `offset in ${url.search}`).toMatch(/^\d+$/);
+      }
+    },
+  );
 });
