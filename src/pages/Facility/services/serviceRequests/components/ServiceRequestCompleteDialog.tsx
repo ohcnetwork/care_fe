@@ -63,12 +63,20 @@ export function ServiceRequestCompleteDialog({
   const handleOpenChange = (nextOpen: boolean) => {
     if (!isPending) onOpenChange(nextOpen);
   };
+  // Held here so swapping sheet and dialog at lg keeps it; reset on each open.
+  const [note, setNote] = useState(request.note ?? "");
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setNote(request.note ?? "");
+  }
 
   const content = (
     <CompletionNoteContent
-      initialNote={request.note ?? ""}
+      note={note}
+      onNoteChange={setNote}
       isUpdating={isPending}
-      onComplete={(note) =>
+      onComplete={() =>
         completeServiceRequest({
           status: Status.completed,
           note: note.trim() || null,
@@ -113,21 +121,21 @@ export function ServiceRequestCompleteDialog({
 }
 
 interface CompletionNoteContentProps {
-  initialNote: string;
+  note: string;
+  onNoteChange: (note: string) => void;
   isUpdating: boolean;
-  onComplete: (note: string) => void;
+  onComplete: () => void;
   onCancel: () => void;
 }
 
-// Mounted only while the dialog is open, so the note resets on each open
 const CompletionNoteContent = ({
-  initialNote,
+  note,
+  onNoteChange,
   isUpdating,
   onComplete,
   onCancel,
 }: CompletionNoteContentProps) => {
   const { t } = useTranslation();
-  const [note, setNote] = useState(initialNote);
 
   return (
     <>
@@ -137,18 +145,14 @@ const CompletionNoteContent = ({
         </p>
         <Textarea
           value={note}
-          onChange={(e) => setNote(e.target.value)}
+          onChange={(e) => onNoteChange(e.target.value)}
           placeholder={t("enter_note")}
           className="min-h-14"
           aria-label={t("completion_note")}
         />
       </div>
       <div className="flex flex-row items-start justify-start gap-2 pt-2 sm:pt-0">
-        <Button
-          variant="primary"
-          onClick={() => onComplete(note)}
-          disabled={isUpdating}
-        >
+        <Button variant="primary" onClick={onComplete} disabled={isUpdating}>
           <CheckIcon className="size-4" />
           {isUpdating ? t("updating") : `${t("save_and_complete")}`}
         </Button>
