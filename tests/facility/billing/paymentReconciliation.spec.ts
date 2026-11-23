@@ -171,6 +171,15 @@ test.describe("Payment Reconciliation", () => {
   }) => {
     await page.getByRole("button", { name: /advance/i }).click();
     await page.locator("label").filter({ hasText: "Cash" }).click();
+    // Without a location, Zod skips the object-level tender check on submit.
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Select Location" })
+      .click();
+    await page
+      .locator('[data-slot="command-item"]')
+      .filter({ hasText: "Bio-Chemistry Lab" })
+      .click();
     const amountPaid = page.getByRole("textbox", { name: "Amount Paid" });
     const amountReceived = page.getByRole("textbox", {
       name: "Amount Received",
@@ -199,13 +208,21 @@ test.describe("Payment Reconciliation", () => {
       page.getByText(/payment.*recorded.*successfully/i),
     ).toHaveCount(0);
 
-    await amountReceived.fill("150");
-    await expect(page.getByText(/change to return/i)).toContainText(
+    const changeToReturn = page.getByText(/change to return/i);
+    const formatCurrency = (value: number) =>
       new Intl.NumberFormat("en-IN", {
         style: "currency",
         currency: "INR",
-      }).format(50),
-    );
+      }).format(value);
+
+    await amountReceived.fill("150");
+    await expect(changeToReturn).toContainText(formatCurrency(50));
+
+    // After a submit, the form validates on each change. A partial amount paid
+    // must show its error, and the change counts it as 0.
+    await amountPaid.fill(".");
+    await expect(page.getByText("Must be a valid number")).toBeVisible();
+    await expect(changeToReturn).toContainText(formatCurrency(150));
   });
 
   test("should record payment twice without refreshing page with location cache", async ({
