@@ -357,7 +357,6 @@ export function EncounterCommandDialog({
           label: encounterRequiresDischarge(encounter)
             ? t("mark_for_discharge")
             : t("mark_as_completed"),
-          shortcut: getShortcutDisplay("mark-as-completed"),
           icon: <CheckCircle2 />,
         },
         {
@@ -403,7 +402,7 @@ export function EncounterCommandDialog({
     });
 
     // Go to navigation - limited to pages visible in the active workspace
-    const goToItems: (ActionItem & { pageKey: string })[] = [
+    const goToItems: (ActionItem & { pageKey: string; visible?: boolean })[] = [
       {
         id: "encounter-overview",
         pageKey: "updates",
@@ -421,7 +420,15 @@ export function EncounterCommandDialog({
         pageKey: "immunizations",
         label: t("immunizations"),
       },
-      { id: "referrals", pageKey: "referrals", label: t("referrals") },
+      {
+        id: "referrals",
+        pageKey: "referrals",
+        label: t("referrals"),
+        visible:
+          canNavigateToReferrals &&
+          (selectedEncounterPermissions.canReadReferral ||
+            selectedEncounterPermissions.canCreateReferral),
+      },
       { id: "responses", pageKey: "responses", label: t("responses") },
       { id: "files", pageKey: "files", label: t("files") },
       { id: "notes", pageKey: "notes", label: t("notes") },
@@ -442,14 +449,10 @@ export function EncounterCommandDialog({
     groups.push({
       group: t("go_to"),
       items: goToItems
-        .filter(({ pageKey }) =>
-          pageKey === "referrals"
-            ? canNavigateToReferrals &&
-              (selectedEncounterPermissions.canReadReferral ||
-                selectedEncounterPermissions.canCreateReferral)
-            : isPageVisible(pageKey),
+        .filter(
+          ({ pageKey, visible }) => (visible ?? true) && isPageVisible(pageKey),
         )
-        .map(({ pageKey: _pageKey, ...item }) => ({
+        .map(({ pageKey: _pageKey, visible: _visible, ...item }) => ({
           ...item,
           shortcut: getShortcutDisplay(item.id),
           icon: <ArrowBigRight />,

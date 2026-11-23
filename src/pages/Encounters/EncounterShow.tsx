@@ -88,14 +88,12 @@ export const EncounterShow = (props: Props) => {
     canReadClinicalData,
     canReadSelectedEncounter,
     selectedEncounterPermissions,
-    canRestartSelectedEncounter,
     actions: {
       markAsCompleted,
       dispense,
       viewLocationHistory,
       manageCareTeam,
       manageDepartments,
-      restartEncounter,
     },
   } = useEncounter();
 
@@ -295,12 +293,6 @@ export const EncounterShow = (props: Props) => {
         {t("location_history")}
         <ShortcutBadge actionId="view-location-history" />
       </Button>
-      {canRestartSelectedEncounter && (
-        <Button className="sr-only" tabIndex={-1} onClick={restartEncounter}>
-          {t("restart_encounter")}
-          <ShortcutBadge actionId="restart-encounter" />
-        </Button>
-      )}
       <div className="@container/encounter-header flex flex-col gap-2">
         <div className="flex min-w-0 items-center justify-between gap-2">
           {backButton}

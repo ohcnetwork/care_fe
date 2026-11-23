@@ -53,16 +53,19 @@ export const SummaryPanelActionsTab = ({
       label: t("manage_care_team"),
       onClick: manageCareTeam,
       hideOnMobile: true,
+      shortcut: <ShortcutBadge actionId="manage-care-team" />,
     },
     {
       label: t("update_location"),
       onClick: assignLocation,
       hideOnMobile: true,
+      shortcut: <ShortcutBadge actionId="assign-location" />,
     },
     {
       label: t("update_department"),
       onClick: manageDepartments,
       hideOnMobile: true,
+      shortcut: <ShortcutBadge actionId="manage-departments" />,
     },
     {
       label: t("dispense"),
