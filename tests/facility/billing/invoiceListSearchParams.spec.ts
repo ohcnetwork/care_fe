@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { seedInvoiceViaApi } from "tests/helper/billing";
 import {
   applyOptionFilter,
   selectedMultiFilterBar,
@@ -58,8 +59,14 @@ const invoiceListRequest = (
 test.describe("Invoice List search params", () => {
   let facilityId: string;
 
-  test.beforeAll(() => {
+  test.beforeAll(async () => {
     facilityId = getFacilityId();
+    // An issued invoice of its own, so the issued filter always lists a row.
+    await seedInvoiceViaApi({
+      facilityId,
+      issue: true,
+      namePrefix: "Invoice Params",
+    });
   });
 
   const listUrl = (params: Record<string, string> = {}) => {
@@ -67,100 +74,118 @@ test.describe("Invoice List search params", () => {
     return `/facility/${facilityId}/billing/invoices${search ? `?${search}` : ""}`;
   };
 
-  test("writes the status filter to the URL and lists only that status", async ({
-    page,
-  }) => {
-    // The second page can be empty: it depends on the number of invoices.
-    const secondPage = invoiceListRequest(
-      page,
-      (params) => params.get("offset") === String(PAGE_SIZE),
-    );
-    await page.goto(listUrl({ page: "2" }));
-    await secondPage;
+  test(
+    "writes the status filter to the URL and lists only that status",
+    { tag: ["@atomic", "@cap:billing.invoice.filter"] },
+    async ({ page }) => {
+      // The second page can be empty: it depends on the number of invoices.
+      const secondPage = invoiceListRequest(
+        page,
+        (params) => params.get("offset") === String(PAGE_SIZE),
+      );
+      await page.goto(listUrl({ page: "2" }));
+      await secondPage;
 
-    await applyInvoiceStatusFilter(page, /^issued$/i);
+      await applyInvoiceStatusFilter(page, /^issued$/i);
 
-    await expect(page).toHaveURL(/[?&]status=issued(&|$)/);
-    // A new filter goes back to the first page.
-    await expect(page).toHaveURL(/[?&]page=1(&|$)/);
-    await expect(statusFilterBar(page)).toContainText(/issued/i);
-    await expectAllRowsWithStatus(page, "Issued");
-  });
+      await expect(page).toHaveURL(/[?&]status=issued(&|$)/);
+      // A new filter goes back to the first page.
+      await expect(page).toHaveURL(/[?&]page=1(&|$)/);
+      await expect(statusFilterBar(page)).toContainText(/issued/i);
+      await expectAllRowsWithStatus(page, "Issued");
+    },
+  );
 
-  test("restores the status filter from a bookmarked URL", async ({ page }) => {
-    await page.goto(listUrl({ status: "issued" }));
+  test(
+    "restores the status filter from a bookmarked URL",
+    { tag: ["@atomic", "@cap:billing.invoice.filter"] },
+    async ({ page }) => {
+      await page.goto(listUrl({ status: "issued" }));
 
-    await expect(statusFilterBar(page)).toContainText(/issued/i);
-    await expectAllRowsWithStatus(page, "Issued");
-    await expect(page).toHaveURL(/[?&]status=issued(&|$)/);
-  });
+      await expect(statusFilterBar(page)).toContainText(/issued/i);
+      await expectAllRowsWithStatus(page, "Issued");
+      await expect(page).toHaveURL(/[?&]status=issued(&|$)/);
+    },
+  );
 
-  test("opens the bookmarked page number", async ({ page }) => {
-    const secondPage = invoiceListRequest(
-      page,
-      (params) => params.get("offset") === String(PAGE_SIZE),
-    );
-    await page.goto(listUrl({ page: "2" }));
-    await secondPage;
+  test(
+    "opens the bookmarked page number",
+    { tag: ["@atomic", "@cap:billing.invoice.list"] },
+    async ({ page }) => {
+      const secondPage = invoiceListRequest(
+        page,
+        (params) => params.get("offset") === String(PAGE_SIZE),
+      );
+      await page.goto(listUrl({ page: "2" }));
+      await secondPage;
 
-    await expect(page).toHaveURL(/[?&]page=2(&|$)/);
-  });
+      await expect(page).toHaveURL(/[?&]page=2(&|$)/);
+    },
+  );
 
-  test("keeps the status filter as is when the user searches", async ({
-    page,
-  }) => {
-    await page.goto(listUrl({ status: "issued" }));
-    await waitForInvoiceRows(page);
-
-    await page.getByRole("textbox", { name: /search invoices/i }).fill("1");
-
-    await expect(page).toHaveURL(/[?&]search=1(&|$)/);
-    await expect(page).toHaveURL(/[?&]status=issued(&|$)/);
-    await expect(page).toHaveURL(/[?&]page=1(&|$)/);
-  });
-
-  test("ignores invalid values in a bookmarked URL", async ({ page }) => {
-    const firstPage = invoiceListRequest(
-      page,
-      (params) => params.get("offset") === "0" && !params.has("status"),
-    );
-    await page.goto(listUrl({ page: "abc", status: "bogus" }));
-
-    await test.step("Lists invoices from the first page, unfiltered", async () => {
-      await firstPage;
-      // The router drops the invalid values when the page loads.
-      await expect(page).not.toHaveURL(/status=|page=abc/);
+  test(
+    "keeps the status filter as is when the user searches",
+    { tag: ["@atomic", "@cap:billing.invoice.search"] },
+    async ({ page }) => {
+      await page.goto(listUrl({ status: "issued" }));
       await waitForInvoiceRows(page);
-      await expect(statusFilterBar(page)).toBeHidden();
-    });
 
-    await test.step("Keeps them out on the next filter change", async () => {
       await page.getByRole("textbox", { name: /search invoices/i }).fill("1");
 
       await expect(page).toHaveURL(/[?&]search=1(&|$)/);
+      await expect(page).toHaveURL(/[?&]status=issued(&|$)/);
       await expect(page).toHaveURL(/[?&]page=1(&|$)/);
+    },
+  );
+
+  test(
+    "ignores invalid values in a bookmarked URL",
+    { tag: ["@atomic", "@cap:billing.invoice.filter"] },
+    async ({ page }) => {
+      const firstPage = invoiceListRequest(
+        page,
+        (params) => params.get("offset") === "0" && !params.has("status"),
+      );
+      await page.goto(listUrl({ page: "abc", status: "bogus" }));
+
+      await test.step("Lists invoices from the first page, unfiltered", async () => {
+        await firstPage;
+        // The router drops the invalid values when the page loads.
+        await expect(page).not.toHaveURL(/status=|page=abc/);
+        await waitForInvoiceRows(page);
+        await expect(statusFilterBar(page)).toBeHidden();
+      });
+
+      await test.step("Keeps them out on the next filter change", async () => {
+        await page.getByRole("textbox", { name: /search invoices/i }).fill("1");
+
+        await expect(page).toHaveURL(/[?&]search=1(&|$)/);
+        await expect(page).toHaveURL(/[?&]page=1(&|$)/);
+        await expect(page).not.toHaveURL(/status=/);
+        await expect(page).not.toHaveURL(/page=abc/);
+      });
+    },
+  );
+
+  test(
+    "does not restore filters after the user leaves the list",
+    { tag: ["@atomic", "@cap:billing.invoice.filter"] },
+    async ({ page }) => {
+      await page.goto(listUrl());
+      await waitForInvoiceRows(page);
+      await applyInvoiceStatusFilter(page, /^issued$/i);
+      await expect(page).toHaveURL(/[?&]status=issued(&|$)/);
+
+      await page.goto(`/facility/${facilityId}/overview`);
+      await expect(page).toHaveURL(/\/overview$/);
+
+      await page.goto(listUrl());
+      await waitForInvoiceRows(page);
+
+      await expect(statusFilterBar(page)).toBeHidden();
       await expect(page).not.toHaveURL(/status=/);
-      await expect(page).not.toHaveURL(/page=abc/);
-    });
-  });
-
-  test("does not restore filters after the user leaves the list", async ({
-    page,
-  }) => {
-    await page.goto(listUrl());
-    await waitForInvoiceRows(page);
-    await applyInvoiceStatusFilter(page, /^issued$/i);
-    await expect(page).toHaveURL(/[?&]status=issued(&|$)/);
-
-    await page.goto(`/facility/${facilityId}/overview`);
-    await expect(page).toHaveURL(/\/overview$/);
-
-    await page.goto(listUrl());
-    await waitForInvoiceRows(page);
-
-    await expect(statusFilterBar(page)).toBeHidden();
-    await expect(page).not.toHaveURL(/status=/);
-  });
+    },
+  );
 });
 
 test.describe("Account page search params", () => {
@@ -177,35 +202,39 @@ test.describe("Account page search params", () => {
     return `/facility/${facilityId}/billing/account/${accountId}/${tab}${search ? `?${search}` : ""}`;
   };
 
-  test("writes the invoice status filter to the account URL", async ({
-    page,
-  }) => {
-    await page.goto(accountTabUrl("invoices"));
-    await expect(
-      page.getByRole("tab", { name: "Invoices", exact: true }),
-    ).toHaveAttribute("aria-selected", "true");
+  test(
+    "writes the invoice status filter to the account URL",
+    { tag: ["@atomic", "@cap:billing.invoice.filter"] },
+    async ({ page }) => {
+      await page.goto(accountTabUrl("invoices"));
+      await expect(
+        page.getByRole("tab", { name: "Invoices", exact: true }),
+      ).toHaveAttribute("aria-selected", "true");
 
-    await applyInvoiceStatusFilter(page, /^draft$/i);
+      await applyInvoiceStatusFilter(page, /^draft$/i);
 
-    await expect(page).toHaveURL(
-      new RegExp(`/account/${accountId}/invoices\\?.*status=draft`),
-    );
-    await expect(statusFilterBar(page)).toContainText(/draft/i);
-  });
+      await expect(page).toHaveURL(
+        new RegExp(`/account/${accountId}/invoices\\?.*status=draft`),
+      );
+      await expect(statusFilterBar(page)).toContainText(/draft/i);
+    },
+  );
 
-  test("keeps a charge item status when the user searches charge items", async ({
-    page,
-  }) => {
-    // Charge item statuses are not invoice statuses. The account route reads
-    // `status` as a string, so a charge items filter must survive.
-    await page.goto(accountTabUrl("charge_items", { status: "billable" }));
-    await expect(
-      page.getByRole("tab", { name: "Charge Items", exact: true }),
-    ).toHaveAttribute("aria-selected", "true");
+  test(
+    "keeps a charge item status when the user searches charge items",
+    { tag: ["@atomic", "@cap:billing.chargeitem.search"] },
+    async ({ page }) => {
+      // Charge item statuses are not invoice statuses. The account route reads
+      // `status` as a string, so a charge items filter must survive.
+      await page.goto(accountTabUrl("charge_items", { status: "billable" }));
+      await expect(
+        page.getByRole("tab", { name: "Charge Items", exact: true }),
+      ).toHaveAttribute("aria-selected", "true");
 
-    await page.getByRole("textbox", { name: "Search by item" }).fill("zz");
+      await page.getByRole("textbox", { name: "Search by item" }).fill("zz");
 
-    await expect(page).toHaveURL(/[?&]title=zz(&|$)/);
-    await expect(page).toHaveURL(/[?&]status=billable(&|$)/);
-  });
+      await expect(page).toHaveURL(/[?&]title=zz(&|$)/);
+      await expect(page).toHaveURL(/[?&]status=billable(&|$)/);
+    },
+  );
 });

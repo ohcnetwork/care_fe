@@ -41,62 +41,80 @@ test.describe("Payment list search params", () => {
     return `/facility/${facilityId}/billing/payments${search ? `?${search}` : ""}`;
   };
 
-  test("writes the payment status filter to the URL", async ({ page }) => {
-    await page.goto(listUrl());
-    await expect(page).toHaveURL(/[?&]ordering=-payment_datetime(&|$)/);
+  test(
+    "writes the payment status filter to the URL",
+    { tag: ["@atomic", "@cap:billing.payment.filter"] },
+    async ({ page }) => {
+      await page.goto(listUrl());
+      await expect(page).toHaveURL(/[?&]ordering=-payment_datetime(&|$)/);
 
-    const request = paymentListRequest(
-      page,
-      (params) => params.get("status") === "cancelled",
-    );
-    await applyOptionFilter(page, /payment status/i, /^cancelled$/i);
-    await request;
+      const request = paymentListRequest(
+        page,
+        (params) => params.get("status") === "cancelled",
+      );
+      await applyOptionFilter(page, /payment status/i, /^cancelled$/i);
+      await request;
 
-    await expect(page).toHaveURL(/[?&]status=cancelled(&|$)/);
-    await expect(statusFilterBar(page)).toContainText(/cancelled/i);
-  });
+      await expect(page).toHaveURL(/[?&]status=cancelled(&|$)/);
+      await expect(statusFilterBar(page)).toContainText(/cancelled/i);
+    },
+  );
 
-  test("restores the payment status filter from a bookmarked URL", async ({
-    page,
-  }) => {
-    const request = paymentListRequest(
-      page,
-      (params) => params.get("status") === "cancelled",
-    );
-    await page.goto(listUrl({ status: "cancelled" }));
-    await request;
+  test(
+    "restores the payment status filter from a bookmarked URL",
+    { tag: ["@atomic", "@cap:billing.payment.filter"] },
+    async ({ page }) => {
+      const request = paymentListRequest(
+        page,
+        (params) => params.get("status") === "cancelled",
+      );
+      await page.goto(listUrl({ status: "cancelled" }));
+      await request;
 
-    await expect(statusFilterBar(page)).toContainText(/cancelled/i);
-    await expect(page).toHaveURL(/[?&]status=cancelled(&|$)/);
-  });
+      await expect(statusFilterBar(page)).toContainText(/cancelled/i);
+      await expect(page).toHaveURL(/[?&]status=cancelled(&|$)/);
+    },
+  );
 
-  test("ignores invalid filters in a bookmarked URL", async ({ page }) => {
-    // The list sorts by payment date when it opens.
-    const request = paymentListRequest(
-      page,
-      (params) => params.get("ordering") === "-payment_datetime",
-    );
-    await page.goto(listUrl({ status: "bogus", method: "bogus", page: "abc" }));
-    const params = new URL((await request).url()).searchParams;
+  test(
+    "ignores invalid filters in a bookmarked URL",
+    { tag: ["@atomic", "@cap:billing.payment.filter"] },
+    async ({ page }) => {
+      // The list sorts by payment date when it opens.
+      const request = paymentListRequest(
+        page,
+        (params) => params.get("ordering") === "-payment_datetime",
+      );
+      await page.goto(
+        listUrl({ status: "bogus", method: "bogus", page: "abc" }),
+      );
+      const params = new URL((await request).url()).searchParams;
 
-    expect(params.get("status")).toBeNull();
-    expect(params.get("method")).toBeNull();
-    expect(params.get("offset")).toBe("0");
-    await expect(statusFilterBar(page)).toBeHidden();
-    await expect(page).toHaveURL(/[?&]page=1(&|$)/);
-    await expect(page).not.toHaveURL(/bogus|page=abc/);
-  });
+      expect(params.get("status")).toBeNull();
+      expect(params.get("method")).toBeNull();
+      expect(params.get("offset")).toBe("0");
+      await expect(statusFilterBar(page)).toBeHidden();
+      await expect(page).toHaveURL(/[?&]page=1(&|$)/);
+      await expect(page).not.toHaveURL(/bogus|page=abc/);
+    },
+  );
 
-  test("lists the payments of the account in accountId", async ({ page }) => {
-    const accountId = getAccountId();
-    const request = paymentListRequest(
-      page,
-      (params) => params.get("account") === accountId,
-    );
+  test(
+    "lists the payments of the account in accountId",
+    { tag: ["@atomic", "@cap:billing.payment.filter"] },
+    async ({ page }) => {
+      const accountId = getAccountId();
+      const request = paymentListRequest(
+        page,
+        (params) => params.get("account") === accountId,
+      );
 
-    await page.goto(listUrl({ accountId }));
-    await request;
+      await page.goto(listUrl({ accountId }));
+      await request;
 
-    await expect(page).toHaveURL(new RegExp(`[?&]accountId=${accountId}(&|$)`));
-  });
+      await expect(page).toHaveURL(
+        new RegExp(`[?&]accountId=${accountId}(&|$)`),
+      );
+    },
+  );
 });

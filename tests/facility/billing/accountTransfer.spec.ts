@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Page, expect, test } from "@playwright/test";
+import { createAccount } from "tests/helper/billing";
 import { createTestPatient } from "tests/helper/patient";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
@@ -15,30 +16,16 @@ interface AccountInfo {
   patient?: string;
 }
 
-async function createAccount(
+/**
+ * Creates an account with the shared billing helper. The API returns the
+ * whole account, which `updateAccount` sends back.
+ */
+async function createAccountInfo(
   facilityId: string,
   patientId: string,
   opts: { name: string; status: string; billing_status: string },
 ): Promise<AccountInfo> {
-  const res = await fetch(
-    `${getApiUrl()}/api/v1/facility/${facilityId}/account/`,
-    {
-      method: "POST",
-      headers: getApiHeaders(),
-      body: JSON.stringify({
-        name: opts.name,
-        status: opts.status,
-        billing_status: opts.billing_status,
-        patient: patientId,
-        service_period: { start: new Date().toISOString() },
-      }),
-    },
-  );
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Failed to create account: ${res.status} — ${text}`);
-  }
-  return (await res.json()) as AccountInfo;
+  return (await createAccount(facilityId, patientId, opts)) as AccountInfo;
 }
 
 async function updateAccount(
@@ -140,25 +127,27 @@ test.describe("Account Transfer Payment", () => {
   let billingAccount: AccountInfo;
   let nonActiveAccounts: AccountInfo[];
 
-  test.beforeAll(async () => {
+  // Every test seeds its own patient and accounts: the transfer tests move
+  // money out of the source account, so sharing them couples the tests.
+  test.beforeEach(async () => {
     // Create a dedicated patient so we don't interfere with other tests
     patientId = await createTestPatient("Transfer Test");
 
     const suffix = faker.string.alphanumeric(6);
 
-    sourceAccount = await createAccount(facilityId, patientId, {
+    sourceAccount = await createAccountInfo(facilityId, patientId, {
       name: `Source CareComplete ${suffix}`,
       status: "active",
       billing_status: "carecomplete_notbilled",
     });
 
-    targetAccount = await createAccount(facilityId, patientId, {
+    targetAccount = await createAccountInfo(facilityId, patientId, {
       name: `Target Open ${suffix}`,
       status: "active",
       billing_status: "open",
     });
 
-    billingAccount = await createAccount(facilityId, patientId, {
+    billingAccount = await createAccountInfo(facilityId, patientId, {
       name: `Billing Active ${suffix}`,
       status: "active",
       billing_status: "billing",
@@ -218,7 +207,7 @@ test.describe("Account Transfer Payment", () => {
     nonActiveAccounts = [];
     for (const config of nonActiveConfigs) {
       nonActiveAccounts.push(
-        await createAccount(facilityId, patientId, config),
+        await createAccountInfo(facilityId, patientId, config),
       );
     }
 
@@ -226,191 +215,205 @@ test.describe("Account Transfer Payment", () => {
     await recordPayment(facilityId, sourceAccount.id, "500");
   });
 
-  test.afterAll(async () => {
+  test.afterEach(async () => {
     // Deactivate accounts to avoid conflicts on re-runs
     if (sourceAccount) await deactivateAccount(facilityId, sourceAccount);
     if (targetAccount) await deactivateAccount(facilityId, targetAccount);
     if (billingAccount) await deactivateAccount(facilityId, billingAccount);
   });
 
-  test("should show more options dropdown only for active accounts", async ({
-    page,
-  }) => {
-    // Active accounts with different billing statuses — all show dropdown with menu items
-    for (const account of [sourceAccount, targetAccount, billingAccount]) {
-      await page.goto(`/facility/${facilityId}/billing/account/${account.id}`);
-      await expect(page.getByText(account.name)).toBeVisible();
-      await expect(page.locator(moreOptionsSelector).first()).toBeVisible();
+  test(
+    "should show more options dropdown only for active accounts",
+    { tag: ["@atomic", "@cap:billing.payment.transfer"] },
+    async ({ page }) => {
+      // Active accounts with different billing statuses — all show dropdown with menu items
+      for (const account of [sourceAccount, targetAccount, billingAccount]) {
+        await page.goto(
+          `/facility/${facilityId}/billing/account/${account.id}`,
+        );
+        await expect(page.getByText(account.name)).toBeVisible();
+        await expect(page.locator(moreOptionsSelector).first()).toBeVisible();
 
-      // Open dropdown and verify menu items are present
-      await page.locator(moreOptionsSelector).first().click();
-      await expect(
-        page.getByRole("menuitem", { name: /Transfer Payment/i }),
-      ).toBeVisible();
-      await expect(
-        page.getByRole("menuitem", { name: /Record Credit Note/i }),
-      ).toBeVisible();
-      // Close dropdown before navigating
-      await page.keyboard.press("Escape");
-    }
+        // Open dropdown and verify menu items are present
+        await page.locator(moreOptionsSelector).first().click();
+        await expect(
+          page.getByRole("menuitem", { name: /Transfer Payment/i }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("menuitem", { name: /Record Credit Note/i }),
+        ).toBeVisible();
+        // Close dropdown before navigating
+        await page.keyboard.press("Escape");
+      }
 
-    // Non-active statuses × all billing statuses — no dropdown
-    for (const account of nonActiveAccounts) {
-      await page.goto(`/facility/${facilityId}/billing/account/${account.id}`);
-      await expect(page.getByText(account.name)).toBeVisible();
-      await expect(page.locator(moreOptionsSelector)).not.toBeVisible();
-    }
-  });
+      // Non-active statuses × all billing statuses — no dropdown
+      for (const account of nonActiveAccounts) {
+        await page.goto(
+          `/facility/${facilityId}/billing/account/${account.id}`,
+        );
+        await expect(page.getByText(account.name)).toBeVisible();
+        await expect(page.locator(moreOptionsSelector)).toBeHidden();
+      }
+    },
+  );
 
-  test("should transfer payment between two active accounts", async ({
-    page,
-  }) => {
-    await page.goto(
-      `/facility/${facilityId}/billing/account/${sourceAccount.id}`,
-    );
-    await expect(page.getByText(sourceAccount.name)).toBeVisible();
+  test(
+    "should transfer payment between two active accounts",
+    { tag: ["@atomic", "@cap:billing.payment.transfer"] },
+    async ({ page }) => {
+      await page.goto(
+        `/facility/${facilityId}/billing/account/${sourceAccount.id}`,
+      );
+      await expect(page.getByText(sourceAccount.name)).toBeVisible();
 
-    await openTransferPaymentSheet(page);
+      await openTransferPaymentSheet(page);
 
-    const amount = faker.number.int({ min: 1, max: 10 }).toString();
-    await page.getByPlaceholder("Enter amount").fill(amount);
+      const amount = faker.number.int({ min: 1, max: 10 }).toString();
+      await page.getByPlaceholder("Enter amount").fill(amount);
 
-    // The backend doesn't restrict the target's status, so non-active
-    // accounts are offered too
-    await expect(page.getByText(targetAccount.name)).toBeVisible();
-    await expect(page.getByText(nonActiveAccounts[0].name)).toBeVisible();
+      // The backend doesn't restrict the target's status, so non-active
+      // accounts are offered too
+      await expect(page.getByText(targetAccount.name)).toBeVisible();
+      await expect(page.getByText(nonActiveAccounts[0].name)).toBeVisible();
 
-    await page.getByText(targetAccount.name).click();
+      await page.getByText(targetAccount.name).click();
 
-    await page
-      .locator("[data-slot='sheet-footer']")
-      .getByRole("button", { name: /transfer payment/i })
-      .click();
-
-    await expect(
-      page.getByText(/payment.*transferred.*successfully/i),
-    ).toBeVisible();
-
-    // Verify outgoing transfer on source account's Payments tab
-    await page.goto(
-      `/facility/${facilityId}/billing/account/${sourceAccount.id}/payments`,
-    );
-    await expect(page.getByText("Outgoing Transfer").first()).toBeVisible();
-
-    // Click View on the outgoing transfer to see payment detail
-    const outgoingRow = page
-      .locator("tr", { hasText: "Outgoing Transfer" })
-      .first();
-    await outgoingRow.getByRole("link", { name: /view/i }).click();
-    await page.waitForURL(/\/billing\/payments\//);
-
-    // Verify payment detail page for outgoing transfer. Wait for text that
-    // only the detail page has: the previous page can stay on screen until
-    // the new route has loaded.
-    await expect(
-      page.getByText(`Transferred to account ${targetAccount.id}`),
-    ).toBeVisible();
-    await expect(page.getByText("Outgoing Transfer").first()).toBeVisible();
-    await expect(page.getByText("Cash").first()).toBeVisible();
-    await expect(page.getByText("Active")).toBeVisible();
-    await expect(page.getByText("Complete")).toBeVisible();
-
-    // Verify incoming transfer on target account's Payments tab
-    await page.goto(
-      `/facility/${facilityId}/billing/account/${targetAccount.id}/payments`,
-    );
-    await expect(page.getByText("Incoming Transfer").first()).toBeVisible();
-
-    // Click View on the incoming transfer to see payment detail
-    const incomingRow = page
-      .locator("tr", { hasText: "Incoming Transfer" })
-      .first();
-    await incomingRow.getByRole("link", { name: /view/i }).click();
-    await page.waitForURL(/\/billing\/payments\//);
-
-    // Verify payment detail page for incoming transfer. Wait for text that
-    // only the detail page has: the previous page can stay on screen until
-    // the new route has loaded.
-    await expect(
-      page.getByText(`Transferred from account ${sourceAccount.id}`),
-    ).toBeVisible();
-    await expect(page.getByText("Incoming Transfer").first()).toBeVisible();
-    await expect(page.getByText("Cash").first()).toBeVisible();
-    await expect(page.getByText("Active")).toBeVisible();
-    await expect(page.getByText("Complete")).toBeVisible();
-  });
-
-  test("should show error when transfer amount exceeds total paid", async ({
-    page,
-  }) => {
-    // Fetch actual total_paid after the recorded payment
-    const accountData = await getAccount(facilityId, sourceAccount.id);
-    const totalPaid = parseFloat(accountData.total_paid || "0");
-    expect(totalPaid).toBeGreaterThan(0);
-
-    await page.goto(
-      `/facility/${facilityId}/billing/account/${sourceAccount.id}`,
-    );
-    await expect(page.getByText(sourceAccount.name)).toBeVisible();
-
-    await openTransferPaymentSheet(page);
-
-    // Try transferring ₹1 more than total_paid — should show error
-    const excessAmount = (totalPaid + 1).toString();
-    await page.getByPlaceholder("Enter amount").fill(excessAmount);
-    await page.getByText(targetAccount.name).click();
-
-    await page
-      .locator("[data-slot='sheet-footer']")
-      .getByRole("button", { name: /transfer payment/i })
-      .click();
-
-    await expect(
-      page.getByText(/transfer amount cannot exceed the total paid amount/i),
-    ).toBeVisible();
-  });
-
-  test("should disable transfer button when amount is zero or negative", async ({
-    page,
-  }) => {
-    await page.goto(
-      `/facility/${facilityId}/billing/account/${sourceAccount.id}`,
-    );
-    await expect(page.getByText(sourceAccount.name)).toBeVisible();
-
-    await openTransferPaymentSheet(page);
-    await page.getByText(targetAccount.name).click();
-
-    const transferButton = page
-      .locator("[data-slot='sheet-footer']")
-      .getByRole("button", { name: /transfer payment/i });
-
-    // Zero amount — disabled
-    await page.getByPlaceholder("Enter amount").fill("0");
-    await expect(transferButton).toBeDisabled();
-
-    // Negative amount — disabled
-    await page.getByPlaceholder("Enter amount").fill("-100");
-    await expect(transferButton).toBeDisabled();
-  });
-
-  test("should disable transfer button without selecting target account", async ({
-    page,
-  }) => {
-    await page.goto(
-      `/facility/${facilityId}/billing/account/${sourceAccount.id}`,
-    );
-    await expect(page.getByText(sourceAccount.name)).toBeVisible();
-
-    await openTransferPaymentSheet(page);
-
-    const amount = faker.number.int({ min: 100, max: 1000 }).toString();
-    await page.getByPlaceholder("Enter amount").fill(amount);
-
-    await expect(
-      page
+      await page
         .locator("[data-slot='sheet-footer']")
-        .getByRole("button", { name: /transfer payment/i }),
-    ).toBeDisabled();
-  });
+        .getByRole("button", { name: /transfer payment/i })
+        .click();
+
+      await expect(
+        page.getByText(/payment.*transferred.*successfully/i),
+      ).toBeVisible();
+
+      // Verify outgoing transfer on source account's Payments tab
+      await page.goto(
+        `/facility/${facilityId}/billing/account/${sourceAccount.id}/payments`,
+      );
+      await expect(page.getByText("Outgoing Transfer").first()).toBeVisible();
+
+      // Click View on the outgoing transfer to see payment detail
+      const outgoingRow = page
+        .locator("tr", { hasText: "Outgoing Transfer" })
+        .first();
+      await outgoingRow.getByRole("link", { name: /view/i }).click();
+      await page.waitForURL(/\/billing\/payments\//);
+
+      // Verify payment detail page for outgoing transfer. Wait for text that
+      // only the detail page has: the previous page can stay on screen until
+      // the new route has loaded.
+      await expect(
+        page.getByText(`Transferred to account ${targetAccount.id}`),
+      ).toBeVisible();
+      await expect(page.getByText("Outgoing Transfer").first()).toBeVisible();
+      await expect(page.getByText("Cash").first()).toBeVisible();
+      await expect(page.getByText("Active")).toBeVisible();
+      await expect(page.getByText("Complete")).toBeVisible();
+
+      // Verify incoming transfer on target account's Payments tab
+      await page.goto(
+        `/facility/${facilityId}/billing/account/${targetAccount.id}/payments`,
+      );
+      await expect(page.getByText("Incoming Transfer").first()).toBeVisible();
+
+      // Click View on the incoming transfer to see payment detail
+      const incomingRow = page
+        .locator("tr", { hasText: "Incoming Transfer" })
+        .first();
+      await incomingRow.getByRole("link", { name: /view/i }).click();
+      await page.waitForURL(/\/billing\/payments\//);
+
+      // Verify payment detail page for incoming transfer. Wait for text that
+      // only the detail page has: the previous page can stay on screen until
+      // the new route has loaded.
+      await expect(
+        page.getByText(`Transferred from account ${sourceAccount.id}`),
+      ).toBeVisible();
+      await expect(page.getByText("Incoming Transfer").first()).toBeVisible();
+      await expect(page.getByText("Cash").first()).toBeVisible();
+      await expect(page.getByText("Active")).toBeVisible();
+      await expect(page.getByText("Complete")).toBeVisible();
+    },
+  );
+
+  test(
+    "should show error when transfer amount exceeds total paid",
+    { tag: ["@atomic", "@cap:billing.payment.transfer"] },
+    async ({ page }) => {
+      // Fetch actual total_paid after the recorded payment
+      const accountData = await getAccount(facilityId, sourceAccount.id);
+      const totalPaid = parseFloat(accountData.total_paid || "0");
+      expect(totalPaid).toBeGreaterThan(0);
+
+      await page.goto(
+        `/facility/${facilityId}/billing/account/${sourceAccount.id}`,
+      );
+      await expect(page.getByText(sourceAccount.name)).toBeVisible();
+
+      await openTransferPaymentSheet(page);
+
+      // Try transferring ₹1 more than total_paid — should show error
+      const excessAmount = (totalPaid + 1).toString();
+      await page.getByPlaceholder("Enter amount").fill(excessAmount);
+      await page.getByText(targetAccount.name).click();
+
+      await page
+        .locator("[data-slot='sheet-footer']")
+        .getByRole("button", { name: /transfer payment/i })
+        .click();
+
+      await expect(
+        page.getByText(/transfer amount cannot exceed the total paid amount/i),
+      ).toBeVisible();
+    },
+  );
+
+  test(
+    "should disable transfer button when amount is zero or negative",
+    { tag: ["@atomic", "@cap:billing.payment.transfer"] },
+    async ({ page }) => {
+      await page.goto(
+        `/facility/${facilityId}/billing/account/${sourceAccount.id}`,
+      );
+      await expect(page.getByText(sourceAccount.name)).toBeVisible();
+
+      await openTransferPaymentSheet(page);
+      await page.getByText(targetAccount.name).click();
+
+      const transferButton = page
+        .locator("[data-slot='sheet-footer']")
+        .getByRole("button", { name: /transfer payment/i });
+
+      // Zero amount — disabled
+      await page.getByPlaceholder("Enter amount").fill("0");
+      await expect(transferButton).toBeDisabled();
+
+      // Negative amount — disabled
+      await page.getByPlaceholder("Enter amount").fill("-100");
+      await expect(transferButton).toBeDisabled();
+    },
+  );
+
+  test(
+    "should disable transfer button without selecting target account",
+    { tag: ["@atomic", "@cap:billing.payment.transfer"] },
+    async ({ page }) => {
+      await page.goto(
+        `/facility/${facilityId}/billing/account/${sourceAccount.id}`,
+      );
+      await expect(page.getByText(sourceAccount.name)).toBeVisible();
+
+      await openTransferPaymentSheet(page);
+
+      const amount = faker.number.int({ min: 100, max: 1000 }).toString();
+      await page.getByPlaceholder("Enter amount").fill(amount);
+
+      await expect(
+        page
+          .locator("[data-slot='sheet-footer']")
+          .getByRole("button", { name: /transfer payment/i }),
+      ).toBeDisabled();
+    },
+  );
 });

@@ -14,65 +14,71 @@ test.describe("Payment Sheet URL Persistence", () => {
   test.describe("facility admin", () => {
     test.use({ storageState: "tests/.auth/facilityAdmin.json" });
 
-    test("advance payment slideover persists after page refresh", async ({
-      page,
-    }) => {
-      await page.goto(`/facility/${facilityId}/billing/account/${accountId}`);
+    test(
+      "advance payment slideover persists after page refresh",
+      { tag: ["@atomic", "@cap:billing.payment.sheet.navigate"] },
+      async ({ page }) => {
+        await page.goto(`/facility/${facilityId}/billing/account/${accountId}`);
 
-      await page.getByRole("button", { name: "Advance/Receipt" }).click();
+        await page.getByRole("button", { name: "Advance/Receipt" }).click();
 
-      const paymentSheet = page.locator("[role='dialog']").filter({
-        has: page.getByRole("heading", {
-          name: /collect payment|record credit note/i,
-        }),
-      });
-      await expect(paymentSheet).toBeVisible();
-      await expect(page).toHaveURL(/\/payment\/pay/);
+        const paymentSheet = page.locator("[role='dialog']").filter({
+          has: page.getByRole("heading", {
+            name: /collect payment|record credit note/i,
+          }),
+        });
+        await expect(paymentSheet).toBeVisible();
+        await expect(page).toHaveURL(/\/payment\/pay/);
 
-      await page.reload();
+        await page.reload();
 
-      // After reload, the sheet should still be open with the form (not success view)
-      await expect(paymentSheet).toBeVisible();
-      await expect(page).toHaveURL(/\/payment\/pay/);
-    });
+        // After reload, the sheet should still be open with the form (not success view)
+        await expect(paymentSheet).toBeVisible();
+        await expect(page).toHaveURL(/\/payment\/pay/);
+      },
+    );
 
-    test("payment sheet closes and URL clears when dismissed", async ({
-      page,
-    }) => {
-      await page.goto(
-        `/facility/${facilityId}/billing/account/${accountId}/invoices/payment/pay`,
-      );
+    test(
+      "payment sheet closes and URL clears when dismissed",
+      { tag: ["@atomic", "@cap:billing.payment.sheet.navigate"] },
+      async ({ page }) => {
+        await page.goto(
+          `/facility/${facilityId}/billing/account/${accountId}/invoices/payment/pay`,
+        );
 
-      const paymentSheet = page.locator("[role='dialog']").filter({
-        has: page.getByRole("heading", {
-          name: /collect payment|record credit note/i,
-        }),
-      });
-      await expect(paymentSheet).toBeVisible();
+        const paymentSheet = page.locator("[role='dialog']").filter({
+          has: page.getByRole("heading", {
+            name: /collect payment|record credit note/i,
+          }),
+        });
+        await expect(paymentSheet).toBeVisible();
 
-      // Close via the sheet's close button
-      await paymentSheet.getByRole("button", { name: /close/i }).click();
+        // Close via the sheet's close button
+        await paymentSheet.getByRole("button", { name: /close/i }).click();
 
-      await expect(paymentSheet).not.toBeVisible();
-      await expect(page).not.toHaveURL(/\/payment\//);
-    });
+        await expect(paymentSheet).toBeHidden();
+        await expect(page).not.toHaveURL(/\/payment\//);
+      },
+    );
 
-    test("credit note slideover persists after page refresh", async ({
-      page,
-    }) => {
-      await page.goto(
-        `/facility/${facilityId}/billing/account/${accountId}/invoices/payment/credit_note`,
-      );
+    test(
+      "credit note slideover persists after page refresh",
+      { tag: ["@atomic", "@cap:billing.payment.sheet.navigate"] },
+      async ({ page }) => {
+        await page.goto(
+          `/facility/${facilityId}/billing/account/${accountId}/invoices/payment/credit_note`,
+        );
 
-      const creditNoteSheet = page.locator("[role='dialog']").filter({
-        has: page.getByRole("heading", { name: /record credit note/i }),
-      });
-      await expect(creditNoteSheet).toBeVisible();
+        const creditNoteSheet = page.locator("[role='dialog']").filter({
+          has: page.getByRole("heading", { name: /record credit note/i }),
+        });
+        await expect(creditNoteSheet).toBeVisible();
 
-      await page.reload();
+        await page.reload();
 
-      await expect(creditNoteSheet).toBeVisible();
-      await expect(page).toHaveURL(/\/payment\/credit_note/);
-    });
+        await expect(creditNoteSheet).toBeVisible();
+        await expect(page).toHaveURL(/\/payment\/credit_note/);
+      },
+    );
   });
 });
