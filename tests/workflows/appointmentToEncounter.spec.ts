@@ -48,6 +48,11 @@ test(
         await expect(
           sheet.getByRole("combobox", { name: "Status", exact: true }),
         ).toContainText("Planned");
+        // The seeded service schedule has no encounter type, so the sheet
+        // preselects no class and blocks submit with "Required".
+        const ambulatory = sheet.getByRole("button", { name: /^Ambulatory\b/ });
+        await ambulatory.click();
+        await expect(ambulatory).toHaveAttribute("aria-pressed", "true");
         const created = page.waitForResponse(
           (response) =>
             response.request().method() === "POST" &&
