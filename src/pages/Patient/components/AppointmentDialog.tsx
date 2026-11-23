@@ -1,10 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-
-import { cn } from "@/lib/utils";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -18,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { PatientAge } from "@/components/Patient/PatientAge";
+import { navigate } from "@/lib/router/navigate";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
@@ -58,9 +56,14 @@ function AppointmentDialog({
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const handleRescheduleAppointment = (appointment: PublicAppointment) => {
     // TODO: I am pretty sure this is not correct
-    navigate(
-      `/facility/${appointment.facility.id}/appointments/${appointment.resource.id}/reschedule/${appointment.id}`,
-    );
+    navigate({
+      to: "/facility/$facilityId/appointments/$staffId/reschedule/$appointmentId",
+      params: {
+        facilityId: appointment.facility.id,
+        staffId: appointment.resource.id,
+        appointmentId: appointment.id,
+      },
+    });
   };
   const { mutate: cancelAppointment, isPending } = useMutation({
     mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
@@ -158,9 +161,7 @@ function AppointmentDialog({
                         {t("cancel")}
                       </AlertDialogCancel>
                       <AlertDialogAction
-                        className={cn(
-                          buttonVariants({ variant: "destructive" }),
-                        )}
+                        variant="destructive"
                         onClick={() => {
                           cancelAppointment({
                             appointment: appointment.id,

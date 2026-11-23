@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   Bed,
@@ -9,7 +10,6 @@ import {
   Package,
   Pill,
 } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TagBadges } from "@/components/Tags/TagBadges";
 
 import query from "@/Utils/request/query";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -48,6 +49,8 @@ export function LocationOverview({
     }),
   });
 
+  const isStore = location?.inventory_usage === "store";
+
   const linkGroups = [
     {
       title: t("patient_care"),
@@ -73,14 +76,19 @@ export function LocationOverview({
         { label: t("items"), path: "/inventory/summary" },
         { label: t("to_receive"), path: "/inventory/internal/receive/" },
         { label: t("to_dispatch"), path: "/inventory/internal/dispatch/" },
-        {
-          label: t("purchase_orders"),
-          path: "/inventory/external/orders/outgoing",
-        },
-        {
-          label: t("purchase_deliveries"),
-          path: "/inventory/external/deliveries/incoming",
-        },
+        // External supply is only for Store locations
+        ...(isStore
+          ? [
+              {
+                label: t("purchase_orders"),
+                path: "/inventory/external/orders/outgoing",
+              },
+              {
+                label: t("purchase_deliveries"),
+                path: "/inventory/external/deliveries/incoming",
+              },
+            ]
+          : []),
       ],
     },
     {
@@ -204,8 +212,8 @@ export function LocationOverview({
               }
             />
             <Link
-              basePath="/"
-              href={`${baseUrl}/responses`}
+              to="/facility/$facilityId/locations/$locationId/responses"
+              params={{ facilityId, locationId }}
               className="group flex items-center gap-4 rounded-[10px] border border-neutral-200 bg-white p-4 shadow-xs transition-colors hover:bg-neutral-100/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
             >
               <ClipboardList
@@ -256,8 +264,7 @@ export function LocationOverview({
                 <ul className="p-2">
                   {links.map(({ label, path }) => (
                     <li key={path}>
-                      <Link
-                        basePath="/"
+                      <HrefLink
                         href={`${baseUrl}${path}`}
                         className="group flex min-h-12 md:min-h-10 items-center justify-between gap-3 rounded-md px-2 py-2 text-sm text-neutral-700 hover:bg-neutral-100/50 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                       >
@@ -266,7 +273,7 @@ export function LocationOverview({
                           className="size-4 shrink-0 text-neutral-400 group-hover:text-neutral-700"
                           aria-hidden="true"
                         />
-                      </Link>
+                      </HrefLink>
                     </li>
                   ))}
                 </ul>

@@ -49,14 +49,33 @@ test.describe("Activity Definition Resource Category List", () => {
 
     const slugInput = page.getByPlaceholder(/enter category slug/i);
     await expect(getFieldErrorMessage(slugInput)).toContainText(
-      /atleast 5.*atmost 50/i,
+      /at least 5.*at most 50/i,
     );
 
     await slugInput.click();
     await slugInput.fill("abc");
     await expect(getFieldErrorMessage(slugInput)).toContainText(
-      /atleast 5.*atmost 50/i,
+      /at least 5.*at most 50/i,
     );
+  });
+
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: /add category/i }).click();
+
+    await expect(
+      page.getByRole("heading", { name: /create category/i }),
+    ).toBeVisible();
+
+    const titleInput = page.getByPlaceholder(/enter category title/i);
+    await titleInput.fill("   ");
+
+    await page.getByRole("button", { name: /create category/i }).click();
+
+    const errorMessage = getFieldErrorMessage(titleInput);
+    await expect(errorMessage).toBeVisible();
+    await expect(errorMessage).toHaveText("This field is required");
   });
 
   test("should create category with required fields only", async ({ page }) => {

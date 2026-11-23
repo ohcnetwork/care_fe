@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isBefore, parseISO, startOfDay } from "date-fns";
-import { useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -10,7 +9,6 @@ import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -35,10 +33,13 @@ import {
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
 import {
   getAppointmentsSchedulingTimeZone,
   getClinicTodayDate,
 } from "@/pages/Appointments/schedulingTimeZone";
+import { ScheduleValidityField } from "@/pages/Scheduling/components/ScheduleValidityField";
 import {
   isScheduleStartTimeInFutureInZone,
   isScheduleTimeBefore,
@@ -69,13 +70,13 @@ export default function CreateScheduleExceptionSheet({
   const queryClient = useQueryClient();
 
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
-  const [qParams, _setQParams] = useQueryParams<QueryParams>();
+  const [qParams, _setQParams] = useQueryParams(scheduleHomeSearch);
   const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
   const clinicToday = getClinicTodayDate();
 
   const formSchema = z
     .object({
-      reason: z.string().min(1, t("field_required")),
+      reason: z.string().trim().min(1, t("field_required")),
       valid_from: z
         .date({ error: t("field_required") })
         .min(startOfDay(clinicToday), {
@@ -142,6 +143,9 @@ export default function CreateScheduleExceptionSheet({
     },
   });
 
+  // The URL holds local calendar dates (YYYY-MM-DD). `new Date()` would read
+  // them as UTC midnight, the previous day west of UTC; parseISO reads them as
+  // local midnight.
   useEffect(() => {
     if (qParams.valid_from) {
       form.setValue("valid_from", parseISO(qParams.valid_from));
@@ -248,45 +252,7 @@ export default function CreateScheduleExceptionSheet({
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                  <FormField
-                    control={form.control}
-                    name="valid_from"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel aria-required>{t("valid_from")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          today={clinicToday}
-                          disabled={(date) =>
-                            isBefore(startOfDay(date), startOfDay(clinicToday))
-                          }
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="valid_to"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel aria-required>{t("valid_to")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          today={clinicToday}
-                          disabled={(date) =>
-                            isBefore(startOfDay(date), startOfDay(clinicToday))
-                          }
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <ScheduleValidityField disablePast />
 
                 <FormField
                   control={form.control}

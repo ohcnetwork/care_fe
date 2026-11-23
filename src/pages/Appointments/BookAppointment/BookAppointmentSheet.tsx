@@ -11,12 +11,14 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQueryParams } from "raviger";
 
 import { SchedulingTimeZoneCallout } from "@/pages/Appointments/components/SchedulingTimeZoneCallout";
 
 import { BookAppointmentDetails } from "./BookAppointmentDetails";
 import { BookingsList } from "./BookingsList";
+
+import { useQueryParams } from "@/lib/router/queryParams";
+import { bookAppointmentSheetSearch } from "@/lib/router/search/appointments";
 
 interface Props {
   patientId: string;
@@ -33,10 +35,10 @@ export default function BookAppointmentSheet({
   onSuccess,
   defaultOpen,
 }: Props) {
-  const [qParams] = useQueryParams();
+  const [qParams] = useQueryParams(bookAppointmentSheetSearch);
   const referralContext = useAppointmentReferral(patientId);
   const [isOpen, setIsOpen] = useState(
-    defaultOpen || qParams.open_schedule === "true",
+    defaultOpen || qParams.open_schedule === true,
   );
   const { t } = useTranslation();
 
@@ -62,7 +64,7 @@ export default function BookAppointmentSheet({
             <SchedulingTimeZoneCallout />
           </div>
           <Tabs defaultValue="appointment">
-            <div className="max-w-full overflow-x-auto pb-1">
+            <div className="max-w-full overflow-x-auto">
               <TabsList variant="line">
                 <TabsTrigger value="appointment">
                   {t("book_appointment")}

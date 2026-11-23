@@ -15,7 +15,9 @@ import type {
   QuestionType,
 } from "@/types/emr/observationDefinition/observationDefinition";
 
-import { createServiceRequest } from "./serviceRequest";
+import { createServiceRequest, reportTypeCombobox } from "./serviceRequest";
+
+const COMPONENT_RESULT = "96.5";
 
 test.use({
   storageState: "tests/.auth/user.json",
@@ -44,12 +46,7 @@ function getObservationGroup(
 }
 
 async function createReport(page: Page, reportType: string) {
-  await page
-    .getByRole("combobox", {
-      name: "Select Diagnostic Report Type",
-      exact: true,
-    })
-    .click();
+  await reportTypeCombobox(page).click();
   await page.getByRole("option", { name: reportType }).click();
   const created = page.waitForResponse(
     (response) =>
@@ -94,13 +91,14 @@ async function selectResultAction(
   action: "Add Another Result" | "Remove observation",
   resultNumber = 1,
 ) {
-  await observationGroup
-    .getByRole("button", {
-      name: `Result actions ${resultNumber}`,
-      exact: true,
-    })
-    .click();
-  await page.getByRole("menuitem", { name: action, exact: true }).click();
+  const name = `Result actions ${resultNumber}`;
+  await observationGroup.getByRole("button", { name, exact: true }).click();
+  // Scope to this result's menu: the menu of the previous action can still be
+  // mounted while it animates out, and it has the same items. Two groups can
+  // also share a menu name, so wait for this one to unmount before returning.
+  const menu = page.getByRole("menu", { name, exact: true });
+  await menu.getByRole("menuitem", { name: action, exact: true }).click();
+  await expect(menu).toBeHidden();
 }
 
 async function saveResults(page: Page, entry: Locator) {
@@ -339,7 +337,7 @@ test.describe("Additional diagnostic report observations", () => {
       await expect(secondEntry.getByText(textDefinition.title)).toHaveCount(0);
 
       await addObservation(page, secondEntry, componentDefinition);
-      await componentInputs.fill("96.5");
+      await componentInputs.fill(COMPONENT_RESULT);
       await expect(firstEntry.getByText(componentDefinition.title)).toHaveCount(
         0,
       );
@@ -351,7 +349,7 @@ test.describe("Additional diagnostic report observations", () => {
 
     await test.step("Saving one report preserves the other's added draft", async () => {
       await saveResults(page, firstEntry);
-      await expect(componentInputs).toHaveValue("96.5");
+      await expect(componentInputs).toHaveValue(COMPONENT_RESULT);
       await saveResults(page, secondEntry);
       const firstResults = await readObservations(firstReportId);
       expect(firstResults).toHaveLength(2);
@@ -370,7 +368,7 @@ test.describe("Additional diagnostic report observations", () => {
           {
             code: componentDefinition.component![0].code,
             value: {
-              value: "96.5",
+              value: COMPONENT_RESULT,
               unit: componentDefinition.component![0].permitted_unit,
             },
           },
@@ -386,7 +384,7 @@ test.describe("Additional diagnostic report observations", () => {
       await expect(textCard.getByPlaceholder("Result value")).toHaveValue(
         "No growth detected",
       );
-      await expect(componentInputs).toHaveValue("96.5");
+      await expect(componentInputs).toHaveValue(COMPONENT_RESULT);
 
       await page.screenshot({
         path: testInfo.outputPath("extra-observations-saved.png"),

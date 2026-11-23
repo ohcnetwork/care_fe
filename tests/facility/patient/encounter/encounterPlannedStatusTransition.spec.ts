@@ -1,11 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
-import {
-  getEncounterCreateDialog,
-  openCalendarAndGetNextMonthButton,
-  openCreateEncounterDialog,
-  selectStatusInCreateDialog,
-} from "tests/facility/patient/encounter/encounterFormHelpers";
-import { expectToast } from "tests/helper/ui";
+import { addDays } from "date-fns";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import { expectAndDismissToast, expectToast } from "tests/helper/ui";
+import { getApiHeaders, getApiUrl } from "tests/helper/utils";
+import { getFacilityId } from "tests/support/facilityId";
 
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 
@@ -19,31 +17,18 @@ async function createPlannedEncounter(
   start: "past" | "future",
   encounterClass: "Ambulatory" | "Inpatient" = "Ambulatory",
 ) {
-  await openCreateEncounterDialog(page);
-  const dialog = getEncounterCreateDialog(page);
-  await dialog
-    .getByRole("button", { name: new RegExp(`^${encounterClass}`) })
-    .click();
-  await selectStatusInCreateDialog(page, "Planned");
-  await openCalendarAndGetNextMonthButton(page);
-  await page
-    .getByRole("button", {
-      name: `Go to the ${start === "future" ? "Next" : "Previous"} Month`,
-    })
-    .click();
-  await page
-    .getByRole("gridcell")
-    .filter({ hasText: /^15$/ })
-    .getByRole("button")
-    .click();
-
-  await Promise.all([
-    page.waitForURL(/\/encounter\/[^/]+/),
-    dialog.getByRole("button", { name: /^Create Encounter/ }).click(),
-  ]);
-  await expect(
-    page.getByRole("button", { name: "Encounter Actions" }),
-  ).toBeVisible();
+  const facilityId = getFacilityId();
+  const { patientId, encounterId } = await createQuestionnaireEncounter(
+    facilityId,
+    {
+      status: "planned",
+      encounterClass: encounterClass === "Inpatient" ? "imp" : "amb",
+      start: addDays(new Date(), start === "future" ? 7 : -7),
+    },
+  );
+  await page.goto(
+    `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+  );
 }
 
 // The update form's label isn't associated with its SelectTrigger yet.
@@ -85,10 +70,10 @@ async function submitQuestionnaire(page: Page) {
   await page.getByRole("button", { name: "Save Changes", exact: true }).click();
 }
 
+// Closes the toast too: a test that saves the form again (the cleanup
+// steps) must see that save's own toast, not this one.
 async function expectSubmissionSuccess(page: Page) {
-  await expect(
-    page.getByText("Questionnaire submitted successfully"),
-  ).toBeVisible();
+  await expectAndDismissToast(page, "Questionnaire submitted successfully");
 }
 
 async function cancelEncounterFromCurrentForm(page: Page) {
@@ -107,16 +92,11 @@ async function expectPersistedPeriod(
   )?.[1];
   expect(encounterId).toBeTruthy();
 
-  const [response] = await Promise.all([
-    page.waitForResponse(
-      (response) =>
-        new URL(response.url()).pathname ===
-          `/api/v1/encounter/${encounterId}/` &&
-        response.request().method() === "GET",
-    ),
-    page.reload(),
-  ]);
-  expect(response.ok()).toBeTruthy();
+  const response = await page.request.get(
+    `${getApiUrl()}/api/v1/encounter/${encounterId}/`,
+    { headers: getApiHeaders() },
+  );
+  await expect(response).toBeOK();
   const encounter: EncounterRead = await response.json();
   expect(encounter.status).toBe(status);
   if (hasEnd) {
@@ -131,9 +111,6 @@ async function expectPersistedPeriod(
 }
 
 test.describe("Planned Encounter Status Transition", () => {
-  // Tests share a patient with a limit of five live encounters.
-  test.describe.configure({ mode: "serial" });
-
   test.afterEach(async ({ page }, testInfo) => {
     if (testInfo.status === testInfo.expectedStatus) return;
     try {

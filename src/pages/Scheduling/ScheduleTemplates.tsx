@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Edit3Icon, Lock } from "lucide-react";
-import { useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -15,6 +14,8 @@ import ScheduleChargeItemDefinitionSelector from "@/pages/Scheduling/components/
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
 import { clinicCalendarDate } from "@/pages/Appointments/schedulingTimeZone";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
@@ -92,7 +93,7 @@ const ScheduleTemplateItem = ({
   resourceId: string;
 }) => {
   const { t } = useTranslation();
-  const [qParams, setQParams] = useQueryParams<{ edit: string | null }>();
+  const [qParams, setQParams] = useQueryParams(scheduleHomeSearch);
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(facilityApi.get, {

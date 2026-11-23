@@ -12,6 +12,7 @@ import {
   typeCollectedOptions,
 } from "tests/facility/settings/specimenDefinitions/specimenDefinitionConstants";
 import { getFieldErrorMessage } from "tests/helper/error";
+import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -65,8 +66,40 @@ test.describe("Specimen Definitions Create", () => {
       .fill(derivedFromURI);
 
     const collectionOption = faker.helpers.arrayElement(collectionOptions);
-    await page.getByRole("combobox", { name: "Collection" }).click();
+    await page
+      .getByRole("combobox", { name: "Collection", exact: true })
+      .click();
     await page.getByRole("option", { name: collectionOption }).click();
+
+    const expectedQuantity = page.getByRole("combobox", {
+      name: "Expected Quantity",
+    });
+    for (const invalidValue of [".", "1.999"]) {
+      await expectedQuantity.fill("3");
+      await expectedQuantity.fill(invalidValue);
+      await expectedQuantity.press("Escape");
+      await page.getByRole("button", { name: /save/i }).click();
+      await expect(expectedQuantity).toHaveAttribute("aria-invalid", "true");
+      await expect(expectedQuantity).toHaveAccessibleDescription(/quantity/i);
+    }
+    await expectedQuantity.fill("3.00");
+    await page
+      .getByRole("option", { name: "3.00 milliliter", exact: true })
+      .click();
+    await page
+      .getByRole("combobox", { name: "Collection Method", exact: true })
+      .click();
+    await page.getByRole("option", { name: "Aspiration - action" }).click();
+    await page
+      .getByRole("combobox", { name: "Body Site", exact: true })
+      .click();
+    await page
+      .getByPlaceholder("Select Body Site")
+      .fill("Distal phalanx of hallux");
+    await page
+      .getByRole("option", { name: /Distal phalanx of hallux/i })
+      .first()
+      .click();
 
     const preparationOption = faker.helpers.arrayElement(preparationOptions);
     await page.getByRole("button", { name: "Add" }).click();
@@ -89,7 +122,7 @@ test.describe("Specimen Definitions Create", () => {
 
     const retentionTime = faker.number.int(INT_MAX);
     await page
-      .getByRole("combobox", { name: "Enter Retention Time" })
+      .getByPlaceholder("Enter Retention Time", { exact: true })
       .fill(retentionTime.toString());
     // Pick the unit to commit the quantity and close the suggestions.
     await page
@@ -111,7 +144,7 @@ test.describe("Specimen Definitions Create", () => {
 
     const capacity = faker.number.int(INT_MAX);
     await page
-      .getByRole("combobox", { name: "Enter Capacity" })
+      .getByPlaceholder("Enter Capacity", { exact: true })
       .fill(capacity.toString());
     // Pick the unit to commit the quantity and close the suggestions.
     await page
@@ -132,8 +165,10 @@ test.describe("Specimen Definitions Create", () => {
     await page.getByRole("button", { name: /save/i }).click();
 
     // Apply status filter before searching
-    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
-    await page.getByRole("option", { name: status.toLowerCase() }).click();
+    await page.getByRole("button", { name: /^Status/ }).click();
+    await page
+      .getByRole("menuitemradio", { name: status.toLowerCase() })
+      .click();
 
     // Search for the newly created definition
     await page
@@ -158,6 +193,13 @@ test.describe("Specimen Definitions Create", () => {
     await expect(page.getByText(derivedFromURI)).toBeVisible();
     await expect(page.getByText(typeCollected)).toBeVisible();
     await expect(page.getByText(collectionOption)).toBeVisible();
+    await expect(page.getByText("3 milliliter", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Aspiration - action", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Distal phalanx of hallux", { exact: true }),
+    ).toBeVisible();
     await expect(page.getByText(preparationOption)).toBeVisible();
     await expect(
       page.getByText(new RegExp(`Is Derived${isDerived ? "Yes" : "No"}`, "i")),
@@ -207,8 +249,10 @@ test.describe("Specimen Definitions Create", () => {
     await page.getByRole("button", { name: /save/i }).click();
 
     // Apply status filter before searching
-    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
-    await page.getByRole("option", { name: status.toLowerCase() }).click();
+    await page.getByRole("button", { name: /^Status/ }).click();
+    await page
+      .getByRole("menuitemradio", { name: status.toLowerCase() })
+      .click();
 
     // Search for the newly created definition
     await page
@@ -262,6 +306,29 @@ test.describe("Specimen Definitions Create", () => {
     ).toBeVisible();
   });
 
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: "Add Definition" }).click();
+
+    const whitespace = "   ";
+    const fields = ["Title *", "Description *"];
+
+    for (const field of fields) {
+      await page.getByRole("textbox", { name: field }).fill(whitespace);
+    }
+
+    await page.getByRole("button", { name: /save/i }).click();
+
+    for (const field of fields) {
+      const errorMessage = getFieldErrorMessage(
+        page.getByRole("textbox", { name: field }),
+      );
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("This field is required");
+    }
+  });
+
   test("should auto-populate slug from title", async ({ page }) => {
     await page.getByRole("button", { name: "Add Definition" }).click();
 
@@ -303,7 +370,7 @@ test.describe("Specimen Definitions Create", () => {
       page.getByRole("textbox", { name: "Slug *" }),
     );
     await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText(/atleast \d+.*atmost 50/i);
+    await expect(errorMessage).toHaveText(/at least \d+.*at most 50/i);
 
     // Test: Slug too long (more than 50 characters)
     const longSlug = faker.string.alphanumeric(MAX_SLUG_LENGTH + 1);
@@ -313,7 +380,7 @@ test.describe("Specimen Definitions Create", () => {
     await page.getByRole("button", { name: /save/i }).click();
 
     await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText(/atleast \d+.*atmost 50/i);
+    await expect(errorMessage).toHaveText(/at least \d+.*at most 50/i);
 
     const validSlug = faker.string.alphanumeric(
       faker.number.int({ min: MIN_SLUG_LENGTH, max: MAX_SLUG_LENGTH }),
@@ -321,6 +388,38 @@ test.describe("Specimen Definitions Create", () => {
     await page.getByRole("textbox", { name: "Slug *" }).fill(validSlug);
     await page.getByRole("button", { name: /save/i }).click();
 
+    await expect(page).not.toHaveURL(/\/new$/);
+  });
+
+  test("should reject a malformed Derived From URI and save once it is cleared", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: "Add Definition" }).click();
+
+    await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
+    await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);
+    await page
+      .getByRole("textbox", { name: "Description *" })
+      .fill(definitionDescription);
+    await page.getByRole("combobox", { name: "Status *" }).click();
+    await page.getByRole("option", { name: status }).click();
+
+    await page.getByRole("combobox", { name: "Type Collected *" }).click();
+    await page.getByRole("option", { name: typeCollected }).click();
+
+    const derivedFromURIField = page.getByRole("textbox", {
+      name: "Derived From URI",
+    });
+    await derivedFromURIField.fill(faker.lorem.words(2));
+    await page.getByRole("button", { name: /save/i }).click();
+    await expect(getFieldErrorMessage(derivedFromURIField)).toHaveText(
+      "Please enter a valid URL",
+    );
+
+    await derivedFromURIField.clear();
+    await page.getByRole("button", { name: /save/i }).click();
+
+    await expectToast(page, "Specimen definition created");
     await expect(page).not.toHaveURL(/\/new$/);
   });
 });

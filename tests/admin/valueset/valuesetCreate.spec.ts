@@ -185,6 +185,62 @@ test.describe("ValueSet Create", () => {
     }
   });
 
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    const whitespace = "   ";
+    const ruleSection = (heading: string) =>
+      page
+        .locator("section")
+        .filter({
+          has: page.getByRole("heading", { name: heading, exact: true }),
+        })
+        .last();
+    const includeRules = ruleSection("Include rules");
+    const excludeRules = ruleSection("Exclude rules");
+    const filterFields = ["Property", "Operator", "Value"];
+
+    await page.getByRole("link", { name: "Create ValueSet" }).click();
+
+    // A rule holds either concepts or filters, so use one rule for each.
+    await test.step("Add a concept with a whitespace-only code", async () => {
+      await includeRules.getByRole("button", { name: "Add Rule" }).click();
+      await includeRules.getByRole("button", { name: "Add Concept" }).click();
+      await includeRules
+        .getByRole("textbox", { name: "Code" })
+        .fill(whitespace);
+    });
+
+    await test.step("Add a filter with whitespace-only fields", async () => {
+      await excludeRules.getByRole("button", { name: "Add Rule" }).click();
+      await excludeRules.getByText("Advanced: filter by properties").click();
+      await excludeRules.getByRole("button", { name: "Add Filter" }).click();
+      for (const field of filterFields) {
+        await excludeRules
+          .getByRole("textbox", { name: field })
+          .fill(whitespace);
+      }
+    });
+
+    await page.getByRole("button", { name: "Save ValueSet" }).click();
+
+    await test.step("Verify each field shows a required error", async () => {
+      const codeError = getFieldErrorMessage(
+        includeRules.getByRole("textbox", { name: "Code" }),
+      );
+      await expect(codeError).toBeVisible();
+      await expect(codeError).toHaveText("This field is required");
+
+      for (const field of filterFields) {
+        const errorMessage = getFieldErrorMessage(
+          excludeRules.getByRole("textbox", { name: field }),
+        );
+        await expect(errorMessage).toBeVisible();
+        await expect(errorMessage).toHaveText("This field is required");
+      }
+    });
+  });
+
   test("verify slug validation of 5 - 50 character", async ({ page }) => {
     await page.getByRole("link", { name: "Create ValueSet" }).click();
 
@@ -200,7 +256,7 @@ test.describe("ValueSet Create", () => {
     );
     await expect(errorMessage).toBeVisible();
     await expect(errorMessage).toHaveText(
-      new RegExp(`atleast \\d+.*atmost ${MAX_SLUG_LENGTH}`, "i"),
+      new RegExp(`at least \\d+.*at most ${MAX_SLUG_LENGTH}`, "i"),
     );
 
     // Test: Slug too long (more than 50 characters)
@@ -212,7 +268,7 @@ test.describe("ValueSet Create", () => {
 
     await expect(errorMessage).toBeVisible();
     await expect(errorMessage).toHaveText(
-      new RegExp(`atleast \\d+.*atmost ${MAX_SLUG_LENGTH}`, "i"),
+      new RegExp(`at least \\d+.*at most ${MAX_SLUG_LENGTH}`, "i"),
     );
 
     const validSlug = faker.string.alphanumeric(

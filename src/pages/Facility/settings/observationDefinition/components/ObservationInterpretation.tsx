@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetBody,
@@ -30,7 +30,13 @@ import {
 } from "@/types/base/qualifiedRange/qualifiedRange";
 import { AlertTriangle, Edit, Ruler, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { FieldValues, UseFormReturn } from "react-hook-form";
+import {
+  FieldPath,
+  FieldValues,
+  PathValue,
+  SetValueConfig,
+  UseFormReturn,
+} from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { QualifiedRangeEditor } from "./QualifiedRangeEditor";
 
@@ -70,6 +76,13 @@ export function ObservationInterpretation<
     Set<number>
   >(new Set());
   const [editedRange, setEditedRange] = useState<QualifiedRange | null>(null);
+
+  const setFormRanges = (ranges: QualifiedRange[], options?: SetValueConfig) =>
+    form.setValue(
+      name as FieldPath<TFieldValues>,
+      ranges as PathValue<TFieldValues, FieldPath<TFieldValues>>,
+      options,
+    );
 
   // Detect current interpretation type from existing data
   useEffect(() => {
@@ -155,9 +168,7 @@ export function ObservationInterpretation<
       });
       setQualifiedRanges(updatedRanges);
 
-      form.setValue(name as any, updatedRanges as any, {
-        shouldValidate: true,
-      });
+      setFormRanges(updatedRanges, { shouldValidate: true });
 
       setRecentlyChangedRanges(changedIndices);
 
@@ -260,7 +271,7 @@ export function ObservationInterpretation<
     const updatedRanges = qualifiedRanges.filter((_, i) => i !== index);
     setQualifiedRanges(updatedRanges);
 
-    form.setValue(name as any, updatedRanges as any);
+    setFormRanges(updatedRanges);
 
     const newRecentlyChanged = new Set<number>();
     recentlyChangedRanges.forEach((changedIndex) => {
@@ -296,7 +307,7 @@ export function ObservationInterpretation<
       ];
       setQualifiedRanges(newRanges);
 
-      form.setValue(name as any, newRanges as any);
+      setFormRanges(newRanges);
       const isValid = await form.trigger(
         `${name}.${editingIndex}` as Parameters<typeof form.trigger>[0],
       );
@@ -320,7 +331,9 @@ export function ObservationInterpretation<
     onCancel?.();
     handleSheetState(false);
     setEditedRange(null);
-    form.clearErrors(`${name}.${editedRange?.id || 0}` as any);
+    form.clearErrors(
+      `${name}.${editedRange?.id || 0}` as FieldPath<TFieldValues>,
+    );
   };
 
   const getInterpretationSummary = (range: QualifiedRange, index: number) => {
@@ -370,10 +383,10 @@ export function ObservationInterpretation<
     );
   };
 
-  const handleEditRange = (
+  const handleEditRange = <K extends keyof QualifiedRange>(
     range: QualifiedRange,
-    field: keyof QualifiedRange | undefined,
-    value: any,
+    field?: K,
+    value?: QualifiedRange[K],
   ) => {
     if (field) {
       const updatedRange = {
@@ -442,7 +455,7 @@ export function ObservationInterpretation<
         <div className="space-y-2">
           {qualifiedRanges.map((range, index) => {
             const errors = form.getFieldState(
-              `${name}.${index}` as any,
+              `${name}.${index}` as FieldPath<TFieldValues>,
               form.formState,
             ).error;
             return (
@@ -536,7 +549,7 @@ export function ObservationInterpretation<
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmTypeChange}
-              className={buttonVariants({ variant: "destructive" })}
+              variant="destructive"
             >
               {t("continue_and_clear")}
             </AlertDialogAction>

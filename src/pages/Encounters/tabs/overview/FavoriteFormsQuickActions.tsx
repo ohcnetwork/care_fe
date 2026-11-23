@@ -1,18 +1,16 @@
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
-import { useQuery } from "@tanstack/react-query";
 import { FileText } from "lucide-react";
-import { Link } from "raviger";
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 
 import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import query from "@/Utils/request/query";
+
+import { useQuestionnaireFavorites } from "./useQuestionnaireFavorites";
 
 interface FavoriteFormsQuickActionsProps extends React.ComponentProps<"div"> {
   showEmpty?: boolean;
@@ -33,25 +31,12 @@ export const FavoriteFormsQuickActions = ({
   } = useEncounter();
 
   const {
-    data: favoritesResponse,
+    data: favorites = [],
     isLoading,
     isError,
     isFetching,
     refetch,
-  } = useQuery({
-    queryKey: ["questionnaire-favorites", facilityId],
-    queryFn: query(questionnaireApi.list, {
-      silent: true,
-      queryParams: {
-        favorite_list: "favorites_form",
-      },
-    }),
-  });
-
-  const favorites = useMemo(() => {
-    if (!favoritesResponse?.results) return [];
-    return favoritesResponse.results;
-  }, [favoritesResponse]);
+  } = useQuestionnaireFavorites(facilityId);
 
   if (!isLoading && !isError && !favorites.length && !showEmpty) return null;
 
@@ -77,7 +62,7 @@ export const FavoriteFormsQuickActions = ({
       ) : favorites.length ? (
         <div className="flex flex-wrap gap-2">
           {favorites.map((form) => (
-            <Link
+            <HrefLink
               key={form.id}
               href={appendReferralNativeContext(
                 `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${form.id}${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`,
@@ -87,7 +72,7 @@ export const FavoriteFormsQuickActions = ({
             >
               <FileText className="size-3.5 shrink-0 text-gray-500" />
               <span className="min-w-0 break-words">{form.title}</span>
-            </Link>
+            </HrefLink>
           ))}
         </div>
       ) : !isError ? (

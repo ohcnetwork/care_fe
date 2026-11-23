@@ -1,9 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { AlertCircle, Edit, Wrench } from "lucide-react";
-import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { useQueryParams } from "@/lib/router/queryParams";
+import { deviceShowSearch } from "@/lib/router/search/settings";
 import { cn } from "@/lib/utils";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -48,7 +49,7 @@ export default function DeviceServiceHistory({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
+  const [qParams, setQueryParams] = useQueryParams(deviceShowSearch);
   const {
     data: serviceHistory,
     isLoading,

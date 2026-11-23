@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -28,8 +27,10 @@ import {
 import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
+import { specimenDefinitionListSearch } from "@/lib/router/search/settings";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import {
   SPECIMEN_DEFINITION_STATUS_COLORS,
   SpecimenDefinitionRead,
@@ -85,8 +86,8 @@ export function SpecimenDefinitionsList({
 }: SpecimenDefinitionsListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: specimenDefinitionListSearch,
     limit: 15,
-    disableCache: true,
     defaultQueryParams: {
       status: "active",
     },
@@ -122,9 +123,10 @@ export function SpecimenDefinitionsList({
             </div>
             <Button
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/specimen_definitions/new`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/settings/specimen_definitions/new",
+                  params: { facilityId },
+                })
               }
             >
               <CareIcon icon="l-plus" className="mr-2" />

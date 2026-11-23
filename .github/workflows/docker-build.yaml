@@ -1,0 +1,39 @@
+name: Docker Build
+
+# Checks that the production Docker image still builds.
+# PRs are not covered here: Playwright and the PR preview already run
+# `npm run build` on every PR.
+
+on:
+  push:
+    branches: [develop, "3.*"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.repository == 'ohcnetwork/care_fe'
+    runs-on: ubuntu-24.04-arm
+    name: Build
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          provenance: false
+          cache-from: type=gha,scope=docker-build
+          cache-to: type=gha,mode=max,scope=docker-build,ignore-error=true

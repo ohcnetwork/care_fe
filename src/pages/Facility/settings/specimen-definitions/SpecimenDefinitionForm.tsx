@@ -34,6 +34,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
+import { navigate } from "@/lib/router/navigate";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import { slugValueSchema } from "@/types/base/slug/schema";
 import {
@@ -44,14 +45,15 @@ import {
   SpecimenDefinitionCreate,
   SpecimenDefinitionRead,
   SpecimenDefinitionStatus,
+  wholeSpecimenQuantity,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 import { zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlugValue } from "@/Utils/slug";
+import { goBack } from "@/Utils/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
 
 const typeTestedSchema = z.object({
   is_derived: z.boolean(),
@@ -153,33 +155,100 @@ interface SpecimenDefinitionFormContentProps {
   onCancel?: () => void;
 }
 
+function CollectionCodeField({
+  label,
+  placeholder,
+  system,
+  value,
+  onChange,
+}: {
+  label: string;
+  placeholder: string;
+  system: string;
+  value?: Code | null;
+  onChange: (code: Code | null) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <FormItem className="flex min-w-0 flex-col">
+      <FormLabel>{label}</FormLabel>
+      <div className="flex items-center gap-1">
+        <FormControl>
+          <ValueSetSelect
+            className="min-w-0 flex-1 justify-between font-normal"
+            system={system}
+            placeholder={placeholder}
+            value={value}
+            onSelect={onChange}
+          />
+        </FormControl>
+        {value && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={t("remove_name", { name: label })}
+            onClick={() => onChange(null)}
+          >
+            <XCircle />
+          </Button>
+        )}
+      </div>
+      <FormMessage />
+    </FormItem>
+  );
+}
+
 function SpecimenDefinitionFormContent({
   facilityId,
   specimenSlug,
   initialData,
   onSuccess,
-  onCancel = () => {
-    if (specimenSlug) {
-      navigate(
-        `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`,
-      );
-    } else {
-      navigate(`/facility/${facilityId}/settings/specimen_definitions`);
-    }
-  },
+  onCancel = () =>
+    goBack(
+      specimenSlug
+        ? `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`
+        : `/facility/${facilityId}/settings/specimen_definitions`,
+    ),
 }: SpecimenDefinitionFormContentProps) {
   const { t } = useTranslation();
   const isEditMode = Boolean(specimenSlug);
 
   const formSchema = z.object({
-    title: z.string().min(1, t("field_required")),
+    title: z.string().trim().min(1, t("field_required")),
     slug_value: slugValueSchema(),
     status: z.enum(SpecimenDefinitionStatus),
-    description: z.string().min(1, t("field_required")),
-    derived_from_uri: z.url({ message: t("field_required") }).optional(),
+    description: z.string().trim().min(1, t("field_required")),
+    derived_from_uri: z
+      .url({ message: t("invalid_url") })
+      .or(z.literal(""))
+      .optional(),
     type_collected: CodeSchema,
     patient_preparation: z.array(CodeSchema).min(0),
-    collection: CodeSchema.optional(),
+    collection: z
+      .object({
+        code: CodeSchema.nullish(),
+        quantity: z
+          .object({ value: z.string(), unit: CodeSchema.optional() })
+          .nullish()
+          .superRefine((quantity, ctx) => {
+            if (!quantity) return;
+            if (!wholeSpecimenQuantity(quantity.value)) {
+              ctx.addIssue({
+                code: "custom",
+                message: t("invalid_quantity"),
+              });
+            } else if (!quantity.unit) {
+              ctx.addIssue({
+                code: "custom",
+                message: t("field_required"),
+              });
+            }
+          }),
+        method: CodeSchema.nullish(),
+        body_site: CodeSchema.nullish(),
+      })
+      .optional(),
     type_tested: typeTestedSchema.optional(),
   });
 
@@ -235,10 +304,6 @@ function SpecimenDefinitionFormContent({
     form.setValue("type_collected", code);
   };
 
-  const handleCollectionMethodSelect = (code: Code) => {
-    form.setValue("collection", code);
-  };
-
   const handleCapTypeSelect = (code: Code) => {
     form.setValue("type_tested.container.cap", code);
   };
@@ -281,7 +346,11 @@ function SpecimenDefinitionFormContent({
         if (onSuccess) {
           onSuccess();
         } else {
-          navigate(`/facility/${facilityId}/settings/specimen_definitions`);
+          navigate({
+            to: "/facility/$facilityId/settings/specimen_definitions",
+            params: { facilityId },
+            replace: true,
+          });
         }
       },
     });
@@ -299,16 +368,33 @@ function SpecimenDefinitionFormContent({
         if (onSuccess) {
           onSuccess();
         } else {
-          navigate(
-            `/facility/${facilityId}/settings/specimen_definitions/${updated.slug}`,
-          );
+          navigate({
+            to: "/facility/$facilityId/settings/specimen_definitions/$specimenSlug",
+            params: { facilityId, specimenSlug: updated.slug },
+            replace: true,
+          });
         }
       },
     });
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    const quantity = data.collection?.quantity;
+    const normalizedQuantity = quantity?.unit
+      ? {
+          unit: quantity.unit,
+          value: wholeSpecimenQuantity(quantity.value) ?? quantity.value,
+        }
+      : null;
+    const collection = data.collection
+      ? {
+          ...data.collection,
+          quantity: normalizedQuantity,
+        }
+      : undefined;
     const payload: SpecimenDefinitionCreate = {
       ...data,
+      collection:
+        collection && Object.values(collection).some(Boolean) ? collection : {},
       patient_preparation:
         data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested
@@ -492,20 +578,69 @@ function SpecimenDefinitionFormContent({
 
                     <FormField
                       control={form.control}
-                      name="collection"
+                      name="collection.code"
                       render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>{t("collection")}</FormLabel>
+                        <CollectionCodeField
+                          label={t("collection")}
+                          system="system-specimen_collection_code"
+                          placeholder={t("select_collection")}
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <FormField
+                      control={form.control}
+                      name="collection.quantity"
+                      render={({ field }) => (
+                        <FormItem className="flex min-w-0 flex-col">
+                          <FormLabel>{t("expected_quantity")}</FormLabel>
                           <FormControl>
-                            <ValueSetSelect
-                              {...field}
-                              system="system-specimen_collection_code"
-                              placeholder={t("select_collection")}
-                              onSelect={handleCollectionMethodSelect}
+                            <ComboboxQuantityInput
+                              quantity={
+                                field.value?.unit
+                                  ? {
+                                      value: field.value.value,
+                                      unit: field.value.unit,
+                                    }
+                                  : undefined
+                              }
+                              onChange={field.onChange}
+                              placeholder={t("quantity")}
+                              units={SPECIMEN_DEFINITION_UNITS_CODES}
                             />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="collection.method"
+                      render={({ field }) => (
+                        <CollectionCodeField
+                          label={t("collection_method")}
+                          system="system-collection-method-code"
+                          placeholder={t("select_method")}
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="collection.body_site"
+                      render={({ field }) => (
+                        <CollectionCodeField
+                          label={t("body_site")}
+                          system="system-body-site-observation"
+                          placeholder={t("select_body_site")}
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
                       )}
                     />
                   </div>

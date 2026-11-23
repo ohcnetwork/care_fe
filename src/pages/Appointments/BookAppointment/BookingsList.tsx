@@ -1,6 +1,6 @@
+import { Link } from "@tanstack/react-router";
 import { differenceInMinutes } from "date-fns";
 import { CalendarDays, CalendarOff } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import query from "@/Utils/request/query";
@@ -35,13 +35,11 @@ import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import {
   formatSchedulingTimeRange,
   getAppointmentsSchedulingTimeZone,
 } from "@/pages/Appointments/schedulingTimeZone";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { useInView } from "react-intersection-observer";
 
 interface BookingsListProps {
   patientId: string;
@@ -60,9 +58,13 @@ export const BookingsList = ({
     new Date(),
     schedulingTimeZone,
   );
-  const appointmentQuery = appointmentQueryParams?.referralId
-    ? `?${new URLSearchParams(Object.entries(appointmentQueryParams).filter((entry): entry is [string, string] => typeof entry[1] === "string"))}`
-    : "";
+  const appointmentSearch = appointmentQueryParams?.referralId
+    ? Object.fromEntries(
+        Object.entries(appointmentQueryParams).filter(
+          (entry): entry is [string, string] => typeof entry[1] === "string",
+        ),
+      )
+    : undefined;
   return (
     <div className="mt-2">
       <Tabs defaultValue="upcoming">
@@ -76,7 +78,7 @@ export const BookingsList = ({
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              appointmentQuery={appointmentQuery}
+              appointmentSearch={appointmentSearch}
               statuses={UpcomingAppointmentStatuses}
               schedulingTimeZone={schedulingTimeZone}
               date_after={clinicToday}
@@ -86,7 +88,7 @@ export const BookingsList = ({
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              appointmentQuery={appointmentQuery}
+              appointmentSearch={appointmentSearch}
               statuses={PastAppointmentStatuses}
               schedulingTimeZone={schedulingTimeZone}
               date_before={clinicToday}
@@ -96,7 +98,7 @@ export const BookingsList = ({
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              appointmentQuery={appointmentQuery}
+              appointmentSearch={appointmentSearch}
               statuses={CancelledAppointmentStatuses}
               schedulingTimeZone={schedulingTimeZone}
             />
@@ -111,13 +113,13 @@ const AppointmentCard = ({
   appointment,
   patientId,
   showFacilityInfo,
-  appointmentQuery,
+  appointmentSearch,
   schedulingTimeZone,
 }: {
   appointment: Appointment;
   patientId: string;
   showFacilityInfo: boolean;
-  appointmentQuery: string;
+  appointmentSearch?: Record<string, string>;
   schedulingTimeZone: string;
 }) => {
   const { t } = useTranslation();
@@ -183,7 +185,13 @@ const AppointmentCard = ({
           asChild
         >
           <Link
-            href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}${appointmentQuery}`}
+            to="/facility/$facilityId/patient/$patientId/appointments/$appointmentId"
+            params={{
+              facilityId: appointment.facility.id,
+              patientId,
+              appointmentId: appointment.id,
+            }}
+            search={appointmentSearch}
           >
             {t("see_details")}
           </Link>
@@ -197,13 +205,13 @@ const AppointmentTable = ({
   appointments,
   patientId,
   showFacilityInfo,
-  appointmentQuery,
+  appointmentSearch,
   schedulingTimeZone,
 }: {
   appointments: Appointment[];
   patientId: string;
   showFacilityInfo: boolean;
-  appointmentQuery: string;
+  appointmentSearch?: Record<string, string>;
   schedulingTimeZone: string;
 }) => {
   const { t } = useTranslation();
@@ -230,7 +238,13 @@ const AppointmentTable = ({
         {appointments.map((appointment) => (
           <Link
             key={appointment.id}
-            href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}${appointmentQuery}`}
+            to="/facility/$facilityId/patient/$patientId/appointments/$appointmentId"
+            params={{
+              facilityId: appointment.facility.id,
+              patientId,
+              appointmentId: appointment.id,
+            }}
+            search={appointmentSearch}
             className="contents"
           >
             <TableRow className="shadow bg-white space-y-3 rounded-lg cursor-pointer hover:bg-gray-50">
@@ -327,7 +341,7 @@ export const BookingListContent = ({
   schedulingTimeZone,
   date_after,
   date_before,
-  appointmentQuery = "",
+  appointmentSearch,
 }: {
   patientId: string;
   facilityId?: string;
@@ -335,49 +349,31 @@ export const BookingListContent = ({
   schedulingTimeZone: string;
   date_after?: string;
   date_before?: string;
-  appointmentQuery?: string;
+  appointmentSearch?: Record<string, string>;
 }) => {
   const { t } = useTranslation();
-  const { ref, inView } = useInView();
-
   const {
     data: appointmentsData,
-    hasNextPage,
     isFetchingNextPage,
-    fetchNextPage,
+    hasNextPage,
     isLoading,
-  } = useInfiniteQuery({
+    ref,
+  } = useInfiniteList({
     queryKey: ["infinite-appointments", patientId, facilityId, statuses],
 
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(scheduleApi.appointments.getAppointments, {
-        pathParams: { patientId },
-        queryParams: {
-          offset: pageParam,
-          limit: 15,
-          facility: facilityId,
-          ...(date_after && { date_after }),
-          ...(date_before && { date_before }),
-          status: statuses?.join(","),
-        },
-      })({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * 15;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+    ...query.infinite(scheduleApi.appointments.getAppointments, {
+      pathParams: { patientId },
+      queryParams: {
+        facility: facilityId,
+        ...(date_after && { date_after }),
+        ...(date_before && { date_before }),
+        status: statuses?.join(","),
+      },
+      pageSize: 15,
+    }),
   });
 
-  const appointments =
-    appointmentsData?.pages.flatMap((page) => page.results) ?? [];
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
+  const appointments = appointmentsData?.results ?? [];
 
   if (isLoading) {
     return <CardListSkeleton count={15} />;
@@ -399,7 +395,7 @@ export const BookingListContent = ({
           appointments={appointments}
           patientId={patientId}
           showFacilityInfo={!facilityId}
-          appointmentQuery={appointmentQuery}
+          appointmentSearch={appointmentSearch}
           schedulingTimeZone={schedulingTimeZone}
         />
       </div>
@@ -410,7 +406,7 @@ export const BookingListContent = ({
             appointment={appointment}
             patientId={patientId}
             showFacilityInfo={!facilityId}
-            appointmentQuery={appointmentQuery}
+            appointmentSearch={appointmentSearch}
             schedulingTimeZone={schedulingTimeZone}
           />
         ))}

@@ -13,6 +13,12 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
+  fieldTriggerLayout,
+  fieldTriggerSurface,
+  invalidTriggerRing,
+  triggerFocus,
+} from "@/components/ui/field-trigger-styles";
+import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
@@ -28,12 +34,16 @@ function ComboboxValue({ ...props }: ComboboxPrimitive.Value.Props) {
 }
 
 function ComboboxTrigger({
+  appearance = "field",
   className,
   children,
   render,
   showChevron = true,
   ...props
-}: ComboboxPrimitive.Trigger.Props & { showChevron?: boolean }) {
+}: ComboboxPrimitive.Trigger.Props & {
+  appearance?: "field" | "addon";
+  showChevron?: boolean;
+}) {
   const triggerChildren =
     children ??
     (React.isValidElement<{ children?: React.ReactNode }>(render)
@@ -43,12 +53,30 @@ function ComboboxTrigger({
     <ComboboxPrimitive.Trigger
       data-slot="combobox-trigger"
       render={render}
-      className={cn("[&_svg:not([class*='size-'])]:size-4", className)}
+      className={(state) =>
+        cn(
+          "[&_svg:not([class*='size-'])]:size-4",
+          !render &&
+            (appearance === "field"
+              ? cn(
+                  fieldTriggerLayout,
+                  fieldTriggerSurface,
+                  triggerFocus,
+                  invalidTriggerRing,
+                  "justify-between",
+                )
+              : "inline-flex size-10 shrink-0 items-center justify-center rounded-md hover:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring disabled:opacity-50 md:size-9"),
+          typeof className === "function" ? className(state) : className,
+        )
+      }
       {...props}
     >
       {triggerChildren}
       {showChevron && (
-        <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4" />
+        <ChevronDownIcon
+          aria-hidden="true"
+          className="text-muted-foreground pointer-events-none size-4"
+        />
       )}
     </ComboboxPrimitive.Trigger>
   );
@@ -83,7 +111,7 @@ function ComboboxInput({
   inputClassName?: string;
 }) {
   return (
-    <InputGroup className={cn("w-auto", className)}>
+    <InputGroup className={cn("w-auto shadow-2xs", className)}>
       <ComboboxPrimitive.Input
         render={
           <InputGroupInput disabled={disabled} className={inputClassName} />
@@ -92,16 +120,11 @@ function ComboboxInput({
       />
       <InputGroupAddon align="inline-end">
         {showTrigger && (
-          <InputGroupButton
-            size="icon-xs"
-            variant="ghost"
-            asChild
-            data-slot="input-group-button"
+          <ComboboxTrigger
+            appearance="addon"
             className="group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent"
             disabled={disabled}
-          >
-            <ComboboxTrigger />
-          </InputGroupButton>
+          />
         )}
         {showClear && <ComboboxClear disabled={disabled} />}
       </InputGroupAddon>

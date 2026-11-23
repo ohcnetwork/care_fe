@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -16,7 +16,8 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
+import { formatDateTime, goBack } from "@/Utils/utils";
+import { navigate } from "@/lib/router/navigate";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
@@ -107,7 +108,9 @@ export default function PatientSelect({
   staffId: string;
 }) {
   const { t } = useTranslation();
-  const [{ slotId, reason }] = useQueryParams();
+  const { slotId, reason } = useSearch({
+    from: "/_patient/facility/$facilityId/appointments/$staffId/patient-select",
+  });
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
   const patientUserContext = usePatientContext();
@@ -115,18 +118,26 @@ export default function PatientSelect({
 
   const queryClient = useQueryClient();
 
-  if (!staffId) {
-    toast.error(t("staff_not_found"));
-    navigate(`/facility/${facilityId}`);
-  } else if (!tokenData) {
-    toast.error(t("phone_number_not_found"));
-    navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
-  } else if (!slotId) {
-    toast.error(t("selected_slot_not_found"));
-    navigate(
-      `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
-    );
-  }
+  // Side effects stay out of render: a toast during the router's transition
+  // render interrupts it, so the render would restart without end.
+  useEffect(() => {
+    if (!staffId) {
+      toast.error(t("staff_not_found"));
+      navigate({ to: "/facility/$id", params: { id: facilityId } });
+    } else if (!tokenData) {
+      toast.error(t("phone_number_not_found"));
+      navigate({
+        to: "/facility/$facilityId/appointments/$staffId/otp/$page",
+        params: { facilityId, staffId, page: "send" },
+      });
+    } else if (!slotId) {
+      toast.error(t("selected_slot_not_found"));
+      navigate({
+        to: "/facility/$facilityId/appointments/$staffId/book-appointment",
+        params: { facilityId, staffId },
+      });
+    }
+  }, [facilityId, staffId, tokenData, slotId, t]);
 
   const { data: patientData, isLoading } = useQuery({
     queryKey: ["otp-patient"],
@@ -154,7 +165,9 @@ export default function PatientSelect({
           ["appointment", tokenData.phoneNumber],
         ],
       });
-      navigate(`/facility/${facilityId}/appointments/${data.id}/success`, {
+      navigate({
+        to: "/facility/$facilityId/appointments/$appointmentId/success",
+        params: { facilityId, appointmentId: data.id },
         replace: true,
       });
     },
@@ -188,7 +201,7 @@ export default function PatientSelect({
 
     createAppointment({
       patient: selectedPatientData.id,
-      note: reason,
+      note: reason ?? "",
     });
   };
 
@@ -198,7 +211,7 @@ export default function PatientSelect({
         <Button
           variant="outline"
           onClick={() =>
-            navigate(
+            goBack(
               `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
             )
           }
@@ -213,15 +226,14 @@ export default function PatientSelect({
           variant="primary_gradient"
           className="w-full sm:w-auto"
           onClick={() =>
-            navigate(
-              `/facility/${facilityId}/appointments/${staffId}/patient-registration`,
-              {
-                query: {
-                  slotId,
-                  reason,
-                },
+            navigate({
+              to: "/facility/$facilityId/appointments/$staffId/patient-registration",
+              params: { facilityId, staffId },
+              search: {
+                slotId,
+                reason,
               },
-            )
+            })
           }
         >
           <span className="bg-linear-to-b from-white/15 to-transparent"></span>

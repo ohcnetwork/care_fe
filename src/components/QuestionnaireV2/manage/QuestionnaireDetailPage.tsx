@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Check, Copy, Download, Eye, SquarePen } from "lucide-react";
-import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -26,6 +25,9 @@ import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { LabeledActionButton } from "@/components/QuestionnaireV2/shared/LabeledActionButton";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { questionnaireShowSearch } from "@/lib/router/search/admin";
 import {
   QUESTIONNAIRE_STATUS_COLORS,
   QuestionnaireScope,
@@ -33,9 +35,11 @@ import {
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 
 import { buildUpdateBody } from "@/components/QuestionnaireV2/shared/buildUpdateBody";
 import { downloadQuestionnaireJson } from "@/components/QuestionnaireV2/shared/downloadQuestionnaireJson";
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { BasicInformationCard } from "./BasicInformationCard";
 import { CloneQuestionnaireDialog } from "./CloneQuestionnaireDialog";
 import { FormPropertiesSidebar } from "./FormPropertiesSidebar";
@@ -74,7 +78,7 @@ export function QuestionnaireDetailPage({
     useState<OrganizationSelection | null>(null);
   // `?tab=versions` deep-links straight to the Versions tab — it's how the
   // revision page's Back button returns to the tab it was opened from.
-  const [{ tab }] = useQueryParams();
+  const [{ tab }] = useQueryParams(questionnaireShowSearch);
   const { canWrite, isLoading: isPermissionLoading } =
     useCanWriteQuestionnaire(scope);
 
@@ -111,7 +115,7 @@ export function QuestionnaireDetailPage({
   // toast (see the hook's doc comment).
   const { mutate: save, isPending } = useUpdateQuestionnaire(id);
   const dirty = form.formState.isDirty || organizationDraft !== null;
-  useNavigationPrompt(dirty, t("unsaved_changes_warning"));
+  useNavigationBlocker(dirty, t("unsaved_changes_warning"));
 
   const onSubmit = (values: DetailFormValues) => {
     if (!questionnaire) return;
@@ -161,7 +165,7 @@ export function QuestionnaireDetailPage({
           <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{t("no_data_found")}</AlertDescription>
         </Alert>
-        <Button variant="outline" onClick={() => navigate(scope.basePath)}>
+        <Button variant="outline" onClick={() => goBack(scope.basePath)}>
           <ArrowLeft className="mr-2 size-4" />
           {t("back")}
         </Button>
@@ -173,7 +177,21 @@ export function QuestionnaireDetailPage({
     <div className="space-y-4">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Tabs defaultValue={tab === "versions" ? "versions" : "questions"}>
+          <Tabs
+            value={tab === "versions" ? "versions" : "questions"}
+            // In the URL, so going back from a revision returns to this tab.
+            // Only the query changes: unsaved edits stay, so no prompt.
+            onValueChange={(value) =>
+              navigate({
+                href:
+                  value === "versions"
+                    ? `${scope.basePath}/${id}?tab=versions`
+                    : `${scope.basePath}/${id}`,
+                replace: true,
+                ignoreBlocker: true,
+              })
+            }
+          >
             {/* Sticky header band: back + breadcrumb, title row and the tab
                 strip stay pinned while the body scrolls beneath, keeping the
                 primary Save Form action reachable on long questionnaires. */}
@@ -183,7 +201,7 @@ export function QuestionnaireDetailPage({
                   type="button"
                   variant="outline"
                   size="xs"
-                  onClick={() => navigate(scope.basePath)}
+                  onClick={() => goBack(scope.basePath)}
                 >
                   <ArrowLeft className="size-4" />
                   {t("back")}
@@ -193,7 +211,7 @@ export function QuestionnaireDetailPage({
                   <BreadcrumbList>
                     <BreadcrumbItem>
                       <BreadcrumbLink
-                        onClick={() => navigate(scope.basePath)}
+                        onClick={() => navigate({ href: scope.basePath })}
                         className="cursor-pointer"
                       >
                         {t("questionnaire_other")}
@@ -234,7 +252,7 @@ export function QuestionnaireDetailPage({
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate(scope.basePath)}
+                    onClick={() => goBack(scope.basePath)}
                   >
                     {t("cancel")}
                   </Button>
@@ -247,7 +265,7 @@ export function QuestionnaireDetailPage({
                 </div>
               </div>
 
-              <div className="max-w-full overflow-x-auto border-b border-border pb-px">
+              <div className="max-w-full overflow-x-auto">
                 <TabsList variant="line">
                   <TabsTrigger value="questions">{t("questions")}</TabsTrigger>
                   <TabsTrigger value="versions">{t("versions")}</TabsTrigger>
@@ -274,14 +292,16 @@ export function QuestionnaireDetailPage({
                       )
                     }
                     onEditQuestions={(questionId) =>
-                      navigate(
-                        questionId
+                      navigate({
+                        href: questionId
                           ? `${scope.basePath}/${id}/edit?question=${encodeURIComponent(questionId)}`
                           : `${scope.basePath}/${id}/edit`,
-                      )
+                      })
                     }
                     onImportQuestions={() =>
-                      navigate(`${scope.basePath}/${id}/edit?import=1`)
+                      navigate({
+                        href: `${scope.basePath}/${id}/edit?import=1`,
+                      })
                     }
                   />
                 </div>
@@ -304,7 +324,9 @@ export function QuestionnaireDetailPage({
                   {canWrite && (
                     <LabeledActionButton
                       label={t("edit_questions")}
-                      onClick={() => navigate(`${scope.basePath}/${id}/edit`)}
+                      onClick={() =>
+                        navigate({ href: `${scope.basePath}/${id}/edit` })
+                      }
                     >
                       <SquarePen className="size-4" />
                       {t("edit_questions")}
@@ -313,7 +335,9 @@ export function QuestionnaireDetailPage({
                   <LabeledActionButton
                     label={t("check_how_form_looks")}
                     onClick={() =>
-                      navigate(`${scope.basePath}/${id}/edit?mode=preview`)
+                      navigate({
+                        href: `${scope.basePath}/${id}/edit?mode=preview`,
+                      })
                     }
                   >
                     <Eye className="size-4" />

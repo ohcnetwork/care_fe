@@ -4,6 +4,7 @@ import {
   ENCOUNTER_DISCHARGE_DISPOSITION,
   EncounterDischargeDisposition,
 } from "../src/types/emr/encounter/encounter";
+import { parseCareApp } from "../src/Utils/careApps";
 
 import { z } from "zod";
 
@@ -101,7 +102,9 @@ const VALID_TOAST_POSITIONS = [
  * and all values are valid URLs
  */
 const apiUrlMapSchema = jsonAsStringSchema
-  .transform((val) => JSON.parse(val) as Record<string, string>)
+  .transform((val) => JSON.parse(val))
+  // Requires an object: Object.entries() below throws on null.
+  .pipe(z.record(z.string(), z.string()))
   .refine(
     (map) => {
       return Object.entries(map).every(([origin, url]) => {
@@ -120,7 +123,8 @@ const apiUrlMapSchema = jsonAsStringSchema
     },
   );
 
-const envSchema = z
+// Also checks runtime-env.js overrides in the browser (src/index.tsx).
+export const envSchema = z
   .object({
     // An empty string is allowed and means "use relative, same-origin API requests".
     REACT_CARE_API_URL: z.url().or(z.literal("")).optional(),
@@ -145,7 +149,23 @@ const envSchema = z
     REACT_CUSTOM_DESCRIPTION: z.string().optional(),
     REACT_CUSTOM_LOGO_ALT: logoSchemaString.optional(),
     REACT_MAPS_FALLBACK_URL_TEMPLATE: z.url().optional(),
-    REACT_ENABLED_APPS: z.string().optional(),
+    // Parsed the same way as careApps in care.config.ts.
+    REACT_ENABLED_APPS: z
+      .string()
+      .refine(
+        (val) =>
+          !val ||
+          val.split(",").every((app) => {
+            try {
+              parseCareApp(app);
+              return true;
+            } catch {
+              return false;
+            }
+          }),
+        { message: "Each entry must be 'org/repo' or 'org/repo@url'" },
+      )
+      .optional(),
     REACT_MFE_REGISTERED_COMPONENTS: z
       .string()
       .optional()
@@ -157,6 +177,7 @@ const envSchema = z
     REACT_RECAPTCHA_SITE_KEY: z.string(),
     REACT_APP_RESEND_OTP_TIMEOUT: positiveNumberAsString.optional(),
     REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: positiveNumberAsString.optional(),
+    REACT_APP_MAX_FILE_UPLOAD_SIZE_MB: positiveNumberAsString.optional(),
     REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT: positiveNumberAsString.optional(),
     REACT_JWT_TOKEN_REFRESH_INTERVAL: positiveNumberAsString.optional(),
     REACT_DISABLE_PATIENT_LOGIN: booleanAsStringSchema.optional(),

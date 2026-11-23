@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -8,7 +7,10 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
+import { useQueryParams } from "@/lib/router/queryParams";
+import { questionnaireStudioSearch } from "@/lib/router/search/admin";
 import { cn } from "@/lib/utils";
+import { goBack } from "@/Utils/utils";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -29,6 +31,7 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
 import query from "@/Utils/request/query";
 
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { ActionsPanel } from "./ActionsPanel";
 import { FormSettingsPanel } from "./FormSettingsPanel";
 import { QuestionInspector } from "./QuestionInspector";
@@ -104,7 +107,9 @@ export function QuestionnaireStudioPage({
     subjectType: questionnaire?.subject_type,
   });
 
-  const [queryParams, setQueryParams] = useQueryParams();
+  const [queryParams, setQueryParams] = useQueryParams(
+    questionnaireStudioSearch,
+  );
   const { mode, import: importParam, question: questionParam } = queryParams;
   const [requestedView, setView] = useState<"edit" | "preview">(
     mode === "preview" ? "preview" : "edit",
@@ -135,7 +140,7 @@ export function QuestionnaireStudioPage({
     }
   }, [state.questions, revealQuestion]);
 
-  useNavigationPrompt(dirty, t("unsaved_changes_warning"));
+  useNavigationBlocker(dirty, t("unsaved_changes_warning"));
 
   const { canWrite, isLoading: isPermissionLoading } =
     useCanWriteQuestionnaire(scope);
@@ -211,7 +216,7 @@ export function QuestionnaireStudioPage({
           <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{t("no_data_found")}</AlertDescription>
         </Alert>
-        <Button variant="outline" onClick={() => navigate(scope.basePath)}>
+        <Button variant="outline" onClick={() => goBack(scope.basePath)}>
           <ArrowLeft className="size-4" />
           {t("back")}
         </Button>
@@ -229,8 +234,8 @@ export function QuestionnaireStudioPage({
       revealHidden={editing}
       inert={editing}
     >
-      {/* Fullscreen shell (the route opts out of the app sidebar in
-          AppRouter's PATHS_WITHOUT_SIDEBAR): the reference design's
+      {/* Fullscreen shell (the route opts out of the app sidebar with a
+          layout flag): the reference design's
           viewport-filling frame — fixed top bar, three independently
           scrolling columns, from md up. z-40 keeps portals (dialogs, popovers, toasts
           at z-50) above it. */}

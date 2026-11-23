@@ -1,9 +1,5 @@
 import { Spinner } from "@/components/ui/spinner";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
   CalendarDays,
@@ -57,6 +53,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { cn } from "@/lib/utils";
 import { ReferralRetrieve } from "@/types/emr/referral/referral";
 import {
@@ -67,7 +64,7 @@ import {
 } from "@/types/emr/referral/referralResource";
 import referralResourceApi from "@/types/emr/referral/referralResourceApi";
 import { FILE_EXTENSIONS } from "@/types/files/file";
-import { callApi } from "@/Utils/request/query";
+import query, { callApi } from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
 import { EncounterRead } from "@/types/emr/encounter/encounter";
@@ -314,36 +311,22 @@ function useReferralRecords(
   category: ReferralResourceCategory | undefined,
   enabled: boolean,
 ) {
-  const records = useInfiniteQuery({
+  const records = useInfiniteList({
     queryKey: category
       ? ["referrals", referralId, "resources", category]
       : ["referrals", referralId, "resources"],
-    initialPageParam: 0,
-    queryFn: ({ pageParam, signal }) =>
-      callApi(referralResourceApi.list, {
-        pathParams: { referralId },
-        queryParams: {
-          limit: 20,
-          offset: pageParam,
-          ...(category ? { attachment_type: category } : {}),
-        },
-        signal,
-        silent: true,
-      }),
+    ...query.infinite(referralResourceApi.list, {
+      pathParams: { referralId },
+      queryParams: {
+        ...(category ? { attachment_type: category } : {}),
+      },
+      pageSize: 20,
+      silent: true,
+    }),
     enabled,
-    getNextPageParam: (last, pages) => {
-      if (last.results.length === 0) return undefined;
-      const loaded = pages.reduce(
-        (count, page) => count + page.results.length,
-        0,
-      );
-      return loaded < last.count ? loaded : undefined;
-    },
   });
   const attachments =
-    enabled && !records.isError
-      ? (records.data?.pages.flatMap((page) => page.results) ?? [])
-      : [];
+    enabled && !records.isError ? (records.data?.results ?? []) : [];
   // Keep resolve batches within their category. Loading metadata later must
   // not reshuffle a source batch and resolve its records a second time.
   const resolved = useResolvedReferralResources(attachments);
@@ -419,9 +402,7 @@ export function ReferralSharedRecords({
     ? [sourceRecords, responseRecords, metadataRecords]
     : [allRecords];
   const knownAttachments = knownQueries.flatMap((records) =>
-    records.isError
-      ? []
-      : (records.data?.pages.flatMap((page) => page.results) ?? []),
+    records.isError ? [] : (records.data?.results ?? []),
   );
   const isLoading = queries.some((records) => records.isLoading);
   const isError = queries.some((records) => records.isError);

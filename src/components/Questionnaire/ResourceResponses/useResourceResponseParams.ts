@@ -1,24 +1,19 @@
-import { useQueryParams } from "raviger";
-
-import { QuestionnaireResponseStatus } from "@/types/questionnaire/questionnaireResponse";
-
 import type { ResourceResponseFilterValues } from "./ResourceResponseFilters";
+
+import { useQueryParams } from "@/lib/router/queryParams";
+import { resourceResponseListSearch } from "@/lib/router/search/questionnaire";
 
 /** Keep response selection, pagination and filter labels in the shareable URL. */
 export function useResourceResponseParams() {
-  const [params, setParams] = useQueryParams();
-  const parsedPage = Number(params.page);
-  const page =
-    Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const [params, setParams] = useQueryParams(resourceResponseListSearch);
+  const page = params.page ?? 1;
   const responseId = params.response || undefined;
   const filters: ResourceResponseFilterValues = {
     questionnaire: params.questionnaire || undefined,
     questionnaireTitle: params.questionnaire_title || undefined,
     createdBy: params.created_by || undefined,
     creatorName: params.creator_name || undefined,
-    status: Object.values(QuestionnaireResponseStatus).includes(params.status)
-      ? (params.status as QuestionnaireResponseStatus)
-      : undefined,
+    status: params.status,
   };
   const hasFilters = !!(
     filters.questionnaire ||

@@ -32,6 +32,7 @@ import { useCallback, useMemo, useState } from "react";
 import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
 import { useCareAppTabs, useCareApps } from "@/hooks/useCareApps";
+import { navigate } from "@/lib/router/navigate";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { parseEncounterWorkspace } from "@/pages/Encounters/workspace/parseEncounterWorkspace";
@@ -40,7 +41,6 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { SYSTEM_PAGE_KEYS } from "@/types/workspace/encounterWorkspace";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 interface ActionItem {
@@ -81,7 +81,6 @@ export function EncounterCommandDialog({
   } = useEncounter();
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
-  const navigate = useNavigate();
   const { defaults, list, workspace } = useEncounterWorkspaces(
     encounter.encounter_class,
   );
@@ -180,40 +179,53 @@ export function EncounterCommandDialog({
     (actionId: string) => {
       const actionHandlers: Record<string, () => void> = {
         "add-service-request": () =>
-          navigate(buildEncounterUrl("/questionnaire/service_request")),
+          navigate({
+            href: buildEncounterUrl("/questionnaire/service_request"),
+          }),
         "add-medication-request": () =>
-          navigate(buildEncounterUrl("/questionnaire/medication_request")),
+          navigate({
+            href: buildEncounterUrl("/questionnaire/medication_request"),
+          }),
         "add-allergy": () =>
-          navigate(buildEncounterUrl("/questionnaire/allergy_intolerance")),
+          navigate({
+            href: buildEncounterUrl("/questionnaire/allergy_intolerance"),
+          }),
         "add-symptoms": () =>
-          navigate(buildEncounterUrl("/questionnaire/symptom")),
+          navigate({ href: buildEncounterUrl("/questionnaire/symptom") }),
         "add-diagnosis": () =>
-          navigate(buildEncounterUrl("/questionnaire/diagnosis")),
+          navigate({ href: buildEncounterUrl("/questionnaire/diagnosis") }),
         "add-procedure": () =>
-          navigate(buildEncounterUrl("/questionnaire/procedure")),
+          navigate({ href: buildEncounterUrl("/questionnaire/procedure") }),
         "update-encounter": () =>
-          navigate(buildEncounterUrl("/questionnaire/encounter")),
+          navigate({ href: buildEncounterUrl("/questionnaire/encounter") }),
         "service-requests": () =>
-          navigate(buildEncounterUrl("/service_requests")),
+          navigate({ href: buildEncounterUrl("/service_requests") }),
         "diagnostic-reports": () =>
-          navigate(buildEncounterUrl("/diagnostic_reports")),
+          navigate({ href: buildEncounterUrl("/diagnostic_reports") }),
         "clinical-history": () =>
-          navigate(
-            `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/history/responses?sourceUrl=${encodeURIComponent(
-              buildEncounterUrl("/updates"),
-            )}`,
-          ),
-        "encounter-overview": () => navigate(buildEncounterUrl("/updates")),
-        plots: () => navigate(buildEncounterUrl("/plots")),
-        observations: () => navigate(buildEncounterUrl("/observations")),
-        medicines: () => navigate(buildEncounterUrl("/medicines")),
-        immunizations: () => navigate(buildEncounterUrl("/immunizations")),
-        responses: () => navigate(buildEncounterUrl("/responses")),
-        files: () => navigate(buildEncounterUrl("/files")),
-        referrals: () => navigate(buildEncounterUrl("/referrals")),
-        notes: () => navigate(buildEncounterUrl("/notes")),
-        devices: () => navigate(buildEncounterUrl("/devices")),
-        consents: () => navigate(buildEncounterUrl("/consents")),
+          navigate({
+            to: "/facility/$facilityId/patient/$patientId/history/$tab",
+            params: {
+              facilityId: encounter.facility.id,
+              patientId: encounter.patient.id,
+              tab: "responses",
+            },
+            search: { sourceUrl: buildEncounterUrl("/updates") },
+          }),
+        "encounter-overview": () =>
+          navigate({ href: buildEncounterUrl("/updates") }),
+        plots: () => navigate({ href: buildEncounterUrl("/plots") }),
+        observations: () =>
+          navigate({ href: buildEncounterUrl("/observations") }),
+        medicines: () => navigate({ href: buildEncounterUrl("/medicines") }),
+        immunizations: () =>
+          navigate({ href: buildEncounterUrl("/immunizations") }),
+        responses: () => navigate({ href: buildEncounterUrl("/responses") }),
+        files: () => navigate({ href: buildEncounterUrl("/files") }),
+        referrals: () => navigate({ href: buildEncounterUrl("/referrals") }),
+        notes: () => navigate({ href: buildEncounterUrl("/notes") }),
+        devices: () => navigate({ href: buildEncounterUrl("/devices") }),
+        consents: () => navigate({ href: buildEncounterUrl("/consents") }),
         "mark-as-completed": () => actions.markAsCompleted(),
         "mark-as-complete": () => actions.markAsCompleted(true),
         "assign-location": () => actions.assignLocation(),
@@ -231,19 +243,23 @@ export function EncounterCommandDialog({
       }
 
       if (actionId.startsWith(WORKSPACE_PAGE_PREFIX)) {
-        navigate(
-          buildEncounterUrl(`/${actionId.slice(WORKSPACE_PAGE_PREFIX.length)}`),
-        );
+        navigate({
+          href: buildEncounterUrl(
+            `/${actionId.slice(WORKSPACE_PAGE_PREFIX.length)}`,
+          ),
+        });
         return;
       }
 
       // Handle dynamic questionnaire actions
       if (actionId.startsWith("questionnaire-")) {
         const questionnaireId = actionId.replace("questionnaire-", "");
-        navigate(buildEncounterUrl(`/questionnaire/${questionnaireId}`));
+        navigate({
+          href: buildEncounterUrl(`/questionnaire/${questionnaireId}`),
+        });
       }
     },
-    [navigate, buildEncounterUrl, actions, encounter],
+    [buildEncounterUrl, actions, encounter],
   );
 
   const addRecentAction = useCallback(

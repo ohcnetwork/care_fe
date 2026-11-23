@@ -19,6 +19,9 @@ export interface AppVersionInfo {
 export interface BuildMeta {
   version: string;
   built_at: string;
+  /** Set in GitHub Actions builds; absent elsewhere */
+  commit?: string;
+  ref?: string;
 }
 
 /**

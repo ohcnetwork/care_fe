@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
 import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -12,6 +11,12 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import {
+  dispatchDeliveryListSearch,
+  dispatchOrderListSearch,
+} from "@/lib/router/search/inventory";
 import query from "@/Utils/request/query";
 import {
   dateQueryString,
@@ -101,15 +106,15 @@ export function ToDispatch({ facilityId, locationId, internal, tab }: Props) {
           }}
           currentTab={currentTab}
           onTabChange={(value) => {
-            navigate(
-              getInventoryBasePath(
+            navigate({
+              href: getInventoryBasePath(
                 facilityId,
                 locationId,
                 internal,
                 value === "orders",
                 false,
               ),
-            );
+            });
           }}
         />
       </div>
@@ -134,10 +139,10 @@ function IncomingOrdersTab({
   ];
   const defaultStatus = EFFECTIVE_STATUSES[0].value;
 
-  const [qParams] = useQueryParams();
+  const [qParams] = useQueryParams(dispatchOrderListSearch);
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: dispatchOrderListSearch,
     limit: 14,
-    disableCache: true,
     defaultQueryParams: { status: defaultStatus },
   });
   const currentStatus = qParams.status || defaultStatus;
@@ -274,10 +279,10 @@ function OutgoingDeliveriesTab({
   ];
   const defaultStatus = EFFECTIVE_STATUSES[0].value;
 
-  const [qParams] = useQueryParams();
+  const [qParams] = useQueryParams(dispatchDeliveryListSearch);
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: dispatchDeliveryListSearch,
     limit: 14,
-    disableCache: true,
     defaultQueryParams: { status: defaultStatus },
   });
   const currentStatus = qParams.status || defaultStatus;
@@ -383,8 +388,8 @@ function OutgoingDeliveriesTab({
           <Button
             variant="primary"
             onClick={() =>
-              navigate(
-                getInventoryBasePath(
+              navigate({
+                href: getInventoryBasePath(
                   facilityId,
                   locationId,
                   internal,
@@ -392,7 +397,7 @@ function OutgoingDeliveriesTab({
                   false,
                   "new",
                 ),
-              )
+              })
             }
           >
             <CareIcon icon="l-plus" />

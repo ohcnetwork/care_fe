@@ -56,8 +56,33 @@ test.describe("activity definition form", () => {
     await slugInput.click();
     await slugInput.fill("abc");
     await expect(getFieldErrorMessage(slugInput)).toContainText(
-      /atleast 5.*atmost 50/i,
+      /at least 5.*at most 50/i,
     );
+  });
+
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    await page.goto(
+      `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}/new`,
+    );
+
+    const whitespace = "   ";
+    const fields = ["Title *", "Description *", "Usage *"];
+
+    for (const field of fields) {
+      await page.getByRole("textbox", { name: field }).fill(whitespace);
+    }
+
+    await page.getByRole("button", { name: "Create" }).click();
+
+    for (const field of fields) {
+      const errorMessage = getFieldErrorMessage(
+        page.getByRole("textbox", { name: field }),
+      );
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("This field is required");
+    }
   });
 
   test("should create activity definition with required fields", async ({

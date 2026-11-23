@@ -164,6 +164,16 @@ export async function resolveSlugForFacility(
   slug: string,
   facilityId: string,
 ): Promise<{ id: string; name: string }> {
+  return (await expandFirstCode(slug, facilityId)).valueset;
+}
+
+export async function firstValueSetDisplay(slug: string, facilityId: string) {
+  const { results } = await expandFirstCode(slug, facilityId);
+  if (!results[0]?.display) throw new Error(`No codes available in ${slug}`);
+  return results[0].display;
+}
+
+async function expandFirstCode(slug: string, facilityId: string) {
   const res = await fetch(`${apiBaseUrl()}/api/v1/valueset/expand_slug/`, {
     method: "POST",
     headers: adminApiHeaders(),
@@ -172,8 +182,10 @@ export async function resolveSlugForFacility(
   if (!res.ok) {
     throw new Error(`expand_slug failed: ${res.status}`);
   }
-  const body = (await res.json()) as { valueset: { id: string; name: string } };
-  return body.valueset;
+  return (await res.json()) as {
+    valueset: { id: string; name: string };
+    results: { display: string }[];
+  };
 }
 
 /** Resolves an instance value set by slug (the list has no slug filter). */

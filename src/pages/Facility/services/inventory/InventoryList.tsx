@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { TriangleAlertIcon } from "lucide-react";
-import { Link } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -23,6 +23,7 @@ import {
 } from "@/components/Common/Table";
 
 import useFilters from "@/hooks/useFilters";
+import { inventoryListSearch } from "@/lib/router/search/inventory";
 
 import { isLessThan, round } from "@/Utils/decimal";
 import { getExpiryBadgeVariant, getExpiryStatus } from "@/Utils/inventory";
@@ -63,8 +64,8 @@ interface InventoryListProps {
 export function InventoryList({ facilityId, locationId }: InventoryListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: inventoryListSearch,
     limit: 14,
-    disableCache: true,
   });
 
   // State to store the selected product knowledge object
@@ -216,8 +217,8 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                 <TableRow key={inventory.id}>
                   <TableCell className="font-semibold">
                     <Link
-                      href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
-                      basePath="/"
+                      to="/facility/$facilityId/settings/product/$id"
+                      params={{ facilityId, id: inventory.product.id }}
                       className="flex items-center gap-2"
                     >
                       {inventory.product.product_knowledge.name}

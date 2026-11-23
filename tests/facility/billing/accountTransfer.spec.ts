@@ -275,9 +275,10 @@ test.describe("Account Transfer Payment", () => {
     const amount = faker.number.int({ min: 1, max: 10 }).toString();
     await page.getByPlaceholder("Enter amount").fill(amount);
 
-    // Active target visible, non-active targets not visible
+    // The backend doesn't restrict the target's status, so non-active
+    // accounts are offered too
     await expect(page.getByText(targetAccount.name)).toBeVisible();
-    await expect(page.getByText(nonActiveAccounts[0].name)).not.toBeVisible();
+    await expect(page.getByText(nonActiveAccounts[0].name)).toBeVisible();
 
     await page.getByText(targetAccount.name).click();
 
@@ -303,14 +304,16 @@ test.describe("Account Transfer Payment", () => {
     await outgoingRow.getByRole("link", { name: /view/i }).click();
     await page.waitForURL(/\/billing\/payments\//);
 
-    // Verify payment detail page for outgoing transfer
+    // Verify payment detail page for outgoing transfer. Wait for text that
+    // only the detail page has: the previous page can stay on screen until
+    // the new route has loaded.
+    await expect(
+      page.getByText(`Transferred to account ${targetAccount.id}`),
+    ).toBeVisible();
     await expect(page.getByText("Outgoing Transfer").first()).toBeVisible();
     await expect(page.getByText("Cash").first()).toBeVisible();
     await expect(page.getByText("Active")).toBeVisible();
     await expect(page.getByText("Complete")).toBeVisible();
-    await expect(
-      page.getByText(`Transferred to account ${targetAccount.id}`),
-    ).toBeVisible();
 
     // Verify incoming transfer on target account's Payments tab
     await page.goto(
@@ -325,14 +328,16 @@ test.describe("Account Transfer Payment", () => {
     await incomingRow.getByRole("link", { name: /view/i }).click();
     await page.waitForURL(/\/billing\/payments\//);
 
-    // Verify payment detail page for incoming transfer
+    // Verify payment detail page for incoming transfer. Wait for text that
+    // only the detail page has: the previous page can stay on screen until
+    // the new route has loaded.
+    await expect(
+      page.getByText(`Transferred from account ${sourceAccount.id}`),
+    ).toBeVisible();
     await expect(page.getByText("Incoming Transfer").first()).toBeVisible();
     await expect(page.getByText("Cash").first()).toBeVisible();
     await expect(page.getByText("Active")).toBeVisible();
     await expect(page.getByText("Complete")).toBeVisible();
-    await expect(
-      page.getByText(`Transferred from account ${sourceAccount.id}`),
-    ).toBeVisible();
   });
 
   test("should show error when transfer amount exceeds total paid", async ({

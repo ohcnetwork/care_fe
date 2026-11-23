@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Ticket } from "lucide-react";
-import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -31,6 +30,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { getClinicTodayYmd } from "@/pages/Appointments/schedulingTimeZone";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { TokenGenerateWithQueue, TokenRead } from "@/types/tokens/token/token";
@@ -139,8 +139,10 @@ export default function CreateTokenForm({
       });
       onSuccess?.();
       if (!disableRedirectOnSuccess) {
-        navigate(`/facility/${facilityId}/patients/home`, {
-          query: {
+        navigate({
+          to: "/facility/$facilityId/patients/home",
+          params: { facilityId },
+          search: {
             phone_number: patient?.phone_number,
             year_of_birth: patient?.year_of_birth?.toString() ?? "",
             partial_id: patient?.id.slice(0, 5),

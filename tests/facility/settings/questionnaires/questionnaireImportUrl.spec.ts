@@ -95,7 +95,7 @@ test.describe("Questionnaire v2 import via URL and malformed payloads", () => {
         .fill(url);
       await dialog.getByRole("button", { name: "Import", exact: true }).click();
 
-      await expect(dialog.getByText("Please enter a valid url")).toBeVisible();
+      await expect(dialog.getByText("Please enter a valid URL")).toBeVisible();
       // Still on the select step — no confirm summary appeared.
       await expect(dialog.getByText(/Question count/)).not.toBeVisible();
     }

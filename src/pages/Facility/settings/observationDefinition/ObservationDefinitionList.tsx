@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -28,10 +27,12 @@ import {
 import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
+import { observationDefinitionListSearch } from "@/lib/router/search/settings";
 
 import query from "@/Utils/request/query";
 import { valuesOf } from "@/Utils/utils";
 
+import { navigate } from "@/lib/router/navigate";
 import {
   OBSERVATION_DEFINITION_STATUS_COLORS,
   ObservationDefinitionCategory,
@@ -91,8 +92,8 @@ export default function ObservationDefinitionList({
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: observationDefinitionListSearch,
     limit: 15,
-    disableCache: true,
     defaultQueryParams: {
       status: ObservationDefinitionStatus.ACTIVE,
     },
@@ -129,9 +130,10 @@ export default function ObservationDefinitionList({
             </div>
             <Button
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/observation_definitions/new`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/settings/observation_definitions/new",
+                  params: { facilityId },
+                })
               }
             >
               <CareIcon icon="l-plus" className="mr-2" />

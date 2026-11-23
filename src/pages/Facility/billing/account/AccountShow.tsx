@@ -1,8 +1,15 @@
-import { DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { Hash, Info, MoreVertical } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -14,12 +21,6 @@ import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,6 +70,7 @@ import BackButton from "@/components/Common/BackButton";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { navigate } from "@/lib/router/navigate";
 import {
   isAccountActiveAndBillable,
   isAccountBillingClosed,
@@ -123,13 +125,16 @@ function AccountShow({
   const { t } = useTranslation();
   const [sheetOpen, setSheetOpen] = useState(false);
   const openPaymentSheet = (type: AccountPaymentType) => {
-    navigate(
-      `/facility/${facilityId}/billing/account/${accountId}/${tab}/payment/${type}`,
-      { replace: true },
-    );
+    navigate({
+      to: "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType",
+      params: { facilityId, accountId, tab, paymentType: type },
+      replace: true,
+    });
   };
   const closePaymentSheet = () => {
-    navigate(`/facility/${facilityId}/billing/account/${accountId}/${tab}`, {
+    navigate({
+      to: "/facility/$facilityId/billing/account/$accountId/$tab",
+      params: { facilityId, accountId, tab },
       replace: true,
     });
   };
@@ -143,10 +148,11 @@ function AccountShow({
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
-  const { canUpdateAccount } = getPermissions(
-    hasPermission,
-    facility?.permissions || [],
-  );
+  const {
+    canUpdateAccount,
+    canCreateChargeItem,
+    canWritePaymentReconciliation,
+  } = getPermissions(hasPermission, facility?.permissions || []);
 
   useShortcutSubContext("facility:account:show");
 
@@ -282,17 +288,16 @@ function AccountShow({
           <h2 className="text-2xl font-bold">{t("account_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("account_may_not_exist")}</p>
           <Button asChild className="mt-4">
-            <Link href={`/facility/${facilityId}/billing/account`}>
+            <HrefLink href={`/facility/${facilityId}/billing/account`} back>
               {t("back_to_accounts")}
-            </Link>
+            </HrefLink>
           </Button>
         </div>
       </div>
     );
   }
 
-  const isAccountBillableAndActive =
-    !!account && isAccountActiveAndBillable(account);
+  const isAccountBillableAndActive = isAccountActiveAndBillable(account);
 
   const roundedBalance = roundWhole(account.total_balance);
   const roundedBilledGross = roundWhole(account.total_gross);
@@ -318,6 +323,7 @@ function AccountShow({
           accountId={accountId}
           patientId={account.patient.id}
           canAddChargeItems={isAccountBillableAndActive}
+          canChangeAccount={canCreateChargeItem}
         />
       ),
       shortcutId: "switch-to-charge-items-tab",
@@ -330,6 +336,7 @@ function AccountShow({
           accountId={accountId}
           patientId={account.patient.id}
           hideAccountColumn
+          canChangeAccount={canWritePaymentReconciliation}
         />
       ),
       shortcutId: "switch-to-payments-tab",
@@ -385,9 +392,10 @@ function AccountShow({
                 variant="outline"
                 className="border-gray-400 text-gray-950"
                 onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                  )
+                  navigate({
+                    to: "/facility/$facilityId/billing/account/$accountId/invoices/create",
+                    params: { facilityId, accountId },
+                  })
                 }
               >
                 <CareIcon icon="l-plus" className="mr-2 size-4" />
@@ -407,9 +415,10 @@ function AccountShow({
                 variant="outline"
                 className="border-gray-400 text-gray-950"
                 onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                  )
+                  navigate({
+                    to: "/facility/$facilityId/billing/account/$accountId/invoices/create",
+                    params: { facilityId, accountId },
+                  })
                 }
               >
                 <CareIcon icon="l-plus" className="size-4" />
@@ -536,7 +545,12 @@ function AccountShow({
           <div className="flex items-center gap-2">
             <Button variant="link" asChild className="text-gray-950 underline">
               <Link
-                href={`/facility/${facilityId}/patient/${account.patient.id}/accounts`}
+                to="/facility/$facilityId/patient/$patientId/{-$tab}"
+                params={{
+                  facilityId,
+                  patientId: account.patient.id,
+                  tab: "accounts",
+                }}
               >
                 {t("past_accounts")}
               </Link>
@@ -714,9 +728,10 @@ function AccountShow({
         tabs={tabs}
         currentTab={tab}
         onTabChange={(value) =>
-          navigate(
-            `/facility/${facilityId}/billing/account/${accountId}/${value}`,
-          )
+          navigate({
+            to: "/facility/$facilityId/billing/account/$accountId/$tab",
+            params: { facilityId, accountId, tab: value },
+          })
         }
         setPageTitle={false}
         showMoreAfterIndex={showMoreAfterIndex}

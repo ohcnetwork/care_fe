@@ -1,4 +1,4 @@
-import { navigate, useQueryParams } from "raviger";
+import { useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import Page from "@/components/Common/Page";
 
 import PaymentsData from "./PaymentsData";
+
+import { navigate } from "@/lib/router/navigate";
 
 function PaymentReconciliationList({
   facilityId,
@@ -16,8 +18,9 @@ function PaymentReconciliationList({
   hideHeader?: boolean;
 }) {
   const { t } = useTranslation();
-  const [urlParams] = useQueryParams();
-  const urlAccountId = urlParams.accountId;
+  const { accountId: urlAccountId } = useSearch({
+    from: "/_app/facility/$facilityId/billing/payments/",
+  });
 
   // Use the prop accountId if provided, otherwise use from URL params
   const effectiveAccountId = accountId || urlAccountId;
@@ -39,9 +42,9 @@ function PaymentReconciliationList({
           {accountId && (
             <Button
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/billing/account/${accountId}/payments/create`,
-                )
+                navigate({
+                  href: `/facility/${facilityId}/billing/account/${accountId}/payments/create`,
+                })
               }
             >
               {t("create_payment")}

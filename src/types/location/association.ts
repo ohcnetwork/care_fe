@@ -20,7 +20,7 @@ export type LocationAssociationRead = {
 };
 
 export interface LocationAssociation {
-  meta: Record<string, any>;
+  meta: Record<string, unknown>;
   id: string | null;
   encounter: EncounterRead;
   start_datetime: string;
@@ -31,7 +31,7 @@ export interface LocationAssociation {
 }
 
 export interface LocationAssociationRequest {
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
   encounter: string;
   start_datetime: string;
   end_datetime?: string;

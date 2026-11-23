@@ -1,9 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Eye } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { navigate } from "@/lib/router/navigate";
 
 import {
   Table,
@@ -122,8 +122,8 @@ export default function RequestOrderTable({
                 variant="outline"
                 className="shadow-sm font-semibold text-gray-950"
                 onClick={() =>
-                  navigate(
-                    getInventoryBasePath(
+                  navigate({
+                    href: getInventoryBasePath(
                       facilityId,
                       locationId,
                       internal,
@@ -131,7 +131,7 @@ export default function RequestOrderTable({
                       isRequester,
                       `${request.id}`,
                     ),
-                  )
+                  })
                 }
               >
                 <Eye />

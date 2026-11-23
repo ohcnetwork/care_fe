@@ -35,9 +35,11 @@ import Page from "@/components/Common/Page";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { queueListSearch } from "@/lib/router/search/queues";
 
 import query from "@/Utils/request/query";
 import useAuthUser from "@/hooks/useAuthUser";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { TokenQueueRead } from "@/types/tokens/tokenQueue/tokenQueue";
@@ -60,10 +62,11 @@ import {
   getClinicTodayYmd,
 } from "@/pages/Appointments/schedulingTimeZone";
 import { isBefore, parseISO, startOfDay } from "date-fns";
-import { Link } from "raviger";
 import ManageServicePointSheet from "./ManageServicePointSheet";
 import QueueFormSheet from "./QueueFormSheet";
 import SubQueueFormSheet from "./SubQueueFormSheet";
+
+import { getQueueBoardPath } from "./utils";
 
 interface QueueRowProps {
   queue: TokenQueueRead;
@@ -82,10 +85,13 @@ function QueueRow({
 }: QueueRowProps) {
   const { t } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
-  const queueLink =
-    resourceType === SchedulableResourceType.Practitioner
-      ? `/facility/${facilityId}/practitioner/${resourceId}/queues/${queue.id}/ongoing`
-      : `/queues/${queue.id}/ongoing`;
+  const queueLink = getQueueBoardPath({
+    facilityId,
+    resourceType,
+    resourceId,
+    queueId: queue.id,
+    tab: "ongoing",
+  });
 
   const { mutate: setPrimary } = useMutation({
     mutationFn: mutate(tokenQueueApi.setPrimary, {
@@ -106,11 +112,11 @@ function QueueRow({
       <TableCell className="border-r border-gray-200 bg-white">
         <div className="flex items-center gap-2 justify-between">
           <div className="flex items-center gap-2">
-            <Link href={queueLink} className="font-medium underline">
+            <HrefLink href={queueLink} className="font-medium underline">
               {queue.name === "System Generated"
                 ? t("primary_queue")
                 : queue.name}
-            </Link>
+            </HrefLink>
             {queue.is_primary && (
               <Badge
                 variant="secondary"
@@ -126,7 +132,7 @@ function QueueRow({
             className="h-7 px-3 text-xs border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
             asChild
           >
-            <Link href={queueLink}>{t("open")}</Link>
+            <HrefLink href={queueLink}>{t("open")}</HrefLink>
           </Button>
         </div>
       </TableCell>
@@ -150,10 +156,10 @@ function QueueRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="border border-gray-200">
             <DropdownMenuItem asChild>
-              <Link href={queueLink} className="flex items-center gap-2">
+              <HrefLink href={queueLink} className="flex items-center gap-2">
                 <Notebook className="size-4 mr-2" />
                 {t("open_queue_board")}
-              </Link>
+              </HrefLink>
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setEditOpen(true)}>
               <Pencil className="size-4 mr-2" />
@@ -227,7 +233,7 @@ export default function QueuesIndex({
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
-    disableCache: true,
+    schema: queueListSearch,
   });
 
   const { id: currentUserId } = useAuthUser();
@@ -242,7 +248,7 @@ export default function QueuesIndex({
     resourceId ||
     (resourceType === SchedulableResourceType.Practitioner
       ? cachedPractitionerId || currentUserId
-      : undefined);
+      : "");
 
   // Fetch available users for practitioner resource type
   const { data: availableUsersData } = useQuery({

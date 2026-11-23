@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowUpRight, Trash2 } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -22,6 +21,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import { navigate } from "@/lib/router/navigate";
 import type { FormSubmissionRead } from "@/types/questionnaire/formSubmission";
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
 
@@ -235,7 +235,7 @@ export function FormSubmissionDrafts({
                 aria-label={t("continue_draft_named", { title: row.title })}
                 title={t("continue_draft_named", { title: row.title })}
                 disabled={isDiscarding}
-                onClick={() => navigate(row.url)}
+                onClick={() => navigate({ href: row.url })}
               >
                 <span className="hidden @sm/draft-forms:inline">
                   {t("continue")}

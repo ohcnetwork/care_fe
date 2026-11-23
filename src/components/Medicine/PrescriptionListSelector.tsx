@@ -13,12 +13,12 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import type { PrescriptionList } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronDown, ReceiptTextIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useOnInView } from "react-intersection-observer";
@@ -60,30 +60,16 @@ export default function PrescriptionListSelector({
   const [openDrawer, setOpenDrawer] = React.useState(false);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
+    useInfiniteList({
       queryKey: ["infinite-prescriptions", patientId, encounterId, facilityId],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(prescriptionApi.list, {
-          pathParams: { patientId },
-          queryParams: {
-            encounter: encounterId,
-            facility: facilityId,
-            limit: String(RESULTS_PER_PAGE_LIMIT),
-            offset: String(pageParam),
-          },
-        })({
-          signal,
-        });
-        return response;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
+      ...query.infinite(prescriptionApi.list, {
+        pathParams: { patientId },
+        queryParams: { encounter: encounterId, facility: facilityId },
+        pageSize: RESULTS_PER_PAGE_LIMIT,
+      }),
     });
 
-  const prescriptions = data?.pages.flatMap((page) => page.results) ?? [];
+  const prescriptions = data?.results ?? [];
 
   const loadMoreRef = useOnInView<HTMLDivElement>((inView) => {
     if (inView && hasNextPage && !isFetchingNextPage) {

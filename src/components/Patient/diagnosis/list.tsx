@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -9,8 +9,9 @@ import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError
 import { ClinicalListPanel } from "@/components/Patient/Common/ClinicalListPanel";
 import EmptyState from "@/components/Patient/Common/EmptyState";
 
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
@@ -53,36 +54,21 @@ export function DiagnosisList({
 }: DiagnosisListProps) {
   const { t } = useTranslation();
 
-  const LIMIT = showTimeline ? 30 : 14;
   const { facilityId: currentFacilityId } = useCurrentFacilitySilently();
   const facilityId = providedFacilityId ?? currentFacilityId;
-  const queryState = useInfiniteQuery({
+  const queryState = useInfiniteList({
     queryKey: ["infinite-encounter_diagnosis", patientId, encounterId],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(diagnosisApi.listDiagnosis, {
-        pathParams: { patientId },
-        silent: true,
-        queryParams: {
-          category: "encounter_diagnosis,chronic_condition",
-          clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
-          exclude_verification_status: "entered_in_error",
-          ...(encounterId ? { encounter: encounterId } : {}),
-          limit: LIMIT,
-          offset: String(pageParam),
-        },
-      })({ signal });
-      return response as PaginatedResponse<Diagnosis>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.reduce(
-        (count, page) => count + page.results.length,
-        0,
-      );
-      return lastPage.results.length > 0 && currentOffset < lastPage.count
-        ? currentOffset
-        : undefined;
-    },
+    ...query.infinite(diagnosisApi.listDiagnosis, {
+      pathParams: { patientId },
+      silent: true,
+      queryParams: {
+        category: "encounter_diagnosis,chronic_condition",
+        clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
+        exclude_verification_status: "entered_in_error",
+        ...(encounterId ? { encounter: encounterId } : {}),
+      },
+      pageSize: showTimeline ? 30 : 14,
+    }),
   });
 
   const {
@@ -96,7 +82,7 @@ export function DiagnosisList({
     isFetchingNextPage,
   } = queryState;
 
-  const diagnoses = data?.pages.flatMap((page) => page.results) ?? [];
+  const diagnoses = data?.results ?? [];
   const { data: resolvedDiagnoses } = useQuery({
     queryKey: ["encounter_diagnosis_resolved_count", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
@@ -112,7 +98,7 @@ export function DiagnosisList({
     }),
     enabled: !showTimeline && presentation === "panel",
   });
-  const activeCount = data?.pages[0]?.count;
+  const activeCount = data?.count;
   const resolvedCount = resolvedDiagnoses?.count ?? 0;
 
   if (showTimeline) {

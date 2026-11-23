@@ -4,13 +4,16 @@ import { ENCOUNTER_CLASSES } from "tests/facility/patient/encounter/encounterCla
 import { createTestPatient } from "tests/helper/patient";
 import { getFacilityId } from "tests/support/facilityId";
 
-export async function openCreateEncounterDialog(page: Page) {
+export async function openCreateEncounterDialog(
+  page: Page,
+  patientId?: string,
+) {
   const facilityId = getFacilityId();
-  // A fresh patient per dialog: these specs leave their encounters active,
+  // A fresh patient by default: these specs leave their encounters active,
   // and the backend caps active encounters per patient in a facility.
-  const patientId = await createTestPatient();
+  const encounterPatientId = patientId ?? (await createTestPatient());
 
-  await page.goto(`/facility/${facilityId}/patient/${patientId}`);
+  await page.goto(`/facility/${facilityId}/patient/${encounterPatientId}`);
   await page.getByRole("link", { name: "Patient Home" }).first().click();
 
   await expect(
@@ -22,13 +25,6 @@ export async function openCreateEncounterDialog(page: Page) {
 export async function selectRandomEncounterClass(page: Page) {
   const randomClass = faker.helpers.arrayElement(ENCOUNTER_CLASSES);
   await page.getByRole("button", { name: randomClass }).click();
-}
-
-export async function selectStatusInCreateDialog(page: Page, status: string) {
-  await getEncounterCreateDialog(page)
-    .getByRole("combobox", { name: "Status", exact: true })
-    .click();
-  await page.getByRole("option", { name: status, exact: true }).click();
 }
 
 export async function openCalendarAndGetNextMonthButton(page: Page) {

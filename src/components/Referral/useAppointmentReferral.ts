@@ -1,10 +1,12 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { useQueryParams } from "@/lib/router/queryParams";
+import { referralContextSearch } from "@/lib/router/search/referral";
 import referralApi from "@/types/emr/referral/referralApi";
 import { ReferralResource } from "@/types/emr/referral/referralResource";
 import referralResourceApi from "@/types/emr/referral/referralResourceApi";
+import { navigateBackFrom } from "@/Utils/navigationTrail";
 import query, { callApi } from "@/Utils/request/query";
 
 import { getReferralDetailUrl } from "./referralNavigation";
@@ -58,10 +60,7 @@ export async function findAppointmentReferralAttachment(
 export function useAppointmentReferral(patientId: string) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [params] = useQueryParams<{
-    referralId?: string;
-    referralSourceUrl?: string;
-  }>();
+  const [params] = useQueryParams(referralContextSearch);
   const requested = params.referralId !== undefined;
   const referralId =
     typeof params.referralId === "string" &&
@@ -102,6 +101,12 @@ export function useAppointmentReferral(patientId: string) {
   const returnUrl = readableReferral
     ? getReferralDetailUrl(readableReferral.id, sourceUrl)
     : undefined;
+  // Back to the referral the booking flow started from, else open it.
+  const returnToReferral = () => {
+    if (!readableReferral || !returnUrl) return;
+    const referralPath = getReferralDetailUrl(readableReferral.id);
+    navigateBackFrom((pathname) => pathname === referralPath, returnUrl);
+  };
   const successQueryParams: {
     referralId?: string;
     referralSourceUrl?: string;
@@ -154,6 +159,7 @@ export function useAppointmentReferral(patientId: string) {
     isLoading,
     error,
     returnUrl,
+    returnToReferral,
     successQueryParams,
     attachAppointment,
     refetch: referralQuery.refetch,

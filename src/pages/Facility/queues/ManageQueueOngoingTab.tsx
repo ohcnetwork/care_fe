@@ -30,6 +30,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { queueBoardSearch } from "@/lib/router/search/queues";
 import { cn } from "@/lib/utils";
 import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
@@ -49,7 +51,6 @@ import {
   SettingsIcon,
   SlidersHorizontalIcon,
 } from "lucide-react";
-import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ServicePointsDropDown } from "./ServicePointsDropDown";
@@ -66,7 +67,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const { preferredServicePointCategories } = usePreferredServicePointCategory({
     facilityId,
   });
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams, setQueryParams] = useQueryParams(queueBoardSearch);
   const { autoRefresh, search, patient, patient_name } = qParams;
   const [mobileSection, setMobileSection] = useState<"waiting" | "serving">(
     "waiting",
@@ -78,7 +79,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
     queryFn: query(tokenQueueApi.summary, {
       pathParams: { facility_id: facilityId, id: queueId },
     }),
-    refetchInterval: autoRefresh === "true" ? 10000 : false,
+    refetchInterval: autoRefresh === true ? 10000 : false,
   });
 
   return (
@@ -295,9 +296,9 @@ function FilterControls({
   search: string | undefined;
   patient: string | undefined;
   patientName: string | undefined;
-  qParams: Record<string, string | undefined>;
+  qParams: Record<string, unknown>;
   setQueryParams: (
-    params: Record<string, string | undefined>,
+    params: Record<string, unknown>,
     options?: { overwrite?: boolean; replace?: boolean },
   ) => void;
   hideSearchLabel?: boolean;
