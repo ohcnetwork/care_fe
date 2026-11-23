@@ -62,6 +62,7 @@ export const contactPointSchema = () =>
       system: z.literal("pager"),
       value: z
         .string()
+        .trim()
         .min(1, {
           message: t("character_count_validation", { min: 1, max: 20 }),
         })
@@ -73,7 +74,10 @@ export const contactPointSchema = () =>
     // Other (catch-all with basic validation)
     z.object({
       system: z.literal("other"),
-      value: z.string().min(1, { message: t("required") }),
+      value: z
+        .string()
+        .trim()
+        .min(1, { message: t("required") }),
       use: z.enum(ContactPointUses),
     }),
   ]);
