@@ -16,6 +16,9 @@ export const NOTIFICATION_CLICK_CACHE = "care-notification-click-v1";
 export const NOTIFICATION_CLICK_MESSAGE = "NOTIFICATION_CLICK";
 export const NOTIFICATION_CLICK_EVENT = "care:notification-click";
 export const NOTIFICATION_CLICK_HASH_KEY = "notification_click";
+export const NOTIFICATION_CLICK_CREATED_HEADER = "x-created-at";
+/** A stored payload that no window consumed within this time is abandoned. */
+export const NOTIFICATION_CLICK_TTL_MS = 10 * 60 * 1000;
 
 export const notificationClickCacheKey = (id: string) =>
   `/__notification_click__/${id}`;

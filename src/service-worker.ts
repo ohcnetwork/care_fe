@@ -10,8 +10,10 @@ import { precacheAndRoute } from "workbox-precaching";
 
 import {
   NOTIFICATION_CLICK_CACHE,
+  NOTIFICATION_CLICK_CREATED_HEADER,
   NOTIFICATION_CLICK_HASH_KEY,
   NOTIFICATION_CLICK_MESSAGE,
+  NOTIFICATION_CLICK_TTL_MS,
   notificationClickCacheKey,
 } from "./lib/notificationClick";
 
@@ -122,11 +124,26 @@ self.addEventListener("notificationclick", (e) => {
         try {
           const clickId = crypto.randomUUID();
           const cache = await caches.open(NOTIFICATION_CLICK_CACHE);
-          // Entries left by earlier clicks that never loaded are stale.
-          await Promise.all((await cache.keys()).map((k) => cache.delete(k)));
+          // Drop only abandoned entries; a recent one may belong to a click
+          // whose window is still opening.
+          const now = Date.now();
+          await Promise.all(
+            (await cache.keys()).map(async (request) => {
+              const createdAt = Number(
+                (await cache.match(request))?.headers.get(
+                  NOTIFICATION_CLICK_CREATED_HEADER,
+                ),
+              );
+              if (!(now - createdAt < NOTIFICATION_CLICK_TTL_MS)) {
+                await cache.delete(request);
+              }
+            }),
+          );
           await cache.put(
             notificationClickCacheKey(clickId),
-            new Response(JSON.stringify(data)),
+            new Response(JSON.stringify(data), {
+              headers: { [NOTIFICATION_CLICK_CREATED_HEADER]: String(now) },
+            }),
           );
           targetUrl = `/#${NOTIFICATION_CLICK_HASH_KEY}=${clickId}`;
         } catch (err) {
