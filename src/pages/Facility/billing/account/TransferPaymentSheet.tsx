@@ -29,7 +29,6 @@ import {
   ACCOUNT_STATUS_COLORS,
   AccountBase,
   AccountRead,
-  AccountStatus,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 import {
@@ -70,7 +69,6 @@ export default function TransferPaymentSheet({
       pathParams: { facilityId },
       queryParams: {
         patient: account.patient.id,
-        status: AccountStatus.active,
         limit: 50,
       },
     }),
