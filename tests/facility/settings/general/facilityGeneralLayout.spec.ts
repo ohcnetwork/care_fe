@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 
 import type { FacilityRead } from "@/types/facility/facility";
 import type { CurrentUserRead } from "@/types/user/user";
+import { PrintTemplateType } from "../../../../src/types/facility/printTemplate";
 
 // These layout tests use isolated API fixtures, not a live healthcare backend.
 test.use({ storageState: { cookies: [], origins: [] } });
@@ -96,6 +97,79 @@ test.describe("Facility general settings layout", () => {
         throw new Error(`Unexpected API mutation in layout test: ${path}`);
       }
     });
+  });
+
+  test("keeps print types unique and makes removed types available again", async ({
+    page,
+  }) => {
+    facility.print_templates = Object.values(PrintTemplateType)
+      .filter((type) => type !== PrintTemplateType.payment_receipt)
+      .map((slug) => ({ slug }));
+    await page.goto(`/facility/${facility.id}/settings/general`);
+    await page.getByRole("button", { name: "Configurations" }).click();
+    await page
+      .getByRole("button", { name: "Print Templates", exact: true })
+      .click();
+    const sheet = page.getByRole("dialog", {
+      name: "Print Templates",
+      exact: true,
+    });
+
+    await sheet.getByRole("combobox").first().click();
+    await expect(
+      page.getByRole("option", { name: "Default", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("option", { name: "Invoice", exact: true }),
+    ).toHaveCount(0);
+    await page.keyboard.press("Escape");
+
+    const add = sheet.getByRole("button", {
+      name: "Add Print Template",
+      exact: true,
+    });
+    await add.click();
+    await expect(sheet.getByRole("combobox").last()).toHaveText(
+      "Payment Receipt",
+    );
+    await expect(add).toBeDisabled();
+
+    await sheet
+      .getByRole("button", { name: "Remove", exact: true })
+      .first()
+      .click();
+    await expect(add).toBeEnabled();
+    await add.click();
+    await expect(sheet.getByRole("combobox").last()).toHaveText("Default");
+    await expect(add).toBeDisabled();
+  });
+
+  test("requires duplicate existing print types to be resolved before saving", async ({
+    page,
+  }) => {
+    facility.print_templates = [{ slug: "invoice" }, { slug: "invoice" }];
+    await page.goto(`/facility/${facility.id}/settings/general`);
+    await page.getByRole("button", { name: "Configurations" }).click();
+    await page
+      .getByRole("button", { name: "Print Templates", exact: true })
+      .click();
+    const sheet = page.getByRole("dialog", {
+      name: "Print Templates",
+      exact: true,
+    });
+    await expect(
+      sheet.getByRole("button", { name: "Save", exact: true }),
+    ).toBeDisabled();
+    await expect(
+      sheet.getByText("Each print type can only be configured once."),
+    ).toBeVisible();
+    await sheet
+      .getByRole("button", { name: "Remove", exact: true })
+      .last()
+      .click();
+    await expect(
+      sheet.getByRole("button", { name: "Save", exact: true }),
+    ).toBeEnabled();
   });
 
   test("uses compact button icons without shrinking touch targets", async ({

@@ -3670,6 +3670,7 @@
   "print_selected": "Print Selected",
   "print_selected_rx": "Print Selected Rx",
   "print_setup": "Print Setup",
+  "print_template_types_must_be_unique": "Each print type can only be configured once.",
   "print_templates": "Print Templates",
   "print_templates_description": "Configure print layouts, branding, and page settings for this facility",
   "print_templates_updated": "Print templates updated successfully",

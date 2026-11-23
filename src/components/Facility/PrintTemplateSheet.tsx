@@ -55,17 +55,20 @@ interface Props {
   trigger?: React.ReactNode;
 }
 
-const EMPTY_TEMPLATE: PrintTemplate = {
-  slug: "",
-};
-
 const URL_PLACEHOLDER = "https://...";
+const TEMPLATE_TYPES = Object.values(PrintTemplateType);
 
 export default function PrintTemplateSheet({ facility, trigger }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [templates, setTemplates] = useState<PrintTemplate[]>([]);
+  const configuredTypes = templates
+    .map((template) => template.slug)
+    .filter(Boolean);
+  const usedTypes = new Set(configuredTypes);
+  const hasDuplicateTypes = usedTypes.size !== configuredTypes.length;
+  const availableTypes = TEMPLATE_TYPES.filter((type) => !usedTypes.has(type));
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
@@ -90,6 +93,7 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
   });
 
   const handleSave = () => {
+    if (hasDuplicateTypes) return;
     const validTemplates = templates.filter((tpl) => tpl.slug.trim());
     updateFacility({
       name: facility.name,
@@ -109,7 +113,12 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
   };
 
   const addTemplate = () => {
-    setTemplates((prev) => [...prev, { ...EMPTY_TEMPLATE }]);
+    setTemplates((prev) => {
+      const slug = TEMPLATE_TYPES.find(
+        (type) => !prev.some((template) => template.slug === type),
+      );
+      return slug ? [...prev, { slug }] : prev;
+    });
   };
 
   const removeTemplate = (index: number) => {
@@ -150,6 +159,9 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
               <TemplateEditor
                 key={index}
                 template={template}
+                availableTypes={TEMPLATE_TYPES.filter(
+                  (type) => type === template.slug || !usedTypes.has(type),
+                )}
                 onUpdate={(updater) => updateTemplate(index, updater)}
                 onRemove={() => removeTemplate(index)}
               />
@@ -160,10 +172,16 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
               variant="outline"
               className="w-full"
               onClick={addTemplate}
+              disabled={availableTypes.length === 0}
             >
               <Plus className="mr-2 size-4" />
               {t("add_print_template")}
             </Button>
+            {hasDuplicateTypes && (
+              <p role="alert" className="text-sm text-destructive">
+                {t("print_template_types_must_be_unique")}
+              </p>
+            )}
           </div>
         </SheetBody>
 
@@ -171,7 +189,10 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
           <Button variant="outline" onClick={() => setOpen(false)}>
             {t("cancel")}
           </Button>
-          <Button onClick={handleSave} disabled={isPending}>
+          <Button
+            onClick={handleSave}
+            disabled={isPending || hasDuplicateTypes}
+          >
             {isPending ? t("saving") : t("save")}
           </Button>
         </SheetFooter>
@@ -182,10 +203,12 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
 
 function TemplateEditor({
   template,
+  availableTypes,
   onUpdate,
   onRemove,
 }: {
   template: PrintTemplate;
+  availableTypes: PrintTemplateType[];
   onUpdate: (updater: (tpl: PrintTemplate) => PrintTemplate) => void;
   onRemove: () => void;
 }) {
@@ -206,7 +229,7 @@ function TemplateEditor({
               <SelectValue placeholder={t("template_slug_placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              {Object.values(PrintTemplateType).map((slug) => (
+              {availableTypes.map((slug) => (
                 <SelectItem key={slug} value={slug}>
                   {t(slug)}
                 </SelectItem>
