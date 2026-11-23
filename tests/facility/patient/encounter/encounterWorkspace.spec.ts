@@ -475,19 +475,7 @@ async function mockEncounterWorkspaceApi(
       diagnosis: "Previous asthma",
     },
   };
-  const imagingReport = {
-    id: faker.string.uuid(),
-    status: "final",
-    category: { system: "test", code: "imaging", display: "Imaging" },
-    encounter: currentEncounter,
-    observations: [],
-    conclusion: "No acute findings",
-    created_by: actor,
-    updated_by: actor,
-    requester: actor,
-    created_date: "2026-10-01T12:00:00Z",
-    modified_date: "2026-10-01T12:30:00Z",
-  };
+  // The service-request list API does not include diagnostic reports.
   const widgetOrders = options.includeWidgetData
     ? [
         {
@@ -499,19 +487,17 @@ async function mockEncounterWorkspaceApi(
             code: "36643-5",
             display: "XR Chest",
           },
-          diagnostic_reports: [imagingReport],
           created_date: "2026-10-01T09:00:00Z",
         },
         {
           title: "Creatinine",
-          status: "active",
+          status: "on_hold",
           category: "laboratory",
           code: {
             system: "http://loinc.org",
             code: "2160-0",
             display: "Creatinine",
           },
-          diagnostic_reports: [],
           created_date: "2026-10-01T10:00:00Z",
         },
         {
@@ -523,7 +509,6 @@ async function mockEncounterWorkspaceApi(
             code: "718-7",
             display: "Hemoglobin",
           },
-          diagnostic_reports: [],
           created_date: "2026-10-01T11:00:00Z",
         },
       ].map((order) => ({
@@ -1149,7 +1134,6 @@ async function mockEncounterWorkspaceApi(
     currentCareTeamMember,
     pastCareTeamMember,
     otherPrescriber,
-    imagingReport,
     widgetOrders,
     writes,
     basePath: `/facility/${facility.id}/patient/${patient.id}/encounter/${currentEncounter.id}`,
@@ -1522,6 +1506,40 @@ test("organization history filters use each primary encounter's facility scope",
 });
 
 test.describe("Encounter workspace rendering", () => {
+  test("hides empty custom clinical sections while retaining populated sections", async ({
+    page,
+  }) => {
+    const fixture = await mockEncounterWorkspaceApi(page, { symptomCount: 0 });
+    let releaseSymptoms!: () => void;
+    const symptomsReady = new Promise<void>((resolve) => {
+      releaseSymptoms = resolve;
+    });
+    await page.route(
+      (url) =>
+        url.pathname === `/api/v1/patient/${fixture.patient.id}/symptom/`,
+      async (route) => {
+        await symptomsReady;
+        await route.fulfill({ json: { count: 0, results: [] } });
+      },
+    );
+    await page.goto(`${fixture.basePath}/rounds`);
+    await expect(
+      page.getByRole("region", { name: "Allergy review", exact: true }),
+    ).toContainText("Penicillin allergy");
+    const symptoms = page.getByRole("region", {
+      name: "Symptoms today",
+      exact: true,
+    });
+    await expect(symptoms.getByRole("status")).toBeVisible();
+    releaseSymptoms();
+    await expect(
+      page.getByRole("region", { name: "Symptoms today", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByText("No symptoms have been recorded", { exact: true }),
+    ).toHaveCount(0);
+  });
+
   test("renders configured clinical data while retaining system pages and encounter navigation", async ({
     page,
   }, testInfo) => {
@@ -4524,14 +4542,6 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
     includeSectionData: true,
     includeWidgetData: true,
   });
-  fixture.widgetOrders[1].diagnostic_reports = [
-    {
-      ...fixture.imagingReport,
-      id: faker.string.uuid(),
-      status: "preliminary",
-      conclusion: "",
-    },
-  ];
   const loinc = (code: string, display: string) => ({
     system: "http://loinc.org",
     code,
@@ -4695,24 +4705,23 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
     ),
   ).toBe(true);
 
-  // Outstanding orders: drafts are excluded, reports link out, open orders
-  // link to their status page.
-  await expect(orders).toContainText("1 with reports · 1 awaiting results");
+  // The list response has order statuses, not diagnostic-report outcomes.
+  await expect(orders).toContainText("Chest X-ray");
   await expect(orders.getByText("Unsent draft order")).toHaveCount(0);
   const xray = orders.getByRole("listitem").filter({ hasText: "Chest X-ray" });
   await expect(xray).toContainText("Imaging");
-  await expect(xray).toContainText("Report received");
+  await expect(xray).toContainText("Active");
   await expect(
-    xray.getByRole("link", { name: "View Report", exact: true }),
+    xray.getByRole("link", { name: "Check Status", exact: true }),
   ).toHaveAttribute(
     "href",
-    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/diagnostic_reports/${fixture.imagingReport.id}`,
+    `/facility/${fixture.facility.id}/service_requests/${fixture.widgetOrders[0].id}`,
   );
   const creatinine = orders
     .getByRole("listitem")
     .filter({ hasText: "Creatinine" });
   await expect(creatinine).toContainText("Laboratory");
-  await expect(creatinine).toContainText("No result yet");
+  await expect(creatinine).toContainText("On Hold");
   await expect(
     creatinine.getByRole("link", { name: "View Report", exact: true }),
   ).toHaveCount(0);
@@ -4855,6 +4864,5 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
   ).toBeVisible();
   await expect(vitalRow("Pulse")).not.toContainText("82");
   await expect(medication).toBeVisible();
-  await expect(orders).toContainText("No service requests found");
-  await expect(orders.getByRole("listitem")).toHaveCount(0);
+  await expect(orders).toHaveCount(0);
 });
