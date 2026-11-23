@@ -28,7 +28,10 @@ const PAPERS: Record<NonNullable<PageConfig["size"]>, TypstPaper> = {
 };
 
 /** Used when a template sets no margins; configured values, even 0, win. */
-const DEFAULT_MARGIN_MM = 10;
+export const DEFAULT_MARGIN_MM = 10;
+
+/** Used when a template's watermark leaves these unset. */
+export const DEFAULT_WATERMARK = { opacity: 0.08, rotation: -30 };
 
 /** Paths in the compiler's virtual file system. */
 export const BRANDING_ASSET_PATHS = {
@@ -150,8 +153,11 @@ export function buildPrintLayout({
       watermark?.enabled && watermark.text
         ? {
             text: watermark.text,
-            opacity: Math.min(Math.max(watermark.opacity ?? 0.08, 0), 1),
-            rotation: watermark.rotation ?? -30,
+            opacity: Math.min(
+              Math.max(watermark.opacity ?? DEFAULT_WATERMARK.opacity, 0),
+              1,
+            ),
+            rotation: watermark.rotation ?? DEFAULT_WATERMARK.rotation,
           }
         : null,
     status_watermark: statusWatermark

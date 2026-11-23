@@ -3,7 +3,6 @@ import { expect, test } from "@playwright/test";
 
 import type { FacilityRead } from "@/types/facility/facility";
 import type { CurrentUserRead } from "@/types/user/user";
-import { PrintTemplateType } from "../../../../src/types/facility/printTemplate";
 
 // These layout tests use isolated API fixtures, not a live healthcare backend.
 test.use({ storageState: { cookies: [], origins: [] } });
@@ -11,12 +10,8 @@ test.use({ storageState: { cookies: [], origins: [] } });
 test.describe("Facility general settings layout", () => {
   let facility: FacilityRead;
   let user: CurrentUserRead;
-  let savedPrintTemplates: FacilityRead["print_templates"][];
-  let updateResponse: Promise<void>;
 
   test.beforeEach(async ({ page }) => {
-    savedPrintTemplates = [];
-    updateResponse = Promise.resolve();
     const id = faker.string.uuid();
     facility = {
       id,
@@ -92,12 +87,6 @@ test.describe("Facility general settings layout", () => {
       if (path === "/api/v1/users/getcurrentuser/") {
         await route.fulfill({ json: user });
       } else if (path === `/api/v1/facility/${facility.id}/`) {
-        if (route.request().method() === "PUT") {
-          const body = route.request().postDataJSON();
-          savedPrintTemplates.push(body.print_templates);
-          await updateResponse;
-          facility = { ...facility, print_templates: body.print_templates };
-        }
         await route.fulfill({ json: facility });
       } else if (path === "/api/v1/plug_config/") {
         await route.fulfill({ json: { configs: [] } });
@@ -107,193 +96,6 @@ test.describe("Facility general settings layout", () => {
         throw new Error(`Unexpected API mutation in layout test: ${path}`);
       }
     });
-  });
-
-  test("keeps print types unique and makes removed types available again", async ({
-    page,
-  }) => {
-    facility.print_templates = Object.values(PrintTemplateType)
-      .filter((type) => type !== PrintTemplateType.payment_receipt)
-      .map((slug) => ({ slug }));
-    await page.goto(`/facility/${facility.id}/settings/general`);
-    await page.getByRole("button", { name: "Configurations" }).click();
-    await page
-      .getByRole("menu")
-      .getByText("Print Templates", { exact: true })
-      .click();
-    await expect(page).toHaveURL(
-      `/facility/${facility.id}/settings/print-templates`,
-    );
-    const sheet = page.getByRole("form", {
-      name: "Print Templates",
-      exact: true,
-    });
-    await expect(
-      page.getByRole("heading", { name: "Print Templates", exact: true }),
-    ).toBeVisible();
-
-    await sheet.getByRole("combobox").first().click();
-    await expect(
-      page.getByRole("option", { name: "Default", exact: true }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("option", { name: "Invoice", exact: true }),
-    ).toHaveCount(0);
-    await page.keyboard.press("Escape");
-
-    const add = sheet.getByRole("button", {
-      name: "Add Print Template",
-      exact: true,
-    });
-    await add.click();
-    // Opening or dismissing the chooser does not insert a default row.
-    await expect(sheet.getByRole("combobox")).toHaveCount(15);
-    await expect(
-      page.getByRole("menuitem", { name: "Invoice", exact: true }),
-    ).toHaveCount(0);
-    await page.keyboard.press("Escape");
-    await expect(sheet.getByRole("combobox")).toHaveCount(15);
-    await add.click();
-    await page
-      .getByRole("menuitem", { name: "Payment Receipt", exact: true })
-      .click();
-    await expect(sheet.getByRole("combobox").last()).toHaveText(
-      "Payment Receipt",
-    );
-    await expect(add).toBeDisabled();
-
-    await sheet
-      .getByRole("button", { name: "Remove", exact: true })
-      .first()
-      .click();
-    await expect(add).toBeEnabled();
-    await add.click();
-    await page.getByRole("menuitem", { name: "Default", exact: true }).click();
-    await expect(sheet.getByRole("combobox").last()).toHaveText("Default");
-    await expect(add).toBeDisabled();
-  });
-
-  test("refreshes pristine templates, protects drafts, and saves the chosen settings", async ({
-    page,
-  }) => {
-    const original = {
-      slug: "default",
-      page: { size: "A5" as const, orientation: "landscape" as const },
-      branding: {
-        logo: {
-          url: "https://example.com/logo.png",
-          alignment: "center" as const,
-        },
-      },
-      watermark: { enabled: true, text: "Local QA", opacity: 0.13 },
-      print_setup: { auto_print: true },
-    };
-    facility.print_templates = [original];
-    await page.goto(`/facility/${facility.id}/settings/general`);
-    await expect(
-      page.getByRole("heading", { name: facility.name }),
-    ).toBeVisible();
-    // General cached one template; the editor's fresh response adds another.
-    facility.print_templates = [original, { slug: "prescription" }];
-    await page
-      .getByRole("link", { name: "Print Templates", exact: true })
-      .click();
-    const form = page.getByRole("form", {
-      name: "Print Templates",
-      exact: true,
-    });
-    await expect(form.getByRole("combobox")).toHaveCount(2);
-    const save = form.getByRole("button", { name: "Save", exact: true });
-    await expect(save).toBeDisabled();
-    const add = form.getByRole("button", {
-      name: "Add Print Template",
-      exact: true,
-    });
-    await add.click();
-    await page.getByRole("menuitem", { name: "Invoice", exact: true }).click();
-    page.once("dialog", (dialog) => dialog.dismiss());
-    await page.getByRole("link", { name: "General", exact: true }).click();
-    await expect(page).toHaveURL(
-      `/facility/${facility.id}/settings/print-templates`,
-    );
-    await expect(form.getByRole("combobox")).toHaveCount(3);
-    await form
-      .getByRole("button", { name: "Discard Changes", exact: true })
-      .click();
-    await expect(form.getByRole("combobox")).toHaveCount(2);
-    await expect(save).toBeDisabled();
-    expect(savedPrintTemplates).toEqual([]);
-    await add.click();
-    await page.getByRole("menuitem", { name: "Invoice", exact: true }).click();
-    let acknowledge!: () => void;
-    updateResponse = new Promise<void>((resolve) => {
-      acknowledge = resolve;
-    });
-    await form
-      .getByRole("button", { name: "Print Setup", exact: true })
-      .first()
-      .click();
-    await form
-      .getByRole("button", { name: "Watermark", exact: true })
-      .first()
-      .click();
-    try {
-      await save.focus();
-      await save.press("Enter");
-      await expect(add).toBeDisabled();
-      await expect(form.getByRole("switch")).toHaveCount(2);
-      for (const toggle of await form.getByRole("switch").all())
-        await expect(toggle).toBeDisabled();
-    } finally {
-      acknowledge();
-    }
-    await expect(
-      page.getByText("Print templates updated successfully", { exact: true }),
-    ).toBeVisible();
-    expect(savedPrintTemplates).toEqual([
-      [original, { slug: "prescription" }, { slug: "invoice" }],
-    ]);
-    await expect(save).toBeDisabled();
-    await page.reload();
-    await expect(form.getByRole("combobox")).toHaveCount(3);
-    await expect(save).toBeDisabled();
-    await page.getByRole("link", { name: "General", exact: true }).click();
-    await expect(page).toHaveURL(`/facility/${facility.id}/settings/general`);
-  });
-
-  test("requires duplicate existing print types to be resolved before saving", async ({
-    page,
-  }) => {
-    facility.print_templates = [{ slug: "invoice" }, { slug: "invoice" }];
-    await page.goto(`/facility/${facility.id}/settings/general`);
-    await page.getByRole("button", { name: "Configurations" }).click();
-    await page
-      .getByRole("menu")
-      .getByText("Print Templates", { exact: true })
-      .click();
-    await expect(page).toHaveURL(
-      `/facility/${facility.id}/settings/print-templates`,
-    );
-    const sheet = page.getByRole("form", {
-      name: "Print Templates",
-      exact: true,
-    });
-    await expect(
-      page.getByRole("heading", { name: "Print Templates", exact: true }),
-    ).toBeVisible();
-    await expect(
-      sheet.getByRole("button", { name: "Save", exact: true }),
-    ).toBeDisabled();
-    await expect(
-      sheet.getByText("Each print type can only be configured once."),
-    ).toBeVisible();
-    await sheet
-      .getByRole("button", { name: "Remove", exact: true })
-      .last()
-      .click();
-    await expect(
-      sheet.getByRole("button", { name: "Save", exact: true }),
-    ).toBeEnabled();
   });
 
   test("uses compact button icons without shrinking touch targets", async ({
@@ -367,9 +169,10 @@ test.describe("Facility general settings layout", () => {
       .click();
 
     await header.getByRole("button", { name: "Configurations" }).click();
+    // Print templates have their own settings page, not a menu item.
     await expect(
       page.getByRole("menuitem", { name: "Print Templates" }),
-    ).toBeVisible();
+    ).toHaveCount(0);
     await page.getByRole("menuitem", { name: "Edit Facility Details" }).click();
     const editSheet = page.getByRole("dialog", {
       name: "Edit Facility",
@@ -747,18 +550,6 @@ test.describe("Facility general settings layout", () => {
         .locator('[data-cy="facility-forms"]')
         .getByRole("link", { name: "Responses" }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Print Templates", exact: true }),
-    ).toHaveCount(0);
-    await page.goto(`/facility/${facility.id}/settings/print-templates`);
-    await expect(
-      page.getByText("You do not have permissions to view this page", {
-        exact: true,
-      }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("form", { name: "Print Templates" }),
-    ).toHaveCount(0);
   });
 
   test("facility editors can update without deleting and use the selected theme", async ({
