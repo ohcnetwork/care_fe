@@ -1,3 +1,4 @@
+import { atomFamily } from "jotai-family";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
@@ -28,12 +29,14 @@ const defaultHistoryFilters: EncounterHistoryFilters = {
  * Atom for persisting encounter history filters
  * Uses sessionStorage to persist filters during the session
  */
-export const encounterHistoryFiltersAtom =
+export const encounterHistoryFiltersAtom = atomFamily((scope: string) =>
   atomWithStorage<EncounterHistoryFilters>(
-    "encounter_history_filters",
+    encounterFilterStorageKey("history", scope),
     defaultHistoryFilters,
     createJSONStorage(() => sessionStorage),
-  );
+    { getOnInit: true },
+  ),
+);
 
 export interface EncounterListFilters {
   status?: string;
@@ -61,8 +64,19 @@ const defaultListFilters: EncounterListFilters = {
  * Atom for persisting encounter list filters
  * Uses sessionStorage to persist filters during the session
  */
-export const encounterListFiltersAtom = atomWithStorage<EncounterListFilters>(
-  "encounter_list_filters",
-  defaultListFilters,
-  createJSONStorage(() => sessionStorage),
+export const encounterListFiltersAtom = atomFamily((scope: string) =>
+  atomWithStorage<EncounterListFilters>(
+    encounterFilterStorageKey("list", scope),
+    defaultListFilters,
+    createJSONStorage(() => sessionStorage),
+    { getOnInit: true },
+  ),
 );
+
+/** Unscoped legacy filters are deliberately not restored across facilities. */
+export function encounterFilterStorageKey(
+  kind: "list" | "history",
+  scope: string,
+) {
+  return `encounter_${kind}_filters:${scope}`;
+}

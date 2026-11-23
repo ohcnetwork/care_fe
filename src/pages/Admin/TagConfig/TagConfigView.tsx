@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -9,11 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import TagConfigFormDrawer from "./components/TagConfigFormDrawer";
+import TagConfigForm from "./TagConfigForm";
 
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import TagColorDot from "@/components/Tags/TagColorDot";
+import { formatExpiryOffset } from "@/components/Tags/tagExpiry";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -25,6 +25,7 @@ import {
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
 import BackButton from "@/components/Common/BackButton";
+import { navigate } from "@/lib/router/navigate";
 import TagConfigTable from "./components/TagConfigTable";
 
 interface TagConfigViewProps {
@@ -82,6 +83,8 @@ export default function TagConfigView({
         priority: childData.priority,
         status: TagStatus.ARCHIVED,
         resource: childData.resource,
+        facility_organization: childData.facility_organization?.id ?? null,
+        organization: childData.organization?.id ?? null,
         parent:
           childData.parent &&
           typeof childData.parent === "object" &&
@@ -112,14 +115,31 @@ export default function TagConfigView({
 
   const handleViewChild = (configId: string) => {
     if (facilityId) {
-      navigate(`/facility/${facilityId}/settings/tag_config/${configId}`);
+      navigate({
+        to: "/facility/$facilityId/settings/tag_config/$tagId",
+        params: { facilityId, tagId: configId },
+      });
     } else {
-      navigate(`/admin/tag_config/${configId}`);
+      navigate({ to: "/admin/tag_config/$id", params: { id: configId } });
     }
   };
 
   const handleArchiveChild = (child: TagConfig) => {
     archiveMutation.mutate(child);
+  };
+
+  const describeExpiry = () => {
+    const { autoset_expiry, expiry_offset, modification_allowed } =
+      tagConfig?.expiry_metadata ?? {};
+    if (autoset_expiry && expiry_offset) {
+      const duration = formatExpiryOffset(expiry_offset, t);
+      return modification_allowed
+        ? t("tag_expiry_after_duration_changeable", { duration })
+        : t("tag_expiry_after_duration", { duration });
+    }
+    return modification_allowed
+      ? t("tag_expiry_set_when_applied")
+      : t("tag_expiry_none");
   };
 
   if (isLoading) {
@@ -163,7 +183,7 @@ export default function TagConfigView({
               </h1>
             </div>
           </div>
-          <TagConfigFormDrawer
+          <TagConfigForm
             title={t("edit_tag_config")}
             configId={tagId}
             onSuccess={handleEditSuccess}
@@ -238,6 +258,12 @@ export default function TagConfigView({
                 </div>
               )}
               <div>
+                <p className="text-sm font-medium text-gray-600">
+                  {t("expiry")}
+                </p>
+                <div className="mt-1 text-sm">{describeExpiry()}</div>
+              </div>
+              <div>
                 <label className="text-sm font-medium text-gray-600">
                   {t("managing_organization")}
                 </label>
@@ -292,7 +318,7 @@ export default function TagConfigView({
                   <CareIcon icon="l-sitemap" className="size-5" />
                   {t("child_tags")}
                 </CardTitle>
-                <TagConfigFormDrawer
+                <TagConfigForm
                   title={t("add_child_tag")}
                   parentId={tagId}
                   onSuccess={handleAddChildSuccess}

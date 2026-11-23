@@ -9,6 +9,7 @@ import {
   Drawer,
   DrawerContent,
   DrawerHeader,
+  DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import {
@@ -37,6 +38,7 @@ interface InstructionContentSectionProps {
   disabled: boolean;
   removeInstruction: (code: string) => void;
   addInstruction: (instruction: Code) => void;
+  fillHeight?: boolean;
 }
 
 function InstructionContentSection({
@@ -45,15 +47,22 @@ function InstructionContentSection({
   disabled,
   removeInstruction,
   addInstruction,
+  fillHeight = false,
 }: InstructionContentSectionProps) {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-3">
+    <div
+      className={cn(
+        "space-y-3",
+        fillHeight && "flex min-h-0 flex-1 flex-col space-y-0 gap-3",
+      )}
+    >
       {currentInstructions.length > 0 && (
         <div
           className={cn(
             "flex flex-nowrap overflow-x-auto p-2 sm:flex-wrap sm:max-h-32 sm:overflow-y-auto gap-2 mb-1",
+            fillHeight && "shrink-0",
             isReadOnly && "h-auto overflow-y-auto flex-wrap overflow-x-hidden",
           )}
         >
@@ -89,7 +98,7 @@ function InstructionContentSection({
       )}
 
       {!isReadOnly && (
-        <div>
+        <div className={cn(fillHeight && "flex min-h-0 flex-1 flex-col")}>
           <ValueSetSelect
             system="system-additional-instruction"
             value={null}
@@ -119,7 +128,7 @@ const TriggerButton = (
     <Button
       variant="white"
       className={cn(
-        "w-full justify-between border-gray-300 font-normal shadow-xs h-auto",
+        "w-full justify-between border-gray-300 font-normal shadow-xs",
         currentInstructions.length === 0 && "text-gray-500 hover:bg-white",
       )}
       disabled={disabledButton}
@@ -151,21 +160,24 @@ export default function InstructionsPopover({
 
   if (isMobile) {
     return (
-      <Drawer repositionInputs>
+      <Drawer>
         <DrawerTrigger asChild>
           {TriggerButton(currentInstructions, disabledButton)}
         </DrawerTrigger>
-        <DrawerContent className="min-h-[60vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
-          <div className="pb-[env(safe-area-inset-bottom)]">
-            <DrawerHeader className="sticky top-0 z-10 bg-white p-0 mt-1.5">
+        <DrawerContent height="child" className="p-1.5">
+          <DrawerHeader>
+            <DrawerTitle className="sr-only">
               {t("additional_instructions")}
-            </DrawerHeader>
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
             <InstructionContentSection
               currentInstructions={currentInstructions}
               isReadOnly={isReadOnly}
               disabled={disabled}
               removeInstruction={removeInstruction}
               addInstruction={addInstruction}
+              fillHeight
             />
           </div>
         </DrawerContent>

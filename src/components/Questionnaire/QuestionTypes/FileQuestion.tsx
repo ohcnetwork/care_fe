@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -12,7 +12,6 @@ import FileUploadDropdown from "@/components/Files/FileUploadDropdown";
 import useFileUpload from "@/hooks/useFileUpload";
 import { cn } from "@/lib/utils";
 
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import {
   BACKEND_ALLOWED_EXTENSIONS,
   FileCategory,
@@ -126,37 +125,56 @@ export function FilesQuestion(props: FilesQuestionProps) {
     compress: false,
   });
 
-  useEffect(() => {
-    (async () => {
+  const appendSelectedFiles = useEffectEvent(() => {
+    if (fileUpload.files.length === 0 || fileUpload.previewing) return;
+    const additions = fileUpload.files.filter(
+      (file) => !values.some((value) => value.file_data === file),
+    );
+    if (additions.length > 0) {
       updateQuestionnaireResponseCB(
         [
           {
             type: "files",
-            value: fileUpload.files.map((file, i) => ({
-              name: values[i]?.name || "",
-              file_data: file,
-              original_name: file.name,
-              file_type: FileType.ENCOUNTER,
-              file_category: FileCategory.UNSPECIFIED,
-              associating_id: encounterId,
-            })),
+            value: [
+              ...values,
+              ...additions.map((file) => ({
+                name: "",
+                file_data: file,
+                original_name: file.name,
+                file_type: FileType.ENCOUNTER,
+                file_category: FileCategory.UNSPECIFIED,
+                associating_id: encounterId,
+              })),
+            ],
           },
         ],
         questionnaireResponse.question_id,
         questionnaireResponse.note,
       );
-    })();
-  }, [fileUpload.files]);
+    }
+    fileUpload.clearFiles();
+  });
+
+  useEffect(() => {
+    appendSelectedFiles();
+  }, [fileUpload.files, fileUpload.previewing]);
 
   return (
     <div className="flex flex-col gap-2">
-      <QuestionLabel question={props.question} />
       {values.map((value, index) => {
         const sizeError = getFileSizeError(value.file_data);
-        // Always rendered inline: the question-level slot shows only the first
-        // error for the question, so a later row's size error could otherwise
-        // go unseen. The name input is the row's focusable control, so it
-        // carries the aria association with the message.
+        // Shown as soon as the file is picked. After a submit attempt the
+        // question lists the same message among its errors, so the inline
+        // copy is hidden then to avoid showing (and announcing) it twice.
+        const showSizeError =
+          sizeError &&
+          !props.errors.some(
+            (error) =>
+              error.index === index &&
+              error.field_key === FILE_UPLOAD_FIELDS.FILE_DATA.key,
+          );
+        // The name input is the row's focusable control, so it carries the
+        // aria association with the message.
         const sizeErrorId = `${props.question.id}-file-${index}-size-error`;
         return (
           <div key={index} className="flex flex-col gap-1">
@@ -164,10 +182,11 @@ export function FilesQuestion(props: FilesQuestionProps) {
               <Input
                 placeholder={t("file_name")}
                 className="flex-1"
+                disabled={props.disabled}
                 value={value.name}
                 onChange={(e) => handleUpdate({ name: e.target.value }, index)}
                 aria-invalid={!!sizeError}
-                aria-describedby={sizeError ? sizeErrorId : undefined}
+                aria-describedby={showSizeError ? sizeErrorId : undefined}
               />
               <div
                 className={cn(
@@ -178,10 +197,10 @@ export function FilesQuestion(props: FilesQuestionProps) {
                 <span className="text-sm truncate">{value.original_name}</span>
               </div>
               <Button
+                disabled={props.disabled}
                 variant={"outline"}
                 className="border border-secondary-300"
                 onClick={() => {
-                  fileUpload.removeFile(index);
                   updateQuestionnaireResponseCB(
                     [
                       {
@@ -197,7 +216,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
                 <CareIcon icon="l-trash" className="size-4" />
               </Button>
             </div>
-            {sizeError && (
+            {showSizeError && (
               <p
                 id={sizeErrorId}
                 role="alert"
@@ -211,6 +230,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
       })}
       <FileUploadDropdown
         fileUpload={fileUpload}
+        disabled={props.disabled}
         buttonVariant="secondary"
         buttonClassName="border border-secondary-300"
       />

@@ -1,4 +1,5 @@
 import { HasPermissionFn, getPermissions } from "@/common/Permissions";
+import { PatientReferralsTab } from "./PatientReferrals";
 
 import { PatientRead } from "@/types/emr/patient/patient";
 
@@ -48,6 +49,10 @@ export const BASE_PATIENT_TABS: Tab[] = [
     component: Updates,
   },
   {
+    route: "referrals",
+    component: PatientReferralsTab,
+  },
+  {
     route: "resource_requests",
     component: ResourceRequests,
   },
@@ -84,10 +89,14 @@ export function getTabs(
     canViewPatientQuestionnaireResponses,
     canListEncounters,
     canViewPatients,
+    canReadReferral,
+    canCreateReferral,
   } = getPermissions(hasPermission, permissions);
 
   const getTabVisibility = (tab: Tab) => {
     switch (tab.route) {
+      case "referrals":
+        return { ...tab, visible: canReadReferral || canCreateReferral };
       case "appointments":
         return { ...tab, visible: canViewAppointments };
       case "encounters":

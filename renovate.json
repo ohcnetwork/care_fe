@@ -22,6 +22,14 @@
       ],
       "matchCurrentVersion": "!/^0/",
       "automerge": true
+    },
+    {
+      "description": "@mdxeditor/editor bundles its own lexical. Our direct lexical packages must stay on the same version, or the app loads two lexical copies and the rich text editor crashes. Bump them by hand together with @mdxeditor/editor.",
+      "matchPackageNames": [
+        "lexical",
+        "@lexical/**"
+      ],
+      "enabled": false
     }
   ]
 }

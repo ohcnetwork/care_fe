@@ -1,8 +1,7 @@
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronsUpDown as CaretSortIcon } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
@@ -15,7 +14,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
@@ -23,10 +28,10 @@ import {
 } from "@/components/ui/popover";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 import query from "@/Utils/request/query";
-import { isIOSDevice } from "@/Utils/utils";
 
 interface RoleSelectProps {
   value?: RoleBase;
@@ -36,8 +41,6 @@ interface RoleSelectProps {
   className?: string;
   placeholder?: string;
 }
-
-const PAGE_LIMIT = 10;
 
 interface RoleCommandContentProps {
   setSearchTerm: (value: string) => void;
@@ -66,11 +69,13 @@ function RoleCommandContent({
     <Command>
       <CommandInput
         placeholder={t("search_roles")}
+        aria-label={t("search_roles")}
         onValueChange={setSearchTerm}
-        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
-        autoFocus={!isIOSDevice}
+        wrapperClassName="border-b border-gray-100 shadow-xs"
+        className="text-base sm:text-sm"
+        autoFocus
       />
-      <CommandList>
+      <CommandList className="scrollbar-gutter-auto">
         <CommandEmpty>
           {isFetching ? t("searching") : t("no_roles_found")}
         </CommandEmpty>
@@ -84,14 +89,9 @@ function RoleCommandContent({
                 setOpen(false);
               }}
               className="cursor-pointer"
+              data-checked={value?.id === role.id}
               ref={i === rolesList.length - 1 ? ref : undefined}
             >
-              <CheckIcon
-                className={cn(
-                  "mr-2 size-4",
-                  value?.id === role.id ? "opacity-100" : "opacity-0",
-                )}
-              />
               <div className="flex flex-col items-start">
                 <span>{role.name}</span>
                 {role.description && (
@@ -122,38 +122,18 @@ export function RoleSelect({
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
-  const { ref, inView } = useInView();
   const isMobile = useBreakpoints({ default: true, sm: false });
   const selectedRoleId = value?.id;
 
-  const getQueryParams = (pageParam: number) => ({
-    limit: String(PAGE_LIMIT),
-    offset: String(pageParam),
-    name: searchTerm,
-    context,
-  });
-
-  const {
-    data: rolesList,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isFetching,
-  } = useInfiniteQuery({
+  const { data, isFetchingNextPage, isFetching, ref } = useInfiniteList({
     queryKey: ["roles", searchTerm, context],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query.debounced(roleApi.listRoles, {
-        queryParams: getQueryParams(pageParam),
-      })({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * PAGE_LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) => data?.pages.flatMap((p) => p.results) || [],
+    ...query.infinite(roleApi.listRoles, {
+      queryParams: { name: searchTerm, context },
+      pageSize: 10,
+      debounceInterval: 500,
+    }),
   });
+  const rolesList = data?.results;
 
   const { data: selectedRoleData } = useQuery({
     queryKey: ["role", selectedRoleId],
@@ -164,10 +144,6 @@ export function RoleSelect({
   });
 
   const selectedRole = value?.name ? value : selectedRoleData;
-
-  useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage();
-  }, [inView, hasNextPage, fetchNextPage]);
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
@@ -195,8 +171,15 @@ export function RoleSelect({
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerTrigger asChild>{renderTriggerButton()}</DrawerTrigger>
-        <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
-          <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
+        <DrawerContent
+          aria-describedby={undefined}
+          height="fixed"
+          className="p-1.5"
+        >
+          <DrawerHeader className="pl-1 md:pb-2" showCloseButton>
+            <DrawerTitle>{placeholder || t("select_role")}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex min-h-0 flex-1 flex-col pb-[env(safe-area-inset-bottom)]">
             <RoleCommandContent
               setSearchTerm={setSearchTerm}
               rolesList={rolesList}
@@ -216,7 +199,7 @@ export function RoleSelect({
   return (
     <Popover open={open} onOpenChange={handleOpenChange} modal>
       <PopoverTrigger asChild>{renderTriggerButton()}</PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+      <PopoverContent className="w-[var(--anchor-width)] p-0 overflow-clip">
         <RoleCommandContent
           setSearchTerm={setSearchTerm}
           rolesList={rolesList}

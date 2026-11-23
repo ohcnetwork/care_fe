@@ -6,11 +6,32 @@ import {
   EncounterDischargeDisposition,
 } from "@/types/emr/encounter/encounter";
 
+import { parseCareApp } from "@/Utils/careApps";
 import { NonEmptyArray } from "@/Utils/types";
 import Decimal from "decimal.js";
 import { CountryCode } from "libphonenumber-js";
 
-const env = import.meta.env;
+// A deployment can serve its own /runtime-env.js to override the REACT_* values
+// baked in at build time (see docs/runtime-configuration.md). src/index.tsx
+// validates the result before the app starts.
+export const env: ImportMetaEnv = {
+  ...import.meta.env,
+  ...(typeof window !== "undefined" ? window.__CARE_RUNTIME_ENV__ : undefined),
+};
+
+// Falls back on malformed JSON from runtime-env.js, so this module still loads
+// and src/index.tsx can report the invalid setting.
+const parseJson = (value?: string) => {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+};
 
 interface ILogo {
   light: string;
@@ -34,9 +55,8 @@ const logo = (value?: string, fallback?: ILogo) => {
  * Maps frontend origins (including port) to backend URLs.
  * Example: '{"http://localhost:3000": "http://careapi.localhost"}'
  */
-const apiUrlMap: Record<string, string> = env.REACT_CARE_URL_MAP
-  ? JSON.parse(env.REACT_CARE_URL_MAP)
-  : {};
+const apiUrlMap: Record<string, string> =
+  parseJson(env.REACT_CARE_URL_MAP) ?? {};
 
 /**
  * Resolve API URL based on current origin.
@@ -54,7 +74,6 @@ const careConfig = {
   apiUrl: resolveApiUrl(),
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
   urls: {
-    github: env.REACT_GITHUB_URL || "https://github.com/ohcnetwork",
     ohcn: env.REACT_OHCN_URL || "https://ohc.network?ref=care",
   },
 
@@ -65,7 +84,6 @@ const careConfig = {
   stateLogo: logo(env.REACT_STATE_LOGO),
   customLogo: logo(env.REACT_CUSTOM_LOGO),
   customLogoAlt: logo(env.REACT_CUSTOM_LOGO_ALT),
-  customDescription: env.REACT_CUSTOM_DESCRIPTION,
   availableLocales: (env.REACT_ALLOWED_LOCALES || "")
     .split(",")
     .map((l) => l.trim()),
@@ -168,6 +186,11 @@ const careConfig = {
   })(),
 
   /**
+   * Default payment terms to prefill when creating a new invoice
+   */
+  defaultPaymentTerms: env.REACT_DEFAULT_PAYMENT_TERMS || "",
+
+  /**
    * Screen position for toast notifications (Sonner)
    * Valid values: top-left, top-center, top-right, bottom-left, bottom-center, bottom-right
    * Defaults to top-center if unset or invalid.
@@ -196,36 +219,21 @@ const careConfig = {
     return defaultPosition;
   })(),
 
+  // An invalid entry is left out instead of thrown, so this module still loads
+  // and src/index.tsx can report the setting.
   careApps: env.REACT_ENABLED_APPS
-    ? env.REACT_ENABLED_APPS.split(",").map((app) => {
-        const [module, cdn] = app.split("@");
-        const [org, repo] = module.split("/");
-
-        if (!org || !repo) {
-          throw new Error(
-            `Invalid plug configuration: ${module}. Expected 'org/repo@url'.`,
-          );
+    ? env.REACT_ENABLED_APPS.split(",").flatMap((app) => {
+        try {
+          return [parseCareApp(app)];
+        } catch (error) {
+          console.error(error);
+          return [];
         }
-
-        let url = "";
-        if (!cdn) {
-          url = `https://${org}.github.io/${repo}`;
-        }
-
-        if (!url.startsWith("http")) {
-          url = `${cdn.includes("localhost") ? "http" : "https"}://${cdn}`;
-        }
-
-        return {
-          url: new URL(url).toString(),
-          name: repo,
-          package: module,
-        };
       })
     : [],
 
   appStore: {
-    indexUrl: env.REACT_APP_STORE_INDEX_URL,
+    apiUrl: env.REACT_APP_STORE_API_URL,
   },
 
   plotsConfigUrl:
@@ -323,9 +331,7 @@ const careConfig = {
    * Each shortcut can have: title, description, href, icon (optional)
    * Placeholders like {facilityId}, {userId} will be replaced at runtime
    */
-  customShortcuts: env.REACT_CUSTOM_SHORTCUTS
-    ? JSON.parse(env.REACT_CUSTOM_SHORTCUTS)
-    : [],
+  customShortcuts: parseJson(env.REACT_CUSTOM_SHORTCUTS) ?? [],
   /**
    * System identifier for patient phone number configuration
    */
@@ -366,10 +372,13 @@ const careConfig = {
       false,
     ),
     /**
-     * Number of months offset for expiry restriction.
-     * 0 = current month, 1 = next month, etc.
-     * Products expiring before the end of (current month + offset) will be restricted.
-     * Set to null (default) to disable expiry restriction entirely.
+     * Number of months after the current month during which products are
+     * considered "expiring soon" (a positive integer). Products expiring on or
+     * before the end of (current month + offset) are restricted from
+     * dispensing, and the "expiring soon" status and filter become available.
+     * Products expiring by the end of the current month are always treated as
+     * expired and restricted, regardless of this setting.
+     * Set to null (default) to disable the "expiring soon" restriction.
      */
     expiryMonthOffset: env.REACT_INVENTORY_EXPIRY_MONTH_OFFSET
       ? parseInt(env.REACT_INVENTORY_EXPIRY_MONTH_OFFSET, 10)

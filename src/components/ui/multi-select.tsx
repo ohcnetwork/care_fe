@@ -1,200 +1,51 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+  Combobox,
+  ComboboxCollection,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxGroup,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxLabel,
+  ComboboxList,
+  ComboboxTrigger,
+} from "@/components/ui/combobox";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
+  fieldTriggerLayout,
+  fieldTriggerSurface,
+  invalidTriggerOutline,
+  triggerFocus,
+} from "@/components/ui/field-trigger-styles";
+import { Label } from "@/components/ui/label";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { isIOSDevice } from "@/Utils/utils";
+import { cn } from "@/lib/utils";
 
-type ButtonProps = Omit<
-  React.ComponentProps<typeof Button>,
+type TriggerProps = Omit<
+  React.ComponentProps<"button">,
   keyof MultiSelectProps
 >;
 interface MultiSelectProps {
-  options: {
-    label: string;
-    value: string;
-    icon?: IconName;
-  }[];
+  options: { label: string; value: string; icon?: IconName }[];
   onValueChange: (value: string[]) => void;
   value: string[];
   placeholder: string;
   className?: string;
   selectionSummary?: string;
   translationBasekey?: string;
-}
-
-function ListContent({
-  translationBasekey,
-  options,
-  value,
-  selectedValues,
-  setSelectedValues,
-  onValueChange,
-  setOpen,
-}: {
-  translationBasekey?: string;
-  options: {
-    label: string;
-    value: string;
-    icon?: IconName;
-  }[];
-  value: string[];
-  selectedValues: string[];
-  setSelectedValues: React.Dispatch<React.SetStateAction<string[]>>;
-  onValueChange: (value: string[]) => void;
-  setOpen: (open: boolean) => void;
-}) {
-  const { t } = useTranslation();
-
-  const handleToggleOption = (option: string) => {
-    setSelectedValues((prevSelectedValues) =>
-      prevSelectedValues.includes(option)
-        ? prevSelectedValues.filter((v) => v !== option)
-        : [...prevSelectedValues, option],
-    );
-  };
-  const handleSelectAll = () => {
-    setSelectedValues((prevSelectedValues) => {
-      if (prevSelectedValues.length === options.length) return [];
-      return options.map((o) => o.value);
-    });
-  };
-  return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <Command className="flex-1 overflow-hidden min-h-0">
-        <div className="border border-gray-200 rounded-md m-1 mb-2">
-          <CommandInput
-            placeholder={
-              translationBasekey
-                ? t(`search_${translationBasekey}`)
-                : t("search_options")
-            }
-            className="outline-hidden text-base sm:text-sm border-none ring-0 shadow-none -ml-3"
-            autoFocus={!isIOSDevice}
-          />
-        </div>
-        <CommandList className="max-h-none">
-          <CommandEmpty>{t("no_results_found")}</CommandEmpty>
-          <CommandGroup>
-            <CommandItem
-              key="all"
-              onSelect={handleSelectAll}
-              className="cursor-pointer h-10"
-            >
-              <Checkbox
-                checked={selectedValues.length === options.length}
-                aria-label="Select all options"
-                className="data-[state=checked]:text-white"
-              />
-              <span className="font-medium">{t("select_all")}</span>
-            </CommandItem>
-          </CommandGroup>
-
-          <CommandSeparator className="mx-auto w-[95%]" />
-
-          {value.length > 0 && (
-            <>
-              <CommandGroup heading={t("selected")}>
-                {options
-                  .filter((option) => value.includes(option.value))
-                  .map((option) => (
-                    <CommandItem
-                      key={option.value}
-                      onSelect={() => handleToggleOption(option.value)}
-                      aria-label={`Select ${option.label}`}
-                      className="cursor-pointer h-10 flex gap-3"
-                    >
-                      <Checkbox
-                        checked={selectedValues.includes(option.value)}
-                        className="data-[state=checked]:text-white"
-                      />
-
-                      <div className="flex items-center gap-1">
-                        {option?.icon && (
-                          <CareIcon icon={option.icon} className="size-4" />
-                        )}
-                        <span>{option.label}</span>
-                      </div>
-                    </CommandItem>
-                  ))}
-              </CommandGroup>
-
-              <CommandSeparator className="mx-auto w-[95%]" />
-            </>
-          )}
-
-          {value.length < options.length && (
-            <CommandGroup>
-              {options
-                .filter((option) => !value.includes(option.value))
-                .map((option) => (
-                  <CommandItem
-                    key={option.value}
-                    onSelect={() => handleToggleOption(option.value)}
-                    aria-label={`Select ${option.label}`}
-                    className="cursor-pointer h-10 flex gap-3"
-                  >
-                    <Checkbox
-                      checked={selectedValues.includes(option.value)}
-                      className="data-[state=checked]:text-white"
-                    />
-
-                    <div className="flex items-center gap-1">
-                      {option?.icon && (
-                        <CareIcon icon={option.icon} className="size-4" />
-                      )}
-                      <span>{option.label}</span>
-                    </div>
-                  </CommandItem>
-                ))}
-            </CommandGroup>
-          )}
-        </CommandList>
-      </Command>
-      <div className="flex justify-end space-x-2 p-3 border-t border-t-gray-200 shrink-0">
-        <Button
-          variant="link"
-          size="md"
-          className="underline"
-          onClick={() => setOpen(false)}
-        >
-          {t("cancel")}
-        </Button>
-        <Button
-          variant="primary_gradient"
-          size="md"
-          onClick={() => {
-            onValueChange(selectedValues);
-            setOpen(false);
-          }}
-        >
-          {t("done")}
-        </Button>
-      </div>
-    </div>
-  );
 }
 
 export function MultiSelect({
@@ -207,128 +58,195 @@ export function MultiSelect({
   selectionSummary,
   translationBasekey,
   ...props
-}: ButtonProps & MultiSelectProps) {
+}: TriggerProps & MultiSelectProps) {
+  const { t } = useTranslation();
   const [selectedValues, setSelectedValues] = React.useState<string[]>(value);
   const [open, setOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
+  const selectAllId = React.useId();
 
-  React.useEffect(() => {
+  // Re-sync the draft only when the contents of `value` change
+  const valueKey = JSON.stringify([...value].sort());
+  const [syncedValueKey, setSyncedValueKey] = React.useState(valueKey);
+  if (syncedValueKey !== valueKey) {
+    setSyncedValueKey(valueKey);
     setSelectedValues(value);
-  }, [value, open]);
-  React.useEffect(() => {
-    if (open == false) onValueChange(selectedValues);
-  }, [open]);
+  }
 
-  const { t } = useTranslation();
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      setSelectedValues(value);
+    } else if (open) {
+      onValueChange(selectedValues);
+    }
+    setOpen(nextOpen);
+  };
 
-  if (isMobile) {
-    return (
-      <div className="w-full">
-        <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerTrigger asChild>
-            <Button
-              variant="outline"
-              ref={ref}
-              role="combobox"
-              onClick={() => setOpen((open) => !open)}
-              className={cn(
-                "flex w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
-                open && "ring-2 ring-blue-500 border-0",
-                className,
-              )}
-              {...props}
+  const optionByValue = new Map(
+    options.map((option) => [option.value, option]),
+  );
+  const committed = new Set(value);
+  const draft = new Set(selectedValues);
+  const groups = [
+    { value: "selected", items: value },
+    {
+      value: "available",
+      items: [...optionByValue.keys()].filter((item) => !committed.has(item)),
+    },
+  ].filter((group) => group.items.length > 0);
+  const allSelected =
+    options.length > 0 && options.every((option) => draft.has(option.value));
+
+  const trigger = (
+    <button
+      type="button"
+      ref={ref}
+      role="combobox"
+      aria-expanded={open}
+      className={cn(
+        fieldTriggerLayout,
+        fieldTriggerSurface,
+        triggerFocus,
+        invalidTriggerOutline,
+        "h-auto min-h-12 w-full min-w-0 justify-between py-1 text-start font-normal md:h-auto md:min-h-10",
+        className,
+      )}
+      {...props}
+    >
+      {value.length === 0 ? (
+        <span className="truncate text-muted-foreground">{placeholder}</span>
+      ) : selectionSummary ? (
+        <Badge
+          variant="neutral"
+          className="min-w-0 shrink whitespace-normal wrap-anywhere"
+        >
+          {selectionSummary}
+        </Badge>
+      ) : (
+        <span className="flex min-w-0 flex-wrap gap-1">
+          {value.map((item) => (
+            <Badge
+              key={item}
+              variant="neutral"
+              className="max-w-full whitespace-normal wrap-anywhere"
             >
-              <div className="flex justify-between items-center w-full">
-                {value.length == 0 ? (
-                  <span className="text-sm text-gray-500 mx-3">
-                    {placeholder}
-                  </span>
-                ) : (
-                  <Badge className="m-1" variant="secondary">
-                    {selectionSummary
-                      ? selectionSummary
-                      : t("options_selected", { count: value.length })}
-                  </Badge>
-                )}
-                {open ? (
-                  <ChevronUp className="h-4 mx-2 cursor-pointer text-black" />
-                ) : (
-                  <ChevronDown className="h-4 mx-2 cursor-pointer text-black" />
-                )}
-              </div>
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent className="px-0 pt-2 flex flex-col min-h-[50vh] max-h-[85vh]">
-            <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex flex-col flex-1 overflow-hidden">
-              <ListContent
-                translationBasekey={translationBasekey}
-                options={options}
-                value={value}
-                setSelectedValues={setSelectedValues}
-                selectedValues={selectedValues}
-                onValueChange={onValueChange}
-                setOpen={setOpen}
-              />
+              {optionByValue.get(item)?.label ?? item}
+            </Badge>
+          ))}
+        </span>
+      )}
+      <ChevronDown
+        aria-hidden="true"
+        className="size-4 shrink-0 text-muted-foreground"
+      />
+    </button>
+  );
+
+  const content = (
+    <>
+      <ComboboxInput
+        showTrigger={false}
+        placeholder={
+          translationBasekey
+            ? t(`search_${translationBasekey}`)
+            : t("search_options")
+        }
+        aria-label={
+          translationBasekey
+            ? t(`search_${translationBasekey}`)
+            : t("search_options")
+        }
+      />
+      <div
+        className={cn(
+          "flex items-center gap-2 border-b border-border px-3 py-2",
+          isMobile && "min-h-11",
+        )}
+      >
+        <Checkbox
+          id={selectAllId}
+          checked={allSelected}
+          onCheckedChange={() =>
+            setSelectedValues(
+              allSelected
+                ? []
+                : [...new Set([...draft, ...optionByValue.keys()])],
+            )
+          }
+        />
+        <Label htmlFor={selectAllId}>{t("select_all")}</Label>
+      </div>
+      <ComboboxEmpty>{t("no_results_found")}</ComboboxEmpty>
+      <ComboboxList showScrollbar className="min-h-0 flex-1">
+        {(group: { value: string; items: string[] }) => (
+          <ComboboxGroup key={group.value} items={group.items}>
+            {group.value === "selected" && (
+              <ComboboxLabel>{t("selected")}</ComboboxLabel>
+            )}
+            <ComboboxCollection>
+              {(optionValue: string) => {
+                const option = optionByValue.get(optionValue);
+                return (
+                  <ComboboxItem
+                    key={optionValue}
+                    value={optionValue}
+                    className={cn(isMobile && "min-h-11 py-2.5")}
+                  >
+                    {option?.icon && (
+                      <CareIcon icon={option.icon} className="size-4" />
+                    )}
+                    {option?.label ?? optionValue}
+                  </ComboboxItem>
+                );
+              }}
+            </ComboboxCollection>
+          </ComboboxGroup>
+        )}
+      </ComboboxList>
+      <div className="flex shrink-0 justify-end gap-2 border-t border-border p-2">
+        <Button onClick={() => handleOpenChange(false)}>{t("done")}</Button>
+      </div>
+    </>
+  );
+
+  return (
+    <Combobox<string, true>
+      multiple
+      items={groups}
+      value={selectedValues}
+      onValueChange={setSelectedValues}
+      itemToStringLabel={(optionValue) =>
+        optionByValue.get(optionValue)?.label ?? optionValue
+      }
+      open={open}
+      inline={isMobile}
+      disabled={props.disabled}
+      onOpenChange={(nextOpen, details) => {
+        if (!nextOpen && details.reason === "item-press") {
+          details.cancel();
+          return;
+        }
+        handleOpenChange(nextOpen);
+      }}
+    >
+      {isMobile ? (
+        <Drawer open={open} onOpenChange={handleOpenChange}>
+          <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+          <DrawerContent height="fixed">
+            <DrawerTitle className="sr-only">{placeholder}</DrawerTitle>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-2 pb-0">
+              {content}
             </div>
           </DrawerContent>
         </Drawer>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-full">
-      <Popover open={open} onOpenChange={setOpen} modal>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            ref={ref}
-            role="combobox"
-            onClick={() => setOpen((open) => !open)}
-            className={cn(
-              "flex w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
-              open && "ring-2 ring-blue-500 border-0",
-              className,
-            )}
-            {...props}
-          >
-            <div className="flex justify-between items-center w-full">
-              {value.length == 0 ? (
-                <span className="text-sm text-gray-500 mx-3">
-                  {placeholder}
-                </span>
-              ) : (
-                <Badge className="m-1" variant="secondary">
-                  {selectionSummary
-                    ? selectionSummary
-                    : t("options_selected", { count: value.length })}
-                </Badge>
-              )}
-              {open ? (
-                <ChevronUp className="h-4 mx-2 cursor-pointer text-black" />
-              ) : (
-                <ChevronDown className="h-4 mx-2 cursor-pointer text-black" />
-              )}
-            </div>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          className="p-0 w-(--radix-popover-trigger-width) max-h-[35vh] flex flex-col overflow-hidden"
-          align="center"
-        >
-          <ListContent
-            translationBasekey={translationBasekey}
-            options={options}
-            value={value}
-            setSelectedValues={setSelectedValues}
-            selectedValues={selectedValues}
-            onValueChange={onValueChange}
-            setOpen={setOpen}
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
+      ) : (
+        <>
+          <ComboboxTrigger render={trigger} showChevron={false} />
+          <ComboboxContent className="flex w-(--anchor-width) flex-col">
+            {content}
+          </ComboboxContent>
+        </>
+      )}
+    </Combobox>
   );
 }
-
-MultiSelect.displayName = "MultiSelect";

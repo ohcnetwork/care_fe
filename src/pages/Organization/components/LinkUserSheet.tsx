@@ -10,8 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -116,7 +118,7 @@ export default function LinkUserSheet({
           {isServiceAccount ? t("link_service_account") : t("link_user")}
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>
             {isServiceAccount
@@ -129,96 +131,100 @@ export default function LinkUserSheet({
               : t("link_user_to_organization_description")}
           </SheetDescription>
         </SheetHeader>
-        <div className="space-y-6 py-4">
-          <UserSelector
-            selected={selectedUser}
-            onChange={handleUserChange}
-            placeholder={
-              isServiceAccount
-                ? t("search_for_a_service_account")
-                : t("search_for_a_user")
-            }
-            noOptionsMessage={
-              isServiceAccount
-                ? t("no_service_accounts_found")
-                : t("no_users_found")
-            }
-            popoverClassName="w-full"
-            isServiceAccount={isServiceAccount}
-          />
-          {selectedUser && (
-            <div className="space-y-4">
-              <div className="rounded-lg border border-gray-200 p-4 space-y-4">
-                <div className="flex gap-4 flex-row">
-                  <Avatar
-                    name={formatName(selectedUser, true)}
-                    imageUrl={selectedUser.profile_picture_url}
-                    className="size-12"
-                  />
-                  <div className="w-3/4">
-                    <p className="font-medium text-lg truncate">
-                      {formatName(selectedUser)}
-                    </p>
+        <SheetBody>
+          <div className="space-y-6">
+            <UserSelector
+              selected={selectedUser}
+              onChange={handleUserChange}
+              placeholder={
+                isServiceAccount
+                  ? t("search_for_a_service_account")
+                  : t("search_for_a_user")
+              }
+              noOptionsMessage={
+                isServiceAccount
+                  ? t("no_service_accounts_found")
+                  : t("no_users_found")
+              }
+              popoverClassName="w-full"
+              isServiceAccount={isServiceAccount}
+            />
+            {selectedUser && (
+              <div className="space-y-4">
+                <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+                  <div className="flex gap-4 flex-row">
+                    <Avatar
+                      name={formatName(selectedUser, true)}
+                      imageUrl={selectedUser.profile_picture_url}
+                      className="size-12"
+                    />
+                    <div className="w-3/4">
+                      <p className="font-medium text-lg truncate">
+                        {formatName(selectedUser)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+                    <div>
+                      <span className="text-sm text-gray-500">
+                        {t("username")}
+                      </span>
+                      <p className="text-sm font-medium truncate">
+                        {selectedUser.username}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">
+                        {isServiceAccount
+                          ? t("service_account_type")
+                          : t("user_type")}
+                      </span>
+                      <p className="text-sm font-medium">
+                        {selectedUser.user_type}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">
+                        {t("phone_number")}
+                      </span>
+                      <p className="text-sm font-medium truncate">
+                        {selectedUser.phone_number
+                          ? formatPhoneNumberIntl(selectedUser.phone_number)
+                          : "-"}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">
+                    {t("select_role")}
+                  </Label>
                   <div>
-                    <span className="text-sm text-gray-500">
-                      {t("username")}
-                    </span>
-                    <p className="text-sm font-medium truncate">
-                      {selectedUser.username}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-500">
-                      {isServiceAccount
-                        ? t("service_account_type")
-                        : t("user_type")}
-                    </span>
-                    <p className="text-sm font-medium">
-                      {selectedUser.user_type}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-500">
-                      {t("phone_number")}
-                    </span>
-                    <p className="text-sm font-medium truncate">
-                      {selectedUser.phone_number
-                        ? formatPhoneNumberIntl(selectedUser.phone_number)
-                        : "-"}
-                    </p>
+                    <RoleSelect
+                      value={selectedRole}
+                      onChange={setSelectedRole}
+                      context={getRoleContextForOrganizationType(
+                        organization?.org_type,
+                      )}
+                      disabled={!organization}
+                    />
                   </div>
                 </div>
               </div>
+            )}
+          </div>
+        </SheetBody>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">
-                  {t("select_role")}
-                </Label>
-                <div>
-                  <RoleSelect
-                    value={selectedRole}
-                    onChange={setSelectedRole}
-                    context={getRoleContextForOrganizationType(
-                      organization?.org_type,
-                    )}
-                    disabled={!organization}
-                  />
-                </div>
-              </div>
-              <Button
-                className="w-full"
-                onClick={handleAddUser}
-                disabled={!selectedRole}
-              >
-                {t("link_to_organization")}
-              </Button>
-            </div>
-          )}
-        </div>
+        <SheetFooter>
+          <Button
+            onClick={handleAddUser}
+            disabled={!selectedUser || !selectedRole}
+          >
+            {t("link_to_organization")}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -44,8 +44,8 @@ const DeviceEncounterHistory = ({ facilityId, deviceId, trigger }: Props) => {
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md pr-2 pl-3">
-        <SheetHeader className="space-y-1 px-1">
+      <SheetContent size="md" className="overflow-hidden">
+        <SheetHeader>
           <SheetTitle className="text-xl font-semibold">
             {t("device_encounter_history")}
           </SheetTitle>
@@ -53,7 +53,7 @@ const DeviceEncounterHistory = ({ facilityId, deviceId, trigger }: Props) => {
             {t("device_encounter_history_description")}
           </SheetDescription>
         </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-8rem)] mt-6">
+        <SheetBody>
           <div>
             {isLoading ? (
               <div>
@@ -100,7 +100,7 @@ const DeviceEncounterHistory = ({ facilityId, deviceId, trigger }: Props) => {
               </div>
             )}
           </div>
-        </ScrollArea>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

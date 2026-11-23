@@ -46,11 +46,13 @@ import {
 import templateApi from "@/types/emr/template/templateApi";
 
 import queryClient from "@/Utils/request/queryClient";
-import { generateSlug } from "@/Utils/utils";
+
+import { generateSlugValue } from "@/Utils/slug";
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
+import { slugValueSchema } from "@/types/base/slug/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DOMPurify from "dompurify";
-import { navigate } from "raviger";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -93,18 +95,7 @@ export default function TemplateBuilder({
 
   const templateBuilderSchema = z.object({
     name: z.string().trim().min(1, t("field_required")),
-    slug_value: z
-      .string()
-      .trim()
-      .min(5, {
-        message: t("character_count_validation", { min: 5, max: 36 }),
-      })
-      .max(25, {
-        message: t("character_count_validation", { min: 5, max: 36 }),
-      })
-      .regex(/^[a-z0-9-]+$/, {
-        message: t("slug_format_message"),
-      }),
+    slug_value: slugValueSchema(),
     status: z.enum(TemplateStatuses),
     template_type: z.string().min(1, t("field_required")),
     default_format: z.enum(TemplateFormats),
@@ -148,7 +139,10 @@ export default function TemplateBuilder({
     mutationFn: mutate(templateApi.createTemplate),
     onSuccess: (data: TemplateRead) => {
       toast.success(t("template_saved"));
-      navigate(`/facility/${facilityId}/template/builder/${data.slug}`);
+      navigate({
+        to: "/facility/$facilityId/template/builder/$slug",
+        params: { facilityId, slug: data.slug },
+      });
     },
     onError: (error) => {
       toast.error(error.message);
@@ -188,7 +182,7 @@ export default function TemplateBuilder({
     if (isEditing) return;
     const subscription = form.watch((value, { name }) => {
       if (name === "name") {
-        form.setValue("slug_value", generateSlug(value.name || "", 25), {
+        form.setValue("slug_value", generateSlugValue(value.name), {
           shouldValidate: true,
         });
       }

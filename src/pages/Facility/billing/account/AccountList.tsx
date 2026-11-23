@@ -1,6 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowUpRightSquare, PlusIcon } from "lucide-react";
-import { navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +15,7 @@ import {
   accountBillingStatusFilter,
   accountStatusFilter,
   dateFilter,
+  encounterClassFilter,
   tagFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
@@ -42,6 +42,7 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import useFilters from "@/hooks/useFilters";
+import { accountListSearch } from "@/lib/router/search/billing";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
 import {
@@ -55,6 +56,7 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
 import { dateTimeQueryString } from "@/Utils/utils";
 
+import { navigate } from "@/lib/router/navigate";
 import { isPositive, roundWhole } from "@/Utils/decimal";
 import AccountSheet from "./AccountSheet";
 
@@ -86,8 +88,8 @@ export function AccountList({
   const [editingAccount, setEditingAccount] =
     React.useState<AccountRead | null>(null);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: accountListSearch,
     limit: 15,
-    disableCache: true,
     defaultQueryParams: { status: "active" },
   });
 
@@ -111,6 +113,7 @@ export function AccountList({
     accountStatusFilter("status"),
     dateFilter("created_date", t("period"), longDateRangeOptions, false),
     accountBillingStatusFilter("billing_status"),
+    encounterClassFilter("encounter_class"),
     tagFilter("tags", TagResource.ACCOUNT, "multi", "tags"),
   ];
 
@@ -159,6 +162,9 @@ export function AccountList({
     billing_status: qParams.billing_status
       ? [qParams.billing_status]
       : undefined,
+    encounter_class: qParams.encounter_class
+      ? [qParams.encounter_class]
+      : undefined,
     tags: selectedTags,
   });
 
@@ -172,6 +178,7 @@ export function AccountList({
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         billing_status: qParams.billing_status,
+        encounter_class: qParams.encounter_class,
         created_date_after: qParams.created_date_after,
         created_date_before: qParams.created_date_before,
         tags: qParams.tags,
@@ -345,9 +352,10 @@ export function AccountList({
                         size="sm"
                         className="font-semibold"
                         onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/billing/account/${account.id}`,
-                          )
+                          navigate({
+                            to: "/facility/$facilityId/billing/account/$accountId",
+                            params: { facilityId, accountId: account.id },
+                          })
                         }
                       >
                         <ArrowUpRightSquare strokeWidth={1.5} />
