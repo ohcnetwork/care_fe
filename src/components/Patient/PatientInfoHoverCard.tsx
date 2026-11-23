@@ -6,13 +6,17 @@ import { formatPatientAddress } from "@/components/Patient/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  getPatientIdentifiers,
   PatientListRead,
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
+import { Link } from "@tanstack/react-router";
 import { Phone } from "lucide-react";
-import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
+
+import { HrefLink } from "@/lib/router/HrefLink";
+import { usePathname } from "@/lib/router/location";
 
 export const PatientInfoHoverCard = ({
   patient,
@@ -23,7 +27,7 @@ export const PatientInfoHoverCard = ({
 }) => {
   const { t } = useTranslation();
 
-  const path = usePath();
+  const path = usePathname();
   const isPatientHomePage = path?.endsWith(
     `/facility/${facilityId}/patients/home`,
   );
@@ -36,7 +40,7 @@ export const PatientInfoHoverCard = ({
         patient.facility_tags.length > 0));
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <div className="flex justify-between">
         <div className="flex items-center gap-4">
           <div className="size-12">
@@ -59,14 +63,13 @@ export const PatientInfoHoverCard = ({
         {!isPatientHomePage && facilityId && (
           <Button variant="outline" className="text-gray-950" asChild>
             <Link
-              basePath="/"
-              href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
-                {
-                  phone_number: patient.phone_number,
-                  year_of_birth: patient.year_of_birth?.toString() ?? "",
-                  partial_id: patient.id.slice(0, 5),
-                },
-              ).toString()}`}
+              to="/facility/$facilityId/patients/home"
+              params={{ facilityId }}
+              search={{
+                phone_number: patient.phone_number,
+                year_of_birth: patient.year_of_birth?.toString() ?? "",
+                partial_id: patient.id.slice(0, 5),
+              }}
             >
               {t("patient_home")}
             </Link>
@@ -74,8 +77,7 @@ export const PatientInfoHoverCard = ({
         )}
 
         <Button variant="outline" className="text-gray-950" asChild>
-          <Link
-            basePath="/"
+          <HrefLink
             href={
               facilityId
                 ? `/facility/${facilityId}/patient/${patient.id}`
@@ -83,25 +85,22 @@ export const PatientInfoHoverCard = ({
             }
           >
             {t("view_profile")}
-          </Link>
+          </HrefLink>
         </Button>
       </div>
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3 border-t border-gray-200 pt-4">
-          {"instance_identifiers" in patient &&
-            patient.instance_identifiers
-              ?.filter(({ config }) => !config.config.auto_maintained)
-              .map((identifier) => (
-                <div
-                  key={identifier.config.id}
-                  className="flex flex-col gap-0.5 text-sm"
-                >
-                  <span className="font-medium text-gray-700">
-                    {identifier.config.config.display}:{" "}
-                  </span>
-                  <span className="font-semibold">{identifier.value}</span>
-                </div>
-              ))}
+          {getPatientIdentifiers(patient).map((identifier) => (
+            <div
+              key={identifier.config.id}
+              className="flex flex-col gap-0.5 text-sm"
+            >
+              <span className="font-medium text-gray-700">
+                {identifier.config.config.display}:{" "}
+              </span>
+              <span className="font-semibold">{identifier.value}</span>
+            </div>
+          ))}
           {patient.phone_number && (
             <div className="flex flex-col gap-1 text-sm font-medium">
               <span className="text-gray-700">{t("contact")}</span>
@@ -152,6 +151,6 @@ export const PatientInfoHoverCard = ({
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };

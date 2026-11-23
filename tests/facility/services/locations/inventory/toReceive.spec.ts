@@ -1,5 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { openFacilityService } from "tests/facility/services/helpers";
+import { waitForOrderUpdate } from "tests/helper/inventory";
+
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -15,12 +18,9 @@ test.describe("Facility To-Receive Orders Inventory Flow", () => {
     if (isInitialized) return;
     const facilityId = getFacilityId();
     const servicesUrl = `/facility/${facilityId}/services/`;
-    await page.goto(servicesUrl);
-
-    await page.getByRole("link", { name: "Main Pharmacy" }).click();
+    await openFacilityService(page, servicesUrl, "Main Pharmacy");
     await page.getByRole("link", { name: "Pharmacy" }).click();
-    await page.goto(servicesUrl);
-    await page.getByRole("link", { name: "Pathology Lab" }).click();
+    await openFacilityService(page, servicesUrl, "Pathology Lab");
     await page.getByRole("link", { name: "Bio-Chemistry" }).click();
     bioChemLabLocationId =
       page
@@ -61,7 +61,9 @@ test.describe("Facility To-Receive Orders Inventory Flow", () => {
     let tableRow1 = page.locator("table tbody tr").nth(0);
     await expect(tableRow1).toContainText("Paracetamol");
     await expect(tableRow1).toContainText("5");
-    await page.getByRole("button", { name: "Mark as Approved" }).click();
+    await waitForOrderUpdate(page, "pending", () =>
+      page.getByRole("button", { name: "Mark as Approved" }).click(),
+    );
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     // verify item appears in table
     const orderRow = page
@@ -92,13 +94,17 @@ test.describe("Facility To-Receive Orders Inventory Flow", () => {
     let tableRow1 = page.locator("table tbody tr").nth(0);
     await expect(tableRow1).toContainText("Paracetamol");
     await expect(tableRow1).toContainText("5");
-    await page
-      .getByRole("button", { name: "Mark as Approved" })
-      .click({ timeout: 5000 });
+    const approveButton = page.getByRole("button", {
+      name: "Mark as Approved",
+    });
+    await expect(approveButton).toBeEnabled();
+    await waitForOrderUpdate(page, "pending", () => approveButton.click());
     await page
       .locator('[data-slot="dropdown-menu-trigger"]:has(.care-l-ellipsis-v)')
       .click();
-    await page.getByRole("menuitem", { name: "Mark as Completed" }).click();
+    await waitForOrderUpdate(page, "completed", () =>
+      page.getByRole("menuitem", { name: "Mark as Completed" }).click(),
+    );
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     await page.getByRole("tab", { name: "Completed" }).click();
     // verify item appears in table

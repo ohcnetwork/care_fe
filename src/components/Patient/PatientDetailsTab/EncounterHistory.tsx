@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { useQueryParams } from "@/lib/router/queryParams";
+import { patientEncounterListSearch } from "@/lib/router/search/patient";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import { TimelineWrapper } from "@/components/Common/TimelineWrapper";
 import { EmptyState } from "@/components/ui/empty-state";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { CaptionsOff, PlusIcon } from "lucide-react";
 
@@ -33,11 +35,21 @@ const EncounterHistory = (props: PatientProps) => {
 
   const { t } = useTranslation();
 
-  const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
+  const [qParams, setQueryParams] = useQueryParams(patientEncounterListSearch);
   const { hasPermission } = usePermissions();
   const { canViewPatients } = getPermissions(
     hasPermission,
     patientData.permissions,
+  );
+
+  // "can_create_encounter" has the ENCOUNTER permission context, and the
+  // patient response only carries PATIENT and FACILITY context permissions.
+  // The facility permissions are the correct source, as in the other
+  // encounter creation entry points.
+  const { facility } = useCurrentFacilitySilently();
+  const { canCreateEncounter } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
   );
 
   const { data: encounterData, isLoading } = useQuery({
@@ -79,18 +91,20 @@ const EncounterHistory = (props: PatientProps) => {
                     description={t("create_a_new_encounter_to_get_started")}
                     icon={<CaptionsOff className="size-5 text-primary m-1" />}
                     action={
-                      <CreateEncounterForm
-                        facilityId={facilityId}
-                        patientId={patientId}
-                        patientName={patientData.name}
-                        trigger={
-                          <Button>
-                            <PlusIcon />
-                            {t("create_encounter")}
-                            <ShortcutBadge actionId="create-encounter" />
-                          </Button>
-                        }
-                      />
+                      canCreateEncounter ? (
+                        <CreateEncounterForm
+                          facilityId={facilityId}
+                          patientId={patientId}
+                          patientName={patientData.name}
+                          trigger={
+                            <Button>
+                              <PlusIcon />
+                              {t("create_encounter")}
+                              <ShortcutBadge actionId="create-encounter" />
+                            </Button>
+                          }
+                        />
+                      ) : undefined
                     }
                   />
                 </div>

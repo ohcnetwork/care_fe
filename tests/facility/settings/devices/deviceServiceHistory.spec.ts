@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getFieldErrorMessage } from "tests/helper/error";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -72,6 +73,11 @@ test.describe("Device Service History", () => {
 
     await expect(page.getByText(notes)).toBeVisible();
 
+    // Wait for the Add sheet to fully close before opening Edit; otherwise its
+    // controls linger in the DOM during the close animation and collide with
+    // the edit sheet's controls.
+    await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
+
     await page
       .locator('[data-slot="card"]')
       .filter({ hasText: notes })
@@ -79,8 +85,14 @@ test.describe("Device Service History", () => {
       .first()
       .click();
 
+    // With the Add sheet closed, the edit sheet is the only open dialog. Use
+    // .last() to target the most recently opened dialog so a still-unmounting
+    // sheet can't reintroduce a strict-mode match.
+    const editSheet = page.getByRole("dialog").last();
+    await expect(editSheet).toBeVisible();
+
     const pastYear = new Date().getFullYear() - 1;
-    await page
+    await editSheet
       .locator('[data-slot="form-item"]')
       .filter({ hasText: "Service Date" })
       .locator('[data-slot="popover-trigger"]')
@@ -88,9 +100,11 @@ test.describe("Device Service History", () => {
     await page.locator(".rdp-years_dropdown").selectOption(pastYear.toString());
     await page.locator('[role="gridcell"]:not([data-outside])').first().click();
 
-    await page.getByRole("textbox", { name: "Notes *" }).fill(updatedNotes);
+    await editSheet
+      .getByRole("textbox", { name: "Notes *" })
+      .fill(updatedNotes);
 
-    await page.getByRole("button", { name: "Update" }).click();
+    await editSheet.getByRole("button", { name: "Update" }).click();
 
     const updatedCard = page
       .locator('[data-slot="card"]')
@@ -103,6 +117,27 @@ test.describe("Device Service History", () => {
     await expect(
       page.locator('[data-slot="card"]').filter({ hasText: notes }),
     ).toHaveCount(0);
+  });
+
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    const firstDeviceLink = page
+      .getByRole("link")
+      .filter({ has: page.locator('[data-slot="card"]') })
+      .first();
+    await firstDeviceLink.click();
+
+    await page.getByRole("button", { name: "Add Service Record" }).click();
+
+    const notesField = page.getByRole("textbox", { name: "Notes *" });
+    await notesField.fill("   ");
+
+    await page.getByRole("button", { name: "Save" }).click();
+
+    const errorMessage = getFieldErrorMessage(notesField);
+    await expect(errorMessage).toBeVisible();
+    await expect(errorMessage).toHaveText("This field is required");
   });
 
   test("Show validation error for future date in service record", async ({
@@ -176,6 +211,11 @@ test.describe("Device Service History", () => {
 
     await expect(page.getByText(notes)).toBeVisible();
 
+    // Wait for the Add sheet to fully close before opening Edit; otherwise its
+    // controls linger in the DOM during the close animation and collide with
+    // the edit sheet's controls.
+    await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
+
     await page
       .locator('[data-slot="card"]')
       .filter({ hasText: notes })
@@ -183,14 +223,22 @@ test.describe("Device Service History", () => {
       .first()
       .click();
 
-    const updateButton = page.getByRole("button", { name: "Update" });
+    // With the Add sheet closed, the edit sheet is the only open dialog. Use
+    // .last() to target the most recently opened dialog so a still-unmounting
+    // sheet can't reintroduce a strict-mode match.
+    const editSheet = page.getByRole("dialog").last();
+    await expect(editSheet).toBeVisible();
+
+    const updateButton = editSheet.getByRole("button", { name: "Update" });
     await expect(updateButton).toBeDisabled();
 
-    await page.getByRole("textbox", { name: "Notes *" }).fill(updatedNotes);
+    await editSheet
+      .getByRole("textbox", { name: "Notes *" })
+      .fill(updatedNotes);
 
     await expect(updateButton).toBeEnabled();
 
-    await page.getByRole("textbox", { name: "Notes *" }).fill(notes);
+    await editSheet.getByRole("textbox", { name: "Notes *" }).fill(notes);
 
     await expect(updateButton).toBeDisabled();
   });

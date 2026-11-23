@@ -1,7 +1,7 @@
 ## Plugin Discovery & Setup
 
 - Build-time plugins configured via REACT_ENABLED_APPS env var
-- format: org/repo or org/repo@host/path/to/remoteEntry.js
+- format: org/repo, org/repo@host/path/to/remoteEntry.js, or org/repo@/path/to/remoteEntry.js (relative, same origin)
 
 ## Build-time vs. Runtime
 
@@ -11,9 +11,9 @@
 
 ## Vite Federation Architecture
 
-- Main app (vite.config.mts): federation with name "core", dummy remote, shared: react/react-dom/i18next/react-query/raviger/sonner/decimal.js
+- Main app (vite.config.mts): federation with name "core", dummy remote, shared: react/react-dom/i18next/react-query/react-router/sonner/decimal.js
 - Per-app (apps/care_hello_fe/vite.config.ts): exposes ./manifest pointing to src/manifest.tsx, builds remoteEntry.js to dist/assets/
-- RemoteEntry URL resolving: GitHub Pages if no @ suffix, otherwise http:// for localhost, https:// elsewhere
+- RemoteEntry URL resolving: GitHub Pages if no @ suffix, kept relative if it starts with /, otherwise http:// for localhost, https:// elsewhere. PluginEngine resolves all URLs against the current page at load time.
 - Runtime: PluginEngine.tsx uses setFederationRemote() to register each plugin slug dynamically, then getFederationRemote() to load manifest
 
 ## Local Dev Workflow
@@ -33,8 +33,8 @@
 ## Dev-Mode Local Discovery Plan
 
 - Goal: Auto-discover apps/ plugins in dev-only mode for direct HMR without separate builds/previews
-- Approach: Detect mode === 'dev', scan apps/ directory for manifest.tsx files, manage two pluginMap paths
-- Shared deps already configured: federation shares react, react-dom, react-i18next, @tanstack/react-query, raviger, sonner, decimal.js
+- Approach: Detect mode === 'dev', scan apps/ directory for `src/manifest.*` files, manage two pluginMap paths
+- Shared deps already configured: federation shares react, react-dom, react-i18next, @tanstack/react-query, @tanstack/react-router, sonner, decimal.js
 - Tailwind content: Already includes ./apps/\*_/_ so CSS should work
 - Risk: Re-export cycles if apps/ import from src/ (already happens - care_hello_fe imports Page component)
 - Federation globals: **federation** methods already in globals.d.ts and usable in dev mode
@@ -81,6 +81,8 @@ Flags:
   - `@/foo` is left as-is (plugins use the same `@/*` alias).
 - Skips existing files unless `--force` is passed.
 - Copies binary assets (images, fonts, lottie, etc.) byte-for-byte without rewriting.
+- Collects bare-specifier imports and syncs any missing packages into the target app's `package.json` using the version and dependency section from the root workspace `package.json`.
+- Ignores imports that only appear inside comments.
 
 ### Output
 
@@ -88,7 +90,11 @@ A summary is printed at the end:
 
 - `✓ Copied` — files written (or that would be written under `--dry-run`).
 - `• Skipped` — files already present in the target app; re-run with `--force` to replace.
-- `• External packages referenced` — bare-specifier imports encountered (e.g. `react`, `@radix-ui/react-slot`). Add any missing entries to the plugin's `package.json` before building.
+- `• External packages referenced` — bare-specifier imports encountered (e.g. `react`, `@radix-ui/react-slot`).
+- `✓ Synced` — packages added to the target app's `package.json` (or that would be added under `--dry-run`).
+- `• Packages already present` — dependencies the target app already declares.
+- `• Skipped Node builtins` — built-in Node modules that do not belong in `package.json`.
+- `! External packages missing from the root package.json` — packages the script could not source a version for automatically.
 - `! Unresolved imports` — specifiers that could not be resolved to a file in `src/` or `care.config.ts`. These need manual attention (often host-only modules outside `src/` such as `vite-env.d.ts`-style globals).
 
 ### Examples
@@ -107,5 +113,6 @@ npm run clone-component -- @careConfig care_voice_fe
 ### Caveats
 
 - Only files under `src/` (and `care.config.ts`) are followed. Imports that resolve outside those roots are reported as unresolved.
-- The CLI does not install npm dependencies or update the plugin's `package.json` — review the "External packages" list and add anything missing.
+- The CLI updates the target app's `package.json`, but it does not run `npm install`.
+- Auto-sync only works for packages that already exist in the root workspace `package.json`; anything else is still reported for manual follow-up.
 - Once cloned, files are independent copies. They will not stay in sync with the host; re-run with `--force` to refresh.

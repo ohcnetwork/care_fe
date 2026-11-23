@@ -11,10 +11,9 @@ export interface DispenseOrderBatchResponse {
 export function extractDispenseOrderFromBatchResponse(
   response: DispenseOrderBatchResponse,
 ): DispenseOrderRead | undefined {
-  const orders = response.results
+  return response.results
     .map((item) => item.data?.order)
-    .filter((item): item is DispenseOrderRead => !!item);
-  return orders[0];
+    .filter((item): item is DispenseOrderRead => !!item)[0];
 }
 
 export enum DispenseOrderStatus {
@@ -36,6 +35,7 @@ export interface DispenseOrderRead extends DispenseOrderBase {
   patient: PatientRead;
   location: LocationRead;
   created_by: UserReadMinimal | null;
+  updated_by: UserReadMinimal | null;
   created_date: string;
   modified_date: string;
 }
@@ -62,3 +62,5 @@ export const DISPENSE_ORDER_STATUS_STYLES: Record<
   [DispenseOrderStatus.abandoned]: "secondary",
   [DispenseOrderStatus.entered_in_error]: "destructive",
 };
+
+export const MAX_DISPENSES_PER_DISPENSE_ORDER = 100;

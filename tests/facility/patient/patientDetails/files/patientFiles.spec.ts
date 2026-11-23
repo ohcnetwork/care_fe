@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import { format, subDays } from "date-fns";
+import { filterSelectButton } from "tests/helper/searchParams";
 import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -56,32 +57,41 @@ test.describe("Patient Files", () => {
     return response;
   };
 
+  // Opens the preview for a specific uploaded file and closes it again,
+  // confirming the file is accessible to the current user.
+  const openFilePreview = async (page: Page, displayName: string) => {
+    // Scope to the row for this exact file so other files on the shared
+    // patient (including archived ones, whose "View" opens a different
+    // dialog) can't be picked up by mistake.
+    const fileRow = page
+      .getByRole("row")
+      .filter({ hasText: displayName })
+      .first();
+    await expect(fileRow).toBeVisible();
+    await fileRow.getByRole("button", { name: "View", exact: true }).click();
+
+    // The file preview dialog (not the archived-file dialog) must open. Filter
+    // by its title so an upload sheet or other dialog that may still be mounted
+    // can't cause a strict-mode match on the Close button.
+    const previewDialog = page
+      .getByRole("dialog")
+      .filter({ hasText: "File Preview" });
+    await expect(previewDialog).toBeVisible();
+
+    // Close it, scoping to the dialog so page-level toasts named "Close"
+    // can't cause a strict-mode match.
+    await previewDialog
+      .getByRole("button", { name: "Close", exact: true })
+      .click();
+    await expect(previewDialog).toBeHidden();
+  };
+
   let facilityId: string;
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
-
-    // Navigate to encounters page and open first in-progress encounter
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
-    );
-
-    // Open first encounter details - wait for the link to be visible
-    const viewEncounterLink = page
-      .getByRole("link", { name: "View Encounter" })
-      .first();
-    await expect(viewEncounterLink).toBeVisible({ timeout: 10000 });
-    await viewEncounterLink.click();
-
-    // Wait for encounter page to load and get URL
-    await expect(page).toHaveURL(/\/encounter\//, { timeout: 10000 });
-    const currentUrl = page.url();
-    const patientUrl = currentUrl.split("/encounter/")[0];
-
-    // Navigate to patient details page
-    await page.goto(patientUrl);
+    // Open the saved patient fixture; list navigation is covered separately.
+    await page.goto(`/facility/${facilityId}/patient/${getPatientId()}`);
 
     // Wait for Files tab to be visible and click it
     const filesTab = page.getByRole("tab", { name: "Files" });
@@ -166,55 +176,35 @@ test.describe("Patient Files", () => {
     page,
     browser,
   }) => {
-    const inputFileName1 = faker.system.fileName();
+    // Unique, extension-free display name so this exact file's row can be
+    // located reliably among other files on the shared patient.
+    const uploadedFileName = `access-${faker.string.alphanumeric(10)}`;
 
-    // Upload file as first user (doctor)
-    await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
+    // Upload the file as the first user (doctor).
+    await uploadFile(
+      page,
+      `tests/fixtures/images/${fileName}`,
+      uploadedFileName,
+    );
 
-    // Wait for the file to appear in the list
-    await expect(
-      page.getByRole("button", { name: /view/i }).first(),
-    ).toBeVisible({ timeout: 10000 });
+    // Capture the stable Files-tab URL to reopen as a different user.
+    const filesUrl = page.url();
 
-    // View the uploaded file
-    await page.getByRole("button", { name: /view/i }).first().click();
+    // The uploader can preview the file they just added.
+    await openFilePreview(page, uploadedFileName);
 
-    // Wait for file viewer to load
-    await expect(
-      page.getByRole("button", { name: "Close", exact: true }),
-    ).toBeVisible({
-      timeout: 5000,
-    });
-    await page.getByRole("button", { name: "Close", exact: true }).click();
-
-    // Save current URL for navigation
-    const currentUrl = page.url();
-
-    // Create a new browser context with nurse authentication
+    // The same file must be accessible to a different user (nurse).
     const nurseContext = await browser.newContext({
       storageState: "tests/.auth/nurse.json",
     });
     const nursePage = await nurseContext.newPage();
-
-    // Navigate to the patient files page as nurse
-    await nursePage.goto(currentUrl);
-
-    // Wait for the files tab to load
-    await expect(
-      nursePage.getByRole("button", { name: /view/i }).first(),
-    ).toBeVisible({ timeout: 10000 });
-
-    // View the file as nurse
-    await nursePage.getByRole("button", { name: /view/i }).first().click();
-
-    // Verify file viewer loaded for nurse
-    await expect(nursePage.getByRole("button", { name: "Close" })).toBeVisible({
-      timeout: 5000,
-    });
-
-    // Clean up
-    await nursePage.close();
-    await nurseContext.close();
+    try {
+      await nursePage.goto(filesUrl);
+      await openFilePreview(nursePage, uploadedFileName);
+    } finally {
+      await nursePage.close();
+      await nurseContext.close();
+    }
   });
 
   test("Add a new patient file and rename it", async ({ page }) => {
@@ -222,26 +212,20 @@ test.describe("Patient Files", () => {
     const newFileName = faker.system.fileName();
 
     // Filter for active files first
-    await page.getByRole("button", { name: "Filter" }).click();
-    await expect(
-      page.getByRole("menuitem", { name: "Active Files" }),
-    ).toBeVisible({ timeout: 5000 });
-    await page.getByRole("menuitem", { name: "Active Files" }).click();
-
     const filterPromise = page.waitForResponse(
       (response) =>
         response.url().includes("/api/v1/files/") &&
+        response.url().includes("is_archived=false") &&
         response.request().method() === "GET",
       { timeout: 15000 },
     );
+    await filterSelectButton(page, "Status").click();
+    await page
+      .getByRole("menuitemradio", { name: "Active", exact: true })
+      .click();
 
     const filterResponse = await filterPromise;
     expect(filterResponse.status()).toBe(200);
-
-    // Wait for filter to be applied and active files badge to appear
-    await expect(page.getByText("Active Files")).toBeVisible({
-      timeout: 10000,
-    });
 
     // Upload a single file using helper
     await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
@@ -286,26 +270,20 @@ test.describe("Patient Files", () => {
     const archiveReason = faker.lorem.sentence();
 
     // Filter for active files first
-    await page.getByRole("button", { name: "Filter" }).click();
-    await expect(
-      page.getByRole("menuitem", { name: "Active Files" }),
-    ).toBeVisible({ timeout: 5000 });
-    await page.getByRole("menuitem", { name: "Active Files" }).click();
-
     const filterPromise = page.waitForResponse(
       (response) =>
         response.url().includes("/api/v1/files/") &&
+        response.url().includes("is_archived=false") &&
         response.request().method() === "GET",
       { timeout: 15000 },
     );
+    await filterSelectButton(page, "Status").click();
+    await page
+      .getByRole("menuitemradio", { name: "Active", exact: true })
+      .click();
 
     const filterResponse = await filterPromise;
     expect(filterResponse.status()).toBe(200);
-
-    // Wait for filter to be applied and active files badge to appear
-    await expect(page.getByText("Active Files")).toBeVisible({
-      timeout: 10000,
-    });
 
     // Upload a single file using helper
     await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);

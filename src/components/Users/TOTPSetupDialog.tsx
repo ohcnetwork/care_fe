@@ -119,14 +119,19 @@ export function TOTPSetupDialog({
             </div>
 
             {showSecretKey && (
-              <div
-                className="p-2 bg-indigo-50 rounded flex items-center justify-between cursor-pointer"
-                onClick={handleCopyKey}
-              >
+              <div className="p-2 bg-indigo-50 rounded flex items-center justify-between gap-2">
                 <code className="text-indigo-600 text-sm select-all">
                   {setupData.secret_key}
                 </code>
-                <CareIcon icon="l-copy" className="size-4 text-gray-500" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t("copy")}
+                  onClick={handleCopyKey}
+                >
+                  <CareIcon icon="l-copy" className="size-4 text-gray-500" />
+                </Button>
               </div>
             )}
           </div>

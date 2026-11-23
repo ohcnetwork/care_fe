@@ -1,5 +1,4 @@
 import { TriangleAlert } from "lucide-react";
-import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -14,12 +13,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+import { navigate } from "@/lib/router/navigate";
 import {
   AccountBase,
   AccountBillingStatus,
   AccountStatus,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useQuery } from "@tanstack/react-query";
@@ -73,14 +74,20 @@ export default function NoActiveAccountWarningDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{t("proceed")}</AlertDialogCancel>
+          <AlertDialogCancel>
+            <ShortcutBadge actionId="cancel-action" />
+            {t("create_account")}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={() =>
-              navigate(
-                `/facility/${facilityId}/billing/account?patient_filter=${patientId}`,
-              )
+              navigate({
+                to: "/facility/$facilityId/billing/account",
+                params: { facilityId },
+                search: { patient_filter: patientId },
+              })
             }
           >
+            <ShortcutBadge actionId="submit-action" />
             {t("go_to_accounts")}
           </AlertDialogAction>
         </AlertDialogFooter>

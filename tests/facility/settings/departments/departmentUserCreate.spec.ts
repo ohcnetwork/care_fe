@@ -50,8 +50,7 @@ test.describe("User Management in Departments", () => {
       await page
         .getByRole("textbox", { name: "Phone Number *" })
         .fill(phoneNumber);
-      await page.getByRole("combobox", { name: "Gender *" }).click();
-      await page.getByRole("option", { name: gender, exact: true }).click();
+      await page.getByRole("radio", { name: gender, exact: true }).check();
 
       await page
         .getByRole("combobox")

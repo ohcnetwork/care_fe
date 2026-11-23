@@ -4,6 +4,7 @@ import {
   SpecimenBase,
   SpecimenFromDefinitionCreate,
   SpecimenRead,
+  SpecimenRetrieve,
 } from "./specimen";
 
 export default {
@@ -28,12 +29,12 @@ export default {
   getSpecimen: {
     path: "/api/v1/facility/{facilityId}/specimen/{specimenId}/",
     method: HttpMethod.GET,
-    TRes: Type<SpecimenRead>(),
+    TRes: Type<SpecimenRetrieve>(),
   },
   retrieveByAccessionIdentifier: {
     path: "/api/v1/facility/{facilityId}/specimen/retrieve_by_accession_identifier/",
     method: HttpMethod.POST,
-    TRes: Type<SpecimenRead>(),
+    TRes: Type<SpecimenRetrieve>(),
     TBody: Type<{ accession_identifier: string }>(),
   },
 };

@@ -26,8 +26,10 @@ type Column = {
 interface RowProps {
   columns: Column[];
   note?: string;
-  createdBy: UserReadMinimal;
+  createdBy?: UserReadMinimal | null;
   onViewEncounter?: () => void;
+  /** Matches the tighter row gap used by panel presentations. */
+  compact?: boolean;
 }
 
 export function BadgeButtonDropdownTrigger({ note }: { note?: string }) {
@@ -37,7 +39,9 @@ export function BadgeButtonDropdownTrigger({ note }: { note?: string }) {
       <Button
         variant="link"
         className="hover:text-gray-700"
-        aria-label={note ? t("has_note") : undefined}
+        aria-label={
+          note ? `${t("more_actions")}, ${t("has_note")}` : t("more_actions")
+        }
       >
         <span className="relative inline-flex">
           <BadgeInfo size={16} />
@@ -58,6 +62,7 @@ export default function ClinicalInformationRow({
   note,
   createdBy,
   onViewEncounter,
+  compact = false,
 }: RowProps) {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -73,13 +78,19 @@ export default function ClinicalInformationRow({
             index !== 0 && "border-l",
             index === columns.length - 1 && "border-r",
             col.className,
+            compact && "rounded-none border-t-0",
           )}
         >
           {col.render()}
         </div>
       ))}
 
-      <div className="flex items-center justify-center border border-gray-200 border-l-0 rounded-r-sm">
+      <div
+        className={cn(
+          "flex items-center justify-center border border-gray-200 border-l-0 rounded-r-sm",
+          compact && "rounded-none border-t-0",
+        )}
+      >
         <DropdownMenu>
           <BadgeButtonDropdownTrigger note={note} />
           <DropdownMenuContent>
@@ -103,29 +114,36 @@ export default function ClinicalInformationRow({
               </DropdownMenuItem>
             )}
 
-            {(!!onViewEncounter || note) && (
+            {(!!onViewEncounter || note) && createdBy && (
               <div className="my-2 border-t border-dashed border-gray-300" />
             )}
 
-            <div className="p-1 text-sm">
-              <div className="text-gray-500">{t("reported_by")}:</div>
-              <div className="mt-1 flex items-center gap-2">
-                <Avatar
-                  name={formatName(createdBy)}
-                  className="size-6"
-                  imageUrl={createdBy.profile_picture_url}
-                />
-                <span className="font-semibold text-gray-900">
-                  {formatName(createdBy)}
-                </span>
+            {createdBy && (
+              <div className="p-1 text-sm">
+                <div className="text-gray-500">{t("reported_by")}:</div>
+                <div className="mt-1 flex items-center gap-2">
+                  <Avatar
+                    name={formatName(createdBy, true)}
+                    className="size-6"
+                    imageUrl={createdBy.profile_picture_url}
+                  />
+                  <span className="font-semibold text-gray-900">
+                    {formatName(createdBy)}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
       {showNote && note && (
-        <div className="col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded -mt-2.5 rounded-t-none">
+        <div
+          className={cn(
+            "col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded rounded-t-none",
+            compact ? "-mt-px" : "-mt-2.5",
+          )}
+        >
           <div className="text-sm font-semibold text-gray-800">
             {t("note")}
             {":"}

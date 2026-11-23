@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -53,11 +53,11 @@ export function ObservationHistorySheet({
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-xl bg-gray-50">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("observation_history")}</SheetTitle>
         </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-8rem)] mt-3 pr-4">
+        <SheetBody>
           <div className="space-y-4">
             {deletedObservations.length === 0 ? (
               <EmptyState
@@ -155,7 +155,7 @@ export function ObservationHistorySheet({
               ))
             )}
           </div>
-        </ScrollArea>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

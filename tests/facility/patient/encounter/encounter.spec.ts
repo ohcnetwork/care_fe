@@ -64,16 +64,9 @@ test.describe("Create an Encounter", () => {
       page.getByText("Encounter created successfully"),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: randomEncounterClass }),
-    ).toBeVisible();
-
-    //verify encounter details on the details tab
-    await page.getByRole("tab", { name: "Details" }).click();
-    await page.getByRole("link", { name: "Update Encounter" }).click();
-
-    // Verify encounter status, class, and priority are displayed correctly
-    await expect(
-      page.getByRole("combobox").filter({ hasText: randomEncounterClass }),
+      page
+        .getByRole("region", { name: "Encounter", exact: true })
+        .getByText(randomEncounterClass, { exact: true }),
     ).toBeVisible();
   });
 
@@ -142,19 +135,19 @@ test.describe("Create an Encounter", () => {
 
     //verify on encounter page
     await expect(
-      page.getByRole("heading", { name: randomEncounterClass }),
+      page
+        .getByRole("region", { name: "Encounter", exact: true })
+        .getByText(randomEncounterClass, { exact: true }),
     ).toBeVisible();
 
-    //verify encounter details on the details tab
-    await page.getByRole("tab", { name: "Details" }).click();
-    await page.getByRole("link", { name: "Update Encounter" }).click();
+    // Verify the encounter details through the header's edit link
+    await page
+      .getByRole("link", { name: "Edit encounter", exact: true })
+      .click();
 
-    // Verify encounter status, class, and priority are displayed correctly
+    // Verify encounter status and priority are displayed correctly.
     await expect(
       page.getByRole("combobox").filter({ hasText: randomEncounterStatus }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("combobox").filter({ hasText: randomEncounterClass }),
     ).toBeVisible();
     await expect(
       page.getByRole("combobox").filter({ hasText: randomEncounterPriority }),

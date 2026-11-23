@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
 import {
   PluginManifest,
@@ -15,6 +16,7 @@ import React, { Suspense, useEffect, useMemo, useRef } from "react";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
+import { registerQuestionGroup } from "@/components/QuestionnaireV2/groups/registry";
 import { addOverride } from "@/lib/override";
 import { PlugConfig, PlugConfigMeta } from "@/types/plugConfig";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
@@ -22,9 +24,8 @@ import { mergePlugConfigs } from "@/Utils/plugConfig";
 import query from "@/Utils/request/query";
 import { deepFreeze } from "@/Utils/utils";
 import { t } from "i18next";
-import { Loader2Icon } from "lucide-react";
+
 import { localDevPluginManifests } from "virtual:care-local-plugins";
-import { z } from "zod";
 
 const getPluginManifest = async (config: PlugConfig) => {
   const localManifest = localDevPluginManifests[config.slug];
@@ -36,15 +37,18 @@ const getPluginManifest = async (config: PlugConfig) => {
     } as PluginManifestWithMeta;
   }
 
-  if (!config.meta.url || !z.url().safeParse(config.meta.url).success) {
-    console.error(
-      `Plugin ${config.slug} has an invalid URL (${config.meta.url}) in meta`,
-    );
+  if (!config.meta.url) {
+    console.error(`Plugin ${config.slug} has no URL in meta`);
     return null;
   }
 
+  // Resolve against the page so relative URLs (e.g. `/plugs/<slug>/remoteEntry.js`)
+  // work from any origin. Invalid URLs throw here and are caught below.
   setFederationRemote(config.slug, {
-    url: () => Promise.resolve(config.meta.url as string),
+    url: () =>
+      Promise.resolve(
+        new URL(config.meta.url as string, window.location.href).href,
+      ),
     format: "esm",
     from: "vite",
     externalType: "promise",
@@ -63,13 +67,11 @@ const getPluginManifest = async (config: PlugConfig) => {
   }
 };
 
-// Import the remote component synchronously
 export default function PluginEngine({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Fetch enabled plugins from the backend API
   const { data: enabledPlugins } = useQuery({
     queryKey: ["enabled-plugins"],
     queryFn: query(plugConfigApi.list, {
@@ -85,7 +87,7 @@ export default function PluginEngine({
 
   const pluginsQuery = useQueries({
     queries: resolvedPlugins.map((config) => ({
-      queryKey: ["plugin-manifest", config.slug],
+      queryKey: ["plugin-manifest", config.slug, config.meta],
       queryFn: () => getPluginManifest(config),
     })),
     combine: (queries) =>
@@ -96,7 +98,13 @@ export default function PluginEngine({
           return { ...config, isLoading: true as const };
         }
 
-        return { ...config, isLoading: false as const, ...data! };
+        // `slug` spreads after the untrusted manifest so it can never shadow the backend-issued identity.
+        return {
+          ...config,
+          isLoading: false as const,
+          ...data!,
+          slug: config.slug,
+        };
       }),
   });
 
@@ -116,31 +124,40 @@ export default function PluginEngine({
     window.__CARE_PLUGIN_RUNTIME__ = deepFreeze({ meta: pluginMeta });
   }, [pluginMeta]);
 
-  // Register plugin overrides
   const overrideCleanupRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
-    // Clean up previous overrides
     overrideCleanupRef.current.forEach((cleanup) => cleanup());
     overrideCleanupRef.current = [];
 
-    // Register new overrides from all loaded plugins
     for (const plugin of pluginsQuery) {
-      if (plugin.isLoading || !plugin.overrides) continue;
+      if (plugin.isLoading) continue;
 
-      for (const override of plugin.overrides) {
+      for (const override of plugin.overrides ?? []) {
         const cleanup = addOverride(override.component, {
           component: override.replacement,
           condition: override.condition,
           priority: override.priority,
           description:
-            override.description ?? `Override from plugin: ${plugin.plugin}`,
+            override.description ?? `Override from plugin: ${plugin.slug}`,
         });
         overrideCleanupRef.current.push(cleanup);
       }
+
+      for (const definition of plugin.registeredQuestionGroups ?? []) {
+        try {
+          overrideCleanupRef.current.push(
+            registerQuestionGroup(definition, plugin.slug),
+          );
+        } catch (error) {
+          console.error(
+            `Invalid registered group from plugin ${plugin.slug}`,
+            error,
+          );
+        }
+      }
     }
 
-    // Cleanup on unmount
     return () => {
       overrideCleanupRef.current.forEach((cleanup) => cleanup());
       overrideCleanupRef.current = [];
@@ -197,11 +214,11 @@ export function PLUGIN_Component(props: PluginComponentProps) {
         } as PluginProps<typeof __name>;
 
         return (
-          <PluginErrorBoundary key={plugin.plugin} pluginName={plugin.plugin}>
+          <PluginErrorBoundary key={plugin.slug} pluginName={plugin.slug}>
             <React.Suspense
               fallback={
                 <div className="flex items-center justify-center gap-2">
-                  <Loader2Icon
+                  <Spinner
                     role="status"
                     aria-label="Loading"
                     className="size-4 animate-spin"

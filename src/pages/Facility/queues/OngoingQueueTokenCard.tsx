@@ -28,7 +28,10 @@ import {
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
+import { QueryParams } from "@/Utils/request/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import type { TFunction } from "i18next";
 import {
   BringToFront,
   Check,
@@ -41,7 +44,6 @@ import {
   RotateCcw,
   TicketCheck,
 } from "lucide-react";
-import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -285,7 +287,7 @@ function OngoingQueueTokenCardInner({
   setShowCancelDialog: (open: boolean) => void;
   showEnteredInErrorDialog: boolean;
   setShowEnteredInErrorDialog: (open: boolean) => void;
-  t: (key: string, options?: Record<string, unknown>) => string;
+  t: TFunction;
 }) {
   const actions = useTokenActions({
     facilityId,
@@ -322,8 +324,12 @@ function OngoingQueueTokenCardInner({
         >
           <div className="flex items-center justify-between gap-2 md:w-auto w-full min-w-0">
             <Link
-              basePath="/"
-              href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+              to="/facility/$facilityId/queue/$queueId/token/$tokenId"
+              params={{
+                facilityId,
+                queueId: token.queue.id,
+                tokenId: token.id,
+              }}
               className="font-semibold hover:underline transition-colors min-w-0"
             >
               <span className="font-semibold flex items-center gap-1 min-w-0">
@@ -352,8 +358,12 @@ function OngoingQueueTokenCardInner({
           <div className="flex w-full md:w-auto items-center flex-wrap gap-2 md:gap-3">
             <Button variant="outline" asChild size="sm">
               <Link
-                basePath="/"
-                href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+                to="/facility/$facilityId/queue/$queueId/token/$tokenId"
+                params={{
+                  facilityId,
+                  queueId: token.queue.id,
+                  tokenId: token.id,
+                }}
               >
                 {t("encounter")}
               </Link>
@@ -461,7 +471,7 @@ export function OngoingQueueTokenCardsList({
 }: {
   facilityId: string;
   queueId: string;
-  qParams: Record<string, unknown>;
+  qParams: QueryParams;
   emptyState?: React.ReactNode;
   header?: React.ReactNode;
 }) {

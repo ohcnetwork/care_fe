@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { TFunction } from "i18next";
 import { CheckIcon, PlusCircle, X } from "lucide-react";
-import { Link, navigate } from "raviger";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -35,9 +35,12 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import { slugValueSchema } from "@/types/base/slug/schema";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import {
   ProductKnowledgeBase,
@@ -49,24 +52,15 @@ import {
   UCUM_TIME_UNITS_CODES,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+import { generateSlugValue } from "@/Utils/slug";
 
-const createFormSchema = (
-  t: (key: string, options?: Record<string, unknown>) => string,
-) => {
+const createFormSchema = (t: TFunction) => {
   return z.object({
-    name: z.string().min(1, { message: t("name_is_required") }),
-    slug_value: z
+    name: z
       .string()
       .trim()
-      .min(5, {
-        message: t("character_count_validation", { min: 5, max: 25 }),
-      })
-      .max(25, {
-        message: t("character_count_validation", { min: 5, max: 25 }),
-      })
-      .regex(/^[a-z0-9_-]+$/, {
-        message: t("slug_format_message"),
-      }),
+      .min(1, { message: t("name_is_required") }),
+    slug_value: slugValueSchema(),
     product_type: z.enum(ProductKnowledgeType),
     status: z.enum(ProductKnowledgeStatus),
     alternate_identifier: z.string().trim().optional(),
@@ -79,14 +73,20 @@ const createFormSchema = (
       .array(
         z.object({
           name_type: z.enum(ProductNameTypes),
-          name: z.string().min(1, { message: t("name_is_required") }),
+          name: z
+            .string()
+            .trim()
+            .min(1, { message: t("name_is_required") }),
         }),
       )
       .default([]),
     storage_guidelines: z
       .array(
         z.object({
-          note: z.string().min(1, { message: t("field_required") }),
+          note: z
+            .string()
+            .trim()
+            .min(1, { message: t("field_required") }),
           stability_duration: z
             .object({
               value: z.number().int().optional(),
@@ -170,10 +170,14 @@ function ProductKnowledgeFormContent({
   slug,
   existingData,
   categorySlug,
-  onSuccess = () =>
-    navigate(
-      `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
-    ),
+  onSuccess = () => {
+    if (!categorySlug) return;
+    navigate({
+      to: "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug",
+      params: { facilityId, categorySlug },
+      replace: true,
+    });
+  },
 }: {
   facilityId: string;
   slug?: string;
@@ -264,9 +268,11 @@ function ProductKnowledgeFormContent({
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
-        navigate(
-          `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
-        );
+        if (!categorySlug) return;
+        navigate({
+          to: "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug",
+          params: { facilityId, categorySlug },
+        });
       },
     },
   );
@@ -287,9 +293,11 @@ function ProductKnowledgeFormContent({
           queryKey: ["productKnowledge", slug],
         });
         toast.success(t("product_knowledge_updated_successfully"));
-        navigate(
-          `/facility/${facilityId}/settings/product_knowledge/${productKnowledge.slug}`,
-        );
+        navigate({
+          to: "/facility/$facilityId/settings/product_knowledge/$slug",
+          params: { facilityId, slug: productKnowledge.slug },
+          replace: true,
+        });
       },
     },
   );
@@ -365,10 +373,8 @@ function ProductKnowledgeFormContent({
                               if (!isEditMode) {
                                 form.setValue(
                                   "slug_value",
-                                  generateSlug(e.target.value || "", 25),
-                                  {
-                                    shouldValidate: true,
-                                  },
+                                  generateSlugValue(e.target.value),
+                                  { shouldValidate: true },
                                 );
                               }
                             }}
@@ -586,7 +592,7 @@ function ProductKnowledgeFormContent({
                       {t("alternative_names")}
                     </h2>
                     <p className="mt-0.5 text-sm text-gray-500">
-                      {t("add_product_alternative name")}
+                      {t("add_product_alternative_name")}
                     </p>
                   </div>
                   <Button
@@ -1024,15 +1030,16 @@ function ProductKnowledgeFormContent({
 
             <div className="mt-6 flex justify-end space-x-4">
               <Button type="button" variant="outline" asChild>
-                <Link
+                <HrefLink
                   href={
-                    isEditMode
-                      ? `/product_knowledge/${slug}`
-                      : `/product_knowledge/categories/${categorySlug}`
+                    slug
+                      ? `/facility/${facilityId}/settings/product_knowledge/${slug}`
+                      : `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug ?? ""}`
                   }
+                  back
                 >
                   {t("cancel")}
-                </Link>
+                </HrefLink>
               </Button>
               <Button
                 type="submit"

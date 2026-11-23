@@ -154,7 +154,7 @@ const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
         {medication.dosage_instruction.map((di, idx) => {
           const isSelected = idx === selectedIndex;
           return (
-            <div
+            <Label
               key={idx}
               className={cn(
                 "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
@@ -162,7 +162,6 @@ const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
                   ? "bg-primary-50 border-primary-300"
                   : "bg-gray-50 border-gray-200 hover:border-gray-300",
               )}
-              onClick={() => handleSelectDosage(idx)}
             >
               <RadioGroupItem
                 value={String(idx)}
@@ -171,31 +170,29 @@ const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
               />
               <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <Label className="text-xs text-gray-500">{t("dosage")}</Label>
+                  <span className="text-xs text-gray-500">{t("dosage")}</span>
                   <p className="font-medium">
                     <FormattedDosage instruction={di} />
                   </p>
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500">
                     {t("frequency")}
-                  </Label>
+                  </span>
                   <p className="font-medium">{formatFrequency(di) || "-"}</p>
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-500">{t("route")}</Label>
+                  <span className="text-xs text-gray-500">{t("route")}</span>
                   <p className="font-medium">
                     {di?.route?.display || t("oral")}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-500">
-                    {t("duration")}
-                  </Label>
+                  <span className="text-xs text-gray-500">{t("duration")}</span>
                   <p className="font-medium">{formatDuration(di) || "-"}</p>
                 </div>
               </div>
-            </div>
+            </Label>
           );
         })}
       </RadioGroup>
@@ -624,16 +621,20 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 return { di, freq };
               });
               return (
-                <button
+                <Button
+                  variant="outline"
                   type="button"
                   key={req.id}
                   onClick={() => canSelect && onMedicationChange(req)}
                   disabled={isCurrentMedication}
                   className={cn(
-                    "flex items-center justify-between w-full px-3 py-2 rounded-md text-sm border text-left transition-colors",
-                    isCurrentMedication
-                      ? "bg-primary-50 border-primary-200 cursor-default"
-                      : "bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200 cursor-pointer",
+                    "h-auto justify-start whitespace-normal",
+                    cn(
+                      "flex items-center justify-between w-full px-3 py-2 rounded-md text-sm border text-left transition-colors",
+                      isCurrentMedication
+                        ? "bg-primary-50 border-primary-200 cursor-default"
+                        : "bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200 cursor-pointer",
+                    ),
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -681,7 +682,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                   >
                     {t(req.status)}
                   </Badge>
-                </button>
+                </Button>
               );
             })}
           </div>

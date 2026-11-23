@@ -23,6 +23,7 @@ import {
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   BringToFront,
   DoorOpenIcon,
@@ -30,7 +31,6 @@ import {
   MoreHorizontal,
   RotateCcw,
 } from "lucide-react";
-import { Link } from "raviger";
 import { forwardRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -83,11 +83,8 @@ export function ManageQueueFinishedTab({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tokens.map((token, index) => (
-                  <TableRow
-                    key={token.id}
-                    ref={index === tokens.length - 1 ? ref : undefined}
-                  >
+                {tokens.map((token) => (
+                  <TableRow key={token.id}>
                     <TableCell>
                       <span className="font-mono font-semibold">
                         {renderTokenNumber(token)}
@@ -96,16 +93,16 @@ export function ManageQueueFinishedTab({
                     <TableCell>
                       {token.patient ? (
                         <Link
-                          href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
-                            {
-                              phone_number: token.patient.phone_number,
-                              year_of_birth:
-                                token.patient.year_of_birth?.toString() ?? "",
-                              partial_id: token.patient.id.slice(0, 5),
-                              queue_id: token.queue.id,
-                              token_id: token.id,
-                            },
-                          ).toString()}`}
+                          to="/facility/$facilityId/patients/home"
+                          params={{ facilityId }}
+                          search={{
+                            phone_number: token.patient.phone_number,
+                            year_of_birth:
+                              token.patient.year_of_birth?.toString() ?? "",
+                            partial_id: token.patient.id.slice(0, 5),
+                            queue_id: token.queue.id,
+                            token_id: token.id,
+                          }}
                           className="hover:underline transition-colors flex items-center gap-1"
                         >
                           {token.patient.name}
@@ -117,7 +114,12 @@ export function ManageQueueFinishedTab({
                     </TableCell>
                     <TableCell>
                       <Link
-                        href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+                        to="/facility/$facilityId/queue/$queueId/token/$tokenId"
+                        params={{
+                          facilityId,
+                          queueId: token.queue.id,
+                          tokenId: token.id,
+                        }}
                         className="hover:underline transition-colors flex items-center gap-1"
                       >
                         {t("encounter")}
@@ -161,17 +163,19 @@ export function ManageQueueFinishedTab({
 
           {/* Mobile card list */}
           <div className="lg:hidden flex flex-col gap-3">
-            {tokens.map((token, index) => (
+            {tokens.map((token) => (
               <FinishedTokenCard
                 key={token.id}
                 token={token}
                 facilityId={facilityId}
                 queueId={queueId}
-                ref={index === tokens.length - 1 ? ref : undefined}
               />
             ))}
             {isFetchingNextPage && <FinishedTokenCardSkeletons count={3} />}
           </div>
+
+          {/* One sentinel for both layouts; each layout is hidden on some screens. */}
+          <div ref={ref} className="-mt-4" />
         </>
       ) : (
         <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-16 lg:py-20 px-4 text-center border border-gray-100">
@@ -210,15 +214,15 @@ const FinishedTokenCard = forwardRef<
           </span>
           {token.patient ? (
             <Link
-              href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
-                {
-                  phone_number: token.patient.phone_number,
-                  year_of_birth: token.patient.year_of_birth?.toString() ?? "",
-                  partial_id: token.patient.id.slice(0, 5),
-                  queue_id: token.queue.id,
-                  token_id: token.id,
-                },
-              ).toString()}`}
+              to="/facility/$facilityId/patients/home"
+              params={{ facilityId }}
+              search={{
+                phone_number: token.patient.phone_number,
+                year_of_birth: token.patient.year_of_birth?.toString() ?? "",
+                partial_id: token.patient.id.slice(0, 5),
+                queue_id: token.queue.id,
+                token_id: token.id,
+              }}
               className="text-sm font-medium hover:underline flex items-center gap-1 min-w-0"
             >
               <span className="truncate">{token.patient.name}</span>
@@ -256,7 +260,8 @@ const FinishedTokenCard = forwardRef<
           </span>
         </div>
         <Link
-          href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+          to="/facility/$facilityId/queue/$queueId/token/$tokenId"
+          params={{ facilityId, queueId: token.queue.id, tokenId: token.id }}
           className="hover:underline transition-colors flex items-center gap-1 font-medium"
         >
           {t("encounter")}
@@ -367,10 +372,11 @@ function FinishedTokenOptions({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger
+          appearance="icon"
+          aria-label={t("more_actions")}
           disabled={isUpdating}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
         >
-          <MoreHorizontal className="size-4" />
+          <MoreHorizontal aria-hidden="true" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {token.sub_queue ? (
