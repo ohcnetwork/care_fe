@@ -13,6 +13,7 @@ import {
   Building,
   CalendarFold,
   CircleDashed,
+  CircleDot,
   Hospital,
   MapPin,
   Tag,
@@ -121,7 +122,7 @@ export const encounterStatusFilter = (
       getOperations: () => customOperations || [{ label: "is" }],
       mode,
       optionSize: "default",
-      icon: <CircleDashed className="w-4 h-4" />,
+      icon: <CircleDot className="size-4" />,
     },
   );
 export const encounterClassFilter = (

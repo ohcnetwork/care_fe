@@ -59,7 +59,7 @@ export default function FilterRenderer({
     handleClose ? (
       <FilterFooter
         multiple={multiple}
-        hasSelection={Array.isArray(selected) && selected.length > 0}
+        selectedCount={Array.isArray(selected) ? selected.length : 0}
         onClear={
           filter.disableClear ? undefined : () => onFilterChange(filter.key, [])
         }

@@ -49,6 +49,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -938,7 +939,14 @@ function SelectOptionsPopover<T = unknown>({
             )}
 
             {selectedOptions.length > 0 && (
-              <div className="px-1 py-1">
+              <div
+                role="group"
+                aria-labelledby={`${baseId}-selected`}
+                className="px-1 py-1"
+              >
+                <DropdownMenuLabel id={`${baseId}-selected`}>
+                  {context.i18n.selected}
+                </DropdownMenuLabel>
                 {selectedOptions.map((option, index) => {
                   const isHighlighted = highlightedIndex === index;
                   const itemId = `${baseId}-item-${index}`;
@@ -1638,8 +1646,9 @@ export function Filters<T = unknown>({
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editingFromSummary, setEditingFromSummary] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const summaryButtonRef = useRef<HTMLButtonElement>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
-  const returnToAdd = useRef(false);
+  const restoreTriggerFocus = useRef(false);
   const [addFilterOpen, setAddFilterOpen] = useState(false);
   const [menuSearchInput, setMenuSearchInputState] = useState("");
   const [activeMenu, setActiveMenu] = useState<string>("root");
@@ -1838,8 +1847,22 @@ export function Filters<T = unknown>({
       </span>
     </Button>
   );
+  const summaryButton = (
+    <Button
+      ref={summaryButtonRef}
+      data-filter-summary-trigger=""
+      type="button"
+      variant="ghost"
+      className="h-auto pe-1 hover:bg-transparent focus-visible:outline-0 aria-expanded:bg-transparent [:active,[data-pressed]]:bg-transparent [:active,[data-pressed]]:inset-shadow-none dark:hover:bg-transparent"
+    >
+      <span className="sr-only sm:not-sr-only">{t("active_filters")}</span>
+      <Badge variant="primary" counter size="sm">
+        {applied.length}
+      </Badge>
+    </Button>
+  );
   const closeEditor = () => {
-    returnToAdd.current = true;
+    restoreTriggerFocus.current = true;
     setEditingKey(null);
   };
   // Back returns to the Active filters list when the editor was opened from
@@ -1860,8 +1883,14 @@ export function Filters<T = unknown>({
     },
     onChange: (values: T[]) => {
       if (existing) {
-        if (!values.length) removeFilter(existing.id);
-        else updateFilter(existing.id, { values });
+        if (!values.length) {
+          if (editingFromSummary && applied.length === 1) {
+            // Clearing the last field removes the summary trigger.
+            addButtonRef.current?.focus();
+            setEditingKey(null);
+          }
+          removeFilter(existing.id);
+        } else updateFilter(existing.id, { values });
       } else if (editingKey && values.length) {
         onChange([
           ...filters,
@@ -1869,18 +1898,59 @@ export function Filters<T = unknown>({
         ]);
       }
     },
-    trigger: addButton,
+    trigger: editingFromSummary ? summaryButton : addButton,
   };
 
-  // Editors and the field menu use different triggers. Restore keyboard focus to
-  // the replacement, but leave focus alone if the user clicked another control.
+  // The trigger remounts when its editor closes. Don't steal focus if the user
+  // has already clicked another control.
   React.useLayoutEffect(() => {
-    if (!editingKey && returnToAdd.current) {
-      returnToAdd.current = false;
-      if (document.activeElement === document.body)
-        addButtonRef.current?.focus();
+    if (!editingKey && restoreTriggerFocus.current) {
+      restoreTriggerFocus.current = false;
+      if (document.activeElement === document.body) {
+        const origin = editingFromSummary ? summaryButtonRef : addButtonRef;
+        (origin.current ?? addButtonRef.current)?.focus();
+      }
     }
-  }, [editingKey]);
+  }, [editingKey, editingFromSummary]);
+
+  const fieldEditor =
+    editing &&
+    (editing.customRenderer ? (
+      <FilterFieldEditor
+        key={editingKey}
+        render={editing.customRenderer}
+        {...editProps}
+        finalFocus={false}
+        onBack={leaveEditor}
+        onClose={closeEditor}
+        field={editing}
+        operator={existing?.operator ?? editing.defaultOperator ?? "is"}
+      />
+    ) : (
+      <SelectOptionsPopover
+        key={editingKey}
+        field={editing}
+        {...editProps}
+        header={
+          <FilterHeader
+            label={editing.label ?? ""}
+            icon={editing.icon}
+            onBack={leaveEditor}
+            onClose={closeEditor}
+          />
+        }
+        footer={
+          <FilterFooter
+            multiple={editing.type === "multiselect"}
+            selectedCount={editProps.values.length}
+            onClear={
+              editing.disableClear ? undefined : () => editProps.onChange([])
+            }
+            onDone={closeEditor}
+          />
+        }
+      />
+    ));
 
   const clear = () => {
     addButtonRef.current?.focus();
@@ -1918,119 +1988,110 @@ export function Filters<T = unknown>({
           // open and focus states of the summary trigger.
           <div
             data-slot="filter-summary"
-            className="relative flex h-12 items-stretch rounded-md border border-stronger-border bg-background pe-2 shadow-2xs transition md:h-10 md:pe-1 dark:border-input dark:bg-input/30 has-[[data-slot=popover-trigger]:hover]:bg-muted has-[[data-slot=popover-trigger][aria-expanded=true]]:bg-muted dark:has-[[data-slot=popover-trigger]:hover]:bg-input/50 dark:has-[[data-slot=popover-trigger][aria-expanded=true]]:bg-input/50 has-[[data-slot=popover-trigger]:focus-visible]:z-10 has-[[data-slot=popover-trigger]:focus-visible]:outline-2 has-[[data-slot=popover-trigger]:focus-visible]:outline-offset-2 has-[[data-slot=popover-trigger]:focus-visible]:outline-ring"
+            className="relative flex h-12 items-stretch rounded-md border border-stronger-border bg-background pe-2 shadow-2xs transition md:h-10 md:pe-1 dark:border-input dark:bg-input/30 has-[[data-filter-summary-trigger]:hover]:bg-muted has-[[data-filter-summary-trigger][aria-expanded=true]]:bg-muted dark:has-[[data-filter-summary-trigger]:hover]:bg-input/50 dark:has-[[data-filter-summary-trigger][aria-expanded=true]]:bg-input/50 has-[[data-filter-summary-trigger]:focus-visible]:z-10 has-[[data-filter-summary-trigger]:focus-visible]:outline-2 has-[[data-filter-summary-trigger]:focus-visible]:outline-offset-2 has-[[data-filter-summary-trigger]:focus-visible]:outline-ring"
           >
-            <Popover open={summaryOpen} onOpenChange={setSummaryOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="h-auto pe-1 hover:bg-transparent focus-visible:outline-0 aria-expanded:bg-transparent [:active,[data-pressed]]:bg-transparent [:active,[data-pressed]]:inset-shadow-none dark:hover:bg-transparent"
+            {editing && editingFromSummary ? (
+              fieldEditor
+            ) : (
+              <Popover open={summaryOpen} onOpenChange={setSummaryOpen}>
+                <PopoverTrigger asChild>{summaryButton}</PopoverTrigger>
+                <PopoverContent
+                  align={align}
+                  className="w-80 max-w-(--available-width) gap-0 overflow-hidden p-0"
                 >
-                  <span className="sr-only sm:not-sr-only">
-                    {t("active_filters")}
-                  </span>
-                  <Badge variant="primary" counter size="sm">
-                    {applied.length}
-                  </Badge>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                align={align}
-                className="w-80 max-w-(--available-width) gap-0 overflow-hidden p-0"
-              >
-                <div className="flex items-center gap-2 border-b border-border bg-soft-background px-4 py-2.5">
-                  <PopoverTitle className="text-sm font-semibold">
-                    {t("active_filters")}
-                  </PopoverTitle>
-                  <Badge variant="primary" counter size="sm">
-                    {applied.length}
-                  </Badge>
-                </div>
-                <div className="p-1">
-                  {applied.map((filter) => {
-                    const field = fieldsMap[filter.field];
-                    if (!field) return null;
-                    const value = toolbarSummary(filter, field);
-                    return (
-                      // The row is the item surface, so its remove button
-                      // shares the hover and focus state of the edit button.
-                      <div
-                        key={filter.id}
-                        role="group"
-                        aria-label={field.label}
-                        className="flex items-center gap-1 rounded-md pe-1 transition hover:bg-muted-background has-[[data-slot=filter-summary-edit]:focus-visible]:bg-muted-background has-[[data-slot=filter-summary-edit]:focus-visible]:outline-2 has-[[data-slot=filter-summary-edit]:focus-visible]:-outline-offset-2 has-[[data-slot=filter-summary-edit]:focus-visible]:outline-ring"
-                      >
-                        <Button
-                          data-slot="filter-summary-edit"
-                          variant="ghost"
-                          className="min-w-0 flex-1 justify-start hover:bg-transparent focus-visible:outline-0 dark:hover:bg-transparent"
-                          onClick={() => {
-                            setSummaryOpen(false);
-                            setEditingFromSummary(true);
-                            setEditingKey(filter.field);
-                          }}
+                  <div className="flex items-center gap-2 border-b border-border bg-soft-background px-4 py-2.5">
+                    <PopoverTitle className="text-sm font-semibold">
+                      {t("active_filters")}
+                    </PopoverTitle>
+                    <Badge variant="primary" counter size="sm">
+                      {applied.length}
+                    </Badge>
+                  </div>
+                  <div className="p-1">
+                    {applied.map((filter) => {
+                      const field = fieldsMap[filter.field];
+                      if (!field) return null;
+                      const value = toolbarSummary(filter, field);
+                      return (
+                        // The row is the item surface, so its remove button
+                        // shares the hover and focus state of the edit button.
+                        <div
+                          key={filter.id}
+                          role="group"
+                          aria-label={field.label}
+                          className="flex items-center gap-1 rounded-md pe-1 transition hover:bg-muted-background has-[[data-slot=filter-summary-edit]:focus-visible]:bg-muted-background has-[[data-slot=filter-summary-edit]:focus-visible]:outline-2 has-[[data-slot=filter-summary-edit]:focus-visible]:-outline-offset-2 has-[[data-slot=filter-summary-edit]:focus-visible]:outline-ring"
                         >
-                          {field.icon}
-                          <span className="text-muted-foreground">
-                            {field.label}
-                          </span>
-                          <span className="truncate" title={value}>
-                            {value}
-                          </span>
-                        </Button>
-                        {(field.operators?.length ?? 0) > 1 && (
-                          <FilterOperatorDropdown
-                            field={field}
-                            operator={filter.operator}
-                            values={filter.values}
-                            onChange={(operator) =>
-                              updateFilter(filter.id, { operator })
-                            }
-                          />
-                        )}
-                        {!field.disableClear && (
                           <Button
-                            variant="tertiary"
-                            size="icon-xs"
-                            className="text-muted-foreground"
-                            aria-label={mergedI18n.removeFilter}
+                            data-slot="filter-summary-edit"
+                            variant="ghost"
+                            className="min-w-0 flex-1 justify-start hover:bg-transparent focus-visible:outline-0 dark:hover:bg-transparent"
                             onClick={() => {
-                              if (applied.length === 1) {
-                                setSummaryOpen(false);
-                                addButtonRef.current?.focus();
-                              }
-                              removeFilter(filter.id);
+                              setSummaryOpen(false);
+                              setEditingFromSummary(true);
+                              setEditingKey(filter.field);
                             }}
                           >
-                            <XIcon />
+                            {field.icon}
+                            <span className="text-muted-foreground">
+                              {field.label}
+                            </span>
+                            <span className="truncate" title={value}>
+                              {value}
+                            </span>
                           </Button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="flex items-center justify-between gap-2 border-t p-1.5">
-                  <Button
-                    variant="tertiary"
-                    size="sm"
-                    className="text-muted-foreground"
-                    onClick={clear}
-                  >
-                    {mergedI18n.clearAll}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="shadow-2xs"
-                    onClick={openFieldMenu}
-                  >
-                    <PlusIcon data-icon="inline-start" aria-hidden="true" />
-                    {mergedI18n.addFilter}
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
+                          {(field.operators?.length ?? 0) > 1 && (
+                            <FilterOperatorDropdown
+                              field={field}
+                              operator={filter.operator}
+                              values={filter.values}
+                              onChange={(operator) =>
+                                updateFilter(filter.id, { operator })
+                              }
+                            />
+                          )}
+                          {!field.disableClear && (
+                            <Button
+                              variant="tertiary"
+                              size="icon-xs"
+                              className="text-muted-foreground"
+                              aria-label={mergedI18n.removeFilter}
+                              onClick={() => {
+                                if (applied.length === 1) {
+                                  setSummaryOpen(false);
+                                  addButtonRef.current?.focus();
+                                }
+                                removeFilter(filter.id);
+                              }}
+                            >
+                              <XIcon />
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center justify-between gap-2 border-t p-1.5">
+                    <Button
+                      variant="tertiary"
+                      size="sm"
+                      className="text-muted-foreground"
+                      onClick={clear}
+                    >
+                      {mergedI18n.clearAll}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="shadow-2xs"
+                      onClick={openFieldMenu}
+                    >
+                      <PlusIcon data-icon="inline-start" aria-hidden="true" />
+                      {mergedI18n.addFilter}
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -2048,375 +2109,353 @@ export function Filters<T = unknown>({
             </Tooltip>
           </div>
         )}
-        {editing ? (
-          editing.customRenderer ? (
-            <FilterFieldEditor
-              key={editingKey}
-              render={editing.customRenderer}
-              {...editProps}
-              // The Add filter button remounts when the editor closes, so Base UI
-              // would fall back to stale focus history (e.g. Date). The layout
-              // effect above restores focus instead.
-              finalFocus={false}
-              onBack={leaveEditor}
-              onClose={closeEditor}
-              field={editing}
-              operator={existing?.operator ?? editing.defaultOperator ?? "is"}
-            />
-          ) : (
-            <SelectOptionsPopover
-              key={editingKey}
-              field={editing}
-              {...editProps}
-              header={
-                <FilterHeader
-                  label={editing.label ?? ""}
-                  icon={editing.icon}
-                  onBack={leaveEditor}
-                  onClose={closeEditor}
-                />
-              }
-              footer={
-                <FilterFooter
-                  multiple={editing.type === "multiselect"}
-                  hasSelection={editProps.values.length > 0}
-                  onClear={
-                    editing.disableClear
-                      ? undefined
-                      : () => editProps.onChange([])
+        {editing && !editingFromSummary
+          ? fieldEditor
+          : selectableFields.length > 0 && (
+              <DropdownMenu
+                modal={false}
+                open={addFilterOpen}
+                onOpenChange={(open) => {
+                  setAddFilterOpen(open);
+                  if (!open) {
+                    setTimeout(() => {
+                      setMenuSearchInput("");
+                      setSessionFilterIds({});
+                    }, 200);
+                  } else {
+                    setActiveMenu("root");
                   }
-                  onDone={closeEditor}
-                />
-              }
-            />
-          )
-        ) : (
-          selectableFields.length > 0 && (
-            <DropdownMenu
-              modal={false}
-              open={addFilterOpen}
-              onOpenChange={(open) => {
-                setAddFilterOpen(open);
-                if (!open) {
-                  setTimeout(() => {
-                    setMenuSearchInput("");
-                    setSessionFilterIds({});
-                  }, 200);
-                } else {
-                  setActiveMenu("root");
-                }
-              }}
-            >
-              <DropdownMenuTrigger asChild>
-                {(toolbarSummary ? addButton : trigger) || (
-                  <Button
-                    data-slot="filter-trigger"
-                    variant="outline"
-                    size={size}
-                    className="shadow-sm"
-                    aria-label={mergedI18n.addFilter}
-                    aria-haspopup="menu"
-                    aria-expanded={addFilterOpen}
-                  >
-                    <ListFilterIcon aria-hidden="true" />
-                    {mergedI18n.addFilter}
-                  </Button>
-                )}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className={cn("w-55", menuPopupClassName)}
-                align={align}
+                }}
               >
-                {showSearchInput && (
-                  <>
-                    <div className="relative">
-                      <Input
-                        ref={rootInputRef}
-                        role="combobox"
-                        aria-controls={`${rootId}-listbox`}
-                        aria-activedescendant={
-                          highlightedIndex >= 0
-                            ? `${rootId}-item-${highlightedIndex}`
-                            : undefined
-                        }
-                        placeholder={mergedI18n.searchFields}
-                        className={cn(
-                          "h-8 rounded-none border-0 bg-transparent! px-2 text-sm shadow-none",
-                          "focus-visible:border-border focus-visible:ring-0 focus-visible:ring-offset-0",
-                        )}
-                        value={menuSearchInput}
-                        onChange={(e) => setMenuSearchInput(e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        onKeyDown={(e) => {
-                          if (e.key === "ArrowDown") {
-                            e.preventDefault();
-                            if (filteredFields.length > 0) {
-                              setHighlightedIndex((prev) =>
-                                prev < filteredFields.length - 1 ? prev + 1 : 0,
-                              );
-                            }
-                          } else if (e.key === "ArrowUp") {
-                            e.preventDefault();
-                            if (filteredFields.length > 0) {
-                              setHighlightedIndex((prev) =>
-                                prev > 0 ? prev - 1 : filteredFields.length - 1,
-                              );
-                            }
-                          } else if (
-                            (e.key === "ArrowRight" || e.key === "ArrowLeft") &&
+                <DropdownMenuTrigger asChild>
+                  {(toolbarSummary ? addButton : trigger) || (
+                    <Button
+                      data-slot="filter-trigger"
+                      variant="outline"
+                      size={size}
+                      className="shadow-sm"
+                      aria-label={mergedI18n.addFilter}
+                      aria-haspopup="menu"
+                      aria-expanded={addFilterOpen}
+                    >
+                      <ListFilterIcon aria-hidden="true" />
+                      {mergedI18n.addFilter}
+                    </Button>
+                  )}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className={cn("w-55", menuPopupClassName)}
+                  align={align}
+                >
+                  {showSearchInput && (
+                    <>
+                      <div className="relative">
+                        <Input
+                          ref={rootInputRef}
+                          role="combobox"
+                          aria-controls={`${rootId}-listbox`}
+                          aria-activedescendant={
                             highlightedIndex >= 0
-                          ) {
-                            const field = filteredFields[highlightedIndex];
-                            const hasSubMenu = field && opensSubmenu(field);
-
-                            if (e.key === "ArrowRight" && hasSubMenu) {
+                              ? `${rootId}-item-${highlightedIndex}`
+                              : undefined
+                          }
+                          placeholder={mergedI18n.searchFields}
+                          className={cn(
+                            "h-8 rounded-none border-0 bg-transparent! px-2 text-sm shadow-none",
+                            "focus-visible:border-border focus-visible:ring-0 focus-visible:ring-offset-0",
+                          )}
+                          value={menuSearchInput}
+                          onChange={(e) => setMenuSearchInput(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => {
+                            if (e.key === "ArrowDown") {
                               e.preventDefault();
-                              setOpenSubMenu(field.key || null);
-                              setActiveMenu(field.key || "root");
-                            } else if (e.key === "ArrowLeft") {
-                              e.preventDefault();
-                              if (openSubMenu) {
-                                setOpenSubMenu(null);
-                                setActiveMenu("root");
+                              if (filteredFields.length > 0) {
+                                setHighlightedIndex((prev) =>
+                                  prev < filteredFields.length - 1
+                                    ? prev + 1
+                                    : 0,
+                                );
                               }
-                            }
-                          } else if (
-                            e.key === "Enter" &&
-                            highlightedIndex >= 0
-                          ) {
-                            e.preventDefault();
-                            const field = filteredFields[highlightedIndex];
-                            if (field.key) {
-                              if (!opensSubmenu(field)) {
-                                addFilter(field.key);
-                              } else {
-                                if (openSubMenu === field.key) {
+                            } else if (e.key === "ArrowUp") {
+                              e.preventDefault();
+                              if (filteredFields.length > 0) {
+                                setHighlightedIndex((prev) =>
+                                  prev > 0
+                                    ? prev - 1
+                                    : filteredFields.length - 1,
+                                );
+                              }
+                            } else if (
+                              (e.key === "ArrowRight" ||
+                                e.key === "ArrowLeft") &&
+                              highlightedIndex >= 0
+                            ) {
+                              const field = filteredFields[highlightedIndex];
+                              const hasSubMenu = field && opensSubmenu(field);
+
+                              if (e.key === "ArrowRight" && hasSubMenu) {
+                                e.preventDefault();
+                                setOpenSubMenu(field.key || null);
+                                setActiveMenu(field.key || "root");
+                              } else if (e.key === "ArrowLeft") {
+                                e.preventDefault();
+                                if (openSubMenu) {
                                   setOpenSubMenu(null);
                                   setActiveMenu("root");
-                                } else {
-                                  setOpenSubMenu(field.key);
-                                  setActiveMenu(field.key);
                                 }
                               }
-                            }
-                          } else if (e.key === "Escape") {
-                            setAddFilterOpen(false);
-                          }
-                          e.stopPropagation();
-                        }}
-                      />
-                      {enableShortcut && shortcutLabel && (
-                        <Kbd className="bg-background absolute top-1/2 right-2 -translate-y-1/2 border">
-                          {shortcutLabel}
-                        </Kbd>
-                      )}
-                    </div>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
-
-                <div className="relative flex max-h-full">
-                  <div
-                    className="flex max-h-[min(var(--available-height),24rem)] w-full scroll-pt-2 scroll-pb-2 flex-col overscroll-contain"
-                    role="listbox"
-                    id={`${rootId}-listbox`}
-                  >
-                    <ScrollArea className="**:data-[slot=scroll-area-scrollbar]:m-0">
-                      {(() => {
-                        if (filteredFields.length === 0) {
-                          return (
-                            <div className="text-muted-foreground py-2 text-center text-sm">
-                              {mergedI18n.noFieldsFound}
-                            </div>
-                          );
-                        }
-
-                        return filteredFields.map((field, index) => {
-                          const isHighlighted = highlightedIndex === index;
-                          const itemId = `${rootId}-item-${index}`;
-
-                          if (opensSubmenu(field)) {
-                            const isMultiSelect = field.type === "multiselect";
-                            const fieldKey = field.key as string;
-                            const existingFieldFilter = filters.find(
-                              (f) => f.field === fieldKey,
-                            );
-                            const sessionFilterId = sessionFilterIds[fieldKey];
-                            const sessionFilter = sessionFilterId
-                              ? filters.find((f) => f.id === sessionFilterId)
-                              : null;
-                            const currentValues =
-                              existingFieldFilter?.values ||
-                              sessionFilter?.values ||
-                              [];
-
-                            return (
-                              <DropdownMenuSub
-                                key={fieldKey}
-                                open={openSubMenu === fieldKey}
-                                onOpenChange={(open) => {
-                                  if (open) {
-                                    setOpenSubMenu((prev) =>
-                                      prev === fieldKey ? prev : fieldKey,
-                                    );
+                            } else if (
+                              e.key === "Enter" &&
+                              highlightedIndex >= 0
+                            ) {
+                              e.preventDefault();
+                              const field = filteredFields[highlightedIndex];
+                              if (field.key) {
+                                if (!opensSubmenu(field)) {
+                                  addFilter(field.key);
+                                } else {
+                                  if (openSubMenu === field.key) {
+                                    setOpenSubMenu(null);
+                                    setActiveMenu("root");
                                   } else {
-                                    if (openSubMenu === fieldKey) {
-                                      setOpenSubMenu(null);
-                                      setActiveMenu("root");
-                                    }
+                                    setOpenSubMenu(field.key);
+                                    setActiveMenu(field.key);
                                   }
-                                }}
-                              >
-                                <DropdownMenuSubTrigger
-                                  id={itemId}
-                                  role="option"
-                                  aria-selected={isHighlighted}
-                                  data-highlighted={isHighlighted || undefined}
-                                  onMouseEnter={() =>
-                                    setHighlightedIndex(index)
-                                  }
-                                  className="data-[state=open]:bg-accent data-[state=open]:text-accent-foreground data-highlighted:bg-accent data-highlighted:text-accent-foreground"
-                                >
-                                  {field.icon}
-                                  <span>{field.label}</span>
-                                  {currentValues.length > 0 && (
-                                    <span className="text-muted-foreground ml-auto text-xs tabular-nums">
-                                      {currentValues.length}
-                                    </span>
-                                  )}
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent className="w-50">
-                                  <FilterSubmenuContent
-                                    field={field}
-                                    currentValues={currentValues}
-                                    isMultiSelect={isMultiSelect}
-                                    i18n={mergedI18n}
-                                    isActive={activeMenu === fieldKey}
-                                    onActive={() => {
-                                      if (field.searchable !== false) {
-                                        setActiveMenu(fieldKey);
-                                      }
-                                    }}
-                                    onBack={() => {
-                                      setOpenSubMenu(null);
-                                      setActiveMenu("root");
-                                    }}
-                                    onClose={() => setAddFilterOpen(false)}
-                                    onToggle={(value, isSelected) => {
-                                      if (isMultiSelect) {
-                                        const nextValues = isSelected
-                                          ? (currentValues.filter(
-                                              (v) => v !== value,
-                                            ) as T[])
-                                          : ([...currentValues, value] as T[]);
+                                }
+                              }
+                            } else if (e.key === "Escape") {
+                              setAddFilterOpen(false);
+                            }
+                            e.stopPropagation();
+                          }}
+                        />
+                        {enableShortcut && shortcutLabel && (
+                          <Kbd className="bg-background absolute top-1/2 right-2 -translate-y-1/2 border">
+                            {shortcutLabel}
+                          </Kbd>
+                        )}
+                      </div>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
 
-                                        // Find an existing filter to update (either from chips or this session)
-                                        const targetFilter =
-                                          existingFieldFilter ?? sessionFilter;
-                                        if (targetFilter) {
-                                          if (nextValues.length === 0) {
-                                            onChange(
-                                              filters.filter(
-                                                (f) => f.id !== targetFilter.id,
-                                              ),
+                  <div className="relative flex max-h-full">
+                    <div
+                      className="flex max-h-[min(var(--available-height),24rem)] w-full scroll-pt-2 scroll-pb-2 flex-col overscroll-contain"
+                      role="listbox"
+                      id={`${rootId}-listbox`}
+                    >
+                      <ScrollArea className="**:data-[slot=scroll-area-scrollbar]:m-0">
+                        {(() => {
+                          if (filteredFields.length === 0) {
+                            return (
+                              <div className="text-muted-foreground py-2 text-center text-sm">
+                                {mergedI18n.noFieldsFound}
+                              </div>
+                            );
+                          }
+
+                          return filteredFields.map((field, index) => {
+                            const isHighlighted = highlightedIndex === index;
+                            const itemId = `${rootId}-item-${index}`;
+
+                            if (opensSubmenu(field)) {
+                              const isMultiSelect =
+                                field.type === "multiselect";
+                              const fieldKey = field.key as string;
+                              const existingFieldFilter = filters.find(
+                                (f) => f.field === fieldKey,
+                              );
+                              const sessionFilterId =
+                                sessionFilterIds[fieldKey];
+                              const sessionFilter = sessionFilterId
+                                ? filters.find((f) => f.id === sessionFilterId)
+                                : null;
+                              const currentValues =
+                                existingFieldFilter?.values ||
+                                sessionFilter?.values ||
+                                [];
+
+                              return (
+                                <DropdownMenuSub
+                                  key={fieldKey}
+                                  open={openSubMenu === fieldKey}
+                                  onOpenChange={(open) => {
+                                    if (open) {
+                                      setOpenSubMenu((prev) =>
+                                        prev === fieldKey ? prev : fieldKey,
+                                      );
+                                    } else {
+                                      if (openSubMenu === fieldKey) {
+                                        setOpenSubMenu(null);
+                                        setActiveMenu("root");
+                                      }
+                                    }
+                                  }}
+                                >
+                                  <DropdownMenuSubTrigger
+                                    id={itemId}
+                                    role="option"
+                                    aria-selected={isHighlighted}
+                                    data-highlighted={
+                                      isHighlighted || undefined
+                                    }
+                                    onMouseEnter={() =>
+                                      setHighlightedIndex(index)
+                                    }
+                                    className="data-[state=open]:bg-accent data-[state=open]:text-accent-foreground data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                                  >
+                                    {field.icon}
+                                    <span>{field.label}</span>
+                                    {currentValues.length > 0 && (
+                                      <span className="text-muted-foreground ml-auto text-xs tabular-nums">
+                                        {currentValues.length}
+                                      </span>
+                                    )}
+                                  </DropdownMenuSubTrigger>
+                                  <DropdownMenuSubContent className="w-50">
+                                    <FilterSubmenuContent
+                                      field={field}
+                                      currentValues={currentValues}
+                                      isMultiSelect={isMultiSelect}
+                                      i18n={mergedI18n}
+                                      isActive={activeMenu === fieldKey}
+                                      onActive={() => {
+                                        if (field.searchable !== false) {
+                                          setActiveMenu(fieldKey);
+                                        }
+                                      }}
+                                      onBack={() => {
+                                        setOpenSubMenu(null);
+                                        setActiveMenu("root");
+                                      }}
+                                      onClose={() => setAddFilterOpen(false)}
+                                      onToggle={(value, isSelected) => {
+                                        if (isMultiSelect) {
+                                          const nextValues = isSelected
+                                            ? (currentValues.filter(
+                                                (v) => v !== value,
+                                              ) as T[])
+                                            : ([
+                                                ...currentValues,
+                                                value,
+                                              ] as T[]);
+
+                                          // Find an existing filter to update (either from chips or this session)
+                                          const targetFilter =
+                                            existingFieldFilter ??
+                                            sessionFilter;
+                                          if (targetFilter) {
+                                            if (nextValues.length === 0) {
+                                              onChange(
+                                                filters.filter(
+                                                  (f) =>
+                                                    f.id !== targetFilter.id,
+                                                ),
+                                              );
+                                              setSessionFilterIds((prev) => ({
+                                                ...prev,
+                                                [fieldKey]: "",
+                                              }));
+                                            } else {
+                                              onChange(
+                                                filters.map((f) =>
+                                                  f.id === targetFilter.id
+                                                    ? {
+                                                        ...f,
+                                                        values: nextValues,
+                                                      }
+                                                    : f,
+                                                ),
+                                              );
+                                            }
+                                          } else {
+                                            const newFilter = createFilter<T>(
+                                              fieldKey,
+                                              field.defaultOperator ||
+                                                "is_any_of",
+                                              nextValues,
                                             );
+                                            onChange([...filters, newFilter]);
                                             setSessionFilterIds((prev) => ({
                                               ...prev,
-                                              [fieldKey]: "",
+                                              [fieldKey]: newFilter.id,
                                             }));
+                                          }
+                                        } else {
+                                          // Single-select: update existing filter if present
+                                          if (existingFieldFilter) {
+                                            if (!isSelected) {
+                                              onChange(
+                                                filters.map((f) =>
+                                                  f.id ===
+                                                  existingFieldFilter.id
+                                                    ? {
+                                                        ...f,
+                                                        values: [value] as T[],
+                                                      }
+                                                    : f,
+                                                ),
+                                              );
+                                            }
+                                            setAddFilterOpen(false);
                                           } else {
-                                            onChange(
-                                              filters.map((f) =>
-                                                f.id === targetFilter.id
-                                                  ? { ...f, values: nextValues }
-                                                  : f,
-                                              ),
+                                            const newFilter = createFilter<T>(
+                                              fieldKey,
+                                              field.defaultOperator || "is",
+                                              [value] as T[],
                                             );
+                                            setLastAddedFilterId(newFilter.id);
+                                            onChange([...filters, newFilter]);
+                                            setAddFilterOpen(false);
                                           }
-                                        } else {
-                                          const newFilter = createFilter<T>(
-                                            fieldKey,
-                                            field.defaultOperator ||
-                                              "is_any_of",
-                                            nextValues,
-                                          );
-                                          onChange([...filters, newFilter]);
-                                          setSessionFilterIds((prev) => ({
-                                            ...prev,
-                                            [fieldKey]: newFilter.id,
-                                          }));
                                         }
-                                      } else {
-                                        // Single-select: update existing filter if present
-                                        if (existingFieldFilter) {
-                                          if (!isSelected) {
-                                            onChange(
-                                              filters.map((f) =>
-                                                f.id === existingFieldFilter.id
-                                                  ? {
-                                                      ...f,
-                                                      values: [value] as T[],
-                                                    }
-                                                  : f,
-                                              ),
-                                            );
-                                          }
-                                          setAddFilterOpen(false);
-                                        } else {
-                                          const newFilter = createFilter<T>(
-                                            fieldKey,
-                                            field.defaultOperator || "is",
-                                            [value] as T[],
-                                          );
-                                          setLastAddedFilterId(newFilter.id);
-                                          onChange([...filters, newFilter]);
-                                          setAddFilterOpen(false);
-                                        }
-                                      }
-                                    }}
-                                  />
-                                </DropdownMenuSubContent>
-                              </DropdownMenuSub>
+                                      }}
+                                    />
+                                  </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                              );
+                            }
+
+                            const existingFilter = filters.find(
+                              (f) => f.field === field.key,
                             );
-                          }
+                            const filterValueCount =
+                              existingFilter?.values.filter(
+                                (v) => v !== "" && v != null,
+                              ).length || 0;
 
-                          const existingFilter = filters.find(
-                            (f) => f.field === field.key,
-                          );
-                          const filterValueCount =
-                            existingFilter?.values.filter(
-                              (v) => v !== "" && v != null,
-                            ).length || 0;
-
-                          return (
-                            <DropdownMenuItem
-                              key={field.key}
-                              id={itemId}
-                              role="option"
-                              aria-selected={isHighlighted}
-                              data-highlighted={isHighlighted || undefined}
-                              onMouseEnter={() => setHighlightedIndex(index)}
-                              onClick={() => field.key && addFilter(field.key)}
-                              className="data-highlighted:bg-accent data-highlighted:text-accent-foreground"
-                            >
-                              {field.icon}
-                              <span>{field.label}</span>
-                              {filterValueCount > 0 && (
-                                <span className="text-muted-foreground ml-auto text-xs tabular-nums">
-                                  {filterValueCount}
-                                </span>
-                              )}
-                            </DropdownMenuItem>
-                          );
-                        });
-                      })()}
-                    </ScrollArea>
+                            return (
+                              <DropdownMenuItem
+                                key={field.key}
+                                id={itemId}
+                                role="option"
+                                aria-selected={isHighlighted}
+                                data-highlighted={isHighlighted || undefined}
+                                onMouseEnter={() => setHighlightedIndex(index)}
+                                onClick={() =>
+                                  field.key && addFilter(field.key)
+                                }
+                                className="data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                              >
+                                {field.icon}
+                                <span>{field.label}</span>
+                                {filterValueCount > 0 && (
+                                  <span className="text-muted-foreground ml-auto text-xs tabular-nums">
+                                    {filterValueCount}
+                                  </span>
+                                )}
+                              </DropdownMenuItem>
+                            );
+                          });
+                        })()}
+                      </ScrollArea>
+                    </div>
                   </div>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )
-        )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
 
         {!toolbarSummary &&
           filters.map((filter) => {

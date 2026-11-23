@@ -2,15 +2,15 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
-/** Action row shared by filter pickers: selection hint, Clear and Done. */
+/** Action row shared by filter pickers: selection summary, Clear and Done. */
 function FilterFooter({
   multiple,
-  hasSelection,
+  selectedCount,
   onClear,
   onDone,
 }: {
   multiple: boolean;
-  hasSelection: boolean;
+  selectedCount: number;
   /** Omit for fields that can't be cleared. */
   onClear?: () => void;
   onDone: () => void;
@@ -21,8 +21,13 @@ function FilterFooter({
       data-slot="filter-footer"
       className="flex items-center gap-2 border-t p-2"
     >
-      <span className="min-w-0 flex-1 truncate px-2 text-sm text-muted-foreground">
-        {t(multiple ? "filter_pick_one_or_more" : "filter_pick_one")}
+      <span
+        role={multiple ? "status" : undefined}
+        className="min-w-0 flex-1 truncate px-2 text-sm text-muted-foreground"
+      >
+        {multiple
+          ? t("selected_count", { count: selectedCount })
+          : t("filter_pick_one")}
       </span>
       {onClear && (
         <Button
@@ -31,7 +36,7 @@ function FilterFooter({
           size="sm"
           // Stays focusable so keyboard focus isn't dropped once the selection is cleared.
           focusableWhenDisabled
-          disabled={!hasSelection}
+          disabled={selectedCount === 0}
           className="text-muted-foreground aria-disabled:pointer-events-none aria-disabled:opacity-50"
           onClick={onClear}
         >

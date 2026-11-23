@@ -124,7 +124,7 @@ function DateRangeOptions({
       {handleClose ? (
         <FilterFooter
           multiple={false}
-          hasSelection={hasSelection}
+          selectedCount={hasSelection ? 1 : 0}
           onClear={onClear}
           onDone={handleClose}
         />

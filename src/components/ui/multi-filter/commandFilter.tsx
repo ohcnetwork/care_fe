@@ -1,5 +1,11 @@
 import { useTranslation } from "react-i18next";
 
+import {
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+
 import { FilterChoiceItem } from "./filterChoiceItem";
 import FilterHeader from "./filterHeader";
 import {
@@ -8,7 +14,7 @@ import {
   useFilterMenuSearch,
 } from "./filterMenuSearch";
 import { FilterOptionIndicator } from "./filterOptionIndicator";
-import { FilterConfig, FilterValues } from "./utils/Utils";
+import { FilterConfig, FilterOption, FilterValues } from "./utils/Utils";
 
 /** Fixed option lists (status, priority) in the same menu as the domain pickers. */
 export default function RenderCommandFilter({
@@ -29,20 +35,38 @@ export default function RenderCommandFilter({
   const multiple = filter.mode === "multi";
   const label = t(filter.label);
   const term = search.trim().toLowerCase();
-  // Keep the configured order so rows don't move as they are toggled.
-  const options = filter.options.filter(
-    (option) => !term || t(option.label).toLowerCase().includes(term),
-  );
+  const selectedValues = new Set(selected);
+  const selectedOptions: FilterOption[] = [];
+  const availableOptions: FilterOption[] = [];
+  for (const option of filter.options) {
+    if (term && !t(option.label).toLowerCase().includes(term)) continue;
+    if (selectedValues.has(option.value)) selectedOptions.push(option);
+    else availableOptions.push(option);
+  }
 
   const toggle = (value: string) =>
     onFilterChange(
       filter.key,
       !multiple
         ? [value]
-        : selected.includes(value)
+        : selectedValues.has(value)
           ? selected.filter((item) => item !== value)
           : [...selected, value],
     );
+
+  const renderOption = (option: FilterOption) => (
+    <FilterChoiceItem
+      key={option.value}
+      multiple={multiple}
+      checked={selectedValues.has(option.value)}
+      onChoose={() => toggle(option.value)}
+    >
+      {filter.showColorIndicators !== false && (
+        <FilterOptionIndicator color={option.color} />
+      )}
+      <span className="truncate">{t(option.label)}</span>
+    </FilterChoiceItem>
+  );
 
   return (
     <div>
@@ -61,20 +85,17 @@ export default function RenderCommandFilter({
         />
       </div>
       <FilterMenuList className="max-h-[30vh] overflow-y-auto p-3">
-        {options.map((option) => (
-          <FilterChoiceItem
-            key={option.value}
-            multiple={multiple}
-            checked={selected.includes(option.value)}
-            onChoose={() => toggle(option.value)}
-          >
-            {filter.showColorIndicators !== false && (
-              <FilterOptionIndicator color={option.color} />
-            )}
-            <span className="truncate">{t(option.label)}</span>
-          </FilterChoiceItem>
-        ))}
-        {options.length === 0 && (
+        {selectedOptions.length > 0 && (
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>{t("selected")}</DropdownMenuLabel>
+            {selectedOptions.map(renderOption)}
+          </DropdownMenuGroup>
+        )}
+        {selectedOptions.length > 0 && availableOptions.length > 0 && (
+          <DropdownMenuSeparator />
+        )}
+        {availableOptions.map(renderOption)}
+        {!selectedOptions.length && !availableOptions.length && (
           <div className="text-muted-foreground px-2 py-4 text-center text-sm">
             {t("no_results_found")}
           </div>
