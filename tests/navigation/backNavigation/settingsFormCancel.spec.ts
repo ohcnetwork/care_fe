@@ -24,21 +24,23 @@ const CASES = [
 
 test.describe("Cancel on facility settings forms", () => {
   for (const { name, list, open } of CASES) {
-    test(`cancel on a new ${name} returns to the list it was opened from`, async ({
-      page,
-    }) => {
-      const listPath = `/facility/${getFacilityId()}/settings/${list}`;
-      await page.goto(listPath);
-      await page.getByRole("button", { name: open, exact: true }).click();
-      await expect(page).toHaveURL(`${listPath}/new`);
-      await expectHistoryIndex(page, 1);
+    test(
+      `cancel on a new ${name} returns to the list it was opened from`,
+      { tag: ["@atomic", "@cap:nav.back.navigate"] },
+      async ({ page }) => {
+        const listPath = `/facility/${getFacilityId()}/settings/${list}`;
+        await page.goto(listPath);
+        await page.getByRole("button", { name: open, exact: true }).click();
+        await expect(page).toHaveURL(`${listPath}/new`);
+        await expectHistoryIndex(page, 1);
 
-      await page.getByRole("button", { name: "Cancel", exact: true }).click();
-      await expect(page).toHaveURL(atPath(listPath));
-      await expectHistoryIndex(page, 0);
+        await page.getByRole("button", { name: "Cancel", exact: true }).click();
+        await expect(page).toHaveURL(atPath(listPath));
+        await expectHistoryIndex(page, 0);
 
-      await page.goForward();
-      await expect(page).toHaveURL(`${listPath}/new`);
-    });
+        await page.goForward();
+        await expect(page).toHaveURL(`${listPath}/new`);
+      },
+    );
   }
 });
