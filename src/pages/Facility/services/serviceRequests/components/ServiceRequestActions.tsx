@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  EDITABLE_SERVICE_REQUEST_STATUSES,
   ServiceRequestReadSpec,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
@@ -17,8 +18,11 @@ import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+
+import { ServiceRequestCompleteDialog } from "./ServiceRequestCompleteDialog";
 
 interface ServiceRequestActionsProps {
   request: ServiceRequestReadSpec;
@@ -35,6 +39,10 @@ export function ServiceRequestActions({
 }: ServiceRequestActionsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
+  const canComplete = EDITABLE_SERVICE_REQUEST_STATUSES.includes(
+    request.status,
+  );
   const {
     mutate: cancelServiceRequest,
     isPending: isCancellingServiceRequest,
@@ -91,6 +99,18 @@ export function ServiceRequestActions({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {canComplete && (
+                  <DropdownMenuItem asChild className="text-primary-900">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setIsCompleteDialogOpen(true)}
+                      className="w-full flex flex-row justify-stretch items-center"
+                    >
+                      <CareIcon icon="l-check-circle" className="mr-1" />
+                      {t("mark_as_completed")}
+                    </Button>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild className="text-primary-900">
                   <Button
                     variant="ghost"
@@ -123,6 +143,15 @@ export function ServiceRequestActions({
             </DropdownMenu>
           )}
       </div>
+      {canComplete && (
+        <ServiceRequestCompleteDialog
+          request={request}
+          facilityId={facilityId}
+          serviceRequestId={serviceRequestId}
+          open={isCompleteDialogOpen}
+          onOpenChange={setIsCompleteDialogOpen}
+        />
+      )}
     </div>
   );
 }
