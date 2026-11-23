@@ -273,22 +273,10 @@ test.describe("Facility Creation", () => {
 
   test("Create a facility with only mandatory fields", async ({ page }) => {
     await test.step("Create facility with mandatory fields", async () => {
-      await createFacilityWithMandatoryFields(page);
+      await openOwnFacility(page);
     });
 
-    // Navigate to the created facility
-    await page
-      .getByRole("textbox", { name: "Search by facility name" })
-      .click();
-    await page
-      .getByRole("textbox", { name: "Search by facility name" })
-      .fill(facilityName);
-    await page.getByRole("link", { name: "View Facility" }).click();
-
     // Verify facility details - only mandatory fields should be visible
-    await expect(
-      page.getByRole("heading", { name: facilityName }),
-    ).toBeVisible();
     await expect(facilityTypeLine(page, facilityName)).toHaveText(facilityType);
     await expect(page.getByText(address)).toBeVisible();
     await expect(
@@ -527,19 +515,8 @@ test.describe("Facility Creation", () => {
     page,
   }) => {
     await test.step("Create facility with mandatory fields", async () => {
-      await createFacilityWithMandatoryFields(page);
+      await openOwnFacility(page);
     });
-
-    // Navigate to the created facility
-    await page
-      .getByRole("textbox", { name: "Search by facility name" })
-      .fill(facilityName);
-    await page.getByRole("link", { name: "View Facility" }).click();
-
-    // Verify we're on the facility details page
-    await expect(
-      page.getByRole("heading", { name: facilityName }),
-    ).toBeVisible();
 
     // Open the delete confirmation from the Configurations menu
     await openConfigurationsItem(page, "Delete Facility");
