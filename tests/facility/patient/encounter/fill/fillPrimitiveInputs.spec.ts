@@ -157,9 +157,9 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
   removeFirstOption = true;
   await page.reload();
   await page.getByRole("button", { name: "Resume", exact: true }).click();
-  await expect(
-    multiSelect.getByText("Option 1", { exact: true }),
-  ).toHaveCount(0);
+  await expect(multiSelect.getByText("Option 1", { exact: true })).toHaveCount(
+    0,
+  );
   await expect(
     multiSelect.getByText("Option 2", { exact: true }),
   ).toBeVisible();

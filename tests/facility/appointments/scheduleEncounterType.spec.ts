@@ -121,7 +121,10 @@ test("a planned encounter starts with the appointment's type and resets an unsav
           token_slot: {
             start_datetime: now,
             end_datetime: now,
-            availability: { name: "Clinic", schedule: { encounter_type: "vr" } },
+            availability: {
+              name: "Clinic",
+              schedule: { encounter_type: "vr" },
+            },
           },
         },
       }),
