@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -18,6 +17,7 @@ import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 
 import { LocalStorageKeys } from "@/common/constants";
 
+import { navigate } from "@/lib/router/navigate";
 import { TokenData } from "@/types/otp/otp";
 
 export const LoginHeader = () => {
@@ -40,7 +40,7 @@ export const LoginHeader = () => {
           <Button
             variant="ghost"
             className="text-sm font-medium hover:bg-gray-100 px-6"
-            onClick={() => navigate("/patient/home")}
+            onClick={() => navigate({ to: "/patient/home" })}
           >
             {t("home")}
           </Button>
@@ -75,12 +75,12 @@ export const LoginHeader = () => {
           variant="ghost"
           className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
           onClick={() =>
-            navigate(
-              `/login?mode=${
+            navigate({
+              href: `/login?mode=${
                 localStorage.getItem(LocalStorageKeys.loginPreference) ??
                 "patient"
               }`,
-            )
+            })
           }
         >
           {t("sign_in")}

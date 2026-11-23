@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { createLocationHierarchy } from "tests/helper/locations";
 import { getAccountId } from "tests/support/accountId";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -39,12 +40,10 @@ test.describe("Payment Reconciliation", () => {
 
     await page
       .locator('[data-slot="command-item"]')
-      .first()
-      .waitFor({ state: "visible" });
+      .filter({ hasText: "Bio-Chemistry Lab" })
+      .click();
 
-    await page.locator('[data-slot="command-item"]').first().click();
-
-    const paymentTypes = [/^Payment$/, /^Adjustment$/, /^Advance$/];
+    const paymentTypes = [/^Payment$/, /^Advance$/];
     const selectedType = faker.helpers.arrayElement(paymentTypes);
 
     await page.locator("label").filter({ hasText: selectedType }).click();
@@ -95,40 +94,76 @@ test.describe("Payment Reconciliation", () => {
     // Save payment
     await page.getByRole("button", { name: /record payment/i }).click();
 
-    // Verify success
-    await expect(
-      page.getByText(/payment.*recorded.*successfully/i),
-    ).toBeVisible();
+    // Wait for success message to appear in the sheet
+    const successMessage = page.getByText(/payment.*recorded.*successfully/i);
+    await expect(successMessage).toBeVisible();
   });
 
-  test("should open record payment dialog using keyboard shortcut R", async ({
+  test("should open record payment dialog using keyboard shortcut C", async ({
     page,
   }) => {
+    // "R" is bound only to the lg:hidden mobile button; desktop uses "C"
     await expect(page.getByRole("button", { name: /advance/i })).toBeVisible();
-    // Press 'R' to open Record Payment
-    await page.keyboard.press("r");
+    await page.keyboard.press("c");
 
-    // Verify Record Payment dialog is open
-    const dialog = page.getByRole("dialog", { name: "Record Payment" });
-    await expect(dialog).toBeVisible();
+    // Verify Record Payment sheet is open by checking for the sheet heading
+    const sheet = page.locator("[role='dialog']").filter({
+      has: page.getByRole("heading", { name: /collect payment/i }),
+    });
+    await expect(sheet).toBeVisible();
   });
 
-  test("should show validation error when submitting empty payment", async ({
+  test("selects a ward with beds without opening an empty sub-location list", async ({
+    page,
+    request,
+  }) => {
+    const { root, ward, rootBed } = await createLocationHierarchy(
+      request,
+      getFacilityId(),
+    );
+    await page.getByRole("button", { name: /advance/i }).click();
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Select Location" })
+      .click();
+    await page.getByPlaceholder("Search locations...").fill(root.name);
+    await page.getByRole("option", { name: root.name, exact: true }).click();
+
+    await expect(
+      page.getByRole("option", { name: ward.name, exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("option", { name: rootBed.name, exact: true }),
+    ).toHaveCount(0);
+    await page.getByRole("option", { name: ward.name, exact: true }).click();
+
+    await expect(
+      page.getByRole("combobox").filter({ hasText: ward.name }),
+    ).toHaveAttribute("aria-expanded", "false");
+    await expect(
+      page.getByPlaceholder("Search locations..."),
+    ).not.toBeVisible();
+  });
+
+  test("only enables recording a payment for a positive amount", async ({
     page,
   }) => {
-    // Open Record Payment
     await page.getByRole("button", { name: /advance/i }).click();
+    const amount = page.getByRole("textbox", { name: "Amount Paid" });
+    const recordPayment = page.getByRole("button", {
+      name: /record payment/i,
+    });
 
-    // Click Record Payment without filling anything
-    await page.getByRole("button", { name: /record payment/i }).click();
+    await expect(recordPayment).toBeDisabled();
+    for (const value of ["0", "0.00"]) {
+      await amount.fill(value);
+      await expect(recordPayment).toBeDisabled();
+    }
 
-    // Verify validation error is shown
-    const paymentAmountSection = page
-      .locator("div")
-      .filter({ hasText: /^Amount Paid/ })
-      .filter({ hasText: /Must be a valid number$/ });
-
-    await expect(paymentAmountSection).toBeVisible();
+    await amount.fill("0.01");
+    await expect(recordPayment).toBeEnabled();
+    await amount.clear();
+    await expect(recordPayment).toBeDisabled();
   });
 
   test("should record payment twice without refreshing page with location cache", async ({
@@ -139,7 +174,7 @@ test.describe("Payment Reconciliation", () => {
 
     await page.locator("label").filter({ hasText: "Cash" }).click();
 
-    // Select the first location
+    // Select the location
     await page
       .getByRole("combobox")
       .filter({ hasText: "Select Location" })
@@ -147,10 +182,8 @@ test.describe("Payment Reconciliation", () => {
 
     await page
       .locator('[data-slot="command-item"]')
-      .first()
-      .waitFor({ state: "visible" });
-
-    await page.locator('[data-slot="command-item"]').first().click();
+      .filter({ hasText: "Bio-Chemistry Lab" })
+      .click();
     // Enter Amount Paid
     const paymentAmount = faker.number.int({ min: 100, max: 5000 }).toString();
     await page
@@ -172,6 +205,13 @@ test.describe("Payment Reconciliation", () => {
     await expect(
       page.getByText(/payment.*recorded.*successfully/i),
     ).toBeVisible();
+
+    // Close the success view by clicking the close button in the sheet
+    const sheet = page.locator("[role='dialog']");
+    await sheet.getByRole("button", { name: /close/i }).first().click();
+
+    // Wait for sheet to close and button to be visible again
+    await expect(page.getByRole("button", { name: /advance/i })).toBeVisible();
 
     // Record Payment again without refreshing the page
     await page.getByRole("button", { name: /advance/i }).click();

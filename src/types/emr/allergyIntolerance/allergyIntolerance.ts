@@ -14,11 +14,7 @@ export const ALLERGY_CATEGORY = [
 ] as const;
 export const ALLERGY_CRITICALITY = ["low", "high", "unable_to_assess"] as const;
 export type AllergyVerificationStatus =
-  | "unconfirmed"
-  | "confirmed"
-  | "refuted"
-  | "presumed"
-  | "entered_in_error";
+  "unconfirmed" | "confirmed" | "refuted" | "presumed" | "entered_in_error";
 export type AllergyClinicalStatus = (typeof ALLERGY_CLINICAL_STATUS)[number];
 export type AllergyCategory = (typeof ALLERGY_CATEGORY)[number];
 export type AllergyCriticality = (typeof ALLERGY_CRITICALITY)[number];

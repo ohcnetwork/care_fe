@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetFooter,
   SheetHeader,
@@ -26,6 +27,10 @@ import {
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
 import { MedicineAdminForm } from "./MedicineAdminForm";
 import {
@@ -41,6 +46,7 @@ interface Props {
   lastAdministeredDates?: Record<string, string>;
   patientId: string;
   encounterId: string;
+  productType: AdministrableProductType;
   selectedGroup?: GroupedMedication;
 }
 
@@ -53,6 +59,7 @@ interface MedicineListItemProps {
   lastAdministeredBy?: string;
   onAdministrationChange: (request: MedicationAdministrationRequest) => void;
   isValid: (valid: boolean) => void;
+  productType: AdministrableProductType;
 }
 
 const MedicineListItem = ({
@@ -64,6 +71,7 @@ const MedicineListItem = ({
   lastAdministeredBy,
   onAdministrationChange,
   isValid,
+  productType,
 }: MedicineListItemProps) => {
   const { t } = useTranslation();
 
@@ -81,6 +89,11 @@ const MedicineListItem = ({
               </span>
             )}
           </div>
+          {medicine.note && (
+            <p className="text-sm text-gray-500 italic whitespace-pre-wrap break-words">
+              {medicine.note}
+            </p>
+          )}
         </div>
         <div className="mt-1 mr-6">
           <Checkbox
@@ -106,6 +119,7 @@ const MedicineListItem = ({
               administrationRequest={administrationRequest}
               onChange={onAdministrationChange}
               isValid={isValid}
+              productType={productType}
             />
           )}
         </div>
@@ -122,6 +136,7 @@ export function MedicineAdminSheet({
   patientId,
   encounterId,
   selectedGroup,
+  productType,
 }: Props) {
   const { t } = useTranslation();
 
@@ -157,7 +172,13 @@ export function MedicineAdminSheet({
       pathParams: { patientId },
     }),
     onSuccess: () => {
-      toast.success(t("medication_administration_saved"));
+      toast.success(
+        t(
+          productType === ProductKnowledgeType.medication
+            ? "medication_administration_saved"
+            : "nutritional_product_administration_saved",
+        ),
+      );
       handleClose();
     },
   });
@@ -191,7 +212,7 @@ export function MedicineAdminSheet({
     [medications, encounterId],
   );
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     const administrations = Array.from(selectedMedicines).map(
       (id) => administrationRequests[id],
@@ -235,23 +256,22 @@ export function MedicineAdminSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="w-full sm:min-w-[44rem] max-w-2xl flex flex-col h-full pr-0"
-      >
+      <SheetContent size="lg" className="overflow-hidden">
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="flex flex-col h-full"
+          className="flex min-h-0 flex-1 flex-col"
         >
-          <SheetHeader className="space-y-4 shrink-0 mr-2">
-            <SheetTitle className="text-xl">
-              {t("administer_medicines")}
+          <SheetHeader>
+            <SheetTitle>
+              {productType === ProductKnowledgeType.medication
+                ? t("administer_medicines")
+                : t("record_intake")}
             </SheetTitle>
           </SheetHeader>
 
-          <div className="flex-1 overflow-y-auto mt-8">
-            <div className="space-y-2 pb-4 mr-2">
+          <SheetBody>
+            <div className="space-y-2">
               {medications.map((medicine) => (
                 <MedicineListItem
                   key={medicine.id}
@@ -264,32 +284,35 @@ export function MedicineAdminSheet({
                     handleAdministrationChange(medicine.id, request)
                   }
                   isValid={(valid) => handleFormValidation(medicine.id, valid)}
+                  productType={productType}
                 />
               ))}
             </div>
-          </div>
+          </SheetBody>
 
-          <SheetFooter className="border-t border-gray-200 pt-4 mr-2">
-            <div className="flex justify-between w-full">
-              <Button type="button" variant="outline" onClick={handleClose}>
-                {t("cancel")}
-              </Button>
-              <Button
-                type="submit"
-                className="bg-primary-700 hover:bg-primary-700/90"
-                disabled={
-                  selectedMedicines.size === 0 || isPending || !isAllFormsValid
-                }
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleSubmit(e as any);
-                }}
-              >
-                {isPending
-                  ? t("saving")
-                  : `${t("administer_medicines")} (${selectedMedicines.size})`}
-              </Button>
-            </div>
+          <SheetFooter>
+            <Button type="button" variant="outline" onClick={handleClose}>
+              {t("cancel")}
+            </Button>
+            <Button
+              type="submit"
+              className="bg-primary-700 hover:bg-primary-700/90"
+              disabled={
+                selectedMedicines.size === 0 || isPending || !isAllFormsValid
+              }
+              onClick={(e) => {
+                e.preventDefault();
+                handleSubmit(e);
+              }}
+            >
+              {isPending
+                ? t("saving")
+                : `${
+                    productType === ProductKnowledgeType.medication
+                      ? t("administer_medicines")
+                      : t("record_intake")
+                  } (${selectedMedicines.size})`}
+            </Button>
           </SheetFooter>
         </form>
       </SheetContent>

@@ -1,8 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,13 +11,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { buttonVariants } from "@/components/ui/button";
 
 import {
   ACTIVE_MEDICATION_STATUSES,
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
 import { GroupedMedication } from "./utils";
 
@@ -30,12 +31,22 @@ interface DiscontinueConfirmDialogProps {
   group?: GroupedMedication | null;
   onConfirm: () => void;
   isPending?: boolean;
+  productType: AdministrableProductType;
 }
 
 export const DiscontinueConfirmDialog: React.FC<
   DiscontinueConfirmDialogProps
-> = ({ open, onOpenChange, medication, group, onConfirm, isPending }) => {
+> = ({
+  open,
+  onOpenChange,
+  medication,
+  group,
+  onConfirm,
+  isPending,
+  productType,
+}) => {
   const { t } = useTranslation();
+  const isMedication = productType === ProductKnowledgeType.medication;
 
   // Count active requests in group
   const activeCount = group
@@ -47,19 +58,34 @@ export const DiscontinueConfirmDialog: React.FC<
     : 0;
 
   const title = group
-    ? t("discontinue_medication_group_title", {
-        product: group.productName,
-      })
-    : t("discontinue_medication");
+    ? isMedication
+      ? t("discontinue_medication_group_title", {
+          product: group.productName,
+        })
+      : t("discontinue_nutritional_product_group_title", {
+          product: group.productName,
+        })
+    : isMedication
+      ? t("discontinue_medication")
+      : t("discontinue_nutritional_product");
 
   const description = group
-    ? t("discontinue_medication_group_description", {
-        count: activeCount,
-        product: group.productName,
-      })
-    : t("discontinue_medication_description", {
-        medication: medication ? displayMedicationName(medication) : "",
-      });
+    ? isMedication
+      ? t("discontinue_medication_group_description", {
+          count: activeCount,
+          product: group.productName,
+        })
+      : t("discontinue_nutritional_product_group_description", {
+          count: activeCount,
+          product: group.productName,
+        })
+    : isMedication
+      ? t("discontinue_medication_description", {
+          medication: medication ? displayMedicationName(medication) : "",
+        })
+      : t("discontinue_nutritional_product_description", {
+          medication: medication ? displayMedicationName(medication) : "",
+        });
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -75,7 +101,7 @@ export const DiscontinueConfirmDialog: React.FC<
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isPending}
-            className={cn(buttonVariants({ variant: "destructive" }))}
+            variant="destructive"
           >
             {isPending ? t("discontinuing") : t("discontinue")}
           </AlertDialogAction>

@@ -9,20 +9,24 @@ on:
       - assigned
       - unassigned
       - review_requested
-  pull_request_review:
+  workflow_run:
+    workflows: ["PR Review Trigger"]
     types:
-      - submitted
+      - completed
 
 permissions:
   contents: read
   issues: write
   pull-requests: write
+  actions: read
 
 jobs:
   assign-pr:
     runs-on: ubuntu-24.04-arm
-    # Skip workflow for PRs created by bots
-    if: ${{ github.event.pull_request.user.type != 'Bot' }}
+    # Only run for pull_request_target events and skip PRs created by bots
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      github.event.pull_request.user.type != 'Bot'
 
     steps:
       - name: Generate token
@@ -60,17 +64,6 @@ jobs:
             fi
           fi
 
-      - name: Handle Review Changes Requested
-        if: github.event_name == 'pull_request_review' && github.event.review.state == 'changes_requested'
-        env:
-          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPO: ${{ github.repository }}
-        run: |
-          gh pr edit $PR_NUMBER --remove-label "needs review" --repo $REPO 2>/dev/null || true
-          gh pr edit $PR_NUMBER --remove-label "needs testing" --repo $REPO 2>/dev/null || true
-          gh pr edit $PR_NUMBER --add-label "changes required" --repo $REPO
-
       - name: Handle Review Re-Request
         if: github.event.action == 'review_requested' && github.event.requested_reviewer.type != 'Bot'
         env:
@@ -93,3 +86,72 @@ jobs:
           if [[ -z "$HAS_NEEDS_REVIEW" ]]; then
             gh pr edit $PR_NUMBER --add-label "needs review" --repo $REPO
           fi
+
+  handle-review:
+    runs-on: ubuntu-24.04-arm
+    # Only run for workflow_run events from the PR Review Trigger workflow
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - name: Check for review artifact
+        id: check-artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ARTIFACT_NAME=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts" \
+            --jq '.artifacts[] | select(.name == "review-info") | .name')
+          if [[ -n "$ARTIFACT_NAME" ]]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "No review-info artifact found — expected for non-changes_requested reviews"
+          fi
+
+      - name: Download review info
+        if: steps.check-artifact.outputs.exists == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: review-info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Read and validate review info
+        if: steps.check-artifact.outputs.exists == 'true'
+        id: review
+        run: |
+          PR_NUMBER=$(cat pr_number.txt)
+          REVIEW_STATE=$(cat review_state.txt)
+
+          if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "::error::Invalid PR number: $PR_NUMBER"
+            exit 1
+          fi
+
+          if [[ "$REVIEW_STATE" != "changes_requested" && "$REVIEW_STATE" != "approved" && "$REVIEW_STATE" != "commented" && "$REVIEW_STATE" != "dismissed" ]]; then
+            echo "::error::Invalid review state: $REVIEW_STATE"
+            exit 1
+          fi
+
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "review_state=$REVIEW_STATE" >> $GITHUB_OUTPUT
+
+      - name: Generate token
+        if: steps.check-artifact.outputs.exists == 'true' && steps.review.outputs.review_state == 'changes_requested'
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+
+      - name: Handle Review Changes Requested
+        if: steps.check-artifact.outputs.exists == 'true' && steps.review.outputs.review_state == 'changes_requested'
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          PR_NUMBER: ${{ steps.review.outputs.pr_number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh pr edit $PR_NUMBER --remove-label "needs review" --repo $REPO 2>/dev/null || true
+          gh pr edit $PR_NUMBER --remove-label "needs testing" --repo $REPO 2>/dev/null || true
+          gh pr edit $PR_NUMBER --add-label "changes required" --repo $REPO

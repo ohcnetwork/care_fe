@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## What is CARE?
+All shared guidance for AI coding agents lives in a single source of truth: [`AGENTS.md`](./AGENTS.md). Claude Code inherits that guidance via the import below — keep repository conventions in `AGENTS.md` so every agent (Claude Code, Codex, Cursor, GitHub Copilot, Gemini, etc.) stays in sync.
 
 CARE is a Digital Public Good building an open source EMR + Hospital Management system. This is the React frontend (React 19 + TypeScript + Vite).
 
@@ -13,6 +13,7 @@ CARE is a Digital Public Good building an open source EMR + Hospital Management 
 Clone the [care backend](https://github.com/ohcnetwork/care) alongside this repo and create a Python 3.13 venv with dependencies installed.
 
 **Start backend services:**
+
 ```bash
 # Ensure PostgreSQL and Redis are running
 pg_isready || sudo pg_ctlcluster 16 main start
@@ -24,6 +25,7 @@ DJANGO_SETTINGS_MODULE=config.settings.local DJANGO_READ_DOT_ENV_FILE=true .venv
 ```
 
 **Database commands:**
+
 ```bash
 cd <care-backend-dir>
 .venv/bin/python manage.py migrate                    # Run migrations
@@ -32,33 +34,46 @@ cd <care-backend-dir>
 
 **Backend fixture credentials:**
 
-| Role | Username | Password |
-|------|----------|----------|
-| Doctor | `doctor_2_0` | `Coronasafe@123` |
-| Admin | `administrator_2_0` | `Coronasafe@123` |
-| Nurse | `nurse_2_0` | `Coronasafe@123` |
-| Staff | `staff_2_0` | `Coronasafe@123` |
-| Facility Admin | `facility_admin_2_0` | `Coronasafe@123` |
+| Role           | Username         | Password   |
+| -------------- | ---------------- | ---------- |
+| Doctor         | `care-doctor`    | `Ohcn@123` |
+| Admin          | `care-admin`     | `Ohcn@123` |
+| Nurse          | `care-nurse`     | `Ohcn@123` |
+| Staff          | `care-staff`     | `Ohcn@123` |
+| Volunteer      | `care-volunteer` | `Ohcn@123` |
+| Facility Admin | `care-fac-admin` | `Ohcn@123` |
+
+**Managing organization users** (Health Department):
+
+| Role    | Username            | Password   |
+| ------- | ------------------- | ---------- |
+| Admin   | `care-role-admin`   | `Ohcn@123` |
+| Manager | `care-role-manager` | `Ohcn@123` |
+| Member  | `care-role-member`  | `Ohcn@123` |
 
 **Playwright E2E test credentials** (used in `tests/setup/*.setup.ts`):
 
-| Storage State | Username | Password |
-|--------------|----------|----------|
-| `tests/.auth/user.json` | `admin` | `admin` |
-| `tests/.auth/nurse.json` | `nurse_2_0` | `Coronasafe@123` |
-| `tests/.auth/facilityAdmin.json` | `facility_admin_2_0` | `Coronasafe@123` |
+| Storage State                    | Username         | Password   |
+| -------------------------------- | ---------------- | ---------- |
+| `tests/.auth/user.json`          | `admin`          | `admin`    |
+| `tests/.auth/nurse.json`         | `care-nurse`     | `Ohcn@123` |
+| `tests/.auth/staff.json`         | `care-staff`     | `Ohcn@123` |
+| `tests/.auth/facilityAdmin.json` | `care-fac-admin` | `Ohcn@123` |
 
 ### Frontend Setup
 
 The frontend is configured via `.env.local` to use the local backend:
+
 ```
 REACT_CARE_API_URL=http://127.0.0.1:9000
 ```
 
 ## Build/Lint/Test Commands
 
-- `npm run dev` — Start dev server at http://localhost:4000
+- `portless` — Preferred way to start the dev server
+- `npm run dev` — Start dev server directly at http://localhost:4000 (only if portless is unavailable)
 - `npm run build` — Production build (takes 2+ minutes, set timeout to 180s+)
+- `npm run typecheck` — Type check with TypeScript (`tsc --noEmit`)
 - `npm run lint` — Run ESLint (takes 85s+, set timeout to 120s+)
 - `npm run lint-fix` — ESLint with auto-fix
 - `npm run format` — Prettier formatting
@@ -74,15 +89,16 @@ npm run playwright:test                                 # Run all tests
 npm run playwright:test -- tests/auth/login.spec.ts     # Run a single test file
 npm run playwright:test -- -g "test name"               # Run tests matching a pattern
 npm run playwright:test -- --workers=4                   # Run with 4 parallel workers
-npm run playwright:test -- --shard=1/3                   # Run shard 1 of 3
+npm run playwright:test -- --shard=1/8                   # Run one equal-count shard locally
 npm run playwright:test:ui                              # Interactive Playwright UI mode
 ```
 
 **Running tests efficiently:**
-- Use `--workers=4` for parallel execution (CI runs setup with 1 worker, then chromium with 4 workers)
+
+- CI runs 8 Playwright shards on `ubuntu-latest-m`, with 6 Chromium workers per shard by default (see `docs/testing.md`).
 - Use `--shard=N/TOTAL` to split across multiple processes
 - Run specific test directories to iterate faster: `npx playwright test tests/auth/`
-- The `setup` project runs first to authenticate test users and save storage state
+- The `setup-*` projects run first to authenticate test users and save storage state, parallelizing independent setup tasks while preserving data dependencies.
 
 **Database management for re-runs:**
 
@@ -99,12 +115,14 @@ npm run playwright:db-status     # Check snapshot info
 ```
 
 The `globalSetup` automatically restores the DB snapshot before each local test run (skipped on CI). To set up for the first time:
+
 ```bash
 npm run playwright:db-reset      # Creates snapshot with fixtures
 npm run playwright:test           # Tests run against clean DB, auto-restores on next run
 ```
 
 **Test structure:**
+
 - `tests/setup/` — Authentication & fixture setup (runs before tests)
 - `tests/auth/` — Login, session, homepage tests
 - `tests/facility/` — Facility management, settings, patients, encounters
@@ -114,6 +132,7 @@ npm run playwright:test           # Tests run against clean DB, auto-restores on
 - `tests/support/` — ID management (facility, patient, encounter IDs)
 
 **Writing new tests:**
+
 - Use `faker` for data generation — avoid hardcoded names/slugs that collide on re-run
 - Use `Date.now()` or `faker.string.alphanumeric()` for unique identifiers
 - Don't rely on cleanup — the DB snapshot system handles state reset
@@ -131,17 +150,25 @@ npm run playwright:test           # Tests run against clean DB, auto-restores on
 
 ## Architecture
 
-### Routing (Raviger)
+### Routing (TanStack Router)
 
-Routes defined in `src/Routers/routes/` (e.g., `FacilityRoutes.tsx`, `PatientRoutes.tsx`). Combined in `src/Routers/AppRouter.tsx`. Three routers: `PublicRouter`, `PatientRouter`, `AppRouter` — selected by auth state. Plugin routes injected via `usePluginRoutes()`.
+File routes live under `src/routes/` (`@tanstack/router-plugin` generates `src/routeTree.gen.ts`). The pathless layouts `_public`, `_patient` and `_app` guard each area in `beforeLoad`. Plugin manifest routes attach to the tree at runtime (`src/lib/router/pluginRoutes.tsx`). See [`docs/architecture.md`](docs/architecture.md#routing-tanstack-router).
 
-```typescript
-const FacilityRoutes: AppRoutes = {
-  "/facility/:facilityId/overview": ({ facilityId }) => <FacilityOverview facilityId={facilityId} />,
-};
+```tsx
+// src/routes/_app/facility.$facilityId.overview.tsx
+export const Route = createFileRoute("/_app/facility/$facilityId/overview")({
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  const { facilityId } = useParams({
+    from: "/_app/facility/$facilityId/overview",
+  });
+  return <FacilityOverview facilityId={facilityId} />;
+}
 ```
 
-Use `navigate()` from raviger for programmatic navigation.
+Use `<Link to params>` from `@tanstack/react-router` and `navigate({ to, params })` from `@/lib/router/navigate` (both type-checked). For a URL built at runtime, use `<HrefLink href>` (`@/lib/router/HrefLink`) and `navigate({ href })`.
 
 ### API Layer (TanStack Query + custom wrappers)
 
@@ -165,7 +192,10 @@ const { data } = useQuery({
   queryFn: query(userApi.list),
 });
 // With path/query params:
-queryFn: query(userApi.get, { pathParams: { username }, queryParams: { search } })
+queryFn: query(userApi.get, {
+  pathParams: { username },
+  queryParams: { search },
+});
 ```
 
 Mutations use `mutate()` wrapper from `src/Utils/request/mutate.ts`:
@@ -189,6 +219,7 @@ Errors handled globally — session expiry redirects to `/session-expired`, 400/
 ### UI Components
 
 Built on **shadcn/ui** + **Radix UI primitives** + **Tailwind CSS v4** (shadcn/ui pattern):
+
 - `src/components/ui/` — Base UI primitives (Button, Dialog, Form, Select, etc.). Do not modify these directly.
 - `src/CAREUI/` — Custom healthcare icon library, use `lucide-react` unless you are explicitly asked to use CAREUI icons.
 - Forms use `react-hook-form` + `zod` validation with the custom `<Form>` component
@@ -245,3 +276,5 @@ npx tsc --noEmit
 # 3. Run related tests (requires backend + build)
 npx playwright test tests/path/to/related/
 ```
+
+@AGENTS.md

@@ -1,20 +1,399 @@
-import { type UserConfig, defineConfig, loadEnv } from "vite";
+import fs from "fs";
+import {
+  type Plugin,
+  type UserConfig,
+  type ViteDevServer,
+  defineConfig,
+  loadEnv,
+  normalizePath,
+} from "vite";
 
 import federation from "@originjs/vite-plugin-federation";
-import reactScan from "@react-scan/vite-plugin-react-scan";
 import tailwindcss from "@tailwindcss/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import { marked } from "marked";
 import path from "path";
-import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
-import { viteStaticCopy } from "vite-plugin-static-copy";
+import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
+import { typstCompilerWasm } from "./plugins/typstCompilerWasm";
 import validateEnv from "./scripts/validate-env";
+
+const LOCAL_PLUGIN_MODULE_ID = "virtual:care-local-plugins";
+const RESOLVED_LOCAL_PLUGIN_MODULE_ID = `\0${LOCAL_PLUGIN_MODULE_ID}`;
+const LOCAL_PLUGIN_PUBLIC_PREFIX = "/local-plugins";
+
+interface LocalPluginDefinition {
+  slug: string;
+  importName: string;
+  manifestPath: string;
+  publicDir: string;
+}
+
+const LOCAL_PLUGIN_SOURCE_EXTENSIONS = [
+  ".ts",
+  ".tsx",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".mts",
+  ".cjs",
+  ".cts",
+];
+
+function toImportName(slug: string) {
+  return `${slug.replace(/[^a-zA-Z0-9]+(.)/g, (_, char: string) => char.toUpperCase())}Manifest`;
+}
+
+function getLocalPluginDefinitions(rootDir: string): LocalPluginDefinition[] {
+  // ponytail: an app shipping two manifests (manifest.ts AND manifest.tsx) yields
+  // duplicate imports in the generated module; make this throw if it ever happens.
+  return fs
+    .globSync(
+      `apps/*/src/manifest{${LOCAL_PLUGIN_SOURCE_EXTENSIONS.join(",")}}`,
+      { cwd: rootDir },
+    )
+    .map((manifestFile) => {
+      const slug = manifestFile.split(/[\\/]/)[1];
+      return {
+        slug,
+        importName: toImportName(slug),
+        manifestPath: path.join(rootDir, manifestFile),
+        publicDir: path.join(rootDir, "apps", slug, "public"),
+      };
+    })
+    .sort((left, right) => left.manifestPath.localeCompare(right.manifestPath));
+}
+
+function getMimeType(filePath: string) {
+  const extension = path.extname(filePath).toLowerCase();
+
+  switch (extension) {
+    case ".css":
+      return "text/css; charset=utf-8";
+    case ".gif":
+      return "image/gif";
+    case ".html":
+      return "text/html; charset=utf-8";
+    case ".jpeg":
+    case ".jpg":
+      return "image/jpeg";
+    case ".js":
+      return "application/javascript; charset=utf-8";
+    case ".json":
+      return "application/json; charset=utf-8";
+    case ".png":
+      return "image/png";
+    case ".svg":
+      return "image/svg+xml";
+    case ".txt":
+      return "text/plain; charset=utf-8";
+    case ".webp":
+      return "image/webp";
+    default:
+      return "application/octet-stream";
+  }
+}
+
+function parseRegisteredComponentNames(value: string | undefined) {
+  if (!value || value.trim() === "") {
+    return new Set<string>();
+  }
+
+  if (value.trim() === "*") {
+    return null;
+  }
+
+  return new Set(
+    value
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean),
+  );
+}
+
+function isPluginManifestPath(rootDir: string, filePath: string) {
+  const normalizedFilePath = normalizePath(filePath);
+  const appsPrefix = `${normalizePath(path.join(rootDir, "apps"))}/`;
+  return (
+    normalizedFilePath.startsWith(appsPrefix) &&
+    LOCAL_PLUGIN_SOURCE_EXTENSIONS.some((extension) =>
+      normalizedFilePath.endsWith(`/src/manifest${extension}`),
+    )
+  );
+}
+
+function getPluginRootFromImporter(rootDir: string, importer?: string) {
+  if (!importer) {
+    return null;
+  }
+
+  const normalizedImporter = normalizePath(importer);
+  const appsPrefix = `${normalizePath(path.join(rootDir, "apps"))}/`;
+
+  if (!normalizedImporter.startsWith(appsPrefix)) {
+    return null;
+  }
+
+  const relativeImporter = normalizedImporter.slice(appsPrefix.length);
+  const [slug] = relativeImporter.split("/");
+
+  if (!slug) {
+    return null;
+  }
+
+  return path.join(rootDir, "apps", slug);
+}
+
+function resolveScopedAliasImport(
+  rootDir: string,
+  importer: string | undefined,
+  id: string,
+) {
+  if (!id.startsWith("@/")) {
+    return null;
+  }
+
+  const requestedPath = id.slice(2);
+  const pluginRoot = getPluginRootFromImporter(rootDir, importer);
+  const baseDir = pluginRoot
+    ? path.join(pluginRoot, "src")
+    : path.join(rootDir, "src");
+  const basePath = path.resolve(baseDir, requestedPath);
+  const candidates = [
+    basePath,
+    ...LOCAL_PLUGIN_SOURCE_EXTENSIONS.map(
+      (extension) => `${basePath}${extension}`,
+    ),
+    ...LOCAL_PLUGIN_SOURCE_EXTENSIONS.map((extension) =>
+      path.join(basePath, `index${extension}`),
+    ),
+  ];
+
+  const isFile = (candidate: string) => {
+    try {
+      return fs.statSync(candidate).isFile();
+    } catch {
+      return false;
+    }
+  };
+
+  return candidates.find(isFile) ?? basePath;
+}
+
+function rewriteLocalPluginImports(rootDir: string, id: string, code: string) {
+  const pluginRoot = getPluginRootFromImporter(rootDir, id);
+
+  if (!pluginRoot || !code.includes("@/")) {
+    return null;
+  }
+
+  const rewrittenCode = code.replace(
+    /(["'])@\/([^"']+)\1/g,
+    (match, quote: string, requestPath: string) => {
+      const resolvedImport = resolveScopedAliasImport(
+        rootDir,
+        id,
+        `@/${requestPath}`,
+      );
+
+      if (
+        !resolvedImport ||
+        !fs.existsSync(resolvedImport) ||
+        !fs.statSync(resolvedImport).isFile()
+      ) {
+        return match;
+      }
+
+      return `${quote}/@fs/${normalizePath(resolvedImport)}${quote}`;
+    },
+  );
+
+  if (rewrittenCode === code) {
+    return null;
+  }
+
+  return rewrittenCode;
+}
+
+// When a local plugin's CSS imports `tailwindcss/*` directly (used by the
+// plugin's standalone build), strip those imports in dev. The host care_fe
+// app already provides Tailwind v4 theme/preflight/utilities and scans
+// apps/** via @source, so these imports would otherwise (a) re-run preflight
+// over the entire host page and (b) duplicate utilities. Keep a reference
+// to the theme so plugin @apply and --spacing() still compile.
+function stripPluginTailwindImports(rootDir: string, id: string, code: string) {
+  if (!id.endsWith(".css")) {
+    return null;
+  }
+
+  const pluginRoot = getPluginRootFromImporter(rootDir, id);
+  if (!pluginRoot) {
+    return null;
+  }
+
+  // Any import options ride along — `layer(theme)`, and `theme(reference)`
+  // for a plugin that compiles its utilities against the host's tokens.
+  const stripped = code.replace(
+    /@import\s+["']tailwindcss(?:\/[^"']*)?["'](?:\s+\w+\([^)]*\))*\s*;?/g,
+    "",
+  );
+
+  if (stripped === code) {
+    return null;
+  }
+
+  return `@reference "tailwindcss";\n${stripped}`;
+}
+
+function createLocalPluginModule(rootDir: string, command: "serve" | "build") {
+  if (command !== "serve") {
+    return [
+      "export const localDevPluginConfigs = [];",
+      "export const localDevPluginManifests = {};",
+    ].join("\n");
+  }
+
+  const localPlugins = getLocalPluginDefinitions(rootDir);
+  const imports = localPlugins.map(
+    (plugin) =>
+      `import ${plugin.importName} from ${JSON.stringify(`/@fs/${normalizePath(plugin.manifestPath)}`)};`,
+  );
+
+  const configEntries = localPlugins.map(
+    (plugin) => `  {
+    slug: ${JSON.stringify(plugin.slug)},
+    meta: {
+      name: ${JSON.stringify(plugin.slug)},
+      localPath: ${JSON.stringify(`${LOCAL_PLUGIN_PUBLIC_PREFIX}/${plugin.slug}`)},
+      package: ${JSON.stringify(`local/${plugin.slug}`)},
+    },
+  }`,
+  );
+
+  const manifestEntries = localPlugins.map(
+    (plugin) => `  ${JSON.stringify(plugin.slug)}: ${plugin.importName}`,
+  );
+
+  return [
+    ...imports,
+    "",
+    `export const localDevPluginConfigs = [\n${configEntries.join(",\n")}\n];`,
+    `export const localDevPluginManifests = {\n${manifestEntries.join(",\n")}\n};`,
+  ].join("\n");
+}
+
+function localPluginDevSupport(): Plugin {
+  let rootDir = process.cwd();
+  let command: "serve" | "build" = "build";
+
+  return {
+    name: "local-plugin-dev-support",
+    enforce: "pre" as const,
+    configResolved(config) {
+      command = config.command;
+      rootDir = config.root;
+    },
+    resolveId(id: string) {
+      if (id === LOCAL_PLUGIN_MODULE_ID) {
+        return RESOLVED_LOCAL_PLUGIN_MODULE_ID;
+      }
+    },
+    load(id: string) {
+      if (id === RESOLVED_LOCAL_PLUGIN_MODULE_ID) {
+        return createLocalPluginModule(rootDir, command);
+      }
+    },
+    transform(code: string, id: string) {
+      const cssStripped = stripPluginTailwindImports(rootDir, id, code);
+      const source = cssStripped ?? code;
+      const rewritten = rewriteLocalPluginImports(rootDir, id, source);
+      if (rewritten !== null) return rewritten;
+      return cssStripped;
+    },
+    configureServer(server: ViteDevServer) {
+      const appsDir = path.join(rootDir, "apps");
+      const invalidateLocalPluginModule = () => {
+        const localPluginModule = server.moduleGraph.getModuleById(
+          RESOLVED_LOCAL_PLUGIN_MODULE_ID,
+        );
+
+        if (localPluginModule) {
+          server.moduleGraph.invalidateModule(localPluginModule);
+        }
+      };
+
+      if (fs.existsSync(appsDir)) {
+        server.watcher.add(appsDir);
+      }
+
+      const reloadLocalPlugins = () => {
+        invalidateLocalPluginModule();
+        server.ws.send({ type: "full-reload" });
+      };
+
+      server.watcher.on("add", (filePath) => {
+        if (isPluginManifestPath(rootDir, filePath)) {
+          reloadLocalPlugins();
+        }
+      });
+
+      server.watcher.on("unlink", (filePath) => {
+        if (isPluginManifestPath(rootDir, filePath)) {
+          reloadLocalPlugins();
+        }
+      });
+
+      server.middlewares.use(LOCAL_PLUGIN_PUBLIC_PREFIX, (req, res, next) => {
+        const requestUrl = req.url?.split("?")[0];
+
+        if (!requestUrl) {
+          next();
+          return;
+        }
+
+        const [slug, ...segments] = decodeURIComponent(requestUrl)
+          .replace(/^\/+/, "")
+          .split("/")
+          .filter(Boolean);
+
+        if (!slug || segments.length === 0) {
+          next();
+          return;
+        }
+
+        const publicDir = path.resolve(rootDir, "apps", slug, "public");
+        const requestedFile = path.resolve(publicDir, ...segments);
+
+        if (
+          requestedFile !== publicDir &&
+          !requestedFile.startsWith(`${publicDir}${path.sep}`)
+        ) {
+          res.statusCode = 403;
+          res.end("Forbidden");
+          return;
+        }
+
+        if (
+          !fs.existsSync(requestedFile) ||
+          fs.statSync(requestedFile).isDirectory()
+        ) {
+          next();
+          return;
+        }
+
+        res.setHeader("Content-Type", getMimeType(requestedFile));
+        res.setHeader("Cache-Control", "no-store");
+        res.end(fs.readFileSync(requestedFile));
+      });
+    },
+  };
+}
 
 // Convert goal description markdown to HTML
 function getDescriptionHtml(description: string) {
@@ -45,7 +424,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
   return {
     envPrefix: "REACT_",
     define: {
-      "process.env.IS_PREACT": JSON.stringify("true"),
       __CUSTOM_DESCRIPTION_HTML__: getDescriptionHtml(
         env.REACT_CUSTOM_DESCRIPTION || "",
       ),
@@ -53,7 +431,24 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
     plugins: [
       careConsoleArt(),
       fixSonnerPackageJson(),
+      localPluginDevSupport(),
+      autoRegisterComponents({
+        include: parseRegisteredComponentNames(
+          env.REACT_MFE_REGISTERED_COMPONENTS,
+        ),
+      }),
       tailwindcss(),
+      // Generates src/routeTree.gen.ts from src/routes/**. Must run before
+      // react().
+      tanstackRouter({
+        target: "react",
+        autoCodeSplitting: false,
+        routesDirectory: "./src/routes",
+        generatedRouteTree: "./src/routeTree.gen.ts",
+        routeFileIgnorePrefix: "-",
+        quoteStyle: "double",
+        semicolons: true,
+      }),
       federation({
         name: "core",
         remotes: {
@@ -64,38 +459,17 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "react-dom",
           "react-i18next",
           "@tanstack/react-query",
-          "raviger",
+          // One router instance: plugins read the host router's context.
+          "@tanstack/react-router",
           "sonner",
           "decimal.js",
         ],
       }),
-      viteStaticCopy({
-        targets: [
-          {
-            src: "node_modules/pdfjs-dist/build/pdf.worker.min.mjs",
-            dest: "",
-          },
-        ],
-      }),
       react(),
-      reactScan({
-        enable:
-          env.NODE_ENV === "development" && env.ENABLE_REACT_SCAN === "true",
-      }),
-      checker({
-        typescript: true,
-        eslint: {
-          useFlatConfig: true,
-          lintCommand: "eslint ./src",
-          dev: {
-            logLevel: ["error"],
-          },
-        },
-        enableBuild: false,
-      }),
       treeShakeCareIcons({
         iconWhitelist: ["default"],
       }),
+      typstCompilerWasm(),
       VitePWA({
         strategies: "injectManifest",
         srcDir: "src",
@@ -107,6 +481,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         },
         injectManifest: {
           maximumFileSizeToCacheInBytes: 8000000,
+          // Replaced per deployment, so it must always come from the network.
+          globIgnores: ["**/node_modules/**/*", "runtime-env.js"],
         },
         manifest: {
           name: "Care",
@@ -147,20 +523,43 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         "@careConfig": path.resolve(__dirname, "./care.config.ts"),
         "@core": path.resolve(__dirname, "src/"),
       },
+      // Dedupe shared packages so locally-served plugin source (apps/*) resolves
+      // these from the main app's node_modules instead of the plugin's own copy.
+      // Without this, hooks break with "Should have a queue" / hook order errors
+      // due to duplicate React (and friends) instances.
+      dedupe: [
+        "react",
+        "react-dom",
+        "react-i18next",
+        "i18next",
+        "@tanstack/react-query",
+        "@tanstack/react-router",
+        "sonner",
+        "decimal.js",
+      ],
     },
-    // optimizeDeps: {
-    //   include: getPluginDependencies(),
-    // },
+    optimizeDeps: {
+      // `virtual:pwa-register` imports workbox-window. The dependency scanner
+      // cannot follow virtual modules, so without this the dev server finds it
+      // on first load, re-optimizes and reloads the page.
+      include: ["workbox-window"],
+    },
+    worker: {
+      // The print worker (src/print) loads the Typst compiler with a dynamic
+      // import, which needs ES module workers.
+      format: "es",
+    },
     build: {
       target: "es2022",
       outDir: "build",
-      sourcemap: true,
+      sourcemap: mode !== "production",
     },
     esbuild: {
       target: "es2022",
     },
     server: {
-      port: 4000,
+      port: Number(process.env.PORT) || 4000,
+      strictPort: !!process.env.PORT,
       host: "0.0.0.0",
       allowedHosts: true,
       watch: {
@@ -182,7 +581,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           img-src 'self' https://cdn.ohc.network ${cdnUrls};\
           object-src 'self' ${cdnUrls};`,
       },
-      port: 4000,
+      port: Number(process.env.PORT) || 4000,
+      strictPort: !!process.env.PORT,
     },
   };
 });

@@ -1,4 +1,3 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -9,24 +8,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
-import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
+import { MedicationRequestEmptyState as EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
-export const MedicationHistory = ({ patientId }: { patientId: string }) => {
+export const MedicationHistory = ({
+  patientId,
+  embedded = false,
+}: {
+  patientId: string;
+  embedded?: boolean;
+}) => {
   const { t } = useTranslation();
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="flex items-center gap-2 mb-5">
-        <MedicineIcon className="size-8 text-pink-800 bg-pink-100 border border-pink-400 rounded-md p-1" />
-        <h4 className="text-xl">{t("past_medications")}</h4>
-      </div>
+      {!embedded && (
+        <div className="flex items-center gap-2 mb-5">
+          <MedicineIcon className="size-8 text-pink-800 bg-pink-100 border border-pink-400 rounded-md p-1" />
+          <h4 className="text-xl">{t("past_medications")}</h4>
+        </div>
+      )}
       <Tabs defaultValue="prescriptions" className="w-full">
         <div className="overflow-x-auto">
           <TabsList className="mb-4">
@@ -74,28 +82,19 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
   const { t } = useTranslation();
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
+    useInfiniteList({
       queryKey: ["infinite-activeMedicationRequests", patientId],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(medicationRequestApi.list, {
-          pathParams: { patientId: patientId },
-          queryParams: {
-            limit: 100,
-            status: "active",
-            medications_only: true,
-            offset: String(pageParam),
-          },
-        })({ signal });
-        return response as PaginatedResponse<MedicationRequestRead>;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * 100;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
+      ...query.infinite(medicationRequestApi.list, {
+        pathParams: { patientId: patientId },
+        queryParams: {
+          status: "active",
+          medications_only: true,
+        },
+        pageSize: 100,
+      }),
     });
 
-  const medications = data?.pages.flatMap((page) => page.results) ?? [];
+  const medications = data?.results ?? [];
 
   if (isLoading) {
     return <TableSkeleton count={10} />;

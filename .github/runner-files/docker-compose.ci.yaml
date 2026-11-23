@@ -1,0 +1,88 @@
+# Backend for the Playwright workflow: the published care image on top of
+# care's docker-compose.yaml (db, redis, minio). Use it as an override:
+#
+#   docker compose -f care/docker-compose.yaml \
+#     -f .github/runner-files/docker-compose.ci.yaml ...
+#
+# Relative paths resolve against care/, the directory of the first file.
+# CARE_IMAGE and JWKS_BASE64 must be set in the environment.
+
+x-care: &care
+  image: ${CARE_IMAGE:?CARE_IMAGE is required}
+  env_file:
+    - ./docker/.prebuilt.env
+  environment:
+    # Matches the dev setup the tests were written against. load_fixtures also
+    # needs it: care_fixture_context (care/fixtures/context.py) refuses to run
+    # unless DEBUG is on.
+    DJANGO_DEBUG: "true"
+    CORS_ALLOWED_ORIGINS: '["http://localhost:4000"]'
+    DJANGO_EMAIL_BACKEND: django.core.mail.backends.console.EmailBackend
+    SMS_BACKEND: care.utils.sms.backend.console.ConsoleBackend
+    MAINTAIN_PATIENT_PHONE_NUMBER_IDENTIFIER: "true"
+    DISABLE_RATELIMIT: "true"
+    JWKS_BASE64: ${JWKS_BASE64:?JWKS_BASE64 is required}
+    MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE: "500"
+    # Shards reuse the setup logins for longer than the default
+    # 10-minute access token, so keep tokens valid for the whole job.
+    JWT_ACCESS_TOKEN_LIFETIME: "60"
+    JWT_REFRESH_TOKEN_LIFETIME: "120"
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_started
+    minio:
+      condition: service_started
+
+services:
+  db:
+    # This database is disposable on each shard, so trading crash durability
+    # for faster fixture loading and test writes is safe here.
+    command:
+      - postgres
+      - -c
+      - fsync=off
+      - -c
+      - synchronous_commit=off
+      - -c
+      - full_page_writes=off
+    healthcheck:
+      # Over TCP: during first-time init Postgres only listens on the socket,
+      # so this does not pass until the server is really up.
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres"]
+      interval: 1s
+      # Without a start period every failed probe counts, so allow about a
+      # minute (care's file sets retries: 5) before `up --wait` gives up.
+      retries: 60
+      start_period: 0s
+
+  backend:
+    <<: *care
+    # The backend shares each runner with Chromium.
+    command:
+      - gunicorn
+      - config.wsgi:application
+      - --bind=0.0.0.0:9000
+      - --workers=4
+      - --threads=4
+      - --timeout=120
+    ports:
+      - "9000:9000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9000/ping/"]
+      interval: 1s
+      retries: 120
+
+  celery:
+    <<: *care
+    command:
+      - celery
+      - --app=config.celery_app
+      - worker
+      - --beat
+      - --loglevel=INFO
+    healthcheck:
+      # The image's check reads a role file written by care's start scripts,
+      # which this setup does not use.
+      disable: true

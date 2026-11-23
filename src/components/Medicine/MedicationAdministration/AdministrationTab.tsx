@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
-import { Link, usePathParams } from "raviger";
+import { Pill, Utensils } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -16,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
+import { MedicationRequestEmptyState as EmptyState } from "@/components/Medicine/MedicationRequestTable";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -33,7 +34,12 @@ import {
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiscontinueConfirmDialog } from "./DiscontinueConfirmDialog";
 import { GroupedMedicationRow } from "./GroupedMedicationRow";
 import { MedicineAdminDialog } from "./MedicineAdminDialog";
@@ -46,6 +52,8 @@ import {
   groupMedicationsByProduct,
   isTimeInSlot,
 } from "./utils";
+
+import { useRouteParams } from "@/hooks/useRouteParams";
 
 // Types and Interfaces
 interface AdministrationTabProps {
@@ -120,9 +128,12 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   showTimeLine = false,
 }) => {
   const { t } = useTranslation();
-  const subpathMatch = usePathParams("/facility/:facilityId/*");
+  const subpathMatch = useRouteParams("/facility/:facilityId");
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { facilityId } = useCurrentFacilitySilently();
+  const [selectedProductType, setSelectedProductType] =
+    useState<AdministrableProductType>(ProductKnowledgeType.medication);
+  const isMedication = selectedProductType === ProductKnowledgeType.medication;
 
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
@@ -157,22 +168,37 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   // Queries
   const { data: activeMedications } = useQuery({
-    queryKey: ["medication_requests_active", patientId, encounterId],
+    queryKey: [
+      "medication_requests_active",
+      patientId,
+      encounterId,
+      selectedProductType,
+      facilityId,
+    ],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
         limit: 1000,
         status: ACTIVE_MEDICATION_STATUSES.join(","),
-        medications_only: true,
         facility: facilityId,
+        ...(selectedProductType === ProductKnowledgeType.medication
+          ? { medications_only: true }
+          : { product_type: selectedProductType }),
       },
     }),
     enabled: !!patientId && canAccess,
+    staleTime: 10 * 1000,
   });
 
   const { data: stoppedMedications } = useQuery({
-    queryKey: ["medication_requests_stopped", patientId, encounterId],
+    queryKey: [
+      "medication_requests_stopped",
+      patientId,
+      encounterId,
+      selectedProductType,
+      facilityId,
+    ],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -180,10 +206,13 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         limit: 1000,
         status: INACTIVE_MEDICATION_STATUSES.join(","),
         facility: facilityId,
-        medications_only: true,
+        ...(selectedProductType === ProductKnowledgeType.medication
+          ? { medications_only: true }
+          : { product_type: selectedProductType }),
       },
     }),
     enabled: !!patientId && canAccess,
+    staleTime: 10 * 1000,
   });
 
   const { data: administrations } = useQuery({
@@ -270,17 +299,18 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     useState<GroupedMedication | null>(null);
 
   // Calculate last modified date
+  const administrationResults = administrations?.results;
   const lastModifiedDate = useMemo(() => {
-    if (!administrations?.results?.length) return null;
+    if (!administrationResults?.length) return null;
 
-    const sortedAdmins = [...administrations.results].sort(
+    const sortedAdmins = [...administrationResults].sort(
       (a, b) =>
         new Date(b.occurrence_period_start).getTime() -
         new Date(a.occurrence_period_start).getTime(),
     );
 
     return new Date(sortedAdmins[0].occurrence_period_start);
-  }, [administrations?.results]);
+  }, [administrationResults]);
 
   // Mutations
   const { mutate: discontinueMedication } = useMutation({
@@ -294,6 +324,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       queryClient.invalidateQueries({
         queryKey: ["medication_requests_stopped"],
       });
+      queryClient.invalidateQueries({ queryKey: ["medication_requests"] });
     },
   });
 
@@ -492,8 +523,14 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   ) {
     content = (
       <EmptyState
-        message={t("no_medications")}
-        description={t("no_medications_to_administer")}
+        message={
+          isMedication ? t("no_medications") : t("no_nutritional_products")
+        }
+        description={
+          isMedication
+            ? t("no_medications_to_administer")
+            : t("no_nutritional_products_to_administer")
+        }
       />
     );
   } else if (
@@ -617,6 +654,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                       onDiscontinue={handleDiscontinueClick}
                       onDiscontinueGroup={handleDiscontinueGroupClick}
                       canWrite={canWrite}
+                      productType={selectedProductType}
                     />
                   ))}
               </div>
@@ -628,10 +666,16 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 <div className="p-3 border-t border-gray-200 bg-gray-50 text-center">
                   <span className="text-xs text-gray-500">
                     {showStopped
-                      ? t("showing_all_medications")
-                      : t("n_discontinued_medications_hidden", {
-                          count: stoppedMedications.results.length,
-                        })}
+                      ? isMedication
+                        ? t("showing_all_medications")
+                        : t("showing_all_nutritional_products")
+                      : isMedication
+                        ? t("n_discontinued_medications_hidden", {
+                            count: stoppedMedications.results.length,
+                          })
+                        : t("n_discontinued_nutritional_products_hidden", {
+                            count: stoppedMedications.results.length,
+                          })}
                   </span>
                 </div>
               )}
@@ -648,24 +692,49 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         <div className="flex flex-col gap-3">
           {/* Search and Actions Row */}
           <div className="flex justify-between items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md bg-white border rounded-lg px-3 py-1.5">
-              <CareIcon icon="l-search" className="text-lg text-gray-400" />
-              <Input
-                placeholder={t("search_medications")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 border-0 bg-transparent text-sm outline-none focus-visible:ring-0 placeholder:text-gray-400 h-8 px-0"
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-                  onClick={() => setSearchQuery("")}
-                >
-                  <CareIcon icon="l-times" className="text-base" />
-                </Button>
-              )}
+            <div className="flex flex-wrap flex-1 gap-2">
+              <Tabs
+                value={selectedProductType}
+                onValueChange={(value) => {
+                  setSelectedProductType(value as AdministrableProductType);
+                  setSearchQuery("");
+                }}
+              >
+                <TabsList>
+                  <TabsTrigger value={ProductKnowledgeType.medication}>
+                    <Pill className="size-4" />
+                    {t("medications")}
+                  </TabsTrigger>
+                  <TabsTrigger value={ProductKnowledgeType.nutritional_product}>
+                    <Utensils className="size-4" />
+                    {t("nutrition")}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-sm bg-white border rounded-lg px-3 py-1.5">
+                <CareIcon icon="l-search" className="text-lg text-gray-400" />
+                <Input
+                  placeholder={
+                    isMedication
+                      ? t("search_medication")
+                      : t("search_nutritional_product")
+                  }
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 shadow-none border-0 bg-transparent text-sm outline-none focus-visible:ring-0 py-0! placeholder:text-gray-400 h-6 px-0"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label={t("clear_search")}
+                    className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    <CareIcon icon="l-times" className="text-base" />
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               {canWrite && (
@@ -675,13 +744,16 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                   onClick={() => setIsSheetOpen(true)}
                   disabled={!activeMedications?.results?.length}
                 >
-                  <CareIcon icon="l-syringe" className="mr-2 size-4" />
-                  {t("administer_medicine")}
+                  <CareIcon
+                    icon={isMedication ? "l-syringe" : "l-utensils"}
+                    className="mr-2 size-4"
+                  />
+                  {isMedication ? t("administer_medicine") : t("record_intake")}
                 </Button>
               )}
               {facilityIdExists && (
-                <Link
-                  href={`../${encounterId}/medicines/administrations/print`}
+                <HrefLink
+                  href={`../${encounterId}/type/${selectedProductType}/administrations/print`}
                 >
                   <Button
                     variant="outline"
@@ -693,9 +765,11 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     className="h-9"
                   >
                     <CareIcon icon="l-file-medical-alt" className="mr-2" />
-                    {t("view_drug_chart")}
+                    {isMedication
+                      ? t("view_drug_chart")
+                      : t("view_intake_chart")}
                   </Button>
-                </Link>
+                </HrefLink>
               )}
             </div>
           </div>
@@ -751,6 +825,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             selectedGroupForAdmin ? selectedGroupForAdmin.requests : undefined
           }
           onMedicationChange={handleMedicationChangeInDialog}
+          productType={selectedProductType}
         />
       )}
 
@@ -771,6 +846,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           patientId={patientId}
           encounterId={encounterId}
           selectedGroup={selectedGroupForAdmin || undefined}
+          productType={selectedProductType}
         />
       )}
 
@@ -780,6 +856,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         medication={itemToDiscontinue?.medication}
         group={itemToDiscontinue?.group}
         onConfirm={handleConfirmDiscontinue}
+        productType={selectedProductType}
       />
     </div>
   );

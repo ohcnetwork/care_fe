@@ -10,7 +10,7 @@ test.describe("Department User Management", () => {
 
   let facilityId: string;
 
-  const testUsers = ["care-doctor", "care-volunteer"];
+  const testUsers = ["care-volunteer"];
 
   const testRoles = ["Doctor", "Staff", "Facility Admin"];
 

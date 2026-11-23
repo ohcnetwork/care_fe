@@ -4,16 +4,15 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { Link, useSearch } from "@tanstack/react-router";
 import {
   ChevronLeft,
-  Edit,
   EllipsisVertical,
   ExternalLink,
   MoreVertical,
   Printer,
   Truck,
 } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -43,8 +42,10 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+import { navigate } from "@/lib/router/navigate";
 import { AddMedicationReturnItemForm } from "@/pages/Facility/services/pharmacy/components/AddMedicationReturnItemForm";
 import { MedicationReturnItemsTable } from "@/pages/Facility/services/pharmacy/components/MedicationReturnItemsTable";
+import { MEDICATION_DISPENSE_CANCELLED_STATUSES } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
@@ -81,16 +82,11 @@ export default function MedicationReturnShow({
     status: SupplyDeliveryStatus.completed,
     condition: SupplyDeliveryCondition.normal,
   });
-  const [deliveryOrderStatusDialog, setDeliveryOrderStatusDialog] = useState<{
-    open: boolean;
-    status: DeliveryOrderStatus | null;
-  }>({
-    open: false,
-    status: null,
+  const [enteredInErrorDialogOpen, setEnteredInErrorDialogOpen] =
+    useState(false);
+  const { dispenseOrderIds: dispenseOrderIdsParam } = useSearch({
+    from: "/_app/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/",
   });
-  const [{ dispenseOrderIds: dispenseOrderIdsParam }] = useQueryParams<{
-    dispenseOrderIds?: string;
-  }>();
 
   const dispenseOrderIds =
     dispenseOrderIdsParam?.split(",").filter(Boolean) || [];
@@ -146,7 +142,9 @@ export default function MedicationReturnShow({
       queryClient.invalidateQueries({
         queryKey: ["medicationReturns", deliveryOrderId],
       });
-
+      queryClient.invalidateQueries({
+        queryKey: ["supplyDeliveries", deliveryOrderId],
+      });
       toast.success(
         updatedDeliveryOrder.status === DeliveryOrderStatus.pending
           ? t("order_marked_as_approved_successfully")
@@ -165,6 +163,7 @@ export default function MedicationReturnShow({
           location: locationId,
           limit: 100,
           order: orderId,
+          exclude_status: MEDICATION_DISPENSE_CANCELLED_STATUSES.join(","),
         },
       }),
       enabled: !!orderId && !!locationId,
@@ -354,22 +353,10 @@ export default function MedicationReturnShow({
             {deliveryOrder.status === DeliveryOrderStatus.completed && (
               <Button variant="outline" asChild>
                 <Link
-                  href={`${basePath}/order/${deliveryOrderId}/print`}
-                  basePath="/"
+                  to="/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/print"
+                  params={{ facilityId, locationId, deliveryOrderId }}
                 >
                   <Printer className="size-4" /> {t("print")}
-                </Link>
-              </Button>
-            )}
-
-            {deliveryOrder.status === DeliveryOrderStatus.draft && (
-              <Button variant="outline" asChild>
-                <Link
-                  basePath="/"
-                  href={`${basePath}/order/${deliveryOrderId}/edit`}
-                >
-                  <Edit /> {t("edit")}
-                  <ShortcutBadge actionId="edit-order" />
                 </Link>
               </Button>
             )}
@@ -397,7 +384,9 @@ export default function MedicationReturnShow({
               </Button>
             )}
 
-            {deliveryOrder.status === DeliveryOrderStatus.draft && (
+            {(deliveryOrder.status === DeliveryOrderStatus.completed ||
+              deliveryOrder.status === DeliveryOrderStatus.pending ||
+              deliveryOrder.status === DeliveryOrderStatus.draft) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon">
@@ -408,33 +397,12 @@ export default function MedicationReturnShow({
                   <DropdownMenuItem asChild>
                     <Button
                       variant="ghost"
-                      onClick={() =>
-                        setDeliveryOrderStatusDialog({
-                          open: true,
-                          status: DeliveryOrderStatus.entered_in_error,
-                        })
-                      }
+                      onClick={() => setEnteredInErrorDialogOpen(true)}
                       disabled={isUpdating}
                       className="w-full flex justify-stretch"
                     >
                       <CareIcon icon="l-exclamation-circle" />
                       <span>{t("mark_as_entered_in_error")}</span>
-                    </Button>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Button
-                      variant="ghost"
-                      onClick={() =>
-                        setDeliveryOrderStatusDialog({
-                          open: true,
-                          status: DeliveryOrderStatus.abandoned,
-                        })
-                      }
-                      disabled={isUpdating}
-                      className="w-full flex justify-stretch"
-                    >
-                      <CareIcon icon="l-ban" />
-                      <span>{t("mark_as_abandoned")}</span>
                     </Button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -456,9 +424,14 @@ export default function MedicationReturnShow({
                     <Button
                       variant="link"
                       className="p-0 h-auto text-lg font-semibold"
-                      onClick={() =>
-                        navigate(`/patient/${deliveryOrder.patient?.id}`)
-                      }
+                      onClick={() => {
+                        const patientId = deliveryOrder.patient?.id;
+                        if (!patientId) return;
+                        navigate({
+                          to: "/patient/$id/{-$tab}",
+                          params: { id: patientId },
+                        });
+                      }}
                     >
                       {deliveryOrder.patient.name}
                     </Button>
@@ -510,6 +483,8 @@ export default function MedicationReturnShow({
                       variant="link"
                       className="p-0 h-auto text-primary-600 font-semibold"
                       onClick={() => {
+                        const invoiceId = deliveryOrder.patient_invoice_id;
+                        if (!invoiceId) return;
                         // Filter out the return invoice itself from related invoices
                         const relatedInvoiceIds = [
                           ...new Set(
@@ -518,21 +493,21 @@ export default function MedicationReturnShow({
                                 item.charge_item?.paid_invoice?.id ?? [],
                             ) || [],
                           ),
-                        ].filter(
-                          (id) => id !== deliveryOrder.patient_invoice_id,
-                        );
-                        const queryParams = new URLSearchParams({
+                        ].filter((id) => id !== invoiceId);
+                        const search: Record<string, string> = {
                           sourceUrl: basePath + "/order/" + deliveryOrderId,
-                        });
+                        };
                         if (relatedInvoiceIds.length > 0) {
-                          queryParams.set(
-                            "relatedInvoices",
-                            relatedInvoiceIds.join(","),
-                          );
+                          search.relatedInvoices = relatedInvoiceIds.join(",");
                         }
-                        navigate(
-                          `/facility/${facilityId}/billing/invoices/${deliveryOrder.patient_invoice_id}?${queryParams.toString()}`,
-                        );
+                        navigate({
+                          to: "/facility/$facilityId/billing/invoices/$invoiceId",
+                          params: {
+                            facilityId,
+                            invoiceId,
+                          },
+                          search,
+                        });
                       }}
                     >
                       {t("view_invoice")}
@@ -803,29 +778,19 @@ export default function MedicationReturnShow({
         </Dialog>
 
         <ConfirmActionDialog
-          open={deliveryOrderStatusDialog.open}
-          onOpenChange={(open) =>
-            setDeliveryOrderStatusDialog((prev) => ({ ...prev, open }))
-          }
-          title={
-            deliveryOrderStatusDialog.status ===
-            DeliveryOrderStatus.entered_in_error
-              ? t("mark_as_entered_in_error")
-              : t("mark_as_abandoned")
-          }
-          description={
-            deliveryOrderStatusDialog.status ===
-            DeliveryOrderStatus.entered_in_error
-              ? t("mark_order_as_entered_in_error_confirmation_description")
-              : t("mark_order_as_abandoned_confirmation_description")
-          }
+          open={enteredInErrorDialogOpen}
+          onOpenChange={setEnteredInErrorDialogOpen}
+          title={t("mark_as_entered_in_error")}
+          description={t(
+            "mark_order_as_entered_in_error_confirmation_description",
+          )}
           confirmText={t("confirm")}
           variant="destructive"
           onConfirm={() => {
-            if (deliveryOrderStatusDialog.status) {
-              handleUpdateDeliveryOrderStatus(deliveryOrderStatusDialog.status);
-            }
-            setDeliveryOrderStatusDialog({ open: false, status: null });
+            handleUpdateDeliveryOrderStatus(
+              DeliveryOrderStatus.entered_in_error,
+            );
+            setEnteredInErrorDialogOpen(false);
           }}
           disabled={isUpdating}
         />

@@ -7,13 +7,7 @@
  * JSON Schema property types
  */
 export type JSONSchemaType =
-  | "string"
-  | "number"
-  | "integer"
-  | "boolean"
-  | "object"
-  | "array"
-  | "null";
+  "string" | "number" | "integer" | "boolean" | "object" | "array" | "null";
 
 /**
  * x-ui control types for custom UI rendering
@@ -29,10 +23,92 @@ export type XUIInputControl =
   | "switch"
   | "date"
   | "datetime"
-  | "autocomplete"
-  | "computed";
+  | "autocomplete";
 
 export type XUIControl = XUILayoutControl | XUIInputControl;
+
+/**
+ * Known extension contexts where a field can render.
+ * Hosts pass one of these values to filter extension fields, and
+ * extension authors declare the same string values in their schema's
+ * `x-ui.render_blacklist` array to opt out of specific contexts.
+ *
+ * @example Read-only summary (e.g. patient demographics tab):
+ * ```tsx
+ * const allExtensions = getExtensions(ExtensionEntityType.patient, "retrieve");
+ * const fields = getExtensionFieldsWithName(
+ *   allExtensions,
+ *   ExtensionContexts.patient_summary,
+ * );
+ * // `fields` excludes any property whose x-ui.render_blacklist contains "patient_summary"
+ * ```
+ *
+ * @example Form host (registration / edit):
+ * ```tsx
+ * const extensions = useEntityExtensions({
+ *   form,
+ *   entityType: ExtensionEntityType.patient,
+ *   context: ExtensionContexts.registration,
+ * });
+ * ```
+ */
+export const ExtensionContexts = {
+  registration: "registration",
+  patient_edit: "patient_edit",
+  appointment_print: "appointment_print",
+  patient_summary: "patient_summary",
+  account_form: "account_form",
+  payment_reconciliation_form: "payment_reconciliation_form",
+  supply_delivery_order_form: "supply_delivery_order_form",
+  supply_delivery_order_summary: "supply_delivery_order_summary",
+  supply_delivery_form: "supply_delivery_form",
+  supply_delivery_table: "supply_delivery_table",
+} as const;
+export type ExtensionContext =
+  (typeof ExtensionContexts)[keyof typeof ExtensionContexts];
+
+/**
+ * Anchors an extension field can name in `x-ui.placement.after`, per entity.
+ * A screen that supports placement renders the field right after the named
+ * core element. Fields without placement, or anchored to an element a screen
+ * doesn't show, stay in that screen's default extension block.
+ *
+ * supply_delivery:
+ * - Add delivery form: every anchor except requested_quantity, date, status
+ *   and condition. `discount` lands with `tax`, whose cell holds both.
+ * - Deliveries table: every anchor except category. Internal transfers also
+ *   hide pack_size, pack_quantity and purchase.
+ * - `sale` and `purchase` are column groups: fields land after the whole group.
+ */
+export const ExtensionAnchors = {
+  supply_delivery: [
+    "product",
+    "batch",
+    "expiry",
+    "category",
+    "requested_quantity",
+    "pack_size",
+    "pack_quantity",
+    "quantity",
+    "date",
+    "sale",
+    "purchase",
+    "tax",
+    "discount",
+    "status",
+    "condition",
+  ],
+} as const;
+export type SupplyDeliveryAnchor =
+  (typeof ExtensionAnchors.supply_delivery)[number];
+
+/**
+ * x-ui placement hint: where a field renders on screens that support it
+ */
+export interface XUIPlacement {
+  /** Anchor of the core element to render right after (see {@link ExtensionAnchors}) */
+  after: string;
+}
 
 /**
  * x-ui extension for custom UI hints
@@ -44,6 +120,46 @@ export interface XUI {
   variant?: string;
   /** Generic metadata for dynamic/complex controls (e.g., autocomplete config, API endpoints) */
   metadata?: Record<string, unknown>;
+  /**
+   * Contexts in which this field should NOT render (render_blacklist).
+   * A field with no `render_blacklist` renders in every context the host passes.
+   * `const` and `hidden` fields ignore the render_blacklist (always pass through for data integrity).
+   *
+   * Known contexts: see {@link ExtensionContexts}.
+   *
+   * @example Hide `religion` from registration & summary but show on patient edit:
+   * ```python
+   * "religion": {
+   *   "type": "string",
+   *   "title": "Religion",
+   *   "x-ui": {
+   *     "control": "textbox",
+   *     "render_blacklist": ["registration", "patient_summary"],
+   *   },
+   * }
+   * ```
+   */
+  render_blacklist?: ExtensionContext[];
+  /**
+   * Renders the field right after a core element of the host screen.
+   * Screens without placement support, or that don't show the anchor, keep
+   * the field in their default extension block.
+   *
+   * Known anchors: see {@link ExtensionAnchors}.
+   *
+   * @example Show free quantity right after the pack quantity column:
+   * ```python
+   * "free_quantity": {
+   *   "type": "integer",
+   *   "title": "Free quantity",
+   *   "x-ui": {
+   *     "control": "textbox",
+   *     "placement": {"after": "pack_quantity"},
+   *   },
+   * }
+   * ```
+   */
+  placement?: XUIPlacement;
 }
 
 /**
@@ -186,6 +302,14 @@ export interface ExtensionFieldMetadata {
   uiVariant?: string;
   /** Generic metadata from x-ui for dynamic controls (e.g., autocomplete, custom widgets) */
   uiMetadata?: Record<string, unknown>;
+  /** x-ui placement hint from schema */
+  uiPlacement?: XUIPlacement;
+  /**
+   * Host contexts in which this field should NOT render (render_blacklist).
+   * Missing/empty means the field renders in every context.
+   * Const/hidden fields bypass context filtering for data integrity.
+   */
+  render_blacklist?: ExtensionContext[];
 }
 
 /**

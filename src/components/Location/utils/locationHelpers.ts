@@ -4,9 +4,12 @@ import {
   LocationAssociationStatus,
 } from "@/types/location/association";
 import { LocationRead, OperationalStatus } from "@/types/location/location";
+import locationApi from "@/types/location/locationApi";
+import { BatchRequestObject } from "@/Utils/request/batch";
 
-export type LocationScreen = "view" | "assign" | "modify";
-export type LocationAction = "move" | "complete" | "cancel" | "new";
+export type LocationScreen = "overview" | "assign" | "modify";
+export type LocationAction =
+  "assign" | "move" | "promote" | "complete" | "edit_time";
 
 export interface LocationSheetState {
   screen: LocationScreen;
@@ -27,12 +30,12 @@ export interface LocationTimeConfig {
 
 export interface CurrentLocations {
   currentLocation: LocationAssociationRead | undefined;
-  activeLocations: LocationAssociationRead[];
+  reservedLocations: LocationAssociationRead[];
   plannedLocations: LocationAssociationRead[];
 }
 
 /**
- * Gets the current, active (non-current), and planned locations from encounter history
+ * Gets the current, reserved, and planned locations from encounter history
  */
 export function getCurrentLocations(
   encounter: EncounterRead,
@@ -45,18 +48,19 @@ export function getCurrentLocations(
       loc.location.id === currentEncounterLocation.id,
   );
 
-  const activeLocations = encounter.location_history.filter(
-    (loc) =>
-      (loc.status === "active" || loc.status === "reserved") &&
-      currentEncounterLocation &&
-      loc.location.id !== currentEncounterLocation.id,
+  const reservedLocations = encounter.location_history.filter(
+    (loc) => loc.status === "reserved",
   );
 
   const plannedLocations = encounter.location_history.filter(
     (loc) => loc.status === "planned",
   );
 
-  return { currentLocation, activeLocations, plannedLocations };
+  return {
+    currentLocation,
+    reservedLocations,
+    plannedLocations,
+  };
 }
 
 /**
@@ -83,11 +87,15 @@ export function createLocationAssociationUpdateRequest(
   config: LocationTimeConfig,
   facilityId: string,
   encounterId: string,
-) {
+): BatchRequestObject {
   return {
-    url: `/api/v1/facility/${facilityId}/location/${location.location.id}/association/${location.id}/`,
-    method: "PUT" as const,
-    reference_id: "updateLocationAssociation",
+    api: locationApi.updateAssociation,
+    pathParams: {
+      facility_external_id: facilityId,
+      location_external_id: location.location.id,
+      external_id: location.id,
+    },
+    referenceId: "updateLocationAssociation",
     body: {
       encounter: encounterId,
       start_datetime: config.start.toISOString(),
@@ -111,11 +119,14 @@ export function createLocationAssociationRequest(
   timeConfig: LocationTimeConfig,
   facilityId: string,
   encounterId: string,
-) {
+): BatchRequestObject {
   return {
-    url: `/api/v1/facility/${facilityId}/location/${bedId}/association/`,
-    method: "POST" as const,
-    reference_id: "createLocationAssociation",
+    api: locationApi.createAssociation,
+    pathParams: {
+      facility_external_id: facilityId,
+      location_external_id: bedId,
+    },
+    referenceId: "createLocationAssociation",
     body: {
       encounter: encounterId,
       start_datetime: timeConfig.start.toISOString(),
@@ -131,11 +142,11 @@ export function createLocationUpdateOperationalStatusRequest(
   location: LocationRead,
   facilityId: string,
   operationalStatus: OperationalStatus,
-) {
+): BatchRequestObject {
   return {
-    url: `/api/v1/facility/${facilityId}/location/${location.id}/`,
-    method: "PUT" as const,
-    reference_id: "updateOperationalStatus",
+    api: locationApi.update,
+    pathParams: { facility_id: facilityId, id: location.id },
+    referenceId: "updateOperationalStatus",
     body: {
       ...location,
       location_type: location.location_type?.code
@@ -154,11 +165,15 @@ export function completeCurrentLocationAssociation(
   facilityId: string,
   encounterId: string,
   endTime: Date = new Date(),
-) {
+): BatchRequestObject {
   return {
-    url: `/api/v1/facility/${facilityId}/location/${location.location.id}/association/${location.id}/`,
-    method: "PUT" as const,
-    reference_id: "completeCurrentLocationAssociation",
+    api: locationApi.updateAssociation,
+    pathParams: {
+      facility_external_id: facilityId,
+      location_external_id: location.location.id,
+      external_id: location.id,
+    },
+    referenceId: "completeCurrentLocationAssociation",
     body: {
       encounter: encounterId,
       end_datetime: endTime.toISOString(),
@@ -175,11 +190,15 @@ export function createDeleteLocationAssociationRequest(
   locationId: string,
   associationId: string,
   facilityId: string,
-) {
+): BatchRequestObject {
   return {
-    url: `/api/v1/facility/${facilityId}/location/${locationId}/association/${associationId}/`,
-    method: "DELETE" as const,
-    reference_id: "deleteLocationAssociation",
+    api: locationApi.deleteAssociation,
+    pathParams: {
+      facility_external_id: facilityId,
+      location_external_id: locationId,
+      external_id: associationId,
+    },
+    referenceId: "deleteLocationAssociation",
     body: {},
   };
 }
@@ -193,31 +212,33 @@ export interface AssignmentHandlers {
   keepBedActive?: boolean;
   onKeepBedActiveChange?: (value: boolean) => void;
   onMove: () => void;
+  onAddBed?: () => void;
   onComplete: (location: LocationAssociationRead) => void;
   onUpdateTime: (location: LocationAssociationRead) => void;
-  onCancel: (
-    status: "active" | "planned",
+  onCancelBed: (
+    status: LocationAssociationStatus,
     location: LocationAssociationRead,
   ) => void;
   onCancelEdit: () => void;
   onConfirmEdit: (location: LocationAssociationRead) => void;
   onConfirmTime: (plannedLocation?: LocationAssociationRead) => void;
-  onAssignLinkedBed?: (location: LocationAssociationRead) => void;
+  onAssignNowPlanned: (location: LocationAssociationRead) => void;
+  onAssignNowReserved: (location: LocationAssociationRead) => void;
+  resetScreen: () => void;
 }
 
 export interface NavigationHandlers {
   onLocationClick: (location: LocationRead) => void;
   onBedSelect: (bed: LocationRead) => void;
-  onLinkedBedSelect: (bed: LocationAssociationRead) => void;
   onCheckBedStatus: (bed: LocationRead) => void;
   onSearchChange: (value: string) => void;
-  onSearch: (e: React.FormEvent) => void;
+  onSearch: (e: React.SubmitEvent) => void;
   onShowAvailableChange: (value: boolean) => void;
   onLoadMore: () => void;
   onClearSelection: () => void;
   onGoBack: () => void;
-  onAssignNowPlanned: (location: LocationAssociationRead) => void;
   onScheduleForLater: () => void;
+  onAddReservedBed: () => void;
   onAssignNow: () => void;
   showAvailableOnly: boolean;
   searchTerm: string;

@@ -1,7 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isFuture } from "date-fns";
-import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -34,6 +32,8 @@ import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import mutate from "@/Utils/request/mutate";
 import BackButton from "@/components/Common/BackButton";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { deviceFormSearch } from "@/lib/router/search/settings";
 import {
   usePluginDevice,
   usePluginDevices,
@@ -57,7 +57,7 @@ interface Props {
 
 export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   const { t } = useTranslation();
-  const [qParams] = useQueryParams<{ type?: string }>();
+  const [qParams] = useQueryParams(deviceFormSearch);
 
   const queryClient = useQueryClient();
   const pluginDevices = usePluginDevices();
@@ -72,7 +72,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
         .date()
         .optional()
         .refine(
-          (date) => !date || !isFuture(date),
+          (date) => !date || date <= new Date(),
           t("manufacture_date_cannot_be_in_future"),
         ),
       expiration_date: z.date().optional(),
@@ -93,7 +93,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           if (normalizedValue) {
             if (valueMap.has(normalizedValue)) {
               ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: "custom",
                 message: t("duplicate_contact_values_not_allowed"),
                 path: [index, "value"],
               });
@@ -455,12 +455,19 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                         const isPhone = (system: string) =>
                           ["phone", "fax", "sms"].includes(system);
 
-                        // If the system is changing from a phone type to a non-phone type, clear the value
+                        // Clear incompatible values when switching between phone and non-phone types.
                         if (isPhone(value) !== isPhone(field.value)) {
                           form.setValue(`contact.${index}.value`, "");
                         }
 
                         field.onChange(value);
+
+                        // Re-validate a kept value against the new type, or drop the stale error.
+                        if (form.getValues(`contact.${index}.value`)) {
+                          form.trigger(`contact.${index}.value`);
+                        } else {
+                          form.clearErrors(`contact.${index}.value`);
+                        }
                       }}
                     >
                       <FormControl>

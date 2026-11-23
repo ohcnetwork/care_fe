@@ -1,31 +1,27 @@
-import { Check } from "lucide-react";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import { InputGroupAddon, InputGroupText } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
-
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-
 import { Code } from "@/types/base/code/code";
 import {
   DOSAGE_UNITS_CODES,
   DosageQuantity,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { QuantitySpec } from "@/types/emr/specimenDefinition/specimenDefinition";
-import { useTranslation } from "react-i18next";
 
-interface Props {
+interface Props extends Pick<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "id" | "aria-describedby" | "aria-invalid"
+> {
   quantity?: DosageQuantity | QuantitySpec | null;
   onChange: (quantity: DosageQuantity | QuantitySpec | null) => void;
   disabled?: boolean;
@@ -39,150 +35,88 @@ export function ComboboxQuantityInput({
   quantity,
   onChange,
   disabled,
-  placeholder = "Enter a number...",
+  placeholder,
   autoFocus,
   units = DOSAGE_UNITS_CODES,
   className,
+  ...inputProps
 }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState(quantity?.value || "");
-  const { t } = useTranslation();
   const [selectedUnit, setSelectedUnit] = React.useState(quantity?.unit);
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const [activeIndex, setActiveIndex] = React.useState<number>(-1);
-
   const showDropdown = /^\d*\.?\d*$/.test(inputValue) && inputValue !== ".";
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (disabled) return;
-    const value = e.target.value;
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      setInputValue(value);
-      setOpen(true);
-      setActiveIndex(0);
-      if (value === "") {
-        onChange(null);
-      }
-      if (value && value !== ".") {
-        onChange({ value, unit: selectedUnit || units[0] });
-      }
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (disabled || !showDropdown) return;
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setOpen(true);
-      setActiveIndex((prev) =>
-        prev === -1 ? 0 : prev < units.length - 1 ? prev + 1 : prev,
-      );
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (activeIndex >= 0 && activeIndex < units.length) {
-        const unit = units[activeIndex];
-        setSelectedUnit(unit);
-        setOpen(false);
-        setActiveIndex(-1);
-        if (inputValue.trim() !== "") {
-          onChange({ value: inputValue, unit });
-        }
-      }
-    }
+  const handleInputChange = (value: string) => {
+    if (disabled || (value !== "" && !/^\d*\.?\d*$/.test(value))) return;
+    const nextValue = value === "." ? "0." : value;
+    setInputValue(nextValue);
+    setOpen(true);
+    if (nextValue === "") onChange(null);
+    else onChange({ value: nextValue, unit: selectedUnit || units[0] });
   };
 
   React.useEffect(() => {
     setInputValue(quantity?.value?.toString() || "");
   }, [quantity?.value]);
-
-  React.useEffect(() => {
-    setSelectedUnit(quantity?.unit);
-  }, [quantity?.unit]);
+  React.useEffect(() => setSelectedUnit(quantity?.unit), [quantity?.unit]);
 
   return (
-    <div className={cn("relative flex w-full flex-col gap-1", className)}>
-      <Popover open={!disabled && open && showDropdown} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <div className="relative">
-            <Input
-              ref={inputRef}
-              type="text"
-              inputMode="decimal"
-              pattern="\d*\.?\d*"
-              value={inputValue}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              placeholder={placeholder}
-              className={cn(
-                "w-full text-base sm:text-sm",
-                selectedUnit && "pr-16",
-              )}
-              disabled={disabled}
-              autoFocus={autoFocus}
-            />
-            {selectedUnit && (
-              <div
-                className={cn(
-                  "absolute right-4 pr-2 top-1/2 -translate-y-1/2 text-sm text-gray-500",
-                )}
-              >
-                {selectedUnit.display}
-              </div>
-            )}
-          </div>
-        </PopoverTrigger>
-        <PopoverContent
-          className="w-auto p-0"
-          align="start"
-          onOpenAutoFocus={(e) => {
-            e.preventDefault();
-            inputRef.current?.focus();
-          }}
+    <div className={cn("w-full", className)}>
+      <Combobox<string>
+        items={units.map((unit) => unit.code)}
+        value={selectedUnit?.code ?? null}
+        inputValue={inputValue}
+        open={open && showDropdown}
+        onOpenChange={setOpen}
+        disabled={disabled}
+        filter={null}
+        autoHighlight
+        onInputValueChange={(value, details) => {
+          if (
+            details.reason === "input-change" ||
+            details.reason === "input-clear"
+          )
+            handleInputChange(value);
+        }}
+        onValueChange={(code) => {
+          const unit = units.find((unit) => unit.code === code);
+          if (!unit) return;
+          setSelectedUnit(unit);
+          setOpen(false);
+          inputRef.current?.focus();
+          if (inputValue.trim() !== "") onChange({ value: inputValue, unit });
+        }}
+      >
+        <ComboboxInput
+          {...inputProps}
+          ref={inputRef}
+          inputMode="decimal"
+          pattern="\d*\.?\d*"
+          placeholder={placeholder || t("enter_a_number")}
+          disabled={disabled}
+          autoFocus={autoFocus}
+          showTrigger={false}
+          className="w-full"
         >
-          <Command>
-            <CommandList>
-              <CommandEmpty>{t("no_results_found")}</CommandEmpty>
-              <CommandGroup>
-                {units.map((unit, index) => (
-                  <CommandItem
-                    key={unit.code}
-                    value={unit.code}
-                    onSelect={() => {
-                      setSelectedUnit(unit);
-                      setOpen(false);
-                      setActiveIndex(-1);
-                      inputRef.current?.focus();
-                      if (inputValue.trim() !== "") {
-                        onChange({ value: inputValue, unit });
-                      }
-                    }}
-                    className={cn(
-                      "flex items-center gap-2",
-                      activeIndex === index && "bg-gray-100",
-                    )}
-                  >
-                    <div>
-                      {inputValue} {unit.display}
-                    </div>
-                    <Check
-                      className={cn(
-                        "ml-auto size-4",
-                        selectedUnit?.code === unit.code
-                          ? "opacity-100"
-                          : "opacity-0",
-                      )}
-                    />
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+          {selectedUnit && (
+            <InputGroupAddon align="inline-end">
+              <InputGroupText>{selectedUnit.display}</InputGroupText>
+            </InputGroupAddon>
+          )}
+        </ComboboxInput>
+        <ComboboxContent>
+          <ComboboxEmpty>{t("no_results_found")}</ComboboxEmpty>
+          <ComboboxList>
+            {(code: string) => (
+              <ComboboxItem key={code} value={code}>
+                {inputValue} {units.find((unit) => unit.code === code)?.display}
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
     </div>
   );
 }

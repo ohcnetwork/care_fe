@@ -28,10 +28,10 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
 import facilityApi from "@/types/facility/facilityApi";
 
-export interface AnnotatedMonetaryComponent extends MonetaryComponentRead {
+export type AnnotatedMonetaryComponent = MonetaryComponentRead & {
   isInstance: boolean;
   facilityIndex?: number;
-}
+};
 
 export function DiscountComponentSettings() {
   const { t } = useTranslation();
@@ -108,7 +108,7 @@ export function DiscountComponentSettings() {
           <CreateDiscountMonetaryComponentSheet />
         </div>
 
-        <div className="rounded-md border overflow-x-auto md:overflow-hidden mt-4">
+        <div className="rounded-md overflow-x-auto md:overflow-hidden mt-4">
           <Table className="w-full md:table-fixed">
             <TableHeader>
               <TableRow>

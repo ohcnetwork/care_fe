@@ -17,7 +17,7 @@ Do not run lint or prettier. For missing i18n keys, simply add the key to the en
 - Styling: Tailwind CSS 4.1.3 with custom healthcare-specific design system
 - UI Components: shadcn/ui as primary system, CAREUI for healthcare-specific components
 - State Management: @tanstack/react-query for server state, React hooks for client state
-- Routing: raviger for application routing
+- Routing: TanStack Router (file routes in `src/routes/`) for application routing
 - Forms: react-hook-form with zod validation for medical data integrity
 - Internationalization: i18next for multi-language healthcare interfaces
 - Testing: Playwright for E2E testing of critical healthcare workflows
@@ -96,15 +96,14 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ### Environment Setup
 
-- Node.js 22+ is required (check `.node-version` file)
-- Install Node.js 22: `curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs`
-- Or use nvm: `nvm install 22 && nvm use 22`
+- Node.js 24+ is required (check `.node-version` file)
+- Install Node.js 24: `curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash - && sudo apt-get install -y nodejs`
+- Or use nvm: `nvm install 24 && nvm use 24`
 
 ### Bootstrap, Build, and Test the Repository
 
 - `npm install --ignore-scripts` -- installs dependencies without platform-specific binaries (takes ~16 seconds)
 - `npm run postinstall` -- installs platform-specific dependencies and generates headers (takes ~3 seconds)
-- `npm run setup` -- generates plugin map and setup (takes ~1 second)
 - `npm run build` -- production build. NEVER CANCEL: Takes 2+ minutes. Set timeout to 180+ seconds.
 - `npm run dev` -- starts development server on http://localhost:4000 (takes ~5 seconds)
 - `npm run preview` -- starts production preview server (requires build first)
@@ -120,7 +119,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - Testing requires local backend: Follow [CARE backend setup docs](https://github.com/ohcnetwork/care#self-hosting)
 - Environment setup for testing:
   ```env
-  REACT_CARE_API_URL=https://care-api.do.ohc.network
+  REACT_CARE_API_URL=http://127.0.0.1:9000
   ```
 
 ## Validation
@@ -128,7 +127,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ### Manual Validation Requirements
 
 - ALWAYS run through complete development workflow after making changes:
-  1. `npm install --ignore-scripts && npm run postinstall && npm run setup`
+  1. `npm install --ignore-scripts && npm run postinstall`
   2. `npm run dev` -- verify development server starts and loads at http://localhost:4000
   3. `npm run build` -- NEVER CANCEL: Takes 2+ minutes
   4. `npm run preview` -- verify production build works
@@ -137,7 +136,6 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
   ### Build Time Expectations
   - npm install (with --ignore-scripts): up to 30 seconds
   - npm run postinstall: up to 8 seconds
-  - npm run setup: up to 3 seconds
   - npm run build: up to 3 minutes (NEVER CANCEL, Set timeout to 180+ seconds; may take longer on slower machines)
   - npm run lint: up to 2 minutes (Set timeout to 120+ seconds; allow extra time on low-resource environments)
   - npm run format: up to 40 seconds
@@ -146,7 +144,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ### Required Validation Steps
 
 - Always run `npm run format` and `npm run lint` before committing changes
-- The CI pipeline (.github/workflows/linter.yml) runs `npm run lint -- --quiet` and `npm run unimported`
+- The CI pipeline (.github/workflows/linter.yml) runs `npm run lint -- --quiet` and `npm run knip`
 - Application loads successfully showing CARE healthcare facility search and login interface
 - Build produces a functional PWA with service worker
 
@@ -156,11 +154,11 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 - @tanstack/react-query for API state management
 - react-query is
-- raviger for routing
+- @tanstack/react-router for routing
 - i18next for internationalization
 - date-fns for date handling
 - zod for schema validation
-- framer-motion for animations
+- motion (`motion/react`) for animations
 
 ### Development Tools
 
@@ -171,8 +169,10 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ## Configuration Files & Environment
 
-- `.env` -- environment variables (not committed)
+- `.env` -- default environment variables (committed); put local overrides in `.env.local`
+- `.example.env` -- reference of all supported environment variables with descriptions and defaults
 - `.env.docker` -- Docker environment template
+- `scripts/validate-env.ts` -- validates environment variables at build/dev server startup
 - `REACT_CARE_API_URL` -- backend API URL (required for full functionality)
 - `care.config.ts` -- application configuration
 - `vite.config.mts` -- Vite build configuration
@@ -188,8 +188,8 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ### Environment Variables
 
-- `REACT_CARE_API_URL` -- backend API endpoint (default: staging API)
-- `REACT_ENABLE_HCX` -- enable HCX features
+- `REACT_CARE_API_URL` -- backend API endpoint (`.env` defaults to the production API; empty means same-origin requests)
+- See `.example.env` for every supported variable. When adding or removing one, update `care.config.ts`, `src/vite-env.d.ts`, `scripts/validate-env.ts` and `.example.env` together.
 - `NODE_OPTIONS="--max-old-space-size=4096"` -- required for Docker builds
 
 ### Build Process Details
@@ -236,7 +236,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 - Regular dependency updates via Renovate
 - Snyk security scanning and vulnerability auditing
-- Security scanning with CodeQL and OSSAR
+- Security scanning with CodeQL
 - Audit vulnerabilities with `npm audit`
 
 ## Resources

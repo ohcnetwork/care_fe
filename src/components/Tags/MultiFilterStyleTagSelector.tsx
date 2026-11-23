@@ -1,13 +1,13 @@
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowDown,
   ArrowLeft,
   ArrowRight,
   ArrowUp,
-  Check,
-  ChevronLeft,
   Component,
-  Loader2,
+  Plus,
   Space,
   Tag as TagIcon,
 } from "lucide-react";
@@ -17,6 +17,10 @@ import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
+import TagBadge from "@/components/Tags/TagBadge";
+import TagColorDot from "@/components/Tags/TagColorDot";
+import { TagExpiryLabel } from "@/components/Tags/TagExpiryLabel";
+import { TagExpiryStep } from "@/components/Tags/TagExpiryStep";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +32,7 @@ import {
 } from "@/components/ui/drawer";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -38,18 +43,28 @@ import {
 } from "@/components/ui/popover";
 
 import query from "@/Utils/request/query";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  TagConfig,
+  TagExpiryOffset,
+  TagResource,
+} from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
 interface MultiFilterStyleTagSelectorProps {
   selected: TagConfig[];
-  onChange: (tags: TagConfig[]) => void;
+  /** `expiryOffset` is the custom expiry chosen for the tag being added. */
+  onChange: (tags: TagConfig[], expiryOffset?: TagExpiryOffset) => void;
   resource: TagResource;
   facilityId?: string;
   className?: string;
   disabled?: boolean;
-  isLoading?: boolean;
+  isTagMutationInProgress?: boolean;
   trigger?: React.ReactNode;
+  align?: "start" | "end";
+  /** Ask for an expiry when adding tags whose config allows changing it. */
+  allowCustomExpiry?: boolean;
 }
 
 // Clean, minimal tag selector matching multi-filter design
@@ -60,8 +75,10 @@ export function MultiFilterStyleTagSelector({
   resource,
   className,
   disabled = false,
-  isLoading = false,
+  isTagMutationInProgress = false,
   trigger,
+  align = "start",
+  allowCustomExpiry = false,
 }: MultiFilterStyleTagSelectorProps) {
   const [open, setOpen] = useState(false);
   const [groupPopoverOpen, setGroupPopoverOpen] = useState<string | null>(null);
@@ -69,6 +86,7 @@ export function MultiFilterStyleTagSelector({
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [childDrawerOpen, setChildDrawerOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<TagConfig | null>(null);
+  const [expiryTag, setExpiryTag] = useState<TagConfig | null>(null);
   const isMobile = useIsMobile();
   const { t } = useTranslation();
 
@@ -107,8 +125,20 @@ export function MultiFilterStyleTagSelector({
       (open && !!groupPopoverOpen) || (childDrawerOpen && !!selectedGroup),
   });
 
-  // Select/deselect tag
-  const handleSelect = (tag: TagConfig) => {
+  const isSelected = (tag: TagConfig) => selected.some((t) => t.id === tag.id);
+
+  // The search is sent to the server for the lists below, so selected tags,
+  // which come from the parent, are matched here on their own and group name.
+  const searchTerm = search.trim().toLowerCase();
+  const visibleSelected = searchTerm
+    ? selected.filter((tag) =>
+        [tag.display, tag.parent?.display].some((name) =>
+          name?.toLowerCase().includes(searchTerm),
+        ),
+      )
+    : selected;
+
+  const addTag = (tag: TagConfig, expiryOffset?: TagExpiryOffset) => {
     // If tag has a parent, enforce single selection per group
     const parentId =
       tag.parent && typeof tag.parent === "object" && "id" in tag.parent
@@ -123,21 +153,47 @@ export function MultiFilterStyleTagSelector({
         t.parent.id === parentId,
     );
 
-    const isCurrentlySelected = selected.some((t) => t.id === tag.id);
+    onChange(
+      [...selected.filter((t) => t.id !== alreadySelectedInGroup?.id), tag],
+      expiryOffset,
+    );
+  };
 
-    if (isCurrentlySelected) {
+  // Select/deselect tag
+  const handleSelect = (tag: TagConfig) => {
+    if (isSelected(tag)) {
       onChange(selected.filter((t) => t.id !== tag.id));
+    } else if (allowCustomExpiry && tag.expiry_metadata?.modification_allowed) {
+      // Pick the expiry in the main menu/drawer before applying the tag
+      setGroupPopoverOpen(null);
+      setChildDrawerOpen(false);
+      setSelectedGroup(null);
+      setExpiryTag(tag);
     } else {
-      onChange([
-        ...selected.filter((t) => t.id !== alreadySelectedInGroup?.id),
-        tag,
-      ]);
+      addTag(tag);
     }
   };
 
-  const _handleGroupClick = (groupId: string) => {
-    setGroupPopoverOpen(groupPopoverOpen === groupId ? null : groupId);
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) setExpiryTag(null);
+    if (isMobile) {
+      setMobileDrawerOpen(isOpen);
+    } else {
+      setOpen(isOpen);
+    }
   };
+
+  const expiryStep = expiryTag && (
+    <TagExpiryStep
+      key={expiryTag.id}
+      tag={expiryTag}
+      onBack={() => setExpiryTag(null)}
+      onApply={(expiryOffset) => {
+        addTag(expiryTag, expiryOffset);
+        setExpiryTag(null);
+      }}
+    />
+  );
 
   const handleMobileGroupClick = (group: TagConfig) => {
     setSelectedGroup(group);
@@ -149,103 +205,119 @@ export function MultiFilterStyleTagSelector({
     setSelectedGroup(null);
   };
 
-  const isSelected = (tag: TagConfig) => selected.some((t) => t.id === tag.id);
+  const otherTags = rootTags?.results
+    ? rootTags.results.filter((tag) => !tag.has_children && !isSelected(tag))
+    : [];
+
+  const groupTags = rootTags?.results
+    ? rootTags.results.filter((tag) => tag.has_children)
+    : [];
+
+  const renderTagNameWithParent = (tag: TagConfig) => {
+    return (
+      <div className="flex items-center max-w-xs gap-2 truncate">
+        <span className="flex flex-row items-center min-w-0 gap-1 text-sm">
+          {tag.parent && <Component className="size-3 text-black/80" />}
+          {tag.parent && (
+            <span className="flex items-center flex-shrink-0 gap-1">
+              <span className="text-gray-700 truncate">
+                {tag.parent.display}
+              </span>
+              <ArrowRight className="flex-shrink-0 size-3" />
+            </span>
+          )}
+          <TagColorDot
+            tag={tag}
+            fallbackColorClass="bg-blue-100 border-blue-300"
+          />
+          <span className="truncate">{tag.display}</span>
+        </span>
+        <TagExpiryLabel tag={tag} />
+      </div>
+    );
+  };
 
   // Render tag list for mobile
-  const renderMobileTagList = (tags: TagConfig[], showGroups = true) => (
+  const renderMobileTagList = (tags: TagConfig[]) => (
     <div className="space-y-1">
-      {tags
-        ?.filter((tag) => (showGroups ? tag.has_children : !tag.has_children))
-        .map((tag) => (
-          <div
+      {tags?.map((tag) =>
+        tag.has_children ? (
+          <Button
             key={tag.id}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-            onClick={() => {
-              if (tag.has_children) {
-                handleMobileGroupClick(tag);
-              } else {
-                handleSelect(tag);
-              }
-            }}
+            type="button"
+            variant="ghost"
+            className="justify-between w-full h-auto gap-3 p-3 rounded-lg"
+            onClick={() => handleMobileGroupClick(tag)}
           >
-            <button
-              type="button"
-              role="checkbox"
-              aria-checked={isSelected(tag)}
-              data-state={isSelected(tag) ? "checked" : "unchecked"}
-              className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
-            >
-              {isSelected(tag) && (
-                <span className="flex items-center justify-center text-current transition-none">
-                  <Check className="size-3.5" />
-                </span>
-              )}
-            </button>
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              {tag.has_children ? (
-                <Component className="h-4 w-4 text-gray-600" />
-              ) : (
-                <div className="h-3 w-3 rounded-full flex-shrink-0 border bg-blue-100 border-blue-300"></div>
-              )}
+            <span className="flex items-center min-w-0 gap-2">
+              <Component className="text-gray-600 size-4 shrink-0" />
               <span className="text-sm truncate">{tag.display}</span>
-              {tag.has_children && (
-                <Badge className="inline-flex items-center rounded-md border font-medium transition-colors gap-1.5 border-gray-300 bg-gray-100 text-gray-900 text-xs p-0.5 ml-auto">
-                  {t("group")}
-                </Badge>
-              )}
-            </div>
-            {tag.has_children && (
-              <ArrowRight className="h-4 w-4 text-gray-400" />
-            )}
-          </div>
-        ))}
+            </span>
+            <span className="flex items-center gap-2">
+              <Badge className="border-gray-300 bg-gray-100 px-1 py-0.5 text-xs text-gray-900">
+                {t("group")}
+              </Badge>
+              <ArrowRight className="text-gray-400 size-4" />
+            </span>
+          </Button>
+        ) : (
+          <Label
+            key={tag.id}
+            className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50"
+          >
+            <Checkbox
+              checked={isSelected(tag)}
+              onCheckedChange={() => handleSelect(tag)}
+              className="size-4"
+            />
+            {renderTagNameWithParent(tag)}
+          </Label>
+        ),
+      )}
     </div>
-  );
-
-  // Common trigger button
+  ); // Common trigger button
   const triggerButton = trigger ? (
     trigger
   ) : (
     <Button
       variant="outline"
       className={cn(
-        "h-10",
-        selected.length > 0 && "border-blue-300 bg-blue-50 h-auto",
+        "h-10 w-full border border-strong-border text-placeholder-foreground font-normal shadow-none! inset-shadow-none! px-2.5",
+        selected.length > 0 &&
+          "border-blue-300 bg-blue-50 h-auto min-h-12 md:min-h-10",
         className,
       )}
-      disabled={disabled || isLoading}
+      disabled={disabled || isTagMutationInProgress}
     >
-      <div className="flex items-center gap-2 min-w-0 w-full">
-        {isLoading ? (
-          <Loader2 className="h-3 w-3 animate-spin" />
+      <div className="flex items-center w-full min-w-0 gap-2">
+        {isTagMutationInProgress ? (
+          <Spinner className="size-3 animate-spin" />
+        ) : selected.length > 0 ? (
+          <TagIcon className="size-3" />
         ) : (
-          <TagIcon className="h-3 w-3" />
+          <Plus className="size-3" />
         )}
 
-        <div className="flex gap-1 flex-wrap min-w-0 w-full overflow-hidden">
-          {isLoading ? (
+        <div>
+          {isTagMutationInProgress ? (
             <span>{t("updating_tags")}</span>
           ) : selected.length > 0 ? (
-            selected.slice(0, 3).map((t) => (
-              <Badge
-                key={t.id}
-                className="
-  bg-blue-100 text-blue-900 border-blue-300
-  whitespace-normal
-  break-words
-  overflow-wrap-anywhere
-"
-              >
-                {t.display}
-              </Badge>
-            ))
+            <div className="flex flex-wrap w-full min-w-0 gap-1 overflow-hidden">
+              {selected.slice(0, 3).map((tag) => (
+                <TagBadge
+                  key={tag.id}
+                  tag={tag}
+                  className="text-blue-900 break-words whitespace-normal bg-blue-100 border-blue-300 overflow-wrap-anywhere"
+                />
+              ))}
+              {selected.length > 3 && (
+                <Badge className="text-gray-900 bg-gray-100 border-gray-300 shrink-0">
+                  +{selected.length - 3} {t("more")}
+                </Badge>
+              )}
+            </div>
           ) : (
             <span>{t("add_tags")}</span>
-          )}
-          {selected.length > 3 && (
-            <Badge className="bg-gray-100 text-gray-900 border-gray-300 shrink-0">
-              +{selected.length - 3} {t("more")}
-            </Badge>
           )}
         </div>
       </div>
@@ -257,100 +329,79 @@ export function MultiFilterStyleTagSelector({
       {/* Mobile Drawer */}
       {isMobile ? (
         <>
-          <Drawer open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
+          <Drawer open={mobileDrawerOpen} onOpenChange={handleOpenChange}>
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-            <DrawerContent className="flex flex-col max-h-[85vh]">
-              <DrawerHeader className="pb-3">
-                <DrawerTitle className="flex items-center gap-2">
-                  {t("manage_tags")}
-                </DrawerTitle>
+            <DrawerContent height="fixed">
+              <DrawerHeader showCloseButton>
+                <DrawerTitle>{t("manage_tags")}</DrawerTitle>
               </DrawerHeader>
-
-              <div className="flex-1 overflow-hidden flex flex-col">
+              {expiryStep}
+              <div
+                className={cn(
+                  "flex min-h-0 flex-1 flex-col",
+                  expiryTag && "hidden",
+                )}
+              >
                 {/* Search */}
-                <div className="px-4 pb-3">
-                  <input
-                    type="text"
+                <div className="p-2 border-b border-gray-100 shadow-xs">
+                  <Input
+                    data-autofocus
                     placeholder={t("search_tags")}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-xs transition-colors file:border-0 file:bg-transparent focus:ring-primary-500 focus:border-primary-500 file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-300 h-8 text-sm"
                   />
                 </div>
-
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto px-4">
-                  {/* Selected Tags */}
-                  {selected.length > 0 && (
-                    <div className="mb-4">
-                      <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                <div className="flex-1 px-2 overflow-y-auto">
+                  {visibleSelected.length > 0 && (
+                    <div className="pt-2 pb-2">
+                      <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                         {t("selected_tags")}
                       </div>
-                      {selected.map((tag) => (
-                        <div
+                      {visibleSelected.map((tag) => (
+                        <Label
                           key={tag.id}
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                          onClick={() => handleSelect(tag)}
+                          className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50"
                         >
-                          <button
-                            type="button"
-                            role="checkbox"
-                            aria-checked="true"
-                            data-state="checked"
-                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
-                          >
-                            <span className="flex items-center justify-center text-current transition-none">
-                              <Check className="size-3.5" />
-                            </span>
-                          </button>
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            {tag.parent && (
-                              <Component className="h-3 w-3 text-gray-600" />
-                            )}
-                            <div className="h-3 w-3 rounded-full flex-shrink-0 border bg-blue-100 border-blue-300"></div>
-                            <span className="text-sm truncate">
-                              {tag.display}
-                            </span>
-                          </div>
-                        </div>
+                          <Checkbox
+                            checked
+                            className="size-4"
+                            onCheckedChange={() => handleSelect(tag)}
+                          />
+                          {renderTagNameWithParent(tag)}
+                        </Label>
                       ))}
                     </div>
                   )}
-
-                  {/* Tag Groups */}
-                  {rootTags?.results &&
-                    rootTags.results.filter((tag) => tag.has_children).length >
-                      0 && (
-                      <div className="mb-4">
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                          {t("tag_groups")}
-                        </div>
-                        {renderMobileTagList(rootTags.results, true)}
-                      </div>
-                    )}
-
-                  {/* Other Tags */}
-                  {rootTags?.results &&
-                    rootTags.results.filter((tag) => !tag.has_children).length >
-                      0 && (
-                      <div className="mb-4">
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                          {t("other_tags")}
-                        </div>
-                        {renderMobileTagList(rootTags.results, false)}
-                      </div>
-                    )}
-
-                  {isLoadingRoot && (
-                    <div className="py-8 text-sm text-gray-500 text-center">
+                  {isLoadingRoot ? (
+                    <div className="py-8 text-sm text-center text-gray-500">
                       {t("loading")}
                     </div>
-                  )}
-
-                  {!isLoadingRoot && !rootTags?.results?.length && (
-                    <div className="py-8 text-sm text-gray-500 text-center">
+                  ) : !rootTags?.results?.length ? (
+                    <div className="py-8 text-sm text-center text-gray-500">
                       {t("no_tags_group")}
                     </div>
+                  ) : (
+                    <>
+                      {/* Tag Groups */}
+                      {groupTags.length > 0 && (
+                        <div className="mb-4 pt-2">
+                          <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                            {t("tag_groups")}
+                          </div>
+                          {renderMobileTagList(groupTags)}
+                        </div>
+                      )}
+
+                      {/* Other Tags */}
+                      {otherTags.length > 0 && (
+                        <div className="mb-4 pt-2">
+                          <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                            {t("other_tags")}
+                          </div>
+                          {renderMobileTagList(otherTags)}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -359,64 +410,51 @@ export function MultiFilterStyleTagSelector({
 
           {/* Child Tags Drawer */}
           <Drawer open={childDrawerOpen} onOpenChange={setChildDrawerOpen}>
-            <DrawerContent className="flex flex-col max-h-[85vh]">
-              <DrawerHeader className="pb-3">
+            <DrawerContent height="child">
+              <DrawerHeader className="p-2 border-b border-gray-100 shadow-xs">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleMobileBack}
-                    className="p-1 h-8 w-8"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
+                  <Button variant="ghost" onClick={handleMobileBack}>
+                    <ArrowLeft className="size-4" />
                   </Button>
                   <DrawerTitle className="flex items-center gap-2">
-                    <Component className="h-4 w-4" />
+                    <Component className="size-4" />
                     {selectedGroup?.display}
                   </DrawerTitle>
                 </div>
               </DrawerHeader>
 
-              <div className="flex-1 overflow-hidden flex flex-col">
-                <div className="flex-1 overflow-y-auto px-4">
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <div className="flex-1 px-4 overflow-y-auto">
                   {isLoadingChildren ? (
-                    <div className="py-8 text-sm text-gray-500 text-center">
+                    <div className="py-8 text-sm text-center text-gray-500">
                       {t("loading")}
                     </div>
                   ) : childTags?.results?.length ? (
                     <div className="space-y-1">
                       {childTags.results.map((childTag) => (
-                        <div
+                        <Label
                           key={childTag.id}
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                          onClick={() => handleSelect(childTag)}
+                          className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50"
                         >
-                          <button
-                            type="button"
-                            role="checkbox"
-                            aria-checked={isSelected(childTag)}
-                            data-state={
-                              isSelected(childTag) ? "checked" : "unchecked"
-                            }
-                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
-                          >
-                            {isSelected(childTag) && (
-                              <span className="flex items-center justify-center text-current transition-none">
-                                <Check className="size-3.5" />
-                              </span>
-                            )}
-                          </button>
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <div className="h-3 w-3 rounded-full flex-shrink-0 border bg-green-100 border-green-300"></div>
+                          <Checkbox
+                            checked={isSelected(childTag)}
+                            className="size-4"
+                            onCheckedChange={() => handleSelect(childTag)}
+                          />
+                          <div className="flex items-center flex-1 min-w-0 gap-2">
+                            <TagColorDot
+                              tag={childTag}
+                              fallbackColorClass="bg-green-100 border-green-300"
+                            />
                             <span className="text-sm truncate">
                               {childTag.display}
                             </span>
                           </div>
-                        </div>
+                        </Label>
                       ))}
                     </div>
                   ) : (
-                    <div className="py-8 text-sm text-gray-500 text-center">
+                    <div className="py-8 text-sm text-center text-gray-500">
                       {t("no_tags")}
                     </div>
                   )}
@@ -427,22 +465,23 @@ export function MultiFilterStyleTagSelector({
         </>
       ) : (
         /* Desktop Dropdown */
-        <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenu open={open} onOpenChange={handleOpenChange}>
           <DropdownMenuTrigger asChild>{triggerButton}</DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[calc(100vw)] max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
-            align="start"
+            align={align}
           >
-            <div className="p-0">
+            {expiryStep}
+            <div className={cn("p-0", expiryTag && "hidden")}>
               {/* Header */}
               <div className="flex items-center gap-2 p-2 border-b border-gray-200">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setOpen(false)}
-                  className="h-6 w-6 p-0"
+                  className="p-0 size-6"
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="size-4" />
                 </Button>
                 <span className="text-sm font-medium">
                   {t("tags", { count: selected.length })}
@@ -452,230 +491,171 @@ export function MultiFilterStyleTagSelector({
               {/* Content */}
               <div className="p-2 max-h-[calc(100vh-28rem)] overflow-y-auto">
                 {/* Search */}
-                <input
-                  type="text"
+                <Input
                   placeholder={t("search_tags")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-xs transition-colors file:border-0 file:bg-transparent focus:ring-primary-500 focus:border-primary-500 file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-300 h-10 text-sm mb-2"
+                  onKeyDown={(e) => e.stopPropagation()}
                 />
+                {/* Selected Tags */}
+                {visibleSelected.length > 0 && (
+                  <>
+                    <div className="px-2 py-0.5 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      {t("selected_tags")}
+                    </div>
+                    {visibleSelected.map((tag) => (
+                      <DropdownMenuCheckboxItem
+                        key={tag.id}
+                        className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"
+                        checked
+                        closeOnClick={false}
+                        onCheckedChange={() => handleSelect(tag)}
+                      >
+                        {renderTagNameWithParent(tag)}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </>
+                )}
 
-                <div>
-                  {/* Selected Tags */}
-                  {selected.length > 0 && (
-                    <>
-                      <div className="px-2 py-0.5 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        {t("selected_tags")}
-                      </div>
-                      {selected.map((tag) => (
-                        <div
-                          key={tag.id}
-                          className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"
-                          onClick={() => handleSelect(tag)}
-                        >
-                          <button
-                            type="button"
-                            role="checkbox"
-                            aria-checked="true"
-                            data-state="checked"
-                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
-                          >
-                            <span className="flex items-center justify-center text-current transition-none">
-                              <Check className="size-3.5" />
-                            </span>
-                          </button>
-                          <div className="flex items-center gap-2 max-w-xs truncate">
-                            <span className="text-sm flex flex-row items-center gap-1 min-w-0">
-                              {tag.parent && (
-                                <Component className="h-3 w-3 text-black/80" />
-                              )}
-                              {tag.parent && (
-                                <span className="flex gap-1 items-center flex-shrink-0">
-                                  <span className="text-gray-700 truncate">
-                                    {tag.parent.display}
-                                  </span>
-                                  <ArrowRight className="h-3 w-3 flex-shrink-0" />
-                                </span>
-                              )}
-                              <div className="h-3 w-3 rounded-full flex-shrink-0 border bg-blue-100 border-blue-300"></div>
-                              <span className="truncate">{tag.display}</span>
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                      <div className="bg-gray-200 -mx-1 my-1 h-px"></div>
-                    </>
-                  )}
-
-                  {/* Tag Groups */}
-                  {rootTags?.results &&
-                    rootTags.results.filter((tag) => tag.has_children).length >
-                      0 && (
+                {isLoadingRoot ? (
+                  <div className="px-2 py-4 text-sm text-center text-gray-500">
+                    {t("loading")}
+                  </div>
+                ) : !rootTags?.results?.length ? (
+                  <div className="px-2 py-4 text-sm text-center text-gray-500">
+                    {t("no_tags_group")}
+                  </div>
+                ) : (
+                  <div>
+                    {/* Tag Groups */}
+                    {groupTags.length > 0 && (
                       <>
-                        <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide mt-2">
+                        <div className="h-px my-1 -mx-1 bg-gray-200"></div>
+                        <div className="px-2 py-1 mt-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {t("tag_groups")}
                         </div>
-                        {rootTags?.results
-                          ?.filter((tag) => tag.has_children)
-                          .map((tag) => (
-                            <div key={tag.id} className="relative">
-                              <Popover
-                                open={groupPopoverOpen === tag.id}
-                                onOpenChange={(open) =>
-                                  setGroupPopoverOpen(open ? tag.id : null)
-                                }
+                        {groupTags.map((tag) => (
+                          <div key={tag.id} className="relative">
+                            <Popover
+                              open={groupPopoverOpen === tag.id}
+                              onOpenChange={(open) =>
+                                setGroupPopoverOpen(open ? tag.id : null)
+                              }
+                            >
+                              <PopoverTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  className="h-auto w-full focus:bg-gray-100 focus:text-gray-900 cursor-default rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5"
+                                >
+                                  <div className="flex items-center justify-between flex-1 gap-2">
+                                    <div className="flex items-center gap-1">
+                                      <Component className="size-4 text-black/80" />
+                                      <span className="text-sm">
+                                        {tag.display}
+                                      </span>
+                                    </div>
+                                    <Badge className="inline-flex items-center rounded-md border font-medium transition-colors gap-1.5 border-gray-300 bg-gray-100 text-gray-900 text-xs p-0.5">
+                                      {t("group")}
+                                    </Badge>
+                                  </div>
+                                  <ArrowRight className="ml-auto size-4" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-64 p-0"
+                                side="right"
+                                align="start"
+                                sideOffset={5}
                               >
-                                <PopoverTrigger asChild>
-                                  <div className="focus:bg-gray-100 focus:text-gray-900 cursor-default rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5">
-                                    <div className="flex items-center gap-2 flex-1 justify-between">
-                                      <div className="flex items-center gap-1">
-                                        <Component className="h-4 w-4 text-black/80" />
+                                <div className="p-2 border-b border-gray-200">
+                                  <div className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                    {tag.display}
+                                  </div>
+                                </div>
+                                {isLoadingChildren ? (
+                                  <div className="p-2 text-sm text-gray-500">
+                                    {t("loading")}
+                                  </div>
+                                ) : childTags?.results?.length ? (
+                                  childTags.results.map((childTag) => (
+                                    <Label
+                                      key={childTag.id}
+                                      className="relative flex items-center gap-2 px-2 py-1 text-sm rounded-sm cursor-pointer select-none focus:bg-gray-100 focus:text-gray-900 outline-hidden"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected(childTag)}
+                                        className="size-4"
+                                        onCheckedChange={() =>
+                                          handleSelect(childTag)
+                                        }
+                                      />
+                                      <div className="flex items-center flex-1 gap-2">
+                                        <TagColorDot
+                                          tag={childTag}
+                                          fallbackColorClass="bg-green-100 border-green-300"
+                                        />
                                         <span className="text-sm">
-                                          {tag.display}
+                                          {childTag.display}
                                         </span>
                                       </div>
-                                      <Badge className="inline-flex items-center rounded-md border font-medium transition-colors gap-1.5 border-gray-300 bg-gray-100 text-gray-900 text-xs p-0.5">
-                                        {t("group")}
-                                      </Badge>
-                                    </div>
-                                    <ArrowRight className="ml-auto size-4" />
+                                    </Label>
+                                  ))
+                                ) : (
+                                  <div className="p-2 text-sm text-gray-500">
+                                    {t("no_tags")}
                                   </div>
-                                </PopoverTrigger>
-                                <PopoverContent
-                                  className="w-64 p-0"
-                                  side="right"
-                                  align="start"
-                                  sideOffset={5}
-                                >
-                                  <div className="p-2 border-b border-gray-200">
-                                    <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                                      {tag.display}
-                                    </div>
-                                  </div>
-                                  {isLoadingChildren ? (
-                                    <div className="p-2 text-sm text-gray-500">
-                                      {t("loading")}
-                                    </div>
-                                  ) : childTags?.results?.length ? (
-                                    childTags.results.map((childTag) => (
-                                      <div
-                                        key={childTag.id}
-                                        className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-1 cursor-pointer"
-                                        onClick={() => handleSelect(childTag)}
-                                      >
-                                        <button
-                                          type="button"
-                                          role="checkbox"
-                                          aria-checked={isSelected(childTag)}
-                                          data-state={
-                                            isSelected(childTag)
-                                              ? "checked"
-                                              : "unchecked"
-                                          }
-                                          className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
-                                        >
-                                          {isSelected(childTag) && (
-                                            <span className="flex items-center justify-center text-current transition-none">
-                                              <Check className="size-3.5" />
-                                            </span>
-                                          )}
-                                        </button>
-                                        <div className="flex items-center gap-2 flex-1">
-                                          <div className="h-3 w-3 rounded-full flex-shrink-0 border bg-green-100 border-green-300"></div>
-                                          <span className="text-sm">
-                                            {childTag.display}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    ))
-                                  ) : (
-                                    <div className="p-2 text-sm text-gray-500">
-                                      {t("no_tags")}
-                                    </div>
-                                  )}
-                                </PopoverContent>
-                              </Popover>
-                            </div>
-                          ))}
-                        <div className="bg-gray-200 -mx-1 my-1 h-px"></div>
+                                )}
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        ))}
                       </>
                     )}
 
-                  {/* Other Tags */}
-                  {rootTags?.results &&
-                    rootTags.results.filter((tag) => !tag.has_children).length >
-                      0 && (
+                    {/* Other Tags */}
+                    {otherTags.length > 0 && (
                       <>
-                        <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide mt-2">
+                        <div className="h-px my-1 -mx-1 bg-gray-200"></div>
+                        <div className="px-2 py-1 mt-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {t("other_tags")}
                         </div>
-                        {rootTags?.results
-                          ?.filter((tag) => !tag.has_children)
-                          .map((tag) => (
-                            <div
-                              key={tag.id}
-                              className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"
-                              onClick={() => handleSelect(tag)}
-                            >
-                              <button
-                                type="button"
-                                role="checkbox"
-                                aria-checked={isSelected(tag)}
-                                data-state={
-                                  isSelected(tag) ? "checked" : "unchecked"
-                                }
-                                className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
-                              >
-                                {isSelected(tag) && (
-                                  <span className="flex items-center justify-center text-current transition-none">
-                                    <Check className="size-3.5" />
-                                  </span>
-                                )}
-                              </button>
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <div className="h-3 w-3 rounded-full flex-shrink-0 border bg-blue-100 border-blue-300"></div>
-                                <span className="text-sm truncate">
-                                  {tag.display}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
+                        {otherTags.map((tag) => (
+                          <DropdownMenuCheckboxItem
+                            key={tag.id}
+                            className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"
+                            checked={isSelected(tag)}
+                            closeOnClick={false}
+                            onCheckedChange={() => handleSelect(tag)}
+                          >
+                            {renderTagNameWithParent(tag)}
+                          </DropdownMenuCheckboxItem>
+                        ))}
                       </>
                     )}
-
-                  {isLoadingRoot && (
-                    <div className="px-2 py-4 text-sm text-gray-500 text-center">
-                      {t("loading")}
-                    </div>
-                  )}
-
-                  {!isLoadingRoot && !rootTags?.results?.length && (
-                    <div className="px-2 py-4 text-sm text-gray-500 text-center">
-                      {t("no_tags_group")}
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* Footer Navigation */}
-              <div className="bg-gray-200 h-px"></div>
-              <div className="flex justify-between items-center h-11">
+              <div className="h-px bg-gray-200"></div>
+              <div className="flex items-center justify-between h-11">
                 <div className="flex gap-1 my-3.5 mx-4">
-                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
+                  <div className="flex items-center px-1 bg-gray-100 border border-gray-300 rounded-md shadow-full">
                     <ArrowUp className="size-3" />
                   </div>
-                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
+                  <div className="flex items-center px-1 bg-gray-100 border border-gray-300 rounded-md shadow-full">
                     <ArrowDown className="size-3" />
                   </div>
-                  <span className="text-xs text-gray-700 self-center">
+                  <span className="self-center text-xs text-gray-700">
                     {t("navigate")}
                   </span>
                 </div>
                 <div className="flex gap-1 my-3.5 mx-4">
-                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
+                  <div className="flex items-center px-1 bg-gray-100 border border-gray-300 rounded-md shadow-full">
                     <Space className="size-3" />
                   </div>
-                  <span className="text-xs text-gray-700 self-center">
+                  <span className="self-center text-xs text-gray-700">
                     {t("to_select")}
                   </span>
                 </div>

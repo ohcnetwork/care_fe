@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { SquarePen } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -17,9 +17,9 @@ import accountApi from "@/types/billing/account/accountApi";
 
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { EmptyState } from "./empty-state";
+import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
-export const Account = () => {
+export const Account = ({ title }: { title?: string } = {}) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const {
@@ -86,9 +86,11 @@ export const Account = () => {
     account?.primary_encounter?.id === encounter.id;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">
-      <div className="flex justify-between items-center text-gray-950 pl-2">
-        <span className="font-semibold">{t("account")}:</span>
+    <div className="w-full rounded-xl border border-gray-200 bg-white">
+      <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
+        <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold uppercase tracking-wide text-gray-600">
+          {title ?? `${t("account")}:`}
+        </span>
         <AccountSheetButton
           encounter={encounter}
           trigger={
@@ -99,11 +101,14 @@ export const Account = () => {
         />
       </div>
 
-      <div className="bg-white rounded-md p-1 shadow">
+      <div className="p-3">
         {!account ? (
           <EmptyState message={t("no_account_found")} />
         ) : (
-          <Link href={`/facility/${facilityId}/billing/account/${account.id}`}>
+          <Link
+            to="/facility/$facilityId/billing/account/$accountId"
+            params={{ facilityId, accountId: account.id }}
+          >
             <div
               className={cn(
                 "flex flex-row bg-gray-100 rounded-md p-2 border border-gray-200 justify-between",
@@ -129,7 +134,7 @@ export const Account = () => {
           size="sm"
           onClick={handleSetPrimaryEncounter}
           disabled={isPending}
-          className="w-full text-xs text-muted-foreground font-medium"
+          className="mx-3 mb-3 w-[calc(100%-1.5rem)] text-xs text-muted-foreground font-medium shadow-none"
         >
           {t("assign_this_encounter")}
         </Button>

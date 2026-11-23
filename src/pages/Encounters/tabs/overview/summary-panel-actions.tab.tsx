@@ -1,12 +1,14 @@
 import { CheckIcon, NotebookPen } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { PLUGIN_Component } from "@/PluginEngine";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { Account } from "./summary-panel-details-tab/account";
 import { DepartmentsAndTeams } from "./summary-panel-details-tab/department-and-team";
 import { DischargeDetails } from "./summary-panel-details-tab/discharge-summary";
@@ -15,26 +17,38 @@ import { HospitalizationDetails } from "./summary-panel-details-tab/hospitalisat
 import { Locations } from "./summary-panel-details-tab/locations";
 import { ManageCareTeam } from "./summary-panel-details-tab/manage-care-team";
 
-export const SummaryPanelActionsTab = () => {
+interface SummaryPanelActionsTabProps {
+  title?: string;
+  embedded?: boolean;
+}
+
+export const SummaryPanelActionsTab = ({
+  title,
+  embedded = false,
+}: SummaryPanelActionsTabProps = {}) => {
   const { t } = useTranslation();
 
   const {
     actions: {
-      markAsCompleted,
       assignLocation,
       manageDepartments,
       manageCareTeam,
       dispense,
+      markAsCompleted,
     },
     selectedEncounter,
   } = useEncounter();
 
   const actions = [
-    {
-      label: t("manage_consents"),
-      onClick: () => navigate("consents"),
-      hideOnMobile: false,
-    },
+    ...(!embedded
+      ? [
+          {
+            label: t("manage_consents"),
+            onClick: () => navigate({ href: "consents" }),
+            hideOnMobile: false,
+          },
+        ]
+      : []),
     {
       label: t("manage_care_team"),
       onClick: manageCareTeam,
@@ -54,32 +68,53 @@ export const SummaryPanelActionsTab = () => {
       label: t("dispense"),
       onClick: dispense,
       hideOnMobile: false,
+      shortcut: <ShortcutBadge actionId="dispense" />,
     },
   ] as const satisfies {
     label: string;
     onClick: () => void;
     hideOnMobile: boolean;
+    shortcut?: React.ReactNode;
   }[];
 
   return (
-    <div className="flex flex-col gap-2 bg-gray-100 @sm:bg-white p-2 @sm:p-3 rounded-lg border border-gray-200 @sm:shadow @sm:overflow-x-auto">
-      <div className="flex pl-1 @xs:hidden">
-        <h6 className="text-gray-950 font-semibold">{t("actions")}</h6>
+    <section
+      aria-label={title ?? t("actions")}
+      className="flex min-w-0 flex-col gap-3 rounded-xl border border-gray-200 bg-white p-3"
+    >
+      <div
+        className={cn(
+          "-mx-3 -mt-3 flex border-b border-gray-200 px-3 py-3",
+          !embedded && "@xs:hidden",
+        )}
+      >
+        <h3 className="min-w-0 text-sm font-bold uppercase tracking-wide text-gray-600 [overflow-wrap:anywhere]">
+          {title ?? t("actions")}
+        </h3>
       </div>
       <div>
-        <div className="flex flex-col sm:@sm:flex-row gap-3 sm:@sm:gap-4">
+        <div
+          className={cn(
+            "flex min-w-0 flex-col gap-3",
+            !embedded && "sm:@sm:flex-row sm:@sm:gap-4",
+          )}
+        >
           {actions.map((action) => (
             <Button
               key={action.label}
               variant="outline"
               className={cn(
-                "justify-start sm:@sm:justify-center sm:@sm:flex-1",
-                action.hideOnMobile && "hidden xl:flex",
+                "h-auto min-h-9 justify-start whitespace-normal [overflow-wrap:anywhere]",
+                !embedded && "sm:@sm:justify-center sm:@sm:flex-1",
+                !embedded && action.hideOnMobile && "hidden xl:flex",
               )}
               onClick={action.onClick}
             >
               <NotebookPen />
               {action.label}
+              <span className="ml-auto">
+                {"shortcut" in action && action.shortcut}
+              </span>
             </Button>
           ))}
 
@@ -89,31 +124,46 @@ export const SummaryPanelActionsTab = () => {
               encounter={selectedEncounter}
               className={cn(
                 buttonVariants({ variant: "outline" }),
-                "justify-start sm:@sm:justify-center sm:@sm:flex-1 w-full",
+                "h-auto min-h-9 justify-start whitespace-normal w-full",
+                !embedded && "sm:@sm:justify-center sm:@sm:flex-1",
               )}
             />
           )}
         </div>
-        <div className="flex xl:hidden flex-col space-y-2 mt-3">
-          <Account />
-          <EncounterTags />
-          <Locations />
-          <ManageCareTeam />
-          <DepartmentsAndTeams />
-          <HospitalizationDetails />
-          <DischargeDetails />
-        </div>
-        <div className="sm:@sm:flex-1 flex flex-col gap-2 border-t border-gray-300 border-dashed sm:@sm:border-none pt-3 sm:@sm:pt-0 mt-3">
-          <Button
-            variant="outline_primary"
-            className="justify-start sm:@sm:justify-center"
-            onClick={markAsCompleted}
+        {!embedded && (
+          <div className="flex xl:hidden flex-col space-y-2 mt-3">
+            <Account />
+            <EncounterTags />
+            <Locations />
+            <ManageCareTeam />
+            <DepartmentsAndTeams />
+            <HospitalizationDetails />
+            <DischargeDetails />
+          </div>
+        )}
+        {selectedEncounter && (
+          <div
+            className={cn(
+              "flex flex-col gap-2 border-t border-gray-300 border-dashed pt-3 mt-3",
+              !embedded && "sm:@sm:flex-1 sm:@sm:border-none sm:@sm:pt-0",
+            )}
           >
-            <CheckIcon />
-            {t("mark_as_completed")}
-          </Button>
-        </div>
+            <Button
+              variant="outline_primary"
+              className={cn(
+                "h-auto min-h-9 justify-start whitespace-normal",
+                !embedded && "sm:@sm:justify-center",
+              )}
+              onClick={() => markAsCompleted()}
+            >
+              <CheckIcon />
+              {encounterRequiresDischarge(selectedEncounter)
+                ? t("mark_for_discharge")
+                : t("mark_as_completed")}
+            </Button>
+          </div>
+        )}
       </div>
-    </div>
+    </section>
   );
 };

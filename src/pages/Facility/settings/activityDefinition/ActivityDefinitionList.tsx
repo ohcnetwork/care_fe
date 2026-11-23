@@ -1,10 +1,10 @@
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
 import { ResourceCategoryList } from "@/components/Common/ResourceCategoryList";
-import { ActivityDefinitionList as ActivityDefinitionListComponent } from "@/pages/Facility/settings/activityDefinition/ActivityDefinitionListComponent";
+import { navigate } from "@/lib/router/navigate";
+import { ActivityDefinitionListContent } from "@/pages/Facility/settings/activityDefinition/ActivityDefinitionListComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { Status } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
@@ -22,15 +22,18 @@ export default function ActivityDefinitionList({
   const [allowCategoryCreate, setAllowCategoryCreate] = useState(false);
 
   const onNavigate = (slug: string) => {
-    navigate(
-      `/facility/${facilityId}/settings/activity_definitions/categories/${slug}`,
-    );
+    navigate({
+      to: "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug",
+      params: { facilityId, categorySlug: slug },
+    });
   };
 
   const onCreateItem = () => {
-    navigate(
-      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}/new`,
-    );
+    if (!categorySlug) return;
+    navigate({
+      to: "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug/new",
+      params: { facilityId, categorySlug },
+    });
   };
 
   return (
@@ -46,6 +49,7 @@ export default function ActivityDefinitionList({
         onCreateItem={onCreateItem}
         createItemLabel={t("add_activity_definition")}
         createItemIcon="l-plus"
+        emptyStateTitle={t("no_activity_definition_categories_found")}
         itemSearchConfig={{
           listItems: {
             queryFn: activityDefinitionApi.listActivityDefinition,
@@ -57,7 +61,7 @@ export default function ActivityDefinitionList({
         }}
       >
         {categorySlug && (
-          <ActivityDefinitionListComponent
+          <ActivityDefinitionListContent
             facilityId={facilityId}
             categorySlug={categorySlug}
             setAllowCategoryCreate={setAllowCategoryCreate}

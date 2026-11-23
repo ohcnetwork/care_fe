@@ -29,6 +29,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/ui/empty-state";
 
 import useFilters from "@/hooks/useFilters";
+import { chargeItemListSearch } from "@/lib/router/search/billing";
 
 import query from "@/Utils/request/query";
 import {
@@ -195,7 +196,7 @@ export interface BedChargeItemsTableProps {
   canAddChargeItems?: boolean;
 }
 
-export function BedChargeItemsTable({
+function BedChargeItemsTable({
   facilityId,
   account,
   canAddChargeItems = true,
@@ -208,8 +209,8 @@ export function BedChargeItemsTable({
     {},
   );
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: chargeItemListSearch,
     limit: 15,
-    disableCache: true,
   });
   const [addChargeItemState, setAddChargeItemState] = useState<{
     serviceRequestId: string;
@@ -244,12 +245,13 @@ export function BedChargeItemsTable({
     isLoading: boolean;
   };
 
+  const chargeItemResults = chargeItems?.results;
   const groupedChargeItems = useMemo(() => {
-    if (!chargeItems?.results?.length) {
+    if (!chargeItemResults?.length) {
       return {};
     }
-    return groupChargeItemsByLocation(chargeItems.results);
-  }, [chargeItems?.results]);
+    return groupChargeItemsByLocation(chargeItemResults);
+  }, [chargeItemResults]);
 
   const toggleItemExpand = (itemId: string) => {
     setExpandedItems((prev) => ({
@@ -314,7 +316,7 @@ export function BedChargeItemsTable({
               status: value === "all" ? undefined : value,
             });
           }}
-          className="max-sm:hidden"
+          className="max-lg:hidden"
         >
           <TabsList>
             <TabsTrigger value="all">{t("all")}</TabsTrigger>
@@ -334,7 +336,7 @@ export function BedChargeItemsTable({
             })
           }
         >
-          <SelectTrigger className="sm:hidden w-full">
+          <SelectTrigger className="lg:hidden w-full">
             <SelectValue placeholder={t("filter_by_status")} />
           </SelectTrigger>
           <SelectContent>
@@ -363,7 +365,7 @@ export function BedChargeItemsTable({
         />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
-          <Table className="rounded-lg border shadow-sm w-full bg-white">
+          <Table className="shadow-sm w-full bg-white">
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>

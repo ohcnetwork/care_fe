@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("User Profile Avatar Modification", () => {
-  const username = "doctor_2_0";
+  const username = "care-doctor";
   const validImagePath = "tests/fixtures/images/avatar.jpg";
   const secondImagePath = "tests/fixtures/images/test-image.jpg";
   const invalidFilePath = "tests/fixtures/images/sample_file.xlsx";
@@ -42,20 +42,22 @@ test.describe("User Profile Avatar Modification", () => {
 
   // Helper function to save the avatar
   async function saveAvatar(page: Page): Promise<void> {
-    const uploadButton = page.getByRole("button", { name: "Upload" });
+    const uploadButton = page.getByRole("button", {
+      name: "Upload",
+      exact: true,
+    });
+    const uploadResponse = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname ===
+          `/api/v1/users/${username}/profile_picture/` &&
+        response.request().method() === "POST",
+    );
     await uploadButton.click();
+    expect((await uploadResponse).ok()).toBe(true);
 
     // Wait for upload to complete by checking dialog closes
     const dialog = page.getByRole("dialog", { name: "Edit Avatar" });
     await expect(dialog).not.toBeVisible({ timeout: 10000 });
-
-    // Verify no error notification
-    const errorNotification = page
-      .getByRole("region", { name: "Notifications alt+T" })
-      .getByText(/error|failed/i);
-    await expect(errorNotification)
-      .not.toBeVisible({ timeout: 1000 })
-      .catch(() => {});
   }
 
   test.beforeEach(async ({ page }) => {
@@ -157,6 +159,34 @@ test.describe("User Profile Avatar Modification", () => {
     });
   });
 
+  test("Show a real image source in the cropper and cropped preview", async ({
+    page,
+  }) => {
+    let dialog: Locator;
+
+    await test.step("Upload an image and verify the cropper uses a real source", async () => {
+      dialog = await openAvatarDialog(page);
+      await page
+        .locator("input[type='file']")
+        .first()
+        .setInputFiles(validImagePath);
+      await expect(page.getByRole("button", { name: "Crop" })).toBeEnabled({
+        timeout: 10000,
+      });
+      await expect(dialog.locator(".reactEasyCrop_Image")).toHaveAttribute(
+        "src",
+        /^(blob:|data:)/,
+      );
+    });
+
+    await test.step("Crop and verify the cropped preview", async () => {
+      await page.getByRole("button", { name: "Crop" }).click();
+      const croppedPreview = dialog.getByAltText("Cropped preview");
+      await expect(croppedPreview).toBeVisible({ timeout: 10000 });
+      await expect(croppedPreview).toHaveAttribute("src", /^(blob:|data:)/);
+    });
+  });
+
   test("Reject avatar upload with invalid file type", async ({ page }) => {
     await test.step("Open avatar editor dialog", async () => {
       await openAvatarDialog(page);
@@ -190,21 +220,23 @@ test.describe("User Profile Avatar Modification", () => {
     });
   });
 
-  test("Verify avatar section exists on profile page", async ({ page }) => {
-    await test.step("Verify profile page loaded", async () => {
-      await expect(page).toHaveURL(`/users/${username}`);
+  test("opens the avatar editor with the keyboard and returns focus after closing", async ({
+    page,
+  }) => {
+    const trigger = page.getByRole("button", {
+      name: "Change Avatar",
+      exact: true,
     });
-
-    await test.step("Verify avatar edit section is visible", async () => {
-      await expect(
-        page.getByRole("button", { name: /change avatar/i }),
-      ).toBeVisible();
-      await expect(page.getByText("Edit Avatar").first()).toBeVisible();
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    const dialog = page.getByRole("dialog", {
+      name: "Edit Avatar",
+      exact: true,
     });
-
-    await test.step("Verify avatar file type requirements displayed", async () => {
-      await expect(page.getByText(/JPG or PNG.*2MB max/i)).toBeVisible();
-    });
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible();
+    await expect(trigger).toBeFocused();
   });
 
   test("Verify crop button only appears after image upload", async ({

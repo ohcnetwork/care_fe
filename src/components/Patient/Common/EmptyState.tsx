@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function EmptyState({
+export default function PatientClinicalEmptyState({
   title,
   description,
 }: {

@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,11 +18,13 @@ import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { EmptyState } from "@/components/ui/empty-state";
 
 import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
-import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
+import { formatFrequency } from "@/components/Medicine/utils";
 
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
   MEDICATION_DISPENSE_STATUS_COLORS,
@@ -172,7 +173,9 @@ export function DispenseHistory({
                   <TableCell className="text-gray-950">
                     <DosageInstructionList
                       instructions={instructions}
-                      renderItem={(di) => formatDosage(di) || "-"}
+                      renderItem={(di) => (
+                        <FormattedDosage instruction={di} fallback="-" />
+                      )}
                     />
                   </TableCell>
                   <TableCell className="text-gray-950">
@@ -213,11 +216,11 @@ export function DispenseHistory({
                         asChild
                         hidden={!facilityId}
                       >
-                        <Link
+                        <HrefLink
                           href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}/?status=${medication.status}&payment_status=${medication.charge_item?.paid_invoice?.status === InvoiceStatus.balanced ? "paid" : "unpaid"}` : ""}`}
                         >
                           {t("dispense")}
-                        </Link>
+                        </HrefLink>
                       </Button>
                     )}
                   </TableCell>

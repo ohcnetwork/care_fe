@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
 import { createContext, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -12,8 +11,11 @@ import { getPermissions, Permissions } from "@/common/Permissions";
 
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { encounterShowSearch } from "@/lib/router/search/encounter";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
-import { useEncounterProgressController } from "@/pages/Encounters/utils/utils";
+import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
 import {
   completedEncounterStatus,
   EncounterRead,
@@ -45,18 +47,16 @@ type EncounterContextType = {
   canReadPrimaryEncounter: boolean;
   canReadSelectedEncounter: boolean;
   canReadClinicalData: boolean;
+  canReadPatientHistory: boolean;
 
   canWritePrimaryEncounter: boolean;
   canWriteSelectedEncounter: boolean;
   canRestartSelectedEncounter: boolean;
   canWriteClinicalData: boolean;
 
-  isEndEncounterPending: boolean;
-
   actions: {
-    markAsCompleted: () => void;
-    endEncounter: (encounter: EncounterRead, closeEncounter: boolean) => void;
     assignLocation: () => void;
+    markAsCompleted: (completeEverything?: boolean) => void;
     viewLocationHistory: () => void;
     manageCareTeam: () => void;
     manageDepartments: () => void;
@@ -95,7 +95,7 @@ export function EncounterProvider({
   const [
     { selectedEncounter: selectedEncounterId = primaryEncounterId },
     setQParams,
-  ] = useQueryParams();
+  ] = useQueryParams(encounterShowSearch);
 
   const { data: patient, isLoading: isPatientLoading } = useQuery({
     queryKey: ["patient", patientId, facilityId],
@@ -190,12 +190,7 @@ export function EncounterProvider({
   const [activeAction, setActiveAction] = useState<EncounterAction | null>(
     null,
   );
-
-  const { endEncounter, isPending: isEndEncounterPending } =
-    useEncounterProgressController();
-  const toDischarge =
-    selectedEncounter?.encounter_class === "imp" &&
-    selectedEncounter?.status !== "discharged";
+  const [completeEverything, setCompleteEverything] = useState(false);
 
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -211,9 +206,15 @@ export function EncounterProvider({
         queryKey: ["encounter", selectedEncounter?.id],
       });
       if (selectedEncounter) {
-        navigate(
-          `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/updates`,
-        );
+        navigate({
+          to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
+          params: {
+            facilityId: selectedEncounter.facility.id,
+            patientId: selectedEncounter.patient.id,
+            encounterId: selectedEncounter.id,
+            tab: "updates",
+          },
+        });
       }
     },
     onError: () => {
@@ -244,19 +245,30 @@ export function EncounterProvider({
         canReadPrimaryEncounter,
         canWritePrimaryEncounter,
         canReadClinicalData,
+        canReadPatientHistory: patientPermissions.canViewClinicalData,
         canWriteClinicalData,
-        isEndEncounterPending,
         actions: {
-          markAsCompleted: () => {
-            if (toDischarge) {
-              navigate(
-                `/facility/${selectedEncounter?.facility.id}/patient/${selectedEncounter?.patient.id}/encounter/${selectedEncounter?.id}/questionnaire/encounter?toDischarge=true`,
-              );
+          markAsCompleted: (completeEverythingToMark = false) => {
+            if (!selectedEncounter) {
+              toast.error(t("encounter_not_found"));
               return;
             }
+            if (encounterRequiresDischarge(selectedEncounter)) {
+              navigate({
+                to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId",
+                params: {
+                  facilityId: selectedEncounter.facility.id,
+                  patientId: selectedEncounter.patient.id,
+                  encounterId: selectedEncounter.id,
+                  questionnaireId: "encounter",
+                },
+                search: { toDischarge: "true" },
+              });
+              return;
+            }
+            setCompleteEverything(completeEverythingToMark);
             setActiveAction(EncounterAction.MarkAsCompleted);
           },
-          endEncounter,
           assignLocation: () => {
             setActiveAction(EncounterAction.AssignLocation);
           },
@@ -283,56 +295,55 @@ export function EncounterProvider({
     >
       {children}
 
-      <MarkEncounterAsCompletedDialog
-        open={activeAction === EncounterAction.MarkAsCompleted}
-        onOpenChange={(open) => {
-          setActiveAction(open ? EncounterAction.MarkAsCompleted : null);
-        }}
-      />
-
       {selectedEncounter && (
-        <LocationSheet
-          open={
-            activeAction === EncounterAction.AssignLocation ||
-            activeAction === EncounterAction.LocationHistory
-          }
-          onOpenChange={(open) => {
-            setActiveAction(open ? EncounterAction.AssignLocation : null);
-          }}
-          facilityId={selectedEncounter.facility.id}
-          history={selectedEncounter.location_history}
-          encounter={selectedEncounter}
-          defaultTab={
-            activeAction === EncounterAction.LocationHistory
-              ? "history"
-              : "assign"
-          }
-        />
-      )}
-
-      {selectedEncounter && (
-        <CareTeamSheet
-          open={activeAction === EncounterAction.ManageCareTeam}
-          setOpen={(open) => {
-            setActiveAction(open ? EncounterAction.ManageCareTeam : null);
-          }}
-          encounter={selectedEncounter}
-          canWrite={canWriteSelectedEncounter}
-        />
-      )}
-
-      {selectedEncounter && (
-        <LinkDepartmentsSheet
-          entityType="encounter"
-          entityId={selectedEncounter.id}
-          currentOrganizations={selectedEncounter.organizations}
-          facilityId={selectedEncounter.facility.id}
-          open={activeAction === EncounterAction.ManageDepartments}
-          setOpen={(open) => {
-            setActiveAction(open ? EncounterAction.ManageDepartments : null);
-          }}
-          trigger={<span />}
-        />
+        <>
+          <MarkEncounterAsCompletedDialog
+            open={activeAction === EncounterAction.MarkAsCompleted}
+            onOpenChange={(open) => {
+              setActiveAction(open ? EncounterAction.MarkAsCompleted : null);
+              if (!open) setCompleteEverything(false);
+            }}
+            encounter={selectedEncounter}
+            completeEverythingToMark={completeEverything}
+          />
+          <LocationSheet
+            readOnly={!canWriteSelectedEncounter}
+            open={
+              activeAction === EncounterAction.AssignLocation ||
+              activeAction === EncounterAction.LocationHistory
+            }
+            onOpenChange={(open) => {
+              setActiveAction(open ? EncounterAction.AssignLocation : null);
+            }}
+            facilityId={selectedEncounter.facility.id}
+            history={selectedEncounter.location_history}
+            encounter={selectedEncounter}
+            defaultTab={
+              activeAction === EncounterAction.LocationHistory
+                ? "history"
+                : "assign"
+            }
+          />
+          <CareTeamSheet
+            open={activeAction === EncounterAction.ManageCareTeam}
+            setOpen={(open) => {
+              setActiveAction(open ? EncounterAction.ManageCareTeam : null);
+            }}
+            encounter={selectedEncounter}
+            canWrite={canWriteSelectedEncounter}
+          />
+          <LinkDepartmentsSheet
+            entityType="encounter"
+            entityId={selectedEncounter.id}
+            currentOrganizations={selectedEncounter.organizations}
+            facilityId={selectedEncounter.facility.id}
+            open={activeAction === EncounterAction.ManageDepartments}
+            setOpen={(open) => {
+              setActiveAction(open ? EncounterAction.ManageDepartments : null);
+            }}
+            trigger={<span />}
+          />
+        </>
       )}
 
       {facilityId && (
@@ -354,4 +365,9 @@ export function useEncounter() {
     throw new Error("useEncounter must be used within an EncounterProvider");
   }
   return context;
+}
+
+/** Encounter context when rendered inside an EncounterProvider, otherwise undefined. */
+export function useEncounterSilently() {
+  return useContext(encounterContext);
 }

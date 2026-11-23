@@ -1,4 +1,3 @@
-import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
@@ -6,17 +5,19 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   CopyPlus,
+  CircleMinus as MinusCircledIcon,
   MoreVerticalIcon,
   Pipette,
   PlusIcon,
   SlidersHorizontal,
   Trash2,
 } from "lucide-react";
-import { useQueryParams } from "raviger";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { useQueryParams } from "@/lib/router/queryParams";
+import { questionnaireFillSearch } from "@/lib/router/search/questionnaire";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -70,14 +71,14 @@ import useAuthUser from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { formatDosage } from "@/components/Medicine/utils";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import {
   buildTimingForTextDosage,
   displayMedicationName,
   DoseRange,
-  formatDurationLabel,
+  getTimingBounds,
   INACTIVE_MEDICATION_STATUSES,
   MEDICATION_REQUEST_INTENT,
   MedicationRequestCreate,
@@ -87,6 +88,8 @@ import {
   MedicationRequestTemplateSpec,
   parseMedicationStringToRequest,
   sumManSlots,
+  timingBoundsToRepeat,
+  validateTimingBounds,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
@@ -114,7 +117,6 @@ import { formatName } from "@/Utils/utils";
 
 import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
 import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Question } from "@/types/questionnaire/question";
 
@@ -147,6 +149,7 @@ export function buildMedicationForTemplate(
   // Remove internal objects that shouldn't be stored in templates
   delete medicationForTemplate.requested_product_internal;
   delete medicationForTemplate.id;
+  delete medicationForTemplate.dispense_status;
 
   return medicationForTemplate;
 }
@@ -189,6 +192,7 @@ async function fetchProductAndBuildMedication(
   return {
     ...med,
     id: undefined,
+    dispense_status: undefined,
     do_not_perform: med.do_not_perform ?? false,
     dosage_instruction: med.dosage_instruction ?? [
       { as_needed_boolean: false },
@@ -209,6 +213,7 @@ interface MedicationRequestQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   encounterId: string;
   errors?: QuestionValidationError[];
@@ -247,10 +252,14 @@ const MEDICATION_REQUEST_FIELDS = {
     validate: (value: unknown) => {
       const dosageInstruction =
         value as MedicationRequestCreate["dosage_instruction"][0];
+      // A real frequency carries an explicit FHIR timing code, an as-needed
+      // flag, or a free-text M-A-N pattern. A bare `timing` is not enough:
+      // setting a duration alone auto-creates a `frequency:1` repeat with no
+      // code/text, which must not satisfy the frequency requirement.
       return !!(
-        dosageInstruction?.timing ||
         dosageInstruction?.as_needed_boolean ||
-        dosageInstruction?.text
+        dosageInstruction?.text ||
+        dosageInstruction?.timing?.code
       );
     },
   },
@@ -260,11 +269,12 @@ const MEDICATION_REQUEST_FIELDS = {
     validate: (value: unknown) => {
       const dosageInstruction =
         value as MedicationRequestCreate["dosage_instruction"][0];
-      if (dosageInstruction?.timing) {
-        const duration = dosageInstruction.timing.repeat.bounds_duration;
-        return !!(duration?.value && duration?.unit);
-      }
-      return true;
+      const bounds = getTimingBounds(dosageInstruction?.timing?.repeat);
+      // Duration is optional — only validate the contents of a bound that was
+      // actually set (range low <= high, period start <= end, etc.).
+      if (!bounds) return true;
+      const error = validateTimingBounds(bounds);
+      return error ? t(error) : true;
     },
   },
 } as const;
@@ -319,10 +329,13 @@ export function validateMedicationRequestQuestion(
           index,
         );
 
-        return fieldErrors.map((error) => ({
-          ...error,
-          error: t("field_required"),
-        }));
+        return fieldErrors.map((error) =>
+          // Duration carries a specific "why it's invalid" message; the
+          // required dose/frequency fields read as a plain required error.
+          error.field_key?.endsWith(".duration")
+            ? error
+            : { ...error, error: t("field_required") },
+        );
       },
     );
 
@@ -333,22 +346,22 @@ export function validateMedicationRequestQuestion(
 export function MedicationRequestQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   patientId,
   encounterId,
   errors,
   questionnaireId: _questionnaireId,
   questionnaireSlug,
-  question,
 }: MedicationRequestQuestionProps) {
   const authUser = useAuthUser();
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
   const currentUser = useAuthUser() as UserReadMinimal;
   const isPreview = patientId === "preview";
-  const [{ prescription: prescriptionId }] = useQueryParams<{
-    prescription?: string;
-  }>();
+  const [{ prescription: prescriptionId }] = useQueryParams(
+    questionnaireFillSearch,
+  );
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequestCreate[]) ||
     [];
@@ -376,9 +389,15 @@ export function MedicationRequestQuestion({
     enabled: !isPreview && !!prescriptionId,
   });
 
-  useEffect(() => {
-    if (prescriptionId && patientMedications?.results) {
-      updateQuestionnaireResponseCB(
+  // Reconcile fresh server data without reinitializing on clinician edits.
+  const initializeResponse = useEffectEvent(() => {
+    if (
+      prescriptionId &&
+      patientMedications?.results &&
+      (initializeQuestionnaireResponseCB ||
+        questionnaireResponse.values.length === 0)
+    ) {
+      (initializeQuestionnaireResponseCB ?? updateQuestionnaireResponseCB)(
         [
           {
             type: "medication_request",
@@ -394,6 +413,10 @@ export function MedicationRequestQuestion({
         questionnaireResponse.question_id,
       );
     }
+  });
+
+  useEffect(() => {
+    initializeResponse();
   }, [patientMedications, prescriptionId]);
 
   const [expandedMedicationIndex, setExpandedMedicationIndex] = useState<
@@ -635,6 +658,7 @@ export function MedicationRequestQuestion({
       ...medications,
       {
         ...medication,
+        dispense_status: undefined,
         dirty: true, // Mark new medication as dirty
         create_prescription: {
           status: PrescriptionStatus.active,
@@ -673,6 +697,7 @@ export function MedicationRequestQuestion({
 
         return {
           ...request,
+          dispense_status: undefined,
           requested_product: requested_product?.id,
           requested_product_internal: requested_product,
           requester: currentUser,
@@ -690,6 +715,7 @@ export function MedicationRequestQuestion({
           ...parseMedicationStringToRequest(currentUser, statement.medication),
           authored_on: new Date().toISOString(),
           note: statement.note,
+          dispense_status: undefined,
           requester: currentUser,
           dirty: true, // Mark as dirty since it's being added as new
           create_prescription: {
@@ -787,6 +813,7 @@ export function MedicationRequestQuestion({
       ...medications,
       {
         ...medicationToAdd,
+        dispense_status: undefined,
         create_prescription: {
           status: PrescriptionStatus.active,
           alternate_identifier: "",
@@ -824,6 +851,7 @@ export function MedicationRequestQuestion({
         ...medications,
         ...medicationsWithProductKnowledge.map((med) => ({
           ...med,
+          dispense_status: undefined,
           create_prescription: {
             status: PrescriptionStatus.active,
             alternate_identifier: "",
@@ -881,12 +909,7 @@ export function MedicationRequestQuestion({
   });
 
   return (
-    <div
-      className={cn(
-        "space-y-4",
-        medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
-      )}
-    >
+    <div className="min-w-0 w-full space-y-4">
       <ConfirmActionDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -898,9 +921,7 @@ export function MedicationRequestQuestion({
         confirmText={t("remove")}
         variant="destructive"
       />
-      <div className="flex justify-between items-center flex-wrap">
-        <QuestionLabel question={question} />
-
+      <div className="flex flex-wrap items-center justify-end">
         {/* Add to Template Dialog */}
         <AddToTemplateDialog
           open={!!medicationToAddToTemplate}
@@ -946,7 +967,10 @@ export function MedicationRequestQuestion({
                     {
                       key: "",
                       label: t("medicine"),
-                      render: (med) => displayMedicationName(med),
+                      render: (med) =>
+                        "dosage_instruction" in med
+                          ? displayMedicationName(med)
+                          : med.medication?.display || "",
                     },
                     {
                       key: "dosage_instruction",
@@ -956,9 +980,16 @@ export function MedicationRequestQuestion({
                           <DosageInstructionList
                             instructions={instructions}
                             renderItem={(di) => {
-                              const dosage = formatDosage(di) || "";
                               const freq = formatFrequency(di) || "";
-                              return [dosage, freq].filter(Boolean).join("\n");
+                              return (
+                                <div className="flex flex-col">
+                                  <FormattedDosage
+                                    instruction={di}
+                                    fallback=""
+                                  />
+                                  {freq && <span>{freq}</span>}
+                                </div>
+                              );
                             }}
                             gap="sm"
                           />
@@ -1101,6 +1132,7 @@ export function MedicationRequestQuestion({
               buttonLabel={t("medication_history")}
               onAddSelected={handleAddHistoricalMedications}
               disableAPI={isPreview}
+              disabled={disabled}
             />
             {questionnaireSlug && (
               <ManageResponseTemplatesSheet
@@ -1133,7 +1165,10 @@ export function MedicationRequestQuestion({
             <div
               className={cn(
                 "relative lg:border border-gray-200 rounded-md",
-                showAdvancedFields ? "max-w-[2678px]" : "max-w-[1108px]",
+                // Must equal the sum of the grid-column tracks below so the
+                // table can expand to its full content width. Keep in sync when
+                // a column width changes (e.g. the duration column at index 3).
+                showAdvancedFields ? "max-w-[2718px]" : "max-w-[1148px]",
                 {
                   "bg-gray-50/50": !desktopLayout,
                 },
@@ -1144,8 +1179,8 @@ export function MedicationRequestQuestion({
                 className={cn(
                   "hidden lg:grid bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500",
                   showAdvancedFields
-                    ? "grid-cols-[280px_220px_180px_160px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
-                    : "grid-cols-[280px_220px_180px_160px_40px_180px_48px]",
+                    ? "grid-cols-[280px_220px_180px_200px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
+                    : "grid-cols-[280px_220px_180px_200px_40px_180px_48px]",
                 )}
               >
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
@@ -1163,12 +1198,17 @@ export function MedicationRequestQuestion({
                   {t("duration")}
                 </div>
                 {/* Expand/Collapse bar for advanced fields */}
-                <div
+                <Button
+                  type="button"
+                  variant="ghost"
                   className={cn(
-                    "flex items-center justify-center border-r border-gray-200 cursor-pointer transition-colors",
-                    showAdvancedFields
-                      ? "bg-primary-50 hover:bg-primary-100"
-                      : "bg-gray-100 hover:bg-gray-200",
+                    "h-full rounded-none px-0",
+                    cn(
+                      "flex items-center justify-center border-r border-gray-200 cursor-pointer transition-colors",
+                      showAdvancedFields
+                        ? "bg-primary-50 hover:bg-primary-100"
+                        : "bg-gray-100 hover:bg-gray-200",
+                    ),
                   )}
                   onClick={() => setShowAdvancedFields(!showAdvancedFields)}
                   title={
@@ -1182,7 +1222,7 @@ export function MedicationRequestQuestion({
                   ) : (
                     <ChevronsUpDown className="h-4 w-4 text-gray-500 rotate-90" />
                   )}
-                </div>
+                </Button>
                 {/* Advanced fields - inserted between bar and notes when expanded */}
                 {showAdvancedFields && (
                   <>
@@ -1330,9 +1370,8 @@ export function MedicationRequestQuestion({
 
                                               {freq && ` · ${freq}`}
 
-                                              {di?.timing?.repeat
-                                                ?.bounds_duration?.value &&
-                                                ` · ${formatDurationLabel(di.timing.repeat.bounds_duration)}`}
+                                              {formatDuration(di) &&
+                                                ` · ${formatDuration(di)}`}
                                             </div>
                                           );
                                         },
@@ -1426,7 +1465,7 @@ export function MedicationRequestQuestion({
             </EntitySelectionDrawer>
           </>
         ) : (
-          <div className="max-w-4xl flex gap-1">
+          <div className="flex min-w-0 w-full gap-1">
             <MedicationValueSetSelect
               placeholder={addMedicationPlaceholder}
               onSelect={handleAddMedication}
@@ -1439,7 +1478,7 @@ export function MedicationRequestQuestion({
 
       {/* Prescription Note Field - show when editing, or when creating with at least one medication */}
       {(prescriptionId || medications.length > 0) && (
-        <div className="max-w-4xl space-y-2">
+        <div className="w-full space-y-2">
           <Label htmlFor="prescription-note">{t("note")}</Label>
           {prescriptionId ? (
             <div className="p-3 bg-gray-50 border border-gray-200 rounded-md min-h-[80px] text-sm text-gray-700 whitespace-pre-wrap">
@@ -1669,8 +1708,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       className={cn(
         "grid grid-cols-1 border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
         showAdvancedFields
-          ? "lg:grid-cols-[280px_220px_180px_160px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
-          : "lg:grid-cols-[280px_220px_180px_160px_40px_180px_48px]",
+          ? "lg:grid-cols-[280px_220px_180px_200px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
+          : "lg:grid-cols-[280px_220px_180px_200px_40px_180px_48px]",
         {
           "opacity-40 pointer-events-none": disabled,
         },
@@ -1678,7 +1717,12 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     >
       {/* Medicine Name */}
       {desktopLayout && (
-        <div className="lg:p-4 lg:px-2 lg:py-1 flex flex-col justify-between lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
+        <div
+          className={cn(
+            "lg:p-4 lg:px-2 lg:py-1 flex flex-col lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm",
+            isReadOnly ? "justify-center" : "justify-between",
+          )}
+        >
           <span
             className={cn(
               "wrap-break-word line-clamp-2 hidden lg:block",
@@ -1690,13 +1734,15 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             {displayMedicationName(medication)}
           </span>
           {!isReadOnly && (
-            <button
+            <Button
+              variant="ghost"
               type="button"
-              className="text-[10px] text-gray-400 hover:text-primary-600 transition-colors self-end mt-0.5"
+              className="h-auto w-auto p-1 text-[10px] text-gray-400 hover:text-primary-600 transition-colors self-end mt-0.5"
               onClick={handleAddDosageInstruction}
+              aria-label={t("add_dosage_step")}
             >
               <PlusIcon className="size-3" />
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -1722,9 +1768,10 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                       value={formatDoseRange(di.dose_and_rate.dose_range)}
                       onClick={() => setShowDosageDialog(dIdx)}
                       className={cn(
-                        "h-9 text-sm cursor-pointer",
+                        "text-sm cursor-pointer",
                         hasError(fieldKey) && "border-red-500",
                       )}
+                      disabled={disabled || isReadOnly}
                     />
                   ) : (
                     <>
@@ -1760,24 +1807,28 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 </div>
                 <div className="flex items-center">
                   <div className="flex items-end">
-                    <button
+                    <Button
+                      variant="ghost"
                       type="button"
-                      className="size-3 rounded-full hover:bg-transparent text-gray-500"
+                      className="h-auto p-0 size-3 rounded-full hover:bg-transparent text-gray-500"
                       onClick={() => handleDoseRangeClick(dIdx)}
+                      aria-label={t("configure_dose_range")}
                       disabled={disabled || isReadOnly}
                     >
                       <Pipette className="size-3" />
-                    </button>
+                    </Button>
                   </div>
                   {isMultiple && !isReadOnly && (
-                    <button
+                    <Button
+                      variant="ghost"
                       type="button"
-                      className="shrink-0 text-gray-500 hover:text-red-500 transition-colors ml-1"
+                      className="h-auto w-auto p-1 shrink-0 text-gray-500 hover:text-red-500 transition-colors ml-1"
                       onClick={() => handleRemoveDosageInstruction(dIdx)}
+                      aria-label={t("remove_dosage_step")}
                       title={t("remove_dosage_step")}
                     >
                       <Trash2 className="size-3" />
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -1869,50 +1920,46 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 <div className="border-t border-dashed border-gray-300 my-1" />
               )}
               <DurationInput
-                value={di?.timing?.repeat?.bounds_duration}
-                onChange={(duration) => {
-                  if (!duration) {
-                    if (di?.timing) {
-                      handleUpdateDosageInstruction(dIdx, {
-                        timing: {
-                          ...di.timing,
-                          repeat: {
-                            ...di.timing.repeat,
-                            bounds_duration: { value: "0", unit: "d" },
-                          },
-                        },
-                      });
-                    }
-                    return;
-                  }
-
+                value={getTimingBounds(di?.timing?.repeat)}
+                onChange={(bounds) => {
                   if (di?.timing) {
                     handleUpdateDosageInstruction(dIdx, {
                       timing: {
                         ...di.timing,
                         repeat: {
                           ...di.timing.repeat,
-                          bounds_duration: duration,
+                          ...timingBoundsToRepeat(bounds),
+                        },
+                      },
+                    });
+                  } else if (di?.text && sumManSlots(di.text) !== null) {
+                    // Text M-A-N dosage: keep the frequency derived from the
+                    // pattern (e.g. 1-0-1) for every bound type, then apply the
+                    // chosen duration / range / period.
+                    const base = buildTimingForTextDosage(di.text, {
+                      value: "0",
+                      unit: "d",
+                    });
+                    handleUpdateDosageInstruction(dIdx, {
+                      timing: {
+                        ...base,
+                        repeat: {
+                          ...base.repeat,
+                          ...timingBoundsToRepeat(bounds),
                         },
                       },
                     });
                   } else {
-                    if (di?.text && sumManSlots(di.text) !== null) {
-                      handleUpdateDosageInstruction(dIdx, {
-                        timing: buildTimingForTextDosage(di.text, duration),
-                      });
-                    } else {
-                      handleUpdateDosageInstruction(dIdx, {
-                        timing: {
-                          repeat: {
-                            frequency: 1,
-                            period: "1",
-                            period_unit: "d",
-                            bounds_duration: duration,
-                          },
+                    handleUpdateDosageInstruction(dIdx, {
+                      timing: {
+                        repeat: {
+                          frequency: 1,
+                          period: "1",
+                          period_unit: "d",
+                          ...timingBoundsToRepeat(bounds),
                         },
-                      });
-                    }
+                      },
+                    });
                   }
                 }}
                 disabled={disabled || di?.as_needed_boolean || isReadOnly}
@@ -1930,12 +1977,17 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       </div>
       {/* Clickable expand/collapse bar column - Desktop only */}
       {desktopLayout && (
-        <div
+        <Button
+          type="button"
+          variant="ghost"
           className={cn(
-            "lg:border-r border-gray-200 cursor-pointer transition-colors flex items-center justify-center",
-            showAdvancedFields
-              ? "bg-primary-50 hover:bg-primary-100"
-              : "bg-gray-100 hover:bg-gray-200",
+            "h-full rounded-none px-0",
+            cn(
+              "lg:border-r border-gray-200 cursor-pointer transition-colors flex items-center justify-center",
+              showAdvancedFields
+                ? "bg-primary-50 hover:bg-primary-100"
+                : "bg-gray-100 hover:bg-gray-200",
+            ),
           )}
           onClick={onToggleAdvanced}
           title={
@@ -1949,7 +2001,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           ) : (
             <ChevronsUpDown className="h-4 w-4 text-gray-500 rotate-90" />
           )}
-        </div>
+        </Button>
       )}
       {/* Advanced Fields - Desktop: inserted between bar and notes when expanded */}
       {showAdvancedFields && desktopLayout && (
@@ -2130,7 +2182,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onChange={(e) => onUpdate?.({ note: e.target.value })}
           placeholder={t("additional_notes")}
           disabled={disabled}
-          className="h-9 text-base sm:text-sm"
+          className="text-base sm:text-sm"
         />
       </div>
 
@@ -2144,7 +2196,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"
-                size="sm"
                 className="w-full justify-between text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               >
                 <span className="flex items-center gap-2">
@@ -2265,7 +2316,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                   }
                   disabled={disabled || isReadOnly}
                 >
-                  <SelectTrigger className="h-9 text-sm capitalize">
+                  <SelectTrigger className="text-sm capitalize">
                     <SelectValue
                       className="capitalize"
                       placeholder={t("select_intent")}
@@ -2373,6 +2424,3 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     </div>
   );
 };
-
-// Re-export reverseFrequencyOption from MedicationTimingSelect for backwards compatibility
-export { reverseFrequencyOption } from "@/components/Medicine/MedicationTimingSelect";

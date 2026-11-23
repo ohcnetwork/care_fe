@@ -23,7 +23,7 @@ export interface ProductBase {
   batch?: ProductBatch;
   expiration_date?: string;
   standard_pack_size?: number;
-  purchase_price?: number;
+  purchase_price?: string;
 }
 
 export interface ProductCreate extends Omit<ProductBase, "id"> {
@@ -41,4 +41,5 @@ export interface ProductUpdate extends ProductBase {
 export interface ProductRead extends ProductBase {
   product_knowledge: ProductKnowledgeBase;
   charge_item_definition?: ChargeItemDefinitionBase;
+  extensions?: Record<string, unknown>;
 }

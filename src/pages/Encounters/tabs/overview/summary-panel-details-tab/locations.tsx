@@ -8,9 +8,13 @@ import { LocationTree } from "@/components/Location/LocationTree";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
-import { EmptyState } from "./empty-state";
+import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
-export const Locations = () => {
+interface LocationsProps {
+  title?: string;
+}
+
+export const Locations = ({ title }: LocationsProps = {}) => {
   const { t } = useTranslation();
   const {
     selectedEncounter: encounter,
@@ -21,27 +25,43 @@ export const Locations = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">
-      <div className="flex justify-between items-center text-black pl-2">
-        <span className=" font-semibold">{t("location")}</span>
-        <div className="flex">
-          <Button variant="ghost" size="sm" onClick={viewLocationHistory}>
+    <section
+      aria-label={title ?? t("location")}
+      className="min-w-0 w-full rounded-xl border border-gray-200 bg-white"
+    >
+      <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
+        <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold uppercase tracking-wide text-gray-600">
+          {title ?? t("location")}
+        </span>
+        <div className="flex shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={viewLocationHistory}
+            aria-label={t("view_history")}
+          >
             <HistoryIcon className="cursor-pointer" strokeWidth={1.5} />
           </Button>
           {canWriteSelectedEncounter && (
-            <Button variant="ghost" size="sm" onClick={assignLocation}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={assignLocation}
+              data-shortcut-id="assign-location"
+              aria-label={t("update_location")}
+            >
               <SquarePen className="cursor-pointer" strokeWidth={1.5} />
             </Button>
           )}
         </div>
       </div>
-      <div className="bg-white rounded-md p-2 shadow">
+      <div className="min-w-0 overflow-x-auto p-3 [overflow-wrap:anywhere] [&_[data-slot=badge]]:whitespace-normal">
         {encounter.current_location ? (
           <LocationTree location={encounter.current_location} />
         ) : (
           <EmptyState message={t("no_location_associated")} />
         )}
       </div>
-    </div>
+    </section>
   );
 };

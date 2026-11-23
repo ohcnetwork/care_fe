@@ -84,7 +84,7 @@ interface EditInvoiceTableProps {
 
 // Schema for a single price component
 const priceComponentSchema = z.object({
-  monetary_component_type: z.nativeEnum(MonetaryComponentType),
+  monetary_component_type: z.enum(MonetaryComponentType),
   code: z
     .object({
       code: z.string(),
@@ -110,17 +110,9 @@ const formSchema = z.object({
     z.object({
       id: z.string(),
       title: z.string(),
-      status: z.nativeEnum(ChargeItemStatus),
-      description: z
-        .string()
-        .optional()
-        .nullable()
-        .transform((val) => (val === "" ? null : val)),
-      note: z
-        .string()
-        .optional()
-        .nullable()
-        .transform((val) => (val === "" ? null : val)),
+      status: z.enum(ChargeItemStatus),
+      description: z.string().optional().nullable(),
+      note: z.string().optional().nullable(),
       ...chargeItemBaseSchema.shape,
     }),
   ),
@@ -444,7 +436,7 @@ export function EditInvoiceTable({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <Table className="border">
+          <Table>
             <TableHeader>
               <TableRow className="divide-x font-semibold">
                 <TableHead className="w-12">#</TableHead>
@@ -806,7 +798,7 @@ export function EditInvoiceTable({
                                                       );
                                                     }}
                                                     disabled={isDisabled}
-                                                    className="data-[state=unchecked]:bg-gray-900"
+                                                    className="data-unchecked:bg-gray-900"
                                                   />
                                                 </FormControl>
                                                 <span className="text-sm text-gray-500">

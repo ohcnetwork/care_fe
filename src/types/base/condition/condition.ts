@@ -135,7 +135,7 @@ export const conditionSchema = z.discriminatedUnion("_conditionType", [
     value: z.enum(careConfig.encounterClasses),
     _conditionType: z.literal("encounter_class_equality"),
   }),
-]) as z.ZodType<ConditionForm>;
+]) as z.ZodType<ConditionForm, ConditionForm>;
 
 export function getConditionDiscriminatorValue(
   metric: string,
@@ -251,7 +251,7 @@ export const getDefaultCondition = (metrics: Metrics[]) => {
   const newCondition = {
     metric: metricName,
     operation: firstOperation,
-    value: value as any,
+    value,
     _conditionType: `${metricName}_${firstOperation}`,
   };
   return newCondition as ConditionForm;

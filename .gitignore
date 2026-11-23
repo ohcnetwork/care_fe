@@ -32,7 +32,6 @@ stats.json
 public/build-meta.json
 .vscode/*
 !.vscode/launch.json
-src/supportedBrowsers.ts
 
 # Reason React
 /lib/bs/**
@@ -65,10 +64,8 @@ bun.lockb
 /tests/.auth/
 test-results.json
 
-# Care Apps
-/apps/*
-src/pluginMap.ts
-/apps_backup/*
+# Local browser automation logs
+/.gstack/*.log
 
 # Federation Temp files
 /.__mf__temp
@@ -77,3 +74,6 @@ public/_headers
 
 namespaceMapping.json
 dump.rdb
+
+# Local migration codemods (not shared)
+/scripts/codemods/

@@ -1,16 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+
+// Extend Window interface for Safari webkitAudioContext support
+declare global {
+  interface Window {
+    webkitAudioContext?: typeof AudioContext;
+  }
+}
 
 const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   const [audioURL, setAudioURL] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
-  const [blob, setBlob] = useState<Blob | null>(null);
-  const [waveform, setWaveform] = useState<number[]>([]); // Decibel waveform
 
-  let audioContext: AudioContext | null = null;
-  let analyser: AnalyserNode | null = null;
-  let source: MediaStreamAudioSourceNode | null = null;
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioURLRef = useRef("");
+  const isRecordingRef = useRef(false);
+
+  useEffect(() => {
+    isRecordingRef.current = isRecording;
+  }, [isRecording]);
 
   useEffect(() => {
     if (!isRecording && recorder && audioURL) {
@@ -44,63 +53,29 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
 
     if (isRecording) {
       recorder.start();
-      setupAudioAnalyser();
     } else {
-      recorder.stream.getTracks().forEach((i) => i.stop());
+      recorder.stream.getTracks().forEach((t) => t.stop());
       recorder.stop();
-      if (audioContext) {
-        audioContext.close();
-      }
     }
 
     const handleData = (e: BlobEvent) => {
+      if (audioURLRef.current) {
+        URL.revokeObjectURL(audioURLRef.current);
+      }
       const url = URL.createObjectURL(e.data);
+      audioURLRef.current = url;
       setAudioURL(url);
-      const blob = new Blob([e.data], { type: "audio/mpeg" });
-      setBlob(blob);
     };
 
     recorder.addEventListener("dataavailable", handleData);
     return () => {
       recorder.removeEventListener("dataavailable", handleData);
-      if (audioContext) {
-        audioContext.close();
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => {});
+        audioContextRef.current = null;
       }
     };
   }, [recorder, isRecording]);
-
-  const setupAudioAnalyser = () => {
-    let animationFrameId: number;
-    audioContext = new (
-      window.AudioContext || (window as any).webkitAudioContext
-    )();
-    analyser = audioContext.createAnalyser();
-    analyser.fftSize = 32;
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    source = audioContext.createMediaStreamSource(
-      recorder?.stream as MediaStream,
-    );
-    source.connect(analyser);
-
-    const updateWaveform = () => {
-      if (isRecording) {
-        analyser?.getByteFrequencyData(dataArray);
-        const normalizedWaveform = Array.from(dataArray).map((value) =>
-          Math.min(100, (value / 255) * 100),
-        );
-        setWaveform(normalizedWaveform);
-        animationFrameId = requestAnimationFrame(updateWaveform);
-      } else {
-        cancelAnimationFrame(animationFrameId);
-        source?.disconnect();
-        analyser?.disconnect();
-      }
-    };
-
-    updateWaveform();
-  };
 
   const startRecording = () => {
     setIsRecording(true);
@@ -108,13 +83,14 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
 
   const stopRecording = () => {
     setIsRecording(false);
-    setWaveform([]);
   };
 
   const resetRecording = () => {
+    if (audioURLRef.current) {
+      URL.revokeObjectURL(audioURLRef.current);
+      audioURLRef.current = "";
+    }
     setAudioURL("");
-    setBlob(null);
-    setWaveform([]);
   };
 
   return {
@@ -122,8 +98,6 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
     isRecording,
     startRecording,
     stopRecording,
-    blob,
-    waveform,
     resetRecording,
   };
 };
@@ -153,4 +127,5 @@ async function requestRecorder() {
     );
   }
 }
+
 export default useVoiceRecorder;

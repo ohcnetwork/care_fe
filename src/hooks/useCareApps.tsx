@@ -1,9 +1,9 @@
-import { PluginManifestWithMeta } from "@/pluginTypes";
-import { CableIcon, Loader2Icon } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { PluginManifest, PluginManifestWithMeta } from "@/pluginTypes";
+import { CableIcon } from "lucide-react";
 import { Suspense, createContext, useContext } from "react";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
-import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import OrganizationLayout from "@/pages/Organization/components/OrganizationLayout";
 import { PlugConfig } from "@/types/plugConfig";
 import { t } from "i18next";
@@ -33,12 +33,12 @@ export const useCareApps = () => {
 //   return navItems;
 // };
 
-const withSuspense = (
-  Component: React.ComponentType<PluginEncounterTabProps>,
+const withSuspense = <T extends object>(
+  Component: React.ComponentType<T>,
   pluginName: string,
 ) => {
   // eslint-disable-next-line react/display-name
-  return (props: PluginEncounterTabProps) => {
+  return (props: T) => {
     return (
       <PluginErrorBoundary
         pluginName={pluginName}
@@ -58,7 +58,7 @@ const withSuspense = (
         <Suspense
           fallback={
             <div className="flex items-center justify-center gap-2">
-              <Loader2Icon
+              <Spinner
                 role="status"
                 aria-label="Loading"
                 className="size-4 animate-spin"
@@ -74,82 +74,56 @@ const withSuspense = (
   };
 };
 
-export const useCareAppEncounterTabs = () => {
+export const useCareAppTabs = <T extends object>(key: keyof PluginManifest) => {
   const careApps = useCareApps();
 
-  return careApps.reduce<Record<string, React.FC<PluginEncounterTabProps>>>(
-    (acc, app) => {
-      if (app.isLoading) {
-        return acc;
-      }
-
-      const appTabs = Object.entries(app.encounterTabs ?? {}).reduce(
-        (acc, [key, Component]) => {
-          return { ...acc, [key]: withSuspense(Component, app.plugin) };
-        },
-        {},
-      );
-
-      return { ...acc, ...appTabs };
-    },
-    {},
-  );
-};
-
-// If required; Reduce plugin.routes to a single pluginRoutes object of type Record<string, () => React.ReactNode>
-export function usePluginRoutes() {
-  const careApps = useCareApps();
-  const routes = careApps.reduce((acc, plugin) => {
-    if (plugin.isLoading) {
+  return careApps.reduce<Record<string, React.FC<T>>>((acc, app) => {
+    if (app.isLoading) {
       return acc;
     }
 
-    return { ...acc, ...(plugin.routes ?? {}) };
+    const tabs = app[key] as Record<string, React.ComponentType<T>> | undefined;
+    if (!tabs) {
+      return acc;
+    }
+
+    const appTabs = Object.entries(tabs).reduce((acc, [key, Component]) => {
+      return { ...acc, [key]: withSuspense(Component, app.plugin) };
+    }, {});
+
+    return { ...acc, ...appTabs };
   }, {});
-  if (!routes) {
-    throw new Error("'usePluginRoutes' must be used within 'AppRouter' only");
-  }
-  return routes;
-}
-
-export const useOrganizationRoutes = () => {
-  const careApps = useCareApps();
-
-  const pluginTabs = careApps.flatMap(
-    (c) => (!c.isLoading && c.organizationTabs) || [],
-  );
-
-  return {
-    ...Object.fromEntries(
-      pluginTabs.flatMap((t) => [
-        [
-          `/organization/:id/${t.slug}`,
-          ({ id }: { id: string }) => (
-            <OrganizationLayout id={id}>
-              {() => <t.component contextId={id} />}
-            </OrganizationLayout>
-          ),
-        ],
-        [
-          `/organization/:navOrganizationId/children/:id/${t.slug}`,
-          ({
-            navOrganizationId,
-            id,
-          }: {
-            navOrganizationId: string;
-            id: string;
-          }) => (
-            <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
-              {() => (
-                <t.component
-                  contextId={id}
-                  navOrganizationId={navOrganizationId}
-                />
-              )}
-            </OrganizationLayout>
-          ),
-        ],
-      ]),
-    ),
-  };
 };
+
+/**
+ * Pages for a plugin's `organizationTabs`, keyed by path pattern, for one
+ * loaded plugin. Each tab renders in the organization layout.
+ */
+export const getOrganizationTabRoutes = (
+  app: PluginManifest,
+): Record<string, (params: Record<string, string>) => React.ReactNode> =>
+  Object.fromEntries(
+    (app.organizationTabs ?? []).flatMap((t) => [
+      [
+        `/organization/:id/${t.slug}`,
+        ({ id }: Record<string, string>) => (
+          <OrganizationLayout id={id}>
+            {() => <t.component contextId={id} />}
+          </OrganizationLayout>
+        ),
+      ],
+      [
+        `/organization/:navOrganizationId/children/:id/${t.slug}`,
+        ({ navOrganizationId, id }: Record<string, string>) => (
+          <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
+            {() => (
+              <t.component
+                contextId={id}
+                navOrganizationId={navOrganizationId}
+              />
+            )}
+          </OrganizationLayout>
+        ),
+      ],
+    ]),
+  );

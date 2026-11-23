@@ -1,4 +1,5 @@
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import { Button } from "@/components/ui/button";
 import {
   CommandDialog,
@@ -8,7 +9,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -16,8 +17,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
-import { navigate } from "raviger";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -25,12 +25,12 @@ import careConfig from "@careConfig";
 
 export const FormDialog = ({
   subjectType,
-  questionnaireTag,
   trigger,
+  returnPage,
 }: {
   subjectType: string;
-  questionnaireTag: string;
   trigger?: React.ReactNode;
+  returnPage?: string;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -74,9 +74,9 @@ export const FormDialog = ({
   }, [favoritesResponse]);
 
   const addFavoriteMutation = useMutation({
-    mutationFn: (slug: string) =>
+    mutationFn: (id: string) =>
       mutate(questionnaireApi.addFavorite, {
-        pathParams: { slug },
+        pathParams: { id },
       })({ favorite_list: "favorites_form" }),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -86,9 +86,9 @@ export const FormDialog = ({
   });
 
   const removeFavoriteMutation = useMutation({
-    mutationFn: (slug: string) =>
+    mutationFn: (id: string) =>
       mutate(questionnaireApi.removeFavorite, {
-        pathParams: { slug },
+        pathParams: { id },
       })({ favorite_list: "favorites_form" }),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -97,12 +97,12 @@ export const FormDialog = ({
     },
   });
 
-  const handleToggleFavorite = (e: React.MouseEvent, slug: string) => {
+  const handleToggleFavorite = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    const isFavorited = favorites.some((f) => f.slug === slug);
+    const isFavorited = favorites.some((f) => f.id === id);
     if (isFavorited) {
-      removeFavoriteMutation.mutate(slug);
+      removeFavoriteMutation.mutate(id);
     } else {
       if (favorites.length >= careConfig.maxFormDialogFavorites) {
         toast.error(
@@ -112,50 +112,33 @@ export const FormDialog = ({
         );
         return;
       }
-      addFavoriteMutation.mutate(slug);
+      addFavoriteMutation.mutate(id);
     }
   };
 
-  const taggedQuestionnaires = useQuestionnaireOptions(questionnaireTag);
-  const allQuestionnaires = [
-    ...taggedQuestionnaires.results,
-    ...(questionnaires?.results ?? []),
-  ];
+  const allQuestionnaires = questionnaires?.results ?? [];
 
   const questionnaireIds = new Set([...allQuestionnaires.map((q) => q.id)]);
 
-  const questionnaireList = [...questionnaireIds].map(
-    (id) => allQuestionnaires.find((q) => q.id === id)!,
+  const questionnaireList = [...questionnaireIds].map((id) =>
+    allQuestionnaires.find((q) => q.id === id)!,
   );
 
-  // Handle keyboard shortcut to open forms dialog
-  useEffect(() => {
-    const handleOpenFormsDialog = () => {
-      setOpen(true);
-    };
-
-    document.addEventListener("open-forms-dialog", handleOpenFormsDialog);
-
-    return () => {
-      document.removeEventListener("open-forms-dialog", handleOpenFormsDialog);
-    };
-  }, []);
-
-  useEffect(() => {
+  const handleOpenChange = (open: boolean) => {
     if (open) {
       setSearch("");
     }
-  }, [open]);
+    setOpen(open);
+  };
 
   return (
     <>
-      <div className="flex" onClick={() => setOpen(true)}>
-        {trigger}
-      </div>
       <CommandDialog
+        trigger={trigger}
         className="md:max-w-2xl"
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={handleOpenChange}
+        title={t("forms")}
       >
         <div className="border-b border-gray-100 shadow-xs">
           <CommandInput
@@ -165,7 +148,7 @@ export const FormDialog = ({
             onValueChange={setSearch}
           />
         </div>
-        <CommandList className="max-h-[80vh] w-full">
+        <CommandList className="w-full md:max-h-[min(24rem,calc(75dvh-8rem))]">
           {isLoading ? (
             <CardListSkeleton count={10} />
           ) : questionnaireList.length === 0 ? (
@@ -175,23 +158,24 @@ export const FormDialog = ({
               <div key={questionnaire.id}>
                 <CommandGroup className="px-2">
                   <CommandItem
-                    key={questionnaire.slug}
+                    key={questionnaire.id}
                     value={`${questionnaire.slug} - ${questionnaire.title}`}
-                    className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
+                    className="flex justify-between rounded-md cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100 [&>svg:last-child]:hidden"
                     onSelect={() => {
-                      navigate(
-                        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.slug}`,
-                      );
+                      navigate({
+                        href: appendReferralNativeContext(
+                          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`,
+                          window.location.search,
+                        ),
+                      });
                       setOpen(false);
                     }}
                   >
                     <span className="flex-1">{questionnaire.title}</span>
                     <Button
-                      onClick={(e) =>
-                        handleToggleFavorite(e, questionnaire.slug)
-                      }
+                      onClick={(e) => handleToggleFavorite(e, questionnaire.id)}
                       aria-label={
-                        favorites.some((f) => f.slug === questionnaire.slug)
+                        favorites.some((f) => f.id === questionnaire.id)
                           ? t("remove_from_favorites")
                           : t("add_to_favorites")
                       }
@@ -201,9 +185,8 @@ export const FormDialog = ({
                       <Star
                         className={cn(
                           "size-4",
-                          favorites.some(
-                            (f) => f.slug === questionnaire.slug,
-                          ) && "fill-current",
+                          favorites.some((f) => f.id === questionnaire.id) &&
+                            "fill-current",
                         )}
                       />
                     </Button>

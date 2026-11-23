@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAtom } from "jotai";
 import {
   CheckIcon,
   MoreVertical,
@@ -7,7 +8,7 @@ import {
   Plus,
   Settings,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -34,9 +35,11 @@ import Page from "@/components/Common/Page";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { queueListSearch } from "@/lib/router/search/queues";
 
 import query from "@/Utils/request/query";
 import useAuthUser from "@/hooks/useAuthUser";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { TokenQueueRead } from "@/types/tokens/tokenQueue/tokenQueue";
@@ -52,13 +55,15 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import mutate from "@/Utils/request/mutate";
 import queryClient from "@/Utils/request/queryClient";
 import { dateQueryString } from "@/Utils/utils";
+import { queuePractitionerAtom } from "@/atoms/queuePractitionerAtom";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
-import { startOfDay } from "date-fns";
+import { parseISO } from "date-fns";
 import dayjs from "dayjs";
-import { Link } from "raviger";
 import ManageServicePointSheet from "./ManageServicePointSheet";
 import QueueFormSheet from "./QueueFormSheet";
 import SubQueueFormSheet from "./SubQueueFormSheet";
+
+import { getQueueBoardPath } from "./utils";
 
 interface QueueRowProps {
   queue: TokenQueueRead;
@@ -76,10 +81,14 @@ function QueueRow({
   index,
 }: QueueRowProps) {
   const { t } = useTranslation();
-  const queueLink =
-    resourceType === SchedulableResourceType.Practitioner
-      ? `/facility/${facilityId}/practitioner/${resourceId}/queues/${queue.id}/ongoing`
-      : `/queues/${queue.id}/ongoing`;
+  const [editOpen, setEditOpen] = useState(false);
+  const queueLink = getQueueBoardPath({
+    facilityId,
+    resourceType,
+    resourceId,
+    queueId: queue.id,
+    tab: "ongoing",
+  });
 
   const { mutate: setPrimary } = useMutation({
     mutationFn: mutate(tokenQueueApi.setPrimary, {
@@ -100,11 +109,11 @@ function QueueRow({
       <TableCell className="border-r border-gray-200 bg-white">
         <div className="flex items-center gap-2 justify-between">
           <div className="flex items-center gap-2">
-            <Link href={queueLink} className="font-medium underline">
+            <HrefLink href={queueLink} className="font-medium underline">
               {queue.name === "System Generated"
                 ? t("primary_queue")
                 : queue.name}
-            </Link>
+            </HrefLink>
             {queue.is_primary && (
               <Badge
                 variant="secondary"
@@ -120,7 +129,7 @@ function QueueRow({
             className="h-7 px-3 text-xs border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
             asChild
           >
-            <Link href={queueLink}>{t("open")}</Link>
+            <HrefLink href={queueLink}>{t("open")}</HrefLink>
           </Button>
         </div>
       </TableCell>
@@ -144,23 +153,15 @@ function QueueRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="border border-gray-200">
             <DropdownMenuItem asChild>
-              <Link href={queueLink} className="flex items-center gap-2">
+              <HrefLink href={queueLink} className="flex items-center gap-2">
                 <Notebook className="size-4 mr-2" />
                 {t("open_queue_board")}
-              </Link>
+              </HrefLink>
             </DropdownMenuItem>
-            <QueueFormSheet
-              facilityId={facilityId}
-              resourceType={resourceType}
-              resourceId={resourceId}
-              queueId={queue.id}
-              trigger={
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <Pencil className="size-4 mr-2" />
-                  {t("edit_queue_name")}
-                </DropdownMenuItem>
-              }
-            />
+            <DropdownMenuItem onSelect={() => setEditOpen(true)}>
+              <Pencil className="size-4 mr-2" />
+              {t("edit_queue_name")}
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => setPrimary({})}
               disabled={queue.is_primary}
@@ -170,6 +171,14 @@ function QueueRow({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <QueueFormSheet
+          facilityId={facilityId}
+          resourceType={resourceType}
+          resourceId={resourceId}
+          queueId={queue.id}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+        />
       </TableCell>
     </TableRow>
   );
@@ -221,18 +230,22 @@ export default function QueuesIndex({
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
-    disableCache: true,
+    schema: queueListSearch,
   });
 
   const { id: currentUserId } = useAuthUser();
+  const [cachedPractitionerId, setCachedPractitionerId] = useAtom(
+    queuePractitionerAtom(facilityId),
+  );
 
   // Set default resourceId for practitioners
+  // Priority: URL param > prop > cached value > current user
   const effectiveResourceId =
     qParams.resource_id ||
     resourceId ||
     (resourceType === SchedulableResourceType.Practitioner
-      ? currentUserId
-      : undefined);
+      ? cachedPractitionerId || currentUserId
+      : "");
 
   // Fetch available users for practitioner resource type
   const { data: availableUsersData } = useQuery({
@@ -269,7 +282,11 @@ export default function QueuesIndex({
 
   // Handle resource selection
   const handleResourceChange = (users: UserReadMinimal[]) => {
-    updateQuery({ resource_id: users[0]?.id });
+    const userId = users[0]?.id;
+    updateQuery({ resource_id: userId });
+    if (resourceType === SchedulableResourceType.Practitioner && userId) {
+      setCachedPractitionerId(userId);
+    }
   };
 
   // Fetch queues with all query parameters
@@ -305,7 +322,7 @@ export default function QueuesIndex({
 
   return (
     <Page title={t("token_queues")} hideTitleOnPage>
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto">
         {/* Header Section - Date, Practitioner, Create Queue */}
         <div className="mb-8 flex flex-wrap gap-4 items-end bg-white p-4 rounded-lg border border-gray-200">
           {/* Date Filter */}
@@ -314,7 +331,7 @@ export default function QueuesIndex({
               {t("date")}
             </label>
             <DatePicker
-              date={qParams.date ? new Date(qParams.date) : undefined}
+              date={qParams.date ? parseISO(qParams.date) : undefined}
               onChange={handleDateChange}
             />
           </div>
@@ -340,7 +357,7 @@ export default function QueuesIndex({
               facilityId={facilityId}
               resourceType={resourceType}
               resourceId={effectiveResourceId}
-              initialDate={startOfDay(qParams.date)}
+              initialDate={qParams.date ? parseISO(qParams.date) : undefined}
               trigger={
                 <Button size="sm" className="font-bold" disabled={isPast}>
                   <Plus className="size-4 mr-2" />
@@ -374,7 +391,9 @@ export default function QueuesIndex({
                     facilityId={facilityId}
                     resourceType={resourceType}
                     resourceId={effectiveResourceId}
-                    initialDate={startOfDay(qParams.date)}
+                    initialDate={
+                      qParams.date ? parseISO(qParams.date) : undefined
+                    }
                     trigger={
                       <Button disabled={isPast}>
                         <Plus className="size-4 mr-2" />

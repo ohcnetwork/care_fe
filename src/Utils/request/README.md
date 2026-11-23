@@ -121,6 +121,43 @@ function SearchComponent() {
 
 The debounced query will wait for the specified interval after the last call before executing the request, helping to reduce unnecessary API calls during rapid user input.
 
+### Infinite Lists
+
+For limit-offset paginated lists that load more pages on scroll, use `useInfiniteList` with `query.infinite`:
+
+```tsx
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+
+import query from "@/Utils/request/query";
+
+function RoleList({ search }: { search: string }) {
+  const { data, isLoading, isFetchingNextPage, ref } = useInfiniteList({
+    queryKey: ["roles", search],
+    ...query.infinite(roleApi.listRoles, {
+      queryParams: { name: search },
+      pageSize: 20, // Optional: defaults to 20
+      debounceInterval: 500, // Optional: debounces the first page only
+    }),
+  });
+
+  if (isLoading) return <Loading />;
+
+  return (
+    <ul>
+      {data?.results.map((role) => (
+        <li key={role.id}>{role.name}</li>
+      ))}
+      <li ref={ref}>{isFetchingNextPage && <Loading />}</li>
+    </ul>
+  );
+}
+```
+
+- `query.infinite` returns `queryFn`, `initialPageParam` and `getNextPageParam`. It sets `limit` and `offset` for each page, so do not pass them in `queryParams`. You can also spread it into a plain `useInfiniteQuery`.
+- `useInfiniteList` merges the pages into `{ count, results }` by default. Pass `select` to change this; it gets the raw `InfiniteData`.
+- Attach `ref` to an element at the end of the list to fetch the next page when it scrolls into view. To load pages with a button instead, leave `ref` unattached and call `fetchNextPage`. Use `inViewOptions` to pass options such as `rootMargin` to `useInView`.
+- If fetching the next page fails, it is not fetched again automatically. Call `fetchNextPage` to retry.
+
 ### Error Handling
 
 All API errors are now handled globally. Common scenarios like:
@@ -177,4 +214,82 @@ function UpdatePatient({ patientId }: { patientId: string }) {
 
   return <PatientForm onSubmit={handleSubmit} />;
 }
+```
+
+## Using Batch Requests with `useBatchRequest`
+
+The batch request API sends more than one request in one call. The backend
+runs the requests in series in one atomic transaction. If one request fails,
+the backend rolls back all the changes of all the requests and gives a 4xx or
+5xx status for the full batch.
+
+Use the `useBatchRequest` hook to call this API. Give the hook an array of
+`BatchRequestObject`. Each object has the API route, the path parameters, the
+body, and a reference ID. Use the reference ID to find the result of each
+request in the response.
+
+```tsx
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
+
+function CloseEncounter({ encounterId }: { encounterId: string }) {
+  const { mutate: batchRequest, isPending } = useBatchRequest({
+    onSuccess: ({ results }) => {
+      // Use the reference ID to find the result of each request.
+      if (
+        results.some((result) => result.reference_id === "encounter-closed")
+      ) {
+        toast.success("Encounter closed");
+      }
+    },
+  });
+
+  const submit = () => {
+    const requests: BatchRequestObject[] = [
+      {
+        api: encounterApi.update,
+        pathParams: { id: encounterId },
+        body: { status: "completed" },
+        referenceId: "encounter-closed",
+      },
+      // ... more requests
+    ];
+
+    batchRequest(requests);
+  };
+
+  return (
+    <Button onClick={submit} disabled={isPending}>
+      Close Encounter
+    </Button>
+  );
+}
+```
+
+### Error Handling
+
+The global error handler cannot read the batch response shape. On a batch
+failure, the response body keeps the status and the error body of each
+sub-request in the `results` array. Without special handling, the global
+error handler shows a wrong error message for the successful sub-requests too.
+
+The `useBatchRequest` hook prevents this. On a batch failure, the hook sends
+the error of each failed sub-request to the global error handler. So each
+failed sub-request gets the full error handling: the pydantic errors, the
+structured errors, the 404 detail, the session expiry, and more. The
+successful sub-requests show no error message.
+
+The original error still goes to the `onError` and the `onSettled` callbacks.
+To read the results of the failed batch, use `error.cause.results`.
+
+Set the `silent` option to `true` if the caller handles the errors itself. The
+hook then shows no error message for the sub-requests.
+
+```tsx
+const { mutate: batchRequest } = useBatchRequest({
+  silent: true,
+  onError: () => {
+    toast.error("Could not save the changes");
+  },
+});
 ```

@@ -59,7 +59,7 @@ export default function PatientIdentifierConfigForm({
   const getFormSchema = (isAutoMaintained: boolean) =>
     z.object({
       config: z.object({
-        use: z.nativeEnum(PatientIdentifierUse),
+        use: z.enum(PatientIdentifierUse),
         description: isAutoMaintained
           ? z.string().trim().optional().nullable()
           : z.string().trim().min(1, t("field_required")),
@@ -86,7 +86,7 @@ export default function PatientIdentifierConfigForm({
           retrieve_with_otp: z.boolean().optional(),
         }),
       }),
-      status: z.nativeEnum(PatientIdentifierConfigStatus),
+      status: z.enum(PatientIdentifierConfigStatus),
       facility: z.string().optional().nullable(),
     });
 
@@ -506,13 +506,14 @@ export default function PatientIdentifierConfigForm({
                           </FormDescription>
                           <Popover>
                             <PopoverTrigger asChild>
-                              <button
+                              <Button
+                                variant="ghost"
                                 type="button"
-                                aria-label="Help"
-                                className="text-muted-foreground hover:text-primary"
+                                aria-label={t("more_info")}
+                                className="h-auto w-auto p-1 text-muted-foreground hover:text-primary"
                               >
                                 <Info className="w-4 h-4" />
-                              </button>
+                              </Button>
                             </PopoverTrigger>
                             <PopoverContent align="start">
                               <div className="font-semibold mb-1">

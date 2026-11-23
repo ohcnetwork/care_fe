@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -48,11 +49,11 @@ export function EditDiscountMonetarySheet({
           <PencilIcon className="size-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("edit_discount_component")}</SheetTitle>
         </SheetHeader>
-        <div className="mt-6">
+        <SheetBody>
           <DiscountMonetaryComponentForm
             defaultValues={component}
             onSubmit={(data) => {
@@ -64,7 +65,9 @@ export function EditDiscountMonetarySheet({
 
               const updatedComponents =
                 facility.discount_monetary_components.map((existing, index) =>
-                  index === component.facilityIndex ? data : existing,
+                  index === component.facilityIndex
+                    ? { ...existing, ...data }
+                    : existing,
                 );
 
               updateComponent({
@@ -74,7 +77,7 @@ export function EditDiscountMonetarySheet({
               });
             }}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

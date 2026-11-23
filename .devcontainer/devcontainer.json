@@ -1,14 +1,14 @@
 // For format details, see https://aka.ms/devcontainer.json
 {
   "name": "CARE Frontend",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:5-24-bookworm",
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
 
   // Lifecycle commands — all run in bash (Bookworm default)
   "waitFor": "onCreateCommand",
-  "onCreateCommand": "npm install --no-audit --no-fund && npm run postinstall && npm run setup",
+  "onCreateCommand": "npm install --no-audit --no-fund && npm run postinstall",
   "postCreateCommand": "echo '✅ CARE Frontend ready — run: npm run dev'",
   "postAttachCommand": {
     "dev-server": "npm run dev"

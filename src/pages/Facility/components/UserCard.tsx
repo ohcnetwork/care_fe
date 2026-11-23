@@ -1,8 +1,8 @@
 import dayjs from "dayjs";
-import { navigate } from "raviger";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ interface Props {
   facilityId: string;
 }
 
-export function UserCard({ user, className, facilityId }: Props) {
+export function FacilityUserCard({ user, className, facilityId }: Props) {
   const { t } = useTranslation();
   const { patientToken: tokenData } = useAuthContext();
 
@@ -63,7 +63,7 @@ export function UserCard({ user, className, facilityId }: Props) {
               variant="outline"
               onClick={() => {
                 storeUserInLocalStorage(user);
-                navigate(returnLink);
+                navigate({ href: returnLink });
               }}
             >
               {t("book_appointment")}

@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { navigate } from "raviger";
-import { useCallback, useState } from "react";
+import { cloneElement, isValidElement, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -18,6 +18,7 @@ import {
 
 import { PatientIdentifierSelector } from "@/components/Patient/PatientIdentifierSelector";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { navigate } from "@/lib/router/navigate";
 import {
   PartialPatientModel,
   PatientListRead,
@@ -56,14 +57,16 @@ export function CreateDispenseSheet({
   // Direct navigation handler when patient is preselected
   const handleDirectDispense = () => {
     if (!preselectedPatient) return;
-    navigate(
-      `/facility/${facilityId}/patients/home?${new URLSearchParams({
+    navigate({
+      to: "/facility/$facilityId/patients/home",
+      params: { facilityId },
+      search: {
         phone_number: preselectedPatient.phone_number,
         year_of_birth: preselectedPatient.year_of_birth?.toString() || "",
         partial_id: preselectedPatient.id.slice(0, 5),
         flow: "dispense",
-      }).toString()}`,
-    );
+      },
+    });
   };
 
   const resetState = () => {
@@ -86,8 +89,10 @@ export function CreateDispenseSheet({
   const handleRegisterNewPatient = useCallback(() => {
     setIsOpen(false);
     resetState();
-    navigate(`/facility/${facilityId}/patient/create`, {
-      query: { flow: "dispense" },
+    navigate({
+      to: "/facility/$facilityId/patient/create",
+      params: { facilityId },
+      search: { flow: "dispense" },
     });
   }, [facilityId]);
 
@@ -98,8 +103,10 @@ export function CreateDispenseSheet({
     }
     setIsOpen(false);
     resetState();
-    navigate(
-      `/facility/${facilityId}/patients/home?${new URLSearchParams({
+    navigate({
+      to: "/facility/$facilityId/patients/home",
+      params: { facilityId },
+      search: {
         phone_number: selectedPatient.phone_number,
         year_of_birth:
           ("year_of_birth" in selectedPatient &&
@@ -107,23 +114,26 @@ export function CreateDispenseSheet({
           "",
         partial_id: selectedPatient.id.slice(0, 5),
         flow: "dispense",
-      }).toString()}`,
-    );
+      },
+    });
   };
 
   // When patientId is provided, render a simple button that navigates directly
   if (patientId && preselectedPatient) {
-    const triggerElement = trigger || (
-      <Button>
-        <Plus className="size-4 mr-1" />
-        {t("new_dispense")}
-      </Button>
-    );
-
+    if (isValidElement<{ onClick?: React.MouseEventHandler }>(trigger)) {
+      return cloneElement(trigger, {
+        onClick: (event) => {
+          trigger.props.onClick?.(event);
+          if (!event.defaultPrevented) handleDirectDispense();
+        },
+      });
+    }
     return (
-      <span onClick={handleDirectDispense} className="cursor-pointer">
-        {triggerElement}
-      </span>
+      <Button onClick={handleDirectDispense}>
+        <Plus className="size-4 mr-1" />
+        {trigger || t("new_dispense")}
+        <ShortcutBadge actionId="dispense-button" />
+      </Button>
     );
   }
 
@@ -144,7 +154,7 @@ export function CreateDispenseSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="sm:max-w-lg overflow-y-auto">
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>{t("new_dispense")}</SheetTitle>
           <SheetDescription>
@@ -156,7 +166,7 @@ export function CreateDispenseSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-6 mt-6">
+        <SheetBody>
           <PatientIdentifierSelector
             facilityId={facilityId}
             selectedPatient={selectedPatient}
@@ -164,22 +174,22 @@ export function CreateDispenseSheet({
             onClearPatient={handleClearPatient}
             onRegisterNewPatient={handleRegisterNewPatient}
           />
+        </SheetBody>
 
-          {selectedPatient && (
-            <SheetFooter className="gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-              >
-                {t("cancel")}
-              </Button>
-              <Button onClick={handleProceedToDispense}>
-                {t("proceed_to_dispense")}
-              </Button>
-            </SheetFooter>
-          )}
-        </div>
+        {selectedPatient && (
+          <SheetFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+            >
+              {t("cancel")}
+            </Button>
+            <Button onClick={handleProceedToDispense}>
+              {t("proceed_to_dispense")}
+            </Button>
+          </SheetFooter>
+        )}
       </SheetContent>
     </Sheet>
   );

@@ -4,6 +4,7 @@ import {
   FileRead,
   FileReadMinimal,
   FileUpdate,
+  FileUploadRequest,
 } from "@/types/files/file";
 
 export default {
@@ -11,6 +12,12 @@ export default {
     path: "/api/v1/files/",
     method: HttpMethod.POST,
     TBody: Type<FileCreate>(),
+    TRes: Type<FileRead>(),
+  },
+  uploadFile: {
+    path: "/api/v1/files/upload-file/",
+    method: HttpMethod.POST,
+    TBody: Type<FileUploadRequest>(),
     TRes: Type<FileRead>(),
   },
   list: {

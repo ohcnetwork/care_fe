@@ -1,14 +1,15 @@
 import { t } from "i18next";
-import { useQueryParams } from "raviger";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { DrawingPage } from "@/components/Files/DrawingSubTab";
 import { FilesPage } from "@/components/Files/FileSubTab";
 
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
+import { useCareAppTabs } from "@/hooks/useCareApps";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { fileListSearch } from "@/lib/router/search/patient";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -18,19 +19,14 @@ import { ReportType } from "@/types/emr/report/report";
 import { FileType } from "@/types/files/file";
 import { ReportSubTab } from "./ReportSubTab";
 
-interface FilesTabsProps {
+export interface FilesTabsProps {
   type: FileType.ENCOUNTER | FileType.PATIENT;
   encounter?: EncounterRead;
   patient?: PatientRead;
   readOnly?: boolean;
 }
 
-type QueryParams = {
-  file: "all" | "reports" | "drawings";
-};
-
-const allowedTabs = ["all", "reports", "drawings"] as const;
-type TabType = (typeof allowedTabs)[number];
+const TAB_SCOPED_PARAMS = ["name", "is_archived", "page", "limit"];
 
 export const FilesTab = ({
   patient,
@@ -38,7 +34,7 @@ export const FilesTab = ({
   encounter,
   readOnly,
 }: FilesTabsProps) => {
-  const [qParams, setQParams] = useQueryParams<QueryParams>();
+  const [qParams, setQParams] = useQueryParams(fileListSearch);
 
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(
@@ -50,9 +46,10 @@ export const FilesTab = ({
     encounter?.permissions ?? [],
   );
 
-  const tabValue: TabType = allowedTabs.includes(qParams.file)
-    ? qParams.file
-    : "all";
+  const pluginTabs = useCareAppTabs<FilesTabsProps>("encounterFileTabs");
+  const allowedTabs = ["all", "reports", ...Object.keys(pluginTabs)];
+  const tabValue =
+    qParams.file && allowedTabs.includes(qParams.file) ? qParams.file : "all";
 
   const canWriteCurrentEncounter =
     canWriteEncounter &&
@@ -74,28 +71,24 @@ export const FilesTab = ({
       <Tabs
         value={tabValue}
         onValueChange={(value) => {
-          setQParams({ file: value as TabType }, { overwrite: false });
+          // Search, status and page belong to the tab that set them; carrying
+          // them over could land the other tab on an empty or out-of-range page.
+          const rest = Object.fromEntries(
+            Object.entries(qParams).filter(
+              ([key]) => !TAB_SCOPED_PARAMS.includes(key),
+            ),
+          );
+          setQParams({ ...rest, file: value }, { overwrite: true });
         }}
       >
         <TabsList className={type != "encounter" ? "mt-2" : ""}>
-          <TabsTrigger
-            value="all"
-            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-          >
-            {t("files")}
-          </TabsTrigger>
-          <TabsTrigger
-            value="reports"
-            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-          >
-            {t("reports")}
-          </TabsTrigger>
-          <TabsTrigger
-            value="drawings"
-            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-          >
-            {t("drawings")}
-          </TabsTrigger>
+          <TabsTrigger value="all">{t("files")}</TabsTrigger>
+          <TabsTrigger value="reports">{t("reports")}</TabsTrigger>
+          {Object.keys(pluginTabs).map((tab) => (
+            <TabsTrigger key={tab} value={tab} className="capitalize">
+              {t(tab)}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value="all">
@@ -122,17 +115,18 @@ export const FilesTab = ({
           />
         </TabsContent>
 
-        <TabsContent value="drawings">
-          <div>
-            <DrawingPage
-              type={type}
-              {...(type === FileType.PATIENT
-                ? { patientId: patient?.id }
-                : { encounter: encounter })}
-              readOnly={readOnly}
-            />
-          </div>
-        </TabsContent>
+        {Object.entries(pluginTabs).map(([pluginName, Component]) => {
+          return (
+            <TabsContent key={pluginName} value={pluginName}>
+              <Component
+                type={type}
+                patient={patient}
+                encounter={encounter}
+                readOnly={readOnly}
+              />
+            </TabsContent>
+          );
+        })}
       </Tabs>
     </div>
   );

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -21,12 +22,8 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 
 import { DosageInstructionList } from "./DosageInstructionList";
-import {
-  formatDosage,
-  formatDuration,
-  formatFrequency,
-  formatSig,
-} from "./utils";
+import { FormattedDosage } from "./FormattedDosage";
+import { formatDuration, formatFrequency, formatSig } from "./utils";
 
 interface MedicationsTableProps {
   medications: MedicationRequestRead[];
@@ -66,7 +63,7 @@ export const MedicationsTable = ({
   }
 
   return (
-    <div className=" @container border border-gray-200 rounded-lg">
+    <div className="@container border border-gray-200 rounded-lg [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
       <Table className="@lg:min-w-auto min-w-6xl">
         <TableHeader>
           <TableRow className="divide-x bg-gray-100">
@@ -103,7 +100,9 @@ export const MedicationsTable = ({
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
                     <DosageInstructionList
                       instructions={instructions}
-                      renderItem={(di) => formatDosage(di) || "-"}
+                      renderItem={(di) => (
+                        <FormattedDosage instruction={di} fallback="-" />
+                      )}
                     />
                   </TableCell>
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
@@ -155,8 +154,11 @@ export const MedicationsTable = ({
         </TableBody>
       </Table>
       {!showActiveOnly && !!inactiveMedications.length && (
-        <div
-          className="flex items-center gap-2 p-4 cursor-pointer hover:bg-gray-50 border-t"
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto w-full justify-start rounded-t-none border-t p-4"
+          aria-expanded={showInactive}
           onClick={() => setShowInactive(!showInactive)}
         >
           {showInactive ? (
@@ -169,7 +171,7 @@ export const MedicationsTable = ({
             {`${inactiveMedications.length} ${t("inactive")}`}{" "}
             {t("medications")}
           </span>
-        </div>
+        </Button>
       )}
     </div>
   );

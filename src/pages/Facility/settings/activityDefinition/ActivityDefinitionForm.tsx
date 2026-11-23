@@ -2,7 +2,6 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2Icon } from "lucide-react";
-import { navigate } from "raviger";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -40,9 +39,11 @@ import { HealthcareServiceSelector } from "@/pages/Facility/services/HealthcareS
 import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
+import { navigate } from "@/lib/router/navigate";
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
 import SpecimenDefinitionForm from "@/pages/Facility/settings/specimen-definitions/SpecimenDefinitionForm";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import { slugValueSchema } from "@/types/base/slug/schema";
 import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionStatus,
@@ -64,7 +65,8 @@ import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareS
 import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+import { generateSlugValue } from "@/Utils/slug";
+import { goBack } from "@/Utils/utils";
 
 export default function ActivityDefinitionForm({
   facilityId,
@@ -130,16 +132,13 @@ function ActivityDefinitionFormContent({
 
   const formSchema = z.object({
     title: z.string().min(1, t("field_required")),
-    slug_value: z
-      .string()
-      .min(5, t("character_count_validation", { min: 5, max: 25 }))
-      .max(25, t("character_count_validation", { min: 5, max: 25 })),
+    slug_value: slugValueSchema(),
     description: z.string().min(1, t("field_required")),
     usage: z.string().min(1, t("field_required")),
     derived_from_uri: z.string().nullable(),
-    status: z.nativeEnum(Status),
-    classification: z.nativeEnum(Classification),
-    kind: z.nativeEnum(Kind),
+    status: z.enum(Status),
+    classification: z.enum(Classification),
+    kind: z.enum(Kind),
     healthcare_service: z.custom<HealthcareServiceReadSpec>().nullable(),
     code: CodeSchema,
     body_site: CodeSchema.nullable(),
@@ -223,17 +222,14 @@ function ActivityDefinitionFormContent({
   const { data: observationDefinitions, isLoading: isLoadingObservations } =
     useQuery({
       queryKey: ["observationDefinitions", facilityId, observationSearch],
-      queryFn: query.debounced(
-        observationDefinitionApi.listObservationDefinition,
-        {
-          queryParams: {
-            facility: facilityId,
-            limit: 100,
-            title: observationSearch,
-            status: ObservationDefinitionStatus.active,
-          },
+      queryFn: query.debounced(observationDefinitionApi.list, {
+        queryParams: {
+          facility: facilityId,
+          limit: 100,
+          title: observationSearch,
+          status: ObservationDefinitionStatus.ACTIVE,
         },
-      ),
+      }),
     });
 
   const form = useForm({
@@ -339,7 +335,7 @@ function ActivityDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || "", 25), {
+        form.setValue("slug_value", generateSlugValue(value.title), {
           shouldValidate: true,
         });
       }
@@ -360,7 +356,9 @@ function ActivityDefinitionFormContent({
           queryKey: ["activityDefinition", activityDefinitionSlug],
         });
         toast.success(t("activity_definition_created_successfully"));
-        navigate(`/facility/${facilityId}/settings/activity_definitions`, {
+        navigate({
+          to: "/facility/$facilityId/settings/activity_definitions",
+          params: { facilityId },
           replace: true,
         });
       },
@@ -382,12 +380,14 @@ function ActivityDefinitionFormContent({
           ],
         });
         toast.success(t("activity_definition_updated_successfully"));
-        navigate(
-          `/facility/${facilityId}/settings/activity_definitions/${activityDefinition.slug}`,
-          {
-            replace: true,
+        navigate({
+          to: "/facility/$facilityId/settings/activity_definitions/$activityDefinitionSlug",
+          params: {
+            facilityId,
+            activityDefinitionSlug: activityDefinition.slug,
           },
-        );
+          replace: true,
+        });
       },
     });
 
@@ -420,15 +420,12 @@ function ActivityDefinitionFormContent({
     }
   }
 
-  const handleCancel = () => {
-    if (categorySlug) {
-      navigate(
-        `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
-      );
-    } else {
-      navigate(`/facility/${facilityId}/settings/activity_definitions`);
-    }
-  };
+  const handleCancel = () =>
+    goBack(
+      categorySlug
+        ? `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`
+        : `/facility/${facilityId}/settings/activity_definitions`,
+    );
 
   return (
     <Page

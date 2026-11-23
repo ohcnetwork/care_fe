@@ -6,20 +6,22 @@ setup("authenticate as facility admin", async ({ page }) => {
   // Navigate to login page
   await page.goto("/login");
 
-  // Fill in credentials for facility_admin_2_0
-  await page
-    .getByRole("textbox", { name: /username/i })
-    .fill("facility_admin_2_0");
-  await page.getByLabel(/password/i).fill("Coronasafe@123");
+  // Fill in credentials for care-fac-admin
+  await page.getByRole("textbox", { name: /username/i }).fill("care-fac-admin");
+  await page.getByLabel(/^password$/i).fill("Ohcn@123");
 
   // Click login button
-  await page.getByRole("button", { name: /login/i }).click();
+  await page.getByRole("button", { name: /^sign in$/i }).click();
 
   // Wait for successful login
   await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
 
   // Verify we're logged in by checking for user-specific elements
-  await expect(page.getByRole("heading", { name: /^Hey .+/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: /^Good (Morning|Afternoon|Evening), .+/,
+    }),
+  ).toBeVisible();
 
   // Save signed-in state to 'authFile'
   await page.context().storageState({ path: authFile });

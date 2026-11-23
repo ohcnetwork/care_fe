@@ -1,27 +1,12 @@
 import { faker } from "@faker-js/faker";
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { BODY_SITES, KNOWN_USERNAMES } from "tests/helper/commonConstants";
-import {
-  expectToast,
-  selectFromCommand,
-  selectFromDefinitionCategoryPicker,
-  selectFromValueSet,
-} from "tests/helper/ui";
-
-export const STATUS_OPTIONS = [
-  "Draft",
-  "Active",
-  "On Hold",
-  "Entered in Error",
-  "Ended",
-  "Completed",
-  "Revoked",
-  "Unknown",
-];
+import { submitAndExpectSuccess } from "tests/helper/questionnaire";
+import { questionBlock } from "tests/helper/questionnaireV2";
+import { selectFromCommand, selectFromValueSet } from "tests/helper/ui";
 
 export const ACTIVITY_DEFINITIONS = [
   "Urinalysis",
-  "Complete Blood Count (CBC) Panel",
   "Lipid Panel",
   "Fasting Blood Glucose",
 ];
@@ -37,6 +22,21 @@ export interface ServiceRequestTestData {
   patientInstruction?: string;
   notes?: string;
   requestor?: string;
+}
+
+export type ServiceRequestOverrides = Partial<
+  Pick<ServiceRequestTestData, "activityDefinition" | "priority">
+>;
+
+/**
+ * The report type picker preselects the only remaining report code, so the
+ * placeholder is not always shown. Locate the picker by its label instead.
+ */
+export function reportTypeCombobox(page: Page) {
+  return page.getByRole("combobox", {
+    name: "Select Diagnostic Report Type",
+    exact: true,
+  });
 }
 
 export function generateServiceRequestTestData(
@@ -68,29 +68,44 @@ export async function createServiceRequest(
   patientId: string,
   encounterId: string,
   allFields: boolean = false,
+  overrides: ServiceRequestOverrides = {},
 ): Promise<ServiceRequestTestData> {
-  const data = generateServiceRequestTestData(allFields);
+  const data = { ...generateServiceRequestTestData(allFields), ...overrides };
 
   await page.goto(
     `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
   );
 
-  await page.getByRole("button", { name: /create service request/i }).click();
+  await page
+    .getByRole("link", { name: "Create Service Request", exact: true })
+    .click();
 
-  const activityDefinitionPicker = page
-    .locator('button[role="combobox"]')
-    .filter({ hasText: /select activity definition/i });
-  await activityDefinitionPicker.waitFor({ state: "visible" });
-
-  await selectFromDefinitionCategoryPicker(page, activityDefinitionPicker, {
-    navigateCategories: data.navigateCategories,
-    search: data.activityDefinition,
+  const block = questionBlock(page, "Service Request");
+  await expect(block).toHaveCount(1);
+  await block
+    .getByRole("combobox")
+    .filter({ hasText: "Select Activity Definition" })
+    .click();
+  const picker = page.getByRole("dialog").filter({
+    has: page.getByPlaceholder("Search activity definitions", { exact: true }),
   });
+  await expect(picker).toBeVisible();
+  for (const category of data.navigateCategories) {
+    await picker.getByRole("option", { name: category, exact: true }).click();
+  }
+  await picker
+    .getByPlaceholder("Search activity definitions", { exact: true })
+    .fill(data.activityDefinition);
+  await picker
+    .getByRole("option")
+    .filter({
+      has: page.getByText(data.activityDefinition, { exact: true }),
+    })
+    .click();
 
-  const serviceRequestCard = page
+  const serviceRequestCard = block
     .locator('[data-slot="collapsible"]')
-    .filter({ hasText: data.activityDefinition })
-    .first();
+    .filter({ hasText: data.activityDefinition });
   await serviceRequestCard.waitFor({ state: "visible" });
 
   await serviceRequestCard.locator('[data-slot="collapsible-trigger"]').click();
@@ -103,8 +118,10 @@ export async function createServiceRequest(
 
   if (allFields) {
     const bodySiteSelector = serviceRequestCard
-      .locator('button[role="combobox"]')
-      .filter({ hasText: /body site/i });
+      .locator("label")
+      .filter({ hasText: /^Body Site$/ })
+      .locator("..")
+      .getByRole("combobox");
     await bodySiteSelector.waitFor({ state: "visible" });
 
     await selectFromValueSet(page, bodySiteSelector, {
@@ -116,9 +133,10 @@ export async function createServiceRequest(
       .fill(data.patientInstruction!);
 
     const requestorSelector = serviceRequestCard
-      .locator('button[role="combobox"]')
-      .filter({ has: page.locator("p") })
-      .first();
+      .locator("label")
+      .filter({ hasText: /^Requester$/ })
+      .locator("..")
+      .getByRole("combobox");
     await requestorSelector.waitFor({ state: "visible" });
 
     await selectFromCommand(page, requestorSelector, {
@@ -126,19 +144,17 @@ export async function createServiceRequest(
     });
 
     // Capture the selected requestor's display name after selection
-    const selectedRequestorName = await serviceRequestCard
-      .locator('button[role="combobox"]')
-      .locator("p.font-medium.text-gray-900")
-      .first()
+    const selectedRequestorName = await requestorSelector
+      .locator("p")
       .textContent();
     data.requestor = selectedRequestorName?.trim() || data.requestor!;
 
     await serviceRequestCard.getByPlaceholder(/add note/i).fill(data.notes!);
   }
 
-  await page.getByRole("button", { name: /submit/i }).click();
-
-  await expectToast(page, /questionnaire submitted successfully/i);
+  // Service requests are authored on the v2 fill page — its primary action
+  // is "Save Changes" (see fill/FillHeader.tsx).
+  await submitAndExpectSuccess(page);
 
   return data;
 }

@@ -15,7 +15,7 @@ test.describe("User Management in Departments", () => {
     facilityId = getFacilityId();
 
     await page.goto(`/facility/${facilityId}/settings/departments`);
-    await page.getByRole("table").getByText("Administration").first().click();
+    await page.getByText("Administration", { exact: true }).click();
     await page.getByRole("tab", { name: "Users" }).click();
   });
 

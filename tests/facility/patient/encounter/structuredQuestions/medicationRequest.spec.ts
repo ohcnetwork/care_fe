@@ -1,10 +1,24 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+// Duration is a native input with plain <button> suggestions in the popover;
+// exact-match avoids catching the range / period action buttons. The popover
+// trigger wrapping the input is itself a button named by the typed value, so
+// the suggestion is scoped to the popover content.
+async function selectDuration(page: Page, duration: number, unit: string) {
+  const field = page.getByRole("textbox", { name: "Duration" });
+  await field.click();
+  await field.fill(`${duration} ${unit}`);
+  await page
+    .locator('[data-slot="popover-content"]')
+    .getByRole("button", { name: `${duration} ${unit}`, exact: true })
+    .click();
+}
 
 const INT_MAX = 70; // Arbitrary upper limit for integer fields
 const DOSAGE_UNITS = [
@@ -113,7 +127,9 @@ test.describe("Medication Request Questionnaire", () => {
     dosageUnit = faker.helpers.arrayElement(DOSAGE_UNITS);
     frequencyData = faker.helpers.arrayElement(frequencies);
     durationUnit = faker.helpers.arrayElement(DURATION_UNITS);
-    duration = faker.number.int({ min: 1, max: INT_MAX });
+    // min: 2 keeps us in the plural range — the new DurationInput renders
+    // proper singulars ("1 day") which would break exact-match option lookups.
+    duration = faker.number.int({ min: 2, max: INT_MAX });
 
     questionnaireUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`;
 
@@ -154,14 +170,7 @@ test.describe("Medication Request Questionnaire", () => {
     await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
     await page.getByRole("option", { name: frequencyData.display }).click();
 
-    await page.getByRole("combobox", { name: "1 day" }).click();
-    await page
-      .getByPlaceholder("Type eg. 5 days, 2 weeks")
-      .fill(`${duration} ${durationUnit}`);
-
-    await page
-      .getByRole("option", { name: `${duration} ${durationUnit}` })
-      .click();
+    await selectDuration(page, duration, durationUnit);
 
     // Select random additional instruction - target only enabled button
     const instruction = faker.helpers.arrayElement(instructionOptions);
@@ -214,7 +223,7 @@ test.describe("Medication Request Questionnaire", () => {
       .last()
       .fill(notes);
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -230,7 +239,7 @@ test.describe("Medication Request Questionnaire", () => {
     const medicationRow = page
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
+      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
       .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
@@ -271,16 +280,9 @@ test.describe("Medication Request Questionnaire", () => {
     await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
     await page.getByRole("option", { name: frequencyData.display }).click();
 
-    await page.getByRole("combobox", { name: "1 day" }).click();
-    await page
-      .getByPlaceholder("Type eg. 5 days, 2 weeks")
-      .fill(`${duration} ${durationUnit}`);
+    await selectDuration(page, duration, durationUnit);
 
-    await page
-      .getByRole("option", { name: `${duration} ${durationUnit}` })
-      .click();
-
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -296,7 +298,7 @@ test.describe("Medication Request Questionnaire", () => {
     const medicationRow = page
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
+      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
       .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
@@ -318,7 +320,7 @@ test.describe("Medication Request Questionnaire", () => {
       .getByRole("option", { name: medicationName, exact: true })
       .click();
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(page.getByText("Dosage*This field is required")).toBeVisible();
 

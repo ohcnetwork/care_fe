@@ -14,6 +14,7 @@ import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import useFilters from "@/hooks/useFilters";
+import { facilityDetailsPageSearch } from "@/lib/router/search/facility";
 
 import query from "@/Utils/request/query";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
@@ -21,7 +22,7 @@ import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import { goBack } from "@/Utils/utils";
 import { Button } from "@/components/ui/button";
 import { FeatureBadge } from "./Utils";
-import { UserCard } from "./components/UserCard";
+import { FacilityUserCard as UserCard } from "./components/UserCard";
 
 interface Props {
   id: string;
@@ -37,6 +38,7 @@ export function FacilityDetailsPage({ id }: Props) {
   });
 
   const { Pagination } = useFilters({
+    schema: facilityDetailsPageSearch,
     limit: 18,
   });
 

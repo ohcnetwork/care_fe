@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -25,6 +24,8 @@ import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading"
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
+import { navigate } from "@/lib/router/navigate";
 import { Code } from "@/types/base/code/code";
 import { ConditionOperationSummary } from "@/types/base/condition/condition";
 import {
@@ -32,7 +33,10 @@ import {
   getValuesetSummary,
   QualifiedRange,
 } from "@/types/base/qualifiedRange/qualifiedRange";
-import { OBSERVATION_DEFINITION_STATUS_COLORS } from "@/types/emr/observationDefinition/observationDefinition";
+import {
+  OBSERVATION_DEFINITION_STATUS_COLORS,
+  ObservationDefinitionStatus,
+} from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 
 interface Props {
@@ -194,7 +198,7 @@ export default function ObservationDefinitionView({
     isError,
   } = useQuery({
     queryKey: ["observationDefinitions", observationSlug],
-    queryFn: query(observationDefinitionApi.retrieveObservationDefinition, {
+    queryFn: query(observationDefinitionApi.get, {
       pathParams: { observationSlug },
       queryParams: {
         facility: facilityId,
@@ -204,7 +208,7 @@ export default function ObservationDefinitionView({
 
   const { mutate: updateObservationDefinition, isPending: isDeleting } =
     useMutation({
-      mutationFn: mutate(observationDefinitionApi.updateObservationDefinition, {
+      mutationFn: mutate(observationDefinitionApi.update, {
         pathParams: { observationSlug },
         queryParams: {
           facility: facilityId,
@@ -213,18 +217,29 @@ export default function ObservationDefinitionView({
       onSuccess: () => {
         toast.success(t("definition_deleted_successfully"));
         queryClient.invalidateQueries({ queryKey: ["observationDefinitions"] });
-        navigate(`/facility/${facilityId}/settings/observation_definitions`);
+        navigate({
+          to: "/facility/$facilityId/settings/observation_definitions",
+          params: { facilityId },
+        });
       },
     });
 
   const handleDelete = () => {
     if (!definition) return;
     updateObservationDefinition({
-      ...definition,
-      component: definition.component || [],
-      status: "retired",
+      title: definition.title,
+      status: ObservationDefinitionStatus.RETIRED,
+      description: definition.description,
+      category: definition.category,
+      code: definition.code,
+      permitted_data_type: definition.permitted_data_type,
+      component: definition.component,
+      body_site: definition.body_site,
+      method: definition.method,
+      permitted_unit: definition.permitted_unit,
+      derived_from_uri: definition.derived_from_uri,
+      qualified_ranges: definition.qualified_ranges,
       slug_value: definition.slug_config.slug_value,
-      facility: facilityId,
     });
   };
 
@@ -247,9 +262,7 @@ export default function ObservationDefinitionView({
             variant="outline"
             className="mt-4"
             onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/observation_definitions`,
-              )
+              goBack(`/facility/${facilityId}/settings/observation_definitions`)
             }
           >
             <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
@@ -268,7 +281,7 @@ export default function ObservationDefinitionView({
           size="xs"
           className="mb-2"
           onClick={() =>
-            navigate(`/facility/${facilityId}/settings/observation_definitions`)
+            goBack(`/facility/${facilityId}/settings/observation_definitions`)
           }
         >
           <CareIcon icon="l-arrow-left" className="size-4" />
@@ -305,9 +318,10 @@ export default function ObservationDefinitionView({
             <Button
               variant="outline"
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/observation_definitions/${definition.slug}/edit`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/settings/observation_definitions/$observationSlug/edit",
+                  params: { facilityId, observationSlug: definition.slug },
+                })
               }
             >
               <CareIcon icon="l-pen" className="mr-2 size-4" />
@@ -413,7 +427,7 @@ export default function ObservationDefinitionView({
           </CardContent>
         </Card>
 
-        {definition.component?.length > 0 && (
+        {definition.component && definition.component.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>{t("components")}</CardTitle>
@@ -423,7 +437,7 @@ export default function ObservationDefinitionView({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {definition.component.map((comp, index) => (
+                {definition.component?.map((comp, index) => (
                   <div
                     key={index}
                     className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"

@@ -1,6 +1,6 @@
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { ArrowRight } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -13,15 +13,21 @@ import { formatName } from "@/Utils/utils";
 import { DeviceLocationHistory } from "@/types/device/device";
 
 interface LocationCardProps {
+  facilityId: string;
   locationData: DeviceLocationHistory;
 }
 
 interface LocationNodeProps {
+  facilityId: string;
   locationData: DeviceLocationHistory;
   children?: React.ReactNode;
 }
 
-function LocationNode({ locationData, children }: LocationNodeProps) {
+function LocationNode({
+  facilityId,
+  locationData,
+  children,
+}: LocationNodeProps) {
   const { t } = useTranslation();
   const { start, end, location, created_by } = locationData;
 
@@ -29,7 +35,8 @@ function LocationNode({ locationData, children }: LocationNodeProps) {
     <div className="flex flex-col gap-1">
       <div className="flex items-center text-sm font-semibold">
         <Link
-          href={`/locations/${location.id}`}
+          to="/facility/$facilityId/settings/locations/$id"
+          params={{ facilityId, id: location.id }}
           className="flex items-center gap-1"
         >
           {location.name}
@@ -62,6 +69,7 @@ function LocationNode({ locationData, children }: LocationNodeProps) {
 }
 
 export const DeviceLocationTimelineCard = ({
+  facilityId,
   locationData,
 }: LocationCardProps) => {
   const { end } = locationData;
@@ -83,7 +91,7 @@ export const DeviceLocationTimelineCard = ({
         </div>
         {!end && <div className="flex-1 w-px bg-gray-200" />}
       </div>
-      <LocationNode locationData={locationData} />
+      <LocationNode facilityId={facilityId} locationData={locationData} />
     </div>
   );
 };

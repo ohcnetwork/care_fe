@@ -1,10 +1,10 @@
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
 import { ResourceCategoryList } from "@/components/Common/ResourceCategoryList";
-import { ProductKnowledgeList as ProductKnowledgeListComponent } from "@/pages/Facility/settings/productKnowledge/ProductKnowledgeListComponent";
+import { navigate } from "@/lib/router/navigate";
+import { ProductKnowledgeListContent } from "@/pages/Facility/settings/productKnowledge/ProductKnowledgeListComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ProductKnowledgeStatus } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
@@ -22,15 +22,18 @@ export default function ProductKnowledgeList({
   const [allowCategoryCreate, setAllowCategoryCreate] = useState(false);
 
   const onNavigate = (slug: string) => {
-    navigate(
-      `/facility/${facilityId}/settings/product_knowledge/categories/${slug}`,
-    );
+    navigate({
+      to: "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug",
+      params: { facilityId, categorySlug: slug },
+    });
   };
 
   const onCreateItem = () => {
-    navigate(
-      `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}/new`,
-    );
+    if (!categorySlug) return;
+    navigate({
+      to: "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug/new",
+      params: { facilityId, categorySlug },
+    });
   };
 
   return (
@@ -60,7 +63,7 @@ export default function ProductKnowledgeList({
         }}
       >
         {categorySlug && (
-          <ProductKnowledgeListComponent
+          <ProductKnowledgeListContent
             facilityId={facilityId}
             categorySlug={categorySlug}
             setAllowCategoryCreate={setAllowCategoryCreate}

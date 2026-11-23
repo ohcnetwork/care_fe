@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -24,7 +23,9 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
+import { productKnowledgeListSearch } from "@/lib/router/search/settings";
 
+import { navigate } from "@/lib/router/navigate";
 import {
   PRODUCT_KNOWLEDGE_STATUS_COLORS,
   PRODUCT_KNOWLEDGE_TYPE_COLORS,
@@ -49,14 +50,14 @@ function ProductKnowledgeCard({
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <div className="flex items-start space-x-3">
+          <div className="flex items-start space-x-3 flex-1 min-w-0 w-full">
             <div className="flex-shrink-0">
               <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
                 <CareIcon icon="l-folder" className="h-5 w-5" />
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-2 mb-1">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
                 <Badge
                   variant={PRODUCT_KNOWLEDGE_TYPE_COLORS[product.product_type]}
                   className="text-xs"
@@ -70,23 +71,23 @@ function ProductKnowledgeCard({
                   {t(product.status)}
                 </Badge>
               </div>
-              <h3 className="font-medium text-gray-900 truncate text-lg">
+              <h3 className="font-medium text-gray-900 wrap-anywhere text-lg">
                 {product.name}
               </h3>
               {product.alternate_identifier && (
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 wrap-anywhere">
                   {t("product_knowledge_alternate_identifier")}:{" "}
                   {product.alternate_identifier}
                 </p>
               )}
               {product.code?.code && (
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 wrap-anywhere">
                   {product.code.system} | {product.code.code}
                 </p>
               )}
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 ml-auto">
+          <div className="flex flex-wrap gap-2 ml-auto shrink-0">
             <ProductKnowledgeActionButtons
               product={product}
               facilityId={facilityId}
@@ -111,21 +112,24 @@ function ProductKnowledgeTableRow({
   return (
     <TableRow className="hover:bg-gray-50 cursor-pointer">
       <TableCell
-        className="font-medium cursor-pointer"
+        className="font-medium cursor-pointer whitespace-normal"
         onClick={() =>
-          navigate(
-            `/facility/${facilityId}/settings/product_knowledge/${product.slug}`,
-          )
+          navigate({
+            to: "/facility/$facilityId/settings/product_knowledge/$slug",
+            params: { facilityId, slug: product.slug },
+          })
         }
       >
         <div className="flex items-center space-x-3">
-          <div className="p-1 rounded bg-gray-100 text-gray-600">
+          <div className="p-1 rounded bg-gray-100 text-gray-600 shrink-0">
             <CareIcon icon="l-folder" className="h-4 w-4" />
           </div>
-          <div>
-            <div className="font-medium text-gray-900">{product.name}</div>
+          <div className="min-w-0">
+            <div className="font-medium text-gray-900 wrap-anywhere">
+              {product.name}
+            </div>
             {product.alternate_identifier && (
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-500 wrap-anywhere">
                 {t("product_knowledge_alternate_identifier")}:{" "}
                 {product.alternate_identifier}
               </div>
@@ -167,15 +171,15 @@ interface ProductKnowledgeListProps {
   setAllowCategoryCreate: (allow: boolean) => void;
 }
 
-export function ProductKnowledgeList({
+export function ProductKnowledgeListContent({
   facilityId,
   categorySlug,
   setAllowCategoryCreate,
 }: ProductKnowledgeListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: productKnowledgeListSearch,
     limit: 15,
-    disableCache: true,
     defaultQueryParams: {
       status: "active",
     },
@@ -200,7 +204,7 @@ export function ProductKnowledgeList({
   const products = productsResponse?.results || [];
 
   useEffect(() => {
-    if (!qParams.search && qParams.page === "1") {
+    if (!qParams.search && qParams.page === 1) {
       setAllowCategoryCreate(!productsResponse?.count);
     }
   }, [
@@ -213,9 +217,9 @@ export function ProductKnowledgeList({
   return (
     <div>
       {/* Header with filters and view toggle */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 mb-6 justify-between">
         {/* Search */}
-        <div className="relative w-full sm:w-auto">
+        <div className="relative min-w-42 flex-1 lg:max-w-xs">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
             <CareIcon icon="l-search" className="size-5" />
           </span>
@@ -225,29 +229,29 @@ export function ProductKnowledgeList({
             onChange={(e) =>
               updateQuery({ search: e.target.value || undefined })
             }
-            className="w-full sm:w-[300px] pl-10"
+            className="w-full pl-10"
           />
         </div>
 
-        {/* Status Filter */}
-        <div className="w-full sm:w-auto">
+        <div className="flex flex-row gap-4 flex-wrap overflow-x-auto">
+          {/* Status Filter */}
           <FilterSelect
             value={qParams.status || ""}
             onValueChange={(value) => updateQuery({ status: value })}
             options={Object.values(ProductKnowledgeStatus)}
             label={t("status")}
             onClear={() => updateQuery({ status: undefined })}
+            className="w-full sm:w-auto"
           />
-        </div>
 
-        {/* Product Type Filter */}
-        <div className="w-full sm:w-auto">
+          {/* Product Type Filter */}
           <FilterSelect
             value={qParams.product_type || ""}
             onValueChange={(value) => updateQuery({ product_type: value })}
             options={Object.values(ProductKnowledgeType)}
             label={t("product_type")}
             onClear={() => updateQuery({ product_type: undefined })}
+            className="w-full sm:w-auto"
           />
         </div>
       </div>
@@ -275,7 +279,7 @@ export function ProductKnowledgeList({
         <>
           {/* Desktop Table View */}
           <div className="hidden lg:block">
-            <div className="border rounded-lg overflow-hidden">
+            <div className="rounded-md overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -302,7 +306,7 @@ export function ProductKnowledgeList({
 
           {/* Mobile Card View */}
           <div className="lg:hidden">
-            <div className="grid gap-3">
+            <div className="grid grid-cols-1 gap-3">
               {products.map((product) => (
                 <ProductKnowledgeCard
                   key={product.id}

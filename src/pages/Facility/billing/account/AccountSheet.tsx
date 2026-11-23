@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetFooter,
   SheetHeader,
@@ -51,13 +52,14 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { ExtensionContexts } from "@/Utils/schema/types";
 
 const createBaseSchema = (t: (key: string) => string) =>
   z.object({
     name: z.string().min(1, t("name_is_required")),
     description: z.string().optional().nullable(),
-    status: z.nativeEnum(AccountStatus),
-    billing_status: z.nativeEnum(AccountBillingStatus),
+    status: z.enum(AccountStatus),
+    billing_status: z.enum(AccountBillingStatus),
     id: z.string().optional(),
     patient: z.custom<PatientRead>().optional(),
     service_period: z.custom<Period>().optional(),
@@ -73,7 +75,7 @@ interface AccountSheetProps {
   isEdit?: boolean;
 }
 
-export function AccountSheet({
+function AccountSheet({
   open,
   onOpenChange,
   facilityId,
@@ -106,6 +108,7 @@ export function AccountSheet({
     () =>
       getCombinedExtensionProps(
         getExtensions(ExtensionEntityType.account, "write"),
+        ExtensionContexts.account_form,
       ),
     [getExtensions],
   );
@@ -140,6 +143,7 @@ export function AccountSheet({
   const extensions = useEntityExtensions({
     entityType: ExtensionEntityType.account,
     schemaType: "write",
+    context: ExtensionContexts.account_form,
     form: methods,
     existingData: initialValues?.extensions,
   });
@@ -226,7 +230,7 @@ export function AccountSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent>
+      <SheetContent className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>
             {isEdit ? t("edit_account") : t("create_account")}
@@ -236,137 +240,141 @@ export function AccountSheet({
           <Form {...methods}>
             <form
               onSubmit={methods.handleSubmit(onSubmit)}
-              className="space-y-6 py-6"
+              className="flex min-h-0 flex-1 flex-col"
             >
-              <FormField
-                name="name"
-                control={methods.control}
-                rules={{ required: t("name_is_required") }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>{t("name")}</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled={isCreating} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="description"
-                control={methods.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("description")}</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        disabled={isCreating}
-                        value={field.value || ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="status"
-                control={methods.control}
-                rules={{ required: t("required") }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>{t("status")}</FormLabel>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={isCreating}
-                      >
-                        <SelectTrigger ref={field.ref}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.keys(ACCOUNT_STATUS_COLORS).map((key) => (
-                            <SelectItem key={key} value={key}>
-                              {t(key)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="billing_status"
-                control={methods.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("billing_status")}</FormLabel>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger ref={field.ref}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {[
-                            AccountBillingStatus.open,
-                            AccountBillingStatus.carecomplete_notbilled,
-                            AccountBillingStatus.billing,
-                          ].map((status) => (
-                            <SelectItem key={status} value={status}>
-                              {t(status)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <SheetBody>
+                <div className="space-y-6">
+                  <FormField
+                    name="name"
+                    control={methods.control}
+                    rules={{ required: t("name_is_required") }}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel aria-required>{t("name")}</FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={isCreating} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="description"
+                    control={methods.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("description")}</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            disabled={isCreating}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="status"
+                    control={methods.control}
+                    rules={{ required: t("required") }}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel aria-required>{t("status")}</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={isCreating}
+                          >
+                            <SelectTrigger ref={field.ref}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.keys(ACCOUNT_STATUS_COLORS).map((key) => (
+                                <SelectItem key={key} value={key}>
+                                  {t(key)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="billing_status"
+                    control={methods.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("billing_status")}</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger ref={field.ref}>
+                              <SelectValue>{t(field.value)}</SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[
+                                AccountBillingStatus.open,
+                                AccountBillingStatus.carecomplete_notbilled,
+                                AccountBillingStatus.billing,
+                              ].map((status) => (
+                                <SelectItem key={status} value={status}>
+                                  {t(status)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              {isEdit && (
-                <FormField
-                  name="primary_encounter"
-                  control={methods.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("primary_encounter")}</FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value || ""}
-                          onValueChange={field.onChange}
-                          disabled={isCreating || isLoadingEncounters}
-                        >
-                          <SelectTrigger ref={field.ref}>
-                            <SelectValue
-                              placeholder={t("select_primary_encounter")}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {encounters?.map((encounter) => (
-                              <SelectItem
-                                key={encounter.id}
-                                value={encounter.id}
-                              >
-                                {`${t(encounter.encounter_class)} - ${t(encounter.status)} (${new Date(encounter.period.start || "").toLocaleDateString("en-IN")})`}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                  {isEdit && (
+                    <FormField
+                      name="primary_encounter"
+                      control={methods.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("primary_encounter")}</FormLabel>
+                          <FormControl>
+                            <Select
+                              value={field.value || ""}
+                              onValueChange={field.onChange}
+                              disabled={isCreating || isLoadingEncounters}
+                            >
+                              <SelectTrigger ref={field.ref}>
+                                <SelectValue
+                                  placeholder={t("select_primary_encounter")}
+                                />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {encounters?.map((encounter) => (
+                                  <SelectItem
+                                    key={encounter.id}
+                                    value={encounter.id}
+                                  >
+                                    {`${t(encounter.encounter_class)} - ${t(encounter.status)} (${new Date(encounter.period.start || "").toLocaleDateString("en-IN")})`}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
-              )}
 
-              {extensions.fields}
+                  {extensions.fields}
+                </div>
+              </SheetBody>
 
               <SheetFooter>
                 <Button

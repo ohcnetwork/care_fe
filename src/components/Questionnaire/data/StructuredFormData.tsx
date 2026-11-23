@@ -1,4 +1,5 @@
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
+import type { StructuredQuestionType } from "@/types/questionnaire/structured";
 
 const encounterQuestionnaire: QuestionnaireRead = {
   id: "encounter",
@@ -6,7 +7,8 @@ const encounterQuestionnaire: QuestionnaireRead = {
   version: "0.0.1",
   title: "Encounter",
   status: "active",
-  subject_type: "patient",
+  // Must be "encounter": a `patient` subject_type makes the renderer drop the question.
+  subject_type: "encounter",
   questions: [
     {
       id: "encounter",
@@ -17,7 +19,6 @@ const encounterQuestionnaire: QuestionnaireRead = {
       structured_type: "encounter",
     },
   ],
-  tags: [],
 };
 
 const medication_request_questionnaire: QuestionnaireRead = {
@@ -37,7 +38,6 @@ const medication_request_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const allergy_intolerance_questionnaire: QuestionnaireRead = {
@@ -57,7 +57,6 @@ const allergy_intolerance_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const medication_statement_questionnaire: QuestionnaireRead = {
@@ -77,7 +76,6 @@ const medication_statement_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const service_request_questionnaire: QuestionnaireRead = {
@@ -97,7 +95,6 @@ const service_request_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const diagnosis_questionnaire: QuestionnaireRead = {
@@ -117,7 +114,6 @@ const diagnosis_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const symptom_questionnaire: QuestionnaireRead = {
@@ -137,7 +133,25 @@ const symptom_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
+};
+
+const procedure_questionnaire: QuestionnaireRead = {
+  id: "procedure",
+  slug: "procedure",
+  version: "0.0.1",
+  title: "Procedure",
+  status: "active",
+  subject_type: "encounter",
+  questions: [
+    {
+      id: "procedure",
+      text: "Procedure",
+      type: "structured",
+      structured_type: "procedure",
+      link_id: "1.1",
+      required: true,
+    },
+  ],
 };
 
 const files_questionnaire: QuestionnaireRead = {
@@ -157,7 +171,6 @@ const files_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const time_of_death_questionnaire: QuestionnaireRead = {
@@ -177,7 +190,6 @@ const time_of_death_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const charge_item_questionnaire: QuestionnaireRead = {
@@ -197,7 +209,6 @@ const charge_item_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const appointment_questionnaire: QuestionnaireRead = {
@@ -217,10 +228,9 @@ const appointment_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
-export const STRUCTURED_QUESTIONS = [
+const structuredQuestionEntries = [
   {
     value: "allergy_intolerance",
     label: "Allergy Intolerance",
@@ -241,6 +251,11 @@ export const STRUCTURED_QUESTIONS = [
     value: "diagnosis",
     label: "Diagnosis",
     questionnaire: diagnosis_questionnaire,
+  },
+  {
+    value: "procedure",
+    label: "Procedure",
+    questionnaire: procedure_questionnaire,
   },
   {
     value: "encounter",
@@ -270,6 +285,12 @@ export const STRUCTURED_QUESTIONS = [
   },
 ] as const;
 
+export const STRUCTURED_QUESTIONS: readonly {
+  value: StructuredQuestionType;
+  label: string;
+  questionnaire: QuestionnaireRead;
+}[] = structuredQuestionEntries;
+
 export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireRead> =
   STRUCTURED_QUESTIONS.reduce(
     (acc, question) => {
@@ -281,8 +302,7 @@ export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireRead> =
     {} as Record<string, QuestionnaireRead>,
   );
 
-export type StructuredQuestionType =
-  (typeof STRUCTURED_QUESTIONS)[number]["value"];
+export type { StructuredQuestionType } from "@/types/questionnaire/structured";
 
 export function filterStructuredQuestionnaireSlugs(slug?: string) {
   return slug &&

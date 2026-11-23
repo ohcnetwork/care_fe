@@ -15,6 +15,7 @@ import {
 import UserListAndCardView from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
+import { facilityUserListSearch } from "@/lib/router/search/facility";
 
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
@@ -23,8 +24,8 @@ import facilityApi from "@/types/facility/facilityApi";
 export default function FacilityUsers(props: { facilityId: string }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: facilityUserListSearch,
     limit: 15,
-    disableCache: true,
   });
   const [activeTab, setActiveTab] = useView("users", "card");
 

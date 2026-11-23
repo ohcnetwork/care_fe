@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { Camera, FilePlus2, Mic, Upload } from "lucide-react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
 
 import { FileUploadReturn } from "@/hooks/useFileUpload";
 
@@ -21,6 +19,7 @@ interface FileUploadDropdownProps {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"];
   buttonClassName?: string;
   buttonText?: string;
+  disabled?: boolean;
 }
 
 export default function FileUploadDropdown({
@@ -28,70 +27,41 @@ export default function FileUploadDropdown({
   showAudioCapture = true,
   inputRef,
   buttonVariant = "outline",
-  buttonClassName = "flex flex-row items-center",
+  buttonClassName,
   buttonText,
+  disabled = false,
 }: FileUploadDropdownProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const prevFileCount = useRef(fileUpload.files.length);
-
-  // Auto-close dropdown when new files are added (after file picker closes)
-  useEffect(() => {
-    if (fileUpload.files.length > prevFileCount.current) {
-      setOpen(false);
-    }
-    prevFileCount.current = fileUpload.files.length;
-  }, [fileUpload.files.length]);
+  const internalInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = inputRef ?? internalInputRef;
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
+    <DropdownMenu>
+      <fileUpload.Input className="hidden" ref={fileInputRef} />
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
           variant={buttonVariant}
           className={buttonClassName}
+          disabled={disabled}
         >
-          <CareIcon icon="l-file-upload" className="mr-1" />
-          <span>{buttonText ?? t("add_files")}</span>
-          <CareIcon icon="l-angle-down" className="ml-1" />
+          <FilePlus2 />
+          {buttonText ?? t("add_files")}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-[calc(100vw-2.5rem)] sm:w-full"
-      >
-        <DropdownMenuItem
-          className="flex flex-row items-center"
-          onSelect={(e) => {
-            e.preventDefault();
-          }}
-          aria-label={t("choose_file")}
-        >
-          <Label className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium">
-            <CareIcon icon="l-file-upload-alt" />
-            <span>{t("choose_file")}</span>
-            {fileUpload.Input({
-              className: "hidden",
-              ...(inputRef ? { ref: inputRef } : {}),
-            })}
-          </Label>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onSelect={() => fileInputRef.current?.click()}>
+          <Upload />
+          {t("choose_file")}
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onSelect={() => fileUpload.handleCameraCapture()}
-          className="flex items-center text-primary-900 font-medium"
-          aria-label={t("open_camera")}
-        >
-          <CareIcon icon="l-camera" />
-          <span>{t("open_camera")}</span>
+        <DropdownMenuItem onSelect={() => fileUpload.handleCameraCapture()}>
+          <Camera />
+          {t("open_camera")}
         </DropdownMenuItem>
         {showAudioCapture && (
-          <DropdownMenuItem
-            onSelect={() => fileUpload.handleAudioCapture()}
-            className="flex items-center text-primary-900 font-medium"
-            aria-label={t("record")}
-          >
-            <CareIcon icon="l-microphone" />
-            <span>{t("record")}</span>
+          <DropdownMenuItem onSelect={() => fileUpload.handleAudioCapture()}>
+            <Mic />
+            {t("record")}
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

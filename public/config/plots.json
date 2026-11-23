@@ -49,6 +49,16 @@
                 ]
             },
             {
+                "title": "Body height",
+                "codes": [
+                    {
+                        "code": "3137-7",
+                        "system": "http://loinc.org",
+                        "display": "Height"
+                    }
+                ]
+            },
+            {
                 "title": "Body weight",
                 "codes": [
                     {
@@ -80,6 +90,11 @@
                         "code": "59408-5",
                         "system": "http://loinc.org",
                         "display": "SpO2 (pulse oximetry)"
+                    },
+                    {
+                        "code": "20564-1",
+                        "system": "http://loinc.org",
+                        "display": "Oxygen saturation in blood"
                     }
                 ]
             },
@@ -321,7 +336,7 @@
                     }
                 ]
             },
-             {
+            {
                 "title": "Fluid Output Wound Drain",
                 "codes": [
                     {
