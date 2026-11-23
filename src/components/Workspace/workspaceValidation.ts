@@ -11,6 +11,7 @@ import {
 import { getCoreWidgetConfigSchema } from "@/types/workspace/widgetConfigSchemas";
 
 import { workspaceWidgetLabel } from "./workspaceEditorCatalog";
+import { TAB_ICONS } from "./workspaceTabIcons";
 import { prepareWidgetConfigSchema } from "./workspaceWidgetSchema";
 
 /**
@@ -51,6 +52,16 @@ export function workspaceWidgetIssues(
   ];
   for (const { page, history } of pages) {
     if (page.kind !== "custom") continue;
+    // Saved templates with an unknown icon still load and fall back to the
+    // dashboard icon; new saves must pick one the tab can render.
+    if (page.icon && !Object.hasOwn(TAB_ICONS, page.icon)) {
+      issues.push(
+        t("workspace_unsupported_tab_icon", {
+          name: page.title,
+          icon: page.icon,
+        }),
+      );
+    }
     for (const column of page.columns) {
       for (const widget of column.widgets) {
         const plugin = plugins.get(widget.type);

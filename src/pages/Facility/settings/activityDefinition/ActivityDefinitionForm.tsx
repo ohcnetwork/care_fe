@@ -131,10 +131,10 @@ function ActivityDefinitionFormContent({
   const { t } = useTranslation();
 
   const formSchema = z.object({
-    title: z.string().min(1, t("field_required")),
+    title: z.string().trim().min(1, t("field_required")),
     slug_value: slugValueSchema(),
-    description: z.string().min(1, t("field_required")),
-    usage: z.string().min(1, t("field_required")),
+    description: z.string().trim().min(1, t("field_required")),
+    usage: z.string().trim().min(1, t("field_required")),
     derived_from_uri: z.string().nullable(),
     status: z.enum(Status),
     classification: z.enum(Classification),

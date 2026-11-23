@@ -81,6 +81,29 @@ test.describe("Location schedule search params", () => {
     });
   });
 
+  test.describe("west of UTC", () => {
+    // URL dates are local calendar dates. Read as UTC midnight, they would
+    // show the previous day here.
+    test.use({ timezoneId: "America/Los_Angeles" });
+
+    test("shows the bookmarked exception dates as written", async ({
+      page,
+    }) => {
+      await page.goto(
+        `${schedulePath}?${new URLSearchParams({
+          tab: "exceptions",
+          sheet: "add_exception",
+          valid_from: "2099-03-15",
+          valid_to: "2099-03-16",
+        })}`,
+      );
+
+      const sheet = addExceptionSheet(page);
+      await expect(sheet).toBeVisible();
+      await expect(validPeriod(sheet)).toHaveText("Mar 15 – Mar 16, 2099");
+    });
+  });
+
   test("ignores invalid values in a bookmarked URL", async ({ page }) => {
     await page.goto(
       `${schedulePath}?${new URLSearchParams({

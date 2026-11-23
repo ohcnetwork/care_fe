@@ -164,7 +164,11 @@ function LeafBlock({
       {errors.length > 0 && (
         <div id={errorId} className="space-y-1">
           {errors.map((error, i) => (
-            <p key={i} role="alert" className="text-sm text-red-600">
+            <p
+              key={i}
+              role="alert"
+              className="text-sm text-red-600 break-words"
+            >
               {error.msg ?? error.error}
             </p>
           ))}

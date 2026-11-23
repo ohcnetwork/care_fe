@@ -192,7 +192,7 @@ export default function ServiceRequestShow({
             serviceRequestId={serviceRequestId}
             hasFinalizedReport={hasFinalizedReport}
           />
-          <div className="px-2 m-0 mb-2">
+          <div className="px-2">
             <PatientHeader
               patient={request.encounter.patient}
               facilityId={facilityId}

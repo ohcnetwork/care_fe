@@ -484,4 +484,93 @@ test.describe("Schedule Template Management", () => {
       });
     });
   });
+
+  test.describe("Schedule exception form", () => {
+    test("should reject whitespace-only input in required text fields", async ({
+      page,
+    }) => {
+      await page
+        .getByRole("button", { name: "Exceptions", exact: true })
+        .click();
+      await page
+        .getByRole("button", { name: "Add Exception", exact: true })
+        .click();
+
+      const sheet = page
+        .getByRole("dialog")
+        .filter({ hasText: "Add Schedule Exceptions" });
+      const reasonInput = sheet.getByRole("textbox", { name: "Reason *" });
+      await reasonInput.fill("   ");
+
+      await sheet
+        .getByRole("button", { name: "Confirm Unavailability" })
+        .click();
+
+      const errorMessage = getFieldErrorMessage(reasonInput);
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("This field is required");
+    });
+  });
+
+  test.describe("Edit schedule template form", () => {
+    test("should reject whitespace-only input in required text fields", async ({
+      page,
+    }) => {
+      const testData = ScheduleTestDataFactory.createWeekdaySchedule();
+      const formPage = new ScheduleFormPage(page);
+      const cardPage = new ScheduleCardPage(page);
+      const editSheetPage = new ScheduleEditSheetPage(page);
+      const sheet = page
+        .getByRole("dialog")
+        .filter({ hasText: "Edit Schedule Template" });
+
+      await test.step("Create a template and open its edit sheet", async () => {
+        await page.getByRole("button", { name: "Create Template" }).click();
+        await formPage.fillTemplateName(testData.templateName);
+        await formPage.selectValidPeriod(1, 2);
+        await formPage.selectWeekdays(testData.weekdays);
+        await formPage.fillSessionDetails({
+          title: testData.sessionTitle,
+          startTime: testData.startTime,
+          endTime: testData.endTime,
+          patientsPerSlot: testData.patientsPerSlot,
+        });
+        await formPage.submitTemplate();
+        await expectToast(page, "Schedule template created successfully");
+        await page.getByRole("button", { name: "Next Month" }).click();
+        await cardPage.openEditForm(testData.templateName);
+        await editSheetPage.verifySheetVisible();
+      });
+
+      await test.step("Template name rejects only spaces", async () => {
+        const templateNameInput = sheet.getByRole("textbox", {
+          name: "Template Name *",
+        });
+        await expect(templateNameInput).toHaveValue(testData.templateName);
+        await templateNameInput.fill("   ");
+        await sheet.getByRole("button", { name: "Save", exact: true }).click();
+
+        const errorMessage = getFieldErrorMessage(templateNameInput);
+        await expect(errorMessage).toBeVisible();
+        await expect(errorMessage).toHaveText("This field is required");
+      });
+
+      await test.step("New session title rejects only spaces", async () => {
+        await sheet
+          .getByRole("button", { name: "Add another session" })
+          .click();
+        const sessionTitleInput = sheet.getByRole("textbox", {
+          name: "Session Title *",
+        });
+        await sessionTitleInput.fill("   ");
+        await sheet
+          .getByRole("button", { name: "Create", exact: true })
+          .click();
+
+        const errorMessage = getFieldErrorMessage(sessionTitleInput);
+        await expect(errorMessage).toBeVisible();
+        await expect(errorMessage).toHaveText("This field is required");
+      });
+    });
+  });
 });
