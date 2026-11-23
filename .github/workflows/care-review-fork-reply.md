@@ -5,15 +5,10 @@ description: >
   reply, resolve a thread, or post one conversation comment — never submit a review or approve. The
   file name predates same-repo PRs using the bridge; it now answers every PR, fork or not.
 on:
-  # Inline review-comment replies arrive from the bridge (Stage 2) as a dispatch. `aw_context` is the
-  # full envelope Stage 2 built (item_type/item_number/comment_id); gh-aw's native <github-context>
-  # lights up the PR number and comment id from it automatically.
+  # Inline review-comment replies arrive from the bridge (Stage 2) as a dispatch. Its `aw_context`
+  # input (declared by the compiler) is the envelope Stage 2 built (item_type/item_number/comment_id);
+  # gh-aw's native <github-context> lights up the PR number and comment id from it automatically.
   workflow_dispatch:
-    inputs:
-      aw_context:
-        description: "Agent caller context JSON (item_type/item_number/comment_id) from Stage 2"
-        required: true
-        type: string
   # Conversation @-mentions arrive directly. `issue_comment` runs from the default branch WITH
   # secrets even on fork PRs, so it needs no bridge.
   issue_comment:
@@ -98,7 +93,7 @@ safe-outputs:
   # issue (the run log records why).
   noop:
     report-as-issue: false
-  missing-tool:
+  report-missing-tool:
     create-issue: true
 ---
 

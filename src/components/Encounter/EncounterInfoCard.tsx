@@ -50,6 +50,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
 
   return (
     <Card
+      data-cy="encounter-card"
       data-status={encounter.status}
       key={props.encounter.id}
       className={cn(

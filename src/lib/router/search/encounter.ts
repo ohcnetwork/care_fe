@@ -5,6 +5,7 @@ import {
   searchEnum,
   searchString,
 } from "@/lib/router/search/fields";
+import { ENCOUNTER_CLASS } from "@/types/emr/encounter/encounter";
 import { Priority, Status } from "@/types/emr/serviceRequest/serviceRequest";
 import { WORKSPACE_STATUSES } from "@/types/workspace/workspace";
 
@@ -17,6 +18,8 @@ export const encounterListSearch = z.object({
   status: searchString(),
   /** A lowercase `ENCOUNTER_PRIORITY` value. */
   priority: searchString(),
+  /** Filters the All list; class-specific lists take the class from the route. */
+  encounter_class: searchEnum(ENCOUNTER_CLASS),
   encounter_id: searchString(),
   patient_filter: searchString(),
   patient_name: searchString(),
