@@ -26,6 +26,9 @@
   ],
   "author": "Open Healthcare Network Contributors",
   "license": "MIT",
+  "engines": {
+    "node": "24.x"
+  },
   "portless": {
     "name": "care",
     "script": "dev"
