@@ -48,15 +48,15 @@ function hasChildren(route: AnyRoute) {
 }
 
 /**
- * Layout flags for a plugin route: those of the deepest core layout route
- * (a route with children) whose path is a prefix of the plugin path. For
- * example, `/facility/$facilityId/settings/encounter` gets the settings
- * workspace from the settings layout. A route param matches any segment.
+ * The deepest core layout route (a route with children) whose path is a
+ * prefix of the plugin path. For example, the settings layout for
+ * `/facility/$facilityId/settings/encounter`. A route param matches any
+ * segment.
  */
-function inheritedLayout(
+function findLayoutRoute(
   routes: readonly AnyRoute[],
   fullPath: string,
-): RouteStaticData {
+): AnyRoute | undefined {
   const segments = pathSegments(fullPath);
   let layout: AnyRoute | undefined;
   let depth = -1;
@@ -72,13 +72,34 @@ function inheritedLayout(
       depth = prefix.length;
     }
   }
+  return layout;
+}
 
+/** Layout flags of the layout branch (for example, the settings workspace). */
+function inheritedLayout(layout: AnyRoute | undefined): RouteStaticData {
   const branch: RouteStaticData[] = [];
   for (let route = layout; route; route = route.parentRoute) {
     branch.unshift(route.options?.staticData ?? {});
   }
   const { sidebar, workspace, navigation } = foldLayoutFlags(branch);
   return { sidebar, workspace, navigation };
+}
+
+type Guard = (options: unknown) => unknown;
+
+/**
+ * `beforeLoad` guards of the layout branch below `parent`, outermost first
+ * (for example, the superuser guard of `/admin`). The router already runs
+ * the guards of `parent` and its ancestors.
+ */
+function inheritedGuards(layout: AnyRoute | undefined, parent: AnyRoute) {
+  const guards: Guard[] = [];
+  for (let route = layout; route; route = route.parentRoute) {
+    if (route === parent) return guards;
+    const guard = route.options?.beforeLoad as Guard | undefined;
+    if (guard) guards.unshift(guard);
+  }
+  return [];
 }
 
 /** Children the parent had before any plugin route was attached. */
@@ -146,11 +167,18 @@ export function attachPluginRoutes(
     if (seen.has(fullPath)) continue;
     seen.add(fullPath);
 
+    const layout = findLayoutRoute(coreRoutes, fullPath);
+    const guards = inheritedGuards(layout, parent);
     pluginRoutes.push(
       createRoute({
         getParentRoute: () => parent,
         path: routerPath,
-        staticData: inheritedLayout(coreRoutes, fullPath),
+        staticData: inheritedLayout(layout),
+        beforeLoad: guards.length
+          ? async (options) => {
+              for (const guard of guards) await guard(options);
+            }
+          : undefined,
         component: () => (
           <PluginRouteComponent plugin={plugin} render={render} />
         ),

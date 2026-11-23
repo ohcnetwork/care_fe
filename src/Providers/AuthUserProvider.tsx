@@ -21,7 +21,11 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import { type AuthStatus, setAuthStatusResolver } from "@/lib/router/auth";
+import {
+  type AuthStatus,
+  setAuthStatusResolver,
+  setSuperuserResolver,
+} from "@/lib/router/auth";
 import { usePathname } from "@/lib/router/location";
 import { navigate } from "@/lib/router/navigate";
 import { getRouter } from "@/lib/router/routerRef";
@@ -36,6 +40,7 @@ import {
 } from "@/types/auth/auth";
 import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/otp/otp";
+import { CurrentUserRead } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
 interface Props {
@@ -100,15 +105,22 @@ export default function AuthUserProvider({ children }: Props) {
     patientTokenRef.current = token;
     setPatientTokenState(token);
   }, []);
-  useState(() =>
+  useState(() => {
     setAuthStatusResolver(() =>
       readAuthStatus(
         queryClient,
         accessTokenRef.current,
         patientTokenRef.current,
       ),
-    ),
-  );
+    );
+    setSuperuserResolver(
+      () =>
+        !!queryClient.getQueryData<CurrentUserRead>([
+          "currentUser",
+          accessTokenRef.current,
+        ])?.is_superuser,
+    );
+  });
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["currentUser", accessToken],

@@ -18,23 +18,33 @@ export type Area = "app" | "patient" | "public";
 export interface RouterAuth {
   /** Read at navigation time, so guards see a sign-in or sign-out at once. */
   readonly status: AuthStatus;
+  /** Whether the signed-in staff user is a superuser. */
+  readonly isSuperuser: boolean;
 }
 
 let resolveStatus: () => AuthStatus = () => "loading";
+let resolveIsSuperuser: () => boolean = () => false;
 
 /**
  * The `auth` object in the router context. `AuthUserProvider` registers the
- * resolver. The object identity never changes; the provider calls
+ * resolvers. The object identity never changes; the provider calls
  * `router.invalidate()` when the status changes, so the guards run again.
  */
 export const routerAuth: RouterAuth = {
   get status() {
     return resolveStatus();
   },
+  get isSuperuser() {
+    return resolveIsSuperuser();
+  },
 };
 
 export function setAuthStatusResolver(resolver: () => AuthStatus) {
   resolveStatus = resolver;
+}
+
+export function setSuperuserResolver(resolver: () => boolean) {
+  resolveIsSuperuser = resolver;
 }
 
 /** The area for routes that do not set one (for example, a not-found). */
@@ -112,6 +122,13 @@ export function requirePatient({
       throw notFound();
     default:
       throw redirectToLogin(location);
+  }
+}
+
+/** `/admin`: superusers only. Other staff users get a not-found. */
+export function requireSuperuser({ context }: GuardOptions) {
+  if (context.auth.status === "user" && !context.auth.isSuperuser) {
+    throw notFound();
   }
 }
 
