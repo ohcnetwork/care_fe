@@ -43,7 +43,9 @@ test.describe("Encounter list search params", () => {
     page,
   }) => {
     await page.goto(listUrl());
-    await expect(page.getByRole("button", { name: /^filter$/i })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /^add filter$/i }),
+    ).toBeVisible();
 
     const request = encounterListRequest(
       page,
@@ -55,6 +57,7 @@ test.describe("Encounter list search params", () => {
 
     await expect(page).toHaveURL(/[?&]priority=urgent(&|$)/);
     await expect(page).toHaveURL(/[?&]page=1(&|$)/);
+    await page.getByRole("button", { name: /active filters/i }).click();
     await expect(selectedMultiFilterBar(page, /priority/i)).toContainText(
       /urgent/i,
     );
@@ -69,6 +72,7 @@ test.describe("Encounter list search params", () => {
     await page.goto(listUrl({ status: "in_progress" }));
     await request;
 
+    await page.getByRole("button", { name: /active filters/i }).click();
     await expect(selectedMultiFilterBar(page, /status/i)).toContainText(
       /in progress/i,
     );

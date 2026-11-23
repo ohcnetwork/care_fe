@@ -15,6 +15,7 @@ import {
   SelectedDateBadge,
   applyDateDraftOnClose,
 } from "./dateFilter";
+import { FilterMenuSearchProvider } from "./filterMenuSearch";
 import FilterRenderer from "./filterRenderer";
 import { FilterDateRange, FilterState } from "./utils/Utils";
 
@@ -27,6 +28,12 @@ interface DomainFilterValueProps {
   onOpenChange?: (open: boolean) => void;
   facilityId?: string;
   className?: string;
+  trigger?: React.ReactElement;
+  finalFocus?: boolean;
+  /** Shows the picker header with a back button (e.g. to the field list). */
+  onBack?: () => void;
+  /** Shows the picker header with a close button. */
+  onClose?: () => void;
 }
 
 export function DomainFilterValue({
@@ -38,13 +45,17 @@ export function DomainFilterValue({
   onOpenChange,
   facilityId,
   className,
+  trigger,
+  finalFocus,
+  onBack,
+  onClose,
 }: DomainFilterValueProps) {
   const { t } = useTranslation();
   const selected = toDomainValues(state, values);
   const { filter } = state;
   const dateDraftRef = useRef<DateFilterHandle>(null);
 
-  return (
+  const menu = (
     <DropdownMenu
       open={open}
       onOpenChange={(next, details) => {
@@ -53,32 +64,39 @@ export function DomainFilterValue({
       }}
     >
       <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          data-slot="filter-value"
-          aria-label={t("filter_value", { field: t(filter.label) })}
-          className={cn(
-            "min-w-0 flex-1 justify-start font-normal shadow-sm md:flex-none",
-            className,
-          )}
-        >
-          <span className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
-            {values.length === 0 ? (
-              t("select")
-            ) : filter.type === "date" ? (
-              <SelectedDateBadge
-                selected={selected as FilterDateRange}
-                filter={filter}
-                interactive={false}
-              />
-            ) : (
-              filter.renderSelected?.(selected, filter)
+        {trigger ?? (
+          <Button
+            type="button"
+            variant="outline"
+            data-slot="filter-value"
+            aria-label={t("filter_value", { field: t(filter.label) })}
+            className={cn(
+              "min-w-0 flex-1 justify-start font-normal shadow-sm md:flex-none",
+              className,
             )}
-          </span>
-        </Button>
+          >
+            <span className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
+              {values.length === 0 ? (
+                t("select")
+              ) : filter.type === "date" ? (
+                <SelectedDateBadge
+                  selected={selected as FilterDateRange}
+                  filter={filter}
+                  interactive={false}
+                />
+              ) : (
+                filter.renderSelected?.(selected, filter)
+              )}
+            </span>
+          </Button>
+        )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-80 p-0" align="start">
+      <DropdownMenuContent
+        className="w-80 p-0"
+        align="start"
+        finalFocus={finalFocus}
+        aria-label={t(filter.label)}
+      >
         <FilterRenderer
           activeFilter={filter.key}
           dateDraftRef={dateDraftRef}
@@ -87,11 +105,23 @@ export function DomainFilterValue({
             [filter.key]: { ...state, selected },
           }}
           facilityId={facilityId}
+          handleBack={onBack}
+          handleClose={onClose}
           onFilterChange={(_, next) =>
             onChange(Array.isArray(next) ? next : [next])
           }
         />
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+  return filter.type === "command" ||
+    filter.type === "tag" ||
+    filter.type === "department" ||
+    filter.type === "care_team" ||
+    filter.type === "facility_user" ||
+    filter.type === "activity_definition" ? (
+    <FilterMenuSearchProvider>{menu}</FilterMenuSearchProvider>
+  ) : (
+    menu
   );
 }

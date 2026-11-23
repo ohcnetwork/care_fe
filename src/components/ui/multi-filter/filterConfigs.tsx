@@ -23,7 +23,6 @@ import {
   ActivityDefinitionFilterValue,
   SelectedActivityDefinitionBadge,
 } from "./activityDefinitionFilter";
-import { SelectedCareTeamBadge } from "./careTeamFilter";
 import { SelectedDateBadge, getDateOperations } from "./dateFilter";
 import { SelectedDepartmentBadge } from "./departmentFilter";
 import { GenericSelectedBadge } from "./genericFilter";
@@ -120,6 +119,7 @@ export const encounterStatusFilter = (
       },
       getOperations: () => customOperations || [{ label: "is" }],
       mode,
+      optionSize: "default",
       icon: <CircleDashed className="w-4 h-4" />,
     },
   );
@@ -192,6 +192,7 @@ export const encounterPriorityFilter = (
       },
       getOperations: () => customOperations || [{ label: "is" }],
       mode,
+      icon: <Zap className="size-4" />,
     },
   );
 export const dateFilter = (
@@ -629,7 +630,9 @@ export const careTeamFilter = (
 ) =>
   createFilterConfig(key, label ? t(label) : t("care_team"), "care_team", [], {
     renderSelected: (selected: FilterValues) => {
-      return <SelectedCareTeamBadge selected={selected as UserReadMinimal[]} />;
+      return (
+        <SelectedFacilityUserBadge selected={selected as UserReadMinimal[]} />
+      );
     },
     getOperations: () => [{ label: "is" }],
     mode,

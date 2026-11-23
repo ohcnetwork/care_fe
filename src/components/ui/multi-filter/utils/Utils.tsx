@@ -9,6 +9,7 @@ import {
   subYears,
 } from "date-fns";
 
+import type { FilterFieldConfig } from "@/components/ui/filters";
 import { ActivityDefinitionFilterValue } from "@/components/ui/multi-filter/activityDefinitionFilter";
 import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter";
 
@@ -91,6 +92,7 @@ export interface BaseFilterConfig {
   ) => React.ReactNode;
   getOperations?: (selected: FilterValues) => Operation[];
   mode?: FilterMode;
+  optionSize?: FilterFieldConfig["optionSize"];
   disableClear?: boolean;
   showColorIndicators?: boolean;
 }
@@ -223,6 +225,7 @@ export function createFilterConfig(
     ) => React.ReactNode;
     getOperations?: (selected: FilterValues) => Operation[];
     mode?: FilterMode;
+    optionSize?: BaseFilterConfig["optionSize"];
     icon?: React.ReactNode;
     dateRangeOptions?: DateRangeOption[];
     operationKey?: string;
@@ -236,6 +239,7 @@ export function createFilterConfig(
     renderSelected,
     getOperations,
     mode,
+    optionSize,
     icon,
     dateRangeOptions,
     operationKey,
@@ -250,6 +254,7 @@ export function createFilterConfig(
     renderSelected: renderSelected || defaultRenderSelected,
     getOperations: getOperations || defaultGetOperations,
     mode: mode || "single",
+    optionSize,
     icon,
     operationKey,
     disableClear,

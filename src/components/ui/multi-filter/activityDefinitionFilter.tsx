@@ -9,12 +9,9 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
@@ -34,7 +31,13 @@ import {
 } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 
+import { FilterChoiceItem } from "./filterChoiceItem";
 import FilterHeader from "./filterHeader";
+import {
+  FilterMenuList,
+  FilterMenuSearch,
+  useFilterMenuSearch,
+} from "./filterMenuSearch";
 import { FilterConfig, FilterMode, FilterValues } from "./utils/Utils";
 
 interface CategoryBreadcrumb {
@@ -67,7 +70,8 @@ function ActivityDefinitionFilterDropdown({
   mode?: FilterMode;
 }) {
   const { t } = useTranslation();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { search: searchQuery, setSearch: setSearchQuery } =
+    useFilterMenuSearch();
   const [breadcrumbs, setBreadcrumbs] = useState<CategoryBreadcrumb[]>([]);
   const [currentParent, setCurrentParent] = useState<string | undefined>(
     undefined,
@@ -160,43 +164,6 @@ function ActivityDefinitionFilterDropdown({
     setSearchQuery("");
   };
 
-  const handleDefinitionToggle = (definition: ActivityDefinitionReadSpec) => {
-    const isSelected = selectedDefinitions.some((d) => d.id === definition.id);
-
-    if (mode === "single") {
-      // Single-select: replace selection
-      if (isSelected) {
-        onDefinitionsChange([]);
-      } else {
-        onDefinitionsChange([
-          {
-            id: definition.id,
-            slug: definition.slug,
-            title: definition.title,
-            category: definition.category,
-          },
-        ]);
-      }
-    } else {
-      // Multi-select: toggle
-      if (isSelected) {
-        onDefinitionsChange(
-          selectedDefinitions.filter((d) => d.id !== definition.id),
-        );
-      } else {
-        onDefinitionsChange([
-          ...selectedDefinitions,
-          {
-            id: definition.id,
-            slug: definition.slug,
-            title: definition.title,
-            category: definition.category,
-          },
-        ]);
-      }
-    }
-  };
-
   const getDisplayPath = (definition: ActivityDefinitionReadSpec) => {
     const pathParts: string[] = [];
     if (definition.category) {
@@ -216,31 +183,18 @@ function ActivityDefinitionFilterDropdown({
     return pathParts.join(" > ");
   };
 
-  useKeyboardShortcut(
-    ["ArrowLeft"],
-    () => {
-      if (breadcrumbs.length > 0) {
-        handleBreadcrumbClick(breadcrumbs.length - 2);
-      } else {
-        handleBack?.();
-      }
-    },
-    {
-      overrideSystem: true,
-    },
-  );
-
   return (
-    <div className="max-h-[40vh] overflow-y-auto">
+    <div
+      className="max-h-[40vh] overflow-y-auto"
+      onKeyDown={(event) => {
+        if (event.key !== "ArrowLeft" || searchQuery) return;
+        if (breadcrumbs.length) handleBreadcrumbClick(breadcrumbs.length - 2);
+        else handleBack?.();
+      }}
+    >
       {/* Search Input */}
       <div className="p-3 border-b">
-        <Input
-          placeholder={t("search_activity_definition")}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => e.stopPropagation()}
-          className="h-8 text-sm"
-        />
+        <FilterMenuSearch placeholder={t("search_activity_definition")} />
       </div>
 
       {/* Breadcrumbs */}
@@ -296,7 +250,7 @@ function ActivityDefinitionFilterDropdown({
         </div>
       )}
 
-      <div className="p-2">
+      <FilterMenuList className="p-2">
         {/* Selected Definitions */}
         {selectedDefinitions.length > 0 && (
           <>
@@ -304,20 +258,16 @@ function ActivityDefinitionFilterDropdown({
               {t("selected")}
             </div>
             {selectedDefinitions.map((def) => (
-              <DropdownMenuItem
+              <FilterChoiceItem
                 key={def.id}
-                onSelect={(e) => {
-                  e.preventDefault();
+                checked
+                multiple={mode === "multi"}
+                onChoose={() => {
                   onDefinitionsChange(
                     selectedDefinitions.filter((d) => d.id !== def.id),
                   );
                 }}
-                className="flex items-center gap-2 px-2 py-1 cursor-pointer"
               >
-                <Checkbox
-                  checked={true}
-                  className="data-checked:border-primary-700 text-white"
-                />
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-sm truncate">{def.title}</span>
                   {def.category && (
@@ -327,7 +277,7 @@ function ActivityDefinitionFilterDropdown({
                     </span>
                   )}
                 </div>
-              </DropdownMenuItem>
+              </FilterChoiceItem>
             ))}
             <div className="border-b my-2" />
           </>
@@ -383,15 +333,22 @@ function ActivityDefinitionFilterDropdown({
               .map((definition) => {
                 const displayPath = getDisplayPath(definition);
                 return (
-                  <DropdownMenuItem
+                  <FilterChoiceItem
                     key={definition.id}
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      handleDefinitionToggle(definition);
-                    }}
-                    className="flex items-center gap-2 px-2 py-1.5 cursor-pointer"
+                    multiple={mode === "multi"}
+                    checked={false}
+                    onChoose={() =>
+                      onDefinitionsChange([
+                        ...(mode === "multi" ? selectedDefinitions : []),
+                        {
+                          id: definition.id,
+                          slug: definition.slug,
+                          title: definition.title,
+                          category: definition.category,
+                        },
+                      ])
+                    }
                   >
-                    <Checkbox checked={false} className="h-4 w-4" />
                     <div className="flex flex-col min-w-0 flex-1">
                       <span className="text-sm truncate">
                         {definition.title}
@@ -403,7 +360,7 @@ function ActivityDefinitionFilterDropdown({
                         </span>
                       )}
                     </div>
-                  </DropdownMenuItem>
+                  </FilterChoiceItem>
                 );
               })}
           </>
@@ -427,7 +384,7 @@ function ActivityDefinitionFilterDropdown({
             <div className="text-sm">{t("no_matching_items_found")}</div>
           </div>
         )}
-      </div>
+      </FilterMenuList>
     </div>
   );
 }
@@ -437,17 +394,27 @@ export default function RenderActivityDefinitionFilter({
   selectedDefinitions,
   onFilterChange,
   handleBack,
+  handleClose,
   facilityId,
 }: {
   filter: FilterConfig;
   selectedDefinitions: ActivityDefinitionFilterValue[];
   onFilterChange: (filterKey: string, values: FilterValues) => void;
   handleBack?: () => void;
+  handleClose?: () => void;
   facilityId: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="p-0">
-      {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
+      {(handleBack || handleClose) && (
+        <FilterHeader
+          label={t(filter.label)}
+          icon={filter.icon}
+          onBack={handleBack}
+          onClose={handleClose}
+        />
+      )}
       <ActivityDefinitionFilterDropdown
         selectedDefinitions={selectedDefinitions}
         onDefinitionsChange={(definitions) => {

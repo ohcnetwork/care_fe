@@ -24,6 +24,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { DateFilterButton } from "@/components/ui/multi-filter/dateFilter";
 import {
   careTeamFilter,
   dateFilter,
@@ -412,9 +413,10 @@ export function EncounterList({
 
   const tagIds = qParams.tags?.split(",") || [];
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
-  const selectedTags = tagQueries
-    .map((query) => query.data)
-    .filter(Boolean) as TagConfig[];
+  // A pending detail lookup is not an empty selection: keep the open tag picker mounted.
+  const selectedTags = tagQueries.some((query) => query.isPending)
+    ? undefined
+    : tagQueries.flatMap((query) => (query.data ? [query.data] : []));
 
   // Fetch organization data if organization ID is in URL params
   const { data: selectedOrg } = useQuery({
@@ -554,7 +556,7 @@ export function EncounterList({
     selectedFilters,
     handleFilterChange,
     handleOperationChange,
-    handleClearAll,
+    handleClearFilters,
     handleClearFilter,
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
@@ -611,18 +613,14 @@ export function EncounterList({
     updateQuery,
   ]);
 
-  const displaySelectedFilters =
-    (patient_filter || encounterClass === "imp") &&
-    !created_date_after &&
-    !created_date_before
-      ? {
-          ...selectedFilters,
-          created_date: {
-            ...selectedFilters.created_date,
-            selected: [],
-          },
-        }
-      : selectedFilters;
+  const { created_date: dateState, ...toolbarFilters } = selectedFilters;
+  const dateRange =
+    Array.isArray(dateState.selected) ||
+    ((patient_filter || encounterClass === "imp") &&
+      !created_date_after &&
+      !created_date_before)
+      ? {}
+      : dateState.selected;
 
   return (
     <Page
@@ -642,110 +640,120 @@ export function EncounterList({
         </Badge>
       }
     >
-      <div className="space-y-4 mt-4 flex flex-col">
-        <div className="flex w-full min-w-0 flex-wrap items-center gap-2.5">
-          <div className="relative w-full sm:w-auto sm:min-w-60">
-            <Popover
-              open={searchOptionsOpen && showSearchOptions}
-              onOpenChange={setSearchOptionsOpen}
-            >
-              <PopoverAnchor asChild>
-                <InputGroup>
-                  <InputGroupInput
-                    ref={searchInputRef}
-                    value={searchText}
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setSearchText(value);
-                      setSearchOptionsOpen(value.trim() !== "");
-                      setActiveSearchOptionIndex(0);
-                    }}
-                    onFocus={() => {
-                      if (showSearchOptions) {
-                        setSearchOptionsOpen(true);
-                      }
-                    }}
-                    onKeyDown={handleSearchInputKeyDown}
-                    placeholder={selectedSearchType.placeholder}
-                  />
-                  <InputGroupAddon>
-                    <Search aria-hidden="true" />
-                  </InputGroupAddon>
-                </InputGroup>
-              </PopoverAnchor>
-              <PopoverContent
-                className="w-(--anchor-width) p-0"
-                align="start"
-                onOpenAutoFocus={(event) => {
-                  event.preventDefault();
-                  searchInputRef.current?.focus();
-                }}
-                onCloseAutoFocus={(event) => {
-                  event.preventDefault();
-                }}
+      <div className="@container/toolbar space-y-4 mt-4 flex flex-col">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 @4xl/toolbar:flex-nowrap">
+          <div className="flex w-full min-w-0 items-center gap-2 @4xl/toolbar:w-auto">
+            <div className="relative min-w-24 flex-1 @4xl/toolbar:w-60 @4xl/toolbar:flex-none">
+              <Popover
+                open={searchOptionsOpen && showSearchOptions}
+                onOpenChange={setSearchOptionsOpen}
               >
-                <Command>
-                  <CommandList>
-                    <CommandGroup>
-                      {searchWithOptions.map((option, index) => (
-                        <CommandItem
-                          key={option.key}
-                          value={option.key}
-                          onSelect={() => handleSearchWithChange(option.key)}
-                          className={`flex items-center gap-2 ${
-                            activeSearchOptionIndex === index ? "bg-accent" : ""
-                          }`}
-                          onMouseEnter={() => setActiveSearchOptionIndex(index)}
-                        >
-                          <div>
-                            {searchText}{" "}
-                            <span className="text-muted-foreground">
-                              {option.label}
-                            </span>
-                          </div>
-                          <Check
-                            className={`ml-auto size-4 ${
-                              option.key === searchWith
-                                ? "opacity-100"
-                                : "opacity-0"
+                <PopoverAnchor asChild>
+                  <InputGroup>
+                    <InputGroupInput
+                      ref={searchInputRef}
+                      value={searchText}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setSearchText(value);
+                        setSearchOptionsOpen(value.trim() !== "");
+                        setActiveSearchOptionIndex(0);
+                      }}
+                      onFocus={() => {
+                        if (showSearchOptions) {
+                          setSearchOptionsOpen(true);
+                        }
+                      }}
+                      onKeyDown={handleSearchInputKeyDown}
+                      placeholder={selectedSearchType.placeholder}
+                    />
+                    <InputGroupAddon>
+                      <Search aria-hidden="true" />
+                    </InputGroupAddon>
+                  </InputGroup>
+                </PopoverAnchor>
+                <PopoverContent
+                  className="w-(--anchor-width) p-0"
+                  align="start"
+                  onOpenAutoFocus={(event) => {
+                    event.preventDefault();
+                    searchInputRef.current?.focus();
+                  }}
+                  onCloseAutoFocus={(event) => {
+                    event.preventDefault();
+                  }}
+                >
+                  <Command>
+                    <CommandList>
+                      <CommandGroup>
+                        {searchWithOptions.map((option, index) => (
+                          <CommandItem
+                            key={option.key}
+                            value={option.key}
+                            onSelect={() => handleSearchWithChange(option.key)}
+                            className={`flex items-center gap-2 ${
+                              activeSearchOptionIndex === index
+                                ? "bg-accent"
+                                : ""
                             }`}
-                          />
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+                            onMouseEnter={() =>
+                              setActiveSearchOptionIndex(index)
+                            }
+                          >
+                            <div>
+                              {searchText}{" "}
+                              <span className="text-muted-foreground">
+                                {option.label}
+                              </span>
+                            </div>
+                            <Check
+                              className={`ml-auto size-4 ${
+                                option.key === searchWith
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              }`}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <PatientIdentifierFilter
+              onSelect={(patientId, patientName) =>
+                updateQuery({
+                  patient_filter: patientId,
+                  patient_name: patientName,
+                  created_date_after: undefined,
+                  created_date_before: undefined,
+                })
+              }
+              placeholder={t("filter_by_identifier")}
+              size="default"
+              className="w-auto min-w-0 flex-1 @4xl/toolbar:flex-none [&>[data-variant]]:shadow-2xs"
+              scanLabelClassName="hidden @lg/toolbar:block"
+              patientId={qParams.patient_filter}
+              patientName={qParams.patient_name}
+            />
           </div>
-          <PatientIdentifierFilter
-            onSelect={(patientId, patientName) =>
-              updateQuery({
-                patient_filter: patientId,
-                patient_name: patientName,
-                created_date_after: undefined,
-                created_date_before: undefined,
-              })
-            }
-            placeholder={t("filter_by_identifier")}
-            size="default"
-            className="w-full sm:w-auto"
-            patientId={qParams.patient_filter}
-            patientName={qParams.patient_name}
-          />
-          <div className="w-full min-w-0 sm:w-auto">
+          <div className="shrink-0">
             <MultiFilter
-              selectedFilters={displaySelectedFilters}
+              compact
+              selectedFilters={toolbarFilters}
               onFilterChange={handleFilterChange}
               onOperationChange={handleOperationChange}
-              onClearAll={handleClearAll}
+              onClearAll={() => handleClearFilters(Object.keys(toolbarFilters))}
               onClearFilter={handleClearFilter}
-              className="w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
-              triggerButtonClassName="self-start sm:self-center"
-              clearAllButtonClassName="self-center"
               facilityId={facilityId}
             />
           </div>
+          <DateFilterButton
+            filter={dateState.filter}
+            selected={dateRange}
+            onFilterChange={handleFilterChange}
+          />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
