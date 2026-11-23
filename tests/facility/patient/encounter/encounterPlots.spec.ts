@@ -63,7 +63,14 @@ test.describe("Encounter Plots Tab", () => {
           contentType: "application/json",
           body: JSON.stringify({
             results: [
-              { code: { code: "8867-4", display: "Pulse" }, results: [] },
+              {
+                code: {
+                  code: "8867-4",
+                  system: "http://loinc.org",
+                  display: "Pulse",
+                },
+                results: [],
+              },
             ],
           }),
         });
@@ -95,9 +102,20 @@ test.describe("Encounter Plots Tab", () => {
           contentType: "application/json",
           body: JSON.stringify({
             results: [
-              { code: { code: "8867-4", display: "Pulse" }, results: [] },
               {
-                code: { code: "8310-5", display: "Temperature" },
+                code: {
+                  code: "8867-4",
+                  system: "http://loinc.org",
+                  display: "Pulse",
+                },
+                results: [],
+              },
+              {
+                code: {
+                  code: "8310-5",
+                  system: "http://loinc.org",
+                  display: "Temperature",
+                },
                 results: [
                   {
                     effective_datetime: "2026-10-13T06:56:32Z",
@@ -113,7 +131,11 @@ test.describe("Encounter Plots Tab", () => {
                 ],
               },
               {
-                code: { code: "2339-0", display: "GRBS" },
+                code: {
+                  code: "2339-0",
+                  system: "http://loinc.org",
+                  display: "GRBS",
+                },
                 results: [
                   {
                     effective_datetime: "2026-10-13T06:56:32Z",
