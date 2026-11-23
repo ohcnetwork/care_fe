@@ -12,16 +12,9 @@ test.use({ storageState: "tests/.auth/user.json" });
 const addExceptionSheet = (page: Page) =>
   page.getByRole("dialog").filter({ hasText: "Add Schedule Exceptions" });
 
-/** The date picker of the form field with `label`. */
-const dateField = (sheet: Locator, label: string) =>
-  sheet
-    .locator('[data-slot="form-item"]')
-    .filter({
-      has: sheet.page().locator('[data-slot="form-label"]', {
-        hasText: label,
-      }),
-    })
-    .getByRole("button");
+/** The range picker that edits `valid_from` and `valid_to` together. */
+const validPeriod = (sheet: Locator) =>
+  sheet.getByRole("button", { name: /^Valid Period/ });
 
 test.describe("Location schedule search params", () => {
   let schedulePath: string;
@@ -77,13 +70,8 @@ test.describe("Location schedule search params", () => {
 
     const sheet = addExceptionSheet(page);
     await expect(sheet).toBeVisible();
-    // Each date picker shows its date from the URL.
-    await expect(dateField(sheet, "Valid From")).toContainText(
-      "March 15th, 2099",
-    );
-    await expect(dateField(sheet, "Valid Till")).toContainText(
-      "March 16th, 2099",
-    );
+    // The validity range picker shows both dates from the URL.
+    await expect(validPeriod(sheet)).toHaveText("Mar 15 – Mar 16, 2099");
 
     await test.step("Closing the sheet drops it and its dates from the URL", async () => {
       await page.keyboard.press("Escape");
