@@ -211,26 +211,18 @@ test.describe("Patient Files", () => {
     const newFileName = faker.system.fileName();
 
     // Filter for active files first
-    await page.getByRole("button", { name: "Filter" }).click();
-    await expect(
-      page.getByRole("menuitem", { name: "Active Files" }),
-    ).toBeVisible({ timeout: 5000 });
-    await page.getByRole("menuitem", { name: "Active Files" }).click();
-
     const filterPromise = page.waitForResponse(
       (response) =>
         response.url().includes("/api/v1/files/") &&
+        response.url().includes("is_archived=false") &&
         response.request().method() === "GET",
       { timeout: 15000 },
     );
+    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
+    await page.getByRole("option", { name: "Active", exact: true }).click();
 
     const filterResponse = await filterPromise;
     expect(filterResponse.status()).toBe(200);
-
-    // Wait for filter to be applied and active files badge to appear
-    await expect(page.getByText("Active Files")).toBeVisible({
-      timeout: 10000,
-    });
 
     // Upload a single file using helper
     await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
@@ -275,26 +267,18 @@ test.describe("Patient Files", () => {
     const archiveReason = faker.lorem.sentence();
 
     // Filter for active files first
-    await page.getByRole("button", { name: "Filter" }).click();
-    await expect(
-      page.getByRole("menuitem", { name: "Active Files" }),
-    ).toBeVisible({ timeout: 5000 });
-    await page.getByRole("menuitem", { name: "Active Files" }).click();
-
     const filterPromise = page.waitForResponse(
       (response) =>
         response.url().includes("/api/v1/files/") &&
+        response.url().includes("is_archived=false") &&
         response.request().method() === "GET",
       { timeout: 15000 },
     );
+    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
+    await page.getByRole("option", { name: "Active", exact: true }).click();
 
     const filterResponse = await filterPromise;
     expect(filterResponse.status()).toBe(200);
-
-    // Wait for filter to be applied and active files badge to appear
-    await expect(page.getByText("Active Files")).toBeVisible({
-      timeout: 10000,
-    });
 
     // Upload a single file using helper
     await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
