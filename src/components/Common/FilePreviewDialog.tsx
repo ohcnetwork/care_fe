@@ -254,7 +254,11 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                     onClick={async () => {
                       try {
                         const response = await fetch(fileUrl);
-                        const blob = await response.blob();
+                        // Force the PDF type so the blob: URL can never be
+                        // rendered as an active same-origin document.
+                        const blob = new Blob([await response.blob()], {
+                          type: "application/pdf",
+                        });
                         const blobUrl = window.URL.createObjectURL(blob);
                         const iframe = document.createElement("iframe");
                         iframe.style.display = "none";

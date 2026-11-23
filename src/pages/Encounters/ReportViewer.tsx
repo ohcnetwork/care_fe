@@ -347,7 +347,11 @@ export default function ReportViewer({
 
     try {
       const response = await fetch(pdfUrl);
-      const blob = await response.blob();
+      // Force the PDF type so non-PDF content (e.g. HTML reports) is never
+      // rendered as an active same-origin document via the blob: URL.
+      const blob = new Blob([await response.blob()], {
+        type: "application/pdf",
+      });
       const blobUrl = window.URL.createObjectURL(blob);
       const iframe = document.createElement("iframe");
       iframe.src = blobUrl;
