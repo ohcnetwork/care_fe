@@ -1,8 +1,7 @@
+import { Link } from "@tanstack/react-router";
 import { ChevronDown, Printer, SquarePen, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +14,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import FacilityDeleteDialog from "@/components/Facility/FacilityDeleteDialog";
-import PrintTemplateSheet from "@/components/Facility/PrintTemplateSheet";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
@@ -36,7 +34,6 @@ export function FacilityHomeActions({
   // The sheet and dialog live outside the menu so closing the menu does not unmount them.
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [printTemplatesOpen, setPrintTemplatesOpen] = useState(false);
 
   return (
     <>
@@ -61,18 +58,17 @@ export function FacilityHomeActions({
               />
               {t("edit_facility_details")}
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => setPrintTemplatesOpen(true)}
-              className={cn(
-                "h-auto w-full justify-start gap-2 rounded-sm px-2 py-1.5 text-sm font-normal tracking-normal whitespace-normal",
-                isSettings && "min-h-12 md:min-h-10",
-              )}
-            >
-              <Printer
-                className="size-4 text-muted-foreground"
-                aria-hidden="true"
-              />
-              {t("print_templates")}
+            <DropdownMenuItem asChild>
+              <Link
+                to="/facility/$facilityId/settings/print-templates"
+                params={{ facilityId: facilityData.id }}
+              >
+                <Printer
+                  className="size-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                {t("print_templates")}
+              </Link>
             </DropdownMenuItem>
             <PLUGIN_Component
               __name="FacilityHomeActions"
@@ -94,11 +90,7 @@ export function FacilityHomeActions({
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-      <PrintTemplateSheet
-        facility={facilityData}
-        open={printTemplatesOpen}
-        onOpenChange={setPrintTemplatesOpen}
-      />
+
       <EditFacilitySheet
         facilityId={facilityData.id}
         open={editOpen}

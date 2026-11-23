@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, type Page, test } from "@playwright/test";
-import { expectToast, selectFromCommand } from "tests/helper/ui";
+import { expectAndDismissToast, expectToast } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -46,7 +46,9 @@ async function createResponsibility(
   }
   await dialog.getByRole("button", { name: /^create$/i }).click();
 
-  await expectToast(page, /organization created successfully/i);
+  // Tests create more than one responsibility in a row; close this toast so
+  // the next create does not match it as well (two toasts, same text).
+  await expectAndDismissToast(page, /organization created successfully/i);
   await expect(dialog).not.toBeVisible();
 }
 
@@ -133,9 +135,9 @@ test.describe("Admin Responsibilities Page", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.reload();
 
-    await expect(
-      page.locator('[data-slot="responsibility-row"]'),
-    ).toHaveCount(101);
+    await expect(page.locator('[data-slot="responsibility-row"]')).toHaveCount(
+      101,
+    );
     await expect(listRow(page, "Responsibility 100")).toBeVisible();
     expect(requestedOffsets).toContain(100);
   });
@@ -268,11 +270,16 @@ test.describe("Admin Responsibilities Page", () => {
       }),
     ).toBeVisible();
 
-    const manageCombobox = manageSection.getByRole("combobox");
-    await selectFromCommand(page, manageCombobox, {
-      search: managedName,
-      itemIndex: 0,
-    });
+    // Pick the role by its name: the picker lists every role until the
+    // search response arrives, so the first option is not always ours.
+    await manageSection.getByRole("combobox").click();
+    const picker = page
+      .getByRole("dialog")
+      .filter({ has: page.getByRole("listbox") });
+    await picker.getByRole("combobox", { name: "Search" }).fill(managedName);
+    await picker
+      .getByRole("option", { name: managedName, exact: true })
+      .click();
 
     await expectToast(page, /managed responsibility added successfully/i);
     await expect(manageSection.getByText(managedName)).toBeVisible();
@@ -285,9 +292,7 @@ test.describe("Admin Responsibilities Page", () => {
 
     await manageSection.getByRole("button", { name: /remove/i }).click();
     await expect(confirmationDialog).toBeVisible();
-    await confirmationDialog
-      .getByRole("button", { name: /remove/i })
-      .click();
+    await confirmationDialog.getByRole("button", { name: /remove/i }).click();
     await expectToast(page, /managed responsibility removed successfully/i);
     await expect(manageSection.getByText(managedName)).not.toBeVisible();
   });
