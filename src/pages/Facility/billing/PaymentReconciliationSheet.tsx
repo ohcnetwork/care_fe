@@ -160,7 +160,9 @@ const createBaseSchema = () =>
     payment_datetime: z.string().refine((val) => new Date(val) <= new Date(), {
       message: t("payment_date_cannot_be_in_future"),
     }),
-    amount: zodDecimal({ min: 0 }),
+    amount: zodDecimal({ min: 0 }).refine(isPositive, {
+      message: t("amount_must_be_greater_than_zero"),
+    }),
     tendered_amount: zodDecimal({ min: 0 }),
     returned_amount: zodDecimal({ min: 0 }).optional(),
     target_invoice: z.string().optional(),
@@ -824,7 +826,9 @@ const PaymentReconciliationSheetBase = ({
 
                   <Button
                     type="submit"
-                    disabled={isPending || isExtensionsLoading}
+                    disabled={
+                      isPending || isExtensionsLoading || !(Number(amount) > 0)
+                    }
                     aria-label={
                       isCreditNote
                         ? t("record_credit_note")

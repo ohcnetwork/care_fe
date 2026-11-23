@@ -471,6 +471,7 @@
   "amount": "Amount",
   "amount_due": "Amount Due",
   "amount_given_by_customer": "Amount given by the customer",
+  "amount_must_be_greater_than_zero": "Amount must be greater than 0",
   "amount_paid": "Amount Paid",
   "amount_received": "Amount Received",
   "amount_refunded": "Amount Refunded",
