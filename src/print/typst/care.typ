@@ -144,27 +144,39 @@
   units
 }
 
-/// Breaks words wider than their cell, like CSS `overflow-wrap: anywhere`
-/// (Typst can't: typst/typst#674). Uses line breaks, not zero-width spaces,
-/// which PDF viewers drop characters next to when copying.
-#let fit-words(body) = layout(size => {
-  show regex("\\S+"): word => context {
-    if measure(word).width <= size.width { return word }
-    let lines = ()
-    let line = ""
-    for piece in word.text.matches(_break-after).map(m => m.text).filter(p => p != "") {
-      let units = if measure(text(piece)).width > size.width { _letters(piece) } else { (piece,) }
-      for unit in units {
-        if line != "" and measure(text(line + unit)).width > size.width {
-          lines.push(line)
-          line = unit
-        } else {
-          line += unit
-        }
+#let _word-or-space = regex("\\S+|\\s+")
+
+// Splits a word wider than `width` into lines: after punctuation first, then
+// between letters.
+#let _break-word(word, width) = {
+  let lines = ()
+  let line = ""
+  for piece in word.matches(_break-after).map(m => m.text).filter(p => p != "") {
+    let units = if measure(text(piece)).width > width { _letters(piece) } else { (piece,) }
+    for unit in units {
+      if line != "" and measure(text(line + unit)).width > width {
+        lines.push(line)
+        line = unit
+      } else {
+        line += unit
       }
     }
-    lines.push(line)
-    lines.join(linebreak())
+  }
+  lines.push(line)
+  lines.join(linebreak())
+}
+
+/// Breaks words wider than their cell, like CSS `overflow-wrap: anywhere`
+/// (Typst can't: typst/typst#674). Uses line breaks, not zero-width spaces,
+/// which PDF viewers drop characters next to when copying. Matches up to 100
+/// words at a time: past ~500 show-rule matches in one paragraph, Typst fails
+/// with "maximum grouping depth exceeded".
+#let fit-words(body) = layout(size => {
+  show regex("\\S+(?:\\s+\\S+){0,99}"): words => context {
+    words.text.matches(_word-or-space).map(m => {
+      let t = m.text
+      if t.trim() == "" or measure(text(t)).width <= size.width { t } else { _break-word(t, size.width) }
+    }).join()
   }
   body
 })

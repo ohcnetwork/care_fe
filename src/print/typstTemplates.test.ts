@@ -400,9 +400,11 @@ test("prescriptions: a long medicine name or frequency keeps every column", asyn
 });
 
 test("prescriptions: a row taller than the page continues on the next page", async () => {
-  // Numbered sentences show exactly which part of the note went missing.
+  // Numbered sentences show exactly which part of the note went missing. 900
+  // words in one cell is past the ~500 show-rule matches Typst allows in a
+  // paragraph, which fit-words once exceeded ("maximum grouping depth").
   const sentences = Array.from(
-    { length: 30 },
+    { length: 60 },
     (_, i) =>
       `S${i + 1}: take with warm water after food and watch for drowsiness, rash or stomach upset.`,
   );
