@@ -1,7 +1,6 @@
-import MarkdownIt from "markdown-it";
+import MarkdownIt, { type Token } from "markdown-it";
 import markdownItMark from "markdown-it-mark";
 import markdownItTaskLists from "markdown-it-task-lists";
-import type Token from "markdown-it/lib/token.mjs";
 
 export const richTextMarkdown = new MarkdownIt({
   html: false,
@@ -12,6 +11,10 @@ export const richTextMarkdown = new MarkdownIt({
 })
   .use(markdownItMark)
   .use(markdownItTaskLists, { enabled: false, label: true });
+
+// linkify-it 6 (markdown-it 15) disabled fuzzy links by default; keep linking
+// bare domains like "www.example.com" as before.
+richTextMarkdown.linkify.set({ fuzzyLink: true });
 
 // MDXEditor exports underlining as these exact tags. Keep every other HTML tag
 // literal instead of enabling arbitrary HTML in clinical conclusions.
