@@ -34,48 +34,54 @@ test.describe("Government organization search params", () => {
     return results[0].id;
   }
 
-  test("writes the search to the URL and the API request", async ({ page }) => {
-    const organizationId = await firstOrganizationId(page);
-    const searchText = faker.string.alpha({ length: 8, casing: "lower" });
-    await page.goto(`${listPath}/${organizationId}`);
-    await expect(searchBox(page)).toBeVisible();
-    const request = waitForApiList(
-      page,
-      "/organization/",
-      (params) =>
-        params.get("parent") === organizationId &&
-        params.get("name") === searchText,
-    );
-    await searchBox(page).fill(searchText);
-    await request;
+  test(
+    "writes the search to the URL and the API request",
+    { tag: ["@atomic", "@cap:admin.organization.search"] },
+    async ({ page }) => {
+      const organizationId = await firstOrganizationId(page);
+      const searchText = faker.string.alpha({ length: 8, casing: "lower" });
+      await page.goto(`${listPath}/${organizationId}`);
+      await expect(searchBox(page)).toBeVisible();
+      const request = waitForApiList(
+        page,
+        "/organization/",
+        (params) =>
+          params.get("parent") === organizationId &&
+          params.get("name") === searchText,
+      );
+      await searchBox(page).fill(searchText);
+      await request;
 
-    await expect(page).toHaveURL(queryParam("search", searchText));
-  });
+      await expect(page).toHaveURL(queryParam("search", searchText));
+    },
+  );
 
-  test("restores the search of an organization from a bookmarked URL", async ({
-    page,
-  }) => {
-    const organizationId = await firstOrganizationId(page);
+  test(
+    "restores the search of an organization from a bookmarked URL",
+    { tag: ["@atomic", "@cap:admin.organization.search"] },
+    async ({ page }) => {
+      const organizationId = await firstOrganizationId(page);
 
-    const searchText = faker.string.alpha({ length: 8, casing: "lower" });
-    const api = recordApiQueries(page);
-    const request = waitForApiList(
-      page,
-      "/organization/",
-      (params) =>
-        params.get("parent") === organizationId &&
-        params.get("name") === searchText &&
-        params.get("offset") === "0",
-    );
-    await page.goto(
-      withSearch(`${listPath}/${organizationId}`, {
-        search: searchText,
-        page: "abc",
-      }),
-    );
-    await request;
+      const searchText = faker.string.alpha({ length: 8, casing: "lower" });
+      const api = recordApiQueries(page);
+      const request = waitForApiList(
+        page,
+        "/organization/",
+        (params) =>
+          params.get("parent") === organizationId &&
+          params.get("name") === searchText &&
+          params.get("offset") === "0",
+      );
+      await page.goto(
+        withSearch(`${listPath}/${organizationId}`, {
+          search: searchText,
+          page: "abc",
+        }),
+      );
+      await request;
 
-    await expect(searchBox(page)).toHaveValue(searchText);
-    api.expectNotSent("abc");
-  });
+      await expect(searchBox(page)).toHaveValue(searchText);
+      api.expectNotSent("abc");
+    },
+  );
 });

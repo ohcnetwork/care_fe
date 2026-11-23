@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { createPatientIdentifierConfigViaUi } from "tests/helper/admin";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
@@ -25,58 +26,54 @@ test.describe("Patient Identifier Config - Edit", () => {
     await page.goto(targetUrl);
   });
 
-  test("should edit a patient identifier config", async ({ page }) => {
-    await page
-      .getByRole("button", { name: "Add patient identifier config" })
-      .click();
+  test(
+    "should edit a patient identifier config",
+    { tag: ["@atomic", "@cap:admin.patient-identifier-config.edit"] },
+    async ({ page }) => {
+      await createPatientIdentifierConfigViaUi(page, {
+        use,
+        display: displayName,
+        description,
+        system: systemUrl,
+        status,
+      });
 
-    await page.getByRole("combobox").filter({ hasText: "usual" }).click();
-    await page.getByRole("option", { name: use }).click();
+      await page.getByRole("button", { name: /^Status/ }).click();
+      await page
+        .getByRole("menuitemradio", { name: status, exact: true })
+        .click();
 
-    await page.getByRole("textbox", { name: "Display" }).fill(displayName);
-    await page.getByRole("textbox", { name: "Description" }).fill(description);
-    await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
+      // Verify that the new config appears in the list
+      await page
+        .getByRole("textbox", { name: "Search configs" })
+        .fill(displayName);
 
-    await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
-    await page.getByRole("option", { name: status, exact: true }).click();
+      // Now edit the created config
+      await page.getByRole("button", { name: "Edit" }).first().click();
 
-    await page.getByRole("button", { name: "Create" }).click();
+      await page
+        .getByRole("textbox", { name: "Display" })
+        .fill(`${displayName}-edited`);
+      await page
+        .getByRole("textbox", { name: "Description" })
+        .fill(`${description}-edited`);
+      await page.getByRole("button", { name: "Update" }).click();
 
-    await page.getByRole("button", { name: /^Status/ }).click();
-    await page
-      .getByRole("menuitemradio", { name: status, exact: true })
-      .click();
+      await page.getByRole("button", { name: /^Status/ }).click();
+      await page
+        .getByRole("menuitemradio", { name: status, exact: true })
+        .click();
 
-    // Verify that the new config appears in the list
-    await page
-      .getByRole("textbox", { name: "Search configs" })
-      .fill(displayName);
+      // Verify that the edited config appears in the list
+      await page
+        .getByRole("textbox", { name: "Search configs" })
+        .fill(`${displayName}-edited`);
 
-    // Now edit the created config
-    await page.getByRole("button", { name: "Edit" }).first().click();
-
-    await page
-      .getByRole("textbox", { name: "Display" })
-      .fill(`${displayName}-edited`);
-    await page
-      .getByRole("textbox", { name: "Description" })
-      .fill(`${description}-edited`);
-    await page.getByRole("button", { name: "Update" }).click();
-
-    await page.getByRole("button", { name: /^Status/ }).click();
-    await page
-      .getByRole("menuitemradio", { name: status, exact: true })
-      .click();
-
-    // Verify that the edited config appears in the list
-    await page
-      .getByRole("textbox", { name: "Search configs" })
-      .fill(`${displayName}-edited`);
-
-    const tableBody = page.locator('[data-slot="table-body"]');
-    await expect(tableBody).toContainText(`${displayName}-edited`);
-    await expect(tableBody).toContainText(systemUrl);
-    await expect(tableBody).toContainText(use);
-    await expect(tableBody).toContainText(status);
-  });
+      const tableBody = page.locator('[data-slot="table-body"]');
+      await expect(tableBody).toContainText(`${displayName}-edited`);
+      await expect(tableBody).toContainText(systemUrl);
+      await expect(tableBody).toContainText(use);
+      await expect(tableBody).toContainText(status);
+    },
+  );
 });
