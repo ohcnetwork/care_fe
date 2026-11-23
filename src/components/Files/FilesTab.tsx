@@ -1,5 +1,4 @@
 import { t } from "i18next";
-import { useQueryParams } from "raviger";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -9,6 +8,8 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 import { useCareAppTabs } from "@/hooks/useCareApps";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { fileListSearch } from "@/lib/router/search/patient";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -33,7 +34,7 @@ export const FilesTab = ({
   encounter,
   readOnly,
 }: FilesTabsProps) => {
-  const [qParams, setQParams] = useQueryParams();
+  const [qParams, setQParams] = useQueryParams(fileListSearch);
 
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(
@@ -47,7 +48,8 @@ export const FilesTab = ({
 
   const pluginTabs = useCareAppTabs<FilesTabsProps>("encounterFileTabs");
   const allowedTabs = ["all", "reports", ...Object.keys(pluginTabs)];
-  const tabValue = allowedTabs.includes(qParams.file) ? qParams.file : "all";
+  const tabValue =
+    qParams.file && allowedTabs.includes(qParams.file) ? qParams.file : "all";
 
   const canWriteCurrentEncounter =
     canWriteEncounter &&

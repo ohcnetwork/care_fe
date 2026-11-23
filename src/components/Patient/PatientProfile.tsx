@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,9 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { patientShowSearch } from "@/lib/router/search/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 import {
@@ -28,6 +30,7 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { ReferralPatientAppointments } from "@/pages/Appointments/ReferralPatientAppointments";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
+
 interface PatientProfileProps {
   facilityId?: string;
   id: string;
@@ -35,7 +38,7 @@ interface PatientProfileProps {
 }
 
 export const PatientProfile = (props: PatientProfileProps) => {
-  const [params] = useQueryParams<{ referralId?: string }>();
+  const [params] = useQueryParams(patientShowSearch);
   if (
     props.facilityId &&
     props.page === "appointments" &&
@@ -119,7 +122,7 @@ const PatientProfileContent = (props: PatientProfileProps) => {
           <div className="overflow-x-auto">
             <div className="flex flex-row" role="tablist">
               {tabs.map((tab) => (
-                <Link
+                <HrefLink
                   key={tab.route}
                   href={
                     facilityId
@@ -136,7 +139,7 @@ const PatientProfileContent = (props: PatientProfileProps) => {
                   aria-controls={`${tab.route}-panel`}
                 >
                   {t(tab.route)}
-                </Link>
+                </HrefLink>
               ))}
             </div>
           </div>
@@ -164,7 +167,7 @@ const PatientProfileContent = (props: PatientProfileProps) => {
 
                   <div className="mt-2 h-full space-y-2">
                     <Button asChild variant="outline" className="w-full">
-                      <Link
+                      <HrefLink
                         href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                           {
                             phone_number: patientData.phone_number,
@@ -175,7 +178,7 @@ const PatientProfileContent = (props: PatientProfileProps) => {
                         ).toString()}`}
                       >
                         {t("patient_home")}
-                      </Link>
+                      </HrefLink>
                     </Button>
                     <div className="space-y-3 text-left text-lg font-semibold text-secondary-900">
                       <div className="space-y-2">

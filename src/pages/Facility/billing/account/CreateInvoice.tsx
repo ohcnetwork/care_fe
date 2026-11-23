@@ -10,7 +10,6 @@ import {
   SquareArrowOutUpRight,
   XIcon,
 } from "lucide-react";
-import { navigate } from "raviger";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -54,6 +53,7 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import UserSelector from "@/components/Common/UserSelector";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
@@ -270,7 +270,7 @@ export function CreateInvoicePage({
         onSuccess?.();
       } else {
         onSuccess?.();
-        navigate(invoiceUrl, { replace: true });
+        navigate({ href: invoiceUrl, replace: true });
       }
     },
   });
@@ -807,7 +807,7 @@ export function CreateInvoicePage({
                       </FormItem>
                     )}
                   />
-                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="payment_terms"
@@ -817,6 +817,7 @@ export function CreateInvoicePage({
                           <FormControl>
                             <Textarea
                               {...field}
+                              className="resize-y"
                               disabled={createMutation.isPending}
                               placeholder={t("payment_terms_placeholder")}
                               rows={2}
@@ -835,6 +836,7 @@ export function CreateInvoicePage({
                           <FormControl>
                             <Textarea
                               {...field}
+                              className="resize-y"
                               disabled={createMutation.isPending}
                               placeholder={t("invoice_note_placeholder")}
                               rows={2}
@@ -871,11 +873,13 @@ export function CreateInvoicePage({
                   type="button"
                   variant="outline_primary"
                   disabled={!locationId}
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}`,
-                    )
-                  }
+                  onClick={() => {
+                    if (!locationId) return;
+                    navigate({
+                      to: "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId",
+                      params: { facilityId, locationId, dispenseOrderId },
+                    });
+                  }}
                 >
                   {t("dispense_now")}
                   <ShortcutBadge actionId="view-prescriptions" />

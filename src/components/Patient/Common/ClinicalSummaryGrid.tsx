@@ -33,11 +33,18 @@ export interface ClinicalSummaryItem {
 /** Compact two-column problem list for clinical panels. */
 export function ClinicalSummaryGrid({
   items,
+  className,
 }: {
   items: ClinicalSummaryItem[];
+  className?: string;
 }) {
   return (
-    <ul className="-mx-2 -mb-2 grid grid-cols-1 overflow-hidden @md/clinical-widget:grid-cols-2">
+    <ul
+      className={cn(
+        "-m-2 grid grid-cols-1 overflow-hidden @md/clinical-widget:grid-cols-2",
+        className,
+      )}
+    >
       {items.map((item) => (
         <ClinicalSummaryRow key={item.id} item={item} />
       ))}
@@ -51,7 +58,7 @@ function ClinicalSummaryRow({ item }: { item: ClinicalSummaryItem }) {
   const meta = item.meta.filter(Boolean);
 
   return (
-    <li className="-mb-px flex min-w-0 items-start gap-2 border-b border-soft-border py-2.5 pr-1 pl-3 @md/clinical-widget:odd:border-r">
+    <li className="-mb-px flex min-w-0 flex-wrap items-start gap-x-2 border-b border-soft-border py-2.5 pr-1 pl-3 @md/clinical-widget:odd:border-r">
       <div className="min-w-0 flex-1">
         <p
           className={cn(
@@ -74,24 +81,6 @@ function ClinicalSummaryRow({ item }: { item: ClinicalSummaryItem }) {
               </Fragment>
             ))}
           </p>
-        )}
-        {showNote && item.note && (
-          <div className="mt-2 rounded-md bg-soft-background p-2 text-sm">
-            <div className="flex items-start justify-between gap-2">
-              <p className="min-w-0 wrap-break-word whitespace-pre-wrap text-muted-foreground">
-                {item.note}
-              </p>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-6 shrink-0"
-                onClick={() => setShowNote(false)}
-                aria-label={t("hide_note")}
-              >
-                <X className="size-3.5" />
-              </Button>
-            </div>
-          </div>
         )}
       </div>
       <DropdownMenu>
@@ -133,6 +122,30 @@ function ClinicalSummaryRow({ item }: { item: ClinicalSummaryItem }) {
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
+      {showNote && item.note && (
+        <div className="mt-2.5 -mr-1 -mb-2.5 -ml-3 min-w-0 grow basis-full border-t border-gray-200 bg-gray-50 p-3 pt-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-xs font-semibold text-gray-800">
+              {t("note")}
+              {":"}
+            </div>
+
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="-my-2 -mr-2 text-gray-600"
+              onClick={() => setShowNote(false)}
+              aria-label={t("hide_note")}
+            >
+              <X className="size-4" />
+            </Button>
+          </div>
+
+          <p className="mt-2 max-w-full text-sm wrap-break-word whitespace-pre-wrap text-gray-700">
+            {item.note}
+          </p>
+        </div>
+      )}
     </li>
   );
 }

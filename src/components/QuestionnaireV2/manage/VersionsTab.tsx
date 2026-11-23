@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { History } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +10,7 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import {
@@ -139,7 +139,9 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      navigate(`${scope.basePath}/${questionnaire.id}/edit`)
+                      navigate({
+                        href: `${scope.basePath}/${questionnaire.id}/edit`,
+                      })
                     }
                   >
                     {canWrite ? t("continue_editing") : t("open")}
@@ -196,9 +198,9 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                          navigate(
-                            `${scope.basePath}/${questionnaire.id}/versions/${revision.id}`,
-                          )
+                          navigate({
+                            href: `${scope.basePath}/${questionnaire.id}/versions/${revision.id}`,
+                          })
                         }
                       >
                         {t("open")}

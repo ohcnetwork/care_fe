@@ -27,13 +27,6 @@ export async function selectRandomEncounterClass(page: Page) {
   await page.getByRole("button", { name: randomClass }).click();
 }
 
-export async function selectStatusInCreateDialog(page: Page, status: string) {
-  await getEncounterCreateDialog(page)
-    .getByRole("combobox", { name: "Status", exact: true })
-    .click();
-  await page.getByRole("option", { name: status, exact: true }).click();
-}
-
 export async function openCalendarAndGetNextMonthButton(page: Page) {
   await page
     .locator('[data-slot="form-item"]')

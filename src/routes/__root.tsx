@@ -25,8 +25,8 @@ const RouterDevtools = import.meta.env.DEV
  * While the router loads a page for a different route, the previous page
  * stays on screen. raviger removed it at once. Make it inert (no clicks, out
  * of the accessibility tree) until the new page commits, so a click cannot
- * land on it and cancel the navigation. Query-only changes and legacy page
- * changes (shown at once by the raviger shim) are not affected.
+ * land on it and cancel the navigation. Changes within the same route (for
+ * example a query change) are not affected.
  */
 function PreviousPageGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();

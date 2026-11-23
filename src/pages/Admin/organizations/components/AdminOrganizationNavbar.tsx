@@ -1,9 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+
+import { OrgSelect } from "@/components/Common/OrgSelect";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { cn } from "@/lib/utils";
 
 import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
@@ -28,13 +32,22 @@ function OrganizationTreeNode({
   organizationType,
   level = 0,
 }: OrganizationTreeNodeProps) {
+  const { t } = useTranslation();
   const isExpanded = expandedOrganizations.has(organization.id);
   const isSelected = organization.id === selectedOrganizationId;
-
-  const { data: children, isLoading } = useQuery({
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetchNextPageError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    refetch,
+    ref,
+  } = useInfiniteList({
     queryKey: ["organization", "list", organizationType, organization.id],
-    queryFn: query(organizationApi.list, {
-      pathParams: { id: organization.id },
+    ...query.infinite(organizationApi.list, {
       queryParams: {
         parent: organization.id || "",
         org_type: organizationType,
@@ -42,25 +55,31 @@ function OrganizationTreeNode({
     }),
     enabled: isExpanded,
   });
+  const children = data?.results ?? [];
 
   return (
     <div className="space-y-1">
       <div
-        className={`flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100 ${isSelected ? "bg-blue-100 text-blue-800" : ""}`}
-        style={{ paddingLeft: `${level}rem` }}
+        className="flex items-center gap-1"
+        style={{ paddingLeft: `${level * 0.75}rem` }}
       >
         {organization.has_children ? (
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6"
+            className="size-7 shrink-0"
+            aria-label={t(
+              isExpanded ? "collapse_organization" : "expand_organization",
+              { name: organization.name },
+            )}
+            aria-expanded={isExpanded}
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand(organization.id);
             }}
           >
             {isLoading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+              <Loader2 className="size-4 animate-spin" />
             ) : isExpanded ? (
               <ChevronDown className="h-4 w-4" />
             ) : (
@@ -75,18 +94,38 @@ function OrganizationTreeNode({
           variant="ghost"
           onClick={() => {
             onSelect(organization);
-            if (organization.has_children) {
+            if (organization.has_children && !isExpanded) {
               onToggleExpand(organization.id);
             }
           }}
-          className="h-auto min-w-0 justify-start p-0 text-left flex items-center flex-1 text-sm gap-2 cursor-pointer"
+          aria-pressed={isSelected}
+          className={cn(
+            "h-auto min-w-0 flex-1 justify-start truncate px-2 py-1.5 text-left text-sm",
+            isSelected
+              ? "bg-primary-100 font-medium text-primary-900 hover:bg-primary-100"
+              : "text-gray-700",
+          )}
         >
           <span className="truncate">{organization.name}</span>
         </Button>
       </div>
-      {isExpanded && children?.results && children.results.length > 0 && (
-        <div className="pl-2">
-          {children.results.map((child) => (
+      {isExpanded && isError && children.length === 0 && (
+        <div className="flex items-center gap-2 pl-8">
+          <p className="text-xs text-gray-500">{t("something_went_wrong")}</p>
+          <Button
+            type="button"
+            variant="link"
+            size="sm"
+            className="h-auto p-0 text-xs"
+            onClick={() => refetch()}
+          >
+            {t("retry")}
+          </Button>
+        </div>
+      )}
+      {isExpanded && children.length > 0 && (
+        <div className="space-y-1">
+          {children.map((child) => (
             <OrganizationTreeNode
               key={child.id}
               organization={child}
@@ -98,6 +137,21 @@ function OrganizationTreeNode({
               organizationType={organizationType}
             />
           ))}
+          {hasNextPage &&
+            (isFetchNextPageError ? (
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                className="ml-8 h-auto p-0 text-xs"
+                onClick={() => fetchNextPage()}
+              >
+                {t("retry")}
+              </Button>
+            ) : (
+              <div ref={ref} />
+            ))}
+          {isFetchingNextPage && <Skeleton className="h-8 w-full" />}
         </div>
       )}
     </div>
@@ -109,7 +163,9 @@ interface AdminOrganizationNavbarProps {
   selectedOrganizationId: string | null;
   expandedOrganizations: Set<string>;
   onToggleExpand: (organizationId: string) => void;
-  onOrganizationSelect: (organization: Organization) => void;
+  /** The search selector can clear the current selection when shown. */
+  onOrganizationSelect: (organization?: Organization) => void;
+  showSearch?: boolean;
 }
 
 export default function AdminOrganizationNavbar({
@@ -118,45 +174,102 @@ export default function AdminOrganizationNavbar({
   expandedOrganizations,
   onToggleExpand,
   onOrganizationSelect,
+  showSearch = false,
 }: AdminOrganizationNavbarProps) {
-  const { data: allOrganizations, isLoading: isLoadingOrganizations } =
-    useQuery({
-      queryKey: ["organization", "list", organizationType],
-      queryFn: query(organizationApi.list, {
-        queryParams: {
-          parent: "",
-          org_type: organizationType,
-          limit: 100,
-        },
-      }),
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-    });
+  const { t } = useTranslation();
+  const {
+    data: allOrganizations,
+    isLoading: isLoadingOrganizations,
+    isError,
+    isFetchNextPageError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    refetch,
+    ref,
+  } = useInfiniteList({
+    queryKey: ["organization", "list", organizationType, "roots"],
+    ...query.infinite(organizationApi.list, {
+      queryParams: {
+        parent: "",
+        org_type: organizationType,
+      },
+    }),
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
 
-  const topLevelOrganizations = (allOrganizations?.results || [])
-    .slice()
-    .sort((left, right) => left.name.localeCompare(right.name));
+  const topLevelOrganizations = allOrganizations?.results ?? [];
 
   return (
-    <div className="h-full bg-white rounded-lg shadow-lg min-w-64 hidden md:block">
-      <ScrollArea className="h-full min-h-[calc(100vh-14rem)]">
-        <div className="p-4">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
+      {showSearch && (
+        <div className="border-b border-gray-200 p-3">
+          <OrgSelect
+            value={selectedOrganizationId ?? undefined}
+            onChange={onOrganizationSelect}
+            orgType={organizationType}
+            placeholder={t("select_organization")}
+            inputPlaceholder={t("search")}
+            showClearButton
+          />
+        </div>
+      )}
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="space-y-1 p-2">
           {isLoadingOrganizations ? (
-            <div className="p-4">
-              <Skeleton className="h-8 w-full" />
+            <div className="space-y-2 p-2">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Skeleton key={index} className="h-9 w-full rounded-md" />
+              ))}
             </div>
+          ) : isError && topLevelOrganizations.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 p-4 text-center">
+              <p className="text-sm text-gray-600">
+                {t("something_went_wrong")}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => refetch()}
+              >
+                {t("retry")}
+              </Button>
+            </div>
+          ) : topLevelOrganizations.length > 0 ? (
+            <>
+              {topLevelOrganizations.map((organization) => (
+                <OrganizationTreeNode
+                  key={organization.id}
+                  organization={organization}
+                  selectedOrganizationId={selectedOrganizationId}
+                  onSelect={onOrganizationSelect}
+                  expandedOrganizations={expandedOrganizations}
+                  onToggleExpand={onToggleExpand}
+                  organizationType={organizationType}
+                />
+              ))}
+              {hasNextPage &&
+                (isFetchNextPageError ? (
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-xs"
+                    onClick={() => fetchNextPage()}
+                  >
+                    {t("retry")}
+                  </Button>
+                ) : (
+                  <div ref={ref} />
+                ))}
+              {isFetchingNextPage && <Skeleton className="h-8 w-full" />}
+            </>
           ) : (
-            topLevelOrganizations.map((organization) => (
-              <OrganizationTreeNode
-                key={organization.id}
-                organization={organization}
-                selectedOrganizationId={selectedOrganizationId}
-                onSelect={onOrganizationSelect}
-                expandedOrganizations={expandedOrganizations}
-                onToggleExpand={onToggleExpand}
-                organizationType={organizationType}
-              />
-            ))
+            <p className="px-3 py-6 text-center text-sm text-gray-500">
+              {t("no_organizations_found")}
+            </p>
           )}
         </div>
       </ScrollArea>

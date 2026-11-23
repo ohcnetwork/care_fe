@@ -11,13 +11,16 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { ScopedQueryParamsProvider } from "@/hooks/useScopedQueryParams";
+
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 
 import { TemplateType } from "@/types/emr/template/template";
-import { navigate } from "raviger";
 import TemplateList from "./TemplateList";
+
+import { navigate } from "@/lib/router/navigate";
 
 interface TemplateReportSheetProps {
   facilityId: string;
@@ -62,23 +65,29 @@ export default function TemplateReportSheet({
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  navigate(`/facility/${facilityId}/template/builder/`)
+                  navigate({
+                    to: "/facility/$facilityId/template/builder",
+                    params: { facilityId },
+                  })
                 }
               >
                 {t("create_template")}
               </Button>
             )}
           </div>
-          <TemplateList
-            facilityId={facilityId}
-            associatingId={associatingId}
-            permissions={permissions}
-            enabled={open}
-            onSuccess={handleSuccess}
-            showFilters={false}
-            reportType={reportType}
-            className="flex flex-col"
-          />
+          {/* The sheet's filters must not read or write the host page's URL. */}
+          <ScopedQueryParamsProvider>
+            <TemplateList
+              facilityId={facilityId}
+              associatingId={associatingId}
+              permissions={permissions}
+              enabled={open}
+              onSuccess={handleSuccess}
+              showFilters={false}
+              reportType={reportType}
+              className="flex flex-col"
+            />
+          </ScopedQueryParamsProvider>
         </SheetBody>
       </SheetContent>
     </Sheet>

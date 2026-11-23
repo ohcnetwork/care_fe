@@ -233,6 +233,12 @@ export file.
     has-a-value test in `evaluateEnableWhen`, and the backend agrees, so a
     `"No"` string would read as `exists: true`, the exact opposite of what
     the author picked.
+- A value-set choice question's `equals`/`not_equals` answer persists as the
+  picked `Code` object; `evaluateEnableWhen` then compares only entries that
+  carry a coding, by system and code, as the backend's `is_question_enabled`
+  does. Fixed answer options stay value-based (the option's string value):
+  `AnswerOption` has no coding on the backend (see Backend gaps), so a coded
+  rule against them would stop matching after a reload.
 - enable_when resolution goes through `isQuestionEnabledInState`
   (`form/engine/store.ts`) — never re-derive it from `evaluateEnableWhen`;
   the required-field pass in `form/validation.ts` consumes the same

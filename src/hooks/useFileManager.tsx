@@ -101,14 +101,13 @@ export default function useFileManager(
   ) => {
     return queryClient.fetchQuery({
       queryKey: ["file", fileType, associating_id, file.id],
-      queryFn: () =>
-        query(fileApi.get, {
-          queryParams: {
-            file_type: fileType,
-            associating_id,
-          },
-          pathParams: { fileId: file.id || "" },
-        })({} as any),
+      queryFn: query(fileApi.get, {
+        queryParams: {
+          file_type: fileType,
+          associating_id,
+        },
+        pathParams: { fileId: file.id || "" },
+      }),
     });
   };
 
@@ -139,7 +138,7 @@ export default function useFileManager(
     setFileUrl(signedUrl);
   };
 
-  const validateArchiveReason = (name: any) => {
+  const validateArchiveReason = (name: string) => {
     if (name.trim() === "") {
       setArchiveReasonError(t("please_enter_a_valid_reason"));
       return false;
@@ -151,10 +150,9 @@ export default function useFileManager(
 
   const { mutateAsync: archiveUpload } = useMutation({
     mutationFn: (body: { id: string; archive_reason: string }) =>
-      query(fileApi.archive, {
-        body: { archive_reason: body.archive_reason },
+      mutate(fileApi.archive, {
         pathParams: { fileId: body.id },
-      })({} as any),
+      })({ archive_reason: body.archive_reason }),
     onSuccess: () => {
       toast.success(t("file_archived_successfully"));
       queryClient.invalidateQueries({
@@ -294,7 +292,7 @@ export default function useFileManager(
           </DialogHeader>
 
           <form
-            onSubmit={(event: any) => {
+            onSubmit={(event) => {
               event.preventDefault();
               handleFileArchive(archiveDialogueOpen);
             }}
@@ -361,42 +359,46 @@ export default function useFileManager(
             {t("this_file_has_been_archived")}
           </div>
           <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
-            {[
-              {
-                label: "File Name",
-                content: archiveDialogueOpen?.name,
-                icon: "l-file",
-              },
-              {
-                label: "Uploaded By",
-                content: formatName(archiveDialogueOpen?.uploaded_by),
-                icon: "l-user",
-              },
-              {
-                label: "Uploaded On",
-                content: formatDateTime(archiveDialogueOpen?.created_date),
-                icon: "l-clock",
-              },
-              {
-                label: "Archive Reason",
-                content: archiveDialogueOpen?.archive_reason,
-                icon: "l-archive",
-              },
-              {
-                label: "Archived By",
-                content: formatName(archiveDialogueOpen?.archived_by),
-                icon: "l-user",
-              },
-              {
-                label: "Archived On",
-                content: formatDateTime(archiveDialogueOpen?.archived_datetime),
-                icon: "l-clock",
-              },
-            ].map((item, index) => (
+            {(
+              [
+                {
+                  label: "File Name",
+                  content: archiveDialogueOpen?.name,
+                  icon: "l-file",
+                },
+                {
+                  label: "Uploaded By",
+                  content: formatName(archiveDialogueOpen?.uploaded_by),
+                  icon: "l-user",
+                },
+                {
+                  label: "Uploaded On",
+                  content: formatDateTime(archiveDialogueOpen?.created_date),
+                  icon: "l-clock",
+                },
+                {
+                  label: "Archive Reason",
+                  content: archiveDialogueOpen?.archive_reason,
+                  icon: "l-archive",
+                },
+                {
+                  label: "Archived By",
+                  content: formatName(archiveDialogueOpen?.archived_by),
+                  icon: "l-user",
+                },
+                {
+                  label: "Archived On",
+                  content: formatDateTime(
+                    archiveDialogueOpen?.archived_datetime,
+                  ),
+                  icon: "l-clock",
+                },
+              ] as const
+            ).map((item, index) => (
               <div key={index} className="flex gap-2">
                 <div className="flex aspect-square h-10 items-center justify-center rounded-full bg-primary-100">
                   <CareIcon
-                    icon={item.icon as any}
+                    icon={item.icon}
                     className="text-lg text-primary-500"
                   />
                 </div>
@@ -446,7 +448,7 @@ export default function useFileManager(
             </DialogTitle>
           </DialogHeader>
           <form
-            onSubmit={(event: any) => {
+            onSubmit={(event) => {
               event.preventDefault();
               setEditing(true);
               if (editDialogueOpen) partialupdateFileName(editDialogueOpen);

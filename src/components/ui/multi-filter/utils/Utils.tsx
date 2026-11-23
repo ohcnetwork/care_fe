@@ -56,6 +56,8 @@ export type FilterMode = "single" | "multi";
 
 export type DateFilterMeta = {
   presetOptions?: DateRangeOption[];
+  minDate?: Date;
+  maxDate?: Date;
 };
 export type TagFilterMeta = {
   resource: TagResource;

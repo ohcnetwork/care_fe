@@ -22,6 +22,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable";
 
 import useFilters from "@/hooks/useFilters";
+import { encounterServiceRequestListSearch } from "@/lib/router/search/encounter";
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -43,8 +44,8 @@ export const EncounterServiceRequestTab = () => {
     Pagination: Pagination,
     resultsPerPage,
   } = useFilters({
+    schema: encounterServiceRequestListSearch,
     limit: 20,
-    disableCache: true,
   });
 
   const { data, isLoading } = useQuery({
@@ -73,7 +74,7 @@ export const EncounterServiceRequestTab = () => {
 
   return (
     <div className="@container min-w-0 space-y-4">
-      <div className="hidden border-b @min-[30rem]:block">
+      <div className="hidden @min-[30rem]:block">
         <FilterTabs
           value={qParams.status || ""}
           onValueChange={(value) => updateQuery({ status: value })}

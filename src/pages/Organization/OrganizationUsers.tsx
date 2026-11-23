@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Bot, ChevronRight } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -24,12 +24,14 @@ import SearchInput from "@/components/Common/SearchInput";
 import { SectionHeader } from "@/components/Common/SectionHeader";
 
 import useFilters from "@/hooks/useFilters";
+import { organizationUserListSearch } from "@/lib/router/search/organization";
 
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 import { UserReadMinimal } from "@/types/user/user";
@@ -93,8 +95,8 @@ export default function OrganizationUsers({
   routeContext,
 }: Props) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: organizationUserListSearch,
     limit: 15,
-    disableCache: true,
   });
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -310,13 +312,18 @@ export default function OrganizationUsers({
                       ) : (
                         users.results.map((userRole) => {
                           const { user } = userRole;
-                          const userUrl = `/users/${user.username}`;
                           const isViewable = !user.deleted;
                           return (
                             <TableRow
                               key={user.id}
                               onClick={
-                                isViewable ? () => navigate(userUrl) : undefined
+                                isViewable
+                                  ? () =>
+                                      navigate({
+                                        to: "/users/$username",
+                                        params: { username: user.username },
+                                      })
+                                  : undefined
                               }
                               className={
                                 isViewable
@@ -382,7 +389,8 @@ export default function OrganizationUsers({
                                   {isViewable && (
                                     <Button variant="tertiary" asChild>
                                       <Link
-                                        href={userUrl}
+                                        to="/users/$username"
+                                        params={{ username: user.username }}
                                         aria-label={`${t("view")} ${formatName(user)}`}
                                         onClick={(e) => e.stopPropagation()}
                                       >

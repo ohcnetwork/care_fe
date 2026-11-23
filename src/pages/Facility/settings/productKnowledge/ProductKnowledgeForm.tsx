@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, PlusCircle, X } from "lucide-react";
-import { Link, navigate as ravigerNavigate } from "raviger";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -36,6 +35,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
@@ -162,10 +162,14 @@ function ProductKnowledgeFormContent({
   slug,
   existingData,
   categorySlug,
-  onSuccess = () =>
-    ravigerNavigate(
-      `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
-    ),
+  onSuccess = () => {
+    if (!categorySlug) return;
+    navigate({
+      to: "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug",
+      params: { facilityId, categorySlug },
+      replace: true,
+    });
+  },
 }: {
   facilityId: string;
   slug?: string;
@@ -256,9 +260,11 @@ function ProductKnowledgeFormContent({
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
-        ravigerNavigate(
-          `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
-        );
+        if (!categorySlug) return;
+        navigate({
+          to: "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug",
+          params: { facilityId, categorySlug },
+        });
       },
     },
   );
@@ -282,6 +288,7 @@ function ProductKnowledgeFormContent({
         navigate({
           to: "/facility/$facilityId/settings/product_knowledge/$slug",
           params: { facilityId, slug: productKnowledge.slug },
+          replace: true,
         });
       },
     },
@@ -1015,15 +1022,16 @@ function ProductKnowledgeFormContent({
 
             <div className="mt-6 flex justify-end space-x-4">
               <Button type="button" variant="outline" asChild>
-                <Link
+                <HrefLink
                   href={
-                    isEditMode
-                      ? `/product_knowledge/${slug}`
-                      : `/product_knowledge/categories/${categorySlug}`
+                    slug
+                      ? `/facility/${facilityId}/settings/product_knowledge/${slug}`
+                      : `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug ?? ""}`
                   }
+                  back
                 >
                   {t("cancel")}
-                </Link>
+                </HrefLink>
               </Button>
               <Button
                 type="submit"

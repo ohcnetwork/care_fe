@@ -1,49 +1,25 @@
-import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { format, subDays } from "date-fns";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import { firstValueSetDisplay } from "tests/helper/valueSet";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-const allergyOptions = [
-  "Fezolinetant",
-  "Anifrolumab",
-  "Live attenuated Junin virus antigen",
-  "Isomaltose",
-  "Cetrimonium bromide",
-  "Benzenesulfonic acid",
-  "Inclisiran sodium",
-  "Purified water",
-  "Olipudase alfa",
-];
-
 test.describe("Allergy in Encounter", () => {
-  let allergyName: string;
-
-  test.beforeEach(async () => {
-    allergyName = faker.helpers.arrayElement(allergyOptions);
-  });
-
   test("should add allergy in encounter and verify it appears in patient overview", async ({
     page,
   }) => {
     const facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
-
+    const { patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId);
+    const allergyName = await firstValueSetDisplay(
+      "system-allergy-code",
+      facilityId,
+    );
     await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
     );
-    await page.getByRole("link", { name: "View Encounter" }).first().click();
-
     await page.getByRole("link", { name: "Add Allergy", exact: true }).click();
-
-    // Wait for allergy intolerance API to load
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes("/allergy_intolerance/") &&
-        response.status() === 200,
-    );
 
     const combobox = page
       .getByRole("combobox")
@@ -54,7 +30,9 @@ test.describe("Allergy in Encounter", () => {
     await page.locator("[cmdk-input]").waitFor({ state: "visible" });
     await page.locator("[cmdk-input]").fill(allergyName);
 
-    const option = page.getByRole("option", { name: allergyName });
+    const option = page
+      .getByTestId("valueset-search-results")
+      .getByRole("option", { name: allergyName, exact: true });
     await option.scrollIntoViewIfNeeded();
     await option.click();
 

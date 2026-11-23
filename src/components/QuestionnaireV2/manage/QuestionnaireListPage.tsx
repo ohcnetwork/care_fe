@@ -9,7 +9,6 @@ import {
   Search,
   Upload,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,7 +33,10 @@ import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import useFilters from "@/hooks/useFilters";
+import { questionnaireListSearch } from "@/lib/router/search/admin";
 
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import {
   QUESTIONNAIRE_STATUSES,
@@ -70,8 +72,8 @@ export function QuestionnaireListPage({
   const { canWrite: canWriteQuestionnaire, isLoading: isPermissionLoading } =
     useCanWriteQuestionnaire(scope);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: questionnaireListSearch,
     limit: 15,
-    disableCache: true,
     defaultQueryParams: { status: "active" },
   });
 
@@ -153,7 +155,7 @@ export function QuestionnaireListPage({
               <Upload className="size-4" />
               {t("import_questionnaire")}
             </Button>
-            <Button onClick={() => navigate(`${scope.basePath}/new`)}>
+            <Button onClick={() => navigate({ href: `${scope.basePath}/new` })}>
               <Plus className="mr-2 size-4" />
               {t("create_questionnaire")}
             </Button>
@@ -170,7 +172,9 @@ export function QuestionnaireListPage({
           description={t("adjust_questionnaire_filters")}
           action={
             canWriteQuestionnaire ? (
-              <Button onClick={() => navigate(`${scope.basePath}/new`)}>
+              <Button
+                onClick={() => navigate({ href: `${scope.basePath}/new` })}
+              >
                 <Plus className="mr-2 size-4" />
                 {t("create_questionnaire")}
               </Button>
@@ -201,13 +205,15 @@ export function QuestionnaireListPage({
                   tabIndex={0}
                   className="group cursor-pointer focus-visible:bg-gray-100/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-500"
                   onClick={() =>
-                    navigate(`${scope.basePath}/${questionnaire.id}`)
+                    navigate({ href: `${scope.basePath}/${questionnaire.id}` })
                   }
                   onKeyDown={(e) => {
                     if (e.target !== e.currentTarget) return;
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      navigate(`${scope.basePath}/${questionnaire.id}`);
+                      navigate({
+                        href: `${scope.basePath}/${questionnaire.id}`,
+                      });
                     }
                   }}
                 >
@@ -230,7 +236,9 @@ export function QuestionnaireListPage({
                         className="invisible shrink-0 group-hover:visible"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`${scope.basePath}/${questionnaire.id}`);
+                          navigate({
+                            href: `${scope.basePath}/${questionnaire.id}`,
+                          });
                         }}
                       >
                         <Eye className="mr-1 size-4" />
@@ -254,7 +262,7 @@ export function QuestionnaireListPage({
               asChild
               className="h-auto block rounded-lg p-4 text-left whitespace-normal"
             >
-              <Link href={`${scope.basePath}/${questionnaire.id}`} basePath="/">
+              <HrefLink href={`${scope.basePath}/${questionnaire.id}`}>
                 <p className="font-medium">{questionnaire.title}</p>
                 <p className="mt-1 line-clamp-2 text-sm text-gray-500">
                   {questionnaire.description}
@@ -262,7 +270,7 @@ export function QuestionnaireListPage({
                 <Badge variant="secondary" className="mt-2 font-normal">
                   {t(questionnaire.subject_type)}
                 </Badge>
-              </Link>
+              </HrefLink>
             </Button>
           ))}
         </div>

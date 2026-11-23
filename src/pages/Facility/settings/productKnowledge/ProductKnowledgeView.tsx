@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate as ravigerNavigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -78,9 +77,11 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
       onSuccess: () => {
         toast.success(t("product_knowledge_deleted_successfully"));
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
-        ravigerNavigate(
-          `/facility/${facilityId}/settings/product_knowledge/categories/${product?.category.slug}`,
-        );
+        if (!product) return;
+        navigate({
+          to: "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug",
+          params: { facilityId, categorySlug: product.category.slug },
+        });
       },
     },
   );

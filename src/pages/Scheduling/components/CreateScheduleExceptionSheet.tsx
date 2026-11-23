@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -10,7 +9,6 @@ import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -35,6 +33,9 @@ import {
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
+import { ScheduleValidityField } from "@/pages/Scheduling/components/ScheduleValidityField";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -61,7 +62,7 @@ export default function CreateScheduleExceptionSheet({
   const queryClient = useQueryClient();
 
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
-  const [qParams, _setQParams] = useQueryParams<QueryParams>();
+  const [qParams, _setQParams] = useQueryParams(scheduleHomeSearch);
   const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
 
   const formSchema = z
@@ -240,43 +241,7 @@ export default function CreateScheduleExceptionSheet({
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                  <FormField
-                    control={form.control}
-                    name="valid_from"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel aria-required>{t("valid_from")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
-                          }
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="valid_to"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel aria-required>{t("valid_to")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
-                          }
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <ScheduleValidityField disablePast />
 
                 <FormField
                   control={form.control}

@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { MoreVertical, Printer } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +21,7 @@ import {
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { FileListTable } from "@/components/Files/FileListTable";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { buildEncounterUrl } from "@/pages/Encounters/utils/utils";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
@@ -117,7 +117,7 @@ export function DiagnosticReportDetailCard({
                   data-shortcut-id="print-button"
                   aria-label={t("print")}
                 >
-                  <Link
+                  <HrefLink
                     href={buildEncounterUrl(
                       patientId,
                       `/diagnostic_reports/${report.id}/print`,
@@ -127,7 +127,7 @@ export function DiagnosticReportDetailCard({
                     rel={embedded ? "noopener noreferrer" : undefined}
                   >
                     <Printer className="size-4" />
-                  </Link>
+                  </HrefLink>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>{t("print")}</TooltipContent>

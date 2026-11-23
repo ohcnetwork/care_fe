@@ -15,7 +15,7 @@
 
 #if c.title != none or c.note != none {
   block(below: px(8), {
-    if c.title != none { text(size: text-size.xxl, weight: "semibold", c.title) }
+    if c.title != none { text(size: text-size.lg, weight: "semibold", fill: gray(700), c.title) }
     if c.title != none and c.note != none { parbreak() }
     if c.note != none { text(fill: gray(600), c.note) }
   })
@@ -26,9 +26,11 @@
 }
 #data-table(
   columns: (1fr,) + (auto,) * (c.table.header.len() - 1),
-  align: (center,) * c.table.header.len(),
+  align: (left,) + (center,) * (c.table.header.len() - 1),
+  header-align: (left,) + (center,) * (c.table.header.len() - 1),
   header: c.table.header,
   rows: c.table.rows,
+  outer: (stroke: px(1) + border-color, radius: px(6)),
 )
 
 #print-meta(left: c.footer.left, right: c.footer.right)

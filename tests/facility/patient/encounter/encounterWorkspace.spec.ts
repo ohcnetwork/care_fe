@@ -1371,7 +1371,10 @@ test("formatting-only optional appointment notes do not require a slot", async (
       .filter({ hasText: "Validation failed" }),
   ).toBeVisible();
   expect(posts).toHaveLength(0);
-  await editor.fill("");
+  // fill("") selects via a DOM range that Lexical may not have synced before
+  // Delete on a busy main thread; its own select-all updates it synchronously.
+  await editor.press("ControlOrMeta+a");
+  await editor.press("Delete");
   await editor.pressSequentially("# ");
   await expect(editor).toHaveText("");
   await page.getByRole("button", { name: "Save Changes" }).click();
@@ -4626,7 +4629,8 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
       has: page.getByRole("button", { name, exact: true }),
     });
   const pulse = vitalRow("Pulse");
-  await expect(pulse.getByRole("cell").first()).toHaveText("82 /min");
+  await expect(pulse.getByRole("cell").first()).toHaveText("82");
+  await expect(pulse.getByRole("cell").first()).toHaveAccessibleName("82 /min");
   await expect(
     pulse.getByRole("cell", { name: "76 /min", exact: true }),
   ).toBeVisible();
@@ -4669,7 +4673,9 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
   await expect(observationHistory).toHaveCount(0);
   await expect(vitalRow("Oxygen saturation")).toContainText("97");
   const temperature = vitalRow("Body temperature");
-  await expect(temperature).toContainText("No reading");
+  await expect(
+    temperature.getByRole("cell", { name: "No reading", exact: true }).first(),
+  ).toHaveText("-");
   await expect(temperature).not.toContainText(/\d/);
   await expect(vitals).toContainText(`by ${actorName}`);
   await expect(

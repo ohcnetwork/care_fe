@@ -27,6 +27,7 @@ import {
 import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
+import { specimenDefinitionListSearch } from "@/lib/router/search/settings";
 
 import query from "@/Utils/request/query";
 import { navigate } from "@/lib/router/navigate";
@@ -85,8 +86,8 @@ export function SpecimenDefinitionsList({
 }: SpecimenDefinitionsListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: specimenDefinitionListSearch,
     limit: 15,
-    disableCache: true,
     defaultQueryParams: {
       status: "active",
     },

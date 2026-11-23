@@ -7,10 +7,31 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import useAuthUser from "@/hooks/useAuthUser";
 import { BadgeInfo } from "lucide-react";
 
-export interface DisplayField<T> {
-  key: keyof T | string;
+type RecordKey<T> = Extract<keyof T, string>;
+
+type KeyedDisplayField<T> = {
+  [K in RecordKey<T>]: {
+    key: K;
+    label: string;
+    render?: (value: T[K]) => React.ReactNode;
+  };
+}[RecordKey<T>];
+
+/** A field with an empty `key` renders the whole record. */
+interface RecordDisplayField<T> {
+  key: "";
   label: string;
-  render?: (value: any) => React.ReactNode;
+  render: (record: T) => React.ReactNode;
+}
+
+export type DisplayField<T> =
+  (T extends unknown ? KeyedDisplayField<T> : never) | RecordDisplayField<T>;
+
+type RenderFn = (value: unknown) => React.ReactNode;
+
+function getFieldValue<T>(record: T, field: DisplayField<T>): unknown {
+  if (field.key === "") return record;
+  return (record as Record<string, unknown>)[field.key];
 }
 
 interface RecordItemProps<T> {
@@ -36,14 +57,15 @@ export function RecordItem<T>({
     onToggleSelect(record);
   };
 
-  const recordId = (record as any).id as string;
+  const recordId = (record as { id: string }).id;
   const isExpanded = expandedRecordId === recordId;
   const user = useAuthUser();
 
   const expandableFieldsWithValues = expandableFields
     ?.map((field) => {
-      const value = record[field.key as keyof T];
-      const displayValue = field.render ? field.render(value) : value;
+      const value = getFieldValue(record, field);
+      const render = field.render as RenderFn | undefined;
+      const displayValue = render ? render(value) : value;
       return { field, displayValue };
     })
     .filter((item) => item.displayValue != null);
@@ -62,18 +84,18 @@ export function RecordItem<T>({
           />
         </TableCell>
         {displayFields.map((field) => {
-          const value = record[field.key as keyof T];
-          const displayValue = field.render
-            ? field.key == ""
-              ? field.render(record)
-              : field.render(value)
-            : value?.toString() || "-";
+          const value = getFieldValue(record, field);
+          const render = field.render as RenderFn | undefined;
+          const displayValue = render
+            ? render(value)
+            : String(value ?? "") || "-";
           const isHighlightedUser =
-            field.key === "created_by" && (value as any)?.id === user?.id;
+            field.key === "created_by" &&
+            (value as { id?: string } | undefined)?.id === user?.id;
 
           return (
             <TableCell
-              key={field.key.toString()}
+              key={field.key}
               className={cn(
                 "p-2 text-sm whitespace-pre-wrap border border-gray-200",
                 "nth-2:rounded-l-md",
@@ -115,14 +137,15 @@ export function RecordItem<T>({
           >
             <div className="space-y-3 ">
               {expandableFieldsWithValues!.map(({ field }, index) => {
-                const value = record[field.key as keyof T];
-                const displayValue = field.render
-                  ? field.render(value)
-                  : value?.toString() || "-";
+                const value = getFieldValue(record, field);
+                const render = field.render as RenderFn | undefined;
+                const displayValue = render
+                  ? render(value)
+                  : String(value ?? "") || "-";
                 const isLastItem =
                   index === expandableFieldsWithValues!.length - 1;
                 return (
-                  <div key={field.key.toString()}>
+                  <div key={field.key}>
                     <div className="font-medium text-sm mb-1">
                       {field.label}
                     </div>

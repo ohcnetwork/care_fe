@@ -51,7 +51,11 @@ const config = [
     ignores: [
       "**/dist",
       "**/public",
-      "**/lib",
+      "**/lib/*",
+      // Lint the search schemas: their import rule keeps them small.
+      "!src/lib/router",
+      "src/lib/router/*",
+      "!src/lib/router/search",
       "**/build",
       "**/*.css",
       "**/*.csv",
@@ -127,6 +131,20 @@ const config = [
       }),
       "no-undef": "off",
 
+      // The app routes with TanStack Router. raviger is not installed.
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "raviger",
+              message:
+                'Use `Link` from "@tanstack/react-router" and the helpers in "@/lib/router/" (see docs/architecture.md, Routing).',
+            },
+          ],
+        },
+      ],
+
       // Require rendering components to pass an ExtensionContexts.* value when rendering
       // extensions. Warns by default, errors on pre-commit.
       "no-restricted-syntax": [
@@ -144,9 +162,9 @@ const config = [
             "Pass `context: ExtensionContexts.<slot>` in the options. Create a new context if needed.",
         },
         {
-          // Route files: `Route.useParams()` in a lazy route component makes
-          // its chunk import the route file, and every route definition then
-          // loads as a separate chunk at startup.
+          // Route files: `Route.useX()` makes a route component depend on its
+          // route module. With `autoCodeSplitting` on, every route definition
+          // then loads as a separate chunk at startup.
           selector:
             "CallExpression[callee.object.name='Route'][callee.property.name=/^use[A-Z]/]",
           message:
@@ -191,6 +209,26 @@ const config = [
           allowSameFolder: true,
           rootDir: "src",
           prefix: "@",
+        },
+      ],
+    },
+  },
+
+  // Search schemas load with the route tree at startup: `validateSearch` is
+  // not code-split. Keep pages, components and their imports out of them.
+  {
+    files: ["src/lib/router/search/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: "^@/(?!types/|lib/router/search/)",
+              message:
+                "A search schema loads at startup. Import only zod, the search fields and `@/types`.",
+            },
+          ],
         },
       ],
     },

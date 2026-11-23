@@ -7,6 +7,7 @@ import {
   type Response,
 } from "@playwright/test";
 import { createTestPatient } from "tests/helper/patient";
+import { expectToast } from "tests/helper/ui";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -287,6 +288,10 @@ test.describe("Quick Add network recovery", () => {
     await quantity.fill("2");
     await add.click();
     await expect.poll(() => attempts).toBe(1);
+    // The request reaching the route does not mean the sheet has finished
+    // with it: until the error toast shows, the mutation can still be
+    // pending, the button not yet relabelled "Adding", and a retry ignored.
+    await expectToast(page, "Temporarily unavailable");
     await expect(add).toBeEnabled();
     await expect(quantity).toHaveValue("2");
     try {

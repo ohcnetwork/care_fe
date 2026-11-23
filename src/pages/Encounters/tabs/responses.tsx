@@ -12,6 +12,7 @@ import {
   useIsScopedQueryParams,
   useScopedQueryParams,
 } from "@/hooks/useScopedQueryParams";
+import { responseListSearch } from "@/lib/router/search/encounter";
 import { cn } from "@/lib/utils";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -181,12 +182,7 @@ export const EncounterResponsesTab = ({
   const { t } = useTranslation();
   const scoped = useIsScopedQueryParams();
   const id = useId();
-  const [qParams, setQueryParams] = useScopedQueryParams<{
-    questionnaireSlug?: string;
-    questionnaireTitle?: string;
-    responseId?: string;
-    role?: string;
-  }>();
+  const [qParams, setQueryParams] = useScopedQueryParams(responseListSearch);
 
   const { questionnaireSlug, questionnaireTitle, responseId, role } = qParams;
 

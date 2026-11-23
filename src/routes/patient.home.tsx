@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PatientProfile } from "@/components/Patient/PatientProfile";
 
 import { staffOrPatient } from "@/lib/router/auth";
+import { patientShowSearch } from "@/lib/router/search/patient";
 import PatientIndex from "@/pages/Patient/index";
 import { useArea } from "@/Routers/AreaChrome";
 
@@ -12,6 +13,7 @@ import { useArea } from "@/Routers/AreaChrome";
  */
 export const Route = createFileRoute("/patient/home")({
   beforeLoad: staffOrPatient,
+  validateSearch: patientShowSearch,
   component: RouteComponent,
 });
 

@@ -99,12 +99,12 @@ export default function useReportManager({
   });
 
   const retrieveReport = async (reportId: string) => {
-    return queryClient.fetchQuery({
+    return queryClient.query({
       queryKey: ["report", reportId],
       queryFn: () =>
         query(reportApi.retrieveReport, {
           pathParams: { id: reportId },
-        })({} as any),
+        })({ signal: new AbortController().signal }),
     });
   };
 

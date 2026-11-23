@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate, useQueryParams } from "raviger";
 import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Loading from "@/components/Common/Loading";
 
+import { navigate } from "@/lib/router/navigate";
 import { AppIcon } from "@/pages/Apps/AppIcon";
 import { AppStorePlugin } from "@/types/appStore/appStore";
 import { PlugConfig } from "@/types/plugConfig";
@@ -41,6 +42,7 @@ import {
 } from "@/Utils/plugConfig";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
 
 interface Props {
@@ -49,7 +51,7 @@ interface Props {
 
 export function PlugConfigEdit({ slug }: Props) {
   const isNew = slug === "new";
-  const [{ appId }] = useQueryParams<{ appId?: string }>();
+  const { appId } = useSearch({ from: "/_app/admin/apps/$slug" });
   const isAppStoreConfigured = Boolean(careConfig.appStore.apiUrl);
 
   const buildTimeConfig = useMemo(
@@ -114,7 +116,6 @@ function PlugConfigForm({
   buildTimeConfig?: ResolvedPlugConfig;
   existingConfig?: PlugConfig;
 }) {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -153,7 +154,7 @@ function PlugConfigForm({
           ? t("app_installed_successfully")
           : t("config_updated_successfully"),
       );
-      navigate("/admin/apps");
+      navigate({ to: "/admin/apps", replace: true });
     },
   });
 
@@ -167,7 +168,7 @@ function PlugConfigForm({
       });
       await queryClient.invalidateQueries({ queryKey: ["enabled-plugins"] });
       toast.success(t("config_deleted_successfully"));
-      navigate("/admin/apps");
+      navigate({ to: "/admin/apps", replace: true });
     },
   });
 
@@ -421,7 +422,7 @@ function PlugConfigForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate("/admin/apps")}
+            onClick={() => goBack("/admin/apps")}
           >
             {t("cancel")}
           </Button>

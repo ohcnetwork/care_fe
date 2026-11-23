@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import {
   addTopLevelQuestion,
+  clickCanvasQuestionLabel,
   createQuestionnaireAndOpenBuilder,
 } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
@@ -140,7 +141,7 @@ test.describe("Questionnaire v2 studio chrome", () => {
     await test.step("Each plain leaf label selects its inspector for title editing", async () => {
       for (const [index, title] of leafTitles.entries()) {
         await nav.getByRole("button", { name: outerTitle }).click();
-        await leafBlock(title).getByText(title, { exact: true }).click();
+        await clickCanvasQuestionLabel(leafBlock(title));
         await expect(titleInput).toHaveValue(title);
         await expect(titleInput).toBeFocused();
         await expect(

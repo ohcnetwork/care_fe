@@ -57,6 +57,7 @@ import { ArchiveStatusFilter } from "@/components/Files/FileFilters";
 
 import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
+import { fileListSearch } from "@/lib/router/search/patient";
 
 import { formatDateTime } from "@/Utils/utils";
 import { navigate } from "@/lib/router/navigate";
@@ -88,8 +89,8 @@ export function ReportSubTab({
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
   const { qParams, updateQuery, updatePage } = useFilters({
+    schema: fileListSearch,
     limit: PAGE_SIZE,
-    disableCache: true,
   });
   const page = Number(qParams.page) || 1;
 
