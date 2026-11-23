@@ -1,9 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-import {
-  createActivityDefinition,
-  RESOURCE_CATEGORY_SLUG,
-} from "tests/facility/settings/activityDefinition/activityDefinition";
+import { RESOURCE_CATEGORY_SLUG } from "tests/facility/settings/activityDefinition/activityDefinition";
+import { createActivityDefinitionViaUi } from "tests/helper/definitions";
 import { getFieldErrorMessage } from "tests/helper/error";
 import { getCardByTitle } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
@@ -17,180 +15,199 @@ test.beforeAll(() => {
 });
 
 test.describe("activity definition form", () => {
-  test("should show validation errors when trying to save without required fields", async ({
-    page,
-  }) => {
-    await page.goto(
-      `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}/new`,
-    );
-
-    await page.getByRole("button", { name: "Create" }).click();
-
-    await expect(
-      getFieldErrorMessage(page.getByRole("textbox", { name: "Title *" })),
-    ).toBeVisible();
-
-    await expect(
-      getFieldErrorMessage(page.getByRole("textbox", { name: "Slug *" })),
-    ).toBeVisible();
-
-    await expect(
-      getFieldErrorMessage(
-        page.getByRole("textbox", { name: "Description *" }),
-      ),
-    ).toBeVisible();
-
-    await expect(
-      getFieldErrorMessage(page.getByRole("textbox", { name: "Usage *" })),
-    ).toBeVisible();
-
-    await expect(
-      getFieldErrorMessage(page.getByRole("combobox", { name: "Category *" })),
-    ).toBeVisible();
-
-    await expect(
-      getFieldErrorMessage(page.getByRole("combobox", { name: "Code *" })),
-    ).toBeVisible();
-
-    const slugInput = page.getByRole("textbox", { name: "Slug *" });
-    await slugInput.click();
-    await slugInput.fill("abc");
-    await expect(getFieldErrorMessage(slugInput)).toContainText(
-      /at least 5.*at most 50/i,
-    );
-  });
-
-  test("should reject whitespace-only input in required text fields", async ({
-    page,
-  }) => {
-    await page.goto(
-      `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}/new`,
-    );
-
-    const whitespace = "   ";
-    const fields = ["Title *", "Description *", "Usage *"];
-
-    for (const field of fields) {
-      await page.getByRole("textbox", { name: field }).fill(whitespace);
-    }
-
-    await page.getByRole("button", { name: "Create" }).click();
-
-    for (const field of fields) {
-      const errorMessage = getFieldErrorMessage(
-        page.getByRole("textbox", { name: field }),
+  test(
+    "should show validation errors when trying to save without required fields",
+    { tag: ["@atomic", "@cap:definition.activity.create"] },
+    async ({ page }) => {
+      await page.goto(
+        `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}/new`,
       );
-      await expect(errorMessage).toBeVisible();
-      await expect(errorMessage).toHaveText("This field is required");
-    }
-  });
 
-  test("should create activity definition with required fields", async ({
-    page,
-  }) => {
-    const createdData = await createActivityDefinition(page, facilityId);
+      await page.getByRole("button", { name: "Create" }).click();
 
-    await page.goto(
-      `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdData.slug}`,
-    );
+      await expect(
+        getFieldErrorMessage(page.getByRole("textbox", { name: "Title *" })),
+      ).toBeVisible();
 
-    // Verify details
-    await expect(
-      page.getByRole("heading", { name: createdData.title }),
-    ).toBeVisible();
+      await expect(
+        getFieldErrorMessage(page.getByRole("textbox", { name: "Slug *" })),
+      ).toBeVisible();
 
-    await expect(page.getByText(createdData.status)).toBeVisible();
+      await expect(
+        getFieldErrorMessage(
+          page.getByRole("textbox", { name: "Description *" }),
+        ),
+      ).toBeVisible();
 
-    const overviewCard = page.locator('[data-slot="card"]').filter({
-      has: page.locator('[data-slot="card-title"]', { hasText: "Overview" }),
-    });
-    await expect(
-      overviewCard.getByText(createdData.resourceCategoryName),
-    ).toBeVisible();
-    await expect(overviewCard.getByText(createdData.description)).toBeVisible();
-    await expect(overviewCard.getByText(createdData.usage)).toBeVisible();
+      await expect(
+        getFieldErrorMessage(page.getByRole("textbox", { name: "Usage *" })),
+      ).toBeVisible();
 
-    const technicalDetailsCard = page.locator('[data-slot="card"]').filter({
-      has: page.locator('[data-slot="card-title"]', {
-        hasText: "Technical Details",
-      }),
-    });
-    await expect(
-      technicalDetailsCard.getByText("Service Request"),
-    ).toBeVisible();
-  });
+      await expect(
+        getFieldErrorMessage(
+          page.getByRole("combobox", { name: "Category *" }),
+        ),
+      ).toBeVisible();
 
-  test("should create activity definition with all fields", async ({
-    page,
-  }) => {
-    const createdData = await createActivityDefinition(page, facilityId, true);
+      await expect(
+        getFieldErrorMessage(page.getByRole("combobox", { name: "Code *" })),
+      ).toBeVisible();
 
-    await page.goto(
-      `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdData.slug}`,
-    );
+      const slugInput = page.getByRole("textbox", { name: "Slug *" });
+      await slugInput.click();
+      await slugInput.fill("abc");
+      await expect(getFieldErrorMessage(slugInput)).toContainText(
+        /at least 5.*at most 50/i,
+      );
+    },
+  );
 
-    // Verify details
-    await expect(
-      page.getByRole("heading", { name: createdData.title }),
-    ).toBeVisible();
-    await expect(page.getByText(createdData.status)).toBeVisible();
+  test(
+    "should reject whitespace-only input in required text fields",
+    { tag: ["@atomic", "@cap:definition.activity.create"] },
+    async ({ page }) => {
+      await page.goto(
+        `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}/new`,
+      );
 
-    const overviewCard = getCardByTitle(page, "Overview");
-    await expect(
-      overviewCard.getByText(createdData.resourceCategoryName),
-    ).toBeVisible();
-    await expect(overviewCard.getByText(createdData.description)).toBeVisible();
-    await expect(overviewCard.getByText(createdData.usage)).toBeVisible();
+      const whitespace = "   ";
+      const fields = ["Title *", "Description *", "Usage *"];
 
-    const technicalDetailsCard = getCardByTitle(page, "Technical Details");
-    await expect(
-      technicalDetailsCard.getByText("Service Request"),
-    ).toBeVisible();
-    await expect(
-      technicalDetailsCard.getByText(createdData.code),
-    ).toBeVisible();
-    await expect(
-      technicalDetailsCard.getByText(createdData.bodySite!),
-    ).toBeVisible();
+      for (const field of fields) {
+        await page.getByRole("textbox", { name: field }).fill(whitespace);
+      }
 
-    await expect(
-      getCardByTitle(page, "Specimen Requirements")
-        .getByText(createdData.specimen!)
-        .first(),
-    ).toBeVisible();
+      await page.getByRole("button", { name: "Create" }).click();
 
-    await expect(
-      getCardByTitle(page, "Observation Result Requirements")
-        .getByText(createdData.observation!)
-        .first(),
-    ).toBeVisible();
+      for (const field of fields) {
+        const errorMessage = getFieldErrorMessage(
+          page.getByRole("textbox", { name: field }),
+        );
+        await expect(errorMessage).toBeVisible();
+        await expect(errorMessage).toHaveText("This field is required");
+      }
+    },
+  );
 
-    await expect(
-      getCardByTitle(page, "Charge Item Definitions")
-        .getByText(createdData.chargeItem!)
-        .first(),
-    ).toBeVisible();
+  test(
+    "should create activity definition with required fields",
+    { tag: ["@atomic", "@cap:definition.activity.create"] },
+    async ({ page }) => {
+      const createdData = await createActivityDefinitionViaUi(page, {
+        facilityId,
+      });
 
-    await expect(
-      getCardByTitle(page, "Healthcare Service").getByText(
-        createdData.healthcareService!,
-      ),
-    ).toBeVisible();
+      await page.goto(
+        `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdData.slug}`,
+      );
 
-    await expect(
-      getCardByTitle(page, "Locations").getByText(createdData.location!),
-    ).toBeVisible();
+      // Verify details
+      await expect(
+        page.getByRole("heading", { name: createdData.title }),
+      ).toBeVisible();
 
-    await expect(
-      getCardByTitle(page, "Diagnostic Report").getByText(
-        createdData.diagnosticReportCode!,
-      ),
-    ).toBeVisible();
+      await expect(page.getByText(createdData.status)).toBeVisible();
 
-    await expect(
-      getCardByTitle(page, "Derived From").getByText(
-        createdData.derivedFromUri!,
-      ),
-    ).toBeVisible();
-  });
+      const overviewCard = page.locator('[data-slot="card"]').filter({
+        has: page.locator('[data-slot="card-title"]', { hasText: "Overview" }),
+      });
+      await expect(
+        overviewCard.getByText(createdData.resourceCategoryName),
+      ).toBeVisible();
+      await expect(
+        overviewCard.getByText(createdData.description),
+      ).toBeVisible();
+      await expect(overviewCard.getByText(createdData.usage)).toBeVisible();
+
+      const technicalDetailsCard = page.locator('[data-slot="card"]').filter({
+        has: page.locator('[data-slot="card-title"]', {
+          hasText: "Technical Details",
+        }),
+      });
+      await expect(
+        technicalDetailsCard.getByText("Service Request"),
+      ).toBeVisible();
+    },
+  );
+
+  test(
+    "should create activity definition with all fields",
+    { tag: ["@atomic", "@cap:definition.activity.create"] },
+    async ({ page }) => {
+      const createdData = await createActivityDefinitionViaUi(page, {
+        facilityId,
+        allFields: true,
+      });
+
+      await page.goto(
+        `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdData.slug}`,
+      );
+
+      // Verify details
+      await expect(
+        page.getByRole("heading", { name: createdData.title }),
+      ).toBeVisible();
+      await expect(page.getByText(createdData.status)).toBeVisible();
+
+      const overviewCard = getCardByTitle(page, "Overview");
+      await expect(
+        overviewCard.getByText(createdData.resourceCategoryName),
+      ).toBeVisible();
+      await expect(
+        overviewCard.getByText(createdData.description),
+      ).toBeVisible();
+      await expect(overviewCard.getByText(createdData.usage)).toBeVisible();
+
+      const technicalDetailsCard = getCardByTitle(page, "Technical Details");
+      await expect(
+        technicalDetailsCard.getByText("Service Request"),
+      ).toBeVisible();
+      await expect(
+        technicalDetailsCard.getByText(createdData.code),
+      ).toBeVisible();
+      await expect(
+        technicalDetailsCard.getByText(createdData.bodySite!),
+      ).toBeVisible();
+
+      await expect(
+        getCardByTitle(page, "Specimen Requirements")
+          .getByText(createdData.specimen!)
+          .first(),
+      ).toBeVisible();
+
+      await expect(
+        getCardByTitle(page, "Observation Result Requirements")
+          .getByText(createdData.observation!)
+          .first(),
+      ).toBeVisible();
+
+      await expect(
+        getCardByTitle(page, "Charge Item Definitions")
+          .getByText(createdData.chargeItem!)
+          .first(),
+      ).toBeVisible();
+
+      await expect(
+        getCardByTitle(page, "Healthcare Service").getByText(
+          createdData.healthcareService!,
+        ),
+      ).toBeVisible();
+
+      await expect(
+        getCardByTitle(page, "Locations").getByText(createdData.location!),
+      ).toBeVisible();
+
+      await expect(
+        getCardByTitle(page, "Diagnostic Report").getByText(
+          createdData.diagnosticReportCode!,
+        ),
+      ).toBeVisible();
+
+      await expect(
+        getCardByTitle(page, "Derived From").getByText(
+          createdData.derivedFromUri!,
+        ),
+      ).toBeVisible();
+    },
+  );
 });

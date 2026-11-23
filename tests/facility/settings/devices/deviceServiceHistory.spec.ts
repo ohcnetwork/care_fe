@@ -1,6 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { getFieldErrorMessage } from "tests/helper/error";
+import {
+  addDeviceServiceRecordViaUi,
+  createDeviceViaUi,
+  searchAndOpenDevice,
+} from "tests/helper/facilitySettings";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -9,237 +14,207 @@ test.describe("Device Service History", () => {
   let facilityId: string;
   let notes: string;
   let updatedNotes: string;
+  let deviceName: string;
+  let deviceId: string;
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     notes = faker.lorem.sentence();
     updatedNotes = faker.lorem.sentence();
+    // Each test records service history on a device of its own, not on a
+    // device other specs also read.
+    deviceName = `Service-${faker.string.alphanumeric(8)}`;
     await page.goto(`/facility/${facilityId}/settings/devices`);
+    ({ deviceId } = await createDeviceViaUi(page, {
+      facilityId,
+      name: deviceName,
+    }));
   });
 
-  test("Open random device and create a new service record", async ({
-    page,
-  }) => {
-    // Wait for device list to load by checking for at least one device card
-    const firstDeviceLink = page
-      .getByRole("link")
-      .filter({ has: page.locator('[data-slot="card"]') })
-      .first();
+  test(
+    "Open random device and create a new service record",
+    {
+      tag: ["@atomic", "@cap:device.service-record.create"],
+    },
+    async ({ page }) => {
+      // Open the device created for this test
+      await searchAndOpenDevice(page, deviceName);
 
-    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
+      await addDeviceServiceRecordViaUi(page, { facilityId, deviceId, notes });
 
-    await firstDeviceLink.click();
+      await expect(page.getByText(notes)).toBeVisible();
+    },
+  );
 
-    // Wait for device details page to load by checking for Add Service Record button
-    await expect(
-      page.getByRole("button", { name: "Add Service Record" }),
-    ).toBeVisible({
-      timeout: 10000,
-    });
+  test(
+    "Edit an existing service record and verify changes",
+    {
+      tag: ["@atomic", "@cap:device.service-record.edit"],
+    },
+    async ({ page }) => {
+      // Open the device created for this test
+      await searchAndOpenDevice(page, deviceName);
 
-    await page.getByRole("button", { name: "Add Service Record" }).click();
+      await addDeviceServiceRecordViaUi(page, { facilityId, deviceId, notes });
 
-    await page.getByRole("textbox", { name: "Notes *" }).fill(notes);
+      // Wait for the Add sheet to fully close before opening Edit; otherwise its
+      // controls linger in the DOM during the close animation and collide with
+      // the edit sheet's controls.
+      await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
 
-    await page.getByRole("button", { name: "Save" }).click();
+      await page
+        .locator('[data-slot="card"]')
+        .filter({ hasText: notes })
+        .locator("button:has(.lucide-square-pen)")
+        .first()
+        .click();
 
-    await expect(page.getByText(notes)).toBeVisible();
-  });
+      // With the Add sheet closed, the edit sheet is the only open dialog. Use
+      // .last() to target the most recently opened dialog so a still-unmounting
+      // sheet can't reintroduce a strict-mode match.
+      const editSheet = page.getByRole("dialog").last();
+      await expect(editSheet).toBeVisible();
 
-  test("Edit an existing service record and verify changes", async ({
-    page,
-  }) => {
-    // Wait for device list to load by checking for at least one device card
-    const firstDeviceLink = page
-      .getByRole("link")
-      .filter({ has: page.locator('[data-slot="card"]') })
-      .first();
+      const pastYear = new Date().getFullYear() - 1;
+      await editSheet
+        .locator('[data-slot="form-item"]')
+        .filter({ hasText: "Service Date" })
+        .locator('[data-slot="popover-trigger"]')
+        .click();
+      await page
+        .locator(".rdp-years_dropdown")
+        .selectOption(pastYear.toString());
+      await page
+        .locator('[role="gridcell"]:not([data-outside])')
+        .first()
+        .click();
 
-    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
+      await editSheet
+        .getByRole("textbox", { name: "Notes *" })
+        .fill(updatedNotes);
 
-    await firstDeviceLink.click();
+      await editSheet.getByRole("button", { name: "Update" }).click();
 
-    // Wait for device details page to load by checking for Add Service Record button
-    await expect(
-      page.getByRole("button", { name: "Add Service Record" }),
-    ).toBeVisible({
-      timeout: 10000,
-    });
+      const updatedCard = page
+        .locator('[data-slot="card"]')
+        .filter({ hasText: updatedNotes })
+        .first();
 
-    await page.getByRole("button", { name: "Add Service Record" }).click();
+      await updatedCard.scrollIntoViewIfNeeded();
+      await expect(updatedCard).toBeVisible();
 
-    await page.getByRole("textbox", { name: "Notes *" }).fill(notes);
-    await page.getByRole("button", { name: "Save" }).click();
+      await expect(
+        page.locator('[data-slot="card"]').filter({ hasText: notes }),
+      ).toHaveCount(0);
+    },
+  );
 
-    await expect(page.getByText(notes)).toBeVisible();
+  test(
+    "should reject whitespace-only input in required text fields",
+    {
+      tag: ["@atomic", "@cap:device.service-record.create"],
+    },
+    async ({ page }) => {
+      await searchAndOpenDevice(page, deviceName);
 
-    // Wait for the Add sheet to fully close before opening Edit; otherwise its
-    // controls linger in the DOM during the close animation and collide with
-    // the edit sheet's controls.
-    await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
+      await page.getByRole("button", { name: "Add Service Record" }).click();
 
-    await page
-      .locator('[data-slot="card"]')
-      .filter({ hasText: notes })
-      .locator("button:has(.lucide-square-pen)")
-      .first()
-      .click();
+      const notesField = page.getByRole("textbox", { name: "Notes *" });
+      await notesField.fill("   ");
 
-    // With the Add sheet closed, the edit sheet is the only open dialog. Use
-    // .last() to target the most recently opened dialog so a still-unmounting
-    // sheet can't reintroduce a strict-mode match.
-    const editSheet = page.getByRole("dialog").last();
-    await expect(editSheet).toBeVisible();
+      await page.getByRole("button", { name: "Save" }).click();
 
-    const pastYear = new Date().getFullYear() - 1;
-    await editSheet
-      .locator('[data-slot="form-item"]')
-      .filter({ hasText: "Service Date" })
-      .locator('[data-slot="popover-trigger"]')
-      .click();
-    await page.locator(".rdp-years_dropdown").selectOption(pastYear.toString());
-    await page.locator('[role="gridcell"]:not([data-outside])').first().click();
+      const errorMessage = getFieldErrorMessage(notesField);
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("This field is required");
+    },
+  );
 
-    await editSheet
-      .getByRole("textbox", { name: "Notes *" })
-      .fill(updatedNotes);
+  test(
+    "Show validation error for future date in service record",
+    {
+      tag: ["@atomic", "@cap:device.service-record.create"],
+    },
+    async ({ page }) => {
+      // Open the device created for this test
+      await searchAndOpenDevice(page, deviceName);
 
-    await editSheet.getByRole("button", { name: "Update" }).click();
+      // Wait for device details page to load by checking for Add Service Record button
+      await expect(
+        page.getByRole("button", { name: "Add Service Record" }),
+      ).toBeVisible({
+        timeout: 10000,
+      });
 
-    const updatedCard = page
-      .locator('[data-slot="card"]')
-      .filter({ hasText: updatedNotes })
-      .first();
+      await page.getByRole("button", { name: "Add Service Record" }).click();
 
-    await updatedCard.scrollIntoViewIfNeeded();
-    await expect(updatedCard).toBeVisible();
+      const futureYear = new Date().getFullYear() + 1;
+      await page
+        .locator('[data-slot="form-item"]')
+        .filter({ hasText: "Service Date" })
+        .locator('[data-slot="popover-trigger"]')
+        .click();
+      await page
+        .locator(".rdp-years_dropdown")
+        .selectOption(futureYear.toString());
+      await page
+        .locator('[role="gridcell"]:not([data-outside])')
+        .first()
+        .click();
 
-    await expect(
-      page.locator('[data-slot="card"]').filter({ hasText: notes }),
-    ).toHaveCount(0);
-  });
+      await page
+        .getByRole("textbox", { name: "Notes *" })
+        .fill(faker.lorem.sentence());
 
-  test("should reject whitespace-only input in required text fields", async ({
-    page,
-  }) => {
-    const firstDeviceLink = page
-      .getByRole("link")
-      .filter({ has: page.locator('[data-slot="card"]') })
-      .first();
-    await firstDeviceLink.click();
+      await page.getByRole("button", { name: "Save" }).click();
 
-    await page.getByRole("button", { name: "Add Service Record" }).click();
+      await expect(
+        page.getByText("Service date must be set to today or a past date"),
+      ).toBeVisible();
+    },
+  );
 
-    const notesField = page.getByRole("textbox", { name: "Notes *" });
-    await notesField.fill("   ");
+  test(
+    "Save button should be disabled when no changes are made in edit mode",
+    {
+      tag: ["@atomic", "@cap:device.service-record.edit"],
+    },
+    async ({ page }) => {
+      // Open the device created for this test
+      await searchAndOpenDevice(page, deviceName);
 
-    await page.getByRole("button", { name: "Save" }).click();
+      await addDeviceServiceRecordViaUi(page, { facilityId, deviceId, notes });
 
-    const errorMessage = getFieldErrorMessage(notesField);
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText("This field is required");
-  });
+      // Wait for the Add sheet to fully close before opening Edit; otherwise its
+      // controls linger in the DOM during the close animation and collide with
+      // the edit sheet's controls.
+      await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
 
-  test("Show validation error for future date in service record", async ({
-    page,
-  }) => {
-    // Wait for device list to load by checking for at least one device card
-    const firstDeviceLink = page
-      .getByRole("link")
-      .filter({ has: page.locator('[data-slot="card"]') })
-      .first();
+      await page
+        .locator('[data-slot="card"]')
+        .filter({ hasText: notes })
+        .locator("button:has(.lucide-square-pen)")
+        .first()
+        .click();
 
-    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
+      // With the Add sheet closed, the edit sheet is the only open dialog. Use
+      // .last() to target the most recently opened dialog so a still-unmounting
+      // sheet can't reintroduce a strict-mode match.
+      const editSheet = page.getByRole("dialog").last();
+      await expect(editSheet).toBeVisible();
 
-    await firstDeviceLink.click();
+      const updateButton = editSheet.getByRole("button", { name: "Update" });
+      await expect(updateButton).toBeDisabled();
 
-    // Wait for device details page to load by checking for Add Service Record button
-    await expect(
-      page.getByRole("button", { name: "Add Service Record" }),
-    ).toBeVisible({
-      timeout: 10000,
-    });
+      await editSheet
+        .getByRole("textbox", { name: "Notes *" })
+        .fill(updatedNotes);
 
-    await page.getByRole("button", { name: "Add Service Record" }).click();
+      await expect(updateButton).toBeEnabled();
 
-    const futureYear = new Date().getFullYear() + 1;
-    await page
-      .locator('[data-slot="form-item"]')
-      .filter({ hasText: "Service Date" })
-      .locator('[data-slot="popover-trigger"]')
-      .click();
-    await page
-      .locator(".rdp-years_dropdown")
-      .selectOption(futureYear.toString());
-    await page.locator('[role="gridcell"]:not([data-outside])').first().click();
+      await editSheet.getByRole("textbox", { name: "Notes *" }).fill(notes);
 
-    await page
-      .getByRole("textbox", { name: "Notes *" })
-      .fill(faker.lorem.sentence());
-
-    await page.getByRole("button", { name: "Save" }).click();
-
-    await expect(
-      page.getByText("Service date must be set to today or a past date"),
-    ).toBeVisible();
-  });
-
-  test("Save button should be disabled when no changes are made in edit mode", async ({
-    page,
-  }) => {
-    // Wait for device list to load by checking for at least one device card
-    const firstDeviceLink = page
-      .getByRole("link")
-      .filter({ has: page.locator('[data-slot="card"]') })
-      .first();
-
-    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
-
-    await firstDeviceLink.click();
-
-    // Wait for device details page to load by checking for Add Service Record button
-    await expect(
-      page.getByRole("button", { name: "Add Service Record" }),
-    ).toBeVisible({
-      timeout: 10000,
-    });
-
-    await page.getByRole("button", { name: "Add Service Record" }).click();
-
-    await page.getByRole("textbox", { name: "Notes *" }).fill(notes);
-    await page.getByRole("button", { name: "Save" }).click();
-
-    await expect(page.getByText(notes)).toBeVisible();
-
-    // Wait for the Add sheet to fully close before opening Edit; otherwise its
-    // controls linger in the DOM during the close animation and collide with
-    // the edit sheet's controls.
-    await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
-
-    await page
-      .locator('[data-slot="card"]')
-      .filter({ hasText: notes })
-      .locator("button:has(.lucide-square-pen)")
-      .first()
-      .click();
-
-    // With the Add sheet closed, the edit sheet is the only open dialog. Use
-    // .last() to target the most recently opened dialog so a still-unmounting
-    // sheet can't reintroduce a strict-mode match.
-    const editSheet = page.getByRole("dialog").last();
-    await expect(editSheet).toBeVisible();
-
-    const updateButton = editSheet.getByRole("button", { name: "Update" });
-    await expect(updateButton).toBeDisabled();
-
-    await editSheet
-      .getByRole("textbox", { name: "Notes *" })
-      .fill(updatedNotes);
-
-    await expect(updateButton).toBeEnabled();
-
-    await editSheet.getByRole("textbox", { name: "Notes *" }).fill(notes);
-
-    await expect(updateButton).toBeDisabled();
-  });
+      await expect(updateButton).toBeDisabled();
+    },
+  );
 });

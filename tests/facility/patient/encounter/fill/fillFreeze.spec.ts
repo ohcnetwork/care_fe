@@ -2,6 +2,10 @@ import { faker } from "@faker-js/faker";
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
+  addQuestionnaireViaUi,
+  answerRespiratoryStatusRequired,
+} from "tests/helper/questionnaire";
+import {
   getQuestionnaireIdBySlug,
   questionBlock,
 } from "tests/helper/questionnaireV2";
@@ -32,26 +36,6 @@ const PRIMARY_SLUG = "respiratory_status-v3";
 const ADDED_SLUG = "patient_feedback";
 const ADDED_TITLE = /Feedback Form/;
 const NOTE_LABEL = "Any Suggestions for Improvement";
-
-/** Answers form A's two required questions (see fillValidation.spec.ts). */
-async function answerPrimaryRequired(page: Page) {
-  await questionBlock(page, "Is bilateral air entry present?")
-    .getByRole("radio", { name: "yes", exact: true })
-    .click();
-  await questionBlock(page, "Select Modality")
-    .getByRole("radio", { name: "oxygen_support", exact: true })
-    .click();
-}
-
-/** Opens the add-questionnaire picker and appends `title` to the session
- *  (mirrors fillMultiForm.spec.ts's own helper — the fill page gives
- *  QuestionnaireSearch a plain-button trigger here, so the affordance has
- *  a real accessible name). */
-async function addQuestionnaire(page: Page, title: RegExp) {
-  await page.getByRole("button", { name: "Add questionnaire" }).click();
-  await page.getByPlaceholder("Search Forms").fill("Feedback");
-  await page.getByRole("option", { name: title }).click();
-}
 
 interface BatchRequestBody {
   requests: {
@@ -110,176 +94,187 @@ test.describe("P1-4: submit freeze", () => {
       questionBlock(page, "Is bilateral air entry present?"),
     ).toBeVisible();
 
-    await answerPrimaryRequired(page);
-    await addQuestionnaire(page, ADDED_TITLE);
+    await answerRespiratoryStatusRequired(page);
+    await addQuestionnaireViaUi(page, {
+      search: "Feedback",
+      title: ADDED_TITLE,
+    });
     await expect(page.locator("[data-form-key]")).toHaveCount(2);
   });
 
-  test("the session freezes during an in-flight submit and releases on success", async ({
-    page,
-  }) => {
-    const note = `Freeze-${faker.string.alphanumeric(10)}`;
-    const noteInput = questionBlock(page, NOTE_LABEL).getByRole("textbox");
-    await noteInput.fill(note);
+  test(
+    "the session freezes during an in-flight submit and releases on success",
+    { tag: ["@atomic", "@cap:questionnaire.fill.submit"] },
+    async ({ page }) => {
+      const note = `Freeze-${faker.string.alphanumeric(10)}`;
+      const noteInput = questionBlock(page, NOTE_LABEL).getByRole("textbox");
+      await noteInput.fill(note);
 
-    const addedForm = page.locator(`[data-form-key="${addedId}"]`);
-    // Substring "Remove" also matches a repeating question's per-entry
-    // remove button elsewhere on the canvas — anchor on the form-level
-    // affordance's real accessible name (`remove_questionnaire`: "Remove
-    // {{title}}"), not the bare word.
-    const removeButton = addedForm.getByRole("button", {
-      name: /^Remove Feedback/,
-    });
-    const addPickerButton = page.getByRole("button", {
-      name: "Add questionnaire",
-    });
-    // The note popover's trigger — a second input-bearing control on the
-    // SAME question as `noteInput` that reads only `mode` before this fix,
-    // so a note typed during flight was silently discarded on success
-    // (notes ARE submitted — composeBatch reads them off the click-time
-    // snapshot same as the answer itself).
-    const noteButton = questionBlock(page, NOTE_LABEL).getByRole("button", {
-      name: "Add note",
-    });
-
-    // Sanity: nothing is disabled before Save Changes is pressed.
-    await expect(noteInput).toBeEnabled();
-    await expect(removeButton).toBeEnabled();
-    await expect(addPickerButton).toBeEnabled();
-    await expect(noteButton).toBeEnabled();
-
-    const intercepted = await interceptBatchWithDelay(page);
-    await page.getByRole("button", { name: "Save Changes" }).click();
-
-    // DURING flight — the whole session freezes, not just the header's
-    // own Save/Cancel buttons (which already disabled before this fix).
-    await expect(noteInput).toBeDisabled();
-    await expect(removeButton).toBeDisabled();
-    await expect(addPickerButton).toBeDisabled();
-    await expect(noteButton).toBeDisabled();
-    // The disabled trigger means the note popover — and its textarea —
-    // is unreachable at all: force a click past Playwright's actionability
-    // guard and confirm the textarea never appears.
-    await noteButton.click({ force: true });
-    await expect(page.getByPlaceholder("Add note")).toHaveCount(0);
-    // The freeze means there is no way to type over it — confirmed by the
-    // disabled assertions above — but the value itself must also still
-    // read back exactly what was there at click time, not reset to blank
-    // or to some intermediate state.
-    await expect(noteInput).toHaveValue(note);
-
-    // The response lands and the success path completes.
-    await expectToast(page, "Questionnaire submitted successfully");
-    await page.waitForURL(/\/updates$/);
-
-    // The composed batch carried exactly the click-time value — nothing
-    // typed after Save (there was nothing typeable) diverged from it.
-    const body = intercepted.body();
-    const submit = body?.requests.find((request) =>
-      request.url.includes(`/questionnaire/${addedId}/submit/`),
-    );
-    const submittedValues = (submit?.body.results ?? []).flatMap((result) =>
-      result.values.map((value) => value.value),
-    );
-    expect(submittedValues).toContain(note);
-  });
-
-  test("a failed submit releases the freeze so the session is editable again", async ({
-    page,
-  }) => {
-    const note = `FreezeErr-${faker.string.alphanumeric(10)}`;
-    const noteInput = questionBlock(page, NOTE_LABEL).getByRole("textbox");
-    await noteInput.fill(note);
-
-    const addedForm = page.locator(`[data-form-key="${addedId}"]`);
-    const removeButton = addedForm.getByRole("button", {
-      name: /^Remove Feedback/,
-    });
-    const noteButton = questionBlock(page, NOTE_LABEL).getByRole("button", {
-      name: "Add note",
-    });
-
-    await interceptBatchWithDelay(page, { fail: true });
-    await page.getByRole("button", { name: "Save Changes" }).click();
-
-    // Frozen while the (doomed) request is in flight.
-    await expect(noteInput).toBeDisabled();
-    await expect(removeButton).toBeDisabled();
-    await expect(noteButton).toBeDisabled();
-
-    await expectToast(page, "Failed to submit questionnaire");
-
-    // The failure releases the freeze — the clinician can still fix
-    // something and try again, rather than being stuck on a dead form.
-    await expect(noteInput).toBeEnabled();
-    await expect(removeButton).toBeEnabled();
-    await expect(noteButton).toBeEnabled();
-    await noteInput.fill(`${note}-retry`);
-    await expect(noteInput).toHaveValue(`${note}-retry`);
-  });
-
-  test("nested server validation errors preserve answers and allow a retry", async ({
-    page,
-  }) => {
-    const note = `Rejected-${faker.string.alphanumeric(10)}`;
-    const noteInput = questionBlock(page, NOTE_LABEL).getByRole("textbox");
-    await noteInput.fill(note);
-    const submitted: BatchRequestBody[] = [];
-    await page.route("**/api/v1/batch_requests/", async (route) => {
-      if (route.request().method() !== "POST") return route.fallback();
-      const body = route.request().postDataJSON() as BatchRequestBody;
-      submitted.push(body);
-      if (submitted.length === 1) {
-        // Exact backend shape for a questionnaire made inactive before save.
-        return route.fulfill({
-          status: 400,
-          contentType: "application/json",
-          body: JSON.stringify({
-            results: [
-              {
-                reference_id: body.requests[0].reference_id,
-                status_code: 400,
-                data: {
-                  errors: [
-                    {
-                      type: "validation_error",
-                      msg: {
-                        type: "questionnaire_inactive",
-                        msg: "Questionnaire is inactive",
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          }),
-        });
-      }
-      return route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ results: [] }),
+      const addedForm = page.locator(`[data-form-key="${addedId}"]`);
+      // Substring "Remove" also matches a repeating question's per-entry
+      // remove button elsewhere on the canvas — anchor on the form-level
+      // affordance's real accessible name (`remove_questionnaire`: "Remove
+      // {{title}}"), not the bare word.
+      const removeButton = addedForm.getByRole("button", {
+        name: /^Remove Feedback/,
       });
-    });
+      const addPickerButton = page.getByRole("button", {
+        name: "Add questionnaire",
+      });
+      // The note popover's trigger — a second input-bearing control on the
+      // SAME question as `noteInput` that reads only `mode` before this fix,
+      // so a note typed during flight was silently discarded on success
+      // (notes ARE submitted — composeBatch reads them off the click-time
+      // snapshot same as the answer itself).
+      const noteButton = questionBlock(page, NOTE_LABEL).getByRole("button", {
+        name: "Add note",
+      });
 
-    const save = page.getByRole("button", { name: "Save Changes" });
-    await save.click();
-    await expect(
-      page.getByRole("alert").filter({ hasText: "Questionnaire is inactive" }),
-    ).toBeVisible();
-    await expect(noteInput).toHaveValue(note);
-    await expect(noteInput).toBeEnabled();
-    await noteInput.fill(`${note}-retry`);
-    await save.click();
-    await expectToast(page, "Questionnaire submitted successfully");
-    await page.waitForURL(/\/updates$/);
-    expect(submitted).toHaveLength(2);
-    expect(
-      submitted[1].requests.flatMap((request) =>
-        (request.body.results ?? []).flatMap((result) =>
-          result.values.map((value) => value.value),
+      // Sanity: nothing is disabled before Save Changes is pressed.
+      await expect(noteInput).toBeEnabled();
+      await expect(removeButton).toBeEnabled();
+      await expect(addPickerButton).toBeEnabled();
+      await expect(noteButton).toBeEnabled();
+
+      const intercepted = await interceptBatchWithDelay(page);
+      await page.getByRole("button", { name: "Save Changes" }).click();
+
+      // DURING flight — the whole session freezes, not just the header's
+      // own Save/Cancel buttons (which already disabled before this fix).
+      await expect(noteInput).toBeDisabled();
+      await expect(removeButton).toBeDisabled();
+      await expect(addPickerButton).toBeDisabled();
+      await expect(noteButton).toBeDisabled();
+      // The disabled trigger means the note popover — and its textarea —
+      // is unreachable at all: force a click past Playwright's actionability
+      // guard and confirm the textarea never appears.
+      await noteButton.click({ force: true });
+      await expect(page.getByPlaceholder("Add note")).toHaveCount(0);
+      // The freeze means there is no way to type over it — confirmed by the
+      // disabled assertions above — but the value itself must also still
+      // read back exactly what was there at click time, not reset to blank
+      // or to some intermediate state.
+      await expect(noteInput).toHaveValue(note);
+
+      // The response lands and the success path completes.
+      await expectToast(page, "Questionnaire submitted successfully");
+      await page.waitForURL(/\/updates$/);
+
+      // The composed batch carried exactly the click-time value — nothing
+      // typed after Save (there was nothing typeable) diverged from it.
+      const body = intercepted.body();
+      const submit = body?.requests.find((request) =>
+        request.url.includes(`/questionnaire/${addedId}/submit/`),
+      );
+      const submittedValues = (submit?.body.results ?? []).flatMap((result) =>
+        result.values.map((value) => value.value),
+      );
+      expect(submittedValues).toContain(note);
+    },
+  );
+
+  test(
+    "a failed submit releases the freeze so the session is editable again",
+    { tag: ["@atomic", "@cap:questionnaire.fill.submit"] },
+    async ({ page }) => {
+      const note = `FreezeErr-${faker.string.alphanumeric(10)}`;
+      const noteInput = questionBlock(page, NOTE_LABEL).getByRole("textbox");
+      await noteInput.fill(note);
+
+      const addedForm = page.locator(`[data-form-key="${addedId}"]`);
+      const removeButton = addedForm.getByRole("button", {
+        name: /^Remove Feedback/,
+      });
+      const noteButton = questionBlock(page, NOTE_LABEL).getByRole("button", {
+        name: "Add note",
+      });
+
+      await interceptBatchWithDelay(page, { fail: true });
+      await page.getByRole("button", { name: "Save Changes" }).click();
+
+      // Frozen while the (doomed) request is in flight.
+      await expect(noteInput).toBeDisabled();
+      await expect(removeButton).toBeDisabled();
+      await expect(noteButton).toBeDisabled();
+
+      await expectToast(page, "Failed to submit questionnaire");
+
+      // The failure releases the freeze — the clinician can still fix
+      // something and try again, rather than being stuck on a dead form.
+      await expect(noteInput).toBeEnabled();
+      await expect(removeButton).toBeEnabled();
+      await expect(noteButton).toBeEnabled();
+      await noteInput.fill(`${note}-retry`);
+      await expect(noteInput).toHaveValue(`${note}-retry`);
+    },
+  );
+
+  test(
+    "nested server validation errors preserve answers and allow a retry",
+    { tag: ["@atomic", "@cap:questionnaire.fill.submit"] },
+    async ({ page }) => {
+      const note = `Rejected-${faker.string.alphanumeric(10)}`;
+      const noteInput = questionBlock(page, NOTE_LABEL).getByRole("textbox");
+      await noteInput.fill(note);
+      const submitted: BatchRequestBody[] = [];
+      await page.route("**/api/v1/batch_requests/", async (route) => {
+        if (route.request().method() !== "POST") return route.fallback();
+        const body = route.request().postDataJSON() as BatchRequestBody;
+        submitted.push(body);
+        if (submitted.length === 1) {
+          // Exact backend shape for a questionnaire made inactive before save.
+          return route.fulfill({
+            status: 400,
+            contentType: "application/json",
+            body: JSON.stringify({
+              results: [
+                {
+                  reference_id: body.requests[0].reference_id,
+                  status_code: 400,
+                  data: {
+                    errors: [
+                      {
+                        type: "validation_error",
+                        msg: {
+                          type: "questionnaire_inactive",
+                          msg: "Questionnaire is inactive",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            }),
+          });
+        }
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ results: [] }),
+        });
+      });
+
+      const save = page.getByRole("button", { name: "Save Changes" });
+      await save.click();
+      await expect(
+        page
+          .getByRole("alert")
+          .filter({ hasText: "Questionnaire is inactive" }),
+      ).toBeVisible();
+      await expect(noteInput).toHaveValue(note);
+      await expect(noteInput).toBeEnabled();
+      await noteInput.fill(`${note}-retry`);
+      await save.click();
+      await expectToast(page, "Questionnaire submitted successfully");
+      await page.waitForURL(/\/updates$/);
+      expect(submitted).toHaveLength(2);
+      expect(
+        submitted[1].requests.flatMap((request) =>
+          (request.body.results ?? []).flatMap((result) =>
+            result.values.map((value) => value.value),
+          ),
         ),
-      ),
-    ).toContain(`${note}-retry`);
-  });
+      ).toContain(`${note}-retry`);
+    },
+  );
 });

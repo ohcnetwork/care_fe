@@ -1,5 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import {
+  createDeviceViaUi,
+  searchAndOpenDevice,
+} from "tests/helper/facilitySettings";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -15,102 +19,92 @@ test.describe("Facility Device Delete", () => {
     await page.goto(`/facility/${facilityId}/settings/devices`);
   });
 
-  test("Create a device, delete it, and verify it no longer exists", async ({
-    page,
-  }) => {
-    // Create a new device
-    await page.getByRole("link", { name: "Add Device" }).click();
+  test(
+    "Create a device, delete it, and verify it no longer exists",
+    {
+      tag: ["@atomic", "@cap:device.delete"],
+    },
+    async ({ page }) => {
+      // Create a new device
+      await createDeviceViaUi(page, { facilityId, name: deviceName });
 
-    await page
-      .getByRole("textbox", { name: "Registered Name *" })
-      .fill(deviceName);
+      // Navigate to the device details page
+      await searchAndOpenDevice(page, deviceName);
 
-    await page.getByRole("button", { name: "Save" }).click();
-    await expect(
-      page.getByText("Device registered successfully"),
-    ).toBeVisible();
+      // Verify device is displayed
+      await expect(
+        page.getByRole("heading", { name: deviceName }),
+      ).toBeVisible();
 
-    // Navigate to the device details page
-    await page
-      .getByRole("textbox", { name: "Search devices..." })
-      .fill(deviceName);
-    await page.getByRole("link", { name: deviceName }).click();
+      // Click Delete button in the Danger Zone
+      await page.getByRole("button", { name: "Delete" }).click();
 
-    // Verify device is displayed
-    await expect(page.getByRole("heading", { name: deviceName })).toBeVisible();
+      // Confirm deletion in the dialog (button name includes its shortcut badge)
+      await page
+        .getByRole("alertdialog", { name: "Delete Device" })
+        .getByRole("button", { name: /^Delete/ })
+        .click();
 
-    // Click Delete button in the Danger Zone
-    await page.getByRole("button", { name: "Delete" }).click();
+      // Search for the deleted device
+      await page
+        .getByRole("textbox", { name: "Search devices..." })
+        .fill(deviceName);
 
-    // Confirm deletion in the dialog (button name includes its shortcut badge)
-    await page
-      .getByRole("alertdialog", { name: "Delete Device" })
-      .getByRole("button", { name: /^Delete/ })
-      .click();
+      // Verify device is not found in the list
+      await expect(page.getByRole("link", { name: deviceName })).toBeHidden();
 
-    // Search for the deleted device
-    await page
-      .getByRole("textbox", { name: "Search devices..." })
-      .fill(deviceName);
+      // Verify "No devices found" message or empty state
+      await expect(
+        page.getByText("No devices match your search criteria", {
+          exact: false,
+        }),
+      ).toBeVisible();
+    },
+  );
 
-    // Verify device is not found in the list
-    await expect(
-      page.getByRole("link", { name: deviceName }),
-    ).not.toBeVisible();
+  test(
+    "Cancel device deletion and verify device still exists",
+    {
+      tag: ["@atomic", "@cap:device.delete"],
+    },
+    async ({ page }) => {
+      // Create a new device
+      await createDeviceViaUi(page, { facilityId, name: deviceName });
 
-    // Verify "No devices found" message or empty state
-    await expect(
-      page.getByText("No devices match your search criteria", { exact: false }),
-    ).toBeVisible();
-  });
+      // Navigate to the device details page
+      await searchAndOpenDevice(page, deviceName);
 
-  test("Cancel device deletion and verify device still exists", async ({
-    page,
-  }) => {
-    // Create a new device
-    await page.getByRole("link", { name: "Add Device" }).click();
+      // Verify device is displayed
+      await expect(
+        page.getByRole("heading", { name: deviceName }),
+      ).toBeVisible();
 
-    await page
-      .getByRole("textbox", { name: "Registered Name *" })
-      .fill(deviceName);
+      // Click Delete button
+      await page.getByRole("button", { name: "Delete" }).click();
 
-    await page.getByRole("button", { name: "Save" }).click();
-    await expect(
-      page.getByText("Device registered successfully"),
-    ).toBeVisible();
+      // Cancel deletion in the dialog
+      await page.getByRole("button", { name: "Cancel" }).click();
 
-    // Navigate to the device details page
-    await page
-      .getByRole("textbox", { name: "Search devices..." })
-      .fill(deviceName);
-    await page.getByRole("link", { name: deviceName }).click();
+      // Verify we're still on the device details page
+      await expect(
+        page.getByRole("heading", { name: deviceName }),
+      ).toBeVisible();
 
-    // Verify device is displayed
-    await expect(page.getByRole("heading", { name: deviceName })).toBeVisible();
+      // Navigate back to devices list and wait for the device list API to load
+      const devicesResponse = page.waitForResponse(
+        (resp) =>
+          resp.url().includes("/device/") && resp.request().method() === "GET",
+      );
+      await page.goto(`/facility/${facilityId}/settings/devices`);
+      await devicesResponse;
 
-    // Click Delete button
-    await page.getByRole("button", { name: "Delete" }).click();
+      // Search for the device
+      await page
+        .getByRole("textbox", { name: "Search devices..." })
+        .fill(deviceName);
 
-    // Cancel deletion in the dialog
-    await page.getByRole("button", { name: "Cancel" }).click();
-
-    // Verify we're still on the device details page
-    await expect(page.getByRole("heading", { name: deviceName })).toBeVisible();
-
-    // Navigate back to devices list and wait for the device list API to load
-    const devicesResponse = page.waitForResponse(
-      (resp) =>
-        resp.url().includes("/device/") && resp.request().method() === "GET",
-    );
-    await page.goto(`/facility/${facilityId}/settings/devices`);
-    await devicesResponse;
-
-    // Search for the device
-    await page
-      .getByRole("textbox", { name: "Search devices..." })
-      .fill(deviceName);
-
-    // Verify device still exists in the list
-    await expect(page.getByRole("link", { name: deviceName })).toBeVisible();
-  });
+      // Verify device still exists in the list
+      await expect(page.getByRole("link", { name: deviceName })).toBeVisible();
+    },
+  );
 });

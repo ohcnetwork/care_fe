@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { waitForListRequest } from "tests/facility/services/helpers";
+import { waitForListRequest } from "tests/helper/healthcareService";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -16,55 +16,73 @@ test.describe("Facility services search params", () => {
     servicesUrl = `/facility/${getFacilityId()}/services`;
   });
 
-  test("writes the search to the URL and the API request", async ({ page }) => {
-    await page.goto(servicesUrl);
-    const searchBox = page.getByRole("textbox", {
-      name: "Search healthcare services...",
-      exact: true,
-    });
-    await expect(searchBox).toBeVisible();
-
-    const request = waitForListRequest(
-      page,
-      "/healthcare_service/",
-      (params) => params.get("name") === SERVICE_NAME,
-    );
-    await searchBox.fill(SERVICE_NAME);
-    await request;
-
-    await expect(page).toHaveURL(/[?&]search=Main\+Pharmacy(&|$)/);
-    await expect(page).toHaveURL(/[?&]page=1(&|$)/);
-    await expect(page.getByRole("link", { name: SERVICE_NAME })).toBeVisible();
-  });
-
-  test("restores the search from a bookmarked URL", async ({ page }) => {
-    const request = waitForListRequest(
-      page,
-      "/healthcare_service/",
-      (params) => params.get("name") === SERVICE_NAME,
-    );
-    await page.goto(`${servicesUrl}?search=Main+Pharmacy`);
-    await request;
-
-    await expect(
-      page.getByRole("textbox", {
+  test(
+    "writes the search to the URL and the API request",
+    { tag: ["@atomic", "@cap:service.search"] },
+    async ({ page }) => {
+      await page.goto(servicesUrl);
+      const searchBox = page.getByRole("textbox", {
         name: "Search healthcare services...",
         exact: true,
-      }),
-    ).toHaveValue(SERVICE_NAME);
-    await expect(page.getByRole("link", { name: SERVICE_NAME })).toBeVisible();
-  });
+      });
+      await expect(searchBox).toBeVisible();
 
-  test("ignores an invalid page number", async ({ page }) => {
-    const request = waitForListRequest(
-      page,
-      "/healthcare_service/",
-      (params) => params.get("offset") === "0",
-    );
-    await page.goto(`${servicesUrl}?page=abc`);
-    await request;
+      const request = waitForListRequest(
+        page,
+        "/healthcare_service/",
+        (params) => params.get("name") === SERVICE_NAME,
+      );
+      await searchBox.fill(SERVICE_NAME);
+      await request;
 
-    await expect(page.getByRole("heading", { name: "Services" })).toBeVisible();
-    await expect(page).not.toHaveURL(/page=abc/);
-  });
+      await expect(page).toHaveURL(/[?&]search=Main\+Pharmacy(&|$)/);
+      await expect(page).toHaveURL(/[?&]page=1(&|$)/);
+      await expect(
+        page.getByRole("link", { name: SERVICE_NAME }),
+      ).toBeVisible();
+    },
+  );
+
+  test(
+    "restores the search from a bookmarked URL",
+    { tag: ["@atomic", "@cap:service.search"] },
+    async ({ page }) => {
+      const request = waitForListRequest(
+        page,
+        "/healthcare_service/",
+        (params) => params.get("name") === SERVICE_NAME,
+      );
+      await page.goto(`${servicesUrl}?search=Main+Pharmacy`);
+      await request;
+
+      await expect(
+        page.getByRole("textbox", {
+          name: "Search healthcare services...",
+          exact: true,
+        }),
+      ).toHaveValue(SERVICE_NAME);
+      await expect(
+        page.getByRole("link", { name: SERVICE_NAME }),
+      ).toBeVisible();
+    },
+  );
+
+  test(
+    "ignores an invalid page number",
+    { tag: ["@atomic", "@cap:service.list"] },
+    async ({ page }) => {
+      const request = waitForListRequest(
+        page,
+        "/healthcare_service/",
+        (params) => params.get("offset") === "0",
+      );
+      await page.goto(`${servicesUrl}?page=abc`);
+      await request;
+
+      await expect(
+        page.getByRole("heading", { name: "Services" }),
+      ).toBeVisible();
+      await expect(page).not.toHaveURL(/page=abc/);
+    },
+  );
 });

@@ -1,5 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import {
+  openPatientFilesTab,
+  uploadPatientFileViaUi,
+} from "tests/helper/patient";
 import { filterSelectButton } from "tests/helper/searchParams";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -16,46 +20,6 @@ test.describe("Patient Files", () => {
   // Test fixture files
   const fileName = "sample_img1.png";
   const fileNames = ["sample_img1.png", "sample_img2.png", "sample_file.xlsx"];
-
-  // Helper function to upload a file with validation
-  const uploadFile = async (
-    page: Page,
-    filePath: string,
-    displayName: string,
-  ) => {
-    await page.getByRole("button", { name: "Add Files" }).click();
-
-    // Wait for file input to be attached
-    await expect(page.locator('input[type="file"]')).toBeAttached({
-      timeout: 5000,
-    });
-    await page.locator('input[type="file"]').setInputFiles(filePath);
-
-    // Wait for file name input to be visible
-    await expect(
-      page.getByRole("textbox", { name: "File Name" }).first(),
-    ).toBeVisible({ timeout: 5000 });
-    await page
-      .getByRole("textbox", { name: "File Name" })
-      .first()
-      .fill(displayName);
-
-    const uploadPromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/v1/files/") &&
-        response.request().method() === "POST",
-      { timeout: 15000 },
-    );
-
-    await page.getByRole("button", { name: "Upload" }).click();
-    const response = await uploadPromise;
-    expect(response.status()).toBe(200);
-    await expect(page.getByText(fileUploadSuccessToast)).toBeVisible({
-      timeout: 10000,
-    });
-    await page.getByRole("button", { name: "Close toast" }).click();
-    return response;
-  };
 
   // Opens the preview for a specific uploaded file and closes it again,
   // confirming the file is accessible to the current user.
@@ -91,236 +55,250 @@ test.describe("Patient Files", () => {
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     // Open the saved patient fixture; list navigation is covered separately.
-    await page.goto(`/facility/${facilityId}/patient/${getPatientId()}`);
-
-    // Wait for Files tab to be visible and click it
-    const filesTab = page.getByRole("tab", { name: "Files" });
-    await expect(filesTab).toBeVisible({ timeout: 10000 });
-    await filesTab.click();
-
-    // Wait for the Files section to load by checking for Add Files button
-    await expect(page.getByRole("button", { name: "Add Files" })).toBeVisible({
-      timeout: 10000,
-    });
+    await openPatientFilesTab(page, { facilityId, patientId: getPatientId() });
   });
 
-  test("Add multiple patient files", async ({ page }) => {
-    // Generate unique file names for this test run
-    const inputFileNames = [
-      faker.system.fileName(),
-      faker.system.fileName(),
-      faker.system.fileName(),
-    ];
+  test(
+    "Add multiple patient files",
+    { tag: ["@atomic", "@cap:patient.files.upload"] },
+    async ({ page }) => {
+      // Generate unique file names for this test run
+      const inputFileNames = [
+        faker.system.fileName(),
+        faker.system.fileName(),
+        faker.system.fileName(),
+      ];
 
-    // Click Add Files button and upload multiple files directly
-    await page.getByRole("button", { name: "Add Files" }).click();
+      // Click Add Files button and upload multiple files directly
+      await page.getByRole("button", { name: "Add Files" }).click();
 
-    // Wait for the file upload dialog to be visible
-    await expect(page.locator('input[type="file"]')).toBeAttached({
-      timeout: 5000,
-    });
+      // Wait for the file upload dialog to be visible
+      await expect(page.locator('input[type="file"]')).toBeAttached({
+        timeout: 5000,
+      });
 
-    // Upload multiple files directly to the file input (bypassing system dialog)
-    await page
-      .locator('input[type="file"]')
-      .setInputFiles(
-        fileNames.map((file) =>
-          file.endsWith(".xlsx")
-            ? `tests/fixtures/${file}`
-            : `tests/fixtures/images/${file}`,
-        ),
+      // Upload multiple files directly to the file input (bypassing system dialog)
+      await page
+        .locator('input[type="file"]')
+        .setInputFiles(
+          fileNames.map((file) =>
+            file.endsWith(".xlsx")
+              ? `tests/fixtures/${file}`
+              : `tests/fixtures/images/${file}`,
+          ),
+        );
+
+      // Wait for files to be loaded in the UI
+      await expect(
+        page.getByRole("textbox", { name: "File Name" }).first(),
+      ).toBeVisible({ timeout: 5000 });
+
+      // Try to upload without names - should show validation error
+      await page.getByRole("button", { name: "Upload" }).click();
+
+      // Verify validation error is shown
+      await expect(page.getByText(validationMessage).first()).toBeVisible({
+        timeout: 5000,
+      });
+
+      // Fill in file names for all files
+      for (let i = 0; i < inputFileNames.length; i++) {
+        await page
+          .getByRole("textbox", { name: "File Name" })
+          .nth(i)
+          .fill(inputFileNames[i]);
+      }
+
+      // Setup API intercept for file upload
+      const uploadPromise = page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/v1/files/") &&
+          response.request().method() === "POST",
+        { timeout: 15000 },
       );
 
-    // Wait for files to be loaded in the UI
-    await expect(
-      page.getByRole("textbox", { name: "File Name" }).first(),
-    ).toBeVisible({ timeout: 5000 });
+      // Click upload button
+      await page.getByRole("button", { name: "Upload" }).click();
 
-    // Try to upload without names - should show validation error
-    await page.getByRole("button", { name: "Upload" }).click();
+      // Wait for API response
+      const response = await uploadPromise;
+      expect(response.status()).toBe(200);
 
-    // Verify validation error is shown
-    await expect(page.getByText(validationMessage).first()).toBeVisible({
-      timeout: 5000,
-    });
+      // Verify at least one success message is shown
+      const successToast = page
+        .locator(`text=${fileUploadSuccessToast}`)
+        .first();
+      await expect(successToast).toBeVisible({ timeout: 10000 });
+    },
+  );
 
-    // Fill in file names for all files
-    for (let i = 0; i < inputFileNames.length; i++) {
+  test(
+    "File Uploaded by one user is accessible to another user",
+    { tag: ["@atomic", "@cap:patient.files.view"] },
+    async ({ page, browser }) => {
+      // Unique, extension-free display name so this exact file's row can be
+      // located reliably among other files on the shared patient.
+      const uploadedFileName = `access-${faker.string.alphanumeric(10)}`;
+
+      // Upload the file as the first user (doctor).
+      await uploadPatientFileViaUi(page, {
+        filePath: `tests/fixtures/images/${fileName}`,
+        displayName: uploadedFileName,
+      });
+
+      // Capture the stable Files-tab URL to reopen as a different user.
+      const filesUrl = page.url();
+
+      // The uploader can preview the file they just added.
+      await openFilePreview(page, uploadedFileName);
+
+      // The same file must be accessible to a different user (nurse).
+      const nurseContext = await browser.newContext({
+        storageState: "tests/.auth/nurse.json",
+      });
+      const nursePage = await nurseContext.newPage();
+      try {
+        await nursePage.goto(filesUrl);
+        await openFilePreview(nursePage, uploadedFileName);
+      } finally {
+        await nursePage.close();
+        await nurseContext.close();
+      }
+    },
+  );
+
+  test(
+    "Add a new patient file and rename it",
+    { tag: ["@atomic", "@cap:patient.files.rename"] },
+    async ({ page }) => {
+      const inputFileName1 = faker.system.fileName();
+      const newFileName = faker.system.fileName();
+
+      // Filter for active files first
+      const filterPromise = page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/v1/files/") &&
+          response.url().includes("is_archived=false") &&
+          response.request().method() === "GET",
+        { timeout: 15000 },
+      );
+      await filterSelectButton(page, "Status").click();
       await page
-        .getByRole("textbox", { name: "File Name" })
-        .nth(i)
-        .fill(inputFileNames[i]);
-    }
+        .getByRole("menuitemradio", { name: "Active", exact: true })
+        .click();
 
-    // Setup API intercept for file upload
-    const uploadPromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/v1/files/") &&
-        response.request().method() === "POST",
-      { timeout: 15000 },
-    );
+      const filterResponse = await filterPromise;
+      expect(filterResponse.status()).toBe(200);
 
-    // Click upload button
-    await page.getByRole("button", { name: "Upload" }).click();
+      // Upload a single file using helper
+      await uploadPatientFileViaUi(page, {
+        filePath: `tests/fixtures/images/${fileName}`,
+        displayName: inputFileName1,
+      });
 
-    // Wait for API response
-    const response = await uploadPromise;
-    expect(response.status()).toBe(200);
+      // Wait for the file row to be visible
+      await expect(page.getByRole("row", { name: inputFileName1 })).toBeVisible(
+        {
+          timeout: 5000,
+        },
+      );
 
-    // Verify at least one success message is shown
-    const successToast = page.locator(`text=${fileUploadSuccessToast}`).first();
-    await expect(successToast).toBeVisible({ timeout: 10000 });
-  });
+      await page
+        .getByRole("row", { name: inputFileName1 })
+        .getByLabel("actions")
+        .click();
 
-  test("File Uploaded by one user is accessible to another user", async ({
-    page,
-    browser,
-  }) => {
-    // Unique, extension-free display name so this exact file's row can be
-    // located reliably among other files on the shared patient.
-    const uploadedFileName = `access-${faker.string.alphanumeric(10)}`;
+      await page.getByRole("menuitem", { name: /rename/i }).click();
 
-    // Upload the file as the first user (doctor).
-    await uploadFile(
-      page,
-      `tests/fixtures/images/${fileName}`,
-      uploadedFileName,
-    );
+      // Wait for rename dialog to appear
+      await expect(page.locator("#edit-file-name")).toBeVisible({
+        timeout: 5000,
+      });
+      await page.locator("#edit-file-name").fill(newFileName);
 
-    // Capture the stable Files-tab URL to reopen as a different user.
-    const filesUrl = page.url();
+      const renamePromise = page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/v1/files/") &&
+          response.request().method() === "PUT",
+        { timeout: 15000 },
+      );
 
-    // The uploader can preview the file they just added.
-    await openFilePreview(page, uploadedFileName);
+      await page.getByRole("button", { name: "Proceed" }).click();
 
-    // The same file must be accessible to a different user (nurse).
-    const nurseContext = await browser.newContext({
-      storageState: "tests/.auth/nurse.json",
-    });
-    const nursePage = await nurseContext.newPage();
-    try {
-      await nursePage.goto(filesUrl);
-      await openFilePreview(nursePage, uploadedFileName);
-    } finally {
-      await nursePage.close();
-      await nurseContext.close();
-    }
-  });
+      const renameResponse = await renamePromise;
+      expect(renameResponse.status()).toBe(200);
 
-  test("Add a new patient file and rename it", async ({ page }) => {
-    const inputFileName1 = faker.system.fileName();
-    const newFileName = faker.system.fileName();
+      await expect(page.getByText(fileRenameSuccessToast)).toBeVisible({
+        timeout: 10000,
+      });
+    },
+  );
 
-    // Filter for active files first
-    const filterPromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/v1/files/") &&
-        response.url().includes("is_archived=false") &&
-        response.request().method() === "GET",
-      { timeout: 15000 },
-    );
-    await filterSelectButton(page, "Status").click();
-    await page
-      .getByRole("menuitemradio", { name: "Active", exact: true })
-      .click();
+  test(
+    "Add a new patient file and archive it",
+    { tag: ["@atomic", "@cap:patient.files.archive"] },
+    async ({ page }) => {
+      const inputFileName1 = faker.system.fileName();
+      const archiveReason = faker.lorem.sentence();
 
-    const filterResponse = await filterPromise;
-    expect(filterResponse.status()).toBe(200);
+      // Filter for active files first
+      const filterPromise = page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/v1/files/") &&
+          response.url().includes("is_archived=false") &&
+          response.request().method() === "GET",
+        { timeout: 15000 },
+      );
+      await filterSelectButton(page, "Status").click();
+      await page
+        .getByRole("menuitemradio", { name: "Active", exact: true })
+        .click();
 
-    // Upload a single file using helper
-    await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
+      const filterResponse = await filterPromise;
+      expect(filterResponse.status()).toBe(200);
 
-    // Wait for the file row to be visible
-    await expect(page.getByRole("row", { name: inputFileName1 })).toBeVisible({
-      timeout: 5000,
-    });
+      // Upload a single file using helper
+      await uploadPatientFileViaUi(page, {
+        filePath: `tests/fixtures/images/${fileName}`,
+        displayName: inputFileName1,
+      });
 
-    await page
-      .getByRole("row", { name: inputFileName1 })
-      .getByLabel("actions")
-      .click();
+      // Wait for the file row to be visible
+      await expect(page.getByRole("row", { name: inputFileName1 })).toBeVisible(
+        {
+          timeout: 5000,
+        },
+      );
 
-    await page.getByRole("menuitem", { name: /rename/i }).click();
+      await page
+        .getByRole("row", { name: inputFileName1 })
+        .getByLabel("actions")
+        .click();
 
-    // Wait for rename dialog to appear
-    await expect(page.locator("#edit-file-name")).toBeVisible({
-      timeout: 5000,
-    });
-    await page.locator("#edit-file-name").fill(newFileName);
+      await page.getByRole("menuitem", { name: /archive/i }).click();
 
-    const renamePromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/v1/files/") &&
-        response.request().method() === "PUT",
-      { timeout: 15000 },
-    );
+      // Wait for archive dialog to appear
+      await expect(page.getByRole("textbox", { name: /reason/i })).toBeVisible({
+        timeout: 5000,
+      });
+      await page.getByRole("textbox", { name: /reason/i }).fill(archiveReason);
 
-    await page.getByRole("button", { name: "Proceed" }).click();
+      const archivePromise = page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/v1/files/") &&
+          response.request().method() === "POST",
+        { timeout: 15000 },
+      );
 
-    const renameResponse = await renamePromise;
-    expect(renameResponse.status()).toBe(200);
+      // Click proceed button
+      await page.getByRole("button", { name: "Proceed" }).click();
 
-    await expect(page.getByText(fileRenameSuccessToast)).toBeVisible({
-      timeout: 10000,
-    });
-  });
+      const archiveResponse = await archivePromise;
+      expect(archiveResponse.status()).toBe(200);
 
-  test("Add a new patient file and archive it", async ({ page }) => {
-    const inputFileName1 = faker.system.fileName();
-    const archiveReason = faker.lorem.sentence();
-
-    // Filter for active files first
-    const filterPromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/v1/files/") &&
-        response.url().includes("is_archived=false") &&
-        response.request().method() === "GET",
-      { timeout: 15000 },
-    );
-    await filterSelectButton(page, "Status").click();
-    await page
-      .getByRole("menuitemradio", { name: "Active", exact: true })
-      .click();
-
-    const filterResponse = await filterPromise;
-    expect(filterResponse.status()).toBe(200);
-
-    // Upload a single file using helper
-    await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
-
-    // Wait for the file row to be visible
-    await expect(page.getByRole("row", { name: inputFileName1 })).toBeVisible({
-      timeout: 5000,
-    });
-
-    await page
-      .getByRole("row", { name: inputFileName1 })
-      .getByLabel("actions")
-      .click();
-
-    await page.getByRole("menuitem", { name: /archive/i }).click();
-
-    // Wait for archive dialog to appear
-    await expect(page.getByRole("textbox", { name: /reason/i })).toBeVisible({
-      timeout: 5000,
-    });
-    await page.getByRole("textbox", { name: /reason/i }).fill(archiveReason);
-
-    const archivePromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/v1/files/") &&
-        response.request().method() === "POST",
-      { timeout: 15000 },
-    );
-
-    // Click proceed button
-    await page.getByRole("button", { name: "Proceed" }).click();
-
-    const archiveResponse = await archivePromise;
-    expect(archiveResponse.status()).toBe(200);
-
-    await expect(page.getByText(fileArchiveSuccessToast)).toBeVisible({
-      timeout: 10000,
-    });
-  });
+      await expect(page.getByText(fileArchiveSuccessToast)).toBeVisible({
+        timeout: 10000,
+      });
+    },
+  );
 });

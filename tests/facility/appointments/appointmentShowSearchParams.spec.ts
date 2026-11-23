@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { getApiHeaders, getApiUrl } from "tests/helper/utils";
+import { createAppointmentViaApi } from "tests/helper/appointment";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -18,40 +18,39 @@ test.describe("Appointment page search params", () => {
   let appointmentPath: string;
 
   test.beforeEach(async ({ request }) => {
-    const facilityId = getFacilityId();
-    const appointments = await request.get(
-      `${getApiUrl()}/api/v1/facility/${facilityId}/appointments/?limit=1&resource_type=practitioner`,
-      { headers: getApiHeaders() },
-    );
-    expect(appointments.ok()).toBe(true);
-    const [appointment] = (
-      (await appointments.json()) as {
-        results: { id: string; patient: { id: string } }[];
-      }
-    ).results;
-    expect(appointment, "The facility needs an appointment").toBeDefined();
-    appointmentPath = `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`;
+    // A fresh booking of our own, not whichever appointment the facility has.
+    const appointment = await createAppointmentViaApi({
+      request,
+      facilityId: getFacilityId(),
+    });
+    appointmentPath = appointment.path;
   });
 
-  test("shows the success message from the URL and drops it on close", async ({
-    page,
-  }) => {
-    await page.goto(`${appointmentPath}?showSuccess=true`);
+  test(
+    "shows the success message from the URL and drops it on close",
+    { tag: ["@atomic", "@cap:appointment.detail.view"] },
+    async ({ page }) => {
+      await page.goto(`${appointmentPath}?showSuccess=true`);
 
-    await expect(successAlert(page)).toBeVisible();
+      await expect(successAlert(page)).toBeVisible();
 
-    await successAlert(page).getByRole("button", { name: "Close" }).click();
+      await successAlert(page).getByRole("button", { name: "Close" }).click();
 
-    await expect(successAlert(page)).toBeHidden();
-    await expect(page).toHaveURL(appointmentPath);
-  });
+      await expect(successAlert(page)).toBeHidden();
+      await expect(page).toHaveURL(appointmentPath);
+    },
+  );
 
-  test("ignores an invalid showSuccess value", async ({ page }) => {
-    await page.goto(`${appointmentPath}?showSuccess=bogus`);
+  test(
+    "ignores an invalid showSuccess value",
+    { tag: ["@atomic", "@cap:appointment.detail.view"] },
+    async ({ page }) => {
+      await page.goto(`${appointmentPath}?showSuccess=bogus`);
 
-    await expect(
-      page.getByRole("heading", { name: "Appointment Details" }),
-    ).toBeVisible();
-    await expect(successAlert(page)).toBeHidden();
-  });
+      await expect(
+        page.getByRole("heading", { name: "Appointment Details" }),
+      ).toBeVisible();
+      await expect(successAlert(page)).toBeHidden();
+    },
+  );
 });

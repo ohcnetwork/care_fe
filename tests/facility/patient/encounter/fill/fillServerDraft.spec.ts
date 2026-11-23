@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { type Page, expect, test } from "@playwright/test";
+import { waitForBatchRequest } from "tests/helper/questionnaire";
 import {
   adminApiHeaders,
   apiBaseUrl,
@@ -83,442 +84,494 @@ test.describe("Fill page server draft", () => {
   test.describe.configure({ mode: "serial" });
 
   for (const operation of ["create", "update"] as const) {
-    test(`${operation} draft freezes edits, prevents duplicate saves, and releases after failure`, async ({
-      page,
-    }) => {
+    test(
+      `${operation} draft freezes edits, prevents duplicate saves, and releases after failure`,
+      {
+        tag: ["@coupled", "@cap:questionnaire.fill.server-draft.save"],
+        annotation: {
+          type: "coupled",
+          description:
+            "Serial describe on the shared fixture encounter; needs the REACT_ENABLE_QUESTIONNAIRE_DRAFT build flag",
+        },
+      },
+      async ({ page }) => {
+        const questionnaireId = await getQuestionnaireIdBySlug(
+          "respiratory_status-v3",
+        );
+        const draftId = crypto.randomUUID();
+        const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
+        const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}${operation === "update" ? `?continue_draft=${draftId}` : ""}`;
+        const saveMethod = operation === "create" ? "POST" : "PUT";
+        const saveUrl = `**/api/v1/form_submission/${operation === "update" ? `${draftId}/` : ""}`;
+        const draft = {
+          id: draftId,
+          status: "draft",
+          response_dump: {
+            questionnaireResponses: {
+              questionnaire: { id: questionnaireId },
+              responses: [],
+            },
+          },
+        };
+
+        if (operation === "update") {
+          await page.route(/\/api\/v1\/form_submission\/\?/, (route) => {
+            const request = route.request();
+            const params = new URL(request.url()).searchParams;
+            if (
+              request.method() !== "GET" ||
+              params.get("encounter") !== getEncounterId() ||
+              params.get("status") !== "draft"
+            ) {
+              return route.fallback();
+            }
+            // Resuming also verifies membership in this encounter's drafts.
+            return route.fulfill({ json: { count: 1, results: [draft] } });
+          });
+        }
+
+        let releaseRequest: (() => void) | undefined;
+        const pendingResponse = new Promise<void>((resolve) => {
+          releaseRequest = resolve;
+        });
+        const savedBodies: {
+          questionnaire?: string;
+          response_dump: {
+            questionnaireResponses: {
+              responses: { values: { value?: string }[] }[];
+            };
+          };
+        }[] = [];
+        await page.route(saveUrl, async (route) => {
+          if (operation === "update" && route.request().method() === "GET") {
+            return route.fulfill({ json: draft });
+          }
+          if (route.request().method() !== saveMethod) return route.fallback();
+          savedBodies.push(route.request().postDataJSON());
+          await pendingResponse;
+          // Keep this test independent of the encounter's persisted drafts.
+          await route.fulfill({ status: 500, json: {} });
+        });
+
+        try {
+          const { saveDraft } = await openFillPage(page, fillUrl);
+          const noteBox = questionBlock(
+            page,
+            "Note on Bilateral Air Entry",
+          ).getByRole("textbox");
+          const note = `Captured ${operation} draft`;
+          await noteBox.fill(note);
+
+          // Two immediate activations exercise a rapid repeated Save click.
+          await saveDraft.evaluate((button) => {
+            (button as HTMLButtonElement).click();
+            (button as HTMLButtonElement).click();
+          });
+          await expect.poll(() => savedBodies.length).toBe(1);
+          await expect(noteBox).toBeDisabled();
+          await expect(saveDraft).toBeDisabled();
+          await expect(
+            page.getByRole("button", { name: "Save Changes" }),
+          ).toBeDisabled();
+          await expect(
+            questionBlock(page, "Note on Bilateral Air Entry").getByRole(
+              "button",
+              { name: "Add note", exact: true },
+            ),
+          ).toBeDisabled();
+          if (operation === "create") {
+            expect(savedBodies[0].questionnaire).toBe(questionnaireId);
+            await expect(
+              page.getByRole("button", { name: "Add questionnaire" }),
+            ).toBeDisabled();
+          }
+          await expect(noteBox).toHaveValue(note);
+          expect(
+            savedBodies[0].response_dump.questionnaireResponses.responses.flatMap(
+              (response) => response.values.map((value) => value.value),
+            ),
+          ).toContain(note);
+          expect(savedBodies).toHaveLength(1);
+
+          releaseRequest?.();
+          await expectToast(page, "Failed to save draft");
+          await expect(noteBox).toBeEnabled();
+          await expect(saveDraft).toBeEnabled();
+          await noteBox.fill(`${note} after failure`);
+
+          // The failed request must release the synchronous save guard too.
+          await saveDraft.click();
+          await expect.poll(() => savedBodies.length).toBe(2);
+          expect(
+            savedBodies[1].response_dump.questionnaireResponses.responses.flatMap(
+              (response) => response.values.map((value) => value.value),
+            ),
+          ).toContain(`${note} after failure`);
+          await expect(noteBox).toBeEnabled();
+        } finally {
+          releaseRequest?.();
+        }
+      },
+    );
+  }
+
+  test(
+    "fixed structured forms do not offer server drafts for synthetic questionnaire ids",
+    {
+      tag: ["@coupled", "@cap:questionnaire.fill.server-draft.save"],
+      annotation: {
+        type: "coupled",
+        description:
+          "Serial describe on the shared fixture encounter and its drafts card",
+      },
+    },
+    async ({ page }) => {
+      await page.goto(
+        `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/symptom`,
+      );
+      await expect(questionBlock(page, "Symptom")).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Save Changes" }),
+      ).toBeVisible();
+      await expect(page.getByRole("button", { name: SAVE_DRAFT })).toHaveCount(
+        0,
+      );
+    },
+  );
+
+  test(
+    "saved draft lists as a compact overview row, resumes, and re-saves onto the same record",
+    {
+      tag: ["@coupled", "@cap:questionnaire.fill.server-draft.resume"],
+      annotation: {
+        type: "coupled",
+        description:
+          "Serial describe on the shared fixture encounter; needs the REACT_ENABLE_QUESTIONNAIRE_DRAFT build flag",
+      },
+    },
+    async ({ page }) => {
+      test.slow();
       const questionnaireId = await getQuestionnaireIdBySlug(
         "respiratory_status-v3",
       );
-      const draftId = crypto.randomUUID();
       const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
-      const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}${operation === "update" ? `?continue_draft=${draftId}` : ""}`;
-      const saveMethod = operation === "create" ? "POST" : "PUT";
-      const saveUrl = `**/api/v1/form_submission/${operation === "update" ? `${draftId}/` : ""}`;
-      const draft = {
-        id: draftId,
-        status: "draft",
-        response_dump: {
-          questionnaireResponses: {
-            questionnaire: { id: questionnaireId },
-            responses: [],
+      const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}`;
+      const note = faker.lorem.sentence();
+      const editedNote = faker.lorem.sentence();
+
+      const { airEntry, saveDraft } = await openFillPage(page, fillUrl);
+      const noteBox = () =>
+        questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox");
+      await airEntry.getByRole("radio", { name: "yes", exact: true }).click();
+      await noteBox().fill(note);
+
+      // POST branch — no draft to continue yet.
+      const createdDraft = createdDraftResponse(page);
+      await saveDraft.click();
+      const createdResponse = await createdDraft;
+      expect(createdResponse.request().postDataJSON().questionnaire).toBe(
+        questionnaireId,
+      );
+      const { id: draftId } = (await createdResponse.json()) as { id: string };
+      const savedRow = serverDraftRow(page, draftId);
+      await expectToast(page, "Draft saved successfully");
+      await page.waitForURL(/\/updates$/);
+
+      // The overview exposes one compact row; saved answers are shown only
+      // after Continue, and the row retains this exact server record's id.
+      await expect(
+        page.getByRole("heading", { name: "Draft Forms" }),
+      ).toBeVisible();
+      await expect(savedRow).toBeVisible();
+      await expect(savedRow).toContainText("Shared");
+      await expect(
+        savedRow.locator("input, textarea, [data-question-id]"),
+      ).toHaveCount(0);
+
+      // Continue deep-links back with ?continue_draft= and the server copy
+      // seeds the store.
+      await savedRow.getByRole("button", { name: /^Continue/ }).click();
+      await page.waitForURL(/continue_draft=/);
+      expect(draftIdFromUrl(page.url())).toBe(draftId);
+      await expect(noteBox()).toHaveValue(note);
+      await expect(
+        questionBlock(page, "Is bilateral air entry present?").getByRole(
+          "radio",
+          {
+            name: "yes",
+            exact: true,
           },
-        },
+        ),
+      ).toHaveAttribute("aria-checked", "true");
+
+      // PUT branch — saving a resumed draft updates that record instead of
+      // creating a second one.
+      await noteBox().fill(editedNote);
+      const [updatedResponse] = await Promise.all([
+        page.waitForResponse(
+          (response) =>
+            response.request().method() === "PUT" &&
+            new URL(response.url()).pathname ===
+              `/api/v1/form_submission/${draftId}/`,
+        ),
+        page.getByRole("button", { name: SAVE_DRAFT }).click(),
+      ]);
+      expect(updatedResponse.ok()).toBe(true);
+      await page.waitForURL(/\/updates$/);
+      await expect(
+        savedRow.getByRole("button", { name: /^Continue/ }),
+      ).toHaveCount(1);
+      await expect(
+        savedRow.locator("input, textarea, [data-question-id]"),
+      ).toHaveCount(0);
+
+      await savedRow.getByRole("button", { name: /^Continue/ }).click();
+      await page.waitForURL(/continue_draft=/);
+      expect(draftIdFromUrl(page.url())).toBe(draftId);
+      await expect(noteBox()).toHaveValue(editedNote);
+
+      // Submitting a resumed draft completes that same record and removes
+      // just its row, regardless of other local or server drafts.
+      await questionBlock(page, "Is bilateral air entry present?")
+        .getByRole("radio", { name: "no", exact: true })
+        .click();
+      await questionBlock(page, "Select Modality")
+        .getByRole("radio", { name: "invasive", exact: true })
+        .click();
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      await expectToast(page, "Questionnaire submitted successfully");
+      await page.waitForURL(/\/updates$/);
+      const completedDraft = await fetch(
+        `${apiBaseUrl()}/api/v1/form_submission/${draftId}/`,
+        { headers: adminApiHeaders() },
+      );
+      expect(completedDraft.ok).toBe(true);
+      expect((await completedDraft.json()).status).toBe("submitted");
+      await expect(savedRow).toHaveCount(0);
+    },
+  );
+
+  test(
+    "Minimize saves the latest server draft edits and confirmed Close discards the draft",
+    {
+      tag: ["@coupled", "@cap:questionnaire.fill.server-draft.discard"],
+      annotation: {
+        type: "coupled",
+        description:
+          "Serial describe on the shared fixture encounter; needs the REACT_ENABLE_QUESTIONNAIRE_DRAFT build flag",
+      },
+    },
+    async ({ page }) => {
+      test.slow();
+      const questionnaireId = await getQuestionnaireIdBySlug(
+        "respiratory_status-v3",
+      );
+      const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
+      const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}`;
+      const note = faker.lorem.sentence();
+      const editedNote = faker.lorem.sentence();
+
+      const { saveDraft } = await openFillPage(page, fillUrl);
+      const noteBox = () =>
+        questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox");
+
+      await noteBox().fill(note);
+      const createdDraft = createdDraftResponse(page);
+      await saveDraft.click();
+      const { id: draftId } = (await (await createdDraft).json()) as {
+        id: string;
       };
+      await expectToast(page, "Draft saved successfully");
+      await page.waitForURL(/\/updates$/);
 
-      if (operation === "update") {
-        await page.route(/\/api\/v1\/form_submission\/\?/, (route) => {
-          const request = route.request();
-          const params = new URL(request.url()).searchParams;
-          if (
-            request.method() !== "GET" ||
-            params.get("encounter") !== getEncounterId() ||
-            params.get("status") !== "draft"
-          ) {
-            return route.fallback();
-          }
-          // Resuming also verifies membership in this encounter's drafts.
-          return route.fulfill({ json: { count: 1, results: [draft] } });
-        });
-      }
+      await serverDraftRow(page, draftId)
+        .getByRole("button", { name: /^Continue/ })
+        .click();
+      await page.waitForURL(/continue_draft=/);
+      await expect(noteBox()).toHaveValue(note);
 
-      let releaseRequest: (() => void) | undefined;
-      const pendingResponse = new Promise<void>((resolve) => {
-        releaseRequest = resolve;
-      });
-      const savedBodies: {
-        questionnaire?: string;
-        response_dump: {
-          questionnaireResponses: {
-            responses: { values: { value?: string }[] }[];
-          };
-        };
-      }[] = [];
-      await page.route(saveUrl, async (route) => {
-        if (operation === "update" && route.request().method() === "GET") {
-          return route.fulfill({ json: draft });
-        }
-        if (route.request().method() !== saveMethod) return route.fallback();
-        savedBodies.push(route.request().postDataJSON());
-        await pendingResponse;
-        // Keep this test independent of the encounter's persisted drafts.
-        await route.fulfill({ status: 500, json: {} });
-      });
+      // Resuming is not itself an edit — nothing unsaved yet.
+      await expect(
+        page.getByRole("tab", { name: /Questionnaire/ }),
+      ).not.toContainText("Draft");
 
-      try {
-        const { saveDraft } = await openFillPage(page, fillUrl);
-        const noteBox = questionBlock(
-          page,
-          "Note on Bilateral Air Entry",
-        ).getByRole("textbox");
-        const note = `Captured ${operation} draft`;
-        await noteBox.fill(note);
+      // Resumed server drafts do not autosave locally. Both exit controls
+      // must therefore handle the server record rather than just navigate.
+      await noteBox().fill(editedNote);
+      await expect(
+        page.getByRole("tab", { name: /Questionnaire/ }),
+      ).toContainText("Draft");
 
-        // Two immediate activations exercise a rapid repeated Save click.
-        await saveDraft.evaluate((button) => {
-          (button as HTMLButtonElement).click();
-          (button as HTMLButtonElement).click();
-        });
-        await expect.poll(() => savedBodies.length).toBe(1);
-        await expect(noteBox).toBeDisabled();
-        await expect(saveDraft).toBeDisabled();
-        await expect(
-          page.getByRole("button", { name: "Save Changes" }),
-        ).toBeDisabled();
-        await expect(
-          questionBlock(page, "Note on Bilateral Air Entry").getByRole(
-            "button",
-            { name: "Add note", exact: true },
-          ),
-        ).toBeDisabled();
-        if (operation === "create") {
-          expect(savedBodies[0].questionnaire).toBe(questionnaireId);
-          await expect(
-            page.getByRole("button", { name: "Add questionnaire" }),
-          ).toBeDisabled();
-        }
-        await expect(noteBox).toHaveValue(note);
-        expect(
-          savedBodies[0].response_dump.questionnaireResponses.responses.flatMap(
-            (response) => response.values.map((value) => value.value),
-          ),
-        ).toContain(note);
-        expect(savedBodies).toHaveLength(1);
+      await page.getByRole("button", { name: "Close", exact: true }).click();
+      const confirmation = page.getByRole("alertdialog");
+      await confirmation.getByRole("button", { name: "Cancel" }).click();
+      await expect(confirmation).toBeHidden();
+      await expect(noteBox()).toHaveValue(editedNote);
 
-        releaseRequest?.();
-        await expectToast(page, "Failed to save draft");
-        await expect(noteBox).toBeEnabled();
-        await expect(saveDraft).toBeEnabled();
-        await noteBox.fill(`${note} after failure`);
+      await page.getByRole("button", { name: "Minimize", exact: true }).click();
+      await page.waitForURL(/\/updates$/);
+      await serverDraftRow(page, draftId)
+        .getByRole("button", { name: /^Continue/ })
+        .click();
+      await page.waitForURL(/continue_draft=/);
+      expect(draftIdFromUrl(page.url())).toBe(draftId);
+      await expect(noteBox()).toHaveValue(editedNote);
 
-        // The failed request must release the synchronous save guard too.
-        await saveDraft.click();
-        await expect.poll(() => savedBodies.length).toBe(2);
-        expect(
-          savedBodies[1].response_dump.questionnaireResponses.responses.flatMap(
-            (response) => response.values.map((value) => value.value),
-          ),
-        ).toContain(`${note} after failure`);
-        await expect(noteBox).toBeEnabled();
-      } finally {
-        releaseRequest?.();
-      }
-    });
-  }
+      // Even without fresh edits, Close must discard the resumed server draft.
+      await page.getByRole("button", { name: "Close", exact: true }).click();
+      await confirmation.getByRole("button", { name: /^Discard\b/ }).click();
+      await page.waitForURL(/\/updates$/);
+      const discardedDraft = await fetch(
+        `${apiBaseUrl()}/api/v1/form_submission/${draftId}/`,
+        { headers: adminApiHeaders() },
+      );
+      expect(discardedDraft.ok).toBe(true);
+      expect((await discardedDraft.json()).status).toBe("entered_in_error");
+      await expect(serverDraftRow(page, draftId)).toHaveCount(0);
+    },
+  );
 
-  test("fixed structured forms do not offer server drafts for synthetic questionnaire ids", async ({
-    page,
-  }) => {
-    await page.goto(
-      `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/symptom`,
-    );
-    await expect(questionBlock(page, "Symptom")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Save Changes" }),
-    ).toBeVisible();
-    await expect(page.getByRole("button", { name: SAVE_DRAFT })).toHaveCount(0);
-  });
-
-  test("saved draft lists as a compact overview row, resumes, and re-saves onto the same record", async ({
-    page,
-  }) => {
-    test.slow();
-    const questionnaireId = await getQuestionnaireIdBySlug(
-      "respiratory_status-v3",
-    );
-    const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
-    const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}`;
-    const note = faker.lorem.sentence();
-    const editedNote = faker.lorem.sentence();
-
-    const { airEntry, saveDraft } = await openFillPage(page, fillUrl);
-    const noteBox = () =>
-      questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox");
-    await airEntry.getByRole("radio", { name: "yes", exact: true }).click();
-    await noteBox().fill(note);
-
-    // POST branch — no draft to continue yet.
-    const createdDraft = createdDraftResponse(page);
-    await saveDraft.click();
-    const createdResponse = await createdDraft;
-    expect(createdResponse.request().postDataJSON().questionnaire).toBe(
-      questionnaireId,
-    );
-    const { id: draftId } = (await createdResponse.json()) as { id: string };
-    const savedRow = serverDraftRow(page, draftId);
-    await expectToast(page, "Draft saved successfully");
-    await page.waitForURL(/\/updates$/);
-
-    // The overview exposes one compact row; saved answers are shown only
-    // after Continue, and the row retains this exact server record's id.
-    await expect(
-      page.getByRole("heading", { name: "Draft Forms" }),
-    ).toBeVisible();
-    await expect(savedRow).toBeVisible();
-    await expect(savedRow).toContainText("Shared");
-    await expect(
-      savedRow.locator("input, textarea, [data-question-id]"),
-    ).toHaveCount(0);
-
-    // Continue deep-links back with ?continue_draft= and the server copy
-    // seeds the store.
-    await savedRow.getByRole("button", { name: /^Continue/ }).click();
-    await page.waitForURL(/continue_draft=/);
-    expect(draftIdFromUrl(page.url())).toBe(draftId);
-    await expect(noteBox()).toHaveValue(note);
-    await expect(
-      questionBlock(page, "Is bilateral air entry present?").getByRole(
-        "radio",
-        {
-          name: "yes",
-          exact: true,
-        },
-      ),
-    ).toHaveAttribute("aria-checked", "true");
-
-    // PUT branch — saving a resumed draft updates that record instead of
-    // creating a second one.
-    await noteBox().fill(editedNote);
-    const [updatedResponse] = await Promise.all([
-      page.waitForResponse(
-        (response) =>
-          response.request().method() === "PUT" &&
-          new URL(response.url()).pathname ===
-            `/api/v1/form_submission/${draftId}/`,
-      ),
-      page.getByRole("button", { name: SAVE_DRAFT }).click(),
-    ]);
-    expect(updatedResponse.ok()).toBe(true);
-    await page.waitForURL(/\/updates$/);
-    await expect(
-      savedRow.getByRole("button", { name: /^Continue/ }),
-    ).toHaveCount(1);
-    await expect(
-      savedRow.locator("input, textarea, [data-question-id]"),
-    ).toHaveCount(0);
-
-    await savedRow.getByRole("button", { name: /^Continue/ }).click();
-    await page.waitForURL(/continue_draft=/);
-    expect(draftIdFromUrl(page.url())).toBe(draftId);
-    await expect(noteBox()).toHaveValue(editedNote);
-
-    // Submitting a resumed draft completes that same record and removes
-    // just its row, regardless of other local or server drafts.
-    await questionBlock(page, "Is bilateral air entry present?")
-      .getByRole("radio", { name: "no", exact: true })
-      .click();
-    await questionBlock(page, "Select Modality")
-      .getByRole("radio", { name: "invasive", exact: true })
-      .click();
-    await page.getByRole("button", { name: "Save Changes" }).click();
-    await expectToast(page, "Questionnaire submitted successfully");
-    await page.waitForURL(/\/updates$/);
-    const completedDraft = await fetch(
-      `${apiBaseUrl()}/api/v1/form_submission/${draftId}/`,
-      { headers: adminApiHeaders() },
-    );
-    expect(completedDraft.ok).toBe(true);
-    expect((await completedDraft.json()).status).toBe("submitted");
-    await expect(savedRow).toHaveCount(0);
-  });
-
-  test("Minimize saves the latest server draft edits and confirmed Close discards the draft", async ({
-    page,
-  }) => {
-    test.slow();
-    const questionnaireId = await getQuestionnaireIdBySlug(
-      "respiratory_status-v3",
-    );
-    const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
-    const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}`;
-    const note = faker.lorem.sentence();
-    const editedNote = faker.lorem.sentence();
-
-    const { saveDraft } = await openFillPage(page, fillUrl);
-    const noteBox = () =>
-      questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox");
-
-    await noteBox().fill(note);
-    const createdDraft = createdDraftResponse(page);
-    await saveDraft.click();
-    const { id: draftId } = (await (await createdDraft).json()) as {
-      id: string;
-    };
-    await expectToast(page, "Draft saved successfully");
-    await page.waitForURL(/\/updates$/);
-
-    await serverDraftRow(page, draftId)
-      .getByRole("button", { name: /^Continue/ })
-      .click();
-    await page.waitForURL(/continue_draft=/);
-    await expect(noteBox()).toHaveValue(note);
-
-    // Resuming is not itself an edit — nothing unsaved yet.
-    await expect(
-      page.getByRole("tab", { name: /Questionnaire/ }),
-    ).not.toContainText("Draft");
-
-    // Resumed server drafts do not autosave locally. Both exit controls
-    // must therefore handle the server record rather than just navigate.
-    await noteBox().fill(editedNote);
-    await expect(
-      page.getByRole("tab", { name: /Questionnaire/ }),
-    ).toContainText("Draft");
-
-    await page.getByRole("button", { name: "Close", exact: true }).click();
-    const confirmation = page.getByRole("alertdialog");
-    await confirmation.getByRole("button", { name: "Cancel" }).click();
-    await expect(confirmation).not.toBeVisible();
-    await expect(noteBox()).toHaveValue(editedNote);
-
-    await page.getByRole("button", { name: "Minimize", exact: true }).click();
-    await page.waitForURL(/\/updates$/);
-    await serverDraftRow(page, draftId)
-      .getByRole("button", { name: /^Continue/ })
-      .click();
-    await page.waitForURL(/continue_draft=/);
-    expect(draftIdFromUrl(page.url())).toBe(draftId);
-    await expect(noteBox()).toHaveValue(editedNote);
-
-    // Even without fresh edits, Close must discard the resumed server draft.
-    await page.getByRole("button", { name: "Close", exact: true }).click();
-    await confirmation.getByRole("button", { name: /^Discard\b/ }).click();
-    await page.waitForURL(/\/updates$/);
-    const discardedDraft = await fetch(
-      `${apiBaseUrl()}/api/v1/form_submission/${draftId}/`,
-      { headers: adminApiHeaders() },
-    );
-    expect(discardedDraft.ok).toBe(true);
-    expect((await discardedDraft.json()).status).toBe("entered_in_error");
-    await expect(serverDraftRow(page, draftId)).toHaveCount(0);
-  });
-
-  test("a form_submission that is no longer a draft refuses to resume", async ({
-    page,
-  }) => {
-    // Not gated on the Save-as-Draft flag: the record is created straight
-    // through the API, and the ?continue_draft= resume path always exists.
-    // A SUBMITTED record re-opening as an editable draft would let one
-    // submission file twice — the URL is shareable and outlives the
-    // overview card's own status filter.
-    const questionnaireId = await getQuestionnaireIdBySlug(
-      "respiratory_status-v3",
-    );
-    const response = await fetch(`${apiBaseUrl()}/api/v1/form_submission/`, {
-      method: "POST",
-      headers: adminApiHeaders(),
-      body: JSON.stringify({
-        questionnaire: questionnaireId,
-        patient: getPatientId(),
-        encounter: getEncounterId(),
-        status: "submitted",
-        response_dump: {
-          questionnaireResponses: {
-            questionnaire: { id: questionnaireId },
-            responses: [],
-            errors: [],
+  test(
+    "a form_submission that is no longer a draft refuses to resume",
+    {
+      tag: ["@coupled", "@cap:questionnaire.fill.server-draft.resume"],
+      annotation: {
+        type: "coupled",
+        description:
+          "Serial describe on the shared fixture encounter and its drafts card",
+      },
+    },
+    async ({ page }) => {
+      // Not gated on the Save-as-Draft flag: the record is created straight
+      // through the API, and the ?continue_draft= resume path always exists.
+      // A SUBMITTED record re-opening as an editable draft would let one
+      // submission file twice — the URL is shareable and outlives the
+      // overview card's own status filter.
+      const questionnaireId = await getQuestionnaireIdBySlug(
+        "respiratory_status-v3",
+      );
+      const response = await fetch(`${apiBaseUrl()}/api/v1/form_submission/`, {
+        method: "POST",
+        headers: adminApiHeaders(),
+        body: JSON.stringify({
+          questionnaire: questionnaireId,
+          patient: getPatientId(),
+          encounter: getEncounterId(),
+          status: "submitted",
+          response_dump: {
+            questionnaireResponses: {
+              questionnaire: { id: questionnaireId },
+              responses: [],
+              errors: [],
+            },
           },
-        },
-      }),
-    });
-    expect(response.ok, "fixture form_submission POST failed").toBe(true);
-    const submission = (await response.json()) as { id: string };
+        }),
+      });
+      expect(response.ok, "fixture form_submission POST failed").toBe(true);
+      const submission = (await response.json()) as { id: string };
 
-    await page.goto(
-      `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}?continue_draft=${submission.id}`,
-    );
+      await page.goto(
+        `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}?continue_draft=${submission.id}`,
+      );
 
-    // The dead-end error page, not an editable form.
-    await expect(page.getByText("Draft cannot be recovered")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Save Changes" }),
-    ).toHaveCount(0);
-  });
+      // The dead-end error page, not an editable form.
+      await expect(page.getByText("Draft cannot be recovered")).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Save Changes" }),
+      ).toHaveCount(0);
+    },
+  );
 
   // P1-9: shares this describe's encounter and drafts card, so it rides the
   // same serial guarantee as the tests above rather than racing them from a
   // separate file/worker.
-  test("P1-9: submitting a resumed draft links the batch's /submit/ body to it via form_submission", async ({
-    page,
-  }) => {
-    test.slow();
-    const questionnaireId = await getQuestionnaireIdBySlug(
-      "respiratory_status-v3",
-    );
-    const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
-    const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}`;
+  test(
+    "P1-9: submitting a resumed draft links the batch's /submit/ body to it via form_submission",
+    {
+      tag: ["@coupled", "@cap:questionnaire.fill.server-draft.submit"],
+      annotation: {
+        type: "coupled",
+        description:
+          "Serial describe on the shared fixture encounter; needs the REACT_ENABLE_QUESTIONNAIRE_DRAFT build flag",
+      },
+    },
+    async ({ page }) => {
+      test.slow();
+      const questionnaireId = await getQuestionnaireIdBySlug(
+        "respiratory_status-v3",
+      );
+      const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
+      const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}`;
 
-    const { saveDraft } = await openFillPage(page, fillUrl);
+      const { saveDraft } = await openFillPage(page, fillUrl);
 
-    // A bare draft is enough to resume from — its content isn't the point
-    // of this case, only that a form_submission id exists to link to.
-    const createdDraft = createdDraftResponse(page);
-    await saveDraft.click();
-    const { id: draftId } = (await (await createdDraft).json()) as {
-      id: string;
-    };
-    await expectToast(page, "Draft saved successfully");
-    await page.waitForURL(/\/updates$/);
+      // A bare draft is enough to resume from — its content isn't the point
+      // of this case, only that a form_submission id exists to link to.
+      const createdDraft = createdDraftResponse(page);
+      await saveDraft.click();
+      const { id: draftId } = (await (await createdDraft).json()) as {
+        id: string;
+      };
+      await expectToast(page, "Draft saved successfully");
+      await page.waitForURL(/\/updates$/);
 
-    await serverDraftRow(page, draftId)
-      .getByRole("button", { name: /^Continue/ })
-      .click();
-    await page.waitForURL(/continue_draft=/);
-    expect(draftIdFromUrl(page.url())).toBe(draftId);
+      await serverDraftRow(page, draftId)
+        .getByRole("button", { name: /^Continue/ })
+        .click();
+      await page.waitForURL(/continue_draft=/);
+      expect(draftIdFromUrl(page.url())).toBe(draftId);
 
-    // Satisfy required fields so the submit clears client validation and
-    // actually reaches the batch compose this case is pinning.
-    await questionBlock(page, "Is bilateral air entry present?")
-      .getByRole("radio", { name: "no", exact: true })
-      .click();
-    await questionBlock(page, "Select Modality")
-      .getByRole("radio", { name: "invasive", exact: true })
-      .click();
+      // Satisfy required fields so the submit clears client validation and
+      // actually reaches the batch compose this case is pinning.
+      await questionBlock(page, "Is bilateral air entry present?")
+        .getByRole("radio", { name: "no", exact: true })
+        .click();
+      await questionBlock(page, "Select Modality")
+        .getByRole("radio", { name: "invasive", exact: true })
+        .click();
 
-    const batchRequest = page.waitForRequest(
-      (request) =>
-        request.url().includes("/api/v1/batch_requests/") &&
-        request.method() === "POST",
-    );
-    await page.getByRole("button", { name: "Save Changes" }).click();
+      const batchRequest = waitForBatchRequest(page);
+      await page.getByRole("button", { name: "Save Changes" }).click();
 
-    const body = JSON.parse((await batchRequest).postData() ?? "{}") as {
-      requests: {
-        url: string;
-        body: {
-          form_submission?: string;
-          status?: string;
-        };
-      }[];
-    };
-    const submit = body.requests.find((request) =>
-      request.url.includes(`/questionnaire/${questionnaireId}/submit/`),
-    );
-    // This is the P1-9 fix: without it the submit sub-request has no
-    // `form_submission`, and the backend's duplicate-submission guard
-    // (which keys off that field) never engages for a resumed draft.
-    expect(
-      submit?.body.form_submission,
-      "submit sub-request must link the resumed draft via form_submission",
-    ).toBe(draftId);
+      const body = JSON.parse((await batchRequest).postData() ?? "{}") as {
+        requests: {
+          url: string;
+          body: {
+            form_submission?: string;
+            status?: string;
+          };
+        }[];
+      };
+      const submit = body.requests.find((request) =>
+        request.url.includes(`/questionnaire/${questionnaireId}/submit/`),
+      );
+      // This is the P1-9 fix: without it the submit sub-request has no
+      // `form_submission`, and the backend's duplicate-submission guard
+      // (which keys off that field) never engages for a resumed draft.
+      expect(
+        submit?.body.form_submission,
+        "submit sub-request must link the resumed draft via form_submission",
+      ).toBe(draftId);
 
-    // Complete the resumed draft in the same batch as its responses.
-    const completion = body.requests.find((request) =>
-      request.url.includes(`/form_submission/${draftId}/`),
-    );
-    expect(completion?.body).toMatchObject({
-      status: "submitted",
-    });
+      // Complete the resumed draft in the same batch as its responses.
+      const completion = body.requests.find((request) =>
+        request.url.includes(`/form_submission/${draftId}/`),
+      );
+      expect(completion?.body).toMatchObject({
+        status: "submitted",
+      });
 
-    // End to end: the server took it, and the draft's record completed —
-    // same cleanup contract every test in this describe leaves behind.
-    await expectToast(page, "Questionnaire submitted successfully");
-    await page.waitForURL(/\/updates$/);
-    await expect(serverDraftRow(page, draftId)).toHaveCount(0);
-    const completedDraft = await fetch(
-      `${apiBaseUrl()}/api/v1/form_submission/${draftId}/`,
-      { headers: adminApiHeaders() },
-    );
-    expect(completedDraft.ok).toBe(true);
-    expect((await completedDraft.json()).status).toBe("submitted");
-  });
+      // End to end: the server took it, and the draft's record completed —
+      // same cleanup contract every test in this describe leaves behind.
+      await expectToast(page, "Questionnaire submitted successfully");
+      await page.waitForURL(/\/updates$/);
+      await expect(serverDraftRow(page, draftId)).toHaveCount(0);
+      const completedDraft = await fetch(
+        `${apiBaseUrl()}/api/v1/form_submission/${draftId}/`,
+        { headers: adminApiHeaders() },
+      );
+      expect(completedDraft.ok).toBe(true);
+      expect((await completedDraft.json()).status).toBe("submitted");
+    },
+  );
 });

@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import { adminApiHeaders, apiBaseUrl } from "tests/helper/questionnaireV2";
+import { createQuestionnaireViaApi } from "tests/helper/questionnaire";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -12,35 +12,24 @@ type Status = "active" | "draft" | "retired";
 
 async function createQuestionnaire(subjectType: SubjectType, status: Status) {
   const slug = faker.string.alphanumeric({ length: 10 });
-  const title = `Visibility ${subjectType} ${status} ${slug}`;
-  const response = await fetch(`${apiBaseUrl()}/api/v1/questionnaire/`, {
-    method: "POST",
-    headers: adminApiHeaders(),
-    body: JSON.stringify({
-      title,
-      slug,
-      description: "",
-      version: "1.0",
-      status,
-      subject_type: subjectType,
-      auth_context: "instance",
-      organizations: [],
-      actions: [],
-      questions: [
-        {
-          id: crypto.randomUUID(),
-          link_id: "note",
-          text: "Note",
-          type: "string",
-        },
-      ],
-    }),
+  const { title } = await createQuestionnaireViaApi({
+    title: `Visibility ${subjectType} ${status} ${slug}`,
+    slug,
+    description: "",
+    version: "1.0",
+    status,
+    subjectType,
+    organizations: [],
+    actions: [],
+    questions: [
+      {
+        id: crypto.randomUUID(),
+        link_id: "note",
+        text: "Note",
+        type: "string",
+      },
+    ],
   });
-  if (!response.ok) {
-    throw new Error(
-      `Failed to create questionnaire: ${response.status} — ${await response.text()}`,
-    );
-  }
   return title;
 }
 
@@ -82,20 +71,26 @@ const cases: [SubjectType, Status, boolean][] = [
 
 test.describe("Questionnaire visibility by status and subject type", () => {
   for (const [subjectType, status, listed] of cases) {
-    test(`${status} ${subjectType} questionnaire is ${listed ? "" : "not "}offered in ${subjectType} forms and never in the other surface`, async ({
-      page,
-    }) => {
-      const title = await createQuestionnaire(subjectType, status);
+    test(
+      `${status} ${subjectType} questionnaire is ${listed ? "" : "not "}offered in ${subjectType} forms and never in the other surface`,
+      { tag: ["@atomic", "@cap:questionnaire.fill.picker"] },
+      async ({ page }) => {
+        const title = await createQuestionnaire(subjectType, status);
 
-      await openEncounterForms(page);
-      await expectFormListed(
-        page,
-        title,
-        listed && subjectType === "encounter",
-      );
+        await openEncounterForms(page);
+        await expectFormListed(
+          page,
+          title,
+          listed && subjectType === "encounter",
+        );
 
-      await openPatientForms(page);
-      await expectFormListed(page, title, listed && subjectType === "patient");
-    });
+        await openPatientForms(page);
+        await expectFormListed(
+          page,
+          title,
+          listed && subjectType === "patient",
+        );
+      },
+    );
   }
 });

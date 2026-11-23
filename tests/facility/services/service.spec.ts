@@ -1,8 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
-import { getApiHeaders, getApiUrl } from "tests/helper/utils";
+import {
+  createHealthcareServiceViaApi,
+  createHealthcareServiceViaUi,
+  toggleSidebar,
+} from "tests/helper/healthcareService";
 import { getFacilityId } from "tests/support/facilityId";
-import { createHealthcareService, toggleSidebar } from "./helpers";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
@@ -11,10 +14,6 @@ test.describe("Services", () => {
   let facilityId: string;
   let serviceName: string;
   let servicesUrl: string;
-
-  async function createService(page: Page, serviceName: string) {
-    await createHealthcareService(page, facilityId, serviceName, servicesUrl);
-  }
 
   test.beforeAll(async ({ browser }) => {
     facilityId = getFacilityId();
@@ -25,7 +24,7 @@ test.describe("Services", () => {
       storageState: "tests/.auth/user.json",
     });
     const page = await context.newPage();
-    await createService(page, serviceName);
+    await createHealthcareServiceViaUi(page, { facilityId, name: serviceName });
     await page.close();
     await context.close();
   });
@@ -34,68 +33,76 @@ test.describe("Services", () => {
     await page.goto(servicesUrl);
   });
 
-  test("should switch healthcare service (expanded sidebar)", async ({
-    page,
-  }) => {
-    await page.getByRole("link", { name: serviceName }).click();
-    await expect(
-      page.getByRole("heading", { level: 1, name: serviceName, exact: true }),
-    ).toBeVisible();
-    await toggleSidebar(page, true);
-    await page.getByRole("button", { name: serviceName }).click();
-    const dialog = page.getByRole("dialog");
-    await expect(
-      dialog.getByRole("heading", { name: serviceName, exact: true }),
-    ).toBeVisible();
-    await dialog.getByPlaceholder("Search").fill("Pathology Lab");
-    await dialog.getByRole("option", { name: "Pathology Lab" }).click();
-    await expect(dialog).not.toBeVisible();
-    await expect(
-      page.getByRole("heading", {
-        level: 1,
-        name: "Pathology Lab",
-        exact: true,
-      }),
-    ).toBeVisible();
-  });
+  test(
+    "should switch healthcare service (expanded sidebar)",
+    {
+      tag: ["@atomic", "@cap:service.switcher.navigate"],
+    },
+    async ({ page }) => {
+      await page.getByRole("link", { name: serviceName }).click();
+      await expect(
+        page.getByRole("heading", { level: 1, name: serviceName, exact: true }),
+      ).toBeVisible();
+      await toggleSidebar(page, true);
+      await page.getByRole("button", { name: serviceName }).click();
+      const dialog = page.getByRole("dialog");
+      await expect(
+        dialog.getByRole("heading", { name: serviceName, exact: true }),
+      ).toBeVisible();
+      await dialog.getByPlaceholder("Search").fill("Pathology Lab");
+      await dialog.getByRole("option", { name: "Pathology Lab" }).click();
+      await expect(dialog).toBeHidden();
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: "Pathology Lab",
+          exact: true,
+        }),
+      ).toBeVisible();
+    },
+  );
 
-  test("should switch healthcare service (collapsed sidebar)", async ({
-    page,
-  }) => {
-    await page.getByRole("link", { name: serviceName }).click();
-    await expect(
-      page.getByRole("heading", { level: 1, name: serviceName, exact: true }),
-    ).toBeVisible();
-    await toggleSidebar(page, false);
-    const toggle = page
-      .getByRole("button", {
-        name: "Toggle Sidebar",
-        exact: true,
-        includeHidden: true,
-      })
-      .and(page.locator('[data-sidebar="trigger"]:visible'));
-    await page.mouse.move(900, 700);
-    await expect(toggle).toHaveAttribute("aria-expanded", "false");
-    await toggle.hover();
-    await page
-      .getByRole("button", { name: serviceName, exact: true })
-      .and(page.locator('[aria-haspopup="dialog"]'))
-      .click();
-    const dialog = page.getByRole("dialog");
-    await expect(
-      dialog.getByRole("heading", { name: serviceName, exact: true }),
-    ).toBeVisible();
-    await dialog.getByPlaceholder("Search").fill("Pathology Lab");
-    await dialog.getByRole("option", { name: "Pathology Lab" }).click();
-    await expect(dialog).not.toBeVisible();
-    await expect(
-      page.getByRole("heading", {
-        level: 1,
-        name: "Pathology Lab",
-        exact: true,
-      }),
-    ).toBeVisible();
-  });
+  test(
+    "should switch healthcare service (collapsed sidebar)",
+    {
+      tag: ["@atomic", "@cap:service.switcher.navigate"],
+    },
+    async ({ page }) => {
+      await page.getByRole("link", { name: serviceName }).click();
+      await expect(
+        page.getByRole("heading", { level: 1, name: serviceName, exact: true }),
+      ).toBeVisible();
+      await toggleSidebar(page, false);
+      const toggle = page
+        .getByRole("button", {
+          name: "Toggle Sidebar",
+          exact: true,
+          includeHidden: true,
+        })
+        .and(page.locator('[data-sidebar="trigger"]:visible'));
+      await page.mouse.move(900, 700);
+      await expect(toggle).toHaveAttribute("aria-expanded", "false");
+      await toggle.hover();
+      await page
+        .getByRole("button", { name: serviceName, exact: true })
+        .and(page.locator('[aria-haspopup="dialog"]'))
+        .click();
+      const dialog = page.getByRole("dialog");
+      await expect(
+        dialog.getByRole("heading", { name: serviceName, exact: true }),
+      ).toBeVisible();
+      await dialog.getByPlaceholder("Search").fill("Pathology Lab");
+      await dialog.getByRole("option", { name: "Pathology Lab" }).click();
+      await expect(dialog).toBeHidden();
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: "Pathology Lab",
+          exact: true,
+        }),
+      ).toBeVisible();
+    },
+  );
 });
 
 test.describe("Services list search", () => {
@@ -115,7 +122,7 @@ test.describe("Services list search", () => {
       .getByRole("main")
       .locator(`a[href^="/facility/${facilityId}/services/"]`);
 
-  test.beforeAll(async ({ playwright }) => {
+  test.beforeAll(async () => {
     facilityId = getFacilityId();
     servicesUrl = `/facility/${facilityId}/services`;
     const prefix = `Search ${faker.string.alphanumeric(8)}`;
@@ -125,27 +132,11 @@ test.describe("Services list search", () => {
       (_, i) => `${prefix} ${String(i).padStart(2, "0")}`,
     );
 
-    const request = await playwright.request.newContext();
-    const headers = getApiHeaders();
     await Promise.all(
-      serviceNames.map(async (name) => {
-        const response = await request.post(
-          `${getApiUrl()}/api/v1/facility/${facilityId}/healthcare_service/`,
-          {
-            headers,
-            data: {
-              name,
-              extra_details: "",
-              styling_metadata: {},
-              locations: [],
-              managing_organization: null,
-            },
-          },
-        );
-        expect(response.ok(), await response.text()).toBeTruthy();
-      }),
+      serviceNames.map((name) =>
+        createHealthcareServiceViaApi({ facilityId, name }),
+      ),
     );
-    await request.dispose();
   });
 
   test.beforeEach(async ({ page }) => {
@@ -153,74 +144,96 @@ test.describe("Services list search", () => {
     await expect(serviceCards(page)).toHaveCount(PAGE_SIZE);
   });
 
-  test("should show only services matching the search", async ({ page }) => {
-    const target = serviceNames[3];
+  test(
+    "should show only services matching the search",
+    {
+      tag: ["@atomic", "@cap:service.search"],
+    },
+    async ({ page }) => {
+      const target = serviceNames[3];
 
-    await test.step("Search for a service by name", async () => {
-      await searchInput(page).fill(target);
-    });
+      await test.step("Search for a service by name", async () => {
+        await searchInput(page).fill(target);
+      });
 
-    await test.step("Verify the URL and results reflect the search", async () => {
-      await expect(page).toHaveURL(
-        (url) => url.searchParams.get("search") === target,
-      );
-      await expect(serviceCards(page)).toHaveCount(1);
-      await expect(serviceCards(page)).toContainText(target);
-    });
-  });
+      await test.step("Verify the URL and results reflect the search", async () => {
+        await expect(page).toHaveURL(
+          (url) => url.searchParams.get("search") === target,
+        );
+        await expect(serviceCards(page)).toHaveCount(1);
+        await expect(serviceCards(page)).toContainText(target);
+      });
+    },
+  );
 
-  test("should show empty state when no service matches", async ({ page }) => {
-    await test.step("Search for a non-existent service", async () => {
-      await searchInput(page).fill(`nomatch-${faker.string.alphanumeric(12)}`);
-    });
+  test(
+    "should show empty state when no service matches",
+    {
+      tag: ["@atomic", "@cap:service.search"],
+    },
+    async ({ page }) => {
+      await test.step("Search for a non-existent service", async () => {
+        await searchInput(page).fill(
+          `nomatch-${faker.string.alphanumeric(12)}`,
+        );
+      });
 
-    await test.step("Verify the empty state is shown", async () => {
-      await expect(page.getByText("No services found")).toBeVisible();
-      await expect(serviceCards(page)).toHaveCount(0);
-    });
-  });
+      await test.step("Verify the empty state is shown", async () => {
+        await expect(page.getByText("No services found")).toBeVisible();
+        await expect(serviceCards(page)).toHaveCount(0);
+      });
+    },
+  );
 
-  test("should restore the full list when the search is cleared", async ({
-    page,
-  }) => {
-    await test.step("Filter the list to a single service", async () => {
-      await searchInput(page).fill(serviceNames[0]);
-      await expect(serviceCards(page)).toHaveCount(1);
-    });
+  test(
+    "should restore the full list when the search is cleared",
+    {
+      tag: ["@atomic", "@cap:service.search"],
+    },
+    async ({ page }) => {
+      await test.step("Filter the list to a single service", async () => {
+        await searchInput(page).fill(serviceNames[0]);
+        await expect(serviceCards(page)).toHaveCount(1);
+      });
 
-    await test.step("Clear the search input", async () => {
-      await searchInput(page).fill("");
-    });
+      await test.step("Clear the search input", async () => {
+        await searchInput(page).fill("");
+      });
 
-    await test.step("Verify the full paginated list is restored", async () => {
-      await expect(page).not.toHaveURL(/[?&]search=/);
-      await expect(serviceCards(page)).toHaveCount(PAGE_SIZE);
-      await expect(page.locator("#page-2")).toBeVisible();
-    });
-  });
+      await test.step("Verify the full paginated list is restored", async () => {
+        await expect(page).not.toHaveURL(/[?&]search=/);
+        await expect(serviceCards(page)).toHaveCount(PAGE_SIZE);
+        await expect(page.locator("#page-2")).toBeVisible();
+      });
+    },
+  );
 
-  test("should reset to the first page when searching from a later page", async ({
-    page,
-  }) => {
-    const target = serviceNames[5];
+  test(
+    "should reset to the first page when searching from a later page",
+    {
+      tag: ["@atomic", "@cap:service.search"],
+    },
+    async ({ page }) => {
+      const target = serviceNames[5];
 
-    await test.step("Navigate to page 2 of the list", async () => {
-      await page.locator("#page-2").click();
-      await expect(page).toHaveURL(/[?&]page=2(&|$)/);
-    });
+      await test.step("Navigate to page 2 of the list", async () => {
+        await page.locator("#page-2").click();
+        await expect(page).toHaveURL(/[?&]page=2(&|$)/);
+      });
 
-    await test.step("Search for a service", async () => {
-      await searchInput(page).fill(target);
-    });
+      await test.step("Search for a service", async () => {
+        await searchInput(page).fill(target);
+      });
 
-    await test.step("Verify pagination resets to page 1 with the match", async () => {
-      await expect(page).toHaveURL(
-        (url) =>
-          url.searchParams.get("page") === "1" &&
-          url.searchParams.get("search") === target,
-      );
-      await expect(serviceCards(page)).toHaveCount(1);
-      await expect(serviceCards(page)).toContainText(target);
-    });
-  });
+      await test.step("Verify pagination resets to page 1 with the match", async () => {
+        await expect(page).toHaveURL(
+          (url) =>
+            url.searchParams.get("page") === "1" &&
+            url.searchParams.get("search") === target,
+        );
+        await expect(serviceCards(page)).toHaveCount(1);
+        await expect(serviceCards(page)).toContainText(target);
+      });
+    },
+  );
 });

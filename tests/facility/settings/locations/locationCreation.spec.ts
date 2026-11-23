@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { createLocationViaUi } from "tests/helper/facilitySettings";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -30,332 +31,346 @@ test.describe("Facility Location Creation", () => {
     await page.goto(`/facility/${facilityId}/settings/locations`);
   });
 
-  test("Add a new location with mandatory fields", async ({ page }) => {
-    const location = faker.helpers.arrayElement(locationTypes);
-    const locationName = faker.company.name();
-    const status = faker.helpers.arrayElement(statusOptions);
-    const operationalStatus = faker.helpers.arrayElement(
-      operationalStatusOptions,
-    );
+  test(
+    "Add a new location with mandatory fields",
+    { tag: ["@atomic", "@cap:location.create"] },
+    async ({ page }) => {
+      const location = faker.helpers.arrayElement(locationTypes);
+      const locationName = faker.company.name();
+      const status = faker.helpers.arrayElement(statusOptions);
+      const operationalStatus = faker.helpers.arrayElement(
+        operationalStatusOptions,
+      );
 
-    await test.step("Create location with mandatory fields", async () => {
-      await page.getByRole("button", { name: "Add Location" }).click();
-      await page.getByRole("combobox", { name: "Location Form" }).click();
-      await page.getByRole("option", { name: location }).click();
-      await page.getByRole("textbox", { name: "Name" }).fill(locationName);
-      await page.getByRole("combobox", { name: "Status", exact: true }).click();
-      await page.getByRole("option", { name: status }).first().click();
-      await page.getByRole("combobox", { name: "Operational Status" }).click();
-      await page
-        .getByRole("option", { name: operationalStatus })
-        .first()
-        .click();
-      await page.getByRole("button", { name: "Create" }).click();
-    });
-
-    await test.step("Verify location in table", async () => {
-      await page
-        .getByRole("textbox", { name: "Search by name" })
-        .fill(locationName);
-      const tableBody = page.locator('[data-slot="table-body"]');
-      await expect(tableBody).toContainText(locationName);
-      // The list names a status only when it is not the usual "Active".
-      if (status === "Active") {
-        await expect(tableBody).not.toContainText("Active");
-      } else {
-        await expect(tableBody).toContainText(status);
-      }
-      await expect(tableBody).toContainText(location);
-    });
-
-    await test.step("Verify location in edit form", async () => {
-      await page.locator("button[title='Edit Location']").first().click();
-
-      // What a location is cannot change: the sheet names it, with no field.
-      const sheet = page.getByRole("dialog", {
-        name: "Edit Location",
-        exact: true,
+      await createLocationViaUi(page, {
+        facilityId,
+        form: location,
+        name: locationName,
+        status,
+        operationalStatus,
       });
-      await expect(
-        sheet.getByRole("combobox", { name: "Location Form" }),
-      ).toHaveCount(0);
-      await expect(sheet.locator('[data-slot="sheet-description"]')).toHaveText(
-        location,
-      );
-      await expect(page.getByRole("textbox", { name: "Name" })).toHaveValue(
-        locationName,
-      );
-      await expect(
-        page.getByRole("textbox", { name: "Description" }),
-      ).toHaveValue("");
-      await expect(
-        page.getByRole("combobox", { name: "Status", exact: true }),
-      ).toContainText(status);
-      await expect(
-        page.getByRole("combobox", { name: "Operational Status" }),
-      ).toContainText(operationalStatus);
-    });
-  });
 
-  test("Add a new location with all fields", async ({ page }) => {
-    const location = faker.helpers.arrayElement(locationTypes);
-    const locationName = faker.company.name();
-    const locationDescription = faker.lorem.sentence();
-    const status = faker.helpers.arrayElement(statusOptions);
-    const operationalStatus = faker.helpers.arrayElement(
-      operationalStatusOptions,
-    );
-
-    await test.step("Create location with all fields", async () => {
-      await page.getByRole("button", { name: "Add Location" }).click();
-      await page.getByRole("combobox", { name: "Location Form" }).click();
-      await page.getByRole("option", { name: location }).click();
-      await page.getByRole("textbox", { name: "Name" }).fill(locationName);
-      await page
-        .getByRole("textbox", { name: "Description" })
-        .fill(locationDescription);
-      await page.getByRole("combobox", { name: "Status", exact: true }).click();
-      await page.getByRole("option", { name: status }).first().click();
-      await page.getByRole("combobox", { name: "Operational Status" }).click();
-      await page
-        .getByRole("option", { name: operationalStatus })
-        .first()
-        .click();
-      await page.getByRole("button", { name: "Create" }).click();
-    });
-
-    await test.step("Verify location in table", async () => {
-      await page
-        .getByRole("textbox", { name: "Search by name" })
-        .fill(locationName);
-      const tableBody = page.locator('[data-slot="table-body"]');
-      await expect(tableBody).toContainText(locationName);
-      // The list names a status only when it is not the usual "Active".
-      if (status === "Active") {
-        await expect(tableBody).not.toContainText("Active");
-      } else {
-        await expect(tableBody).toContainText(status);
-      }
-      await expect(tableBody).toContainText(location);
-    });
-
-    await test.step("Verify location in edit form", async () => {
-      await page.locator("button[title='Edit Location']").first().click();
-
-      // What a location is cannot change: the sheet names it, with no field.
-      const sheet = page.getByRole("dialog", {
-        name: "Edit Location",
-        exact: true,
+      await test.step("Verify location in table", async () => {
+        await page
+          .getByRole("textbox", { name: "Search by name" })
+          .fill(locationName);
+        const tableBody = page.locator('[data-slot="table-body"]');
+        await expect(tableBody).toContainText(locationName);
+        // The list names a status only when it is not the usual "Active".
+        if (status === "Active") {
+          await expect(tableBody).not.toContainText("Active");
+        } else {
+          await expect(tableBody).toContainText(status);
+        }
+        await expect(tableBody).toContainText(location);
       });
-      await expect(
-        sheet.getByRole("combobox", { name: "Location Form" }),
-      ).toHaveCount(0);
-      await expect(sheet.locator('[data-slot="sheet-description"]')).toHaveText(
-        location,
-      );
-      await expect(page.getByRole("textbox", { name: "Name" })).toHaveValue(
-        locationName,
-      );
-      await expect(
-        page.getByRole("textbox", { name: "Description" }),
-      ).toHaveValue(locationDescription);
-      await expect(
-        page.getByRole("combobox", { name: "Status", exact: true }),
-      ).toContainText(status);
-      await expect(
-        page.getByRole("combobox", { name: "Operational Status" }),
-      ).toContainText(operationalStatus);
-    });
-  });
 
-  test("Validate location create button is disabled when mandatory fields are empty", async ({
-    page,
-  }) => {
-    await test.step("Open add location dialog", async () => {
-      await page.getByRole("button", { name: "Add Location" }).click();
-    });
+      await test.step("Verify location in edit form", async () => {
+        await page.locator("button[title='Edit Location']").first().click();
 
-    await test.step("Verify create button is disabled", async () => {
-      await expect(page.getByRole("textbox", { name: "Name" })).toHaveValue("");
-      await expect(page.getByRole("button", { name: "Create" })).toBeDisabled();
-    });
-  });
-
-  test("Add single bed as child location", async ({ page }) => {
-    const bedName = faker.company.name();
-
-    await test.step("Open parent location", async () => {
-      await page.locator('[data-slot="table-body"] tr').first().click();
-    });
-
-    await test.step("Create bed location", async () => {
-      await page.getByRole("button", { name: "Add Location" }).click();
-      await page.getByRole("combobox", { name: "Location Form" }).click();
-      await page.getByRole("option", { name: "Bed" }).click();
-      await page.getByRole("textbox", { name: "Name" }).fill(bedName);
-      await page.getByRole("button", { name: "Create" }).click();
-    });
-
-    await test.step("Verify bed created", async () => {
-      await expect(
-        page.locator("li[data-sonner-toast]").getByText("Location Created"),
-      ).toBeVisible();
-    });
-
-    await test.step("Verify bed in the beds grid", async () => {
-      await page
-        .getByRole("textbox", { name: "Search by name" })
-        .last()
-        .fill(bedName);
-      await expect(
-        page
-          .locator('[data-cy="location-beds"]')
-          .getByRole("button", { name: bedName, exact: true }),
-      ).toBeVisible();
-    });
-  });
-
-  test("Add multiple beds as child location", async ({ page }) => {
-    const bedBaseName = faker.word.words(1);
-    const bedCount = 2;
-
-    await test.step("Open parent location", async () => {
-      await page.locator('[data-slot="table-body"] tr').first().click();
-    });
-
-    await test.step("Create multiple beds", async () => {
-      await page.getByRole("button", { name: "Add Location" }).click();
-      await page.getByRole("combobox", { name: "Location Form" }).click();
-      await page.getByRole("option", { name: "Bed" }).click();
-      await expect(page.getByRole("textbox", { name: "Name" })).toBeVisible();
-      await page.getByRole("textbox", { name: "Name" }).fill(bedBaseName);
-      await page
-        .getByRole("checkbox", { name: "Create Multiple Beds" })
-        .click();
-      await page.getByRole("combobox", { name: "Number of beds" }).click();
-      await page
-        .getByRole("option", { name: `${bedCount} Beds` })
-        .first()
-        .click();
-      await page.getByRole("button", { name: "Create" }).click();
-    });
-
-    await test.step("Verify multiple beds created", async () => {
-      await expect(
-        page
-          .locator("li[data-sonner-toast]")
-          .getByText(`${bedCount} Beds created successfully`),
-      ).toBeVisible();
-    });
-
-    await test.step("Verify each bed in the beds grid", async () => {
-      const childSearchBox = page
-        .getByRole("textbox", { name: "Search by name" })
-        .last();
-      const beds = page.locator('[data-cy="location-beds"]');
-
-      for (let i = 1; i <= bedCount; i++) {
-        await childSearchBox.fill(`${bedBaseName} ${i}`);
+        // What a location is cannot change: the sheet names it, with no field.
+        const sheet = page.getByRole("dialog", {
+          name: "Edit Location",
+          exact: true,
+        });
         await expect(
-          beds.getByRole("button", {
-            name: `${bedBaseName} ${i}`,
-            exact: true,
-          }),
+          sheet.getByRole("combobox", { name: "Location Form" }),
+        ).toHaveCount(0);
+        await expect(
+          sheet.locator('[data-slot="sheet-description"]'),
+        ).toHaveText(location);
+        await expect(page.getByRole("textbox", { name: "Name" })).toHaveValue(
+          locationName,
+        );
+        await expect(
+          page.getByRole("textbox", { name: "Description" }),
+        ).toHaveValue("");
+        await expect(
+          page.getByRole("combobox", { name: "Status", exact: true }),
+        ).toContainText(status);
+        await expect(
+          page.getByRole("combobox", { name: "Operational Status" }),
+        ).toContainText(operationalStatus);
+      });
+    },
+  );
+
+  test(
+    "Add a new location with all fields",
+    { tag: ["@atomic", "@cap:location.create"] },
+    async ({ page }) => {
+      const location = faker.helpers.arrayElement(locationTypes);
+      const locationName = faker.company.name();
+      const locationDescription = faker.lorem.sentence();
+      const status = faker.helpers.arrayElement(statusOptions);
+      const operationalStatus = faker.helpers.arrayElement(
+        operationalStatusOptions,
+      );
+
+      await createLocationViaUi(page, {
+        facilityId,
+        form: location,
+        name: locationName,
+        description: locationDescription,
+        status,
+        operationalStatus,
+      });
+
+      await test.step("Verify location in table", async () => {
+        await page
+          .getByRole("textbox", { name: "Search by name" })
+          .fill(locationName);
+        const tableBody = page.locator('[data-slot="table-body"]');
+        await expect(tableBody).toContainText(locationName);
+        // The list names a status only when it is not the usual "Active".
+        if (status === "Active") {
+          await expect(tableBody).not.toContainText("Active");
+        } else {
+          await expect(tableBody).toContainText(status);
+        }
+        await expect(tableBody).toContainText(location);
+      });
+
+      await test.step("Verify location in edit form", async () => {
+        await page.locator("button[title='Edit Location']").first().click();
+
+        // What a location is cannot change: the sheet names it, with no field.
+        const sheet = page.getByRole("dialog", {
+          name: "Edit Location",
+          exact: true,
+        });
+        await expect(
+          sheet.getByRole("combobox", { name: "Location Form" }),
+        ).toHaveCount(0);
+        await expect(
+          sheet.locator('[data-slot="sheet-description"]'),
+        ).toHaveText(location);
+        await expect(page.getByRole("textbox", { name: "Name" })).toHaveValue(
+          locationName,
+        );
+        await expect(
+          page.getByRole("textbox", { name: "Description" }),
+        ).toHaveValue(locationDescription);
+        await expect(
+          page.getByRole("combobox", { name: "Status", exact: true }),
+        ).toContainText(status);
+        await expect(
+          page.getByRole("combobox", { name: "Operational Status" }),
+        ).toContainText(operationalStatus);
+      });
+    },
+  );
+
+  test(
+    "Validate location create button is disabled when mandatory fields are empty",
+    { tag: ["@atomic", "@cap:location.create"] },
+    async ({ page }) => {
+      await test.step("Open add location dialog", async () => {
+        await page.getByRole("button", { name: "Add Location" }).click();
+      });
+
+      await test.step("Verify create button is disabled", async () => {
+        await expect(page.getByRole("textbox", { name: "Name" })).toHaveValue(
+          "",
+        );
+        await expect(
+          page.getByRole("button", { name: "Create" }),
+        ).toBeDisabled();
+      });
+    },
+  );
+
+  test(
+    "Add single bed as child location",
+    { tag: ["@atomic", "@cap:location.bed.create"] },
+    async ({ page }) => {
+      const bedName = faker.company.name();
+
+      await test.step("Open parent location", async () => {
+        await page.locator('[data-slot="table-body"] tr').first().click();
+      });
+
+      await test.step("Create bed location", async () => {
+        await page.getByRole("button", { name: "Add Location" }).click();
+        await page.getByRole("combobox", { name: "Location Form" }).click();
+        await page.getByRole("option", { name: "Bed" }).click();
+        await page.getByRole("textbox", { name: "Name" }).fill(bedName);
+        await page.getByRole("button", { name: "Create" }).click();
+      });
+
+      await test.step("Verify bed created", async () => {
+        await expect(
+          page.locator("li[data-sonner-toast]").getByText("Location Created"),
         ).toBeVisible();
-      }
-    });
-  });
+      });
 
-  test("preserves a customized bed name when the bed count changes", async ({
-    page,
-  }) => {
-    const bedBaseName = faker.word.words(1);
-    const customBedName = `ICU-${faker.string.alpha(5)}`;
+      await test.step("Verify bed in the beds grid", async () => {
+        await page
+          .getByRole("textbox", { name: "Search by name" })
+          .last()
+          .fill(bedName);
+        await expect(
+          page
+            .locator('[data-cy="location-beds"]')
+            .getByRole("button", { name: bedName, exact: true }),
+        ).toBeVisible();
+      });
+    },
+  );
 
-    await test.step("Open parent location", async () => {
-      await page.locator('[data-slot="table-body"] tr').first().click();
-    });
+  test(
+    "Add multiple beds as child location",
+    { tag: ["@atomic", "@cap:location.bed.create"] },
+    async ({ page }) => {
+      const bedBaseName = faker.word.words(1);
+      const bedCount = 2;
 
-    await test.step("Set up bulk beds and customize the first bed name", async () => {
-      await page.getByRole("button", { name: "Add Location" }).click();
-      await page.getByRole("combobox", { name: "Location Form" }).click();
-      await page.getByRole("option", { name: "Bed" }).click();
-      await page.getByRole("textbox", { name: "Name" }).fill(bedBaseName);
-      await page
-        .getByRole("checkbox", { name: "Create Multiple Beds" })
-        .click();
-      await page.getByRole("combobox", { name: "Number of beds" }).click();
-      await page.getByRole("option", { name: "3 Beds", exact: true }).click();
-      await page
-        .getByRole("checkbox", { name: "Customize individual bed names" })
-        .click();
-      await page
-        .getByRole("textbox", { name: /^Bed Number 1\b/i })
-        .fill(customBedName);
-    });
+      await test.step("Open parent location", async () => {
+        await page.locator('[data-slot="table-body"] tr').first().click();
+      });
 
-    await test.step("Change the bed count; custom name must be kept", async () => {
-      await page.getByRole("combobox", { name: "Number of beds" }).click();
-      await page.getByRole("option", { name: "4 Beds", exact: true }).click();
+      await test.step("Create multiple beds", async () => {
+        await page.getByRole("button", { name: "Add Location" }).click();
+        await page.getByRole("combobox", { name: "Location Form" }).click();
+        await page.getByRole("option", { name: "Bed" }).click();
+        await expect(page.getByRole("textbox", { name: "Name" })).toBeVisible();
+        await page.getByRole("textbox", { name: "Name" }).fill(bedBaseName);
+        await page
+          .getByRole("checkbox", { name: "Create Multiple Beds" })
+          .click();
+        await page.getByRole("combobox", { name: "Number of beds" }).click();
+        await page
+          .getByRole("option", { name: `${bedCount} Beds` })
+          .first()
+          .click();
+        await page.getByRole("button", { name: "Create" }).click();
+      });
 
-      // Changing the count must not reset user-customized names to defaults.
-      await expect(
-        page.getByRole("textbox", { name: /^Bed Number 1\b/i }),
-      ).toHaveValue(customBedName);
-    });
-  });
+      await test.step("Verify multiple beds created", async () => {
+        await expect(
+          page
+            .locator("li[data-sonner-toast]")
+            .getByText(`${bedCount} Beds created successfully`),
+        ).toBeVisible();
+      });
 
-  test("should reject whitespace-only input in required text fields", async ({
-    page,
-  }) => {
-    const bedBaseName = faker.word.words(1);
+      await test.step("Verify each bed in the beds grid", async () => {
+        const childSearchBox = page
+          .getByRole("textbox", { name: "Search by name" })
+          .last();
+        const beds = page.locator('[data-cy="location-beds"]');
 
-    await test.step("Open parent location", async () => {
-      await page.locator('[data-slot="table-body"] tr').first().click();
-    });
+        for (let i = 1; i <= bedCount; i++) {
+          await childSearchBox.fill(`${bedBaseName} ${i}`);
+          await expect(
+            beds.getByRole("button", {
+              name: `${bedBaseName} ${i}`,
+              exact: true,
+            }),
+          ).toBeVisible();
+        }
+      });
+    },
+  );
 
-    await test.step("Set up bulk beds with customized names", async () => {
-      await page.getByRole("button", { name: "Add Location" }).click();
-      await page.getByRole("combobox", { name: "Location Form" }).click();
-      await page.getByRole("option", { name: "Bed" }).click();
-      await page.getByRole("textbox", { name: "Name" }).fill(bedBaseName);
-      await page
-        .getByRole("checkbox", { name: "Create Multiple Beds" })
-        .click();
-      await page
-        .getByRole("checkbox", { name: "Customize individual bed names" })
-        .click();
-    });
+  test(
+    "preserves a customized bed name when the bed count changes",
+    { tag: ["@atomic", "@cap:location.bed.create"] },
+    async ({ page }) => {
+      const bedBaseName = faker.word.words(1);
+      const customBedName = `ICU-${faker.string.alpha(5)}`;
 
-    const bedNameInput = page.getByRole("textbox", {
-      name: /^Bed Number 1\b/i,
-    });
-    const createButton = page.getByRole("button", { name: "Create" });
+      await test.step("Open parent location", async () => {
+        await page.locator('[data-slot="table-body"] tr').first().click();
+      });
 
-    await test.step("Whitespace-only bed name blocks creation", async () => {
-      await bedNameInput.fill("   ");
-      await expect(createButton).toBeDisabled();
-    });
+      await test.step("Set up bulk beds and customize the first bed name", async () => {
+        await page.getByRole("button", { name: "Add Location" }).click();
+        await page.getByRole("combobox", { name: "Location Form" }).click();
+        await page.getByRole("option", { name: "Bed" }).click();
+        await page.getByRole("textbox", { name: "Name" }).fill(bedBaseName);
+        await page
+          .getByRole("checkbox", { name: "Create Multiple Beds" })
+          .click();
+        await page.getByRole("combobox", { name: "Number of beds" }).click();
+        await page.getByRole("option", { name: "3 Beds", exact: true }).click();
+        await page
+          .getByRole("checkbox", { name: "Customize individual bed names" })
+          .click();
+        await page
+          .getByRole("textbox", { name: /^Bed Number 1\b/i })
+          .fill(customBedName);
+      });
 
-    await test.step("A real bed name allows creation again", async () => {
-      await bedNameInput.fill(`${bedBaseName} 1`);
-      await expect(createButton).toBeEnabled();
-    });
-  });
+      await test.step("Change the bed count; custom name must be kept", async () => {
+        await page.getByRole("combobox", { name: "Number of beds" }).click();
+        await page.getByRole("option", { name: "4 Beds", exact: true }).click();
 
-  test("Verify error when creating bed in root location", async ({ page }) => {
-    await test.step("Attempt to create bed at root", async () => {
-      await page.getByRole("button", { name: "Add Location" }).click();
-      await page.getByRole("combobox", { name: "Location Form" }).click();
-      await page.getByRole("option", { name: "Bed" }).click();
-    });
+        // Changing the count must not reset user-customized names to defaults.
+        await expect(
+          page.getByRole("textbox", { name: /^Bed Number 1\b/i }),
+        ).toHaveValue(customBedName);
+      });
+    },
+  );
 
-    await test.step("Verify error message", async () => {
-      await expect(
-        page
-          .locator("li[data-sonner-toast]")
-          .getByText(/Beds can only be created under a parent location/i),
-      ).toBeVisible();
-    });
-  });
+  test(
+    "should reject whitespace-only input in required text fields",
+    { tag: ["@atomic", "@cap:location.bed.create"] },
+    async ({ page }) => {
+      const bedBaseName = faker.word.words(1);
+
+      await test.step("Open parent location", async () => {
+        await page.locator('[data-slot="table-body"] tr').first().click();
+      });
+
+      await test.step("Set up bulk beds with customized names", async () => {
+        await page.getByRole("button", { name: "Add Location" }).click();
+        await page.getByRole("combobox", { name: "Location Form" }).click();
+        await page.getByRole("option", { name: "Bed" }).click();
+        await page.getByRole("textbox", { name: "Name" }).fill(bedBaseName);
+        await page
+          .getByRole("checkbox", { name: "Create Multiple Beds" })
+          .click();
+        await page
+          .getByRole("checkbox", { name: "Customize individual bed names" })
+          .click();
+      });
+
+      const bedNameInput = page.getByRole("textbox", {
+        name: /^Bed Number 1\b/i,
+      });
+      const createButton = page.getByRole("button", { name: "Create" });
+
+      await test.step("Whitespace-only bed name blocks creation", async () => {
+        await bedNameInput.fill("   ");
+        await expect(createButton).toBeDisabled();
+      });
+
+      await test.step("A real bed name allows creation again", async () => {
+        await bedNameInput.fill(`${bedBaseName} 1`);
+        await expect(createButton).toBeEnabled();
+      });
+    },
+  );
+
+  test(
+    "Verify error when creating bed in root location",
+    { tag: ["@atomic", "@cap:location.bed.create"] },
+    async ({ page }) => {
+      await test.step("Attempt to create bed at root", async () => {
+        await page.getByRole("button", { name: "Add Location" }).click();
+        await page.getByRole("combobox", { name: "Location Form" }).click();
+        await page.getByRole("option", { name: "Bed" }).click();
+      });
+
+      await test.step("Verify error message", async () => {
+        await expect(
+          page
+            .locator("li[data-sonner-toast]")
+            .getByText(/Beds can only be created under a parent location/i),
+        ).toBeVisible();
+      });
+    },
+  );
 });

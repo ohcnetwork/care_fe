@@ -1,6 +1,10 @@
 import { faker } from "@faker-js/faker";
 
 import { expect, test } from "@playwright/test";
+import {
+  fillObservationDefinitionBasicFields,
+  generateObservationDefinitionData,
+} from "tests/helper/definitions";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -19,55 +23,6 @@ test.use({ storageState: "tests/.auth/user.json" });
 test.describe("Observation Definition Form with Interpretation", () => {
   let facilityId: string;
 
-  // Generate unique observation definition data
-  function generateObservationData() {
-    const timestamp = Date.now();
-    const title = faker.lorem.words(2);
-    return {
-      title,
-      slug: title,
-      description: `Test observation definition description ${timestamp}`,
-      category: "vital-signs",
-      status: "active",
-      dataType: "quantity",
-    };
-  }
-
-  // Helper to fill basic observation definition form fields
-  async function fillBasicObservationForm(
-    page: any,
-    data: ReturnType<typeof generateObservationData>,
-  ) {
-    await test.step("Fill basic observation definition fields", async () => {
-      // Fill title
-      await page.getByRole("textbox", { name: "Title" }).fill(data.title);
-
-      // Fill description
-      await page
-        .getByRole("textbox", { name: "Description" })
-        .fill(data.description);
-
-      // Select category
-      await page.getByRole("combobox", { name: "Category" }).click();
-      await page.getByRole("option", { name: "Laboratory" }).first().click();
-
-      // Select status
-      await page.getByRole("combobox", { name: "Status" }).click();
-      await page.getByRole("option", { name: "Active" }).first().click();
-
-      // Select data type
-      await page.getByRole("combobox", { name: "Data Type" }).click();
-      await page.getByRole("option", { name: "Integer" }).first().click();
-
-      // Select LOINC code (search and select first available)
-      await page.getByRole("combobox", { name: "LOINC Code *" }).click();
-      await page
-        .getByPlaceholder("Search for observation codes")
-        .fill("procedure");
-      await page.getByRole("option", { name: "Procedure" }).first().click();
-    });
-  }
-
   // Helper to add condition with Patient Gender
   async function addGenderCondition(
     page: any,
@@ -75,7 +30,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
     gender: string = "Male",
   ) {
     await test.step("Add gender condition", async () => {
-      await page.getByTitle(`Condition ${conditionNumber}`);
+      page.getByTitle(`Condition ${conditionNumber}`);
       const conditionSelector = page.getByTitle(`Condition ${conditionNumber}`);
       const conditionSelectorExists = await conditionSelector.isVisible();
       if (!conditionSelectorExists) {
@@ -113,9 +68,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
     ageType: string = "years",
   ) {
     await test.step("Add age condition", async () => {
-      const conditionSelector = await page.getByTitle(
-        `Condition ${conditionNumber}`,
-      );
+      const conditionSelector = page.getByTitle(`Condition ${conditionNumber}`);
 
       // Select metric type
       await conditionSelector.getByRole("combobox").nth(0).click();
@@ -203,285 +156,127 @@ test.describe("Observation Definition Form with Interpretation", () => {
   });
 
   for (const isComponent of [false, true]) {
-    test(`a valid ${isComponent ? "component " : ""}interpretation can be saved before filling the parent definition`, async ({
-      page,
-    }) => {
-      if (isComponent) {
+    test(
+      `a valid ${isComponent ? "component " : ""}interpretation can be saved before filling the parent definition`,
+      { tag: ["@atomic", "@cap:definition.observation.interpretation.create"] },
+      async ({ page }) => {
+        if (isComponent) {
+          await page
+            .getByRole("button", { name: "Add your first component" })
+            .click();
+        }
         await page
-          .getByRole("button", { name: "Add your first component" })
+          .getByRole("button", { name: "Add Interpretation", exact: true })
+          .last()
           .click();
-      }
-      await page
-        .getByRole("button", { name: "Add Interpretation", exact: true })
-        .last()
-        .click();
-      await addGenderCondition(page, 1, "Male");
-      await addNumericRange(page, 1, isComponent, "Normal Range", 10, 100);
-      await page.getByRole("button", { name: "Save", exact: true }).click();
-      await expect(
-        page.getByRole("heading", { name: "Add/Edit Interpretation" }),
-      ).toHaveCount(0);
-      await expect(page.getByRole("textbox", { name: /^Title/ })).toBeEmpty();
-      await page
-        .getByRole("button", { name: "Edit interpretation", exact: true })
-        .click();
-      await expect(
-        page.getByTitle("Range 1").getByPlaceholder("Min", { exact: true }),
-      ).toHaveValue("10");
-      await expect(
-        page.getByTitle("Range 1").getByPlaceholder("Max", { exact: true }),
-      ).toHaveValue("100");
-    });
+        await addGenderCondition(page, 1, "Male");
+        await addNumericRange(page, 1, isComponent, "Normal Range", 10, 100);
+        await page.getByRole("button", { name: "Save", exact: true }).click();
+        await expect(
+          page.getByRole("heading", { name: "Add/Edit Interpretation" }),
+        ).toHaveCount(0);
+        await expect(page.getByRole("textbox", { name: /^Title/ })).toBeEmpty();
+        await page
+          .getByRole("button", { name: "Edit interpretation", exact: true })
+          .click();
+        await expect(
+          page.getByTitle("Range 1").getByPlaceholder("Min", { exact: true }),
+        ).toHaveValue("10");
+        await expect(
+          page.getByTitle("Range 1").getByPlaceholder("Max", { exact: true }),
+        ).toHaveValue("100");
+      },
+    );
   }
 
-  test("should create observation definition with root-level interpretation", async ({
-    page,
-  }) => {
-    const data = generateObservationData();
+  test(
+    "should create observation definition with root-level interpretation",
+    { tag: ["@atomic", "@cap:definition.observation.create"] },
+    async ({ page }) => {
+      const data = generateObservationDefinitionData();
 
-    // Fill basic form
-    await fillBasicObservationForm(page, data);
+      // Fill basic form
+      await fillObservationDefinitionBasicFields(page, data);
 
-    // Add root-level interpretation
-    await page.getByRole("button", { name: "Add Interpretation" }).click();
+      // Add root-level interpretation
+      await page.getByRole("button", { name: "Add Interpretation" }).click();
 
-    /*     // Wait for sheet to open
+      /*     // Wait for sheet to open
         await expect(
           page.getByRole("heading", { name: /Add\/Edit Interpretation/i }),
         ).toBeVisible(); */
 
-    // Add condition
-    await addGenderCondition(page, 1, "Male");
-
-    // Add condition - Patient Age
-    await page
-      .getByText("ConditionsAdd")
-      .getByRole("button", { name: "Add" })
-      .click();
-
-    await addAgeCondition(page, 2, "in_range", undefined, 18, 65, "Years");
-
-    // Add numeric range
-    await addNumericRange(page, 1, false, "Normal Range", 10, 100);
-
-    // Save interpretation
-    await page.getByRole("button", { name: "Save" }).click();
-
-    // Verify sheet closes
-    await expect(
-      page.getByRole("heading", { name: "Add/Edit Interpretation" }),
-    ).not.toBeVisible();
-
-    // Verify interpretation appears in list
-    await expect(
-      page.getByText("Observation Interpretation (1)"),
-    ).toBeVisible();
-
-    // Submit form
-    await page.getByRole("button", { name: "Create" }).click();
-
-    // Wait for success message
-    await expect(
-      page.getByText("observation definition created successfully"),
-    ).toBeVisible({ timeout: 10000 });
-  });
-
-  test("should create observation definition with component-level interpretation", async ({
-    page,
-  }) => {
-    const data = generateObservationData();
-
-    // Fill basic form
-    await fillBasicObservationForm(page, data);
-
-    // Add component first
-    await page
-      .getByRole("button", {
-        name: "Add your first component",
-      })
-      .click();
-
-    // Fill component code
-    await page.getByRole("combobox", { name: "Code *", exact: true }).click();
-    await page.waitForLoadState("networkidle");
-    await page
-      .getByPlaceholder("Search for observation codes")
-      .fill("Hemoglobin");
-    await page.getByRole("option", { name: "Hemoglobin" }).first().click();
-
-    // Select component data type
-    await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
-    await page.getByRole("option", { name: "Quantity" }).first().click();
-
-    // Select component unit
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: "search for units" })
-      .click();
-    await page.waitForLoadState("networkidle");
-    await page.getByPlaceholder("Search for units").fill(unit);
-    await page.getByRole("option", { name: unit }).first().click();
-
-    // Add component-level interpretation
-    await page
-      .getByRole("button", { name: "Add Interpretation" })
-      .nth(1)
-      .click();
-
-    // Wait for sheet to open
-    await expect(
-      page.getByRole("heading", { name: "Add/Edit Interpretation" }),
-    ).toBeVisible();
-
-    // Add condition
-    await addGenderCondition(page, 1, "Female");
-
-    // Add numeric range
-    await addNumericRange(page, 1, true, "Low", undefined, 50);
-
-    // Save interpretation
-    await page.getByRole("button", { name: "Save" }).click();
-
-    // Verify interpretation appears
-    await expect(
-      page.getByText("Observation Interpretation (1)"),
-    ).toBeVisible();
-
-    // Submit form
-    await page.getByRole("button", { name: "Create" }).click();
-
-    // Wait for success message
-    await expect(
-      page.getByText("observation definition created successfully"),
-    ).toBeVisible({ timeout: 10000 });
-  });
-
-  test("should enforce mutual exclusivity between root and component interpretations", async ({
-    page,
-  }) => {
-    const data = generateObservationData();
-
-    // Fill basic form
-    await fillBasicObservationForm(page, data);
-
-    // Add root-level interpretation first
-    await test.step("Add root-level interpretation", async () => {
-      await page.getByRole("button", { name: "Add Interpretation" }).click();
+      // Add condition
       await addGenderCondition(page, 1, "Male");
-      await addNumericRange(page, 1, false, "Normal", 0, 100);
-      await page.getByRole("button", { name: "Save" }).click();
-    });
 
-    // Add component
-    await test.step("Add component", async () => {
+      // Add condition - Patient Age
       await page
-        .getByRole("button", {
-          name: "Add your first component",
-        })
+        .getByText("ConditionsAdd")
+        .getByRole("button", { name: "Add" })
         .click();
 
-      await page.getByRole("combobox", { name: "Code *", exact: true }).click();
-      await page.waitForLoadState("networkidle");
-      await page.getByRole("option").first().click();
+      await addAgeCondition(page, 2, "in_range", undefined, 18, 65, "Years");
 
-      await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
-      await page
-        .getByRole("option", { name: /quantity/i })
-        .first()
-        .click();
+      // Add numeric range
+      await addNumericRange(page, 1, false, "Normal Range", 10, 100);
 
-      await page.getByRole("combobox", { name: "Unit" }).nth(1).click();
-      await page.getByPlaceholder("Search for units").fill(unit);
-      await page.getByRole("option", { name: unit }).first().click();
-    });
-
-    // Verify component interpretation section is disabled
-    const componentInterpretationSection = page
-      .locator("text=Observation Interpretation")
-      .nth(1);
-    await expect(componentInterpretationSection).toBeVisible();
-
-    // Check for conflict message
-    await expect(
-      page.getByText("Root-level observation interpretations exist"),
-    ).toBeVisible();
-
-    // Only the root section keeps its "Add Interpretation" (it allows several);
-    // the component section offers none while root interpretations exist.
-    await expect(
-      page.getByRole("button", { name: "Add Interpretation" }),
-    ).toHaveCount(1);
-
-    // Try to clear root-level interpretation
-    await test.step("Clear root-level interpretation", async () => {
-      await page
-        .getByRole("button", { name: "Clear conflicting interpretations" })
-        .click();
-
-      // Verify warning dialog appears
-      await expect(
-        page.getByRole("heading", { name: "Remove Root Observation" }),
-      ).toBeVisible();
-
-      // Confirm clearing
-      await page.getByRole("button", { name: "Remove" }).click();
-
-      // Verify root interpretation is cleared and component section becomes enabled
-      await expect(
-        page.getByText("No interpretations configured").nth(0),
-      ).toBeVisible();
-      // Verify component interpretation section is enabled
-      await expect(
-        page.getByText("No interpretations configured").nth(1),
-      ).toBeVisible();
-    });
-
-    // Now add component-level interpretation
-    await test.step("Add component-level interpretation after clearing root", async () => {
-      // Find the component interpretation section and add interpretation
-      const componentAddButton = page
-        .getByRole("button", { name: "Add Interpretation" })
-        .last();
-      await componentAddButton.click();
-
-      await addGenderCondition(page, 1, "Female");
-      await addNumericRange(page, 1, true, "Low", undefined, 50);
+      // Save interpretation
       await page.getByRole("button", { name: "Save" }).click();
 
-      // Verify component interpretation is added
+      // Verify sheet closes
+      await expect(
+        page.getByRole("heading", { name: "Add/Edit Interpretation" }),
+      ).toBeHidden();
+
+      // Verify interpretation appears in list
       await expect(
         page.getByText("Observation Interpretation (1)"),
       ).toBeVisible();
-    });
-  });
 
-  test("should enforce mutual exclusivity - component blocks root", async ({
-    page,
-  }) => {
-    const data = generateObservationData();
+      // Submit form
+      await page.getByRole("button", { name: "Create" }).click();
 
-    // Fill basic form
-    await fillBasicObservationForm(page, data);
+      // Wait for success message
+      await expect(
+        page.getByText("observation definition created successfully"),
+      ).toBeVisible({ timeout: 10000 });
+    },
+  );
 
-    // Add component first
-    await test.step("Add component with interpretation", async () => {
+  test(
+    "should create observation definition with component-level interpretation",
+    { tag: ["@atomic", "@cap:definition.observation.create"] },
+    async ({ page }) => {
+      const data = generateObservationDefinitionData();
+
+      // Fill basic form
+      await fillObservationDefinitionBasicFields(page, data);
+
+      // Add component first
       await page
         .getByRole("button", {
           name: "Add your first component",
         })
         .click();
 
+      // Fill component code
       await page.getByRole("combobox", { name: "Code *", exact: true }).click();
       await page.waitForLoadState("networkidle");
-      await page.getByRole("option").first().click();
-
-      await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
       await page
-        .getByRole("option", { name: /quantity/i })
-        .first()
-        .click();
+        .getByPlaceholder("Search for observation codes")
+        .fill("Hemoglobin");
+      await page.getByRole("option", { name: "Hemoglobin" }).first().click();
 
-      await page.getByRole("combobox", { name: "Unit" }).nth(1).click();
+      // Select component data type
+      await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
+      await page.getByRole("option", { name: "Quantity" }).first().click();
+
+      // Select component unit
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: "search for units" })
+        .click();
+      await page.waitForLoadState("networkidle");
       await page.getByPlaceholder("Search for units").fill(unit);
       await page.getByRole("option", { name: unit }).first().click();
 
@@ -490,420 +285,612 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .getByRole("button", { name: "Add Interpretation" })
         .nth(1)
         .click();
-      await addGenderCondition(page, 1, "Male");
-      await addNumericRange(page, 1, true, "Normal", 0, 100);
-      await page.getByRole("button", { name: "Save" }).click();
-    });
-
-    // Verify root-level interpretation section is disabled
-    await test.step("Verify root interpretation is disabled", async () => {
-      await expect(
-        page.getByText("Component-level observation interpretations exist"),
-      ).toBeVisible();
-
-      // Root-level Add Interpretation button should be disabled or conflict message should be visible
-      const rootSection = page
-        .locator("text=Observation Interpretation")
-        .nth(0);
-      await expect(rootSection).toBeVisible();
-    });
-
-    // Clear component interpretation
-    await test.step("Clear component interpretation", async () => {
-      await page
-        .getByRole("button", { name: "Clear conflicting interpretations" })
-        .click();
-
-      await expect(
-        page.getByRole("heading", {
-          name: "Remove Component Observation Interpretation",
-        }),
-      ).toBeVisible();
-
-      await page.getByRole("button", { name: "Remove" }).click();
-
-      // Verify component interpretation is cleared
-      await expect(page.getByText("No interpretations configured")).toHaveCount(
-        2,
-      );
-    });
-
-    // Now add root-level interpretation
-    await test.step("Add root-level interpretation after clearing component", async () => {
-      await page
-        .getByRole("button", { name: "Add Interpretation" })
-        .nth(0)
-        .click();
-
-      await addGenderCondition(page, 1, "Female");
-      await addNumericRange(page, 1, false, "High", 100, undefined);
-      await page.getByRole("button", { name: "Save" }).click();
-
-      await expect(
-        page.getByText("Observation Interpretation (1)"),
-      ).toBeVisible();
-    });
-  });
-
-  test("should create interpretation with multiple conditions and ranges", async ({
-    page,
-  }) => {
-    const data = generateObservationData();
-
-    // Fill basic form
-    await fillBasicObservationForm(page, data);
-
-    // Add root-level interpretation with multiple conditions and ranges
-    await test.step("Add interpretation with multiple conditions and ranges", async () => {
-      await page.getByRole("button", { name: "Add Interpretation" }).click();
-
-      // Add first condition - Gender
-      await addGenderCondition(page, 1, "Male");
-
-      // Add second condition - Age
-      await page
-        .getByText("ConditionsAdd")
-        .getByRole("button", { name: "Add" })
-        .click();
-      await addAgeCondition(page, 2, "in_range", undefined, 18, 65, "Years");
-
-      // Add first range
-      await addNumericRange(page, 1, false, "Low", undefined, 50);
-
-      await page
-        .getByText("RangesAdd")
-        .getByRole("button", { name: "Add" })
-        .click();
-      // Add second range
-      await addNumericRange(page, 2, false, "Normal", 51, 100);
-
-      await page
-        .getByText("RangesAdd")
-        .getByRole("button", { name: "Add" })
-        .click();
-      // Add third range
-      await addNumericRange(page, 3, false, "High", 101, undefined);
-
-      // Save interpretation
-      await page.getByRole("button", { name: "Save" }).click();
-
-      // Verify interpretation summary shows multiple conditions and ranges
-      await expect(
-        page.getByText("Observation Interpretation (1)"),
-      ).toBeVisible();
-    });
-
-    // Submit form
-    await page.getByRole("button", { name: "Create" }).click();
-    await expect(
-      page.getByText("observation definition created successfully"),
-    ).toBeVisible({ timeout: 10000 });
-  });
-
-  test("should edit existing interpretation", async ({ page }) => {
-    const data = generateObservationData();
-
-    // Fill basic form
-    await fillBasicObservationForm(page, data);
-
-    // Create initial interpretation
-    await test.step("Create initial interpretation", async () => {
-      await page.getByRole("button", { name: "Add Interpretation" }).click();
-      await addGenderCondition(page, 1, "Male");
-      await addNumericRange(page, 1, false, "Normal", 0, 100);
-      await page.getByRole("button", { name: "Save" }).click();
-
-      // Explicitly wait for the sheet's exit animation to complete and the
-      // dialog to unmount, so the overlay no longer intercepts clicks
-      await page.getByRole("dialog").waitFor({ state: "detached" });
-    });
-
-    // Edit interpretation
-    await test.step("Edit interpretation", async () => {
-      await page
-        .getByRole("button", { name: "Edit interpretation" })
-        .first()
-        .click();
 
       // Wait for sheet to open
       await expect(
         page.getByRole("heading", { name: "Add/Edit Interpretation" }),
       ).toBeVisible();
 
-      // Modify condition - change gender
-      await page.getByRole("combobox").nth(2).click();
-      await page.getByRole("option", { name: "Female", exact: true }).click();
+      // Add condition
+      await addGenderCondition(page, 1, "Female");
 
-      // Modify range - change display
+      // Add numeric range
+      await addNumericRange(page, 1, true, "Low", undefined, 50);
 
-      await page
-        .locator(
-          'input[name="qualified_ranges.0.ranges.0.interpretation.display"]',
-        )
-        .fill("Updated Normal");
-
-      // Modify range - change values
-      await page
-        .locator('input[name="qualified_ranges.0.ranges.0.min"]')
-        .fill("10");
-      await page
-        .locator('input[name="qualified_ranges.0.ranges.0.max"]')
-        .fill("90");
-
-      // Save changes
+      // Save interpretation
       await page.getByRole("button", { name: "Save" }).click();
-
-      // Verify sheet closes
-      await expect(
-        page.getByRole("heading", { name: "Add/Edit Interpretation" }),
-      ).not.toBeVisible();
-    });
-
-    // Submit form
-    await page.getByRole("button", { name: "Create" }).click();
-    await expect(
-      page.getByText("observation definition created successfully"),
-    ).toBeVisible({ timeout: 10000 });
-  });
-
-  test("should delete interpretation", async ({ page }) => {
-    const data = generateObservationData();
-
-    // Fill basic form
-    await fillBasicObservationForm(page, data);
-
-    // Create interpretation
-    await test.step("Create interpretation", async () => {
-      await page.getByRole("button", { name: "Add Interpretation" }).click();
-      await addGenderCondition(page, 1, "Male");
-      await addNumericRange(page, 1, false, "Normal", 0, 100);
-      await page.getByRole("button", { name: "Save" }).click();
-
-      // Explicitly wait for the sheet's exit animation to complete and the
-      // dialog to unmount, so the overlay no longer intercepts clicks
-      await page.getByRole("dialog").waitFor({ state: "detached" });
 
       // Verify interpretation appears
       await expect(
         page.getByText("Observation Interpretation (1)"),
       ).toBeVisible();
-    });
 
-    // Delete interpretation
-    await test.step("Delete interpretation", async () => {
-      await page
-        .getByRole("button", { name: "Delete interpretation" })
-        .first()
-        .click();
+      // Submit form
+      await page.getByRole("button", { name: "Create" }).click();
 
-      // Verify interpretation is removed
+      // Wait for success message
       await expect(
-        page.getByText("No interpretations configured"),
+        page.getByText("observation definition created successfully"),
+      ).toBeVisible({ timeout: 10000 });
+    },
+  );
+
+  test(
+    "should enforce mutual exclusivity between root and component interpretations",
+    { tag: ["@atomic", "@cap:definition.observation.interpretation.create"] },
+    async ({ page }) => {
+      const data = generateObservationDefinitionData();
+
+      // Fill basic form
+      await fillObservationDefinitionBasicFields(page, data);
+
+      // Add root-level interpretation first
+      await test.step("Add root-level interpretation", async () => {
+        await page.getByRole("button", { name: "Add Interpretation" }).click();
+        await addGenderCondition(page, 1, "Male");
+        await addNumericRange(page, 1, false, "Normal", 0, 100);
+        await page.getByRole("button", { name: "Save" }).click();
+      });
+
+      // Add component
+      await test.step("Add component", async () => {
+        await page
+          .getByRole("button", {
+            name: "Add your first component",
+          })
+          .click();
+
+        await page
+          .getByRole("combobox", { name: "Code *", exact: true })
+          .click();
+        await page.waitForLoadState("networkidle");
+        await page.getByRole("option").first().click();
+
+        await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
+        await page
+          .getByRole("option", { name: /quantity/i })
+          .first()
+          .click();
+
+        await page.getByRole("combobox", { name: "Unit" }).nth(1).click();
+        await page.getByPlaceholder("Search for units").fill(unit);
+        await page.getByRole("option", { name: unit }).first().click();
+      });
+
+      // Verify component interpretation section is disabled
+      const componentInterpretationSection = page
+        .locator("text=Observation Interpretation")
+        .nth(1);
+      await expect(componentInterpretationSection).toBeVisible();
+
+      // Check for conflict message
+      await expect(
+        page.getByText("Root-level observation interpretations exist"),
       ).toBeVisible();
-    });
 
-    // Submit form
-    await page.getByRole("button", { name: "Create" }).click();
-    await expect(
-      page.getByText("observation definition created successfully"),
-    ).toBeVisible({ timeout: 10000 });
-  });
+      // Only the root section keeps its "Add Interpretation" (it allows several);
+      // the component section offers none while root interpretations exist.
+      await expect(
+        page.getByRole("button", { name: "Add Interpretation" }),
+      ).toHaveCount(1);
 
-  test("should validate required fields for interpretation", async ({
-    page,
-  }) => {
-    const data = generateObservationData();
+      // Try to clear root-level interpretation
+      await test.step("Clear root-level interpretation", async () => {
+        await page
+          .getByRole("button", { name: "Clear conflicting interpretations" })
+          .click();
 
-    // Fill basic form
-    await fillBasicObservationForm(page, data);
+        // Verify warning dialog appears
+        await expect(
+          page.getByRole("heading", { name: "Remove Root Observation" }),
+        ).toBeVisible();
 
-    // Try to save interpretation without conditions
-    await test.step("Test validation - no conditions", async () => {
-      await page.getByRole("button", { name: "Add Interpretation" }).click();
-      await addNumericRange(page, 1, false, "Normal", 0, 100);
+        // Confirm clearing
+        await page.getByRole("button", { name: "Remove" }).click();
 
-      const conditionSelector = page.getByTitle(`Condition 1`);
-      const conditionSelectorExists = await conditionSelector.isVisible();
-      if (!conditionSelectorExists) {
+        // Verify root interpretation is cleared and component section becomes enabled
+        await expect(
+          page.getByText("No interpretations configured").nth(0),
+        ).toBeVisible();
+        // Verify component interpretation section is enabled
+        await expect(
+          page.getByText("No interpretations configured").nth(1),
+        ).toBeVisible();
+      });
+
+      // Now add component-level interpretation
+      await test.step("Add component-level interpretation after clearing root", async () => {
+        // Find the component interpretation section and add interpretation
+        const componentAddButton = page
+          .getByRole("button", { name: "Add Interpretation" })
+          .last();
+        await componentAddButton.click();
+
+        await addGenderCondition(page, 1, "Female");
+        await addNumericRange(page, 1, true, "Low", undefined, 50);
+        await page.getByRole("button", { name: "Save" }).click();
+
+        // Verify component interpretation is added
+        await expect(
+          page.getByText("Observation Interpretation (1)"),
+        ).toBeVisible();
+      });
+    },
+  );
+
+  test(
+    "should enforce mutual exclusivity - component blocks root",
+    { tag: ["@atomic", "@cap:definition.observation.interpretation.create"] },
+    async ({ page }) => {
+      const data = generateObservationDefinitionData();
+
+      // Fill basic form
+      await fillObservationDefinitionBasicFields(page, data);
+
+      // Add component first
+      await test.step("Add component with interpretation", async () => {
+        await page
+          .getByRole("button", {
+            name: "Add your first component",
+          })
+          .click();
+
+        await page
+          .getByRole("combobox", { name: "Code *", exact: true })
+          .click();
+        await page.waitForLoadState("networkidle");
+        await page.getByRole("option").first().click();
+
+        await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
+        await page
+          .getByRole("option", { name: /quantity/i })
+          .first()
+          .click();
+
+        await page.getByRole("combobox", { name: "Unit" }).nth(1).click();
+        await page.getByPlaceholder("Search for units").fill(unit);
+        await page.getByRole("option", { name: unit }).first().click();
+
+        // Add component-level interpretation
+        await page
+          .getByRole("button", { name: "Add Interpretation" })
+          .nth(1)
+          .click();
+        await addGenderCondition(page, 1, "Male");
+        await addNumericRange(page, 1, true, "Normal", 0, 100);
+        await page.getByRole("button", { name: "Save" }).click();
+      });
+
+      // Verify root-level interpretation section is disabled
+      await test.step("Verify root interpretation is disabled", async () => {
+        await expect(
+          page.getByText("Component-level observation interpretations exist"),
+        ).toBeVisible();
+
+        // Root-level Add Interpretation button should be disabled or conflict message should be visible
+        const rootSection = page
+          .locator("text=Observation Interpretation")
+          .nth(0);
+        await expect(rootSection).toBeVisible();
+      });
+
+      // Clear component interpretation
+      await test.step("Clear component interpretation", async () => {
+        await page
+          .getByRole("button", { name: "Clear conflicting interpretations" })
+          .click();
+
+        await expect(
+          page.getByRole("heading", {
+            name: "Remove Component Observation Interpretation",
+          }),
+        ).toBeVisible();
+
+        await page.getByRole("button", { name: "Remove" }).click();
+
+        // Verify component interpretation is cleared
+        await expect(
+          page.getByText("No interpretations configured"),
+        ).toHaveCount(2);
+      });
+
+      // Now add root-level interpretation
+      await test.step("Add root-level interpretation after clearing component", async () => {
+        await page
+          .getByRole("button", { name: "Add Interpretation" })
+          .nth(0)
+          .click();
+
+        await addGenderCondition(page, 1, "Female");
+        await addNumericRange(page, 1, false, "High", 100, undefined);
+        await page.getByRole("button", { name: "Save" }).click();
+
+        await expect(
+          page.getByText("Observation Interpretation (1)"),
+        ).toBeVisible();
+      });
+    },
+  );
+
+  test(
+    "should create interpretation with multiple conditions and ranges",
+    { tag: ["@atomic", "@cap:definition.observation.interpretation.create"] },
+    async ({ page }) => {
+      const data = generateObservationDefinitionData();
+
+      // Fill basic form
+      await fillObservationDefinitionBasicFields(page, data);
+
+      // Add root-level interpretation with multiple conditions and ranges
+      await test.step("Add interpretation with multiple conditions and ranges", async () => {
+        await page.getByRole("button", { name: "Add Interpretation" }).click();
+
+        // Add first condition - Gender
+        await addGenderCondition(page, 1, "Male");
+
+        // Add second condition - Age
         await page
           .getByText("ConditionsAdd")
           .getByRole("button", { name: "Add" })
           .click();
-      }
+        await addAgeCondition(page, 2, "in_range", undefined, 18, 65, "Years");
 
-      // Select metric type
-      await conditionSelector
-        .getByRole("combobox")
-        .filter({ hasText: /^Encounter/ })
-        .click();
+        // Add first range
+        await addNumericRange(page, 1, false, "Low", undefined, 50);
 
-      await page.getByRole("option", { name: "Encounter Tags" }).click();
+        await page
+          .getByText("RangesAdd")
+          .getByRole("button", { name: "Add" })
+          .click();
+        // Add second range
+        await addNumericRange(page, 2, false, "Normal", 51, 100);
 
-      await page.getByRole("button", { name: "Save" }).click();
-      // tag selector should show error message
-      await expect(page.getByText("Tags are required")).toBeVisible();
+        await page
+          .getByText("RangesAdd")
+          .getByRole("button", { name: "Add" })
+          .click();
+        // Add third range
+        await addNumericRange(page, 3, false, "High", 101, undefined);
 
-      await cancelAndDeleteInterpretation(page);
-    });
+        // Save interpretation
+        await page.getByRole("button", { name: "Save" }).click();
 
-    // Submit empty values for ranges
-    await test.step("Test validation - empty range", async () => {
-      await page.getByRole("button", { name: "Add Interpretation" }).click();
-      await addGenderCondition(page, 1, "Male");
-
-      await page.getByRole("button", { name: "Save" }).click();
-
-      await expect(page.getByText("Display is required")).toBeVisible();
-      await expect(
-        page.getByText("Either min or max value is required"),
-      ).toBeVisible();
-
-      await cancelAndDeleteInterpretation(page);
-    });
-
-    // Add condition but remove range
-    await test.step("Test validation - no ranges", async () => {
-      await page.getByRole("button", { name: "Add Interpretation" }).click();
-      await addGenderCondition(page, 1, "Male");
-
-      const rangeSelector = page.getByTitle("Range 1");
-
-      // Remove the range
-      await rangeSelector.getByRole("button").click();
-
-      // Save button should be disabled (because no ranges)
-      const saveButton = page.getByRole("button", { name: "Save" });
-      await expect(saveButton).toBeDisabled();
-
-      await cancelAndDeleteInterpretation(page);
-    });
-
-    // Add range back
-    await test.step("Add range to enable save", async () => {
-      await page.getByRole("button", { name: "Add Interpretation" }).click();
-      await addGenderCondition(page, 1, "Male");
-      await addNumericRange(page, 1, false, "Normal", 0, 100);
-
-      // Now save button should be enabled
-      const saveButton = page.getByRole("button", { name: "Save" });
-      await expect(saveButton).toBeEnabled();
-
-      await saveButton.click();
+        // Verify interpretation summary shows multiple conditions and ranges
+        await expect(
+          page.getByText("Observation Interpretation (1)"),
+        ).toBeVisible();
+      });
 
       // Submit form
       await page.getByRole("button", { name: "Create" }).click();
       await expect(
         page.getByText("observation definition created successfully"),
       ).toBeVisible({ timeout: 10000 });
-    });
-  });
+    },
+  );
 
-  test("should handle cancel during interpretation edit", async ({ page }) => {
-    const data = generateObservationData();
+  test(
+    "should edit existing interpretation",
+    { tag: ["@atomic", "@cap:definition.observation.interpretation.edit"] },
+    async ({ page }) => {
+      const data = generateObservationDefinitionData();
 
-    // Fill basic form
-    await fillBasicObservationForm(page, data);
+      // Fill basic form
+      await fillObservationDefinitionBasicFields(page, data);
 
-    // Create initial interpretation
-    await test.step("Create initial interpretation", async () => {
-      await page.getByRole("button", { name: "Add Interpretation" }).click();
-      await addGenderCondition(page, 1, "Male");
-      await addNumericRange(page, 1, false, "Normal", 0, 100);
-      await page.getByRole("button", { name: "Save" }).click();
+      // Create initial interpretation
+      await test.step("Create initial interpretation", async () => {
+        await page.getByRole("button", { name: "Add Interpretation" }).click();
+        await addGenderCondition(page, 1, "Male");
+        await addNumericRange(page, 1, false, "Normal", 0, 100);
+        await page.getByRole("button", { name: "Save" }).click();
 
-      // Explicitly wait for the sheet's exit animation to complete and the
-      // dialog to unmount, so the overlay no longer intercepts clicks
-      await page.getByRole("dialog").waitFor({ state: "detached" });
-    });
+        // Explicitly wait for the sheet's exit animation to complete and the
+        // dialog to unmount, so the overlay no longer intercepts clicks
+        await page.getByRole("dialog").waitFor({ state: "detached" });
+      });
 
-    // Edit and cancel
-    await test.step("Edit and cancel", async () => {
-      await page
-        .getByRole("button", { name: "Edit interpretation" })
-        .first()
-        .click();
+      // Edit interpretation
+      await test.step("Edit interpretation", async () => {
+        await page
+          .getByRole("button", { name: "Edit interpretation" })
+          .first()
+          .click();
 
+        // Wait for sheet to open
+        await expect(
+          page.getByRole("heading", { name: "Add/Edit Interpretation" }),
+        ).toBeVisible();
+
+        // Modify condition - change gender
+        await page.getByRole("combobox").nth(2).click();
+        await page.getByRole("option", { name: "Female", exact: true }).click();
+
+        // Modify range - change display
+
+        await page
+          .locator(
+            'input[name="qualified_ranges.0.ranges.0.interpretation.display"]',
+          )
+          .fill("Updated Normal");
+
+        // Modify range - change values
+        await page
+          .locator('input[name="qualified_ranges.0.ranges.0.min"]')
+          .fill("10");
+        await page
+          .locator('input[name="qualified_ranges.0.ranges.0.max"]')
+          .fill("90");
+
+        // Save changes
+        await page.getByRole("button", { name: "Save" }).click();
+
+        // Verify sheet closes
+        await expect(
+          page.getByRole("heading", { name: "Add/Edit Interpretation" }),
+        ).toBeHidden();
+      });
+
+      // Submit form
+      await page.getByRole("button", { name: "Create" }).click();
       await expect(
-        page.getByRole("heading", { name: "Add/Edit Interpretation" }),
-      ).toBeVisible();
+        page.getByText("observation definition created successfully"),
+      ).toBeVisible({ timeout: 10000 });
+    },
+  );
 
-      // Make changes
+  test(
+    "should delete interpretation",
+    { tag: ["@atomic", "@cap:definition.observation.interpretation.delete"] },
+    async ({ page }) => {
+      const data = generateObservationDefinitionData();
 
-      await page
-        .locator(
-          'input[name="qualified_ranges.0.ranges.0.interpretation.display"]',
-        )
-        .fill("Changed Value");
+      // Fill basic form
+      await fillObservationDefinitionBasicFields(page, data);
 
-      // Cancel
-      await page.getByRole("button", { name: "Cancel" }).click();
+      // Create interpretation
+      await test.step("Create interpretation", async () => {
+        await page.getByRole("button", { name: "Add Interpretation" }).click();
+        await addGenderCondition(page, 1, "Male");
+        await addNumericRange(page, 1, false, "Normal", 0, 100);
+        await page.getByRole("button", { name: "Save" }).click();
 
-      // Verify sheet closes
+        // Explicitly wait for the sheet's exit animation to complete and the
+        // dialog to unmount, so the overlay no longer intercepts clicks
+        await page.getByRole("dialog").waitFor({ state: "detached" });
+
+        // Verify interpretation appears
+        await expect(
+          page.getByText("Observation Interpretation (1)"),
+        ).toBeVisible();
+      });
+
+      // Delete interpretation
+      await test.step("Delete interpretation", async () => {
+        await page
+          .getByRole("button", { name: "Delete interpretation" })
+          .first()
+          .click();
+
+        // Verify interpretation is removed
+        await expect(
+          page.getByText("No interpretations configured"),
+        ).toBeVisible();
+      });
+
+      // Submit form
+      await page.getByRole("button", { name: "Create" }).click();
       await expect(
-        page.getByRole("heading", { name: "Add/Edit Interpretation" }),
-      ).not.toBeVisible();
+        page.getByText("observation definition created successfully"),
+      ).toBeVisible({ timeout: 10000 });
+    },
+  );
 
-      // Verify original values are preserved (should still show "Normal" in summary)
+  test(
+    "should validate required fields for interpretation",
+    { tag: ["@atomic", "@cap:definition.observation.interpretation.create"] },
+    async ({ page }) => {
+      const data = generateObservationDefinitionData();
+
+      // Fill basic form
+      await fillObservationDefinitionBasicFields(page, data);
+
+      // Try to save interpretation without conditions
+      await test.step("Test validation - no conditions", async () => {
+        await page.getByRole("button", { name: "Add Interpretation" }).click();
+        await addNumericRange(page, 1, false, "Normal", 0, 100);
+
+        const conditionSelector = page.getByTitle(`Condition 1`);
+        const conditionSelectorExists = await conditionSelector.isVisible();
+        if (!conditionSelectorExists) {
+          await page
+            .getByText("ConditionsAdd")
+            .getByRole("button", { name: "Add" })
+            .click();
+        }
+
+        // Select metric type
+        await conditionSelector
+          .getByRole("combobox")
+          .filter({ hasText: /^Encounter/ })
+          .click();
+
+        await page.getByRole("option", { name: "Encounter Tags" }).click();
+
+        await page.getByRole("button", { name: "Save" }).click();
+        // tag selector should show error message
+        await expect(page.getByText("Tags are required")).toBeVisible();
+
+        await cancelAndDeleteInterpretation(page);
+      });
+
+      // Submit empty values for ranges
+      await test.step("Test validation - empty range", async () => {
+        await page.getByRole("button", { name: "Add Interpretation" }).click();
+        await addGenderCondition(page, 1, "Male");
+
+        await page.getByRole("button", { name: "Save" }).click();
+
+        await expect(page.getByText("Display is required")).toBeVisible();
+        await expect(
+          page.getByText("Either min or max value is required"),
+        ).toBeVisible();
+
+        await cancelAndDeleteInterpretation(page);
+      });
+
+      // Add condition but remove range
+      await test.step("Test validation - no ranges", async () => {
+        await page.getByRole("button", { name: "Add Interpretation" }).click();
+        await addGenderCondition(page, 1, "Male");
+
+        const rangeSelector = page.getByTitle("Range 1");
+
+        // Remove the range
+        await rangeSelector.getByRole("button").click();
+
+        // Save button should be disabled (because no ranges)
+        const saveButton = page.getByRole("button", { name: "Save" });
+        await expect(saveButton).toBeDisabled();
+
+        await cancelAndDeleteInterpretation(page);
+      });
+
+      // Add range back
+      await test.step("Add range to enable save", async () => {
+        await page.getByRole("button", { name: "Add Interpretation" }).click();
+        await addGenderCondition(page, 1, "Male");
+        await addNumericRange(page, 1, false, "Normal", 0, 100);
+
+        // Now save button should be enabled
+        const saveButton = page.getByRole("button", { name: "Save" });
+        await expect(saveButton).toBeEnabled();
+
+        await saveButton.click();
+
+        // Submit form
+        await page.getByRole("button", { name: "Create" }).click();
+        await expect(
+          page.getByText("observation definition created successfully"),
+        ).toBeVisible({ timeout: 10000 });
+      });
+    },
+  );
+
+  test(
+    "should handle cancel during interpretation edit",
+    { tag: ["@atomic", "@cap:definition.observation.interpretation.edit"] },
+    async ({ page }) => {
+      const data = generateObservationDefinitionData();
+
+      // Fill basic form
+      await fillObservationDefinitionBasicFields(page, data);
+
+      // Create initial interpretation
+      await test.step("Create initial interpretation", async () => {
+        await page.getByRole("button", { name: "Add Interpretation" }).click();
+        await addGenderCondition(page, 1, "Male");
+        await addNumericRange(page, 1, false, "Normal", 0, 100);
+        await page.getByRole("button", { name: "Save" }).click();
+
+        // Explicitly wait for the sheet's exit animation to complete and the
+        // dialog to unmount, so the overlay no longer intercepts clicks
+        await page.getByRole("dialog").waitFor({ state: "detached" });
+      });
+
+      // Edit and cancel
+      await test.step("Edit and cancel", async () => {
+        await page
+          .getByRole("button", { name: "Edit interpretation" })
+          .first()
+          .click();
+
+        await expect(
+          page.getByRole("heading", { name: "Add/Edit Interpretation" }),
+        ).toBeVisible();
+
+        // Make changes
+
+        await page
+          .locator(
+            'input[name="qualified_ranges.0.ranges.0.interpretation.display"]',
+          )
+          .fill("Changed Value");
+
+        // Cancel
+        await page.getByRole("button", { name: "Cancel" }).click();
+
+        // Verify sheet closes
+        await expect(
+          page.getByRole("heading", { name: "Add/Edit Interpretation" }),
+        ).toBeHidden();
+
+        // Verify original values are preserved (should still show "Normal" in summary)
+        await expect(
+          page.getByText("Observation Interpretation (1)"),
+        ).toBeVisible();
+      });
+
+      // Submit form
+      await page.getByRole("button", { name: "Create" }).click();
       await expect(
-        page.getByText("Observation Interpretation (1)"),
-      ).toBeVisible();
-    });
+        page.getByText("observation definition created successfully"),
+      ).toBeVisible({ timeout: 10000 });
+    },
+  );
 
-    // Submit form
-    await page.getByRole("button", { name: "Create" }).click();
-    await expect(
-      page.getByText("observation definition created successfully"),
-    ).toBeVisible({ timeout: 10000 });
-  });
+  test(
+    "should create observation definition with a component that has no unit",
+    { tag: ["@atomic", "@cap:definition.observation.create"] },
+    async ({ page }) => {
+      const data = generateObservationDefinitionData();
 
-  test("should create observation definition with a component that has no unit", async ({
-    page,
-  }) => {
-    const data = generateObservationData();
+      await fillObservationDefinitionBasicFields(page, data);
 
-    await fillBasicObservationForm(page, data);
+      await test.step("Add component without unit", async () => {
+        await page
+          .getByRole("button", {
+            name: "Add your first component",
+          })
+          .click();
 
-    await test.step("Add component without unit", async () => {
+        // Fill component code
+        await selectFromValueSet(
+          page,
+          page.getByRole("combobox", { name: "Code *", exact: true }),
+          { search: "Hemoglobin" },
+        );
+
+        // Select component data type but intentionally skip the unit
+        await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
+        await page.getByRole("option", { name: "Quantity" }).first().click();
+      });
+
+      await page.getByRole("button", { name: "Create" }).click();
+      await expectToast(page, "observation definition created successfully");
+    },
+  );
+
+  test(
+    "should show validation error when component code is left blank",
+    { tag: ["@atomic", "@cap:definition.observation.create"] },
+    async ({ page }) => {
+      const data = generateObservationDefinitionData();
+
+      await fillObservationDefinitionBasicFields(page, data);
+
+      // Add a component but leave the code empty
       await page
         .getByRole("button", {
           name: "Add your first component",
         })
         .click();
 
-      // Fill component code
-      await selectFromValueSet(
-        page,
-        page.getByRole("combobox", { name: "Code *", exact: true }),
-        { search: "Hemoglobin" },
-      );
+      await page.getByRole("button", { name: "Create" }).click();
 
-      // Select component data type but intentionally skip the unit
-      await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
-      await page.getByRole("option", { name: "Quantity" }).first().click();
-    });
+      await expect(page.getByText("Required")).toBeVisible();
 
-    await page.getByRole("button", { name: "Create" }).click();
-    await expectToast(page, "observation definition created successfully");
-  });
-
-  test("should show validation error when component code is left blank", async ({
-    page,
-  }) => {
-    const data = generateObservationData();
-
-    await fillBasicObservationForm(page, data);
-
-    // Add a component but leave the code empty
-    await page
-      .getByRole("button", {
-        name: "Add your first component",
-      })
-      .click();
-
-    await page.getByRole("button", { name: "Create" }).click();
-
-    await expect(page.getByText("Required")).toBeVisible();
-
-    await expect(page).toHaveURL(/observation_definitions\/new/);
-  });
+      await expect(page).toHaveURL(/observation_definitions\/new/);
+    },
+  );
 });

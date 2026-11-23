@@ -1,9 +1,16 @@
 import { faker } from "@faker-js/faker";
 import { expect, type Page } from "@playwright/test";
 import { ENCOUNTER_CLASSES } from "tests/facility/patient/encounter/encounterClasses";
+import { openEncounterCreateDialog } from "tests/helper/encounter";
 import { createTestPatient } from "tests/helper/patient";
 import { getFacilityId } from "tests/support/facilityId";
 
+export {
+  dischargeDispositionCombobox,
+  encounterStatusCombobox,
+} from "tests/helper/encounter";
+
+/** Opens the Create Encounter dialog in the shared facility, for a fresh API patient unless one is given. */
 export async function openCreateEncounterDialog(
   page: Page,
   patientId?: string,
@@ -13,13 +20,10 @@ export async function openCreateEncounterDialog(
   // and the backend caps active encounters per patient in a facility.
   const encounterPatientId = patientId ?? (await createTestPatient());
 
-  await page.goto(`/facility/${facilityId}/patient/${encounterPatientId}`);
-  await page.getByRole("link", { name: "Patient Home" }).first().click();
-
-  await expect(
-    page.getByRole("button", { name: "Create Encounter" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Create Encounter" }).click();
+  await openEncounterCreateDialog(page, {
+    facilityId,
+    patientId: encounterPatientId,
+  });
 }
 
 export async function selectRandomEncounterClass(page: Page) {
@@ -50,20 +54,4 @@ export function getFutureDateButtonFromCalendar(page: Page) {
 
 export function getEncounterCreateDialog(page: Page) {
   return page.getByRole("dialog", { name: "Initiate Patient Encounter" });
-}
-
-function comboboxByLabel(page: Page, label: string | RegExp) {
-  return page
-    .locator('label[data-slot="label"]')
-    .filter({ hasText: label })
-    .locator("..")
-    .getByRole("combobox");
-}
-
-export function encounterStatusCombobox(page: Page) {
-  return comboboxByLabel(page, /^Encounter Status$/);
-}
-
-export function dischargeDispositionCombobox(page: Page) {
-  return comboboxByLabel(page, /^Discharge Disposition/);
 }

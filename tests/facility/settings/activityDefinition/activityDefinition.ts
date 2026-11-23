@@ -85,7 +85,7 @@ export const CLASSIFICATION_OPTIONS = [
   "Education",
 ] as const;
 
-interface ActivityDefinitionData {
+export interface ActivityDefinitionData {
   title: string;
   slug: string;
   description: string;

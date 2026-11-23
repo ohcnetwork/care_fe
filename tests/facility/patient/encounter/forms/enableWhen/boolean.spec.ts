@@ -6,6 +6,7 @@ import {
   createQuestionnaireEncounter,
   expectFieldError,
   fillStringField,
+  openQuestionnaireFillViaUi,
   selectBooleanOption,
   submitAndExpectSuccess,
   submitForm,
@@ -24,11 +25,12 @@ test.describe("Enable When — Boolean Operators", () => {
     const { patientId, encounterId } =
       await createQuestionnaireEncounter(facilityId);
     // The fill route fetches by external_id (slug lookup is not supported).
-    const questionnaireId = await getQuestionnaireId();
-
-    await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,
-    );
+    await openQuestionnaireFillViaUi(page, {
+      facilityId,
+      patientId,
+      encounterId,
+      questionnaireId: getQuestionnaireId(),
+    });
     await expect(questionBlock(page, "Has Allergies")).toBeVisible();
 
     // "Self-Pay Reason" (exists.spec.ts) is required whenever "Insurance
@@ -44,144 +46,156 @@ test.describe("Enable When — Boolean Operators", () => {
   // ──────────────────────────────────────────────
 
   test.describe("'exists' operator", () => {
-    test("T1: source unanswered → dependent hidden [required] → submits", async ({
-      page,
-    }) => {
-      await test.step("Dependent hidden when source is unanswered", async () => {
-        await checkVisibility(page, "List Known Allergies", false);
-      });
+    test(
+      "T1: source unanswered → dependent hidden [required] → submits",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        await test.step("Dependent hidden when source is unanswered", async () => {
+          await checkVisibility(page, "List Known Allergies", false);
+        });
 
-      await test.step("Fill other sources with safe values and submit", async () => {
-        await selectBooleanOption(page, "Is Smoker", "No");
-        await selectBooleanOption(page, "Is Conscious", "Yes");
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Fill other sources with safe values and submit", async () => {
+          await selectBooleanOption(page, "Is Smoker", "No");
+          await selectBooleanOption(page, "Is Conscious", "Yes");
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-        await verifyLabelledValues(page, [
-          ["Is Smoker", "No"],
-          ["Is Conscious", "Yes"],
-        ]);
-        await verifySubmittedValues(page, [], ["List Known Allergies"]);
-      });
-    });
+        await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+          await verifyLabelledValues(page, [
+            ["Is Smoker", "No"],
+            ["Is Conscious", "Yes"],
+          ]);
+          await verifySubmittedValues(page, [], ["List Known Allergies"]);
+        });
+      },
+    );
 
-    test("T2: source unanswered → dependent hidden [optional] → submits", async ({
-      page,
-    }) => {
-      await test.step("Dependent hidden when source is unanswered", async () => {
-        await checkVisibility(page, "Allergy Notes", false);
-      });
+    test(
+      "T2: source unanswered → dependent hidden [optional] → submits",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        await test.step("Dependent hidden when source is unanswered", async () => {
+          await checkVisibility(page, "Allergy Notes", false);
+        });
 
-      await test.step("Fill other sources with safe values and submit", async () => {
-        await selectBooleanOption(page, "Is Smoker", "No");
-        await selectBooleanOption(page, "Is Conscious", "Yes");
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Fill other sources with safe values and submit", async () => {
+          await selectBooleanOption(page, "Is Smoker", "No");
+          await selectBooleanOption(page, "Is Conscious", "Yes");
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-        await verifyLabelledValues(page, [
-          ["Is Smoker", "No"],
-          ["Is Conscious", "Yes"],
-        ]);
-        await verifySubmittedValues(page, [], ["Allergy Notes"]);
-      });
-    });
+        await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+          await verifyLabelledValues(page, [
+            ["Is Smoker", "No"],
+            ["Is Conscious", "Yes"],
+          ]);
+          await verifySubmittedValues(page, [], ["Allergy Notes"]);
+        });
+      },
+    );
 
-    test("T3: source answered → dependent visible [required] + empty → validation error", async ({
-      page,
-    }) => {
-      await test.step("Select source — dependent appears", async () => {
-        await selectBooleanOption(page, "Has Allergies", "Yes");
-        await checkVisibility(page, "List Known Allergies", true);
-      });
+    test(
+      "T3: source answered → dependent visible [required] + empty → validation error",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        await test.step("Select source — dependent appears", async () => {
+          await selectBooleanOption(page, "Has Allergies", "Yes");
+          await checkVisibility(page, "List Known Allergies", true);
+        });
 
-      await test.step("Submit without filling required dependent", async () => {
-        await submitForm(page);
-        await expectFieldError(page, "List Known Allergies");
-      });
-    });
+        await test.step("Submit without filling required dependent", async () => {
+          await submitForm(page);
+          await expectFieldError(page, "List Known Allergies");
+        });
+      },
+    );
 
-    test("T4: source answered → dependent visible [required] + filled → submits", async ({
-      page,
-    }) => {
-      const allergies = faker.lorem.words(3);
+    test(
+      "T4: source answered → dependent visible [required] + filled → submits",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        const allergies = faker.lorem.words(3);
 
-      await test.step("Select source and fill required dependent", async () => {
-        await selectBooleanOption(page, "Has Allergies", "Yes");
-        await checkVisibility(page, "List Known Allergies", true);
-        await fillStringField(page, "List Known Allergies", allergies);
-      });
+        await test.step("Select source and fill required dependent", async () => {
+          await selectBooleanOption(page, "Has Allergies", "Yes");
+          await checkVisibility(page, "List Known Allergies", true);
+          await fillStringField(page, "List Known Allergies", allergies);
+        });
 
-      await test.step("Form submits successfully", async () => {
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Form submits successfully", async () => {
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [allergies]);
-      });
-    });
+        await test.step("Verify submitted values on overview", async () => {
+          await verifySubmittedValues(page, [allergies]);
+        });
+      },
+    );
 
-    test("T5: source answered → dependent visible [optional] + empty → submits", async ({
-      page,
-    }) => {
-      const allergies = faker.lorem.words(3);
+    test(
+      "T5: source answered → dependent visible [optional] + empty → submits",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        const allergies = faker.lorem.words(3);
 
-      await test.step("Select source — optional dependent appears", async () => {
-        await selectBooleanOption(page, "Has Allergies", "No");
-        await checkVisibility(page, "Allergy Notes", true);
-      });
+        await test.step("Select source — optional dependent appears", async () => {
+          await selectBooleanOption(page, "Has Allergies", "No");
+          await checkVisibility(page, "Allergy Notes", true);
+        });
 
-      await test.step("Fill required dependent, leave optional empty", async () => {
-        await fillStringField(page, "List Known Allergies", allergies);
-      });
+        await test.step("Fill required dependent, leave optional empty", async () => {
+          await fillStringField(page, "List Known Allergies", allergies);
+        });
 
-      await test.step("Form submits successfully", async () => {
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Form submits successfully", async () => {
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify submitted values on overview and optional absent", async () => {
-        await verifySubmittedValues(page, [allergies], ["Allergy Notes"]);
-      });
-    });
+        await test.step("Verify submitted values on overview and optional absent", async () => {
+          await verifySubmittedValues(page, [allergies], ["Allergy Notes"]);
+        });
+      },
+    );
 
-    test("T6: source answered then cleared → dependent hides → hidden data not on overview", async ({
-      page,
-    }) => {
-      const allergies = faker.lorem.words(3);
-      const allergyNotes = faker.lorem.sentence();
+    test(
+      "T6: source answered then cleared → dependent hides → hidden data not on overview",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        const allergies = faker.lorem.words(3);
+        const allergyNotes = faker.lorem.sentence();
 
-      await test.step("Select source — dependents appear", async () => {
-        await selectBooleanOption(page, "Has Allergies", "Yes");
-        await checkVisibility(page, "List Known Allergies", true);
-        await checkVisibility(page, "Allergy Notes", true);
-      });
+        await test.step("Select source — dependents appear", async () => {
+          await selectBooleanOption(page, "Has Allergies", "Yes");
+          await checkVisibility(page, "List Known Allergies", true);
+          await checkVisibility(page, "Allergy Notes", true);
+        });
 
-      await test.step("Fill dependents with data", async () => {
-        await fillStringField(page, "List Known Allergies", allergies);
-        await fillStringField(page, "Allergy Notes", allergyNotes);
-      });
+        await test.step("Fill dependents with data", async () => {
+          await fillStringField(page, "List Known Allergies", allergies);
+          await fillStringField(page, "Allergy Notes", allergyNotes);
+        });
 
-      await test.step("Clear source — dependents hide", async () => {
-        await clearBooleanField(page, "Has Allergies", "Yes");
-        await checkVisibility(page, "List Known Allergies", false);
-        await checkVisibility(page, "Allergy Notes", false);
-      });
+        await test.step("Clear source — dependents hide", async () => {
+          await clearBooleanField(page, "Has Allergies", "Yes");
+          await checkVisibility(page, "List Known Allergies", false);
+          await checkVisibility(page, "Allergy Notes", false);
+        });
 
-      await test.step("Fill other sources so form is submittable, then submit", async () => {
-        await selectBooleanOption(page, "Is Smoker", "No");
-        await selectBooleanOption(page, "Is Conscious", "Yes");
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Fill other sources so form is submittable, then submit", async () => {
+          await selectBooleanOption(page, "Is Smoker", "No");
+          await selectBooleanOption(page, "Is Conscious", "Yes");
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify hidden values not on overview", async () => {
-        await verifyLabelledValues(page, [
-          ["Is Smoker", "No"],
-          ["Is Conscious", "Yes"],
-        ]);
-        await verifySubmittedValues(page, [], [allergies, allergyNotes]);
-      });
-    });
+        await test.step("Verify hidden values not on overview", async () => {
+          await verifyLabelledValues(page, [
+            ["Is Smoker", "No"],
+            ["Is Conscious", "Yes"],
+          ]);
+          await verifySubmittedValues(page, [], [allergies, allergyNotes]);
+        });
+      },
+    );
   });
 
   // ──────────────────────────────────────────────
@@ -191,144 +205,162 @@ test.describe("Enable When — Boolean Operators", () => {
   // ──────────────────────────────────────────────
 
   test.describe("'equals' operator", () => {
-    test("T1: source = No → dependent hidden [required] → submits", async ({
-      page,
-    }) => {
-      await test.step("Select No — dependent stays hidden", async () => {
-        await selectBooleanOption(page, "Is Smoker", "No");
-        await checkVisibility(page, "Cigarettes Per Day", false);
-      });
+    test(
+      "T1: source = No → dependent hidden [required] → submits",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        await test.step("Select No — dependent stays hidden", async () => {
+          await selectBooleanOption(page, "Is Smoker", "No");
+          await checkVisibility(page, "Cigarettes Per Day", false);
+        });
 
-      await test.step("Fill other sources with safe values and submit", async () => {
-        await selectBooleanOption(page, "Is Conscious", "Yes");
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Fill other sources with safe values and submit", async () => {
+          await selectBooleanOption(page, "Is Conscious", "Yes");
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-        await verifyLabelledValues(page, [
-          ["Is Smoker", "No"],
-          ["Is Conscious", "Yes"],
-        ]);
-        await verifySubmittedValues(page, [], ["Cigarettes Per Day"]);
-      });
-    });
+        await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+          await verifyLabelledValues(page, [
+            ["Is Smoker", "No"],
+            ["Is Conscious", "Yes"],
+          ]);
+          await verifySubmittedValues(page, [], ["Cigarettes Per Day"]);
+        });
+      },
+    );
 
-    test("T2: source = No → dependent hidden [optional] → submits", async ({
-      page,
-    }) => {
-      await test.step("Select No — dependent stays hidden", async () => {
-        await selectBooleanOption(page, "Is Smoker", "No");
-        await checkVisibility(page, "Smoking Duration", false);
-      });
+    test(
+      "T2: source = No → dependent hidden [optional] → submits",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        await test.step("Select No — dependent stays hidden", async () => {
+          await selectBooleanOption(page, "Is Smoker", "No");
+          await checkVisibility(page, "Smoking Duration", false);
+        });
 
-      await test.step("Fill other sources with safe values and submit", async () => {
-        await selectBooleanOption(page, "Is Conscious", "Yes");
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Fill other sources with safe values and submit", async () => {
+          await selectBooleanOption(page, "Is Conscious", "Yes");
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-        await verifyLabelledValues(page, [
-          ["Is Smoker", "No"],
-          ["Is Conscious", "Yes"],
-        ]);
-        await verifySubmittedValues(page, [], ["Smoking Duration"]);
-      });
-    });
+        await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+          await verifyLabelledValues(page, [
+            ["Is Smoker", "No"],
+            ["Is Conscious", "Yes"],
+          ]);
+          await verifySubmittedValues(page, [], ["Smoking Duration"]);
+        });
+      },
+    );
 
-    test("T3: source = Yes → dependent visible [required] + empty → validation error", async ({
-      page,
-    }) => {
-      await test.step("Select Yes — dependent appears", async () => {
-        await selectBooleanOption(page, "Is Smoker", "Yes");
-        await checkVisibility(page, "Cigarettes Per Day", true);
-      });
+    test(
+      "T3: source = Yes → dependent visible [required] + empty → validation error",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        await test.step("Select Yes — dependent appears", async () => {
+          await selectBooleanOption(page, "Is Smoker", "Yes");
+          await checkVisibility(page, "Cigarettes Per Day", true);
+        });
 
-      await test.step("Submit without filling required dependent", async () => {
-        await submitForm(page);
-        await expectFieldError(page, "Cigarettes Per Day");
-      });
-    });
+        await test.step("Submit without filling required dependent", async () => {
+          await submitForm(page);
+          await expectFieldError(page, "Cigarettes Per Day");
+        });
+      },
+    );
 
-    test("T4: source = Yes → dependent visible [required] + filled → submits", async ({
-      page,
-    }) => {
-      const cigarettesPerDay = faker.number.int({ min: 1, max: 40 }).toString();
+    test(
+      "T4: source = Yes → dependent visible [required] + filled → submits",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        const cigarettesPerDay = faker.number
+          .int({ min: 1, max: 40 })
+          .toString();
 
-      await test.step("Select Yes and fill required dependent", async () => {
-        await selectBooleanOption(page, "Is Smoker", "Yes");
-        await checkVisibility(page, "Cigarettes Per Day", true);
-        await fillStringField(page, "Cigarettes Per Day", cigarettesPerDay);
-      });
+        await test.step("Select Yes and fill required dependent", async () => {
+          await selectBooleanOption(page, "Is Smoker", "Yes");
+          await checkVisibility(page, "Cigarettes Per Day", true);
+          await fillStringField(page, "Cigarettes Per Day", cigarettesPerDay);
+        });
 
-      await test.step("Form submits successfully", async () => {
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Form submits successfully", async () => {
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [cigarettesPerDay]);
-      });
-    });
+        await test.step("Verify submitted values on overview", async () => {
+          await verifySubmittedValues(page, [cigarettesPerDay]);
+        });
+      },
+    );
 
-    test("T5: source = Yes → dependent visible [optional] + empty → submits", async ({
-      page,
-    }) => {
-      const cigarettesPerDay = faker.number.int({ min: 1, max: 40 }).toString();
+    test(
+      "T5: source = Yes → dependent visible [optional] + empty → submits",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        const cigarettesPerDay = faker.number
+          .int({ min: 1, max: 40 })
+          .toString();
 
-      await test.step("Select Yes — optional dependent appears", async () => {
-        await selectBooleanOption(page, "Is Smoker", "Yes");
-        await checkVisibility(page, "Smoking Duration", true);
-      });
+        await test.step("Select Yes — optional dependent appears", async () => {
+          await selectBooleanOption(page, "Is Smoker", "Yes");
+          await checkVisibility(page, "Smoking Duration", true);
+        });
 
-      await test.step("Fill required dependent, leave optional empty", async () => {
-        await fillStringField(page, "Cigarettes Per Day", cigarettesPerDay);
-      });
+        await test.step("Fill required dependent, leave optional empty", async () => {
+          await fillStringField(page, "Cigarettes Per Day", cigarettesPerDay);
+        });
 
-      await test.step("Form submits successfully", async () => {
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Form submits successfully", async () => {
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify submitted values on overview and optional absent", async () => {
-        await verifySubmittedValues(
-          page,
-          [cigarettesPerDay],
-          ["Smoking Duration"],
-        );
-      });
-    });
+        await test.step("Verify submitted values on overview and optional absent", async () => {
+          await verifySubmittedValues(
+            page,
+            [cigarettesPerDay],
+            ["Smoking Duration"],
+          );
+        });
+      },
+    );
 
-    test("T6: source = Yes → changed to No → dependent hides → hidden data not on overview", async ({
-      page,
-    }) => {
-      const cigarettesPerDay = faker.number.int({ min: 1, max: 40 }).toString();
-      const smokingDuration = faker.lorem.words(2);
+    test(
+      "T6: source = Yes → changed to No → dependent hides → hidden data not on overview",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        const cigarettesPerDay = faker.number
+          .int({ min: 1, max: 40 })
+          .toString();
+        const smokingDuration = faker.lorem.words(2);
 
-      await test.step("Select Yes — dependents appear", async () => {
-        await selectBooleanOption(page, "Is Smoker", "Yes");
-        await checkVisibility(page, "Cigarettes Per Day", true);
-        await checkVisibility(page, "Smoking Duration", true);
-      });
+        await test.step("Select Yes — dependents appear", async () => {
+          await selectBooleanOption(page, "Is Smoker", "Yes");
+          await checkVisibility(page, "Cigarettes Per Day", true);
+          await checkVisibility(page, "Smoking Duration", true);
+        });
 
-      await test.step("Fill dependents with data", async () => {
-        await fillStringField(page, "Cigarettes Per Day", cigarettesPerDay);
-        await fillStringField(page, "Smoking Duration", smokingDuration);
-      });
+        await test.step("Fill dependents with data", async () => {
+          await fillStringField(page, "Cigarettes Per Day", cigarettesPerDay);
+          await fillStringField(page, "Smoking Duration", smokingDuration);
+        });
 
-      await test.step("Change source to No — dependents hide", async () => {
-        await selectBooleanOption(page, "Is Smoker", "No");
-        await checkVisibility(page, "Cigarettes Per Day", false);
-        await checkVisibility(page, "Smoking Duration", false);
-      });
+        await test.step("Change source to No — dependents hide", async () => {
+          await selectBooleanOption(page, "Is Smoker", "No");
+          await checkVisibility(page, "Cigarettes Per Day", false);
+          await checkVisibility(page, "Smoking Duration", false);
+        });
 
-      await test.step("Submit and verify hidden values not on overview", async () => {
-        await submitAndExpectSuccess(page);
-        await verifyLabelledValues(page, [["Is Smoker", "No"]]);
-        await verifySubmittedValues(
-          page,
-          [],
-          [cigarettesPerDay, smokingDuration],
-        );
-      });
-    });
+        await test.step("Submit and verify hidden values not on overview", async () => {
+          await submitAndExpectSuccess(page);
+          await verifyLabelledValues(page, [["Is Smoker", "No"]]);
+          await verifySubmittedValues(
+            page,
+            [],
+            [cigarettesPerDay, smokingDuration],
+          );
+        });
+      },
+    );
   });
 
   // ──────────────────────────────────────────────
@@ -338,139 +370,151 @@ test.describe("Enable When — Boolean Operators", () => {
   // ──────────────────────────────────────────────
 
   test.describe("'not_equals' operator", () => {
-    test("T1: source = Yes → dependent hidden [required] → submits", async ({
-      page,
-    }) => {
-      await test.step("Select Yes — dependent stays hidden", async () => {
-        await selectBooleanOption(page, "Is Conscious", "Yes");
-        await checkVisibility(page, "Reason for Unconsciousness", false);
-      });
+    test(
+      "T1: source = Yes → dependent hidden [required] → submits",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        await test.step("Select Yes — dependent stays hidden", async () => {
+          await selectBooleanOption(page, "Is Conscious", "Yes");
+          await checkVisibility(page, "Reason for Unconsciousness", false);
+        });
 
-      await test.step("Fill other sources with safe values and submit", async () => {
-        await selectBooleanOption(page, "Is Smoker", "No");
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Fill other sources with safe values and submit", async () => {
+          await selectBooleanOption(page, "Is Smoker", "No");
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-        await verifyLabelledValues(page, [
-          ["Is Conscious", "Yes"],
-          ["Is Smoker", "No"],
-        ]);
-        await verifySubmittedValues(page, [], ["Reason for Unconsciousness"]);
-      });
-    });
+        await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+          await verifyLabelledValues(page, [
+            ["Is Conscious", "Yes"],
+            ["Is Smoker", "No"],
+          ]);
+          await verifySubmittedValues(page, [], ["Reason for Unconsciousness"]);
+        });
+      },
+    );
 
-    test("T2: source = Yes → dependent hidden [optional] → submits", async ({
-      page,
-    }) => {
-      await test.step("Select Yes — dependent stays hidden", async () => {
-        await selectBooleanOption(page, "Is Conscious", "Yes");
-        await checkVisibility(page, "Additional Observations", false);
-      });
+    test(
+      "T2: source = Yes → dependent hidden [optional] → submits",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        await test.step("Select Yes — dependent stays hidden", async () => {
+          await selectBooleanOption(page, "Is Conscious", "Yes");
+          await checkVisibility(page, "Additional Observations", false);
+        });
 
-      await test.step("Fill other sources with safe values and submit", async () => {
-        await selectBooleanOption(page, "Is Smoker", "No");
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Fill other sources with safe values and submit", async () => {
+          await selectBooleanOption(page, "Is Smoker", "No");
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-        await verifyLabelledValues(page, [
-          ["Is Conscious", "Yes"],
-          ["Is Smoker", "No"],
-        ]);
-        await verifySubmittedValues(page, [], ["Additional Observations"]);
-      });
-    });
+        await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+          await verifyLabelledValues(page, [
+            ["Is Conscious", "Yes"],
+            ["Is Smoker", "No"],
+          ]);
+          await verifySubmittedValues(page, [], ["Additional Observations"]);
+        });
+      },
+    );
 
-    test("T3: source = No → dependent visible [required] + empty → validation error", async ({
-      page,
-    }) => {
-      await test.step("Select No — dependent appears", async () => {
-        await selectBooleanOption(page, "Is Conscious", "No");
-        await checkVisibility(page, "Reason for Unconsciousness", true);
-      });
+    test(
+      "T3: source = No → dependent visible [required] + empty → validation error",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        await test.step("Select No — dependent appears", async () => {
+          await selectBooleanOption(page, "Is Conscious", "No");
+          await checkVisibility(page, "Reason for Unconsciousness", true);
+        });
 
-      await test.step("Submit without filling required dependent", async () => {
-        await submitForm(page);
-        await expectFieldError(page, "Reason for Unconsciousness");
-      });
-    });
+        await test.step("Submit without filling required dependent", async () => {
+          await submitForm(page);
+          await expectFieldError(page, "Reason for Unconsciousness");
+        });
+      },
+    );
 
-    test("T4: source = No → dependent visible [required] + filled → submits", async ({
-      page,
-    }) => {
-      const reason = faker.lorem.words(3);
+    test(
+      "T4: source = No → dependent visible [required] + filled → submits",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        const reason = faker.lorem.words(3);
 
-      await test.step("Select No and fill required dependent", async () => {
-        await selectBooleanOption(page, "Is Conscious", "No");
-        await checkVisibility(page, "Reason for Unconsciousness", true);
-        await fillStringField(page, "Reason for Unconsciousness", reason);
-      });
+        await test.step("Select No and fill required dependent", async () => {
+          await selectBooleanOption(page, "Is Conscious", "No");
+          await checkVisibility(page, "Reason for Unconsciousness", true);
+          await fillStringField(page, "Reason for Unconsciousness", reason);
+        });
 
-      await test.step("Form submits successfully", async () => {
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Form submits successfully", async () => {
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [reason]);
-      });
-    });
+        await test.step("Verify submitted values on overview", async () => {
+          await verifySubmittedValues(page, [reason]);
+        });
+      },
+    );
 
-    test("T5: source = No → dependent visible [optional] + empty → submits", async ({
-      page,
-    }) => {
-      const reason = faker.lorem.words(3);
+    test(
+      "T5: source = No → dependent visible [optional] + empty → submits",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        const reason = faker.lorem.words(3);
 
-      await test.step("Select No — optional dependent appears", async () => {
-        await selectBooleanOption(page, "Is Conscious", "No");
-        await checkVisibility(page, "Additional Observations", true);
-      });
+        await test.step("Select No — optional dependent appears", async () => {
+          await selectBooleanOption(page, "Is Conscious", "No");
+          await checkVisibility(page, "Additional Observations", true);
+        });
 
-      await test.step("Fill required dependent, leave optional empty", async () => {
-        await fillStringField(page, "Reason for Unconsciousness", reason);
-      });
+        await test.step("Fill required dependent, leave optional empty", async () => {
+          await fillStringField(page, "Reason for Unconsciousness", reason);
+        });
 
-      await test.step("Form submits successfully", async () => {
-        await submitAndExpectSuccess(page);
-      });
+        await test.step("Form submits successfully", async () => {
+          await submitAndExpectSuccess(page);
+        });
 
-      await test.step("Verify submitted values on overview and optional absent", async () => {
-        await verifySubmittedValues(
-          page,
-          [reason],
-          ["Additional Observations"],
-        );
-      });
-    });
+        await test.step("Verify submitted values on overview and optional absent", async () => {
+          await verifySubmittedValues(
+            page,
+            [reason],
+            ["Additional Observations"],
+          );
+        });
+      },
+    );
 
-    test("T6: source = No → changed to Yes → dependent hides → hidden data not on overview", async ({
-      page,
-    }) => {
-      const reason = faker.lorem.words(3);
-      const observations = faker.lorem.sentence();
+    test(
+      "T6: source = No → changed to Yes → dependent hides → hidden data not on overview",
+      { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+      async ({ page }) => {
+        const reason = faker.lorem.words(3);
+        const observations = faker.lorem.sentence();
 
-      await test.step("Select No — dependents appear", async () => {
-        await selectBooleanOption(page, "Is Conscious", "No");
-        await checkVisibility(page, "Reason for Unconsciousness", true);
-        await checkVisibility(page, "Additional Observations", true);
-      });
+        await test.step("Select No — dependents appear", async () => {
+          await selectBooleanOption(page, "Is Conscious", "No");
+          await checkVisibility(page, "Reason for Unconsciousness", true);
+          await checkVisibility(page, "Additional Observations", true);
+        });
 
-      await test.step("Fill dependents with data", async () => {
-        await fillStringField(page, "Reason for Unconsciousness", reason);
-        await fillStringField(page, "Additional Observations", observations);
-      });
+        await test.step("Fill dependents with data", async () => {
+          await fillStringField(page, "Reason for Unconsciousness", reason);
+          await fillStringField(page, "Additional Observations", observations);
+        });
 
-      await test.step("Change source to Yes — dependents hide", async () => {
-        await selectBooleanOption(page, "Is Conscious", "Yes");
-        await checkVisibility(page, "Reason for Unconsciousness", false);
-        await checkVisibility(page, "Additional Observations", false);
-      });
+        await test.step("Change source to Yes — dependents hide", async () => {
+          await selectBooleanOption(page, "Is Conscious", "Yes");
+          await checkVisibility(page, "Reason for Unconsciousness", false);
+          await checkVisibility(page, "Additional Observations", false);
+        });
 
-      await test.step("Submit and verify hidden values not on overview", async () => {
-        await submitAndExpectSuccess(page);
-        await verifyLabelledValues(page, [["Is Conscious", "Yes"]]);
-        await verifySubmittedValues(page, [], [reason, observations]);
-      });
-    });
+        await test.step("Submit and verify hidden values not on overview", async () => {
+          await submitAndExpectSuccess(page);
+          await verifyLabelledValues(page, [["Is Conscious", "Yes"]]);
+          await verifySubmittedValues(page, [], [reason, observations]);
+        });
+      },
+    );
   });
 });

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { openServiceLocation } from "tests/facility/services/helpers";
+import { openServiceLocation } from "tests/helper/healthcareService";
 import {
   createQuestionnaireEncounter,
   submitAndExpectSuccess,
@@ -99,36 +99,44 @@ test.describe("Prescriptions preview search params", () => {
   const statusSelect = (page: Page) =>
     filterSelectButton(page, "Dispense Status");
 
-  test("writes the medication search and the status to the URL", async ({
-    page,
-  }) => {
-    await page.goto(previewUrl);
-    await expect(statusSelect(page)).toContainText("All");
+  test(
+    "writes the medication search and the status to the URL",
+    { tag: ["@atomic", "@cap:inventory.prescription.filter"] },
+    async ({ page }) => {
+      await page.goto(previewUrl);
+      await expect(statusSelect(page)).toContainText("All");
 
-    await searchBox(page).fill("para");
-    await expect(page).toHaveURL(/[?&]search=para(&|$)/);
+      await searchBox(page).fill("para");
+      await expect(page).toHaveURL(/[?&]search=para(&|$)/);
 
-    await statusSelect(page).click();
-    await page
-      .getByRole("menuitemradio", { name: "Partial", exact: true })
-      .click();
-    await expect(page).toHaveURL(/[?&]status=partial(&|$)/);
-    await expect(statusSelect(page)).toContainText("Partial");
-  });
+      await statusSelect(page).click();
+      await page
+        .getByRole("menuitemradio", { name: "Partial", exact: true })
+        .click();
+      await expect(page).toHaveURL(/[?&]status=partial(&|$)/);
+      await expect(statusSelect(page)).toContainText("Partial");
+    },
+  );
 
-  test("restores the search and the status from a bookmarked URL", async ({
-    page,
-  }) => {
-    await page.goto(`${previewUrl}?search=para&status=complete`);
+  test(
+    "restores the search and the status from a bookmarked URL",
+    { tag: ["@atomic", "@cap:inventory.prescription.filter"] },
+    async ({ page }) => {
+      await page.goto(`${previewUrl}?search=para&status=complete`);
 
-    await expect(searchBox(page)).toHaveValue("para");
-    await expect(statusSelect(page)).toContainText("Complete");
-  });
+      await expect(searchBox(page)).toHaveValue("para");
+      await expect(statusSelect(page)).toContainText("Complete");
+    },
+  );
 
-  test("ignores an invalid status", async ({ page }) => {
-    await page.goto(`${previewUrl}?status=bogus`);
+  test(
+    "ignores an invalid status",
+    { tag: ["@atomic", "@cap:inventory.prescription.filter"] },
+    async ({ page }) => {
+      await page.goto(`${previewUrl}?status=bogus`);
 
-    await expect(statusSelect(page)).toContainText("All");
-    await expect(page).not.toHaveURL(/status=/);
-  });
+      await expect(statusSelect(page)).toContainText("All");
+      await expect(page).not.toHaveURL(/status=/);
+    },
+  );
 });

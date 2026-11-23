@@ -1,11 +1,20 @@
 import { expect, test, type Page } from "@playwright/test";
 import { addDays } from "date-fns";
+import {
+  changeEncounterStatusViaUi,
+  completeEncounterFromActions,
+  encounterStatusCombobox,
+  openEncounterUpdateForm,
+  saveEncounterUpdateForm,
+  selectEncounterClosingStatus,
+  selectEncounterStatus,
+} from "tests/helper/encounter";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
 import { expectAndDismissToast, expectToast } from "tests/helper/ui";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
-import type { EncounterRead } from "@/types/emr/encounter/encounter";
+import type { EncounterRead } from "../../../../src/types/emr/encounter/encounter";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -29,45 +38,7 @@ async function createPlannedEncounter(
   await page.goto(
     `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
   );
-}
-
-// The update form's label isn't associated with its SelectTrigger yet.
-function encounterStatusCombobox(page: Page) {
-  return page
-    .locator('label[data-slot="label"]')
-    .filter({ hasText: /^Encounter Status$/ })
-    .locator("..")
-    .getByRole("combobox");
-}
-
-async function openEncounterUpdateForm(page: Page) {
-  // The encounter header's edit link opens the encounter update form.
-  await page.getByRole("link", { name: "Edit encounter", exact: true }).click();
-  await expect(encounterStatusCombobox(page)).toBeVisible();
-}
-
-async function changeStatus(page: Page, status: string) {
-  await encounterStatusCombobox(page).click();
-  await page.getByRole("option", { name: status, exact: true }).click();
-}
-
-async function selectClosingStatus(page: Page, status: string) {
-  if (status === "Discharged") {
-    await page.getByRole("button", { name: "Mark for discharge" }).click();
-    await page
-      .locator('label[data-slot="label"]')
-      .filter({ hasText: /^Discharge Disposition/ })
-      .locator("..")
-      .getByRole("combobox")
-      .click();
-    await page.getByRole("option", { name: "Home", exact: true }).click();
-  } else {
-    await changeStatus(page, status);
-  }
-}
-
-async function submitQuestionnaire(page: Page) {
-  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  return { facilityId, patientId, encounterId };
 }
 
 // Closes the toast too: a test that saves the form again (the cleanup
@@ -77,8 +48,8 @@ async function expectSubmissionSuccess(page: Page) {
 }
 
 async function cancelEncounterFromCurrentForm(page: Page) {
-  await changeStatus(page, "Cancelled");
-  await submitQuestionnaire(page);
+  await selectEncounterStatus(page, "Cancelled");
+  await saveEncounterUpdateForm(page);
   await expectSubmissionSuccess(page);
 }
 
@@ -130,22 +101,24 @@ test.describe("Planned Encounter Status Transition", () => {
   ]) {
     for (const start of ["past", "future"] as const) {
       for (const pendingEnd of [false, true]) {
-        test(`${label} with a ${start} start ${pendingEnd ? "clears the pending end date" : "has no end date"}`, async ({
-          page,
-        }) => {
-          await test.step("Create a planned encounter and open the update form", async () => {
-            await createPlannedEncounter(page, start);
-            await openEncounterUpdateForm(page);
-            if (pendingEnd) await changeStatus(page, "Discontinued");
-          });
+        test(
+          `${label} with a ${start} start ${pendingEnd ? "clears the pending end date" : "has no end date"}`,
+          { tag: ["@atomic", "@cap:encounter.status.transition"] },
+          async ({ page }) => {
+            await test.step("Create a planned encounter and open the update form", async () => {
+              await createPlannedEncounter(page, start);
+              await openEncounterUpdateForm(page);
+              if (pendingEnd) await selectEncounterStatus(page, "Discontinued");
+            });
 
-          await test.step(`Select ${label} and verify the persisted period`, async () => {
-            await changeStatus(page, label);
-            await submitQuestionnaire(page);
-            await expectSubmissionSuccess(page);
-            await expectPersistedPeriod(page, status);
-          });
-        });
+            await test.step(`Select ${label} and verify the persisted period`, async () => {
+              await selectEncounterStatus(page, label);
+              await saveEncounterUpdateForm(page);
+              await expectSubmissionSuccess(page);
+              await expectPersistedPeriod(page, status);
+            });
+          },
+        );
       }
     }
   }
@@ -155,103 +128,104 @@ test.describe("Planned Encounter Status Transition", () => {
     ["In Progress", "in_progress"],
     ["On Hold", "on_hold"],
   ]) {
-    test(`${label} clears the pending end date of a future encounter`, async ({
-      page,
-    }) => {
-      await test.step("Switch from Discontinued before saving", async () => {
-        await createPlannedEncounter(page, "future");
-        await openEncounterUpdateForm(page);
-        await changeStatus(page, "Discontinued");
-        await changeStatus(page, label);
-        await submitQuestionnaire(page);
-        await expectSubmissionSuccess(page);
-        await expectPersistedPeriod(page, status);
-      });
+    test(
+      `${label} clears the pending end date of a future encounter`,
+      { tag: ["@atomic", "@cap:encounter.status.transition"] },
+      async ({ page }) => {
+        const encounter =
+          await test.step("Switch from Discontinued before saving", async () => {
+            const created = await createPlannedEncounter(page, "future");
+            await openEncounterUpdateForm(page);
+            await selectEncounterStatus(page, "Discontinued");
+            await selectEncounterStatus(page, label);
+            await saveEncounterUpdateForm(page);
+            await expectSubmissionSuccess(page);
+            await expectPersistedPeriod(page, status);
+            return created;
+          });
 
-      await test.step("Cleanup: cancel the live encounter", async () => {
-        await openEncounterUpdateForm(page);
-        await cancelEncounterFromCurrentForm(page);
-      });
-    });
+        await test.step("Cleanup: cancel the live encounter", async () => {
+          await changeEncounterStatusViaUi(page, {
+            ...encounter,
+            status: "Cancelled",
+          });
+        });
+      },
+    );
   }
 
   for (const [label, status] of [
     ["Discharged", "discharged"],
     ["Discontinued", "discontinued"],
   ]) {
-    test(`${label} sets an end date for a past encounter`, async ({ page }) => {
-      const closed =
-        await test.step("Close an encounter with a valid period", async () => {
-          await createPlannedEncounter(
-            page,
-            "past",
-            label === "Discharged" ? "Inpatient" : "Ambulatory",
-          );
-          await openEncounterUpdateForm(page);
-          await selectClosingStatus(page, label);
-          await submitQuestionnaire(page);
-          await expectSubmissionSuccess(page);
-          return expectPersistedPeriod(page, status, true);
-        });
+    test(
+      `${label} sets an end date for a past encounter`,
+      { tag: ["@atomic", "@cap:encounter.status.transition"] },
+      async ({ page }) => {
+        const closed =
+          await test.step("Close an encounter with a valid period", async () => {
+            await createPlannedEncounter(
+              page,
+              "past",
+              label === "Discharged" ? "Inpatient" : "Ambulatory",
+            );
+            await openEncounterUpdateForm(page);
+            await selectEncounterClosingStatus(page, label);
+            await saveEncounterUpdateForm(page);
+            await expectSubmissionSuccess(page);
+            return expectPersistedPeriod(page, status, true);
+          });
 
-      if (status === "discharged") {
-        await test.step("Complete the discharged encounter without changing its end date", async () => {
-          await page.getByRole("tab", { name: "Actions", exact: true }).click();
-          // The page also renders an sr-only "Mark as Completed" button as
-          // its keyboard-shortcut target; click the one in the Actions tab.
-          await page
-            .getByRole("tabpanel", { name: "Actions", exact: true })
-            .getByRole("button", { name: "Mark as Completed" })
-            .click();
-          await page
-            .getByRole("alertdialog", { name: "Mark as Complete" })
-            .getByRole("button", { name: /^Mark as Complete/ })
-            .click();
-          await expect(
-            page.getByText("Encounter Completed", { exact: true }),
-          ).toBeVisible();
-          const completed = await expectPersistedPeriod(
-            page,
-            "completed",
-            true,
-          );
-          expect(completed.period).toEqual(closed.period);
-        });
-      }
-    });
+        if (status === "discharged") {
+          await test.step("Complete the discharged encounter without changing its end date", async () => {
+            await completeEncounterFromActions(page);
+            const completed = await expectPersistedPeriod(
+              page,
+              "completed",
+              true,
+            );
+            expect(completed.period).toEqual(closed.period);
+          });
+        }
+      },
+    );
   }
 
   for (const status of ["Discharged", "Discontinued"]) {
-    test(`blocks a future Planned encounter from transitioning to ${status} with a period error`, async ({
-      page,
-    }) => {
-      await test.step("Attempt a closing status with an invalid period", async () => {
-        await createPlannedEncounter(
-          page,
-          "future",
-          status === "Discharged" ? "Inpatient" : "Ambulatory",
-        );
-        await openEncounterUpdateForm(page);
-        await selectClosingStatus(page, status);
-        await submitQuestionnaire(page);
-        await expectToast(page, "Failed to submit questionnaire");
-        await expect(
-          page.locator('[data-slot="alert"]').getByText(VALIDATION_ERROR_TEXT),
-        ).toBeVisible();
-      });
+    test(
+      `blocks a future Planned encounter from transitioning to ${status} with a period error`,
+      { tag: ["@atomic", "@cap:encounter.status.transition"] },
+      async ({ page }) => {
+        await test.step("Attempt a closing status with an invalid period", async () => {
+          await createPlannedEncounter(
+            page,
+            "future",
+            status === "Discharged" ? "Inpatient" : "Ambulatory",
+          );
+          await openEncounterUpdateForm(page);
+          await selectEncounterClosingStatus(page, status);
+          await saveEncounterUpdateForm(page);
+          await expectToast(page, "Failed to submit questionnaire");
+          await expect(
+            page
+              .locator('[data-slot="alert"]')
+              .getByText(VALIDATION_ERROR_TEXT),
+          ).toBeVisible();
+        });
 
-      await test.step("Cleanup: cancel the unchanged planned encounter", async () => {
-        // Discharged disables the status picker. Reload the unchanged backend
-        // state, then discard the failed attempt's local draft: saving is
-        // blocked until a restored draft is resumed or discarded.
-        await page.reload();
-        await page
-          .getByRole("button", { name: "Discard", exact: true })
-          .click();
-        await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
-        await expect(encounterStatusCombobox(page)).toContainText("Planned");
-        await cancelEncounterFromCurrentForm(page);
-      });
-    });
+        await test.step("Cleanup: cancel the unchanged planned encounter", async () => {
+          // Discharged disables the status picker. Reload the unchanged backend
+          // state, then discard the failed attempt's local draft: saving is
+          // blocked until a restored draft is resumed or discarded.
+          await page.reload();
+          await page
+            .getByRole("button", { name: "Discard", exact: true })
+            .click();
+          await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
+          await expect(encounterStatusCombobox(page)).toContainText("Planned");
+          await cancelEncounterFromCurrentForm(page);
+        });
+      },
+    );
   }
 });

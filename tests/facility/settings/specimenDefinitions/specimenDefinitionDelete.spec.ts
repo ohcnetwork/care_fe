@@ -5,6 +5,7 @@ import {
   STATUS_OPTIONS,
   typeCollectedOptions,
 } from "tests/facility/settings/specimenDefinitions/specimenDefinitionConstants";
+import { createSpecimenDefinitionViaUi } from "tests/helper/definitions";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -18,7 +19,7 @@ test.describe("Specimen Definitions Delete", () => {
   let status: string;
   let typeCollected: string;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(() => {
     facilityId = getFacilityId();
     definitionTitle = faker.company.name();
     definitionDescription = faker.lorem.sentence();
@@ -28,67 +29,64 @@ test.describe("Specimen Definitions Delete", () => {
     definitionSlug = `${faker.science.chemicalElement().symbol.toLowerCase()}-${randomHex}`;
     status = faker.helpers.arrayElement(STATUS_OPTIONS);
     typeCollected = faker.helpers.arrayElement(typeCollectedOptions);
-
-    const targetUrl = `/facility/${facilityId}/settings/specimen_definitions`;
-    await page.goto(targetUrl);
   });
 
-  test("should be able to delete specimen definition", async ({ page }) => {
-    await page.getByRole("button", { name: "Add Definition" }).click();
+  test(
+    "should be able to delete specimen definition",
+    { tag: ["@atomic", "@cap:definition.specimen.delete"] },
+    async ({ page }) => {
+      await createSpecimenDefinitionViaUi(page, {
+        facilityId,
+        title: definitionTitle,
+        slug: definitionSlug,
+        description: definitionDescription,
+        status,
+        typeCollected,
+      });
 
-    await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
-    await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);
-    await page
-      .getByRole("textbox", { name: "Description *" })
-      .fill(definitionDescription);
-    await page.getByRole("combobox", { name: "Status *" }).click();
-    await page.getByRole("option", { name: status }).click();
+      // Apply status filter before searching
+      await page.getByRole("button", { name: /^Status/ }).click();
+      await page
+        .getByRole("menuitemradio", { name: status.toLowerCase() })
+        .click();
 
-    await page.getByRole("combobox", { name: "Type Collected *" }).click();
-    await page.getByRole("option", { name: typeCollected }).click();
+      // Search for the newly created definition
+      await page
+        .getByRole("textbox", { name: "Search definitions" })
+        .fill(definitionTitle);
 
-    await page.getByRole("button", { name: /save/i }).click();
+      await page.getByRole("link", { name: /view/i }).first().click();
 
-    // Apply status filter before searching
-    await page.getByRole("button", { name: /^Status/ }).click();
-    await page
-      .getByRole("menuitemradio", { name: status.toLowerCase() })
-      .click();
+      // Click Delete button
+      await page.getByRole("button", { name: /delete/i }).click();
 
-    // Search for the newly created definition
-    await page
-      .getByRole("textbox", { name: "Search definitions" })
-      .fill(definitionTitle);
+      // Confirm deletion in the dialog
+      await page.getByRole("button", { name: /confirm/i }).click();
 
-    await page.getByRole("link", { name: /view/i }).first().click();
+      // Wait for table to be loaded
+      const tableBody = page.locator('[data-slot="table-body"]');
+      await expect(tableBody).toBeVisible();
 
-    // Click Delete button
-    await page.getByRole("button", { name: /delete/i }).click();
+      // Filter by retired status
+      await page.getByRole("button", { name: /^Status/ }).click();
+      await page
+        .getByRole("menuitemradio", { name: DELETED_STATUS, exact: true })
+        .click();
 
-    // Confirm deletion in the dialog
-    await page.getByRole("button", { name: /confirm/i }).click();
+      // Wait for filter to apply
+      await expect(page).toHaveURL(/status=retired/);
 
-    // Wait for table to be loaded
-    const tableBody = page.locator('[data-slot="table-body"]');
-    await expect(tableBody).toBeVisible();
+      // Search for the deleted definition
+      await page
+        .getByRole("textbox", { name: "Search definitions" })
+        .fill(definitionTitle);
+      await page.getByRole("link", { name: /view/i }).first().click();
 
-    // Filter by retired status
-    await page.getByRole("button", { name: /^Status/ }).click();
-    await page
-      .getByRole("menuitemradio", { name: DELETED_STATUS, exact: true })
-      .click();
-
-    // Wait for filter to apply
-    await expect(page).toHaveURL(/status=retired/);
-
-    // Search for the deleted definition
-    await page
-      .getByRole("textbox", { name: "Search definitions" })
-      .fill(definitionTitle);
-    await page.getByRole("link", { name: /view/i }).first().click();
-
-    // Verify the definition exists with retired status
-    await expect(page.getByText(definitionTitle)).toBeVisible();
-    await expect(page.getByText(DELETED_STATUS, { exact: true })).toBeVisible();
-  });
+      // Verify the definition exists with retired status
+      await expect(page.getByText(definitionTitle)).toBeVisible();
+      await expect(
+        page.getByText(DELETED_STATUS, { exact: true }),
+      ).toBeVisible();
+    },
+  );
 });

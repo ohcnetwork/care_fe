@@ -1,9 +1,14 @@
-import { type Page, expect, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import {
+  trackBatchRequests,
+  waitForBatchResponse,
+} from "tests/helper/questionnaire";
 import { questionBlock } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
+import { expect, test } from "tests/support/test";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -28,22 +33,14 @@ function sizeError(fileName: string) {
   return `${fileName} is larger than the ${MAX_FILE_UPLOAD_SIZE_MB} MB limit`;
 }
 
-function trackBatchRequests(page: Page): string[] {
-  const urls: string[] = [];
-  page.on("request", (request) => {
-    if (
-      request.method() === "POST" &&
-      request.url().includes("/api/v1/batch_requests/")
-    ) {
-      urls.push(request.url());
-    }
-  });
-  return urls;
-}
-
-async function openFilesQuestion(page: Page) {
+/** Opens the fixed `files` form — on the shared fixture encounter unless
+ *  the test passes its own (any test that uploads must). */
+async function openFilesQuestion(
+  page: Page,
+  { patientId = getPatientId(), encounterId = getEncounterId() } = {},
+) {
   await page.goto(
-    `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/files`,
+    `/facility/${getFacilityId()}/patient/${patientId}/encounter/${encounterId}/questionnaire/files`,
   );
   const block = questionBlock(page, "Files");
   await expect(block).toBeVisible();
@@ -51,84 +48,84 @@ async function openFilesQuestion(page: Page) {
 }
 
 test.describe("Files question size limit", () => {
-  test("flags a file over the limit when it is picked and blocks submit without uploading", async ({
-    page,
-  }) => {
-    const posts = trackBatchRequests(page);
-    const block = await openFilesQuestion(page);
-    const nameInputs = block.getByPlaceholder("File Name", { exact: true });
-    const overLimitError = block.getByText(sizeError("over-limit.txt"), {
-      exact: true,
-    });
+  test(
+    "flags a file over the limit when it is picked and blocks submit without uploading",
+    { tag: ["@atomic", "@cap:questionnaire.structured.files.upload"] },
+    async ({ page }) => {
+      const posts = trackBatchRequests(page);
+      const block = await openFilesQuestion(page);
+      const nameInputs = block.getByPlaceholder("File Name", { exact: true });
+      const overLimitError = block.getByText(sizeError("over-limit.txt"), {
+        exact: true,
+      });
 
-    await test.step("Attach one file just over the limit and one under it", async () => {
+      await test.step("Attach one file just over the limit and one under it", async () => {
+        await block
+          .locator('input[type="file"]')
+          .setInputFiles([
+            textFile("over-limit.txt", MAX_FILE_UPLOAD_SIZE_BYTES + 1),
+            textFile("under-limit.txt", 1024),
+          ]);
+        await expect(nameInputs).toHaveCount(2);
+      });
+
+      await test.step("Only the over-limit file is flagged", async () => {
+        await expect(overLimitError).toBeVisible();
+        await expect(nameInputs.nth(0)).toHaveAccessibleDescription(
+          sizeError("over-limit.txt"),
+        );
+        await expect(nameInputs.nth(1)).toHaveAccessibleDescription("");
+        await expect(
+          block.getByText(sizeError("under-limit.txt"), { exact: true }),
+        ).toHaveCount(0);
+      });
+
+      await test.step("Submit is blocked and the error is shown once", async () => {
+        await nameInputs.nth(0).fill("Over limit");
+        await nameInputs.nth(1).fill("Under limit");
+        await page.getByRole("button", { name: "Save Changes" }).click();
+        await expectToast(page, "Validation failed");
+        // The question lists its errors after a submit attempt; the inline
+        // copy under the row is hidden then, so the message is not repeated.
+        await expect(overLimitError).toHaveCount(1);
+        expect(
+          posts,
+          "no /api/v1/batch_requests/ POST may fire while a file is over the limit",
+        ).toHaveLength(0);
+      });
+
+      await test.step("Removing the over-limit file clears the error", async () => {
+        await nameInputs.nth(0).locator("xpath=..").getByRole("button").click();
+        await expect(nameInputs).toHaveCount(1);
+        await expect(nameInputs.first()).toHaveValue("Under limit");
+        await expect(overLimitError).toHaveCount(0);
+      });
+    },
+  );
+
+  test(
+    "accepts a file exactly at the limit and submits it",
+    { tag: ["@atomic", "@cap:questionnaire.structured.files.upload"] },
+    async ({ page, isolatedEncounter }) => {
+      test.slow();
+      const block = await openFilesQuestion(page, isolatedEncounter);
+      const nameInputs = block.getByPlaceholder("File Name", { exact: true });
+
       await block
         .locator('input[type="file"]')
-        .setInputFiles([
-          textFile("over-limit.txt", MAX_FILE_UPLOAD_SIZE_BYTES + 1),
-          textFile("under-limit.txt", 1024),
-        ]);
-      await expect(nameInputs).toHaveCount(2);
-    });
-
-    await test.step("Only the over-limit file is flagged", async () => {
-      await expect(overLimitError).toBeVisible();
-      await expect(nameInputs.nth(0)).toHaveAccessibleDescription(
-        sizeError("over-limit.txt"),
-      );
-      await expect(nameInputs.nth(1)).toHaveAccessibleDescription("");
-      await expect(
-        block.getByText(sizeError("under-limit.txt"), { exact: true }),
-      ).toHaveCount(0);
-    });
-
-    await test.step("Submit is blocked and the error is shown once", async () => {
-      await nameInputs.nth(0).fill("Over limit");
-      await nameInputs.nth(1).fill("Under limit");
-      await page.getByRole("button", { name: "Save Changes" }).click();
-      await expectToast(page, "Validation failed");
-      // The question lists its errors after a submit attempt; the inline
-      // copy under the row is hidden then, so the message is not repeated.
-      await expect(overLimitError).toHaveCount(1);
-      expect(
-        posts,
-        "no /api/v1/batch_requests/ POST may fire while a file is over the limit",
-      ).toHaveLength(0);
-    });
-
-    await test.step("Removing the over-limit file clears the error", async () => {
-      await nameInputs.nth(0).locator("xpath=..").getByRole("button").click();
+        .setInputFiles(textFile("at-limit.txt", MAX_FILE_UPLOAD_SIZE_BYTES));
       await expect(nameInputs).toHaveCount(1);
-      await expect(nameInputs.first()).toHaveValue("Under limit");
-      await expect(overLimitError).toHaveCount(0);
-    });
-  });
+      await expect(
+        block.getByText(sizeError("at-limit.txt"), { exact: true }),
+      ).toHaveCount(0);
+      await expect(nameInputs.first()).toHaveAccessibleDescription("");
 
-  test("accepts a file exactly at the limit and submits it", async ({
-    page,
-  }) => {
-    test.slow();
-    const block = await openFilesQuestion(page);
-    const nameInputs = block.getByPlaceholder("File Name", { exact: true });
-
-    await block
-      .locator('input[type="file"]')
-      .setInputFiles(textFile("at-limit.txt", MAX_FILE_UPLOAD_SIZE_BYTES));
-    await expect(nameInputs).toHaveCount(1);
-    await expect(
-      block.getByText(sizeError("at-limit.txt"), { exact: true }),
-    ).toHaveCount(0);
-    await expect(nameInputs.first()).toHaveAccessibleDescription("");
-
-    await nameInputs.first().fill("At limit");
-    const batchResponse = page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/v1/batch_requests/") &&
-        response.request().method() === "POST",
-    );
-    await page.getByRole("button", { name: "Save Changes" }).click();
-    // The backend accepts the same boundary the frontend allows.
-    expect((await batchResponse).ok()).toBe(true);
-    await expectToast(page, "Questionnaire submitted successfully");
-  });
+      await nameInputs.first().fill("At limit");
+      const batchResponse = waitForBatchResponse(page);
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      // The backend accepts the same boundary the frontend allows.
+      expect((await batchResponse).ok()).toBe(true);
+      await expectToast(page, "Questionnaire submitted successfully");
+    },
+  );
 });

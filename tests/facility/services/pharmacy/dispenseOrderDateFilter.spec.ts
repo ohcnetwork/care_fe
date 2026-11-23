@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   openServiceLocation,
   waitForListRequest,
-} from "tests/facility/services/helpers";
+} from "tests/helper/healthcareService";
 import {
   applyCustomDateFilterRange,
   applyDateFilterPreset,
@@ -119,153 +119,177 @@ for (const { timezoneId, range, singleDay } of TIMEZONES) {
   test.describe(`Dispense order date filter in ${timezoneId}`, () => {
     test.use({ timezoneId });
 
-    test("includes the whole last day of a bookmarked range", async ({
-      page,
-    }) => {
-      const request = waitForDateBounds(page, range);
-      await page.goto(
-        listUrl({
-          created_date_after: "2026-01-10",
-          created_date_before: "2026-01-13",
-        }),
-      );
-      await request;
-    });
+    test(
+      "includes the whole last day of a bookmarked range",
+      { tag: ["@atomic", "@cap:inventory.dispense-order.filter"] },
+      async ({ page }) => {
+        const request = waitForDateBounds(page, range);
+        await page.goto(
+          listUrl({
+            created_date_after: "2026-01-10",
+            created_date_before: "2026-01-13",
+          }),
+        );
+        await request;
+      },
+    );
 
-    test("sends a whole day when the range is a single day", async ({
-      page,
-    }) => {
-      const request = waitForDateBounds(page, singleDay);
-      await page.goto(
-        listUrl({
-          created_date_after: "2026-01-13",
-          created_date_before: "2026-01-13",
-        }),
-      );
-      await request;
-    });
+    test(
+      "sends a whole day when the range is a single day",
+      { tag: ["@atomic", "@cap:inventory.dispense-order.filter"] },
+      async ({ page }) => {
+        const request = waitForDateBounds(page, singleDay);
+        await page.goto(
+          listUrl({
+            created_date_after: "2026-01-13",
+            created_date_before: "2026-01-13",
+          }),
+        );
+        await request;
+      },
+    );
 
-    test("sends only the start when only the start date is set", async ({
-      page,
-    }) => {
-      const request = waitForDateBounds(page, { after: range.after });
-      await page.goto(listUrl({ created_date_after: "2026-01-10" }));
-      await request;
-    });
+    test(
+      "sends only the start when only the start date is set",
+      { tag: ["@atomic", "@cap:inventory.dispense-order.filter"] },
+      async ({ page }) => {
+        const request = waitForDateBounds(page, { after: range.after });
+        await page.goto(listUrl({ created_date_after: "2026-01-10" }));
+        await request;
+      },
+    );
 
-    test("sends only the end when only the end date is set", async ({
-      page,
-    }) => {
-      const request = waitForDateBounds(page, { before: range.before });
-      await page.goto(listUrl({ created_date_before: "2026-01-13" }));
-      await request;
-    });
+    test(
+      "sends only the end when only the end date is set",
+      { tag: ["@atomic", "@cap:inventory.dispense-order.filter"] },
+      async ({ page }) => {
+        const request = waitForDateBounds(page, { before: range.before });
+        await page.goto(listUrl({ created_date_before: "2026-01-13" }));
+        await request;
+      },
+    );
 
-    test("sends today from midnight to midnight for the Today preset", async ({
-      page,
-    }) => {
-      const unfiltered = waitForDateBounds(page, {});
-      await page.goto(listUrl());
-      await unfiltered;
+    test(
+      "sends today from midnight to midnight for the Today preset",
+      { tag: ["@atomic", "@cap:inventory.dispense-order.filter"] },
+      async ({ page }) => {
+        const unfiltered = waitForDateBounds(page, {});
+        await page.goto(listUrl());
+        await unfiltered;
 
-      const request = waitForDateBounds(page, await todayBounds(page));
-      await applyDateFilterPreset(page, /^date$/i, /^today$/i);
-      await request;
-    });
+        const request = waitForDateBounds(page, await todayBounds(page));
+        await applyDateFilterPreset(page, /^date$/i, /^today$/i);
+        await request;
+      },
+    );
   });
 }
 
 test.describe("Dispense order date filter across daylight saving changes", () => {
   test.use({ timezoneId: "America/New_York" });
 
-  test("ends the range at midnight after clocks go forward", async ({
-    page,
-  }) => {
-    // Clocks go forward on 8 March 2026: that day has 23 hours.
-    const request = waitForDateBounds(page, {
-      after: "2026-03-07T05:00:00.000Z",
-      before: "2026-03-09T04:00:00.000Z",
-    });
-    await page.goto(
-      listUrl({
-        created_date_after: "2026-03-07",
-        created_date_before: "2026-03-08",
-      }),
-    );
-    await request;
-  });
+  test(
+    "ends the range at midnight after clocks go forward",
+    { tag: ["@atomic", "@cap:inventory.dispense-order.filter"] },
+    async ({ page }) => {
+      // Clocks go forward on 8 March 2026: that day has 23 hours.
+      const request = waitForDateBounds(page, {
+        after: "2026-03-07T05:00:00.000Z",
+        before: "2026-03-09T04:00:00.000Z",
+      });
+      await page.goto(
+        listUrl({
+          created_date_after: "2026-03-07",
+          created_date_before: "2026-03-08",
+        }),
+      );
+      await request;
+    },
+  );
 
-  test("ends the range at midnight after clocks go back", async ({ page }) => {
-    // Clocks go back on 1 November 2026: that day has 25 hours.
-    const request = waitForDateBounds(page, {
-      after: "2026-10-31T04:00:00.000Z",
-      before: "2026-11-02T05:00:00.000Z",
-    });
-    await page.goto(
-      listUrl({
-        created_date_after: "2026-10-31",
-        created_date_before: "2026-11-01",
-      }),
-    );
-    await request;
-  });
+  test(
+    "ends the range at midnight after clocks go back",
+    { tag: ["@atomic", "@cap:inventory.dispense-order.filter"] },
+    async ({ page }) => {
+      // Clocks go back on 1 November 2026: that day has 25 hours.
+      const request = waitForDateBounds(page, {
+        after: "2026-10-31T04:00:00.000Z",
+        before: "2026-11-02T05:00:00.000Z",
+      });
+      await page.goto(
+        listUrl({
+          created_date_after: "2026-10-31",
+          created_date_before: "2026-11-01",
+        }),
+      );
+      await request;
+    },
+  );
 });
 
 test.describe("Dispense order date filter", () => {
   test.use({ timezoneId: "Asia/Kolkata" });
 
-  test("applies the date range on the history tab", async ({ page }) => {
-    const request = waitForDateBounds(
-      page,
-      TIMEZONES[0].range,
-      HISTORY_STATUSES,
-    );
-    await page.goto(
-      listUrl({
-        exclude_status: "history",
-        created_date_after: "2026-01-10",
-        created_date_before: "2026-01-13",
-      }),
-    );
-    await request;
-  });
+  test(
+    "applies the date range on the history tab",
+    { tag: ["@atomic", "@cap:inventory.dispense-order.filter"] },
+    async ({ page }) => {
+      const request = waitForDateBounds(
+        page,
+        TIMEZONES[0].range,
+        HISTORY_STATUSES,
+      );
+      await page.goto(
+        listUrl({
+          exclude_status: "history",
+          created_date_after: "2026-01-10",
+          created_date_before: "2026-01-13",
+        }),
+      );
+      await request;
+    },
+  );
 
-  test("writes a custom range to the URL and sends its whole last day", async ({
-    page,
-  }) => {
-    const unfiltered = waitForDateBounds(page, {});
-    await page.goto(listUrl());
-    await unfiltered;
+  test(
+    "writes a custom range to the URL and sends its whole last day",
+    { tag: ["@atomic", "@cap:inventory.dispense-order.filter"] },
+    async ({ page }) => {
+      const unfiltered = waitForDateBounds(page, {});
+      await page.goto(listUrl());
+      await unfiltered;
 
-    const request = waitForDateBounds(page, TIMEZONES[0].range);
-    await applyCustomDateFilterRange(
-      page,
-      /^date$/i,
-      "2026-01-10",
-      "2026-01-13",
-    );
-    await request;
+      const request = waitForDateBounds(page, TIMEZONES[0].range);
+      await applyCustomDateFilterRange(
+        page,
+        /^date$/i,
+        "2026-01-10",
+        "2026-01-13",
+      );
+      await request;
 
-    await expect(page).toHaveURL(/[?&]created_date_after=2026-01-10(&|$)/);
-    await expect(page).toHaveURL(/[?&]created_date_before=2026-01-13(&|$)/);
-  });
+      await expect(page).toHaveURL(/[?&]created_date_after=2026-01-10(&|$)/);
+      await expect(page).toHaveURL(/[?&]created_date_before=2026-01-13(&|$)/);
+    },
+  );
 
-  test("drops both bounds when the date filter is cleared", async ({
-    page,
-  }) => {
-    const filtered = waitForDateBounds(page, TIMEZONES[0].range);
-    await page.goto(
-      listUrl({
-        created_date_after: "2026-01-10",
-        created_date_before: "2026-01-13",
-      }),
-    );
-    await filtered;
+  test(
+    "drops both bounds when the date filter is cleared",
+    { tag: ["@atomic", "@cap:inventory.dispense-order.filter"] },
+    async ({ page }) => {
+      const filtered = waitForDateBounds(page, TIMEZONES[0].range);
+      await page.goto(
+        listUrl({
+          created_date_after: "2026-01-10",
+          created_date_before: "2026-01-13",
+        }),
+      );
+      await filtered;
 
-    const request = waitForDateBounds(page, {});
-    await clearSelectedMultiFilter(page, /^date$/i);
-    await request;
+      const request = waitForDateBounds(page, {});
+      await clearSelectedMultiFilter(page, /^date$/i);
+      await request;
 
-    await expect(page).not.toHaveURL(/created_date_(after|before)=/);
-  });
+      await expect(page).not.toHaveURL(/created_date_(after|before)=/);
+    },
+  );
 });

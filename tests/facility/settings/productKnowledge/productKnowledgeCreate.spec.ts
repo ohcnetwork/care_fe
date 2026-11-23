@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { createProductKnowledgeViaUi } from "tests/helper/definitions";
 import { getFieldErrorMessage } from "tests/helper/error";
 import { expectedSlug } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
@@ -61,172 +62,175 @@ test.describe("Product Knowledge Creation", () => {
     await page.getByRole("heading", { name: categoryName }).click();
   });
 
-  test("validate the basic fields", async ({ page }) => {
-    await page.getByRole("button", { name: /add product/i }).click();
-    await page.getByRole("button", { name: /create/i }).click();
+  test(
+    "validate the basic fields",
+    { tag: ["@atomic", "@cap:product.knowledge.create"] },
+    async ({ page }) => {
+      await page.getByRole("button", { name: /add product/i }).click();
+      await page.getByRole("button", { name: /create/i }).click();
 
-    await expect(page.getByText(/name.*required/i)).toBeVisible();
-    await expect(page.getByText(/slug.*required/i)).toBeVisible();
-    await expect(page.getByText(/base unit.*required/i)).toBeVisible();
-    await expect(page.getByText(/dosage form.*required/i)).toBeVisible();
-  });
+      await expect(page.getByText(/name.*required/i)).toBeVisible();
+      await expect(page.getByText(/slug.*required/i)).toBeVisible();
+      await expect(page.getByText(/base unit.*required/i)).toBeVisible();
+      await expect(page.getByText(/dosage form.*required/i)).toBeVisible();
+    },
+  );
 
-  test("validate all fields", async ({ page }) => {
-    await page.getByRole("button", { name: /add product/i }).click();
-    await page.getByRole("button", { name: "Add Guideline" }).click();
-    await page.getByRole("button", { name: "Add Name" }).click();
-
-    await page.getByRole("button", { name: /create/i }).click();
-
-    await expect(page.getByText(/slug.*required/i)).toBeVisible();
-    await expect(page.getByText(/base unit.*required/i)).toBeVisible();
-    await expect(page.getByText(/dosage form.*required/i)).toBeVisible();
-    await expect(page.getByText("name is required")).toBeVisible();
-    await expect(page.getByText(/note.*required/i)).toBeVisible();
-    await expect(page.getByText(/duration value.*required/i)).toBeVisible();
-  });
-
-  test("should reject whitespace-only input in required text fields", async ({
-    page,
-  }) => {
-    await page.getByRole("button", { name: /add product/i }).click();
-
-    await test.step("Add an alternate name row and a storage guideline row", async () => {
-      await page.getByRole("button", { name: "Add Name" }).click();
+  test(
+    "validate all fields",
+    { tag: ["@atomic", "@cap:product.knowledge.create"] },
+    async ({ page }) => {
+      await page.getByRole("button", { name: /add product/i }).click();
       await page.getByRole("button", { name: "Add Guideline" }).click();
-    });
+      await page.getByRole("button", { name: "Add Name" }).click();
 
-    const whitespace = "   ";
-    const fields = [
-      {
-        input: page.locator('input[name="name"]'),
-        error: "Name is required",
-      },
-      {
-        input: page.locator('input[name="names.0.name"]'),
-        error: "Name is required",
-      },
-      {
-        input: page.locator('textarea[name="storage_guidelines.0.note"]'),
-        error: "This field is required",
-      },
-    ];
+      await page.getByRole("button", { name: /create/i }).click();
 
-    for (const { input } of fields) {
-      await input.fill(whitespace);
-    }
+      await expect(page.getByText(/slug.*required/i)).toBeVisible();
+      await expect(page.getByText(/base unit.*required/i)).toBeVisible();
+      await expect(page.getByText(/dosage form.*required/i)).toBeVisible();
+      await expect(page.getByText("name is required")).toBeVisible();
+      await expect(page.getByText(/note.*required/i)).toBeVisible();
+      await expect(page.getByText(/duration value.*required/i)).toBeVisible();
+    },
+  );
 
-    await page.getByRole("button", { name: /create/i }).click();
+  test(
+    "should reject whitespace-only input in required text fields",
+    { tag: ["@atomic", "@cap:product.knowledge.create"] },
+    async ({ page }) => {
+      await page.getByRole("button", { name: /add product/i }).click();
 
-    for (const { input, error } of fields) {
-      const errorMessage = getFieldErrorMessage(input);
-      await expect(errorMessage).toBeVisible();
-      await expect(errorMessage).toHaveText(error);
-    }
-  });
+      await test.step("Add an alternate name row and a storage guideline row", async () => {
+        await page.getByRole("button", { name: "Add Name" }).click();
+        await page.getByRole("button", { name: "Add Guideline" }).click();
+      });
 
-  test("create a product knowledge with required fields only", async ({
-    page,
-  }) => {
-    await page.getByRole("button", { name: /add product/i }).click();
+      const whitespace = "   ";
+      const fields = [
+        {
+          input: page.locator('input[name="name"]'),
+          error: "Name is required",
+        },
+        {
+          input: page.locator('input[name="names.0.name"]'),
+          error: "Name is required",
+        },
+        {
+          input: page.locator('textarea[name="storage_guidelines.0.note"]'),
+          error: "This field is required",
+        },
+      ];
 
-    // Basic details
-    await page.getByRole("textbox", { name: /name/i }).fill(name);
-    await page.getByRole("textbox", { name: /slug/i }).fill(slug);
+      for (const { input } of fields) {
+        await input.fill(whitespace);
+      }
 
-    // Scroll to Base Unit if not visible
-    await page.getByText(/Base Unit/).click();
-    await page.getByRole("option", { name: baseUnit }).click();
-    await page.keyboard.press("Escape");
+      await page.getByRole("button", { name: /create/i }).click();
 
-    // Scroll to Dosage Form if not visible
-    await page
-      .getByRole("combobox", { name: /dosage form/i })
-      .scrollIntoViewIfNeeded();
-    await page.getByRole("combobox", { name: /dosage form/i }).click();
-    await page.getByPlaceholder("Select Dosage Form").fill(dosageForm);
-    await page.getByRole("option").first().click();
-    await page.getByRole("button", { name: /create/i }).click();
+      for (const { input, error } of fields) {
+        const errorMessage = getFieldErrorMessage(input);
+        await expect(errorMessage).toBeVisible();
+        await expect(errorMessage).toHaveText(error);
+      }
+    },
+  );
 
-    await expect(page.getByText(/created successfully/i)).toBeVisible();
+  test(
+    "create a product knowledge with required fields only",
+    { tag: ["@atomic", "@cap:product.knowledge.create"] },
+    async ({ page }) => {
+      await createProductKnowledgeViaUi(page, {
+        facilityId,
+        categoryName,
+        name,
+        slug,
+        baseUnit,
+        dosageForm,
+      });
 
-    const searchResponse = page.waitForResponse(
-      (resp) =>
-        resp.url().includes("/product_knowledge/") &&
-        resp.request().method() === "GET" &&
-        resp.status() === 200,
-    );
-    await page.getByRole("textbox", { name: "Search products" }).fill(name);
-    await searchResponse;
-    await expect(page.getByRole("table").getByText(name)).toBeVisible();
+      const searchResponse = page.waitForResponse(
+        (resp) =>
+          resp.url().includes("/product_knowledge/") &&
+          resp.request().method() === "GET" &&
+          resp.status() === 200,
+      );
+      await page.getByRole("textbox", { name: "Search products" }).fill(name);
+      await searchResponse;
+      await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
-    await page
-      .getByRole("row")
-      .filter({ hasText: name })
-      .getByRole("link", { name: "View" })
-      .click();
-    await expect(page.getByRole("heading").getByText(name)).toBeVisible();
+      await page
+        .getByRole("row")
+        .filter({ hasText: name })
+        .getByRole("link", { name: "View" })
+        .click();
+      await expect(page.getByRole("heading").getByText(name)).toBeVisible();
 
-    await page.getByRole("button", { name: "Edit" }).first().click();
-    await expect(
-      page.getByRole("textbox", { name: /name/i }).first(),
-    ).toHaveValue(name);
+      await page.getByRole("button", { name: "Edit" }).first().click();
+      await expect(
+        page.getByRole("textbox", { name: /name/i }).first(),
+      ).toHaveValue(name);
 
-    await expect(
-      page.getByRole("textbox", { name: /slug/i }).first(),
-    ).toHaveValue(slug.toLowerCase());
-  });
+      await expect(
+        page.getByRole("textbox", { name: /slug/i }).first(),
+      ).toHaveValue(slug.toLowerCase());
+    },
+  );
 
-  test("create a product knowledge with all fields", async ({ page }) => {
-    await page.getByRole("button", { name: /add product/i }).click();
+  test(
+    "create a product knowledge with all fields",
+    { tag: ["@atomic", "@cap:product.knowledge.create"] },
+    async ({ page }) => {
+      await page.getByRole("button", { name: /add product/i }).click();
 
-    // Basic details
-    await page.getByRole("textbox", { name: /name/i }).fill(name);
-    await page.getByRole("textbox", { name: /slug/i }).fill(slug);
-    await page.getByRole("combobox", { name: /product type/i }).click();
-    await page.getByRole("option", { name: productType }).click();
-    await page.getByText(/Base Unit/).click();
-    await page.getByRole("option", { name: baseUnit }).click();
-    await page.getByRole("textbox", { name: "HSN Code" }).fill(hsnCode);
+      // Basic details
+      await page.getByRole("textbox", { name: /name/i }).fill(name);
+      await page.getByRole("textbox", { name: /slug/i }).fill(slug);
+      await page.getByRole("combobox", { name: /product type/i }).click();
+      await page.getByRole("option", { name: productType }).click();
+      await page.getByText(/Base Unit/).click();
+      await page.getByRole("option", { name: baseUnit }).click();
+      await page.getByRole("textbox", { name: "HSN Code" }).fill(hsnCode);
 
-    // Alternate names and storage guidelines
-    await page.getByRole("button", { name: "Add Name" }).click();
-    await page.locator('input[name="names.0.name"]').fill(altNames);
+      // Alternate names and storage guidelines
+      await page.getByRole("button", { name: "Add Name" }).click();
+      await page.locator('input[name="names.0.name"]').fill(altNames);
 
-    await page.getByRole("button", { name: "Add Guideline" }).click();
-    await page.getByRole("textbox", { name: "Note" }).fill(storageGuidelines);
-    await page.getByRole("spinbutton", { name: "Duration Value" }).fill("2");
+      await page.getByRole("button", { name: "Add Guideline" }).click();
+      await page.getByRole("textbox", { name: "Note" }).fill(storageGuidelines);
+      await page.getByRole("spinbutton", { name: "Duration Value" }).fill("2");
 
-    // Dosage form
-    await page.getByRole("combobox", { name: /dosage form/i }).click();
-    await page.getByPlaceholder("Select Dosage Form").fill(dosageForm);
-    await page.getByRole("option").first().click();
-    await page.getByRole("button", { name: /create/i }).click();
+      // Dosage form
+      await page.getByRole("combobox", { name: /dosage form/i }).click();
+      await page.getByPlaceholder("Select Dosage Form").fill(dosageForm);
+      await page.getByRole("option").first().click();
+      await page.getByRole("button", { name: /create/i }).click();
 
-    await expect(page.getByText(/created successfully/i)).toBeVisible();
+      await expect(page.getByText(/created successfully/i)).toBeVisible();
 
-    const searchResponse = page.waitForResponse(
-      (resp) =>
-        resp.url().includes("/product_knowledge/") &&
-        resp.request().method() === "GET" &&
-        resp.status() === 200,
-    );
-    await page.getByRole("textbox", { name: "Search products" }).fill(name);
-    await searchResponse;
-    await expect(page.getByRole("table").getByText(name)).toBeVisible();
+      const searchResponse = page.waitForResponse(
+        (resp) =>
+          resp.url().includes("/product_knowledge/") &&
+          resp.request().method() === "GET" &&
+          resp.status() === 200,
+      );
+      await page.getByRole("textbox", { name: "Search products" }).fill(name);
+      await searchResponse;
+      await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
-    // View and verify all details
-    await page
-      .getByRole("row")
-      .filter({ hasText: name })
-      .getByRole("link", { name: "View" })
-      .click();
-    await expect(page.getByRole("heading").getByText(name)).toBeVisible();
-    await expect(page.getByText(altNames)).toBeVisible();
-    await expect(page.getByText(storageGuidelines)).toBeVisible();
-    await expect(page.getByText(productType)).toBeVisible();
-    await expect(page.getByText(baseUnit)).toBeVisible();
-    await expect(page.getByText(hsnCode)).toBeVisible();
-    await expect(page.getByText(dosageForm)).toBeVisible();
-  });
+      // View and verify all details
+      await page
+        .getByRole("row")
+        .filter({ hasText: name })
+        .getByRole("link", { name: "View" })
+        .click();
+      await expect(page.getByRole("heading").getByText(name)).toBeVisible();
+      await expect(page.getByText(altNames)).toBeVisible();
+      await expect(page.getByText(storageGuidelines)).toBeVisible();
+      await expect(page.getByText(productType)).toBeVisible();
+      await expect(page.getByText(baseUnit)).toBeVisible();
+      await expect(page.getByText(hsnCode)).toBeVisible();
+      await expect(page.getByText(dosageForm)).toBeVisible();
+    },
+  );
 });
