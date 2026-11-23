@@ -111,7 +111,7 @@ export function ServiceRequestActions({
                     onSelect={() => setIsCompleteDialogOpen(true)}
                   >
                     <CircleCheck className="size-4" />
-                    {t("mark_as_completed")}
+                    {t("mark_as_complete")}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem

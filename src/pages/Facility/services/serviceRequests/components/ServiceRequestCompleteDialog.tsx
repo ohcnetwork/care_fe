@@ -45,6 +45,7 @@ export function ServiceRequestCompleteDialog({
   onOpenChange,
 }: ServiceRequestCompleteDialogProps) {
   const { t } = useTranslation();
+  const [note, setNote] = useState(request.note ?? "");
   const queryClient = useQueryClient();
   const isMobile = useBreakpoints({ default: true, lg: false });
   const { mutate: completeServiceRequest, isPending } = useMutation({
@@ -62,11 +63,13 @@ export function ServiceRequestCompleteDialog({
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!isPending) onOpenChange(nextOpen);
+    if (!nextOpen) setNote(request.note ?? "");
   };
 
   const content = (
     <CompletionNoteContent
-      initialNote={request.note ?? ""}
+      note={note}
+      setNote={setNote}
       isUpdating={isPending}
       onComplete={(note) =>
         completeServiceRequest({
@@ -113,21 +116,21 @@ export function ServiceRequestCompleteDialog({
 }
 
 interface CompletionNoteContentProps {
-  initialNote: string;
+  note: string;
+  setNote: (note: string) => void;
   isUpdating: boolean;
   onComplete: (note: string) => void;
   onCancel: () => void;
 }
 
-// Mounted only while the dialog is open, so the note resets on each open
 const CompletionNoteContent = ({
-  initialNote,
+  note,
+  setNote,
   isUpdating,
   onComplete,
   onCancel,
 }: CompletionNoteContentProps) => {
   const { t } = useTranslation();
-  const [note, setNote] = useState(initialNote);
 
   return (
     <>
