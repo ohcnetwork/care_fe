@@ -9,7 +9,7 @@ on:
   push:
     branches:
       - develop
-      - staging
+      - "3.*"
     tags:
       - v*
   workflow_dispatch:
