@@ -345,6 +345,7 @@ export default function AppointmentDetail(props: Props) {
                     appointment={appointment}
                     token={appointment.token}
                     facility={facility}
+                    canWriteToken={canWriteToken}
                   />
                 </div>
               </>
