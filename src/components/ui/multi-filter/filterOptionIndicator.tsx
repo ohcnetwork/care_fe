@@ -39,6 +39,6 @@ export function getIndicatorTone(color?: string): IndicatorTone {
 
 export function FilterOptionIndicator({ color }: { color?: string }) {
   return (
-    <Indicator variant="filled" size="md" tone={getIndicatorTone(color)} />
+    <Indicator variant="outlined" size="md" tone={getIndicatorTone(color)} />
   );
 }
