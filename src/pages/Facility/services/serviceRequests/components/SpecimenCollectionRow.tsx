@@ -296,8 +296,8 @@ export function SpecimenCollectionRow({
           >
             <div className="flex">
               <Input
+                // No inputMode="numeric": Input then drops ".", so 2.5 would save as 25
                 type="number"
-                inputMode="numeric"
                 min={1}
                 step={1}
                 value={entry.quantityValue ?? ""}
