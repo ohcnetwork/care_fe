@@ -190,7 +190,12 @@ export async function createInstancePatientIdentifierConfigViaApi({
   return { configId: config.id, system };
 }
 
-/** Whether the facility has saved a discount configuration. */
+/**
+ * Whether the facility has a complete discount configuration. A facility that
+ * never saved one reports `{}` (the backend field defaults to an empty dict),
+ * and every discount code or component save re-sends it, which the API
+ * rejects because `max_applicable` and `applicability_order` are required.
+ */
 export async function hasDiscountConfiguration(
   facilityId: string,
 ): Promise<boolean> {
@@ -198,7 +203,11 @@ export async function hasDiscountConfiguration(
     "GET",
     `/api/v1/facility/${facilityId}/`,
   );
-  return facility.discount_configuration != null;
+  const config = facility.discount_configuration;
+  return (
+    typeof config?.max_applicable === "number" &&
+    typeof config?.applicability_order === "string"
+  );
 }
 
 /** API value of a token category resource type shown as e.g. "Healthcare Service". */

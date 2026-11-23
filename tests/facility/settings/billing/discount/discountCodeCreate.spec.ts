@@ -17,9 +17,11 @@ test.describe("Discount Code Settings", () => {
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
 
-    // Saving the configuration rewrites the facility's whole discount setup
-    // from what the page loaded, so it is only done while the facility has
-    // none: an existing configuration (and any code saved meanwhile) is kept.
+    // Creating a code re-sends the facility's discount configuration, which
+    // the API rejects unless it is complete (a fresh facility reports `{}`).
+    // Saving one rewrites the whole discount setup from what the page loaded,
+    // so it is only done while no complete configuration exists: a valid one
+    // (and any code saved meanwhile) is kept.
     if (!(await hasDiscountConfiguration(facilityId))) {
       await configureDiscountViaUi(page, { facilityId });
     }
