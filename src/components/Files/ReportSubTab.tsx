@@ -9,6 +9,7 @@ import {
   RefreshCw,
   SearchIcon,
 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -52,6 +53,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import Pagination from "@/components/Common/Pagination";
 import { ArchivedBadge } from "@/components/Files/ArchivedBadge";
+import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 import { ArchiveStatusFilter } from "@/components/Files/FileFilters";
 import { GenerateReportDropdown } from "@/components/Files/GenerateReportDropdown";
 import { getReportBasePath } from "@/components/Files/reportTemplateOptions";
@@ -116,7 +118,17 @@ export function ReportSubTab({
 
   const isFiltered = !!qParams.name || qParams.is_archived !== undefined;
 
+  const [archivedReport, setArchivedReport] = useState<ReportReadList | null>(
+    null,
+  );
+
   const handleView = (report: ReportReadList) => {
+    // The viewer only lists active reports and would generate a new one.
+    if (report.is_archived) {
+      setArchivedReport(report);
+      return;
+    }
+
     const basePath = getReportBasePath(
       reportType,
       associatingId,
@@ -133,6 +145,12 @@ export function ReportSubTab({
   return (
     <>
       {Dialogs}
+      <ArchivedFileDialog
+        open={!!archivedReport}
+        onOpenChange={(open) => !open && setArchivedReport(null)}
+        file={archivedReport}
+        title={t("archived_report")}
+      />
 
       <Frame spacing="sm" className="min-w-0">
         <FrameHeader className="flex-row flex-wrap items-center gap-2">

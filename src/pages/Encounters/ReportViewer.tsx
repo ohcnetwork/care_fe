@@ -214,7 +214,7 @@ export default function ReportViewer({
         const startTime = generationStartRef.current;
         stopPolling();
 
-        const freshData = await queryClient.fetchQuery({
+        const freshData = await queryClient.query({
           queryKey: [
             "reports",
             associatingId,
@@ -421,6 +421,7 @@ export default function ReportViewer({
   return (
     <Page
       title={template.name}
+      className="flex min-h-0 flex-1 flex-col pb-0"
       hideTitleOnPage
       componentRight={
         <div className="flex gap-2 items-center">
@@ -468,7 +469,7 @@ export default function ReportViewer({
         </div>
       }
     >
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-8rem)] gap-0 mt-2 bg-white rounded-lg border">
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row gap-0 mt-2 bg-white rounded-lg border">
         {/* Mobile: Drawer trigger */}
         {reports.length > 0 && (
           <div className="lg:hidden mb-2">
@@ -563,7 +564,7 @@ export default function ReportViewer({
             </div>
           )}
           <div className="flex-1 overflow-hidden flex items-start justify-center">
-            {isLoadingDetail && (
+            {isLoadingDetail && !isGenerating && (
               <div className="flex items-center justify-center h-full w-full">
                 <Loader className="size-8 animate-spin text-gray-400" />
               </div>
@@ -590,7 +591,7 @@ export default function ReportViewer({
               />
             )}
 
-            {isGenerating && !pdfUrl && (
+            {isGenerating && (
               <EmptyState
                 icon={<Loader className="size-6 animate-spin opacity-30" />}
                 title={t("generating_report")}
@@ -611,7 +612,7 @@ export default function ReportViewer({
                 />
               )}
 
-            {pdfUrl && !isLoadingDetail && (
+            {pdfUrl && !isLoadingDetail && !isGenerating && (
               <object
                 key={selectedReportId}
                 data={pdfUrl}
