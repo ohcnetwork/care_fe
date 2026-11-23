@@ -1,33 +1,24 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Droplets,
-  FileText,
-  Image,
-  Plus,
-  Printer,
-  RotateCcw,
-  Settings,
-  Trash2,
-} from "lucide-react";
-import { useState } from "react";
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Frame,
+  FrameDescription,
+  FrameHeader,
+  FramePanel,
+  FrameTitle,
+} from "@/components/ui/frame";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -35,901 +26,474 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 
-import mutate from "@/Utils/request/mutate";
-import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
-import { FacilityRead } from "@/types/facility/facility";
-import facilityApi from "@/types/facility/facilityApi";
-import {
-  PrintTemplateType,
-  type PrintTemplate,
+import { DEFAULT_MARGIN_MM, DEFAULT_WATERMARK } from "@/print/printLayout";
+import type {
+  BrandingConfig,
+  PageConfig,
+  PageMargin,
+  PrintTemplate,
 } from "@/types/facility/printTemplate";
 
-interface PrintTemplateEditorProps {
-  facility: FacilityRead;
-}
+type TemplateUpdater = (template: PrintTemplate) => PrintTemplate;
 
+const UNSET = "__unset__";
 const URL_PLACEHOLDER = "https://...";
-const TEMPLATE_TYPES = Object.values(PrintTemplateType);
+const MARGIN_SIDES = ["top", "right", "bottom", "left"] as const;
+const BRANDING_IMAGES = ["logo", "header_image", "footer_image"] as const;
 
-export function PrintTemplateEditor({ facility }: PrintTemplateEditorProps) {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const [draft, setDraft] = useState<PrintTemplate[] | null>(null);
-  const persistedTemplates = facility.print_templates ?? [];
-  const templates = draft ?? persistedTemplates;
-  const isDirty = draft !== null;
-  useNavigationBlocker(isDirty, t("unsaved_changes_warning"));
-  const configuredTypes = templates
-    .map((template) => template.slug)
-    .filter(Boolean);
-  const usedTypes = new Set(configuredTypes);
-  const hasDuplicateTypes = usedTypes.size !== configuredTypes.length;
-  const availableTypes = TEMPLATE_TYPES.filter((type) => !usedTypes.has(type));
+const toNumber = (value: string) => (value === "" ? undefined : Number(value));
 
-  const { mutate: updateFacility, isPending } = useMutation({
-    mutationFn: mutate(facilityApi.update, {
-      pathParams: { facilityId: facility.id },
-    }),
-    onSuccess: (updatedFacility) => {
-      queryClient.setQueryData(["facility", facility.id], updatedFacility);
-      setDraft(null);
-      queryClient.invalidateQueries({ queryKey: ["facility", facility.id] });
-      toast.success(t("print_templates_updated"));
-    },
-  });
-
-  const handleSave = () => {
-    if (hasDuplicateTypes || isPending || !isDirty) return;
-    updateFacility({
-      name: facility.name,
-      description: facility.description,
-      address: facility.address,
-      phone_number: facility.phone_number,
-      facility_type: facility.facility_type,
-      is_public: facility.is_public,
-      latitude: facility.latitude,
-      longitude: facility.longitude,
-      middleware_address: facility.middleware_address,
-      pincode: facility.pincode,
-      geo_organization: facility.geo_organization.id,
-      features: facility.features,
-      print_templates: templates.filter((template) => template.slug.trim()),
-    });
+/** Drops empty settings, and fills blank margins once any side is set. */
+export function cleanPrintTemplate(template: PrintTemplate): PrintTemplate {
+  const { page, print_setup, branding, watermark } = template;
+  const margin = page?.margin && compact(page.margin);
+  const withUrl = <T extends { url?: string }>(image?: T) =>
+    image?.url?.trim() ? image : undefined;
+  return {
+    ...template,
+    page:
+      page &&
+      compact({
+        ...page,
+        margin: margin && {
+          top: DEFAULT_MARGIN_MM,
+          right: DEFAULT_MARGIN_MM,
+          bottom: DEFAULT_MARGIN_MM,
+          left: DEFAULT_MARGIN_MM,
+          ...(margin as Partial<PageMargin>),
+        },
+      }),
+    print_setup: print_setup?.auto_print ? print_setup : undefined,
+    branding:
+      branding &&
+      compact({
+        ...branding,
+        logo: withUrl(branding.logo),
+        header_image: withUrl(branding.header_image),
+        footer_image: withUrl(branding.footer_image),
+      }),
+    watermark: watermark && compact(watermark),
   };
-
-  const setTemplates = (
-    updater: (previous: PrintTemplate[]) => PrintTemplate[],
-  ) => {
-    setDraft((previous) => {
-      if (isPending) return previous;
-      const next = updater(previous ?? persistedTemplates);
-      return JSON.stringify(next) === JSON.stringify(persistedTemplates)
-        ? null
-        : next;
-    });
-  };
-
-  const addTemplate = (slug: PrintTemplateType) => {
-    setTemplates((prev) =>
-      prev.some((template) => template.slug === slug)
-        ? prev
-        : [...prev, { slug }],
-    );
-  };
-  const removeTemplate = (index: number) => {
-    setTemplates((prev) => prev.filter((_, i) => i !== index));
-  };
-  const updateTemplate = (
-    index: number,
-    updater: (template: PrintTemplate) => PrintTemplate,
-  ) => {
-    setTemplates((prev) =>
-      prev.map((template, i) => (i === index ? updater(template) : template)),
-    );
-  };
-
-  return (
-    <form
-      noValidate
-      aria-label={t("print_templates")}
-      onSubmit={(event) => {
-        event.preventDefault();
-        handleSave();
-      }}
-    >
-      <fieldset disabled={isPending} className="min-w-0 space-y-4">
-        <div className="flex justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={availableTypes.length === 0}
-              >
-                <Plus className="size-4" aria-hidden="true" />
-                {t("add_print_template")}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="max-h-80 overflow-y-auto"
-            >
-              {availableTypes.map((slug) => (
-                <DropdownMenuItem key={slug} onSelect={() => addTemplate(slug)}>
-                  {t(slug)}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        {templates.length === 0 && (
-          <div className="rounded-lg border border-dashed py-8 text-center text-muted-foreground">
-            <Printer className="mx-auto mb-2 size-8" aria-hidden="true" />
-            <p>{t("no_print_templates")}</p>
-            <p className="mt-1 text-sm">{t("no_print_templates_hint")}</p>
-          </div>
-        )}
-        {templates.map((template, index) => (
-          <TemplateEditor
-            key={index}
-            template={template}
-            disabled={isPending}
-            availableTypes={TEMPLATE_TYPES.filter(
-              (type) => type === template.slug || !usedTypes.has(type),
-            )}
-            onUpdate={(updater) => updateTemplate(index, updater)}
-            onRemove={() => removeTemplate(index)}
-          />
-        ))}
-        {hasDuplicateTypes && (
-          <p role="alert" className="text-sm text-destructive">
-            {t("print_template_types_must_be_unique")}
-          </p>
-        )}
-        <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!isDirty}
-            onClick={() => setDraft(null)}
-          >
-            {t("discard_changes")}
-          </Button>
-          <Button type="submit" disabled={!isDirty || hasDuplicateTypes}>
-            {isPending ? t("saving") : t("save")}
-          </Button>
-        </div>
-      </fieldset>
-    </form>
-  );
 }
 
-function TemplateEditor({
-  template,
-  availableTypes,
-  disabled,
-  onUpdate,
-  onRemove,
-}: {
+function compact<T extends object>(value: T): T | undefined {
+  const entries = Object.entries(value).filter(([, v]) => v !== undefined);
+  return entries.length ? (Object.fromEntries(entries) as T) : undefined;
+}
+
+/** Settings the facility API would reject. */
+export function getPrintTemplateErrors(template: PrintTemplate) {
+  const margins = Object.values(template.page?.margin ?? {});
+  const opacity = template.watermark?.opacity;
+  return {
+    margin: margins.some((value) => value < 0),
+    opacity: opacity !== undefined && (opacity < 0 || opacity > 1),
+  };
+}
+
+interface PrintTemplateEditorProps {
   template: PrintTemplate;
-  availableTypes: PrintTemplateType[];
-  disabled: boolean;
-  onUpdate: (updater: (tpl: PrintTemplate) => PrintTemplate) => void;
-  onRemove: () => void;
-}) {
-  const { t } = useTranslation();
+  onChange: (updater: TemplateUpdater) => void;
+}
 
+/** Page, branding, watermark and print settings of one print template. */
+export function PrintTemplateEditor({
+  template,
+  onChange,
+}: PrintTemplateEditorProps) {
   return (
-    <div className="border rounded-lg">
-      <div className="flex items-center justify-between p-4 pb-2">
-        <div className="flex-1 mr-4">
-          <Label className="text-xs text-gray-500">{t("template_slug")}</Label>
-          <Select
-            value={template.slug || undefined}
-            onValueChange={(value) =>
-              onUpdate((tpl) => ({ ...tpl, slug: value }))
-            }
-          >
-            <SelectTrigger className="mt-1">
-              <SelectValue placeholder={t("template_slug_placeholder")} />
-            </SelectTrigger>
-            <SelectContent>
-              {availableTypes.map((slug) => (
-                <SelectItem key={slug} value={slug}>
-                  {t(slug)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="text-red-500 hover:text-red-700 hover:bg-red-50 mt-4"
-          onClick={onRemove}
-          aria-label={t("remove")}
-        >
-          <Trash2 className="size-4" />
-        </Button>
-      </div>
-
-      <Accordion type="multiple" className="px-4 pb-2">
-        {/* Page Settings */}
-        <AccordionItem value="page">
-          <AccordionTrigger className="text-sm">
-            <span className="flex items-center gap-2">
-              <FileText className="size-4" />
-              {t("page_settings")}
-            </span>
-          </AccordionTrigger>
-          <AccordionContent>
-            <PageSection template={template} onUpdate={onUpdate} />
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* Print Setup */}
-        <AccordionItem value="print_setup">
-          <AccordionTrigger className="text-sm">
-            <span className="flex items-center gap-2">
-              <Settings className="size-4" />
-              {t("print_setup")}
-            </span>
-          </AccordionTrigger>
-          <AccordionContent>
-            <PrintSetupSection
-              template={template}
-              onUpdate={onUpdate}
-              disabled={disabled}
-            />
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* Branding */}
-        <AccordionItem value="branding">
-          <AccordionTrigger className="text-sm">
-            <span className="flex items-center gap-2">
-              <Image className="size-4" />
-              {t("branding")}
-            </span>
-          </AccordionTrigger>
-          <AccordionContent>
-            <BrandingSection template={template} onUpdate={onUpdate} />
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* Watermark */}
-        <AccordionItem value="watermark">
-          <AccordionTrigger className="text-sm">
-            <span className="flex items-center gap-2">
-              <Droplets className="size-4" />
-              {t("watermark")}
-            </span>
-          </AccordionTrigger>
-          <AccordionContent>
-            <WatermarkSection
-              template={template}
-              onUpdate={onUpdate}
-              disabled={disabled}
-            />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+    <div className="flex flex-col gap-4">
+      <PageSection template={template} onChange={onChange} />
+      <BrandingSection template={template} onChange={onChange} />
+      <WatermarkSection template={template} onChange={onChange} />
+      <PrintSetupSection template={template} onChange={onChange} />
     </div>
   );
 }
 
-type SectionProps = {
-  disabled?: boolean;
-  template: PrintTemplate;
-  onUpdate: (updater: (tpl: PrintTemplate) => PrintTemplate) => void;
-};
+function Section({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  const headingId = useId();
+  return (
+    <section aria-labelledby={headingId}>
+      <Frame>
+        <FrameHeader>
+          <FrameTitle>
+            <h3 id={headingId} className="text-base leading-6 font-semibold">
+              {title}
+            </h3>
+          </FrameTitle>
+          <FrameDescription>{description}</FrameDescription>
+        </FrameHeader>
+        <FramePanel>
+          <FieldGroup className="gap-5">{children}</FieldGroup>
+        </FramePanel>
+      </Frame>
+    </section>
+  );
+}
 
-function PageSection({ template, onUpdate }: SectionProps) {
+function PageSection({ template, onChange }: PrintTemplateEditorProps) {
   const { t } = useTranslation();
+  const id = useId();
   const page = template.page;
-
-  const hasPageConfig = page?.size || page?.orientation || page?.margin;
+  const errors = getPrintTemplateErrors(template);
+  const setPage = (update: Partial<PageConfig>) =>
+    onChange((tpl) => ({ ...tpl, page: { ...tpl.page, ...update } }));
 
   return (
-    <div className="space-y-4">
-      {hasPageConfig && (
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-xs text-gray-500 hover:text-red-600"
-            onClick={() =>
-              onUpdate((tpl) => {
-                const { page: _, ...rest } = tpl;
-                return rest as PrintTemplate;
+    <Section
+      title={t("page_settings")}
+      description={t("print_page_settings_description")}
+    >
+      <div className="grid grid-cols-2 gap-4">
+        <Field>
+          <FieldLabel htmlFor={`${id}-size`}>{t("page_size")}</FieldLabel>
+          <Select
+            value={page?.size ?? UNSET}
+            onValueChange={(value) =>
+              setPage({
+                size:
+                  value === UNSET ? undefined : (value as PageConfig["size"]),
               })
             }
           >
-            <RotateCcw className="mr-1 size-3" />
-            {t("clear")}
-          </Button>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label className="text-xs text-gray-500">{t("page_size")}</Label>
-          <Select
-            value={page?.size ?? "__none__"}
-            onValueChange={(value) =>
-              onUpdate((tpl) => ({
-                ...tpl,
-                page: {
-                  ...tpl.page,
-                  size:
-                    value === "__none__"
-                      ? undefined
-                      : (value as "A4" | "A5" | "Letter" | "Legal"),
-                },
-              }))
-            }
-          >
-            <SelectTrigger className="mt-1">
-              <SelectValue placeholder={t("select_page_size")} />
+            <SelectTrigger id={`${id}-size`} className="w-full">
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__none__">{t("none")}</SelectItem>
+              <SelectItem value={UNSET}>
+                {t("print_page_size_unset")}
+              </SelectItem>
               <SelectItem value="A4">{t("page_size_a4")}</SelectItem>
               <SelectItem value="A5">{t("page_size_a5")}</SelectItem>
               <SelectItem value="Letter">{t("page_size_letter")}</SelectItem>
               <SelectItem value="Legal">{t("page_size_legal")}</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-
-        <div>
-          <Label className="text-xs text-gray-500">
+        </Field>
+        <Field>
+          <FieldLabel htmlFor={`${id}-orientation`}>
             {t("page_orientation")}
-          </Label>
+          </FieldLabel>
           <Select
-            value={page?.orientation ?? "__none__"}
+            value={page?.orientation ?? UNSET}
             onValueChange={(value) =>
-              onUpdate((tpl) => ({
-                ...tpl,
-                page: {
-                  ...tpl.page,
-                  orientation:
-                    value === "__none__"
-                      ? undefined
-                      : (value as "portrait" | "landscape"),
-                },
-              }))
+              setPage({
+                orientation:
+                  value === UNSET
+                    ? undefined
+                    : (value as PageConfig["orientation"]),
+              })
             }
           >
-            <SelectTrigger className="mt-1">
-              <SelectValue placeholder={t("select_orientation")} />
+            <SelectTrigger id={`${id}-orientation`} className="w-full">
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__none__">{t("none")}</SelectItem>
+              <SelectItem value={UNSET}>
+                {t("print_page_orientation_unset")}
+              </SelectItem>
               <SelectItem value="portrait">{t("portrait")}</SelectItem>
               <SelectItem value="landscape">{t("landscape")}</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </Field>
       </div>
 
-      <div>
-        <Label className="text-xs text-gray-500 mb-2 block">
+      <FieldSet className="gap-3">
+        <FieldLegend variant="label" className="mb-0">
           {t("page_margins_mm")}
-        </Label>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {(["top", "right", "bottom", "left"] as const).map((side) => (
-            <div key={side}>
-              <Label className="text-xs capitalize">{t(side)}</Label>
+        </FieldLegend>
+        <FieldDescription>
+          {t("print_page_margins_description", { mm: DEFAULT_MARGIN_MM })}
+        </FieldDescription>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {MARGIN_SIDES.map((side) => (
+            <Field key={side}>
+              <FieldLabel htmlFor={`${id}-margin-${side}`}>
+                {t(side)}
+              </FieldLabel>
               <Input
+                id={`${id}-margin-${side}`}
                 type="number"
+                inputMode="decimal"
                 min={0}
                 step={0.5}
+                placeholder={String(DEFAULT_MARGIN_MM)}
+                aria-invalid={(page?.margin?.[side] ?? 0) < 0 || undefined}
                 value={page?.margin?.[side] ?? ""}
-                onChange={(e) => {
-                  const val = e.target.value
-                    ? parseFloat(e.target.value)
-                    : undefined;
-                  onUpdate((tpl) => ({
+                onChange={(event) => {
+                  const value = toNumber(event.target.value);
+                  onChange((tpl) => ({
                     ...tpl,
                     page: {
                       ...tpl.page,
+                      // Blank sides are filled in on save.
                       margin: {
-                        top: tpl.page?.margin?.top ?? 0,
-                        bottom: tpl.page?.margin?.bottom ?? 0,
-                        left: tpl.page?.margin?.left ?? 0,
-                        right: tpl.page?.margin?.right ?? 0,
-                        [side]: val ?? 0,
-                      },
+                        ...tpl.page?.margin,
+                        [side]: value,
+                      } as PageMargin,
                     },
                   }));
                 }}
-                placeholder="10"
-                className="mt-1"
               />
-            </div>
+            </Field>
           ))}
         </div>
-      </div>
-    </div>
+        {errors.margin && (
+          <FieldError>{t("print_page_margins_negative")}</FieldError>
+        )}
+      </FieldSet>
+    </Section>
   );
 }
 
-function PrintSetupSection({ template, onUpdate, disabled }: SectionProps) {
+function BrandingSection({ template, onChange }: PrintTemplateEditorProps) {
   const { t } = useTranslation();
-
-  return (
-    <div className="space-y-2">
-      {template.print_setup?.auto_print && (
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-xs text-gray-500 hover:text-red-600"
-            onClick={() =>
-              onUpdate((tpl) => {
-                const { print_setup: _, ...rest } = tpl;
-                return rest as PrintTemplate;
-              })
-            }
-          >
-            <RotateCcw className="mr-1 size-3" />
-            {t("clear")}
-          </Button>
-        </div>
-      )}
-      <div className="flex items-center justify-between py-2">
-        <div>
-          <Label>{t("auto_print")}</Label>
-          <p className="text-xs text-gray-500">{t("auto_print_description")}</p>
-        </div>
-        <Switch
-          disabled={disabled}
-          aria-label={t("auto_print")}
-          checked={template.print_setup?.auto_print ?? false}
-          onCheckedChange={(checked) =>
-            onUpdate((tpl) => ({
-              ...tpl,
-              print_setup: { ...tpl.print_setup, auto_print: checked },
-            }))
-          }
-        />
-      </div>
-    </div>
-  );
-}
-
-function BrandingSection({ template, onUpdate }: SectionProps) {
-  const { t } = useTranslation();
+  const id = useId();
   const branding = template.branding;
-
-  const hasBranding =
-    branding?.logo?.url ||
-    branding?.header_image?.url ||
-    branding?.footer_image?.url;
+  const setImage = <K extends (typeof BRANDING_IMAGES)[number]>(
+    key: K,
+    update: Partial<NonNullable<BrandingConfig[K]>>,
+  ) =>
+    onChange((tpl) => ({
+      ...tpl,
+      branding: {
+        ...tpl.branding,
+        [key]: {
+          ...(key === "logo" && { alignment: "left" }),
+          url: "",
+          ...tpl.branding?.[key],
+          ...update,
+        },
+      },
+    }));
 
   return (
-    <div className="space-y-6">
-      {hasBranding && (
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-xs text-gray-500 hover:text-red-600"
-            onClick={() =>
-              onUpdate((tpl) => {
-                const { branding: _, ...rest } = tpl;
-                return rest as PrintTemplate;
-              })
-            }
-          >
-            <RotateCcw className="mr-1 size-3" />
-            {t("clear")}
-          </Button>
-        </div>
-      )}
-
-      {/* Logo */}
-      <div className="space-y-3">
-        <Label className="font-medium">{t("logo")}</Label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="sm:col-span-2">
-            <Label className="text-xs text-gray-500">{t("image_url")}</Label>
-            <Input
-              value={branding?.logo?.url ?? ""}
-              onChange={(e) =>
-                onUpdate((tpl) => ({
-                  ...tpl,
-                  branding: {
-                    ...tpl.branding,
-                    logo: {
-                      alignment: tpl.branding?.logo?.alignment ?? "left",
-                      ...tpl.branding?.logo,
-                      url: e.target.value,
-                    },
-                  },
-                }))
-              }
-              placeholder={URL_PLACEHOLDER}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500">{t("width_in_px")}</Label>
-            <Input
-              type="number"
-              min={0}
-              value={branding?.logo?.width ?? ""}
-              onChange={(e) => {
-                const val = e.target.value
-                  ? parseFloat(e.target.value)
-                  : undefined;
-                onUpdate((tpl) => ({
-                  ...tpl,
-                  branding: {
-                    ...tpl.branding,
-                    logo: {
-                      alignment: tpl.branding?.logo?.alignment ?? "left",
-                      url: tpl.branding?.logo?.url ?? "",
-                      ...tpl.branding?.logo,
-                      width: val,
-                    },
-                  },
-                }));
-              }}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500">{t("height_in_px")}</Label>
-            <Input
-              type="number"
-              min={0}
-              value={branding?.logo?.height ?? ""}
-              onChange={(e) => {
-                const val = e.target.value
-                  ? parseFloat(e.target.value)
-                  : undefined;
-                onUpdate((tpl) => ({
-                  ...tpl,
-                  branding: {
-                    ...tpl.branding,
-                    logo: {
-                      alignment: tpl.branding?.logo?.alignment ?? "left",
-                      url: tpl.branding?.logo?.url ?? "",
-                      ...tpl.branding?.logo,
-                      height: val,
-                    },
-                  },
-                }));
-              }}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500">{t("alignment")}</Label>
-            <Select
-              value={branding?.logo?.alignment ?? "left"}
-              onValueChange={(value) =>
-                onUpdate((tpl) => ({
-                  ...tpl,
-                  branding: {
-                    ...tpl.branding,
-                    logo: {
-                      url: tpl.branding?.logo?.url ?? "",
-                      ...tpl.branding?.logo,
-                      alignment: value as "left" | "center" | "right",
-                    },
-                  },
-                }))
-              }
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="left">{t("left")}</SelectItem>
-                <SelectItem value="center">{t("center")}</SelectItem>
-                <SelectItem value="right">{t("right")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        {branding?.logo?.url && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-xs text-gray-500 hover:text-red-600"
-            onClick={() =>
-              onUpdate((tpl) => ({
-                ...tpl,
-                branding: {
-                  ...tpl.branding,
-                  logo: undefined,
-                },
-              }))
-            }
-          >
-            <RotateCcw className="mr-1 size-3" />
-            {t("clear")}
-          </Button>
-        )}
-      </div>
-
-      <Separator />
-
-      {/* Header Image */}
-      <div className="space-y-3">
-        <Label className="font-medium">{t("header_image")}</Label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="sm:col-span-2">
-            <Label className="text-xs text-gray-500">{t("image_url")}</Label>
-            <Input
-              value={branding?.header_image?.url ?? ""}
-              onChange={(e) =>
-                onUpdate((tpl) => ({
-                  ...tpl,
-                  branding: {
-                    ...tpl.branding,
-                    header_image: {
-                      ...tpl.branding?.header_image,
-                      url: e.target.value,
-                    },
-                  },
-                }))
-              }
-              placeholder={URL_PLACEHOLDER}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500">{t("height_in_px")}</Label>
-            <Input
-              type="number"
-              min={0}
-              value={branding?.header_image?.height ?? ""}
-              onChange={(e) => {
-                const val = e.target.value
-                  ? parseFloat(e.target.value)
-                  : undefined;
-                onUpdate((tpl) => ({
-                  ...tpl,
-                  branding: {
-                    ...tpl.branding,
-                    header_image: {
-                      url: tpl.branding?.header_image?.url ?? "",
-                      ...tpl.branding?.header_image,
-                      height: val,
-                    },
-                  },
-                }));
-              }}
-              className="mt-1"
-            />
-          </div>
-        </div>
-        {branding?.header_image?.url && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-xs text-gray-500 hover:text-red-600"
-            onClick={() =>
-              onUpdate((tpl) => ({
-                ...tpl,
-                branding: {
-                  ...tpl.branding,
-                  header_image: undefined,
-                },
-              }))
-            }
-          >
-            <RotateCcw className="mr-1 size-3" />
-            {t("clear")}
-          </Button>
-        )}
-      </div>
-
-      <Separator />
-
-      {/* Footer Image */}
-      <div className="space-y-3">
-        <Label className="font-medium">{t("footer_image")}</Label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="sm:col-span-2">
-            <Label className="text-xs text-gray-500">{t("image_url")}</Label>
-            <Input
-              value={branding?.footer_image?.url ?? ""}
-              onChange={(e) =>
-                onUpdate((tpl) => ({
-                  ...tpl,
-                  branding: {
-                    ...tpl.branding,
-                    footer_image: {
-                      ...tpl.branding?.footer_image,
-                      url: e.target.value,
-                    },
-                  },
-                }))
-              }
-              placeholder={URL_PLACEHOLDER}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500">{t("height_in_px")}</Label>
-            <Input
-              type="number"
-              min={0}
-              value={branding?.footer_image?.height ?? ""}
-              onChange={(e) => {
-                const val = e.target.value
-                  ? parseFloat(e.target.value)
-                  : undefined;
-                onUpdate((tpl) => ({
-                  ...tpl,
-                  branding: {
-                    ...tpl.branding,
-                    footer_image: {
-                      url: tpl.branding?.footer_image?.url ?? "",
-                      ...tpl.branding?.footer_image,
-                      height: val,
-                    },
-                  },
-                }));
-              }}
-              className="mt-1"
-            />
-          </div>
-        </div>
-        {branding?.footer_image?.url && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-xs text-gray-500 hover:text-red-600"
-            onClick={() =>
-              onUpdate((tpl) => ({
-                ...tpl,
-                branding: {
-                  ...tpl.branding,
-                  footer_image: undefined,
-                },
-              }))
-            }
-          >
-            <RotateCcw className="mr-1 size-3" />
-            {t("clear")}
-          </Button>
-        )}
-      </div>
-    </div>
+    <Section
+      title={t("branding")}
+      description={t("print_branding_description")}
+    >
+      {BRANDING_IMAGES.map((key) => {
+        const image = branding?.[key];
+        return (
+          <FieldSet key={key} className="gap-3">
+            <FieldLegend variant="label" className="mb-0">
+              {t(key)}
+            </FieldLegend>
+            <FieldDescription>{t(`print_${key}_description`)}</FieldDescription>
+            <Field>
+              <FieldLabel htmlFor={`${id}-${key}-url`}>
+                {t("image_url")}
+              </FieldLabel>
+              <Input
+                id={`${id}-${key}-url`}
+                type="url"
+                placeholder={URL_PLACEHOLDER}
+                value={image?.url ?? ""}
+                onChange={(event) => setImage(key, { url: event.target.value })}
+              />
+            </Field>
+            {/* Sizes only matter once there is an image to size. */}
+            {image?.url?.trim() && (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {key === "logo" && (
+                  <Field>
+                    <FieldLabel htmlFor={`${id}-${key}-width`}>
+                      {t("width_in_px")}
+                    </FieldLabel>
+                    <Input
+                      id={`${id}-${key}-width`}
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      value={branding?.logo?.width ?? ""}
+                      onChange={(event) =>
+                        setImage("logo", {
+                          width: toNumber(event.target.value),
+                        })
+                      }
+                    />
+                  </Field>
+                )}
+                <Field>
+                  <FieldLabel htmlFor={`${id}-${key}-height`}>
+                    {t("height_in_px")}
+                  </FieldLabel>
+                  <Input
+                    id={`${id}-${key}-height`}
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    value={image.height ?? ""}
+                    onChange={(event) =>
+                      setImage(key, { height: toNumber(event.target.value) })
+                    }
+                  />
+                </Field>
+                {key === "logo" && (
+                  <Field>
+                    <FieldLabel htmlFor={`${id}-${key}-alignment`}>
+                      {t("alignment")}
+                    </FieldLabel>
+                    <Select
+                      value={branding?.logo?.alignment ?? "left"}
+                      onValueChange={(value) =>
+                        setImage("logo", {
+                          alignment: value as "left" | "center" | "right",
+                        })
+                      }
+                    >
+                      <SelectTrigger
+                        id={`${id}-${key}-alignment`}
+                        className="w-full"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="left">{t("left")}</SelectItem>
+                        <SelectItem value="center">{t("center")}</SelectItem>
+                        <SelectItem value="right">{t("right")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+              </div>
+            )}
+          </FieldSet>
+        );
+      })}
+    </Section>
   );
 }
 
-function WatermarkSection({ template, onUpdate, disabled }: SectionProps) {
+function WatermarkSection({ template, onChange }: PrintTemplateEditorProps) {
   const { t } = useTranslation();
+  const id = useId();
   const watermark = template.watermark;
-
-  const hasWatermark = watermark?.enabled || watermark?.text;
+  const errors = getPrintTemplateErrors(template);
+  const setWatermark = (update: NonNullable<PrintTemplate["watermark"]>) =>
+    onChange((tpl) => ({
+      ...tpl,
+      watermark: { ...tpl.watermark, ...update },
+    }));
 
   return (
-    <div className="space-y-4">
-      {hasWatermark && (
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-xs text-gray-500 hover:text-red-600"
-            onClick={() =>
-              onUpdate((tpl) => {
-                const { watermark: _, ...rest } = tpl;
-                return rest as PrintTemplate;
-              })
-            }
-          >
-            <RotateCcw className="mr-1 size-3" />
-            {t("clear")}
-          </Button>
-        </div>
-      )}
-
-      <div className="flex items-center justify-between">
-        <div>
-          <Label>{t("enable_watermark")}</Label>
-          <p className="text-xs text-gray-500">
+    <Section
+      title={t("watermark")}
+      description={t("print_watermark_description")}
+    >
+      <Field orientation="horizontal">
+        <FieldContent>
+          <FieldLabel htmlFor={`${id}-enabled`}>
+            {t("enable_watermark")}
+          </FieldLabel>
+          <FieldDescription>
             {t("enable_watermark_description")}
-          </p>
-        </div>
+          </FieldDescription>
+        </FieldContent>
         <Switch
-          disabled={disabled}
-          aria-label={t("enable_watermark")}
+          id={`${id}-enabled`}
           checked={watermark?.enabled ?? false}
-          onCheckedChange={(checked) =>
-            onUpdate((tpl) => ({
-              ...tpl,
-              watermark: { ...tpl.watermark, enabled: checked },
-            }))
-          }
+          onCheckedChange={(enabled) => setWatermark({ enabled })}
         />
-      </div>
-
+      </Field>
       {watermark?.enabled && (
-        <div className="space-y-4">
-          <div>
-            <Label className="text-xs text-gray-500">
+        <>
+          <Field>
+            <FieldLabel htmlFor={`${id}-text`}>
               {t("watermark_text")}
-            </Label>
+            </FieldLabel>
             <Input
+              id={`${id}-text`}
               value={watermark.text ?? ""}
-              onChange={(e) =>
-                onUpdate((tpl) => ({
-                  ...tpl,
-                  watermark: { ...tpl.watermark, text: e.target.value },
-                }))
-              }
               placeholder={t("watermark_text_placeholder")}
-              className="mt-1"
+              onChange={(event) => setWatermark({ text: event.target.value })}
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-xs text-gray-500">
-                {t("opacity")} {"(0-1)"}
-              </Label>
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field>
+              <FieldLabel htmlFor={`${id}-opacity`}>
+                {t("print_watermark_opacity")}
+              </FieldLabel>
               <Input
+                id={`${id}-opacity`}
                 type="number"
+                inputMode="decimal"
                 min={0}
                 max={1}
                 step={0.05}
+                placeholder={String(DEFAULT_WATERMARK.opacity)}
+                aria-invalid={errors.opacity || undefined}
                 value={watermark.opacity ?? ""}
-                onChange={(e) => {
-                  const val = e.target.value
-                    ? parseFloat(e.target.value)
-                    : undefined;
-                  onUpdate((tpl) => ({
-                    ...tpl,
-                    watermark: { ...tpl.watermark, opacity: val },
-                  }));
-                }}
-                placeholder="0.15"
-                className="mt-1"
+                onChange={(event) =>
+                  setWatermark({ opacity: toNumber(event.target.value) })
+                }
               />
-            </div>
-            <div>
-              <Label className="text-xs text-gray-500">
+            </Field>
+            <Field>
+              <FieldLabel htmlFor={`${id}-rotation`}>
                 {t("rotation_in_degrees")}
-              </Label>
+              </FieldLabel>
               <Input
+                id={`${id}-rotation`}
                 type="number"
+                inputMode="numeric"
                 step={1}
+                placeholder={String(DEFAULT_WATERMARK.rotation)}
                 value={watermark.rotation ?? ""}
-                onChange={(e) => {
-                  const val = e.target.value
-                    ? parseFloat(e.target.value)
-                    : undefined;
-                  onUpdate((tpl) => ({
-                    ...tpl,
-                    watermark: { ...tpl.watermark, rotation: val },
-                  }));
-                }}
-                placeholder="-45"
-                className="mt-1"
+                onChange={(event) =>
+                  setWatermark({ rotation: toNumber(event.target.value) })
+                }
               />
-            </div>
+            </Field>
           </div>
-        </div>
+          {errors.opacity && (
+            <FieldError>{t("print_watermark_opacity_invalid")}</FieldError>
+          )}
+        </>
       )}
-    </div>
+    </Section>
+  );
+}
+
+function PrintSetupSection({ template, onChange }: PrintTemplateEditorProps) {
+  const { t } = useTranslation();
+  const id = useId();
+
+  return (
+    <Section
+      title={t("print_setup")}
+      description={t("print_setup_description")}
+    >
+      <Field orientation="horizontal">
+        <FieldContent>
+          <FieldLabel htmlFor={`${id}-auto-print`}>
+            {t("auto_print")}
+          </FieldLabel>
+          <FieldDescription>{t("auto_print_description")}</FieldDescription>
+        </FieldContent>
+        <Switch
+          id={`${id}-auto-print`}
+          checked={template.print_setup?.auto_print ?? false}
+          onCheckedChange={(auto_print) =>
+            onChange((tpl) => ({
+              ...tpl,
+              print_setup: { ...tpl.print_setup, auto_print },
+            }))
+          }
+        />
+      </Field>
+    </Section>
   );
 }

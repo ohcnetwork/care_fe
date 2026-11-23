@@ -1,5 +1,4 @@
-import { Link } from "@tanstack/react-router";
-import { ChevronDown, Printer, SquarePen, Trash2 } from "lucide-react";
+import { ChevronDown, SquarePen, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -57,18 +56,6 @@ export function FacilityHomeActions({
                 aria-hidden="true"
               />
               {t("edit_facility_details")}
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                to="/facility/$facilityId/settings/print-templates"
-                params={{ facilityId: facilityData.id }}
-              >
-                <Printer
-                  className="size-4 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                {t("print_templates")}
-              </Link>
             </DropdownMenuItem>
             <PLUGIN_Component
               __name="FacilityHomeActions"

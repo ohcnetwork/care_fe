@@ -196,7 +196,9 @@ test.describe("Organization directory compatibility", () => {
     await page.goto(
       `/admin/organizations/product_supplier/${faker.string.uuid()}`,
     );
-    await expect(page).toHaveURL(/\/admin\/organizations\/product_supplier\/?$/);
+    await expect(page).toHaveURL(
+      /\/admin\/organizations\/product_supplier\/?$/,
+    );
     await expect(
       page.getByRole("heading", { name: /^suppliers$/i }),
     ).toBeVisible();
@@ -313,14 +315,16 @@ test.describe("Organization directory compatibility", () => {
       permissions: [],
       has_children: false,
     };
-    let child: {
-      id: string;
-      name: string;
-      org_type: string;
-      parent: typeof root;
-      permissions: string[];
-      has_children: boolean;
-    } | undefined;
+    let child:
+      | {
+          id: string;
+          name: string;
+          org_type: string;
+          parent: typeof root;
+          permissions: string[];
+          has_children: boolean;
+        }
+      | undefined;
 
     await page.route("**/api/v1/organization/**", async (route) => {
       const request = route.request();
@@ -343,7 +347,10 @@ test.describe("Organization directory compatibility", () => {
         await route.fulfill({ json: child });
       } else if (url.pathname === `/api/v1/organization/${root.id}/`) {
         await route.fulfill({ json: root });
-      } else if (child && url.pathname === `/api/v1/organization/${child.id}/`) {
+      } else if (
+        child &&
+        url.pathname === `/api/v1/organization/${child.id}/`
+      ) {
         await route.fulfill({ json: child });
       } else if (url.pathname === "/api/v1/organization/") {
         const candidates =
