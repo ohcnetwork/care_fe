@@ -3109,9 +3109,19 @@ test.describe("Encounter workspace rendering", () => {
     await page.keyboard.press("Enter");
     await expect(page.getByRole("menu")).toBeHidden();
     await expect(priority).toBeFocused();
-    await expect(priority).toHaveCSS("outline-width", "2px");
     await expect(page).toHaveURL((url) => !url.searchParams.has("priority"));
     await expect(priority).toHaveText("Priority");
+    // Field triggers can indicate keyboard focus with an outline or a shadow ring.
+    const focusIndicator = () =>
+      priority.evaluate((element) => {
+        const { outlineStyle, outlineWidth, boxShadow } =
+          getComputedStyle(element);
+        return [outlineStyle, outlineWidth, boxShadow];
+      });
+    const focusedIndicator = await focusIndicator();
+    await page.keyboard.press("Tab");
+    await expect(priority).not.toBeFocused();
+    await expect.poll(focusIndicator).not.toEqual(focusedIndicator);
     await expect(priority).toHaveAttribute(
       "data-slot",
       "dropdown-menu-trigger",
