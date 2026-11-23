@@ -53,11 +53,19 @@ export function ServiceRequestActions({
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
+      // Cancelling also aborts the request's charge items
+      queryClient.invalidateQueries({
+        queryKey: ["chargeItems", facilityId, serviceRequestId],
+      });
     },
   });
 
-  const canCancel =
-    request.status !== Status.completed && request.status !== Status.revoked;
+  // The backend rejects a cancel on completed, revoked or entered-in-error requests
+  const canCancel = ![
+    Status.completed,
+    Status.revoked,
+    Status.entered_in_error,
+  ].includes(request.status);
 
   if (!hasFinalizedReport && !canCancel) {
     return null;
