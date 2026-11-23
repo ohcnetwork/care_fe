@@ -46,7 +46,7 @@ jobs:
     outputs:
       tests: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.tests == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: dorny/paths-filter@v3
         id: filter
@@ -70,7 +70,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
         id: node
@@ -117,7 +117,7 @@ jobs:
       revision: ${{ steps.revision.outputs.sha }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Resolve backend image
         id: image
@@ -144,7 +144,7 @@ jobs:
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
 
       - name: Checkout care
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ohcnetwork/care
           path: care
@@ -211,10 +211,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Checkout care
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ohcnetwork/care
           path: care
@@ -413,7 +413,7 @@ jobs:
 
       - name: Checkout
         if: steps.skipped.outputs.skipped == 'false'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download all test results
         if: steps.skipped.outputs.skipped == 'false'
