@@ -4,7 +4,12 @@ import { cn } from "@/lib/utils";
 
 import { Input } from "@/components/ui/input";
 
-import { ACCOUNTING_PRECISION, round, toNumber } from "@/Utils/decimal";
+import {
+  ACCOUNTING_PRECISION,
+  isValidDecimal,
+  round,
+  toNumber,
+} from "@/Utils/decimal";
 import Decimal from "decimal.js";
 
 // Currency configuration
@@ -36,7 +41,9 @@ function MonetaryDisplay({
   fallback?: React.ReactNode;
   hideCurrency?: boolean;
 } & React.ComponentProps<"data">) {
-  amount &&= round(amount);
+  // Show the fallback for partial input (e.g. "-" while the user types a negative price).
+  amount = isValidDecimal(amount) ? round(amount) : null;
+  factor = isValidDecimal(factor) ? factor : null;
 
   if ((amount ?? factor) == null) {
     return fallback ?? "-";
