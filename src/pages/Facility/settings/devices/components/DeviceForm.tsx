@@ -459,8 +459,14 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                           form.setValue(`contact.${index}.value`, "");
                         }
 
-                        form.clearErrors(`contact.${index}.value`);
                         field.onChange(value);
+
+                        // Re-validate a kept value against the new type, or drop the stale error.
+                        if (form.getValues(`contact.${index}.value`)) {
+                          form.trigger(`contact.${index}.value`);
+                        } else {
+                          form.clearErrors(`contact.${index}.value`);
+                        }
                       }}
                     >
                       <FormControl>
