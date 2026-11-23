@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { TFunction } from "i18next";
 import { CheckIcon, PlusCircle, X } from "lucide-react";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -53,9 +54,7 @@ import {
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import { generateSlugValue } from "@/Utils/slug";
 
-const createFormSchema = (
-  t: (key: string, options?: Record<string, unknown>) => string,
-) => {
+const createFormSchema = (t: TFunction) => {
   return z.object({
     name: z.string().min(1, { message: t("name_is_required") }),
     slug_value: slugValueSchema(),

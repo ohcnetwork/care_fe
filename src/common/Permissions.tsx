@@ -132,6 +132,13 @@ export const PERMISSION_CREATE_ACCOUNT = "can_create_account";
 export const PERMISSION_UPDATE_ACCOUNT = "can_update_account";
 export const PERMISSION_READ_ACCOUNT = "can_read_account";
 
+// Charge Item Permissions
+export const PERMISSION_CREATE_CHARGE_ITEM = "can_create_charge_item";
+
+// Payment Reconciliation Permissions
+export const PERMISSION_WRITE_PAYMENT_RECONCILIATION =
+  "can_write_payment_reconciliation";
+
 // Invoice Permissions
 export const PERMISSION_MANAGE_LOCKED_INVOICE =
   "can_manage_locked_invoice_in_facility";
@@ -324,6 +331,12 @@ export interface Permissions {
   canUpdateAccount: boolean;
   /** Permission slug: "can_read_account" */
   canReadAccount: boolean;
+
+  /** Permission slug: "can_create_charge_item" */
+  canCreateChargeItem: boolean;
+
+  /** Permission slug: "can_write_payment_reconciliation" */
+  canWritePaymentReconciliation: boolean;
 
   /** Permission slug: "can_manage_locked_invoice_in_facility" */
   canManageLockedInvoice: boolean;
@@ -589,6 +602,18 @@ export function getPermissions(
     canCreateAccount: hasPermission(PERMISSION_CREATE_ACCOUNT, permissions),
     canUpdateAccount: hasPermission(PERMISSION_UPDATE_ACCOUNT, permissions),
     canReadAccount: hasPermission(PERMISSION_READ_ACCOUNT, permissions),
+
+    // Charge Item
+    canCreateChargeItem: hasPermission(
+      PERMISSION_CREATE_CHARGE_ITEM,
+      permissions,
+    ),
+
+    // Payment Reconciliation
+    canWritePaymentReconciliation: hasPermission(
+      PERMISSION_WRITE_PAYMENT_RECONCILIATION,
+      permissions,
+    ),
 
     // Invoice
     canManageLockedInvoice: hasPermission(
