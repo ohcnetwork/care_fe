@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import { getFieldErrorMessage } from "tests/helper/error";
 import { selectComboboxOption } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -175,6 +176,54 @@ test.describe("Facility Devices Management", () => {
     await expect(
       page.getByRole("textbox", { name: "Part Number" }),
     ).toHaveValue(partNumber);
+  });
+
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    const whitespace = "   ";
+    const addContactPoint = async (system: string) => {
+      await page.getByRole("button", { name: "Add Contact Point" }).click();
+      // A new contact point row defaults to the "Phone" system.
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: /^Phone$/ })
+        .click();
+      await page.getByRole("option", { name: system, exact: true }).click();
+      // Let the list close fully so the next row's list is the only one.
+      await expect(page.getByRole("listbox")).toHaveCount(0);
+    };
+
+    await page.getByRole("link", { name: "Add Device" }).click();
+    await page
+      .getByRole("textbox", { name: "Registered Name *" })
+      .fill(deviceName);
+
+    await test.step("Add a pager contact point", async () => {
+      await addContactPoint("Pager");
+      await page.getByPlaceholder("Enter pager number").fill(whitespace);
+    });
+
+    await test.step("Add an other contact point", async () => {
+      await addContactPoint("Other");
+      await page.getByPlaceholder("Enter contact value").fill(whitespace);
+    });
+
+    await page.getByRole("button", { name: "Save" }).click();
+
+    const pagerError = getFieldErrorMessage(
+      page.getByPlaceholder("Enter pager number"),
+    );
+    await expect(pagerError).toBeVisible();
+    await expect(pagerError).toHaveText(
+      "Must be at least 1 characters and at most 20 characters",
+    );
+
+    const otherError = getFieldErrorMessage(
+      page.getByPlaceholder("Enter contact value"),
+    );
+    await expect(otherError).toBeVisible();
+    await expect(otherError).toHaveText("Required");
   });
 
   test("Show validation error when clicking Save without filling required field", async ({

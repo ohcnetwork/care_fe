@@ -66,10 +66,11 @@ export default function PublicPatientRegistration(
     .object({
       name: z
         .string()
+        .trim()
         .min(1, t("field_required"))
         .refine(validateName, t("min_char_length_error", { min_length: 3 })),
       gender: z.enum(GENDERS, { error: t("gender_is_required") }),
-      address: z.string().min(1, t("field_required")),
+      address: z.string().trim().min(1, t("field_required")),
       age: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
       pincode: validators().pincode,
