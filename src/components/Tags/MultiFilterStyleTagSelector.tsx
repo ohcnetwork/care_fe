@@ -284,7 +284,7 @@ export function MultiFilterStyleTagSelector({
       className={cn(
         "h-10 w-full border border-strong-border text-placeholder-foreground font-normal shadow-none! inset-shadow-none! px-2.5",
         selected.length > 0 &&
-          "border-blue-300 bg-blue-50 h-auto min-h-12 md:min-h-10",
+          "border-blue-300 bg-blue-50 h-auto min-h-12 md:min-h-10 py-1",
         className,
       )}
       disabled={disabled || isTagMutationInProgress}
@@ -298,7 +298,7 @@ export function MultiFilterStyleTagSelector({
           <Plus className="size-3" />
         )}
 
-        <div>
+        <div className="min-w-0">
           {isTagMutationInProgress ? (
             <span>{t("updating_tags")}</span>
           ) : selected.length > 0 ? (
@@ -548,10 +548,13 @@ export function MultiFilterStyleTagSelector({
                                   variant="ghost"
                                   className="h-auto w-full focus:bg-gray-100 focus:text-gray-900 cursor-default rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5"
                                 >
-                                  <div className="flex items-center justify-between flex-1 gap-2">
-                                    <div className="flex items-center gap-1">
+                                  <div className="flex items-center justify-between flex-1 min-w-0 gap-2">
+                                    <div className="flex items-center min-w-0 gap-1">
                                       <Component className="size-4 text-black/80" />
-                                      <span className="text-sm">
+                                      <span
+                                        className="text-sm truncate"
+                                        title={tag.display}
+                                      >
                                         {tag.display}
                                       </span>
                                     </div>

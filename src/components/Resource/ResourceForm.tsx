@@ -82,13 +82,17 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       })
       .nullable(),
     emergency: z.enum(["true", "false"]),
-    title: z.string().min(1, { message: t("field_required") }),
+    title: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
     reason: z
       .string()
       .trim()
       .min(1, { message: t("field_required") }),
     referring_facility_contact_name: z
       .string()
+      .trim()
       .min(1, { message: t("field_required") }),
     referring_facility_contact_number: validators().phoneNumber.required,
     priority: z.number().default(1),

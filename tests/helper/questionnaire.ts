@@ -27,10 +27,12 @@ export async function createQuestionnaireEncounter(
     status = "in_progress",
     encounterClass = "amb",
     start = new Date(),
+    organizations = [],
   }: {
     status?: "in_progress" | "planned";
     encounterClass?: "amb" | "imp";
     start?: Date;
+    organizations?: string[];
   } = {},
 ): Promise<{ patientId: string; encounterId: string }> {
   const headers = adminApiHeaders();
@@ -42,7 +44,7 @@ export async function createQuestionnaireEncounter(
     encounter_class: encounterClass,
     period: { start: start.toISOString() },
     priority: "routine",
-    organizations: [],
+    organizations,
   });
   for (let attempt = 0; ; attempt++) {
     const response = await fetch(`${apiBaseUrl()}/api/v1/encounter/`, {

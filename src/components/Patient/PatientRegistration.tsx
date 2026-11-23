@@ -1130,7 +1130,7 @@ const getFormSchema = (
       required_identifiers: z.array(
         z.object({
           config: z.uuid(),
-          value: z.string().nonempty(t("field_required")),
+          value: z.string().trim().nonempty(t("field_required")),
         }),
       ),
       optional_identifiers: z.array(

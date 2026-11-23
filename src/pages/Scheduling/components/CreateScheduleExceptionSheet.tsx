@@ -67,7 +67,7 @@ export default function CreateScheduleExceptionSheet({
 
   const formSchema = z
     .object({
-      reason: z.string().min(1, t("field_required")),
+      reason: z.string().trim().min(1, t("field_required")),
       valid_from: z
         .date({ error: t("field_required") })
         .min(dayjs().startOf("day").toDate(), {

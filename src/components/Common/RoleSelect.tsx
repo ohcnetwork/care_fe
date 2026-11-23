@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronsUpDown as CaretSortIcon } from "lucide-react";
+import { ChevronsUpDown as CaretSortIcon, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -22,6 +22,12 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import {
+  fieldTriggerLayout,
+  fieldTriggerSurface,
+  invalidTriggerRing,
+  triggerFocus,
+} from "@/components/ui/field-trigger-styles";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -40,6 +46,8 @@ interface RoleSelectProps {
   disabled?: boolean;
   className?: string;
   placeholder?: string;
+  /** "field" renders the trigger like the other form field comboboxes. */
+  appearance?: "button" | "field";
 }
 
 interface RoleCommandContentProps {
@@ -71,7 +79,7 @@ function RoleCommandContent({
         placeholder={t("search_roles")}
         aria-label={t("search_roles")}
         onValueChange={setSearchTerm}
-        wrapperClassName="border-b border-gray-100 shadow-xs"
+        wrapperClassName="border-b border-soft-border shadow-xs"
         className="text-base sm:text-sm"
         autoFocus
       />
@@ -95,7 +103,7 @@ function RoleCommandContent({
               <div className="flex flex-col items-start">
                 <span>{role.name}</span>
                 {role.description && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-muted-foreground">
                     {role.description}
                   </span>
                 )}
@@ -118,6 +126,7 @@ export function RoleSelect({
   disabled,
   className,
   placeholder,
+  appearance = "button",
 }: RoleSelectProps) {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
@@ -152,20 +161,46 @@ export function RoleSelect({
     }
   };
 
-  const renderTriggerButton = () => (
-    <Button
-      variant="outline"
-      role="combobox"
-      aria-expanded={open}
-      className={cn("w-full justify-between", className)}
-      disabled={disabled}
-    >
-      <span className={cn(!selectedRole && "text-gray-500")}>
-        {selectedRole ? selectedRole.name : placeholder || t("select_role")}
-      </span>
-      <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-    </Button>
-  );
+  const renderTriggerButton = () =>
+    appearance === "field" ? (
+      <button
+        type="button"
+        role="combobox"
+        aria-expanded={open}
+        disabled={disabled}
+        className={cn(
+          fieldTriggerLayout,
+          fieldTriggerSurface,
+          triggerFocus,
+          invalidTriggerRing,
+          "w-full min-w-0 justify-between font-normal",
+          className,
+        )}
+      >
+        <span
+          className={cn(
+            "min-w-0 flex-1 truncate text-left",
+            !selectedRole && "text-placeholder-foreground",
+          )}
+        >
+          {selectedRole ? selectedRole.name : placeholder || t("select_role")}
+        </span>
+        <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+      </button>
+    ) : (
+      <Button
+        variant="outline"
+        role="combobox"
+        aria-expanded={open}
+        className={cn("w-full justify-between", className)}
+        disabled={disabled}
+      >
+        <span className={cn(!selectedRole && "text-placeholder-foreground")}>
+          {selectedRole ? selectedRole.name : placeholder || t("select_role")}
+        </span>
+        <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+      </Button>
+    );
 
   if (isMobile) {
     return (
@@ -199,7 +234,7 @@ export function RoleSelect({
   return (
     <Popover open={open} onOpenChange={handleOpenChange} modal>
       <PopoverTrigger asChild>{renderTriggerButton()}</PopoverTrigger>
-      <PopoverContent className="w-[var(--anchor-width)] p-0 overflow-clip">
+      <PopoverContent className="w-(--anchor-width) p-0 overflow-clip">
         <RoleCommandContent
           setSearchTerm={setSearchTerm}
           rolesList={rolesList}

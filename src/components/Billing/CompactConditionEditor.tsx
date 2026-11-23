@@ -80,7 +80,7 @@ function TagSelector({
         selected={selectedTags}
         resource={resource}
         onChange={handleChange}
-        className="h-9 w-full"
+        className="w-full"
         facilityId={facilityId}
         align="end"
       />

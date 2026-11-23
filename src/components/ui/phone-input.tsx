@@ -78,6 +78,8 @@ function PhoneInput({
         className={cn(
           "PhoneInput",
           "overflow-clip",
+          // A focused country selector rings the whole field, like the number input.
+          "has-[[data-slot=popover-trigger]:focus-visible]:border-ring has-[[data-slot=popover-trigger]:focus-visible]:ring-3 has-[[data-slot=popover-trigger]:focus-visible]:ring-ring/50",
           className,
           value && !RPNInput.isValidPhoneNumber(value)
             ? "ring-destructive"
@@ -171,10 +173,11 @@ function InputComponent({
           "PhoneInputInput h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-2 shadow-none focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent",
           className,
         )}
-        data-slot="input-group-control"
         onBeforeInput={handleBeforeInput}
         aria-describedby="phone-input-constraint"
         {...props}
+        // FormControl's data-slot must not replace the one InputGroup's focus ring reads.
+        data-slot="input-group-control"
       />
       <span id="phone-input-constraint" className="sr-only">
         {t("phone_number_max_digits_constraint", { max: maxNationalDigits })}
@@ -223,7 +226,7 @@ const CountrySelect = ({
         <Button
           type="button"
           variant="ghost"
-          className="border-input flex shrink-0 gap-1.5 rounded-none! border-0 border-r px-2 text-sm no-underline shadow-none not-in-data-[slot=button-group]:rounded-none! focus-visible:ring-3 h-full"
+          className="border-input flex shrink-0 gap-1.5 rounded-none! border-0 border-r px-2 text-sm no-underline shadow-none not-in-data-[slot=button-group]:rounded-none! focus-visible:outline-0 focus-visible:bg-muted h-full"
           disabled={disabled}
         >
           <FlagComponent

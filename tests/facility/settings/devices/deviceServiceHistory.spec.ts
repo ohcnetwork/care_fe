@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getFieldErrorMessage } from "tests/helper/error";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -116,6 +117,27 @@ test.describe("Device Service History", () => {
     await expect(
       page.locator('[data-slot="card"]').filter({ hasText: notes }),
     ).toHaveCount(0);
+  });
+
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    const firstDeviceLink = page
+      .getByRole("link")
+      .filter({ has: page.locator('[data-slot="card"]') })
+      .first();
+    await firstDeviceLink.click();
+
+    await page.getByRole("button", { name: "Add Service Record" }).click();
+
+    const notesField = page.getByRole("textbox", { name: "Notes *" });
+    await notesField.fill("   ");
+
+    await page.getByRole("button", { name: "Save" }).click();
+
+    const errorMessage = getFieldErrorMessage(notesField);
+    await expect(errorMessage).toBeVisible();
+    await expect(errorMessage).toHaveText("This field is required");
   });
 
   test("Show validation error for future date in service record", async ({

@@ -557,7 +557,7 @@ function TemplateCard({
 }
 
 const templateFormSchema = z.object({
-  name: z.string().min(1, t("name_is_required")),
+  name: z.string().trim().min(1, t("name_is_required")),
   description: z.string().optional(),
 });
 

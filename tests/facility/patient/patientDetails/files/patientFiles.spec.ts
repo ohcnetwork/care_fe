@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import { filterSelectButton } from "tests/helper/searchParams";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
@@ -218,8 +219,10 @@ test.describe("Patient Files", () => {
         response.request().method() === "GET",
       { timeout: 15000 },
     );
-    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
-    await page.getByRole("option", { name: "Active", exact: true }).click();
+    await filterSelectButton(page, "Status").click();
+    await page
+      .getByRole("menuitemradio", { name: "Active", exact: true })
+      .click();
 
     const filterResponse = await filterPromise;
     expect(filterResponse.status()).toBe(200);
@@ -274,8 +277,10 @@ test.describe("Patient Files", () => {
         response.request().method() === "GET",
       { timeout: 15000 },
     );
-    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
-    await page.getByRole("option", { name: "Active", exact: true }).click();
+    await filterSelectButton(page, "Status").click();
+    await page
+      .getByRole("menuitemradio", { name: "Active", exact: true })
+      .click();
 
     const filterResponse = await filterPromise;
     expect(filterResponse.status()).toBe(200);
