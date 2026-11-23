@@ -75,41 +75,53 @@ test.describe("Consent encounter scope", () => {
   test("consent created in encounter A is not listed in encounter B of the same patient", async ({
     page,
   }) => {
-    await goToConsentsTab(page, encounterA);
-    await createConsent(page);
-    await expect(consentCards(page)).toHaveCount(1);
+    await test.step("Create a consent in encounter A", async () => {
+      await goToConsentsTab(page, encounterA);
+      await createConsent(page);
+      await expect(consentCards(page)).toHaveCount(1);
+    });
 
-    await goToConsentsTab(page, encounterB);
-    await expect(page.getByText("No Consents found")).toBeVisible();
-    await expect(consentCards(page)).toHaveCount(0);
+    await test.step("Encounter B lists no consents", async () => {
+      await goToConsentsTab(page, encounterB);
+      await expect(page.getByText("No Consents found")).toBeVisible();
+      await expect(consentCards(page)).toHaveCount(0);
+    });
   });
 
   test("consents created in encounters A and B are each listed only in their own encounter", async ({
     page,
   }) => {
-    await goToConsentsTab(page, encounterA);
-    await createConsent(page);
+    await test.step("Create a Treatment consent in encounter A", async () => {
+      await goToConsentsTab(page, encounterA);
+      await createConsent(page);
+    });
 
-    await goToConsentsTab(page, encounterB);
-    await createConsent(page, "Research");
+    await test.step("Create a Research consent in encounter B", async () => {
+      await goToConsentsTab(page, encounterB);
+      await createConsent(page, "Research");
+    });
 
     // Reload each tab so the assertions read a freshly fetched list.
-    await goToConsentsTab(page, encounterB);
-    await expect(consentCards(page)).toHaveCount(1);
-    await expect(
-      consentCards(page).getByText("RESEARCH", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      consentCards(page).getByText("TREATMENT", { exact: true }),
-    ).toHaveCount(0);
+    await test.step("Encounter B lists only its Research consent", async () => {
+      await goToConsentsTab(page, encounterB);
+      await expect(consentCards(page)).toHaveCount(1);
+      await expect(
+        consentCards(page).getByText("RESEARCH", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        consentCards(page).getByText("TREATMENT", { exact: true }),
+      ).toHaveCount(0);
+    });
 
-    await goToConsentsTab(page, encounterA);
-    await expect(consentCards(page)).toHaveCount(1);
-    await expect(
-      consentCards(page).getByText("TREATMENT", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      consentCards(page).getByText("RESEARCH", { exact: true }),
-    ).toHaveCount(0);
+    await test.step("Encounter A lists only its Treatment consent", async () => {
+      await goToConsentsTab(page, encounterA);
+      await expect(consentCards(page)).toHaveCount(1);
+      await expect(
+        consentCards(page).getByText("TREATMENT", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        consentCards(page).getByText("RESEARCH", { exact: true }),
+      ).toHaveCount(0);
+    });
   });
 });

@@ -239,76 +239,91 @@ test.describe("Consent access for a read-only user", () => {
   }
 
   test("Add Consent → Save is rejected by the backend and no consent is added", async () => {
-    await goToConsentsTab();
-    await page.getByRole("button", { name: /add.*consent/i }).click();
     const sheet = page.getByRole("dialog", { name: "Add Consent" });
-    await expect(sheet).toBeVisible();
 
-    const createResponse = waitForApi(
-      page,
-      "POST",
-      `/api/v1/patient/${patientId}/consent/`,
-    );
-    await sheet.getByRole("button", { name: "Save" }).click();
-    expect((await createResponse).status()).toBe(403);
-    await expectToast(page, PERMISSION_DENIED);
+    await test.step("Open the Add Consent sheet", async () => {
+      await goToConsentsTab();
+      await page.getByRole("button", { name: /add.*consent/i }).click();
+      await expect(sheet).toBeVisible();
+    });
 
-    // Reload: only the seeded consent is listed.
-    await goToConsentsTab();
-    await expect(consentCards()).toHaveCount(1);
+    await test.step("Save is rejected with 403", async () => {
+      const createResponse = waitForApi(
+        page,
+        "POST",
+        `/api/v1/patient/${patientId}/consent/`,
+      );
+      await sheet.getByRole("button", { name: "Save" }).click();
+      expect((await createResponse).status()).toBe(403);
+      await expectToast(page, PERMISSION_DENIED);
+    });
+
+    await test.step("After reload, only the seeded consent is listed", async () => {
+      await goToConsentsTab();
+      await expect(consentCards()).toHaveCount(1);
+    });
   });
 
   test("Edit → Save is rejected by the backend and the consent is unchanged", async () => {
     const changedNote = `Changed note ${faker.string.alphanumeric(8)}`;
-
-    await openConsentDetail();
-    await page.getByRole("button", { name: "Edit", exact: true }).click();
     const sheet = page.getByRole("dialog", { name: "Edit Consent" });
-    await expect(sheet).toBeVisible();
-    await sheet.getByLabel("Note", { exact: true }).fill(changedNote);
 
-    const updateResponse = waitForApi(
-      page,
-      "PUT",
-      `/api/v1/patient/${patientId}/consent/${consentId}/`,
-    );
-    await sheet.getByRole("button", { name: "Save" }).click();
-    expect((await updateResponse).status()).toBe(403);
-    await expectToast(page, PERMISSION_DENIED);
+    await test.step("Open the Edit Consent sheet and change the note", async () => {
+      await openConsentDetail();
+      await page.getByRole("button", { name: "Edit", exact: true }).click();
+      await expect(sheet).toBeVisible();
+      await sheet.getByLabel("Note", { exact: true }).fill(changedNote);
+    });
 
-    // Reload: the saved note is still the seeded one.
-    await page.reload();
-    await expect(
-      page.getByRole("heading", { name: "Consent Details" }),
-    ).toBeVisible();
-    await expect(page.getByText(seededNote)).toBeVisible();
-    await expect(page.getByText(changedNote)).toHaveCount(0);
+    await test.step("Save is rejected with 403", async () => {
+      const updateResponse = waitForApi(
+        page,
+        "PUT",
+        `/api/v1/patient/${patientId}/consent/${consentId}/`,
+      );
+      await sheet.getByRole("button", { name: "Save" }).click();
+      expect((await updateResponse).status()).toBe(403);
+      await expectToast(page, PERMISSION_DENIED);
+    });
+
+    await test.step("After reload, the note is still the seeded one", async () => {
+      await page.reload();
+      await expect(
+        page.getByRole("heading", { name: "Consent Details" }),
+      ).toBeVisible();
+      await expect(page.getByText(seededNote)).toBeVisible();
+      await expect(page.getByText(changedNote)).toHaveCount(0);
+    });
   });
 
   test("Add Files → Upload is rejected by the backend and no file is attached", async () => {
     const fileName = `Rejected file ${faker.string.alphanumeric(8)}`;
-
-    await openConsentDetail();
-    await page.getByRole("button", { name: "Add Files" }).click();
-    const fileChooser = page.waitForEvent("filechooser");
-    await page.getByRole("menuitem", { name: "Upload From Device" }).click();
-    await (await fileChooser).setFiles(PNG);
-
     const dialog = page.getByRole("dialog", { name: "Upload File" });
-    await expect(dialog).toBeVisible();
-    await dialog.getByLabel("File Name").fill(fileName);
 
-    // The files API rejects with 403. Its message ("Cannot View File") is
-    // not specific to uploads, so the test checks the status instead.
-    const uploadResponse = waitForApi(page, "POST", "/api/v1/files/");
-    await dialog.getByRole("button", { name: "Upload" }).click();
-    expect((await uploadResponse).status()).toBe(403);
+    await test.step("Choose a file and name it", async () => {
+      await openConsentDetail();
+      await page.getByRole("button", { name: "Add Files" }).click();
+      const fileChooser = page.waitForEvent("filechooser");
+      await page.getByRole("menuitem", { name: "Upload From Device" }).click();
+      await (await fileChooser).setFiles(PNG);
+      await expect(dialog).toBeVisible();
+      await dialog.getByLabel("File Name").fill(fileName);
+    });
 
-    // Reload: the consent still has no files.
-    await page.reload();
-    await expect(
-      page.getByRole("heading", { name: "No files attached" }),
-    ).toBeVisible();
-    await expect(page.getByText(fileName)).toHaveCount(0);
+    await test.step("Upload is rejected with 403", async () => {
+      // The files API's message ("Cannot View File") is not specific to
+      // uploads, so the test checks the status instead.
+      const uploadResponse = waitForApi(page, "POST", "/api/v1/files/");
+      await dialog.getByRole("button", { name: "Upload" }).click();
+      expect((await uploadResponse).status()).toBe(403);
+    });
+
+    await test.step("After reload, the consent still has no files", async () => {
+      await page.reload();
+      await expect(
+        page.getByRole("heading", { name: "No files attached" }),
+      ).toBeVisible();
+      await expect(page.getByText(fileName)).toHaveCount(0);
+    });
   });
 });
