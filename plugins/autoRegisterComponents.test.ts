@@ -1,211 +1,220 @@
 import assert from "node:assert/strict";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { test } from "node:test";
+import { runInNewContext } from "node:vm";
 
-import {
-  assertAllowlistFormsSupported,
-  assertKnownComponentNames,
-  assertUniqueComponentNames,
-  collectUnsupportedComponentTargets,
-  transformSource,
-} from "./autoRegisterComponents.js";
+import { type ReactElement, isValidElement } from "react";
+import * as jsxRuntime from "react/jsx-runtime";
+import ts from "typescript";
+import type { ResolvedConfig } from "vite";
 
-const ID = "/src/components/X.tsx";
+import { autoRegisterComponents } from "./autoRegisterComponents.js";
 
-// ponytail: tiny helper avoids repeating the fixed id in every call
-const transform = (src: string, include?: ReadonlySet<string> | null) =>
-  transformSource(src, ID, include);
+function handler<T extends (...args: never[]) => unknown>(
+  hook: T | { handler: T } | undefined,
+): T {
+  assert.ok(hook);
+  return typeof hook === "object" ? hook.handler : hook;
+}
 
-// ---------------------------------------------------------------------------
-// Happy paths
-// ---------------------------------------------------------------------------
+async function configuredPlugin(
+  root: string,
+  include?: ReadonlySet<string> | null,
+) {
+  const plugin = autoRegisterComponents({ include });
+  await handler(plugin.configResolved).call(
+    {} as never,
+    { root } as ResolvedConfig,
+  );
+  return plugin;
+}
 
-test("export function Foo returning JSX is transformed", () => {
-  const src = `export function Foo() { return <div/>; }`;
-  const result = transform(src);
-  assert.ok(result !== null);
-  assert.ok(
-    result.code.includes(
-      'import { register as __careRegisterComponent } from "@/lib/override"',
+async function transform(source: string, include?: ReadonlySet<string> | null) {
+  const root = path.resolve("component-fixture");
+  const plugin = await configuredPlugin(root, include);
+  return handler(plugin.transform).call(
+    {} as never,
+    source,
+    path.join(root, "src/components/Fixture.tsx"),
+  );
+}
+
+function evaluateModule(result: Awaited<ReturnType<typeof transform>>) {
+  assert.ok(result);
+  const code = typeof result === "string" ? result : result.code;
+  assert.ok(code);
+  type Component = (props?: { depth: number }) => ReactElement;
+  const registrations: {
+    name: string;
+    base: Component;
+    registered: () => null;
+  }[] = [];
+  const exports: Record<string, unknown> = {};
+  const compiled = ts.transpileModule(code.toString(), {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      jsx: ts.JsxEmit.ReactJSX,
+      target: ts.ScriptTarget.ES2022,
+    },
+    fileName: "Fixture.tsx",
+  });
+  runInNewContext(compiled.outputText, {
+    exports,
+    require(specifier: string) {
+      if (specifier === "react/jsx-runtime") return jsxRuntime;
+      assert.equal(specifier, "@/lib/override");
+      return {
+        register(name: string, base: Component) {
+          const registered = () => null;
+          registrations.push({ name, base, registered });
+          return registered;
+        },
+      };
+    },
+  });
+  return { exports, registrations };
+}
+
+async function validateTree(
+  files: Record<string, string>,
+  include?: ReadonlySet<string> | null,
+) {
+  const root = mkdtempSync(path.join(tmpdir(), "care-component-registration-"));
+  try {
+    for (const [name, source] of Object.entries(files)) {
+      const filename = path.join(root, "src", name);
+      mkdirSync(path.dirname(filename), { recursive: true });
+      writeFileSync(filename, source);
+    }
+    const plugin = await configuredPlugin(root, include);
+    await handler(plugin.buildStart).call({} as never, {} as never);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
+for (const { source, name, exported, include } of [
+  {
+    source: "export function Foo() { return <div/>; }",
+    name: "Foo",
+    exported: "Foo",
+    include: null,
+  },
+  {
+    source: "export const Bar = () => <div/>;",
+    name: "Bar",
+    exported: "Bar",
+    include: undefined,
+  },
+  {
+    source: "function Baz() { return <div/>; }\nexport default Baz;",
+    name: "Baz",
+    exported: "default",
+    include: undefined,
+  },
+]) {
+  test(`${name} exports the registered wrapper and preserves its implementation`, async () => {
+    const { exports, registrations } = evaluateModule(
+      await transform(source, include),
+    );
+    assert.equal(registrations.length, 1);
+    const registration = registrations[0];
+    assert.equal(registration.name, name);
+    assert.equal(exports[exported], registration.registered);
+    const rendered = registration.base();
+    assert.ok(isValidElement(rendered));
+    assert.equal(rendered.type, "div");
+  });
+}
+
+test("recursive JSX keeps referring to the original implementation", async () => {
+  const { exports, registrations } = evaluateModule(
+    await transform(
+      "export function Tree({ depth }) { return depth ? <Tree depth={depth - 1}/> : <span/>; }",
     ),
   );
-  assert.ok(result.code.includes("function Foo"));
-  assert.ok(result.code.includes('__careRegisterComponent("Foo", Foo)'));
-  assert.ok(result.code.includes("export { FooRegistered as Foo }"));
+  assert.equal(registrations.length, 1);
+  const { base, registered } = registrations[0];
+  assert.equal(exports.Tree, registered);
+  const child = base({ depth: 1 });
+  assert.ok(isValidElement<{ depth: number }>(child));
+  assert.equal(child.type, base);
+  assert.equal(child.props.depth, 0);
+  assert.equal(base({ depth: 0 }).type, "span");
 });
 
-test("export const Bar arrow function returning JSX is transformed", () => {
-  const src = `export const Bar = () => <div/>;`;
-  const result = transform(src);
-  assert.ok(result !== null);
-  assert.ok(
-    result.code.includes(
-      'import { register as __careRegisterComponent } from "@/lib/override"',
+test("unsupported exports and lowercase functions are left unchanged", async () => {
+  for (const source of [
+    "function Foo() { return <div/>; }\nexport { Foo };",
+    "function X() { return <div/>; }\nexport { X as Y };",
+    "export const A = () => <div/>, B = () => <div/>;",
+    "export const Ref = forwardRef((p, ref) => <div ref={ref}/>);",
+    // JSX is present, so this exercises the lowercase exclusion alone.
+    "export function notComp() { return <div/>; }",
+  ]) {
+    assert.equal(await transform(source), null, source);
+  }
+});
+
+test("the allowlist registers only selected exports", async () => {
+  const { exports, registrations } = evaluateModule(
+    await transform(
+      "export function Keep() { return <div/>; }\nexport function Drop() { return <span/>; }",
+      new Set(["Keep"]),
     ),
   );
-  assert.ok(result.code.includes("const Bar ="));
-  assert.ok(result.code.includes('__careRegisterComponent("Bar", Bar)'));
-  assert.ok(result.code.includes("export { BarRegistered as Bar }"));
+  assert.equal(registrations.length, 1);
+  assert.equal(registrations[0].name, "Keep");
+  assert.equal(exports.Keep, registrations[0].registered);
+  assert.equal(typeof exports.Drop, "function");
+  const dropped = (exports.Drop as () => ReactElement)();
+  assert.ok(isValidElement(dropped));
+  assert.equal(dropped.type, "span");
 });
 
-test("export default Baz where Baz is a local component is transformed", () => {
-  const src = `function Baz() { return <div/>; }\nexport default Baz;`;
-  const result = transform(src);
-  assert.ok(result !== null);
-  assert.ok(
-    result.code.includes(
-      'import { register as __careRegisterComponent } from "@/lib/override"',
+test("build startup rejects duplicate registration names across source files", async () => {
+  await assert.rejects(
+    validateTree({
+      "a.tsx": "export function Foo() { return <div/>; }",
+      "nested/b.tsx": "export const Foo = () => <span/>;",
+    }),
+    /Duplicate exported component names[\s\S]*Foo[\s\S]*a\.tsx[\s\S]*b\.tsx/,
+  );
+});
+
+test("build startup accepts unique names and an unrestricted registration set", async () => {
+  await assert.doesNotReject(
+    validateTree(
+      {
+        "a.tsx": "export function Foo() { return <div/>; }",
+        "b.tsx": "export const Bar = () => <span/>;",
+        "legacy.tsx":
+          "function Legacy() { return <div/>; }\nexport { Legacy };",
+      },
+      null,
     ),
   );
-  assert.ok(result.code.includes('__careRegisterComponent("Baz", Baz)'));
-  assert.ok(result.code.includes("export default BazRegistered"));
 });
 
-// ---------------------------------------------------------------------------
-// Recursive component — original binding must survive (recursion-safe)
-// ---------------------------------------------------------------------------
-
-test("recursive component keeps original binding name", () => {
-  const src = `export function Tree() { return <Tree/>; }`;
-  const result = transform(src);
-  assert.ok(result !== null);
-  assert.ok(result.code.includes("function Tree"));
-  assert.ok(result.code.includes('__careRegisterComponent("Tree", Tree)'));
+test("build startup explains unsupported allowlisted exports", async () => {
+  for (const source of [
+    "function Foo() { return <div/>; }\nexport { Foo };",
+    "function X() { return <div/>; }\nexport { X as Foo };",
+  ]) {
+    await assert.rejects(
+      validateTree({ "a.tsx": source }, new Set(["Foo"])),
+      /unsupported export form[\s\S]*Foo/,
+    );
+  }
 });
 
-// ---------------------------------------------------------------------------
-// Skip paths — transformSource must return null
-// ---------------------------------------------------------------------------
-
-test("export { Foo } named-export block returns null", () => {
-  const src = `function Foo() { return <div/>; }\nexport { Foo };`;
-  assert.equal(transform(src), null);
-});
-
-test("aliased export { X as Y } returns null", () => {
-  const src = `function X() { return <div/>; }\nexport { X as Y };`;
-  assert.equal(transform(src), null);
-});
-
-test("multi-declarator export const A = ..., B = ... returns null", () => {
-  const src = `export const A = () => <div/>, B = () => <div/>;`;
-  assert.equal(transform(src), null);
-});
-
-test("forwardRef export returns null", () => {
-  const src = `export const Ref = forwardRef((p, ref) => <div ref={ref}/>);`;
-  assert.equal(transform(src), null);
-});
-
-test("non-component lowercase function returns null", () => {
-  // returns JSX so only the PascalCase guard (not the JSX guard) excludes it
-  const src = `export function notComp() { return <div/>; }`;
-  assert.equal(transform(src), null);
-});
-
-// ---------------------------------------------------------------------------
-// Allowlist filtering
-// ---------------------------------------------------------------------------
-
-test("include=null transforms all matching components", () => {
-  const src = `export function Comp() { return <div/>; }`;
-  const result = transform(src, null);
-  assert.ok(result !== null);
-  assert.ok(result.code.includes('__careRegisterComponent("Comp", Comp)'));
-});
-
-test("include Set transforms Keep but leaves Drop untouched", () => {
-  const src = [
-    `export function Keep() { return <div/>; }`,
-    `export function Drop() { return <div/>; }`,
-  ].join("\n");
-  const result = transform(src, new Set(["Keep"]));
-  assert.ok(result !== null);
-  assert.ok(result.code.includes('__careRegisterComponent("Keep", Keep)'));
-  assert.ok(!result.code.includes('__careRegisterComponent("Drop", Drop)'));
-  // Drop retains its export keyword
-  assert.ok(result.code.includes("export function Drop"));
-});
-
-// ---------------------------------------------------------------------------
-// collectUnsupportedComponentTargets
-// ---------------------------------------------------------------------------
-
-test("collectUnsupportedComponentTargets: export { FooComp } yields FooComp", () => {
-  const src = `function FooComp() { return <div/>; }\nexport { FooComp };`;
-  const targets = collectUnsupportedComponentTargets(src, ID);
-  assert.equal(targets.length, 1);
-  assert.equal(targets[0].name, "FooComp");
-});
-
-test("collectUnsupportedComponentTargets: aliased export { X as YComp } yields YComp", () => {
-  const src = `function X() { return <div/>; }\nexport { X as YComp };`;
-  const targets = collectUnsupportedComponentTargets(src, ID);
-  assert.equal(targets.length, 1);
-  assert.equal(targets[0].name, "YComp");
-});
-
-// ---------------------------------------------------------------------------
-// assertUniqueComponentNames
-// ---------------------------------------------------------------------------
-
-test("assertUniqueComponentNames: duplicate name across files throws", () => {
-  const targets = [
-    { name: "Foo", file: "/src/a.tsx" },
-    { name: "Foo", file: "/src/b.tsx" },
-  ];
-  assert.throws(() => assertUniqueComponentNames(targets), /Duplicate/);
-});
-
-test("assertUniqueComponentNames: unique names do not throw", () => {
-  const targets = [
-    { name: "Foo", file: "/src/a.tsx" },
-    { name: "Bar", file: "/src/b.tsx" },
-  ];
-  assert.doesNotThrow(() => assertUniqueComponentNames(targets));
-});
-
-// ---------------------------------------------------------------------------
-// assertAllowlistFormsSupported
-// ---------------------------------------------------------------------------
-
-test("assertAllowlistFormsSupported: allowlisted name in unsupported throws", () => {
-  const unsupported = [{ name: "Foo", file: "/src/a.tsx" }];
-  assert.throws(
-    () => assertAllowlistFormsSupported(unsupported, new Set(["Foo"])),
-    /unsupported export form/,
-  );
-});
-
-test("assertAllowlistFormsSupported: include=null never throws", () => {
-  const unsupported = [{ name: "Foo", file: "/src/a.tsx" }];
-  assert.doesNotThrow(() => assertAllowlistFormsSupported(unsupported, null));
-});
-
-// ---------------------------------------------------------------------------
-// assertKnownComponentNames
-// ---------------------------------------------------------------------------
-
-test("assertKnownComponentNames: allowlisted typo (unknown name) throws", () => {
-  const targets = [{ name: "Foo", file: "/src/a.tsx" }];
-  const unsupported: { name: string; file: string }[] = [];
-  assert.throws(
-    () => assertKnownComponentNames(targets, new Set(["Typo"]), unsupported),
-    /Unknown component/,
-  );
-});
-
-test("assertKnownComponentNames: allowlisted name in unsupported does not throw here", () => {
-  const targets: { name: string; file: string }[] = [];
-  const unsupported = [{ name: "Foo", file: "/src/a.tsx" }];
-  assert.doesNotThrow(() =>
-    assertKnownComponentNames(targets, new Set(["Foo"]), unsupported),
-  );
-});
-
-test("assertKnownComponentNames: include=null never throws", () => {
-  const targets = [{ name: "Foo", file: "/src/a.tsx" }];
-  const unsupported: { name: string; file: string }[] = [];
-  assert.doesNotThrow(() =>
-    assertKnownComponentNames(targets, null, unsupported),
+test("build startup accepts known allowlisted names and rejects typos", async () => {
+  const files = { "a.tsx": "export function Foo() { return <div/>; }" };
+  await assert.doesNotReject(validateTree(files, new Set(["Foo"])));
+  await assert.rejects(
+    validateTree(files, new Set(["Typo"])),
+    /Unknown component names[\s\S]*Typo/,
   );
 });

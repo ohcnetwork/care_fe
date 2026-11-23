@@ -34,37 +34,39 @@ test.describe("Token Category List - Permission Tests", () => {
         page.getByRole("heading", { name: "Token Categories" }),
       ).toBeVisible();
 
-      // Verify table structure is present
-      const table = page.locator("table");
-      await expect(table).toBeVisible();
+      // Verify categories are grouped into one section per resource type
+      for (const resourceType of [
+        "Practitioner",
+        "Location",
+        "Healthcare Service",
+      ]) {
+        await expect(
+          page.getByRole("region", { name: resourceType, exact: true }),
+        ).toBeVisible();
+      }
 
-      // Verify table has data rows (tbody should have at least one row)
-      const tableBody = page.locator("tbody");
-      const rowCount = await tableBody.locator("tr").count();
-      expect(rowCount).toBeGreaterThan(0);
-
-      // Verify action buttons (View/Edit) are present in at least one row
+      // Verify at least one category is listed with its actions
+      const firstCategory = page
+        .locator('[data-cy^="token-category-group-"]')
+        .getByRole("listitem")
+        .first();
+      await expect(firstCategory).toBeVisible();
       await expect(
-        page.getByRole("link", { name: "View" }).first(),
-      ).toBeVisible();
-      await expect(
-        page.getByRole("link", { name: "Edit" }).first(),
+        firstCategory.getByRole("button", { name: /^Edit / }),
       ).toBeVisible();
 
       // Verify Token Category is visible in sidebar
-      const sidebarToggle = page.getByRole("button", {
-        name: "Toggle Sidebar",
-      });
+      const sidebarToggle = page
+        .locator('[data-cy="facility-settings-page-header"]')
+        .getByRole("button", { name: "Toggle Sidebar", exact: true });
       await expect(sidebarToggle).toBeVisible();
-      await sidebarToggle.click();
+      if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
+        await sidebarToggle.click();
+      }
 
-      const settingsSection = page.getByRole("button", { name: "Settings" });
-      await expect(settingsSection).toBeVisible();
-      await settingsSection.click();
-
-      const tokenCategoryLink = page.getByRole("link", {
-        name: "Token Category",
-      });
+      const tokenCategoryLink = page
+        .locator('[data-sidebar="sidebar"]')
+        .getByRole("link", { name: "Token Category", exact: true });
       await expect(tokenCategoryLink).toBeVisible();
     });
   });
@@ -76,13 +78,15 @@ test.describe("Token Category List - Permission Tests", () => {
       await page
         .getByRole("textbox", { name: /username/i })
         .fill("care-volunteer");
-      await page.getByLabel(/password/i).fill("Ohcn@123");
-      await page.getByRole("button", { name: /login/i }).click();
+      await page.getByLabel(/^password$/i).fill("Ohcn@123");
+      await page.getByRole("button", { name: /^sign in$/i }).click();
       await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
 
       // Verify we're logged in as volunteer
       await expect(
-        page.getByRole("heading", { name: /^Hey .+/ }),
+        page.getByRole("heading", {
+          name: /^Good (Morning|Afternoon|Evening), .+/,
+        }),
       ).toBeVisible();
     });
 
@@ -100,34 +104,24 @@ test.describe("Token Category List - Permission Tests", () => {
 
       // Step 2: Verify access denied message is shown
 
-      // Step 3: Verify table and data are NOT visible
-      const table = page.locator("table");
-      await expect(table).not.toBeVisible();
-
-      // Verify action buttons are NOT visible
-      const viewButtons = page.getByRole("link", { name: "View", exact: true });
-      const editButtons = page.getByRole("link", { name: "Edit", exact: true });
-      expect(await viewButtons.count()).toBe(0);
-      expect(await editButtons.count()).toBe(0);
+      // Step 3: Verify categories and actions are NOT visible
+      await expect(
+        page.locator('[data-cy^="token-category-group-"]'),
+      ).toHaveCount(0);
+      await expect(page.getByRole("button", { name: /^Edit / })).toHaveCount(0);
 
       // Step 4: Verify Token Category link is NOT visible in sidebar
-      const sidebarToggle = page.getByRole("button", {
-        name: "Toggle Sidebar",
-      });
+      const sidebarToggle = page
+        .locator('[data-cy="facility-settings-page-header"]')
+        .getByRole("button", { name: "Toggle Sidebar", exact: true });
       await expect(sidebarToggle).toBeVisible();
-      await sidebarToggle.click();
-
-      const settingsSection = page.getByRole("button", { name: "Settings" });
-      const settingsVisible = await settingsSection.isVisible();
-
-      if (settingsVisible) {
-        await settingsSection.click();
-        const tokenCategoryLink = page.getByRole("link", {
-          name: "Token Category",
-        });
-        await expect(tokenCategoryLink).not.toBeVisible();
+      if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
+        await sidebarToggle.click();
       }
-      // If Settings section itself isn't visible, Token Category is also not accessible
+      const tokenCategoryLink = page
+        .locator('[data-sidebar="sidebar"]')
+        .getByRole("link", { name: "Token Category", exact: true });
+      await expect(tokenCategoryLink).toHaveCount(0);
     });
   });
 });

@@ -37,8 +37,8 @@ test.describe("Encounter Plots Tab", () => {
     await test.step("Navigate to the Plots tab", async () => {
       await page.goto(plotsUrl);
       await expect(page.getByRole("tab", { name: "Plots" })).toHaveAttribute(
-        "data-state",
-        "active",
+        "aria-selected",
+        "true",
       );
     });
 

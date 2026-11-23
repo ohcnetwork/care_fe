@@ -10,7 +10,6 @@ test.describe("Token Category Edit - Permission Tests", () => {
   let resourceType: string;
   let updatedName: string;
   let updatedShorthand: string;
-  let updatedResourceType: string;
   let facilityId: string;
 
   // Resource types available for token categories
@@ -25,7 +24,6 @@ test.describe("Token Category Edit - Permission Tests", () => {
     // Generate data for updates
     updatedName = faker.company.name();
     updatedShorthand = faker.string.alphanumeric(4).toUpperCase();
-    updatedResourceType = faker.helpers.arrayElement(resourceTypes);
     facilityId = getFacilityId();
   });
 
@@ -33,149 +31,136 @@ test.describe("Token Category Edit - Permission Tests", () => {
     // Use admin authenticated state
     test.use({ storageState: "tests/.auth/user.json" });
 
-    test("Admin can view Edit button in actions and submit the edit form", async ({
-      page,
-    }) => {
-      // Step 1: Navigate directly to token category page
+    test.beforeEach(async ({ page }) => {
+      // Create a token category to edit / view
       await page.goto(`/facility/${facilityId}/settings/token_category`);
-
-      // Wait for page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Token Categories" }),
       ).toBeVisible({ timeout: 10000 });
 
-      // Verify we're on the token category list page
-      await expect(page).toHaveURL(
-        /\/facility\/[^/]+\/settings\/token_category/,
-      );
-
-      // Step 2: Create a token category first (so we have something to edit)
-      const addButton = page.getByRole("button", {
-        name: "Add Token Category",
+      await page
+        .getByRole("region", { name: resourceType, exact: true })
+        .getByRole("button", { name: `Add ${resourceType} Token Category` })
+        .click();
+      const sheet = page.getByRole("dialog", {
+        name: "Create Token Category",
       });
-      await expect(addButton).toBeVisible();
-      await addButton.click();
-
-      // Fill and submit creation form
-      await expect(page).toHaveURL(
-        /\/facility\/[^/]+\/settings\/token_category\/new/,
-      );
-      await page.getByRole("textbox", { name: "Name" }).fill(tokenCategoryName);
-      await page.getByRole("combobox", { name: "Resource Type" }).click();
-      await page.getByRole("option", { name: resourceType }).click();
-      await page.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
-      await page.getByRole("button", { name: "Create" }).click();
-
-      // Wait for navigation back to list page
-      await page.waitForURL(
-        /\/facility\/[^/]+\/settings\/token_category(?!\/new)/,
-      );
-
-      // Step 3: Search for the created token category
-      await page
-        .getByRole("textbox", { name: "Search Token Categories" })
+      await sheet
+        .getByRole("textbox", { name: "Name" })
         .fill(tokenCategoryName);
+      await sheet.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
+      await sheet.getByRole("button", { name: "Create" }).click();
+      await expect(sheet).not.toBeVisible();
 
-      // Step 4: Verify Edit button is visible in actions column
-      const editButton = page.getByRole("link", { name: "Edit" }).first();
-      await expect(editButton).toBeVisible();
-
-      // Step 5: Click Edit button
-      await editButton.click();
-
-      // Verify we're on the edit page
-      await expect(page).toHaveURL(
-        /\/facility\/[^/]+\/settings\/token_category\/.*\/edit/,
-      );
-      await expect(
-        page.getByRole("heading", { name: "Edit Token Category" }),
-      ).toBeVisible();
-
-      // Step 6: Update the token category
-      await page.getByRole("textbox", { name: "Name" }).fill(updatedName);
-      await page.getByRole("combobox", { name: "Resource Type" }).click();
-      await page.getByRole("option", { name: updatedResourceType }).click();
       await page
-        .getByRole("textbox", { name: "Shorthand" })
-        .fill(updatedShorthand);
-
-      // Submit the edit form
-      await page.getByRole("button", { name: "Update" }).click();
-
-      // Wait for navigation back to list page
-      await page.waitForURL(
-        /\/facility\/[^/]+\/settings\/token_category(?!\/.*\/edit)/,
-      );
-
-      // Step 7: Verify the edit was successful
-      await page
-        .getByRole("textbox", { name: "Search Token Categories" })
-        .fill(updatedName);
-
-      const tableBody = page.locator("tbody");
-      await expect(tableBody).toContainText(updatedName);
-      await expect(tableBody).toContainText(updatedShorthand);
-      await expect(tableBody).toContainText(updatedResourceType);
+        .getByRole("searchbox", { name: "Search Token Categories" })
+        .fill(tokenCategoryName);
     });
 
-    test("Admin can access Set as default and Edit buttons after clicking View button", async ({
+    test("Admin can edit a token category but not its resource type", async ({
       page,
     }) => {
-      // Step 1: Navigate directly to token category page
-      await page.goto(`/facility/${facilityId}/settings/token_category`);
+      const section = page.getByRole("region", {
+        name: resourceType,
+        exact: true,
+      });
+      await section
+        .getByRole("listitem")
+        .filter({ hasText: tokenCategoryName })
+        .getByRole("button", { name: `Edit ${tokenCategoryName}` })
+        .click();
 
-      // Wait for page heading to be visible instead of networkidle
+      const sheet = page.getByRole("dialog", { name: "Edit Token Category" });
+      await expect(sheet).toBeVisible();
+
+      // The resource type is shown read-only: the backend's update spec
+      // doesn't accept it.
+      const resourceTypeField = sheet.locator(
+        '[data-cy="token-category-resource-type"]',
+      );
+      await expect(resourceTypeField).toContainText(resourceType);
+      await expect(resourceTypeField).toContainText(
+        "Resource type cannot be changed once the token category is created.",
+      );
       await expect(
-        page.getByRole("heading", { name: "Token Categories" }),
-      ).toBeVisible({ timeout: 10000 });
+        sheet.getByRole("combobox", { name: "Resource Type" }),
+      ).toHaveCount(0);
 
-      // Verify we're on the token category list page
-      await expect(page).toHaveURL(
-        /\/facility\/[^/]+\/settings\/token_category/,
+      await expect(sheet.getByRole("textbox", { name: "Name" })).toHaveValue(
+        tokenCategoryName,
+      );
+      await sheet.getByRole("textbox", { name: "Name" }).fill(updatedName);
+      await sheet
+        .getByRole("textbox", { name: "Shorthand" })
+        .fill(updatedShorthand);
+      await sheet.getByRole("button", { name: "Save Changes" }).click();
+      await expect(sheet).not.toBeVisible();
+
+      // The edited category stays in its original section
+      await page
+        .getByRole("searchbox", { name: "Search Token Categories" })
+        .fill(updatedName);
+      const updatedItem = section
+        .getByRole("listitem")
+        .filter({ hasText: updatedName });
+      await expect(updatedItem).toBeVisible();
+      await expect(updatedItem).toContainText(updatedShorthand);
+    });
+
+    test("Admin can make a token category the default from the edit sheet", async ({
+      page,
+    }) => {
+      const section = page.getByRole("region", {
+        name: resourceType,
+        exact: true,
+      });
+      const item = () =>
+        section.getByRole("listitem").filter({ hasText: tokenCategoryName });
+      const openEditSheet = async () => {
+        await item()
+          .getByRole("button", { name: `Edit ${tokenCategoryName}` })
+          .click();
+        const sheet = page.getByRole("dialog", { name: "Edit Token Category" });
+        await expect(sheet).toBeVisible();
+        return sheet;
+      };
+
+      await expect(item().getByText("Default", { exact: true })).toHaveCount(0);
+
+      let sheet = await openEditSheet();
+      const defaultFrame = sheet.locator('[data-cy="token-category-default"]');
+      // Applies immediately, without saving the form
+      await defaultFrame
+        .getByRole("button", { name: "Set as default" })
+        .click();
+      await expect(
+        defaultFrame.getByRole("button", { name: "Set as default" }),
+      ).toHaveCount(0);
+      await expect(
+        defaultFrame.getByText("Default", { exact: true }),
+      ).toBeVisible();
+      await sheet.getByRole("button", { name: "Close" }).click();
+      await expect(sheet).not.toBeVisible();
+
+      // The new default is badged and listed first in its section
+      await expect(item().getByText("Default", { exact: true })).toBeVisible();
+      await page
+        .getByRole("searchbox", { name: "Search Token Categories" })
+        .clear();
+      await expect(section.getByRole("listitem").first()).toContainText(
+        tokenCategoryName,
       );
 
-      // Step 2: Create a token category first (so we have something to view)
-      const addButton = page.getByRole("button", {
-        name: "Add Token Category",
-      });
-      await expect(addButton).toBeVisible();
-      await addButton.click();
-
-      // Fill and submit creation form
-      await expect(page).toHaveURL(
-        /\/facility\/[^/]+\/settings\/token_category\/new/,
-      );
-      await page.getByRole("textbox", { name: "Name" }).fill(tokenCategoryName);
-      await page.getByRole("combobox", { name: "Resource Type" }).click();
-      await page.getByRole("option", { name: resourceType }).click();
-      await page.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
-      await page.getByRole("button", { name: "Create" }).click();
-
-      // Step 3: Click the View button of the first token category from the table
-      const viewButton = page.getByRole("link", { name: "View" }).nth(1);
-      await expect(viewButton).toBeVisible();
-      await viewButton.click();
-
-      // Wait for the view page to load by checking for Edit button
-      await expect(page.getByRole("link", { name: "Edit" })).toBeVisible({
-        timeout: 10000,
-      });
-
-      // Step 4: Verify Edit button is visible on the view page
-      const editButtonOnViewPage = page.getByRole("link", { name: "Edit" });
-      await expect(editButtonOnViewPage).toBeVisible();
-
-      // Step 5: Verify Set as default button exists and is visible (if the feature exists)
-      const setAsDefaultButton = page.getByRole("button", {
-        name: /Set as default/i,
-      });
-      const setAsDefaultExists = await setAsDefaultButton
-        .isVisible()
-        .catch(() => false);
-
-      if (setAsDefaultExists) {
-        await expect(setAsDefaultButton).toBeVisible();
-      }
+      // A default can't be unset, only replaced by another category
+      await page
+        .getByRole("searchbox", { name: "Search Token Categories" })
+        .fill(tokenCategoryName);
+      sheet = await openEditSheet();
+      await expect(
+        sheet
+          .locator('[data-cy="token-category-default"]')
+          .getByRole("button", { name: "Set as default" }),
+      ).toHaveCount(0);
     });
   });
 });

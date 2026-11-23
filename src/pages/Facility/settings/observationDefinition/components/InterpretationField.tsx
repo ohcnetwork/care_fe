@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import { Highlighter } from "lucide-react";
-import { FieldValues, UseFormReturn } from "react-hook-form";
+import { FieldPath, FieldValues, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 export function InterpretationComponent<
@@ -42,13 +42,13 @@ export function InterpretationComponent<
   };
 
   return (
-    <div className="flex items-center gap-2 w-full">
+    <div className="flex w-full min-w-0 items-start gap-2">
       {!disableDisplay && (
         <FormField
           control={form.control}
-          name={`${fieldName}.display` as any}
+          name={`${fieldName}.display` as FieldPath<TFieldValues>}
           render={({ field }) => (
-            <FormItem className="flex-1">
+            <FormItem className="min-w-0 flex-1">
               <FormControl>
                 <Input
                   {...field}
@@ -63,7 +63,7 @@ export function InterpretationComponent<
           )}
         />
       )}
-      <label className="inline-flex items-center gap-1.5 cursor-pointer shrink-0">
+      <label className="inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5">
         <Switch
           checked={interpretation.highlight ?? false}
           onCheckedChange={handleHighlightChange}

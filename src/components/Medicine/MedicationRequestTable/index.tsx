@@ -75,29 +75,17 @@ export default function MedicationRequestTable() {
     <div className="space-y-2 h-full">
       <Tabs defaultValue="prescriptions" className="h-full">
         <ScrollArea className="w-full">
-          <TabsList>
-            <TabsTrigger
-              value="prescriptions"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
+          <TabsList variant="line">
+            <TabsTrigger value="prescriptions">
               {t("prescriptions")}
             </TabsTrigger>
-            <TabsTrigger
-              value="ongoing"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
+            <TabsTrigger value="ongoing">
               {t("medication_statements")}
             </TabsTrigger>
-            <TabsTrigger
-              value="administration"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
+            <TabsTrigger value="administration">
               {t("medicine_administration")}
             </TabsTrigger>
-            <TabsTrigger
-              value="dispense_history"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
+            <TabsTrigger value="dispense_history">
               {t("dispense_history")}
             </TabsTrigger>
           </TabsList>

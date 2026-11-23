@@ -1,6 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ScanQrCode } from "lucide-react";
-import { navigate } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -20,6 +19,7 @@ import SpecimenIDScanDialog from "@/components/Scan/SpecimenIDScanDialog";
 import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable";
 
 import useFilters from "@/hooks/useFilters";
+import { serviceRequestListSearch } from "@/lib/router/search/services";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
@@ -39,6 +39,7 @@ import {
   longDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { navigate } from "@/lib/router/navigate";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import {
   Priority,
@@ -135,9 +136,14 @@ function ServiceRequestCard({
             variant="outline"
             size="sm"
             onClick={() =>
-              navigate(
-                `/facility/${facilityId}/locations/${locationId}/service_requests/${request.id}`,
-              )
+              navigate({
+                to: "/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId",
+                params: {
+                  facilityId,
+                  locationId,
+                  serviceRequestId: request.id,
+                },
+              })
             }
           >
             <CareIcon icon="l-edit" />
@@ -158,8 +164,8 @@ export default function ServiceRequestList({
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: serviceRequestListSearch,
     limit: 14,
-    disableCache: true,
     defaultQueryParams: {
       status: "active",
     },
@@ -182,7 +188,7 @@ export default function ServiceRequestList({
     queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
       pathParams: {
         facilityId,
-        activityDefinitionSlug: qParams.activity_definition,
+        activityDefinitionSlug: qParams.activity_definition ?? "",
       },
     }),
     enabled: !!qParams.activity_definition && !selectedActivityDefinition,
@@ -357,7 +363,7 @@ export default function ServiceRequestList({
               </Button>
             </div>
           </div>
-          <div className="w-full mb-4 overflow-x-auto">
+          <div className="w-full mb-4">
             <FilterTabs
               value={qParams.status || Status.active}
               onValueChange={(value) => updateQuery({ status: value })}
@@ -411,8 +417,6 @@ export default function ServiceRequestList({
               <TableSkeleton count={5} />
             </div>
           </>
-        ) : serviceRequests.length === 0 && !isLoading ? (
-          <EmptyState />
         ) : serviceRequests.length === 0 ? (
           <EmptyState />
         ) : (

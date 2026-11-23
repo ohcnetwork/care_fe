@@ -122,15 +122,14 @@ export function ComboboxInput({
           {mobileTrigger ?? (
             <Button
               type="button"
-              variant="white"
+              variant="outline"
               role="combobox"
               disabled={disabled}
               aria-label={inputProps["aria-label"]}
               aria-invalid={inputProps["aria-invalid"]}
               className={cn(
-                "flex h-9 w-full items-center justify-between gap-2 border-gray-300 font-normal shadow-xs",
+                "w-full min-w-0 justify-between font-normal",
                 !value && "text-muted-foreground",
-                inputProps["aria-invalid"] && "border-red-500",
                 className,
               )}
             >
@@ -141,12 +140,12 @@ export function ComboboxInput({
             </Button>
           )}
         </DrawerTrigger>
-        <DrawerContent>
+        <DrawerContent height="fixed">
           <DrawerTitle className="sr-only">
             {title ?? inputProps.placeholder ?? ""}
           </DrawerTitle>
           <div className="border-b p-3">{field}</div>
-          <div className="max-h-[70vh] overflow-y-auto">{children}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
         </DrawerContent>
       </Drawer>
     );
@@ -157,10 +156,7 @@ export function ComboboxInput({
       <PopoverTrigger asChild>{field}</PopoverTrigger>
       <PopoverContent
         align={align}
-        className={cn(
-          "w-[var(--radix-popover-trigger-width)] min-w-56 p-0",
-          contentClassName,
-        )}
+        className={cn("w-[var(--anchor-width)] min-w-56 p-0", contentClassName)}
         // Keep the caret in the field when the dropdown opens, so the user can
         // keep typing instead of having focus yanked into the list.
         onOpenAutoFocus={(e) => {

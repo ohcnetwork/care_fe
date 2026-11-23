@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
-import { getEncounterId } from "tests/support/encounterId";
+import { expect, test, type Page } from "@playwright/test";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import { firstValueSetDisplay } from "tests/helper/valueSet";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -25,26 +25,19 @@ const SYMPTOM_VERIFICATION_STATUS = [
   "Refuted",
 ] as const;
 
-const symptomOptions = [
-  "Chronic pain",
-  "Chronic respiratory failure due to obstructive sleep apnoea",
-  "Chronic nontraumatic intracranial subdural haematoma",
-  "Adenosine deaminase 2 deficiency",
-  "Malignant melanoma of skin of left wrist",
-  "Small bowel enteroscopy normal",
-  "Renal scarring due to vesicoureteral reflux",
-  "Venous ulcer of toe of left foot",
-  "Acquired arteriovenous malformation of vascular structure of gastrointestinal tract",
-  "Venous ulcer of left ankle",
-  "Acute left-sided ulcerative colitis",
-  "Allergy to hydrogen peroxide",
-];
-const usedSymptoms = new Set<string>(); // To track used symptoms across tests so we don't add duplicate symptoms
+async function selectSymptom(page: Page, name: string) {
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: /Add (another )?Symptom/i })
+    .click();
+  await page.getByPlaceholder(/Add (another )?Symptom/i).fill(name);
+  await page
+    .getByTestId("valueset-search-results")
+    .getByRole("option", { name, exact: true })
+    .click();
+}
 
 test.describe("Symptom Questionnaire", () => {
-  let facilityId: string;
-  let patientId: string;
-  let encounterId: string;
   let questionnaireUrl: string;
   let symptomName: string;
   let status: string;
@@ -52,15 +45,10 @@ test.describe("Symptom Questionnaire", () => {
   let severity: string;
 
   test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
-    patientId = getPatientId();
-    encounterId = getEncounterId();
-
-    const availableSymptomOptions = symptomOptions.filter(
-      (d) => !usedSymptoms.has(d),
-    );
-    symptomName = faker.helpers.arrayElement(availableSymptomOptions);
-    usedSymptoms.add(symptomName); //Add to used symptoms to avoid duplicates
+    const facilityId = getFacilityId();
+    const { patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId);
+    symptomName = await firstValueSetDisplay("system-symptom-code", facilityId);
 
     status = faker.helpers.arrayElement(SYMPTOM_CLINICAL_STATUS);
     verification = faker.helpers.arrayElement(SYMPTOM_VERIFICATION_STATUS);
@@ -74,12 +62,7 @@ test.describe("Symptom Questionnaire", () => {
   test("should add symptom with all fields", async ({ page }) => {
     await page.waitForLoadState("networkidle");
 
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Symptom/i })
-      .click();
-    await page.getByPlaceholder(/Add (another )?Symptom/i).fill(symptomName);
-    await page.getByRole("option", { name: symptomName, exact: true }).click();
+    await selectSymptom(page, symptomName);
     const symptomRow = page.getByRole("row", { name: symptomName });
 
     await symptomRow.getByRole("cell").nth(2).click();
@@ -91,7 +74,7 @@ test.describe("Symptom Questionnaire", () => {
     await symptomRow.getByRole("cell").nth(4).click();
     await page.getByRole("option", { name: verification, exact: true }).click();
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -105,27 +88,25 @@ test.describe("Symptom Questionnaire", () => {
     });
     await symptomHistoryDialog.waitFor({ state: "visible" });
 
-    const tableBody = symptomHistoryDialog.locator('[data-slot="table-body"]');
-    await expect(tableBody).toContainText(symptomName);
-
+    // Each date group renders its OWN <tbody data-slot="table-body">
+    // (HistoricalRecordSelector/index.tsx) — a locator over that selector
+    // alone strict-mode-violates the moment records span more than one
+    // day. Target the specific row for the symptom JUST added instead.
     const symptomHistoryRow = symptomHistoryDialog
-      .locator('[data-slot="table-body"] tr')
+      .locator("tr")
       .filter({ hasText: symptomName })
       .filter({ hasText: status });
 
+    await expect(symptomHistoryRow.first()).toBeVisible();
+    await expect(symptomHistoryRow.first()).toContainText(symptomName);
     await expect(symptomHistoryRow.first()).toContainText(status);
     await expect(symptomHistoryRow.first()).toContainText(severity);
     await expect(symptomHistoryRow.first()).toContainText(verification);
   });
 
   test("verify duplicate symptom cannot be added", async ({ page }) => {
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Symptom/i })
-      .click();
-    await page.getByPlaceholder(/Add (another )?Symptom/i).fill(symptomName);
-    await page.getByRole("option", { name: symptomName, exact: true }).click();
-    await page.getByRole("button", { name: "Submit" }).click();
+    await selectSymptom(page, symptomName);
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -134,16 +115,7 @@ test.describe("Symptom Questionnaire", () => {
     await page.goto(questionnaireUrl);
     await page.waitForLoadState("networkidle");
 
-    const duplicateSymptomName = faker.helpers.arrayElement([...usedSymptoms]);
-
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Symptom/i })
-      .click();
-    await page
-      .getByRole("option")
-      .filter({ hasText: duplicateSymptomName })
-      .click();
+    await selectSymptom(page, symptomName);
 
     await expect(
       page

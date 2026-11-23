@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
@@ -10,18 +11,23 @@ test.describe("Authenticated User Flow", () => {
 
     // Verify user is logged in
     // Adjust these selectors based on your actual application
-    await expect(page.getByRole("heading", { name: /^Hey .+$/ })).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: /^Good (Morning|Afternoon|Evening), .+/,
+      }),
+    ).toBeVisible();
   });
 
   test("should be able to navigate to facilities", async ({ page }) => {
+    const facilityPath = `/facility/${getFacilityId()}/overview`;
     await page.goto("/");
-
-    // Look for facilities navigation
-    // Adjust based on your actual navigation structure
-    const facilitiesLink = page.getByRole("link", { name: /facilit/i }).first();
-    if (await facilitiesLink.isVisible()) {
-      await facilitiesLink.click();
-      await expect(page).toHaveURL(/.*facilit/);
-    }
+    await page
+      .getByRole("tabpanel")
+      .getByRole("link", { name: /facility with patients?/i })
+      .click();
+    await expect(page).toHaveURL(facilityPath);
+    await expect(
+      page.getByRole("link", { name: "Overview", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
   });
 });

@@ -32,11 +32,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { Code } from "@/types/base/code/code";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { Code } from "@/types/base/code/code";
 
+import { Button } from "@/components/ui/button";
+import { ObservationStatus } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
+import { ObservationDetailSheet } from "./ObservationDetailSheet";
+import { codeKey } from "./observationDetailUtils";
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
 interface CodeGroup {
   codes: Code[];
@@ -50,7 +54,8 @@ interface ObservationVisualizerProps {
   codeGroups: CodeGroup[];
   height?: number;
   gridCols?: number;
-  encounterId: string;
+  /** Omit to chart the patient's observations across encounters. */
+  encounterId?: string;
 }
 
 interface ChartData {
@@ -112,7 +117,7 @@ export const ObservationVisualizer = ({
       "observations",
       patientId,
       encounterId,
-      allCodes.map((c) => c.code).join(","),
+      allCodes.map(codeKey).join(","),
     ],
 
     queryFn: query(observationApi.analyse, {
@@ -125,6 +130,17 @@ export const ObservationVisualizer = ({
       },
     }),
   });
+
+  const chartableReadings = (code: Code) =>
+    (
+      data?.results.find(
+        (rg) => rg.code.code === code.code && rg.code.system === code.system,
+      )?.results ?? []
+    ).filter(
+      (observation) =>
+        observation.status !== ObservationStatus.ENTERED_IN_ERROR,
+    );
+
   if (isLoading) {
     return (
       <div
@@ -170,10 +186,7 @@ export const ObservationVisualizer = ({
     // First, collect all timestamps from all codes in the group
     const allTimestamps = new Set<string>();
     group.codes.forEach((code) => {
-      const resultGroup = data.results.find((rg) => rg.code.code === code.code);
-      if (!resultGroup) return;
-
-      resultGroup.results.forEach((observation) => {
+      chartableReadings(code).forEach((observation) => {
         // Only timestamps with a plottable value, so a group of non-numeric
         // results stays empty and shows the no-data state.
         if (
@@ -196,10 +209,9 @@ export const ObservationVisualizer = ({
 
     // Then fill in the values for each code
     group.codes.forEach((code) => {
-      const resultGroup = data.results.find((rg) => rg.code.code === code.code);
-      if (!resultGroup || !code.display) return;
+      if (!code.display) return;
 
-      resultGroup.results.forEach((observation) => {
+      chartableReadings(code).forEach((observation) => {
         const timestamp = observation.effective_datetime;
         if (!timestamp || typeof timestamp !== "string") return;
 
@@ -238,8 +250,24 @@ export const ObservationVisualizer = ({
       {processedDataByGroup.map((group, groupIndex) => (
         <Card key={groupIndex} className="p-4">
           <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <h3 className="text-sm font-medium">{group.title}</h3>
+            <div className="flex items-center">
+              <h3 className="text-sm font-medium">
+                <ObservationDetailSheet
+                  codes={group.codes}
+                  title={group.title}
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  trigger={
+                    <Button
+                      variant="link"
+                      className="underline text-sm font-medium px-2"
+                    >
+                      {group.title}
+                    </Button>
+                  }
+                />
+              </h3>
+
               <Popover>
                 <PopoverTrigger className="!px-0">
                   <CareIcon
@@ -268,13 +296,13 @@ export const ObservationVisualizer = ({
           </div>
           <Tabs defaultValue="graph" className="w-full">
             <TabsList className="flex w-full">
-              <TabsTrigger className="flex-1" value="graph">
+              <TabsTrigger className="flex-1 px-2" value="graph">
                 {t("graph")}
               </TabsTrigger>
-              <TabsTrigger className="flex-1" value="data">
+              <TabsTrigger className="flex-1 px-2" value="data">
                 {t("recent_data")}
               </TabsTrigger>
-              <TabsTrigger className="flex-1" value="history">
+              <TabsTrigger className="flex-1 px-2" value="history">
                 {t("full_history")}
               </TabsTrigger>
             </TabsList>
