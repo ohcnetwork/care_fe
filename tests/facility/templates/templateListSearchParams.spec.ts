@@ -22,79 +22,89 @@ test.describe("Template list search params", () => {
 
   const listPath = () => `/facility/${facilityId}/template`;
 
-  test("writes the status filter to the URL and the API request", async ({
-    page,
-  }) => {
-    await page.goto(listPath());
-    await expect(
-      page.getByRole("heading", { name: "Templates" }),
-    ).toBeVisible();
+  test(
+    "writes the status filter to the URL and the API request",
+    { tag: ["@atomic", "@cap:facility.templates.filter"] },
+    async ({ page }) => {
+      await page.goto(listPath());
+      await expect(
+        page.getByRole("heading", { name: "Templates" }),
+      ).toBeVisible();
 
-    const request = waitForApiList(
-      page,
-      "/template/",
-      (params) => params.get("status") === "retired",
-    );
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: "All Statuses" })
-      .click();
-    await page.getByRole("option", { name: "Archived", exact: true }).click();
-    await request;
+      const request = waitForApiList(
+        page,
+        "/template/",
+        (params) => params.get("status") === "retired",
+      );
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: "All Statuses" })
+        .click();
+      await page.getByRole("option", { name: "Archived", exact: true }).click();
+      await request;
 
-    await expect(page).toHaveURL(queryParam("status", "retired"));
-  });
+      await expect(page).toHaveURL(queryParam("status", "retired"));
+    },
+  );
 
-  test("restores the filters from a bookmarked URL", async ({ page }) => {
-    const request = waitForApiList(
-      page,
-      "/template/",
-      (params) =>
-        params.get("status") === "draft" &&
-        params.get("template_type") === "patient_summary",
-    );
-    await page.goto(
-      withSearch(listPath(), {
-        status: "draft",
-        template_type: "patient_summary",
-      }),
-    );
-    await request;
+  test(
+    "restores the filters from a bookmarked URL",
+    { tag: ["@atomic", "@cap:facility.templates.filter"] },
+    async ({ page }) => {
+      const request = waitForApiList(
+        page,
+        "/template/",
+        (params) =>
+          params.get("status") === "draft" &&
+          params.get("template_type") === "patient_summary",
+      );
+      await page.goto(
+        withSearch(listPath(), {
+          status: "draft",
+          template_type: "patient_summary",
+        }),
+      );
+      await request;
 
-    await expect(
-      page.getByRole("combobox").filter({ hasText: "Draft" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("combobox").filter({ hasText: "Patient Summary" }),
-    ).toBeVisible();
-  });
+      await expect(
+        page.getByRole("combobox").filter({ hasText: "Draft" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("combobox").filter({ hasText: "Patient Summary" }),
+      ).toBeVisible();
+    },
+  );
 
-  test("ignores invalid filters in a bookmarked URL", async ({ page }) => {
-    const api = recordApiQueries(page);
-    const request = waitForApiList(
-      page,
-      "/template/",
-      (params) =>
-        params.get("offset") === "0" &&
-        !params.has("status") &&
-        !params.has("template_type"),
-    );
-    await page.goto(
-      withSearch(listPath(), {
-        status: "bogus",
-        template_type: "bogus",
-        page: "abc",
-      }),
-    );
-    await request;
+  test(
+    "ignores invalid filters in a bookmarked URL",
+    { tag: ["@atomic", "@cap:facility.templates.filter"] },
+    async ({ page }) => {
+      const api = recordApiQueries(page);
+      const request = waitForApiList(
+        page,
+        "/template/",
+        (params) =>
+          params.get("offset") === "0" &&
+          !params.has("status") &&
+          !params.has("template_type"),
+      );
+      await page.goto(
+        withSearch(listPath(), {
+          status: "bogus",
+          template_type: "bogus",
+          page: "abc",
+        }),
+      );
+      await request;
 
-    await expect(
-      page.getByRole("combobox").filter({ hasText: "All Statuses" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("combobox").filter({ hasText: "All Types" }),
-    ).toBeVisible();
-    api.expectNotSent("bogus");
-    api.expectNotSent("abc");
-  });
+      await expect(
+        page.getByRole("combobox").filter({ hasText: "All Statuses" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("combobox").filter({ hasText: "All Types" }),
+      ).toBeVisible();
+      api.expectNotSent("bogus");
+      api.expectNotSent("abc");
+    },
+  );
 });

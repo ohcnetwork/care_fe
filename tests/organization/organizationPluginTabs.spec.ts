@@ -79,58 +79,68 @@ test.describe("Organization plugin tabs", () => {
     );
   });
 
-  test("renders a plugin tab inside the organization layout", async ({
-    page,
-    request,
-  }) => {
-    const [organization] = await listOrganizations(
-      request,
-      "org_type=govt&limit=1",
-    );
+  test(
+    "renders a plugin tab inside the organization layout",
+    { tag: ["@atomic", "@cap:org.plugin-tab.view"] },
+    async ({ page, request }) => {
+      const [organization] = await listOrganizations(
+        request,
+        "org_type=govt&limit=1",
+      );
 
-    await page.goto(`/organization/${organization.id}/plugin-tab`);
+      await page.goto(`/organization/${organization.id}/plugin-tab`);
 
-    await expect(page.locator("[data-cy=plugin-organization-tab]")).toHaveText(
-      `${organization.id}|`,
-    );
-  });
+      await expect(
+        page.locator("[data-cy=plugin-organization-tab]"),
+      ).toHaveText(`${organization.id}|`);
+    },
+  );
 
-  test("renders a plugin tab of a child organization", async ({
-    page,
-    request,
-  }) => {
-    const parent = (
-      await listOrganizations(request, "org_type=govt&limit=50")
-    ).find((organization) => organization.has_children);
-    if (!parent) {
-      test.skip(true, "No government organization has a child.");
-      return;
-    }
-    const [child] = await listOrganizations(
-      request,
-      `parent=${parent.id}&limit=1`,
-    );
+  test(
+    "renders a plugin tab of a child organization",
+    {
+      tag: ["@coupled", "@cap:org.plugin-tab.view"],
+      annotation: {
+        type: "coupled",
+        description:
+          "Skips when no government organization in the environment has a child organization",
+      },
+    },
+    async ({ page, request }) => {
+      const parent = (
+        await listOrganizations(request, "org_type=govt&limit=50")
+      ).find((organization) => organization.has_children);
+      if (!parent) {
+        test.skip(true, "No government organization has a child.");
+        return;
+      }
+      const [child] = await listOrganizations(
+        request,
+        `parent=${parent.id}&limit=1`,
+      );
 
-    await page.goto(
-      `/organization/${parent.id}/children/${child.id}/plugin-tab`,
-    );
+      await page.goto(
+        `/organization/${parent.id}/children/${child.id}/plugin-tab`,
+      );
 
-    await expect(page.locator("[data-cy=plugin-organization-tab]")).toHaveText(
-      `${child.id}|${parent.id}`,
-    );
-  });
+      await expect(
+        page.locator("[data-cy=plugin-organization-tab]"),
+      ).toHaveText(`${child.id}|${parent.id}`);
+    },
+  );
 
-  test("shows not found for an unknown organization tab", async ({
-    page,
-    request,
-  }) => {
-    const [organization] = await listOrganizations(
-      request,
-      "org_type=govt&limit=1",
-    );
+  test(
+    "shows not found for an unknown organization tab",
+    { tag: ["@atomic", "@cap:org.plugin-tab.view"] },
+    async ({ page, request }) => {
+      const [organization] = await listOrganizations(
+        request,
+        "org_type=govt&limit=1",
+      );
 
-    await page.goto(`/organization/${organization.id}/unknown-tab`);
+      await page.goto(`/organization/${organization.id}/unknown-tab`);
 
-    await expect(page.getByText("Page Not Found")).toBeVisible();
-  });
+      await expect(page.getByText("Page Not Found")).toBeVisible();
+    },
+  );
 });

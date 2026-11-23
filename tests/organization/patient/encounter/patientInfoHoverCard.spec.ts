@@ -5,35 +5,39 @@ import { navigateToOrganizationPatient } from "tests/organization/patient/helper
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("PatientInfoHoverCard Conditional Rendering", () => {
-  test("should NOT show Patient Home button in encounter accessed via organization route", async ({
-    page,
-  }) => {
-    await navigateToOrganizationPatient(page);
+  test(
+    "should NOT show Patient Home button in encounter accessed via organization route",
+    { tag: ["@atomic", "@cap:org.encounter.view"] },
+    async ({ page }) => {
+      await navigateToOrganizationPatient(page);
 
-    // Go to Encounters tab
-    await page.getByRole("tab", { name: "Encounters" }).click();
+      // Go to Encounters tab
+      await page.getByRole("tab", { name: "Encounters" }).click();
 
-    // Click "View Encounter" link
-    await page.getByRole("link", { name: "View Encounter" }).first().click();
+      // Click "View Encounter" link
+      await page.getByRole("link", { name: "View Encounter" }).first().click();
 
-    // Verify URL contains organizationId and NOT facilityId
-    expect(page.url()).toContain(`/organization/organizationId/patient/`);
-    expect(page.url()).not.toContain("/facility/");
+      // Verify URL contains organizationId and NOT facilityId
+      expect(page.url()).toContain(`/organization/organizationId/patient/`);
+      expect(page.url()).not.toContain("/facility/");
 
-    // Wait for patient info hover card trigger
-    await page
-      .locator("[data-slot='patient-info-hover-card-trigger']")
-      .last()
-      .click();
+      // Wait for patient info hover card trigger
+      await page
+        .locator("[data-slot='patient-info-hover-card-trigger']")
+        .last()
+        .click();
 
-    // Verify that Patient Home button is NOT visible (because facilityId is not available)
-    await expect(
-      page.getByRole("link", { name: "Patient Home" }),
-    ).not.toBeVisible();
+      // Verify that Patient Home button is NOT visible (because facilityId is not available)
+      await expect(
+        page.getByRole("link", { name: "Patient Home" }),
+      ).toBeHidden();
 
-    // But View Profile button should still be visible
-    await expect(page.getByRole("link", { name: "View Profile" })).toBeVisible({
-      timeout: 5000,
-    });
-  });
+      // But View Profile button should still be visible
+      await expect(
+        page.getByRole("link", { name: "View Profile" }),
+      ).toBeVisible({
+        timeout: 5000,
+      });
+    },
+  );
 });

@@ -36,67 +36,77 @@ test.describe("Facility users search params", () => {
     return `/facility/${facilityId}/users${search ? `?${search}` : ""}`;
   };
 
-  test("writes the username search to the URL and the request", async ({
-    page,
-  }) => {
-    await page.goto(listUrl());
-    await expect(
-      page.getByRole("heading", { name: "Users Management" }),
-    ).toBeVisible();
+  test(
+    "writes the username search to the URL and the request",
+    { tag: ["@atomic", "@cap:facility.user.search"] },
+    async ({ page }) => {
+      await page.goto(listUrl());
+      await expect(
+        page.getByRole("heading", { name: "Users Management" }),
+      ).toBeVisible();
 
-    const request = apiRequest(
-      page,
-      usersPath(),
-      (params) => params.get("username") === "care",
-    );
-    await page.getByPlaceholder("Search by username").fill("care");
-    await request;
+      const request = apiRequest(
+        page,
+        usersPath(),
+        (params) => params.get("username") === "care",
+      );
+      await page.getByPlaceholder("Search by username").fill("care");
+      await request;
 
-    await expect(page).toHaveURL(/[?&]username=care(&|$)/);
-    await expect(page).toHaveURL(/[?&]page=1(&|$)/);
-  });
+      await expect(page).toHaveURL(/[?&]username=care(&|$)/);
+      await expect(page).toHaveURL(/[?&]page=1(&|$)/);
+    },
+  );
 
-  test("restores the username search from a bookmarked URL", async ({
-    page,
-  }) => {
-    const request = apiRequest(
-      page,
-      usersPath(),
-      (params) => params.get("username") === "care",
-    );
-    await page.goto(listUrl({ username: "care" }));
-    await request;
+  test(
+    "restores the username search from a bookmarked URL",
+    { tag: ["@atomic", "@cap:facility.user.search"] },
+    async ({ page }) => {
+      const request = apiRequest(
+        page,
+        usersPath(),
+        (params) => params.get("username") === "care",
+      );
+      await page.goto(listUrl({ username: "care" }));
+      await request;
 
-    await expect(page.getByPlaceholder("Search by username")).toHaveValue(
-      "care",
-    );
-  });
+      await expect(page.getByPlaceholder("Search by username")).toHaveValue(
+        "care",
+      );
+    },
+  );
 
-  test("ignores an invalid page in a bookmarked URL", async ({ page }) => {
-    const request = apiRequest(page, usersPath());
-    await page.goto(listUrl({ page: "abc" }));
-    const params = new URL((await request).url()).searchParams;
+  test(
+    "ignores an invalid page in a bookmarked URL",
+    { tag: ["@atomic", "@cap:facility.user.search"] },
+    async ({ page }) => {
+      const request = apiRequest(page, usersPath());
+      await page.goto(listUrl({ page: "abc" }));
+      const params = new URL((await request).url()).searchParams;
 
-    expect(params.get("offset")).toBe("0");
+      expect(params.get("offset")).toBe("0");
 
-    await page.getByPlaceholder("Search by username").fill("care");
-    await expect(page).toHaveURL(/[?&]page=1(&|$)/);
-    await expect(page).not.toHaveURL(/page=abc/);
-  });
+      await page.getByPlaceholder("Search by username").fill("care");
+      await expect(page).toHaveURL(/[?&]page=1(&|$)/);
+      await expect(page).not.toHaveURL(/page=abc/);
+    },
+  );
 
-  test("ignores an invalid page in the departments tab of a user", async ({
-    page,
-  }) => {
-    const request = apiRequest(
-      page,
-      `/api/v1/facility/${facilityId}/organizations/`,
-      (params) => params.has("containing_user"),
-    );
-    await page.goto(
-      `/facility/${facilityId}/users/${KNOWN_USERNAMES[0]}/departments?page=abc`,
-    );
-    const params = new URL((await request).url()).searchParams;
+  test(
+    "ignores an invalid page in the departments tab of a user",
+    { tag: ["@atomic", "@cap:user.departments.list"] },
+    async ({ page }) => {
+      const request = apiRequest(
+        page,
+        `/api/v1/facility/${facilityId}/organizations/`,
+        (params) => params.has("containing_user"),
+      );
+      await page.goto(
+        `/facility/${facilityId}/users/${KNOWN_USERNAMES[0]}/departments?page=abc`,
+      );
+      const params = new URL((await request).url()).searchParams;
 
-    expect(params.get("offset")).toBe("0");
-  });
+      expect(params.get("offset")).toBe("0");
+    },
+  );
 });

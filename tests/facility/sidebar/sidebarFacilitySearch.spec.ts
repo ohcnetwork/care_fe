@@ -4,42 +4,53 @@ import { getFacilityId } from "tests/support/facilityId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Sidebar Facility Switcher - Search", () => {
-  test("should filter facilities in the switcher dropdown", async ({
-    page,
-  }) => {
-    await page.goto(`/facility/${getFacilityId()}/overview`);
+  test(
+    "should filter facilities in the switcher dropdown",
+    {
+      tag: ["@coupled", "@cap:nav.facility-switcher.search"],
+      annotation: {
+        type: "coupled",
+        description:
+          "Skips when the search box is hidden; expects the fixture facility name",
+      },
+    },
+    async ({ page }) => {
+      await page.goto(`/facility/${getFacilityId()}/overview`);
 
-    // The switcher trigger is named after the selected facility.
-    const facilityName = "FACILITY WITH PATIENTS";
-    await page.getByRole("button", { name: facilityName, exact: true }).click();
-    await expect(page.getByText(/view dashboard/i)).toBeVisible();
-    await expect(page.getByText(/Facilities/i)).toBeVisible();
+      // The switcher trigger is named after the selected facility.
+      const facilityName = "FACILITY WITH PATIENTS";
+      await page
+        .getByRole("button", { name: facilityName, exact: true })
+        .click();
+      await expect(page.getByText(/view dashboard/i)).toBeVisible();
+      await expect(page.getByText(/Facilities/i)).toBeVisible();
 
-    const searchInput = page.getByPlaceholder(/search/i);
+      const searchInput = page.getByPlaceholder(/search/i);
 
-    const isSearchVisible = await searchInput.isVisible().catch(() => false);
-    if (!isSearchVisible) {
-      test.skip();
-      return;
-    }
+      const isSearchVisible = await searchInput.isVisible().catch(() => false);
+      if (!isSearchVisible) {
+        test.skip();
+        return;
+      }
 
-    await test.step("Search for a facility FACILITY WITH PATIENTS", async () => {
-      await searchInput.fill(facilityName);
+      await test.step("Search for a facility FACILITY WITH PATIENTS", async () => {
+        await searchInput.fill(facilityName);
 
-      // Verify matching facility is still visible
-      await expect(
-        page.getByRole("menuitem").filter({ hasText: facilityName }),
-      ).toBeVisible();
-    });
+        // Verify matching facility is still visible
+        await expect(
+          page.getByRole("menuitem").filter({ hasText: facilityName }),
+        ).toBeVisible();
+      });
 
-    await test.step("Show empty state for non-matching search", async () => {
-      await searchInput.fill("zzz_nonexistent_facility_xyz");
-      await expect(page.getByText(/no facilities found/i)).toBeVisible();
+      await test.step("Show empty state for non-matching search", async () => {
+        await searchInput.fill("zzz_nonexistent_facility_xyz");
+        await expect(page.getByText(/no facilities found/i)).toBeVisible();
 
-      // Ensure more than one facility menuitem is shown after clearing search
-      await searchInput.clear();
-      const facilities = await page.getByRole("menuitem").all();
-      expect(facilities.length).toBeGreaterThan(1);
-    });
-  });
+        // Ensure more than one facility menuitem is shown after clearing search
+        await searchInput.clear();
+        const facilities = await page.getByRole("menuitem").all();
+        expect(facilities.length).toBeGreaterThan(1);
+      });
+    },
+  );
 });

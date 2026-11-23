@@ -10,47 +10,55 @@ test.describe("Back button should not appear when page is opened in a new tab wi
     facilityId = getFacilityId();
   });
 
-  test("Back Button in Patient Registration", async ({ page, context }) => {
-    // Navigate to patient registration page
-    await page.goto(`/facility/${facilityId}/patients`);
-    await page.getByRole("button", { name: /add new patient/i }).click();
+  test(
+    "Back Button in Patient Registration",
+    { tag: ["@atomic", "@cap:nav.back.view"] },
+    async ({ page, context }) => {
+      // Navigate to patient registration page
+      await page.goto(`/facility/${facilityId}/patients`);
+      await page.getByRole("button", { name: /add new patient/i }).click();
 
-    // Verify back button IS visible (has history)
-    const backButtonOriginal = page.getByRole("button", { name: /back/i });
-    await expect(backButtonOriginal).toBeVisible();
+      // Verify back button IS visible (has history)
+      const backButtonOriginal = page.getByRole("button", { name: /back/i });
+      await expect(backButtonOriginal).toBeVisible();
 
-    // Get the current patient registration URL
-    const patientRegUrl = page.url();
+      // Get the current patient registration URL
+      const patientRegUrl = page.url();
 
-    // Open the same patient registration page directly in a new tab (no navigation history)
-    const newPage = await context.newPage();
-    await newPage.goto(patientRegUrl);
+      // Open the same patient registration page directly in a new tab (no navigation history)
+      const newPage = await context.newPage();
+      await newPage.goto(patientRegUrl);
 
-    // Verify back button is NOT visible (no history)
-    const backButton = newPage.getByRole("button", { name: /back/i });
-    await expect(backButton).not.toBeVisible();
-  });
+      // Verify back button is NOT visible (no history)
+      const backButton = newPage.getByRole("button", { name: /back/i });
+      await expect(backButton).toBeHidden();
+    },
+  );
 
-  test("Back button in Account Show", async ({ page, context }) => {
-    // Navigate to account show page
-    await page.goto(`/facility/${facilityId}/billing/account`);
+  test(
+    "Back button in Account Show",
+    { tag: ["@atomic", "@cap:nav.back.view"] },
+    async ({ page, context }) => {
+      // Navigate to account show page
+      await page.goto(`/facility/${facilityId}/billing/account`);
 
-    // Click on the first "Go to account" button
-    await page.getByRole("button", { name: "Go to account" }).first().click();
+      // Click on the first "Go to account" button
+      await page.getByRole("button", { name: "Go to account" }).first().click();
 
-    // Verify back button IS visible (has history)
-    const backButtonOriginal = page.getByRole("button", { name: /back/i });
-    await expect(backButtonOriginal).toBeVisible();
+      // Verify back button IS visible (has history)
+      const backButtonOriginal = page.getByRole("button", { name: /back/i });
+      await expect(backButtonOriginal).toBeVisible();
 
-    // Get the current URL
-    const accountUrl = page.url();
+      // Get the current URL
+      const accountUrl = page.url();
 
-    // Open the same page directly in a new tab (no navigation history)
-    const newPage = await context.newPage();
-    await newPage.goto(accountUrl);
+      // Open the same page directly in a new tab (no navigation history)
+      const newPage = await context.newPage();
+      await newPage.goto(accountUrl);
 
-    // Verify back button is NOT visible (no history)
-    const backButton = newPage.getByRole("button", { name: /back/i });
-    await expect(backButton).not.toBeVisible();
-  });
+      // Verify back button is NOT visible (no history)
+      const backButton = newPage.getByRole("button", { name: /back/i });
+      await expect(backButton).toBeHidden();
+    },
+  );
 });
