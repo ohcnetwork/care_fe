@@ -11,7 +11,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 
 import {
@@ -41,18 +40,19 @@ function processingEventsWithKeys(processing: ProcessingSpec[]) {
 
 interface SpecimenHistorySheetProps {
   specimens: SpecimenRead[];
-  children: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function SpecimenHistorySheet({
   specimens,
-  children,
+  open,
+  onOpenChange,
 }: SpecimenHistorySheetProps) {
   const { t } = useTranslation();
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>{children}</SheetTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("specimen_history")}</SheetTitle>

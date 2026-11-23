@@ -41,6 +41,7 @@ export function ServiceRequestSpecimenWorkflow({
   const { t } = useTranslation();
   const [selectedSpecimenDefinition, setSelectedSpecimenDefinition] =
     useState<SpecimenDefinitionRead | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const {
     isPrintingAllQRCodes,
     isQRCodeSheetOpen,
@@ -131,25 +132,26 @@ export function ServiceRequestSpecimenWorkflow({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <SpecimenHistorySheet
-                    specimens={(request?.specimens || []).filter(
-                      (specimen) =>
-                        specimen.status === SpecimenStatus.entered_in_error ||
-                        specimen.status === SpecimenStatus.unavailable ||
-                        specimen.status === SpecimenStatus.unsatisfactory,
-                    )}
+                  <DropdownMenuItem
+                    onSelect={() => setHistoryOpen(true)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
                   >
-                    <DropdownMenuItem
-                      onSelect={(e) => e.preventDefault()}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                    >
-                      {t("view_specimen_history")}
-                    </DropdownMenuItem>
-                  </SpecimenHistorySheet>
+                    {t("view_specimen_history")}
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <SpecimenHistorySheet
+                open={historyOpen}
+                onOpenChange={setHistoryOpen}
+                specimens={(request?.specimens || []).filter(
+                  (specimen) =>
+                    specimen.status === SpecimenStatus.entered_in_error ||
+                    specimen.status === SpecimenStatus.unavailable ||
+                    specimen.status === SpecimenStatus.unsatisfactory,
+                )}
+              />
             </div>
           </div>
           {requirements.map((requirement) => {

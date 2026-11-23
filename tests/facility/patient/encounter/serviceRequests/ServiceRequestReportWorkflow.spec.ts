@@ -1,5 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import {
+  expectEscapeRestoresFocus,
+  openOverlayFromMenu,
+} from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -12,7 +16,8 @@ interface ReportWorkflowOptions {
   hasReportCode?: boolean;
   hasExistingReport?: boolean;
   reportStatus?: "preliminary" | "final";
-  specimenScenario?: "fractional-template" | "draft-without-quantity";
+  specimenScenario?:
+    "fractional-template" | "draft-without-quantity" | "collected";
 }
 
 async function mockReportWorkflow(
@@ -51,6 +56,23 @@ async function mockReportWorkflow(
     specimen_definition: specimenDefinition,
     specimen_type: code,
     collection: { quantity: null },
+  };
+  const collected = {
+    ...draft,
+    id: faker.string.uuid(),
+    status: "available",
+    processing: [],
+  };
+  const discarded = {
+    ...collected,
+    id: faker.string.uuid(),
+    status: "unavailable",
+    note: faker.lorem.sentence(),
+  };
+  const specimens = {
+    "fractional-template": [],
+    "draft-without-quantity": [draft],
+    collected: [collected, discarded],
   };
   const activity = {
     id: faker.string.uuid(),
@@ -116,8 +138,7 @@ async function mockReportWorkflow(
           activity_definition: activity,
           encounter,
           diagnostic_reports: reports,
-          specimens:
-            specimenScenario === "draft-without-quantity" ? [draft] : [],
+          specimens: specimenScenario ? specimens[specimenScenario] : [],
           locations: [],
           tags: [],
         },
@@ -144,6 +165,8 @@ async function mockReportWorkflow(
     reportCollectionUrl,
     createDraftUrl: `**/service_request/${serviceRequestId}/create_specimen_from_definition/`,
     updateSpecimenUrl: `**/specimen/${draft.id}/`,
+    discarded,
+    discardSpecimenUrl: `**/specimen/${collected.id}/`,
   };
 }
 
@@ -186,6 +209,65 @@ test.describe("Service request report workflow", () => {
     const updated = page.waitForRequest(fixture.updateSpecimenUrl);
     await page.getByRole("button", { name: "Mark as collected" }).click();
     expect((await updated).postDataJSON().collection.quantity).toBeNull();
+  });
+
+  test("shows discarded specimens in the history sheet opened from the menu", async ({
+    page,
+  }) => {
+    const fixture = await mockReportWorkflow(page, {
+      specimenScenario: "collected",
+    });
+    await page.goto(fixture.url);
+    const history = page.getByRole("button", {
+      name: "View Specimen History",
+      exact: true,
+    });
+    const sheet = page.getByRole("dialog", {
+      name: "Specimen History",
+      exact: true,
+    });
+    await openOverlayFromMenu(page, history, "View Specimen History", sheet);
+    await expect(sheet.getByText("Unavailable", { exact: true })).toBeVisible();
+    await expect(sheet.getByText(fixture.discarded.note)).toBeVisible();
+    await expectEscapeRestoresFocus(page, sheet, history);
+  });
+
+  test("discards a collected specimen with the reason chosen in the confirmation", async ({
+    page,
+  }) => {
+    const fixture = await mockReportWorkflow(page, {
+      specimenScenario: "collected",
+    });
+    await page.route(fixture.discardSpecimenUrl, (route) =>
+      route.fulfill({ json: {} }),
+    );
+    await page.goto(fixture.url);
+    const actions = page.getByRole("button", { name: "Actions", exact: true });
+    const confirmation = page.getByRole("alertdialog", {
+      name: "Are you sure?",
+      exact: true,
+    });
+
+    await test.step("Dismiss the confirmation", async () => {
+      await openOverlayFromMenu(page, actions, "Discard", confirmation);
+      await expectEscapeRestoresFocus(page, confirmation, actions);
+    });
+
+    await test.step("Discard with a reason", async () => {
+      await openOverlayFromMenu(page, actions, "Discard", confirmation);
+      const discard = confirmation.getByRole("button", {
+        name: "Discard",
+        exact: true,
+      });
+      await expect(discard).toBeDisabled();
+      await confirmation
+        .getByRole("radio", { name: /^Unsatisfactory/ })
+        .click();
+      const updated = page.waitForRequest(fixture.discardSpecimenUrl);
+      await discard.click();
+      expect((await updated).postDataJSON().status).toBe("unsatisfactory");
+      await expect(confirmation).toBeHidden();
+    });
   });
 
   test("hides report entry for a template without observations, report codes, or existing reports", async ({

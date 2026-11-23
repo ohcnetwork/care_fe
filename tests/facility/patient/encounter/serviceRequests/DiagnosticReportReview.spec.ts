@@ -241,6 +241,10 @@ test.describe("Diagnostic report review", () => {
         await expect(
           historySheet.getByText("101", { exact: true }),
         ).toBeVisible();
+        await expect(page.locator('[role="menu"]')).toHaveCount(0);
+        await page.keyboard.press("Escape");
+        await expect(historySheet).toBeHidden();
+        await expect(history).toBeFocused();
       });
     }
   });

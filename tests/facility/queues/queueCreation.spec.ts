@@ -1,6 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import { expectToast } from "tests/helper/ui";
+import {
+  expectEscapeRestoresFocus,
+  expectToast,
+  openOverlayFromMenu,
+} from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -62,13 +66,7 @@ test.describe("Queue Creation & Editing", () => {
     const modifiedQueueName = faker.lorem.words(4);
     await createQueue(page, queueName);
     const row = page.getByRole("row").filter({ hasText: queueName });
-    const servicePointsLoaded = page.waitForResponse(
-      (response) =>
-        response.url().includes(`/facility/${facilityId}/token/sub_queue/`) &&
-        response.ok(),
-    );
     await row.getByRole("link", { name: /^open$/i }).click();
-    await servicePointsLoaded;
     await page.getByRole("button", { name: /^settings$/i }).click();
     await page.getByRole("menuitem", { name: /edit queue name/i }).click();
 
@@ -100,6 +98,62 @@ test.describe("Queue Creation & Editing", () => {
     await expect(
       page.getByRole("button", { name: /update queue/i }),
     ).toBeDisabled();
+  });
+
+  test("should manage service points from the settings menu on the finished tab", async ({
+    page,
+  }) => {
+    const queueName = faker.lorem.words(3);
+    const servicePoint = {
+      id: faker.string.uuid(),
+      name: faker.lorem.words(2),
+      status: "active",
+    };
+    await createQueue(page, queueName);
+    const boardUrl = await page
+      .getByRole("row")
+      .filter({ hasText: queueName })
+      .getByRole("link", { name: /^open$/i })
+      .getAttribute("href");
+
+    let releaseServicePoints = () => {};
+    const servicePointsHeld = new Promise<void>((resolve) => {
+      releaseServicePoints = resolve;
+    });
+    await page.route(
+      `**/facility/${facilityId}/token/sub_queue/?*`,
+      async (route) => {
+        await servicePointsHeld;
+        await route.fulfill({ json: { count: 1, results: [servicePoint] } });
+      },
+    );
+    // The finished tab does not load service points, so the dialog must.
+    await page.goto(boardUrl!.replace(/\/ongoing$/, "/completed"));
+
+    const settings = page.getByRole("button", { name: /^settings$/i });
+    const dialog = page.getByRole("dialog", {
+      name: /assigned service points/i,
+    });
+    await test.step("Open the dialog while service points load", async () => {
+      await openOverlayFromMenu(
+        page,
+        settings,
+        /manage service points/i,
+        dialog,
+      );
+      await expect(dialog.getByRole("checkbox")).toHaveCount(0);
+    });
+
+    await test.step("Toggle a service point with the keyboard", async () => {
+      releaseServicePoints();
+      await expect(dialog.getByText(servicePoint.name)).toBeVisible();
+      const checkbox = dialog.getByRole("checkbox");
+      await expect(checkbox).toBeChecked();
+      await checkbox.press("Space");
+      await expect(checkbox).not.toBeChecked();
+    });
+
+    await expectEscapeRestoresFocus(page, dialog, settings);
   });
 
   test("should not allow editing queue name when no changes made", async ({

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { MoreVertical, Printer } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +54,7 @@ export function DiagnosticReportDetailCard({
   showObservationHistory = false,
 }: DiagnosticReportDetailCardProps) {
   const { t } = useTranslation();
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const { data: report, isLoading: isReportLoading } = useQuery({
     queryKey: ["diagnosticReport", reportId],
@@ -134,33 +136,36 @@ export function DiagnosticReportDetailCard({
             </Tooltip>
           </TooltipProvider>
           {filteredObservations && filteredObservations.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  aria-label={t("test_results_actions")}
-                >
-                  <MoreVertical className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <ObservationHistorySheet
-                  patientId={patientId}
-                  diagnosticReportId={report.id}
-                >
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    aria-label={t("test_results_actions")}
+                  >
+                    <MoreVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
                   <DropdownMenuItem
-                    onSelect={(e) => e.preventDefault()}
+                    onSelect={() => setHistoryOpen(true)}
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
                   >
                     {t("view_observation_history")}
                   </DropdownMenuItem>
-                </ObservationHistorySheet>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <ObservationHistorySheet
+                open={historyOpen}
+                onOpenChange={setHistoryOpen}
+                patientId={patientId}
+                diagnosticReportId={report.id}
+              />
+            </>
           )}
         </div>
       </CardHeader>
