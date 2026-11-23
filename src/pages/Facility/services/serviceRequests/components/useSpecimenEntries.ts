@@ -115,7 +115,8 @@ export function useSpecimenEntries(
     const seen = new Map<string, PendingSpecimen>();
     for (const item of items) {
       const itemErrors = validateEntry(entryOf(item), t, scanner);
-      const id = identifierOf(item);
+      // The ID the save sends: the typed one, else the printed label's.
+      const id = identifierOf(item) || item.draft?.accession_identifier || "";
       const first = scanner && seen.get(id);
       if (first) {
         itemErrors.accessionIdentifier = t("specimen_id_used_for", {

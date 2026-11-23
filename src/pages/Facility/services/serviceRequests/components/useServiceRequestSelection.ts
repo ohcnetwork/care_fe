@@ -21,20 +21,28 @@ export function useServiceRequestSelection(
   requests: ServiceRequestReadSpec[],
   { enabled, resetKey }: { enabled: boolean; resetKey: string },
 ): ServiceRequestSelection {
-  const [ticked, setTicked] = useState({ key: resetKey, ids: [] as string[] });
-  const ids = ticked.key === resetKey ? ticked.ids : [];
-  const update = (next: string[]) => setTicked({ key: resetKey, ids: next });
+  const [ticked, setTicked] = useState({
+    key: resetKey,
+    ids: new Set<string>(),
+  });
+  // Cleared, not just hidden, so the old key's ticks can't come back.
+  if (ticked.key !== resetKey) setTicked({ key: resetKey, ids: new Set() });
+  const ids = ticked.key === resetKey ? ticked.ids : new Set<string>();
+  const update = (next: Iterable<string>) =>
+    setTicked({ key: resetKey, ids: new Set(next) });
   const active = requests.filter(({ status }) => status === Status.active);
   const isEnabled = enabled && active.length > 0;
-  const selected = isEnabled ? active.filter(({ id }) => ids.includes(id)) : [];
+  const selected = isEnabled ? active.filter(({ id }) => ids.has(id)) : [];
 
   return {
     enabled: isEnabled,
     canSelect: ({ status }) => status === Status.active,
     selected,
-    isSelected: ({ id }) => ids.includes(id),
+    isSelected: ({ id }) => ids.has(id),
     setSelected: ({ id }, isSelected) =>
-      update(isSelected ? [...ids, id] : ids.filter((other) => other !== id)),
+      update(
+        isSelected ? [...ids, id] : [...ids].filter((other) => other !== id),
+      ),
     allSelected: active.length > 0 && selected.length === active.length,
     setAllSelected: (isSelected) =>
       update(isSelected ? active.map(({ id }) => id) : []),
