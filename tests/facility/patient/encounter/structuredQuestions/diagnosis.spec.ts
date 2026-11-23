@@ -1,168 +1,134 @@
 import { faker } from "@faker-js/faker";
-import { type Page, expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import {
+  CLINICAL_STATUS_OPTIONS,
+  type EncounterTarget,
+  SEVERITY_OPTIONS,
+  VERIFICATION_STATUS_OPTIONS,
+  addDiagnosisViaUi,
+  selectDiagnosis,
+} from "tests/helper/structuredQuestions";
 import { firstValueSetDisplay } from "tests/helper/valueSet";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
-let diagnosisName: string;
-let questionnaireUrl: string;
-let status: string;
-let verification: string;
-let severity: string;
-
-const DIAGNOSIS_CLINICAL_STATUS = [
-  "Active",
-  "Recurrence",
-  "Relapse",
-  "Inactive",
-  "Remission",
-  "Resolved",
-];
-
-const DIAGNOSIS_VERIFICATION_STATUS = [
-  "Unconfirmed",
-  "Provisional",
-  "Differential",
-  "Confirmed",
-  "Refuted",
-];
-
-const DIAGNOSIS_SEVERITY = ["Mild", "Moderate", "Severe"];
-
-async function addDiagnosis(page: Page, severity?: string) {
-  await page
-    .getByRole("combobox")
-    .filter({ hasText: /Add (another )?Diagnosis/i })
-    .click();
-  await page.getByPlaceholder(/Add (another )?Diagnosis/i).fill(diagnosisName);
-  await page
-    .getByTestId("valueset-search-results")
-    .getByRole("option", { name: diagnosisName, exact: true })
-    .click();
-
-  const diagnosisRow = page.getByRole("row", { name: diagnosisName });
-
-  if (severity) {
-    await diagnosisRow.getByRole("cell").nth(3).click();
-    await page.getByRole("option", { name: severity }).click();
-    await page.getByRole("button", { name: "Save Changes" }).click();
-  }
-}
 
 test.describe("Diagnosis", () => {
-  test.beforeEach(async ({ page }) => {
+  let encounter: EncounterTarget;
+  let diagnosisName: string;
+  let questionnaireUrl: string;
+  let status: string;
+  let verification: string;
+  let severity: string;
+
+  test.beforeEach(async () => {
     const facilityId = getFacilityId();
     const { patientId, encounterId } =
       await createQuestionnaireEncounter(facilityId);
+    encounter = { facilityId, patientId, encounterId };
     diagnosisName = await firstValueSetDisplay(
       "system-condition-code",
       facilityId,
     );
 
-    status = faker.helpers.arrayElement(DIAGNOSIS_CLINICAL_STATUS);
-    verification = faker.helpers.arrayElement(DIAGNOSIS_VERIFICATION_STATUS);
-    severity = faker.helpers.arrayElement(DIAGNOSIS_SEVERITY);
+    status = faker.helpers.arrayElement(CLINICAL_STATUS_OPTIONS);
+    verification = faker.helpers.arrayElement(VERIFICATION_STATUS_OPTIONS);
+    severity = faker.helpers.arrayElement(SEVERITY_OPTIONS);
 
     questionnaireUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`;
-    await page.goto(questionnaireUrl);
   });
 
-  test("should add diagnosis with all fields and verify it appears in diagnosis history", async ({
-    page,
-  }) => {
-    await page.waitForLoadState("networkidle");
+  test(
+    "should add diagnosis with all fields and verify it appears in diagnosis history",
+    { tag: ["@atomic", "@cap:questionnaire.structured.diagnosis.create"] },
+    async ({ page }) => {
+      await addDiagnosisViaUi(page, {
+        ...encounter,
+        diagnosisName,
+        clinicalStatus: status,
+        severity,
+        verificationStatus: verification,
+      });
 
-    await addDiagnosis(page);
+      await page.goto(questionnaireUrl);
+      await page.getByRole("button", { name: "Diagnosis History" }).click();
 
-    const diagnosisRow = page.getByRole("row", { name: diagnosisName });
+      const historyDialog = page.getByRole("dialog", {
+        name: "Past Diagnoses",
+      });
+      await historyDialog.waitFor({ state: "visible" });
 
-    await diagnosisRow.getByRole("cell").nth(2).click();
-    await page.getByRole("option", { name: status, exact: true }).click();
+      // Each date group renders its OWN <tbody data-slot="table-body">
+      // (HistoricalRecordSelector/index.tsx) — a locator over that selector
+      // alone strict-mode-violates the moment records span more than one
+      // day. Target the specific row for the diagnosis JUST added instead.
+      const diagnosisHistoryRow = historyDialog
+        .locator("tr")
+        .filter({ hasText: diagnosisName })
+        .filter({ hasText: status });
 
-    await diagnosisRow.getByRole("cell").nth(3).click();
-    await page.getByRole("option", { name: severity, exact: true }).click();
+      await expect(diagnosisHistoryRow.first()).toBeVisible();
+      await expect(diagnosisHistoryRow.first()).toContainText(diagnosisName);
+      await expect(diagnosisHistoryRow.first()).toContainText(status);
+      await expect(diagnosisHistoryRow.first()).toContainText(severity);
+      await expect(diagnosisHistoryRow.first()).toContainText(verification);
+    },
+  );
 
-    await diagnosisRow.getByRole("cell").nth(4).click();
-    await page.getByRole("option", { name: verification, exact: true }).click();
-    await expect(diagnosisRow.getByRole("cell").nth(4)).toContainText(
-      verification,
-    );
+  test(
+    "verify duplicate diagnosis cannot be added",
+    { tag: ["@atomic", "@cap:questionnaire.structured.diagnosis.create"] },
+    async ({ page }) => {
+      await addDiagnosisViaUi(page, { ...encounter, diagnosisName });
 
-    await page.getByRole("button", { name: "Save Changes" }).click();
+      await page.goto(questionnaireUrl);
+      await page.waitForLoadState("networkidle");
 
-    await expect(
-      page.getByText("Questionnaire submitted successfully"),
-    ).toBeVisible();
+      await selectDiagnosis(page, diagnosisName);
 
-    await page.goto(questionnaireUrl);
-    await page.getByRole("button", { name: "Diagnosis History" }).click();
+      await expect(
+        page
+          .getByRole("region", { name: "Notifications alt+T" })
+          .getByRole("listitem")
+          .filter({ hasText: "Diagnosis already exists" }),
+      ).toBeVisible();
+    },
+  );
 
-    const historyDialog = page.getByRole("dialog", { name: "Past Diagnoses" });
-    await historyDialog.waitFor({ state: "visible" });
+  test(
+    "add and display diagnosis with severity",
+    { tag: ["@atomic", "@cap:questionnaire.structured.diagnosis.create"] },
+    async ({ page }) => {
+      await addDiagnosisViaUi(page, {
+        ...encounter,
+        diagnosisName,
+        severity: "Severe",
+      });
 
-    // Each date group renders its OWN <tbody data-slot="table-body">
-    // (HistoricalRecordSelector/index.tsx) — a locator over that selector
-    // alone strict-mode-violates the moment records span more than one
-    // day. Target the specific row for the diagnosis JUST added instead.
-    const diagnosisHistoryRow = historyDialog
-      .locator("tr")
-      .filter({ hasText: diagnosisName })
-      .filter({ hasText: status });
-
-    await expect(diagnosisHistoryRow.first()).toBeVisible();
-    await expect(diagnosisHistoryRow.first()).toContainText(diagnosisName);
-    await expect(diagnosisHistoryRow.first()).toContainText(status);
-    await expect(diagnosisHistoryRow.first()).toContainText(severity);
-    await expect(diagnosisHistoryRow.first()).toContainText(verification);
-  });
-
-  test("verify duplicate diagnosis cannot be added", async ({ page }) => {
-    await page.waitForLoadState("networkidle");
-
-    await addDiagnosis(page);
-    await page.getByRole("button", { name: "Save Changes" }).click();
-
-    await expect(
-      page.getByText("Questionnaire submitted successfully"),
-    ).toBeVisible();
-
-    await page.goto(questionnaireUrl);
-    await page.waitForLoadState("networkidle");
-
-    await addDiagnosis(page);
-
-    await expect(
-      page
-        .getByRole("region", { name: "Notifications alt+T" })
+      const diagnosisSummary = page
+        .getByRole("region", { name: "Diagnoses", exact: true })
         .getByRole("listitem")
-        .filter({ hasText: "Diagnosis already exists" }),
-    ).toBeVisible();
-  });
+        .filter({ has: page.getByText(diagnosisName, { exact: true }) });
+      await expect(diagnosisSummary).toBeVisible();
+      await expect(
+        diagnosisSummary.getByText("Severe", { exact: true }),
+      ).toBeVisible();
+      await expect(diagnosisSummary.getByText(/^Onset\b/)).toBeVisible();
 
-  test("add and display diagnosis with severity", async ({ page }) => {
-    await addDiagnosis(page, "severe");
-
-    const diagnosisSummary = page
-      .getByRole("region", { name: "Diagnoses", exact: true })
-      .getByRole("listitem")
-      .filter({ has: page.getByText(diagnosisName, { exact: true }) });
-    await expect(diagnosisSummary).toBeVisible();
-    await expect(
-      diagnosisSummary.getByText("Severe", { exact: true }),
-    ).toBeVisible();
-    await expect(diagnosisSummary.getByText(/^Onset\b/)).toBeVisible();
-
-    await page.goto(questionnaireUrl);
-    await page.getByRole("button", { name: "Diagnosis History" }).click();
-    const historyRow = page
-      .getByRole("dialog", { name: "Past Diagnoses" })
-      .getByRole("row")
-      .filter({ has: page.getByText(diagnosisName, { exact: true }) });
-    await expect(historyRow.getByText("Severe", { exact: true })).toBeVisible();
-    await expect(
-      historyRow.getByText("Confirmed", { exact: true }),
-    ).toBeVisible();
-  });
+      await page.goto(questionnaireUrl);
+      await page.getByRole("button", { name: "Diagnosis History" }).click();
+      const historyRow = page
+        .getByRole("dialog", { name: "Past Diagnoses" })
+        .getByRole("row")
+        .filter({ has: page.getByText(diagnosisName, { exact: true }) });
+      await expect(
+        historyRow.getByText("Severe", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        historyRow.getByText("Confirmed", { exact: true }),
+      ).toBeVisible();
+    },
+  );
 });

@@ -1,26 +1,26 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import {
+  createQuestionnaireEncounter,
+  createQuestionnaireViaApi,
+  waitForBatchResponse,
+} from "tests/helper/questionnaire";
 import { questionBlock } from "tests/helper/questionnaireV2";
-import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-test("a hidden controller cannot keep an OR follow-up active or block a real submission", async ({
-  page,
-  request,
-}) => {
-  const ids = Array.from({ length: 3 }, () => faker.string.uuid());
-  const created = await request.post(`${getApiUrl()}/api/v1/questionnaire/`, {
-    headers: getApiHeaders(),
-    data: {
+test(
+  "a hidden controller cannot keep an OR follow-up active or block a real submission",
+  { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+  async ({ page }) => {
+    const ids = Array.from({ length: 3 }, () => faker.string.uuid());
+    const questionnaire = await createQuestionnaireViaApi({
       title: `Hidden controller ${faker.string.alphanumeric(8)}`,
       slug: `hidden-controller-${faker.string.alphanumeric(8).toLowerCase()}`,
       description: "Conditional answer submission regression",
       status: "active",
-      auth_context: "instance",
-      subject_type: "encounter",
+      subjectType: "encounter",
       questions: [
         {
           id: ids[0],
@@ -49,40 +49,38 @@ test("a hidden controller cannot keep an OR follow-up active or block a real sub
           ],
         },
       ],
-    },
-  });
-  expect(created.ok(), await created.text()).toBe(true);
-  const questionnaire = (await created.json()) as { id: string };
-  const facilityId = getFacilityId();
-  const { patientId, encounterId } =
-    await createQuestionnaireEncounter(facilityId);
-  await page.goto(
-    `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}`,
-  );
-  const controller = questionBlock(page, "Show extra details");
-  await controller.getByRole("radio", { name: "Yes", exact: true }).click();
-  await questionBlock(page, "Extra details").getByRole("textbox").fill("keep");
-  await questionBlock(page, "Follow-up details")
-    .getByRole("textbox")
-    .fill("Must not be submitted while hidden");
-  await controller.getByRole("radio", { name: "No", exact: true }).click();
-  await expect(questionBlock(page, "Extra details")).toHaveCount(0);
-  await expect(questionBlock(page, "Follow-up details")).toHaveCount(0);
-  const submit = page.waitForResponse(
-    (response) =>
-      response.url().endsWith("/api/v1/batch_requests/") &&
-      response.request().method() === "POST",
-  );
-  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
-  const response = await submit;
-  expect(response.ok(), await response.text()).toBe(true);
-  const body = response.request().postDataJSON() as {
-    requests: { body: { results?: { question_id: string }[] } }[];
-  };
-  const submittedIds = body.requests
-    .flatMap((item) => item.body.results ?? [])
-    .map((item) => item.question_id);
-  expect(submittedIds).toContain(ids[0]);
-  expect(submittedIds).not.toContain(ids[1]);
-  expect(submittedIds).not.toContain(ids[2]);
-});
+    });
+    const facilityId = getFacilityId();
+    const { patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId);
+    await page.goto(
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}`,
+    );
+    const controller = questionBlock(page, "Show extra details");
+    await controller.getByRole("radio", { name: "Yes", exact: true }).click();
+    await questionBlock(page, "Extra details")
+      .getByRole("textbox")
+      .fill("keep");
+    await questionBlock(page, "Follow-up details")
+      .getByRole("textbox")
+      .fill("Must not be submitted while hidden");
+    await controller.getByRole("radio", { name: "No", exact: true }).click();
+    await expect(questionBlock(page, "Extra details")).toHaveCount(0);
+    await expect(questionBlock(page, "Follow-up details")).toHaveCount(0);
+    const submit = waitForBatchResponse(page);
+    await page
+      .getByRole("button", { name: "Save Changes", exact: true })
+      .click();
+    const response = await submit;
+    expect(response.ok(), await response.text()).toBe(true);
+    const body = response.request().postDataJSON() as {
+      requests: { body: { results?: { question_id: string }[] } }[];
+    };
+    const submittedIds = body.requests
+      .flatMap((item) => item.body.results ?? [])
+      .map((item) => item.question_id);
+    expect(submittedIds).toContain(ids[0]);
+    expect(submittedIds).not.toContain(ids[1]);
+    expect(submittedIds).not.toContain(ids[2]);
+  },
+);

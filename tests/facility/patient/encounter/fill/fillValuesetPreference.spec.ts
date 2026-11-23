@@ -36,140 +36,142 @@ async function pickType(page: Page, type: string): Promise<void> {
  * user's preference and survives reopening the popover.
  */
 test.describe("Fill page: choosing between value-set variants", () => {
-  test("the search popover lets the user switch the slug between the facility override and the instance set", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
-    const stamp = Date.now();
-    // A facility override wins for every fill in the facility, so this spec
-    // overrides its own instance set, not one other specs are bound to.
-    const parentSlug = `e2e-preference-${stamp}`;
-    const parentName = `E2E Preference Units ${stamp}`;
-    const overrideName = `E2E Preference Override ${stamp}`;
-    const questionTitle = `Dose unit ${stamp}`;
-    let questionnaireId = "";
+  test(
+    "the search popover lets the user switch the slug between the facility override and the instance set",
+    { tag: ["@atomic", "@cap:questionnaire.fill.valueset.configure"] },
+    async ({ page }) => {
+      const facilityId = getFacilityId();
+      const stamp = Date.now();
+      // A facility override wins for every fill in the facility, so this spec
+      // overrides its own instance set, not one other specs are bound to.
+      const parentSlug = `e2e-preference-${stamp}`;
+      const parentName = `E2E Preference Units ${stamp}`;
+      const overrideName = `E2E Preference Override ${stamp}`;
+      const questionTitle = `Dose unit ${stamp}`;
+      let questionnaireId = "";
 
-    const parentId = await createInstanceValueSet({
-      slug: parentSlug,
-      name: parentName,
-    });
-    const overrideId = await createFacilityOverride({
-      facilityId,
-      parentId,
-      parentSlug,
-      name: overrideName,
-    });
+      const parentId = await createInstanceValueSet({
+        slug: parentSlug,
+        name: parentName,
+      });
+      const overrideId = await createFacilityOverride({
+        facilityId,
+        parentId,
+        parentSlug,
+        name: overrideName,
+      });
 
-    try {
-      await test.step("Author a choice question bound to the instance set by slug", async () => {
-        const detailUrl = await createQuestionnaireAndOpenBuilder(page, {
-          basePath: `/facility/${facilityId}/settings/questionnaires`,
-          title: `QV2 VS Preference ${stamp}`,
+      try {
+        await test.step("Author a choice question bound to the instance set by slug", async () => {
+          const detailUrl = await createQuestionnaireAndOpenBuilder(page, {
+            basePath: `/facility/${facilityId}/settings/questionnaires`,
+            title: `QV2 VS Preference ${stamp}`,
+          });
+          questionnaireId =
+            detailUrl.match(/questionnaires\/([0-9a-f-]+)/)?.[1] ?? "";
+          expect(questionnaireId).not.toBe("");
+
+          await addTopLevelQuestion(page, questionTitle);
+          await pickType(page, "choice");
+          await page.getByRole("radio", { name: "Value Set" }).click();
+          await pickValuesetFromAutocomplete(page, {
+            search: parentName,
+            optionName: `${parentName} (Instance)`,
+          });
+          await page.getByRole("button", { name: "Save Changes" }).click();
+          await expectToast(page, "Questionnaire updated successfully");
         });
-        questionnaireId =
-          detailUrl.match(/questionnaires\/([0-9a-f-]+)/)?.[1] ?? "";
-        expect(questionnaireId).not.toBe("");
 
-        await addTopLevelQuestion(page, questionTitle);
-        await pickType(page, "choice");
-        await page.getByRole("radio", { name: "Value Set" }).click();
-        await pickValuesetFromAutocomplete(page, {
-          search: parentName,
-          optionName: `${parentName} (Instance)`,
+        // Put the real override beyond the first page. Preference writes and
+        // terminology resolution still reach the backend.
+        const overrideResponse = await fetch(
+          `${apiBaseUrl()}/api/v1/valueset/${overrideId}/`,
+          {
+            headers: adminApiHeaders(),
+          },
+        );
+        expect(overrideResponse.ok).toBe(true);
+        const override = await overrideResponse.json();
+        await page.route(
+          (url) =>
+            url.pathname === "/api/v1/valueset/" &&
+            url.searchParams.get("facility") === facilityId,
+          async (route) => {
+            const offset = Number(
+              new URL(route.request().url()).searchParams.get("offset") ?? 0,
+            );
+            const results =
+              offset === 0
+                ? Array.from({ length: 100 }, (_, index) => ({
+                    ...override,
+                    id: `unrelated-${index}`,
+                    slug: `unrelated-${index}`,
+                  }))
+                : [override];
+            await route.fulfill({ json: { count: 101, results } });
+          },
+        );
+
+        await page.goto(
+          `/facility/${facilityId}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`,
+        );
+        const block = questionBlock(page, questionTitle);
+        await expect(block).toHaveCount(1);
+
+        const openPicker = async () => {
+          // Close the picker a previous step left open: clicking the combobox
+          // would otherwise toggle it shut instead of reopening it.
+          const openDialog = page.getByRole("dialog").last();
+          if (await openDialog.isVisible().catch(() => false)) {
+            await page.keyboard.press("Escape");
+            await expect(openDialog).toBeHidden();
+          }
+          await block.getByRole("combobox").click();
+          const dialog = page.getByRole("dialog").last();
+          const scope = (await dialog.isVisible().catch(() => false))
+            ? dialog
+            : page.locator("[data-radix-popper-content-wrapper]").last();
+          await expect(scope.getByText(/^Using /)).toBeVisible();
+          return scope;
+        };
+
+        const choose = async (
+          scope: ReturnType<typeof page.locator>,
+          optionName: string,
+        ) => {
+          await scope.getByRole("button", { name: "Change" }).click();
+          await page
+            .getByRole("listbox", { name: "Choose which value set to search" })
+            .getByRole("option", { name: optionName })
+            .click();
+          await expect(scope.getByText(`Using ${optionName}`)).toBeVisible();
+        };
+
+        await test.step("Pick the facility override; the popover and the backend both switch", async () => {
+          const scope = await openPicker();
+          await choose(scope, overrideName);
+          expect(
+            (await resolveSlugForFacility(parentSlug, facilityId)).name,
+          ).toBe(overrideName);
         });
-        await page.getByRole("button", { name: "Save Changes" }).click();
-        await expectToast(page, "Questionnaire updated successfully");
-      });
 
-      // Put the real override beyond the first page. Preference writes and
-      // terminology resolution still reach the backend.
-      const overrideResponse = await fetch(
-        `${apiBaseUrl()}/api/v1/valueset/${overrideId}/`,
-        {
-          headers: adminApiHeaders(),
-        },
-      );
-      expect(overrideResponse.ok).toBe(true);
-      const override = await overrideResponse.json();
-      await page.route(
-        (url) =>
-          url.pathname === "/api/v1/valueset/" &&
-          url.searchParams.get("facility") === facilityId,
-        async (route) => {
-          const offset = Number(
-            new URL(route.request().url()).searchParams.get("offset") ?? 0,
-          );
-          const results =
-            offset === 0
-              ? Array.from({ length: 100 }, (_, index) => ({
-                  ...override,
-                  id: `unrelated-${index}`,
-                  slug: `unrelated-${index}`,
-                }))
-              : [override];
-          await route.fulfill({ json: { count: 101, results } });
-        },
-      );
+        await test.step("Pick the instance set; the preference persists across reopen", async () => {
+          const scope = await openPicker();
+          await choose(scope, parentName);
+          // Asserted server-side: reopening alone would only prove the
+          // client's cache changed, and the toast from the previous pick can
+          // still be on screen.
+          expect(
+            (await resolveSlugForFacility(parentSlug, facilityId)).name,
+          ).toBe(parentName);
 
-      await page.goto(
-        `/facility/${facilityId}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`,
-      );
-      const block = questionBlock(page, questionTitle);
-      await expect(block).toHaveCount(1);
-
-      const openPicker = async () => {
-        // Close the picker a previous step left open: clicking the combobox
-        // would otherwise toggle it shut instead of reopening it.
-        const openDialog = page.getByRole("dialog").last();
-        if (await openDialog.isVisible().catch(() => false)) {
-          await page.keyboard.press("Escape");
-          await expect(openDialog).toBeHidden();
-        }
-        await block.getByRole("combobox").click();
-        const dialog = page.getByRole("dialog").last();
-        const scope = (await dialog.isVisible().catch(() => false))
-          ? dialog
-          : page.locator("[data-radix-popper-content-wrapper]").last();
-        await expect(scope.getByText(/^Using /)).toBeVisible();
-        return scope;
-      };
-
-      const choose = async (
-        scope: ReturnType<typeof page.locator>,
-        optionName: string,
-      ) => {
-        await scope.getByRole("button", { name: "Change" }).click();
-        await page
-          .getByRole("listbox", { name: "Choose which value set to search" })
-          .getByRole("option", { name: optionName })
-          .click();
-        await expect(scope.getByText(`Using ${optionName}`)).toBeVisible();
-      };
-
-      await test.step("Pick the facility override; the popover and the backend both switch", async () => {
-        const scope = await openPicker();
-        await choose(scope, overrideName);
-        expect(
-          (await resolveSlugForFacility(parentSlug, facilityId)).name,
-        ).toBe(overrideName);
-      });
-
-      await test.step("Pick the instance set; the preference persists across reopen", async () => {
-        const scope = await openPicker();
-        await choose(scope, parentName);
-        // Asserted server-side: reopening alone would only prove the
-        // client's cache changed, and the toast from the previous pick can
-        // still be on screen.
-        expect(
-          (await resolveSlugForFacility(parentSlug, facilityId)).name,
-        ).toBe(parentName);
-
-        const reopened = await openPicker();
-        await expect(reopened.getByText(`Using ${parentName}`)).toBeVisible();
-      });
-    } finally {
-      await deleteFacilityValueSetsBySlug(facilityId, parentSlug);
-      await deleteValueSet(parentId);
-    }
-  });
+          const reopened = await openPicker();
+          await expect(reopened.getByText(`Using ${parentName}`)).toBeVisible();
+        });
+      } finally {
+        await deleteFacilityValueSetsBySlug(facilityId, parentSlug);
+        await deleteValueSet(parentId);
+      }
+    },
+  );
 });

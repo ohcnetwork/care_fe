@@ -5,6 +5,7 @@ import {
   createQuestionnaireEncounter,
   expectFieldError,
   fillStringField,
+  openQuestionnaireFillViaUi,
   submitAndExpectSuccess,
   submitForm,
   verifySubmittedValues,
@@ -21,11 +22,12 @@ test.describe("Enable When — 'exists' operator (answer: false)", () => {
     const { patientId, encounterId } =
       await createQuestionnaireEncounter(facilityId);
     // The fill route fetches by external_id (slug lookup is not supported).
-    const questionnaireId = await getQuestionnaireId();
-
-    await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,
-    );
+    await openQuestionnaireFillViaUi(page, {
+      facilityId,
+      patientId,
+      encounterId,
+      questionnaireId: getQuestionnaireId(),
+    });
     await expect(questionBlock(page, "Insurance Provider")).toBeVisible();
   });
 
@@ -36,35 +38,39 @@ test.describe("Enable When — 'exists' operator (answer: false)", () => {
   // in this suite (which all use answer: true).
   // ──────────────────────────────────────────────
 
-  test("T1: source unanswered → dependent visible [required] + empty → validation error", async ({
-    page,
-  }) => {
-    await test.step("Dependent is visible when source is unanswered", async () => {
-      await checkVisibility(page, "Self-Pay Reason", true);
-    });
+  test(
+    "T1: source unanswered → dependent visible [required] + empty → validation error",
+    { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+    async ({ page }) => {
+      await test.step("Dependent is visible when source is unanswered", async () => {
+        await checkVisibility(page, "Self-Pay Reason", true);
+      });
 
-    await test.step("Submit without filling the required dependent", async () => {
-      await submitForm(page);
-      await expectFieldError(page, "Self-Pay Reason");
-    });
-  });
+      await test.step("Submit without filling the required dependent", async () => {
+        await submitForm(page);
+        await expectFieldError(page, "Self-Pay Reason");
+      });
+    },
+  );
 
-  test("T2: source answered → dependent hides → submits without it", async ({
-    page,
-  }) => {
-    const provider = faker.company.name();
+  test(
+    "T2: source answered → dependent hides → submits without it",
+    { tag: ["@atomic", "@cap:questionnaire.fill.enablewhen"] },
+    async ({ page }) => {
+      const provider = faker.company.name();
 
-    await test.step("Fill source — dependent hides", async () => {
-      await fillStringField(page, "Insurance Provider", provider);
-      await checkVisibility(page, "Self-Pay Reason", false);
-    });
+      await test.step("Fill source — dependent hides", async () => {
+        await fillStringField(page, "Insurance Provider", provider);
+        await checkVisibility(page, "Self-Pay Reason", false);
+      });
 
-    await test.step("Form submits successfully without the hidden dependent", async () => {
-      await submitAndExpectSuccess(page);
-    });
+      await test.step("Form submits successfully without the hidden dependent", async () => {
+        await submitAndExpectSuccess(page);
+      });
 
-    await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-      await verifySubmittedValues(page, [provider], ["Self-Pay Reason"]);
-    });
-  });
+      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+        await verifySubmittedValues(page, [provider], ["Self-Pay Reason"]);
+      });
+    },
+  );
 });

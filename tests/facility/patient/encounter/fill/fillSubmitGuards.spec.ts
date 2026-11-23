@@ -1,9 +1,13 @@
-import { type Page, expect, test } from "@playwright/test";
+import {
+  trackBatchRequests,
+  waitForBatchRequest,
+} from "tests/helper/questionnaire";
 import { questionBlock } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
+import { expect, test } from "tests/support/test";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -54,88 +58,74 @@ async function nameEveryFile(
   }
 }
 
-/** Tracks POSTs to the batch endpoint from the moment it's called —
- *  registering the listener AFTER the click would only prove no request
- *  had arrived YET, not that the action never sends one. */
-function trackBatchRequests(page: Page): string[] {
-  const urls: string[] = [];
-  page.on("request", (request) => {
-    if (
-      request.method() === "POST" &&
-      request.url().includes("/api/v1/batch_requests/")
-    ) {
-      urls.push(request.url());
-    }
-  });
-  return urls;
-}
-
 test.describe("P1-10: batch size cap preflight", () => {
-  test("21 files in one question aborts with the specific toast and posts nothing", async ({
-    page,
-  }) => {
-    test.slow();
-    const posts = trackBatchRequests(page);
+  test(
+    "21 files in one question aborts with the specific toast and posts nothing",
+    { tag: ["@atomic", "@cap:questionnaire.fill.submit"] },
+    async ({ page }) => {
+      test.slow();
+      const posts = trackBatchRequests(page);
 
-    await page.goto(
-      `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/files`,
-    );
+      await page.goto(
+        `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/files`,
+      );
 
-    const block = questionBlock(page, "Files");
-    await expect(block).toBeVisible();
+      const block = questionBlock(page, "Files");
+      await expect(block).toBeVisible();
 
-    await block
-      .locator('input[type="file"]')
-      .setInputFiles(tinyFilePayloads(21));
-    await nameEveryFile(block, 21);
+      await block
+        .locator('input[type="file"]')
+        .setInputFiles(tinyFilePayloads(21));
+      await nameEveryFile(block, 21);
 
-    await page.getByRole("button", { name: "Save Changes" }).click();
+      await page.getByRole("button", { name: "Save Changes" }).click();
 
-    await expectToast(
-      page,
-      "This submission has 21 operations; the server accepts at most 20 in one save. Remove some files or split the forms.",
-    );
+      await expectToast(
+        page,
+        "This submission has 21 operations; the server accepts at most 20 in one save. Remove some files or split the forms.",
+      );
 
-    // The whole point of the preflight: the oversized batch never left the
-    // browser.
-    expect(
-      posts,
-      "no /api/v1/batch_requests/ POST may fire when the batch is over the cap",
-    ).toHaveLength(0);
-  });
+      // The whole point of the preflight: the oversized batch never left the
+      // browser.
+      expect(
+        posts,
+        "no /api/v1/batch_requests/ POST may fire when the batch is over the cap",
+      ).toHaveLength(0);
+    },
+  );
 
-  test("20 files in one question submits as a single batch request", async ({
-    page,
-  }) => {
-    test.slow();
-    const posts = trackBatchRequests(page);
+  test(
+    "20 files in one question submits as a single batch request",
+    { tag: ["@atomic", "@cap:questionnaire.fill.submit"] },
+    async ({ page, facilityId, isolatedEncounter }) => {
+      test.slow();
+      const posts = trackBatchRequests(page);
+      const { patientId, encounterId } = isolatedEncounter;
 
-    await page.goto(
-      `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/files`,
-    );
+      // Uploads 20 real files: on this test's own encounter, not the shared one.
+      await page.goto(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/files`,
+      );
 
-    const block = questionBlock(page, "Files");
-    await expect(block).toBeVisible();
+      const block = questionBlock(page, "Files");
+      await expect(block).toBeVisible();
 
-    await block
-      .locator('input[type="file"]')
-      .setInputFiles(tinyFilePayloads(20));
-    await nameEveryFile(block, 20);
+      await block
+        .locator('input[type="file"]')
+        .setInputFiles(tinyFilePayloads(20));
+      await nameEveryFile(block, 20);
 
-    const batchRequest = page.waitForRequest(
-      (request) =>
-        request.url().includes("/api/v1/batch_requests/") &&
-        request.method() === "POST",
-    );
-    await page.getByRole("button", { name: "Save Changes" }).click();
-    await batchRequest;
+      const batchRequest = waitForBatchRequest(page);
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      await batchRequest;
 
-    // The passing side of the same boundary: exactly at the cap, the
-    // submit goes through as one ordinary batch call.
-    await expectToast(page, "Questionnaire submitted successfully");
-    expect(
-      posts,
-      "exactly one /api/v1/batch_requests/ POST for a batch at the cap",
-    ).toHaveLength(1);
-  });
+      // The passing side of the same boundary: exactly at the cap, the
+      // submit goes through as one ordinary batch call.
+      await expectToast(page, "Questionnaire submitted successfully");
+      expect(
+        posts,
+        "exactly one /api/v1/batch_requests/ POST for a batch at the cap",
+      ).toHaveLength(1);
+    },
+  );
 });

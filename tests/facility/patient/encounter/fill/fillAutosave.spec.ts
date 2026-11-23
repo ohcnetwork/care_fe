@@ -1,5 +1,4 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
 import {
   draftFormNoteText,
   fillDraftCount,
@@ -13,314 +12,331 @@ import { expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
+import { expect, test } from "tests/support/test";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Fill page local autosave", () => {
-  test("Minimize and Escape preserve the final edit and confirmed Close discards it without autosaving again", async ({
-    page,
-  }) => {
-    const questionnaireId = await getQuestionnaireIdBySlug(
-      "respiratory_status-v3",
-    );
-    const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
-    await page.goto(fillUrl);
-    const input = questionBlock(page, "Note on Bilateral Air Entry").getByRole(
-      "textbox",
-    );
-    await input.fill("Initial saved note");
-    await expect
-      .poll(() => draftFormNoteText(page, questionnaireId))
-      .toBe("Initial saved note");
+  test(
+    "Minimize and Escape preserve the final edit and confirmed Close discards it without autosaving again",
+    { tag: ["@atomic", "@cap:questionnaire.fill.autosave"] },
+    async ({ page }) => {
+      const questionnaireId = await getQuestionnaireIdBySlug(
+        "respiratory_status-v3",
+      );
+      const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
+      await page.goto(fillUrl);
+      const input = questionBlock(
+        page,
+        "Note on Bilateral Air Entry",
+      ).getByRole("textbox");
+      await input.fill("Initial saved note");
+      await expect
+        .poll(() => draftFormNoteText(page, questionnaireId))
+        .toBe("Initial saved note");
 
-    await input.fill("Final edit before leaving");
-    await page
-      .getByRole("button", { name: "Minimize", exact: true })
-      .press("Enter");
-    await page.waitForURL(/\/updates$/);
-    await expect
-      .poll(() => draftFormNoteText(page, questionnaireId))
-      .toBe("Final edit before leaving");
+      await input.fill("Final edit before leaving");
+      await page
+        .getByRole("button", { name: "Minimize", exact: true })
+        .press("Enter");
+      await page.waitForURL(/\/updates$/);
+      await expect
+        .poll(() => draftFormNoteText(page, questionnaireId))
+        .toBe("Final edit before leaving");
 
-    await page.goto(fillUrl);
-    await page.getByRole("button", { name: "Resume", exact: true }).click();
-    await expect(input).toHaveValue("Final edit before leaving");
+      await page.goto(fillUrl);
+      await page.getByRole("button", { name: "Resume", exact: true }).click();
+      await expect(input).toHaveValue("Final edit before leaving");
 
-    await page.getByRole("button", { name: "Add questionnaire" }).click();
-    const forms = page.getByRole("dialog", { name: "Forms", exact: true });
-    await forms.getByPlaceholder("Search Forms").press("Escape");
-    await expect(forms).not.toBeVisible();
-    await expect(page).toHaveURL(fillUrl);
-    await expect(input).toHaveValue("Final edit before leaving");
+      await page.getByRole("button", { name: "Add questionnaire" }).click();
+      const forms = page.getByRole("dialog", { name: "Forms", exact: true });
+      await forms.getByPlaceholder("Search Forms").press("Escape");
+      await expect(forms).toBeHidden();
+      await expect(page).toHaveURL(fillUrl);
+      await expect(input).toHaveValue("Final edit before leaving");
 
-    await input.fill("Final edit before Escape");
-    await input.press("Escape");
-    await page.waitForURL(/\/updates$/);
-    await page.goto(fillUrl);
-    await page.getByRole("button", { name: "Resume", exact: true }).click();
-    await expect(input).toHaveValue("Final edit before Escape");
+      await input.fill("Final edit before Escape");
+      await input.press("Escape");
+      await page.waitForURL(/\/updates$/);
+      await page.goto(fillUrl);
+      await page.getByRole("button", { name: "Resume", exact: true }).click();
+      await expect(input).toHaveValue("Final edit before Escape");
 
-    await page
-      .getByRole("button", { name: "Close", exact: true })
-      .press("Enter");
-    const confirmation = page.getByRole("alertdialog");
-    await confirmation.getByRole("button", { name: "Cancel" }).press("Enter");
-    await expect(confirmation).not.toBeVisible();
-    await expect(input).toHaveValue("Final edit before Escape");
+      await page
+        .getByRole("button", { name: "Close", exact: true })
+        .press("Enter");
+      const confirmation = page.getByRole("alertdialog");
+      await confirmation.getByRole("button", { name: "Cancel" }).press("Enter");
+      await expect(confirmation).toBeHidden();
+      await expect(input).toHaveValue("Final edit before Escape");
 
-    // Close while another autosave is pending; unmount must not restore it.
-    await input.fill("Edit to discard before the debounce");
-    await page
-      .getByRole("button", { name: "Close", exact: true })
-      .press("Enter");
-    await confirmation
-      .getByRole("button", { name: /^Discard\b/ })
-      .press("Enter");
-    await page.waitForURL(/\/updates$/);
-    await settleAutosaveDebounce(page);
-    expect(await fillDraftCount(page)).toBe(0);
+      // Close while another autosave is pending; unmount must not restore it.
+      await input.fill("Edit to discard before the debounce");
+      await page
+        .getByRole("button", { name: "Close", exact: true })
+        .press("Enter");
+      await confirmation
+        .getByRole("button", { name: /^Discard\b/ })
+        .press("Enter");
+      await page.waitForURL(/\/updates$/);
+      await settleAutosaveDebounce(page);
+      expect(await fillDraftCount(page)).toBe(0);
 
-    await page.goto(fillUrl);
-    await expect(input).toHaveValue("");
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Resume", exact: true }),
-    ).toHaveCount(0);
-  });
+      await page.goto(fillUrl);
+      await expect(input).toHaveValue("");
+      await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
+      await expect(
+        page.getByRole("button", { name: "Resume", exact: true }),
+      ).toHaveCount(0);
+    },
+  );
 
-  test("dismissing the restore prompt persists work typed while autosave was paused", async ({
-    page,
-  }) => {
-    const questionnaireId = await getQuestionnaireIdBySlug(
-      "respiratory_status-v3",
-    );
-    const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
-    await page.goto(fillUrl);
-    const input = questionBlock(page, "Note on Bilateral Air Entry").getByRole(
-      "textbox",
-    );
-    await input.fill("Previous session");
-    await page.reload();
-    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
-    await input.fill("New work while the prompt is visible");
-    await settleAutosaveDebounce(page);
-    await expect
-      .poll(() => draftFormNoteText(page, questionnaireId))
-      .toBe("Previous session");
+  test(
+    "dismissing the restore prompt persists work typed while autosave was paused",
+    { tag: ["@atomic", "@cap:questionnaire.fill.autosave"] },
+    async ({ page }) => {
+      const questionnaireId = await getQuestionnaireIdBySlug(
+        "respiratory_status-v3",
+      );
+      const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
+      await page.goto(fillUrl);
+      const input = questionBlock(
+        page,
+        "Note on Bilateral Air Entry",
+      ).getByRole("textbox");
+      await input.fill("Previous session");
+      await page.reload();
+      await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+      await input.fill("New work while the prompt is visible");
+      await settleAutosaveDebounce(page);
+      await expect
+        .poll(() => draftFormNoteText(page, questionnaireId))
+        .toBe("Previous session");
 
-    await page
-      .getByRole("button", { name: "Close", exact: true })
-      .last()
-      .click();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
-    await expect
-      .poll(() => draftFormNoteText(page, questionnaireId))
-      .toBe("New work while the prompt is visible");
-    await page.reload();
-    await page.getByRole("button", { name: "Resume", exact: true }).click();
-    await expect(input).toHaveValue("New work while the prompt is visible");
-  });
+      await page
+        .getByRole("button", { name: "Close", exact: true })
+        .last()
+        .click();
+      await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
+      await expect
+        .poll(() => draftFormNoteText(page, questionnaireId))
+        .toBe("New work while the prompt is visible");
+      await page.reload();
+      await page.getByRole("button", { name: "Resume", exact: true }).click();
+      await expect(input).toHaveValue("New work while the prompt is visible");
+    },
+  );
 
-  test("reload prompts to resume, Resume applies the draft, submit clears it", async ({
-    page,
-  }) => {
-    const questionnaireId = await getQuestionnaireIdBySlug(
-      "respiratory_status-v3",
-    );
-    const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
-    const note = faker.lorem.sentence();
+  test(
+    "reload prompts to resume, Resume applies the draft, submit clears it",
+    { tag: ["@atomic", "@cap:questionnaire.fill.autosave"] },
+    async ({ page, facilityId, isolatedEncounter }) => {
+      const questionnaireId = await getQuestionnaireIdBySlug(
+        "respiratory_status-v3",
+      );
+      // Submits a response: use this test's own encounter, not the shared one.
+      const { patientId, encounterId } = isolatedEncounter;
+      const fillUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`;
+      const note = faker.lorem.sentence();
 
-    await page.goto(fillUrl);
-    const airEntry = questionBlock(page, "Is bilateral air entry present?");
-    await expect(airEntry).toBeVisible();
-    const textInput = questionBlock(
-      page,
-      "Note on Bilateral Air Entry",
-    ).getByRole("textbox");
+      await page.goto(fillUrl);
+      const airEntry = questionBlock(page, "Is bilateral air entry present?");
+      await expect(airEntry).toBeVisible();
+      const textInput = questionBlock(
+        page,
+        "Note on Bilateral Air Entry",
+      ).getByRole("textbox");
 
-    // No draft yet — no Draft chip on the tab, no prompt.
-    await expect(
-      page.getByRole("tab", { name: /Questionnaire/ }),
-    ).not.toContainText("Draft");
+      // No draft yet — no Draft chip on the tab, no prompt.
+      await expect(
+        page.getByRole("tab", { name: /Questionnaire/ }),
+      ).not.toContainText("Draft");
 
-    await airEntry.getByRole("radio", { name: "yes", exact: true }).click();
-    await textInput.fill(note);
+      await airEntry.getByRole("radio", { name: "yes", exact: true }).click();
+      await textInput.fill(note);
 
-    // Any edit marks the session as a draft.
-    await expect(
-      page.getByRole("tab", { name: /Questionnaire/ }),
-    ).toContainText("Draft");
+      // Any edit marks the session as a draft.
+      await expect(
+        page.getByRole("tab", { name: /Questionnaire/ }),
+      ).toContainText("Draft");
 
-    // Reload — the pagehide flush persists the pending debounce, but the
-    // fresh mount must NOT silently seed the store: it prompts instead.
-    await page.reload();
-    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
-    await expect(textInput).toHaveValue("");
-    await expect(
-      questionBlock(page, "Is bilateral air entry present?").getByRole(
-        "radio",
-        { name: "yes", exact: true },
-      ),
-    ).toHaveAttribute("aria-checked", "false");
+      // Reload — the pagehide flush persists the pending debounce, but the
+      // fresh mount must NOT silently seed the store: it prompts instead.
+      await page.reload();
+      await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+      await expect(textInput).toHaveValue("");
+      await expect(
+        questionBlock(page, "Is bilateral air entry present?").getByRole(
+          "radio",
+          { name: "yes", exact: true },
+        ),
+      ).toHaveAttribute("aria-checked", "false");
 
-    // Resume applies the draft into the live store.
-    await page.getByRole("button", { name: /resume/i }).click();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
-    await expect(textInput).toHaveValue(note);
-    await expect(
-      questionBlock(page, "Is bilateral air entry present?").getByRole(
-        "radio",
-        { name: "yes", exact: true },
-      ),
-    ).toHaveAttribute("aria-checked", "true");
-    await expect(
-      page.getByRole("tab", { name: /Questionnaire/ }),
-    ).toContainText("Draft");
+      // Resume applies the draft into the live store.
+      await page.getByRole("button", { name: /resume/i }).click();
+      await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
+      await expect(textInput).toHaveValue(note);
+      await expect(
+        questionBlock(page, "Is bilateral air entry present?").getByRole(
+          "radio",
+          { name: "yes", exact: true },
+        ),
+      ).toHaveAttribute("aria-checked", "true");
+      await expect(
+        page.getByRole("tab", { name: /Questionnaire/ }),
+      ).toContainText("Draft");
 
-    // Fill the required questions and submit — success clears the draft.
-    await questionBlock(page, "Is bilateral air entry present?")
-      .getByRole("radio", { name: "no", exact: true })
-      .click();
-    await questionBlock(page, "Select Modality")
-      .getByRole("radio", { name: "invasive", exact: true })
-      .click();
-    await page.getByRole("button", { name: "Save Changes" }).click();
-    await expectToast(page, "Questionnaire submitted successfully");
-    await page.waitForURL(/\/updates$/);
+      // Fill the required questions and submit — success clears the draft.
+      await questionBlock(page, "Is bilateral air entry present?")
+        .getByRole("radio", { name: "no", exact: true })
+        .click();
+      await questionBlock(page, "Select Modality")
+        .getByRole("radio", { name: "invasive", exact: true })
+        .click();
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      await expectToast(page, "Questionnaire submitted successfully");
+      await page.waitForURL(/\/updates$/);
 
-    // Back on the fill page: nothing to restore.
-    await page.goto(fillUrl);
-    await expect(
-      questionBlock(page, "Is bilateral air entry present?"),
-    ).toBeVisible();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
-  });
+      // Back on the fill page: nothing to restore.
+      await page.goto(fillUrl);
+      await expect(
+        questionBlock(page, "Is bilateral air entry present?"),
+      ).toBeVisible();
+      await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
+    },
+  );
 
-  test("Discard deletes the draft, a later reload shows no prompt", async ({
-    page,
-  }) => {
-    const questionnaireId = await getQuestionnaireIdBySlug(
-      "respiratory_status-v3",
-    );
-    const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
-    const note = faker.lorem.sentence();
+  test(
+    "Discard deletes the draft, a later reload shows no prompt",
+    { tag: ["@atomic", "@cap:questionnaire.fill.autosave"] },
+    async ({ page }) => {
+      const questionnaireId = await getQuestionnaireIdBySlug(
+        "respiratory_status-v3",
+      );
+      const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
+      const note = faker.lorem.sentence();
 
-    await page.goto(fillUrl);
-    const airEntry = questionBlock(page, "Is bilateral air entry present?");
-    await expect(airEntry).toBeVisible();
-    const textInput = questionBlock(
-      page,
-      "Note on Bilateral Air Entry",
-    ).getByRole("textbox");
+      await page.goto(fillUrl);
+      const airEntry = questionBlock(page, "Is bilateral air entry present?");
+      await expect(airEntry).toBeVisible();
+      const textInput = questionBlock(
+        page,
+        "Note on Bilateral Air Entry",
+      ).getByRole("textbox");
 
-    await airEntry.getByRole("radio", { name: "yes", exact: true }).click();
-    await textInput.fill(note);
-    await expect(
-      page.getByRole("tab", { name: /Questionnaire/ }),
-    ).toContainText("Draft");
+      await airEntry.getByRole("radio", { name: "yes", exact: true }).click();
+      await textInput.fill(note);
+      await expect(
+        page.getByRole("tab", { name: /Questionnaire/ }),
+      ).toContainText("Draft");
 
-    await page.reload();
-    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
-    await expect(textInput).toHaveValue("");
+      await page.reload();
+      await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+      await expect(textInput).toHaveValue("");
 
-    // Discard: prompt gone, form stays pristine, chip gone.
-    await page.getByRole("button", { name: "Discard", exact: true }).click();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
-    await expect(textInput).toHaveValue("");
-    await expect(
-      page.getByRole("tab", { name: /Questionnaire/ }),
-    ).not.toContainText("Draft");
+      // Discard: prompt gone, form stays pristine, chip gone.
+      await page.getByRole("button", { name: "Discard", exact: true }).click();
+      await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
+      await expect(textInput).toHaveValue("");
+      await expect(
+        page.getByRole("tab", { name: /Questionnaire/ }),
+      ).not.toContainText("Draft");
 
-    // The draft was deleted, not merely dismissed — a later reload has
-    // nothing left to prompt about.
-    await page.reload();
-    await expect(airEntry).toBeVisible();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
-    await expect(textInput).toHaveValue("");
-  });
+      // The draft was deleted, not merely dismissed — a later reload has
+      // nothing left to prompt about.
+      await page.reload();
+      await expect(airEntry).toBeVisible();
+      await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
+      await expect(textInput).toHaveValue("");
+    },
+  );
 
-  test("Discard drops only the STORED draft — answers typed while the prompt was pending survive it", async ({
-    page,
-  }) => {
-    // Persistence stands down while the restore prompt is unanswered, so
-    // work typed in the meantime exists nowhere but the live store.
-    // Discard used to reset the covered forms to a pristine seed, which
-    // destroyed exactly that un-persisted work on a button that only
-    // promises to drop an old draft.
-    const questionnaireId = await getQuestionnaireIdBySlug(
-      "respiratory_status-v3",
-    );
-    const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
-    const staleNote = faker.lorem.sentence();
-    const freshNote = `fresh-${faker.string.alphanumeric(10)}`;
+  test(
+    "Discard drops only the STORED draft — answers typed while the prompt was pending survive it",
+    { tag: ["@atomic", "@cap:questionnaire.fill.autosave"] },
+    async ({ page }) => {
+      // Persistence stands down while the restore prompt is unanswered, so
+      // work typed in the meantime exists nowhere but the live store.
+      // Discard used to reset the covered forms to a pristine seed, which
+      // destroyed exactly that un-persisted work on a button that only
+      // promises to drop an old draft.
+      const questionnaireId = await getQuestionnaireIdBySlug(
+        "respiratory_status-v3",
+      );
+      const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
+      const staleNote = faker.lorem.sentence();
+      const freshNote = `fresh-${faker.string.alphanumeric(10)}`;
 
-    await page.goto(fillUrl);
-    const textInput = questionBlock(
-      page,
-      "Note on Bilateral Air Entry",
-    ).getByRole("textbox");
-    await textInput.fill(staleNote);
-    await expect(
-      page.getByRole("tab", { name: /Questionnaire/ }),
-    ).toContainText("Draft");
+      await page.goto(fillUrl);
+      const textInput = questionBlock(
+        page,
+        "Note on Bilateral Air Entry",
+      ).getByRole("textbox");
+      await textInput.fill(staleNote);
+      await expect(
+        page.getByRole("tab", { name: /Questionnaire/ }),
+      ).toContainText("Draft");
 
-    await page.reload();
-    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+      await page.reload();
+      await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
 
-    // Ignore the prompt and type fresh work.
-    await textInput.fill(freshNote);
+      // Ignore the prompt and type fresh work.
+      await textInput.fill(freshNote);
 
-    await page.getByRole("button", { name: "Discard", exact: true }).click();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
-    // The fresh work is still on screen…
-    await expect(textInput).toHaveValue(freshNote);
+      await page.getByRole("button", { name: "Discard", exact: true }).click();
+      await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
+      // The fresh work is still on screen…
+      await expect(textInput).toHaveValue(freshNote);
 
-    // …and Discard re-armed persistence immediately, so the fresh work is
-    // itself recoverable: the old draft is gone, the new one restores it.
-    await page.reload();
-    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
-    await page.getByRole("button", { name: /resume/i }).click();
-    await expect(textInput).toHaveValue(freshNote);
-  });
+      // …and Discard re-armed persistence immediately, so the fresh work is
+      // itself recoverable: the old draft is gone, the new one restores it.
+      await page.reload();
+      await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+      await page.getByRole("button", { name: /resume/i }).click();
+      await expect(textInput).toHaveValue(freshNote);
+    },
+  );
 
-  test("an untouched clinical form writes no draft, however much it prefetches", async ({
-    page,
-  }) => {
-    // The fixed "encounter" questionnaire: its structured widget fetches
-    // the encounter and writes it into the response store from a mount
-    // effect. That write is not an edit — it is server data arriving — but
-    // the draft layer used to count it both as dirty AND as draft content,
-    // so merely OPENING this form (the Update Encounter flow, one of the
-    // highest-traffic screens) persisted a draft and every later visit
-    // opened with a false "unsaved entry" prompt that restored nothing.
-    const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/encounter`;
+  test(
+    "an untouched clinical form writes no draft, however much it prefetches",
+    { tag: ["@atomic", "@cap:questionnaire.fill.autosave"] },
+    async ({ page }) => {
+      // The fixed "encounter" questionnaire: its structured widget fetches
+      // the encounter and writes it into the response store from a mount
+      // effect. That write is not an edit — it is server data arriving — but
+      // the draft layer used to count it both as dirty AND as draft content,
+      // so merely OPENING this form (the Update Encounter flow, one of the
+      // highest-traffic screens) persisted a draft and every later visit
+      // opened with a false "unsaved entry" prompt that restored nothing.
+      const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/encounter`;
 
-    await page.goto(fillUrl);
-    // The widget has rendered WITH its prefetched row — the encounter
-    // class combobox only carries a value once the fetch landed.
-    await expect(
-      page.getByRole("button", { name: "Save Changes" }),
-    ).toBeVisible();
-    await expect(page.getByRole("combobox").first()).toBeVisible();
+      await page.goto(fillUrl);
+      // The widget has rendered WITH its prefetched row — the encounter
+      // class combobox only carries a value once the fetch landed.
+      await expect(
+        page.getByRole("button", { name: "Save Changes" }),
+      ).toBeVisible();
+      await expect(page.getByRole("combobox").first()).toBeVisible();
 
-    // Touch nothing. No Draft chip, and nothing in storage after well over
-    // AUTOSAVE_DEBOUNCE_MS — the wait has to be explicit: `expect.poll`
-    // resolves on its first passing evaluation, so polling for an absence
-    // that already holds observes nothing at all.
-    await expect(
-      page.getByRole("tab", { name: /Questionnaire/ }),
-    ).not.toContainText("Draft");
-    await settleAutosaveDebounce(page);
-    expect(await fillDraftCount(page)).toBe(0);
+      // Touch nothing. No Draft chip, and nothing in storage after well over
+      // AUTOSAVE_DEBOUNCE_MS — the wait has to be explicit: `expect.poll`
+      // resolves on its first passing evaluation, so polling for an absence
+      // that already holds observes nothing at all.
+      await expect(
+        page.getByRole("tab", { name: /Questionnaire/ }),
+      ).not.toContainText("Draft");
+      await settleAutosaveDebounce(page);
+      expect(await fillDraftCount(page)).toBe(0);
 
-    // And the next visit is clean — no prompt to answer, nothing to
-    // restore.
-    await page.reload();
-    await expect(
-      page.getByRole("button", { name: "Save Changes" }),
-    ).toBeVisible();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
-    await settleAutosaveDebounce(page);
-    expect(await fillDraftCount(page)).toBe(0);
-  });
+      // And the next visit is clean — no prompt to answer, nothing to
+      // restore.
+      await page.reload();
+      await expect(
+        page.getByRole("button", { name: "Save Changes" }),
+      ).toBeVisible();
+      await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
+      await settleAutosaveDebounce(page);
+      expect(await fillDraftCount(page)).toBe(0);
+    },
+  );
 });

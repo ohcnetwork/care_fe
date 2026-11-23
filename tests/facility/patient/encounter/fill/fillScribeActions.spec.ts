@@ -188,193 +188,216 @@ test.afterEach(async ({ page }, testInfo) => {
 for (const timezoneId of ["America/Los_Angeles", "Asia/Kolkata"]) {
   test.describe(timezoneId, () => {
     test.use({ timezoneId });
-    test("Scribe date, datetime and time answers render in their own input formats", async ({
-      page,
-    }) => {
-      await test.step("Set a calendar date, a local datetime and a clock time", async () => {
-        expect(await setAnswer(page, "date", ["2026-09-08"])).toEqual({
-          ok: true,
+
+    test(
+      "Scribe date, datetime and time answers render in their own input formats",
+      {
+        tag: ["@coupled", "@mocked", "@cap:questionnaire.fill.scribe"],
+        annotation: {
+          type: "coupled",
+          description:
+            "Needs the Vite dev server (vite-modules project) to import source modules",
+        },
+      },
+      async ({ page }) => {
+        await test.step("Set a calendar date, a local datetime and a clock time", async () => {
+          expect(await setAnswer(page, "date", ["2026-09-08"])).toEqual({
+            ok: true,
+          });
+          expect(
+            await setAnswer(page, "dateTime", ["2026-09-08T14:35"]),
+          ).toEqual({ ok: true });
+          expect(await setAnswer(page, "time", ["09:12:30"])).toEqual({
+            ok: true,
+          });
+          await expect(page.locator('[data-question-id="date"]')).toContainText(
+            "September 8th, 2026",
+          );
+          await expect(
+            page.locator('[data-question-id="dateTime"] input[type="time"]'),
+          ).toHaveValue("14:35");
+          await expect(
+            page.locator('[data-question-id="time"] input'),
+          ).toHaveValue("09:12:30");
         });
-        expect(await setAnswer(page, "dateTime", ["2026-09-08T14:35"])).toEqual(
-          { ok: true },
-        );
-        expect(await setAnswer(page, "time", ["09:12:30"])).toEqual({
-          ok: true,
+
+        await test.step("Reject mixed formats without replacing the displayed answers", async () => {
+          expect((await setAnswer(page, "date", ["2026-09-08T14:35"])).ok).toBe(
+            false,
+          );
+          expect((await setAnswer(page, "dateTime", ["2026-09-08"])).ok).toBe(
+            false,
+          );
+          expect((await setAnswer(page, "time", ["2026-09-08T14:35"])).ok).toBe(
+            false,
+          );
+          expect((await setAnswer(page, "date", ["2026-02-30"])).ok).toBe(
+            false,
+          );
+          await expect(page.locator('[data-question-id="date"]')).toContainText(
+            "September 8th, 2026",
+          );
+          await expect(
+            page.locator('[data-question-id="dateTime"] input[type="time"]'),
+          ).toHaveValue("14:35");
+          await expect(
+            page.locator('[data-question-id="time"] input'),
+          ).toHaveValue("09:12:30");
         });
-        await expect(page.locator('[data-question-id="date"]')).toContainText(
-          "September 8th, 2026",
-        );
-        await expect(
-          page.locator('[data-question-id="dateTime"] input[type="time"]'),
-        ).toHaveValue("14:35");
-        await expect(
-          page.locator('[data-question-id="time"] input'),
-        ).toHaveValue("09:12:30");
-      });
-      await test.step("Reject mixed formats without replacing the displayed answers", async () => {
-        expect((await setAnswer(page, "date", ["2026-09-08T14:35"])).ok).toBe(
-          false,
-        );
-        expect((await setAnswer(page, "dateTime", ["2026-09-08"])).ok).toBe(
-          false,
-        );
-        expect((await setAnswer(page, "time", ["2026-09-08T14:35"])).ok).toBe(
-          false,
-        );
-        expect((await setAnswer(page, "date", ["2026-02-30"])).ok).toBe(false);
-        await expect(page.locator('[data-question-id="date"]')).toContainText(
-          "September 8th, 2026",
-        );
-        await expect(
-          page.locator('[data-question-id="dateTime"] input[type="time"]'),
-        ).toHaveValue("14:35");
-        await expect(
-          page.locator('[data-question-id="time"] input'),
-        ).toHaveValue("09:12:30");
-      });
-      await test.step("Display an explicit datetime offset in the clinician's timezone", async () => {
-        expect(
-          await setAnswer(page, "dateTime", ["2026-09-08T14:35:00+05:30"]),
-        ).toEqual({ ok: true });
-        await expect(
-          page.locator('[data-question-id="dateTime"] input[type="time"]'),
-        ).toHaveValue(timezoneId === "Asia/Kolkata" ? "14:35" : "02:05");
-      });
-    });
+
+        await test.step("Display an explicit datetime offset in the clinician's timezone", async () => {
+          expect(
+            await setAnswer(page, "dateTime", ["2026-09-08T14:35:00+05:30"]),
+          ).toEqual({ ok: true });
+          await expect(
+            page.locator('[data-question-id="dateTime"] input[type="time"]'),
+          ).toHaveValue(timezoneId === "Asia/Kolkata" ? "14:35" : "02:05");
+        });
+      },
+    );
   });
 }
 
 for (const type of clinicalTypes) {
-  test(`Scribe ${type} rows append and update without replacing other answers`, async ({
-    page,
-  }) => {
-    const label = `Scribe ${type}`;
-    const row = {
-      code: { code: `scribe-${type}`, system: "test", display: label },
-      clinical_status: "active",
-      verification_status: "confirmed",
-      severity: "moderate",
-      criticality: "low",
-      category:
-        type === "allergy_intolerance"
-          ? "food"
-          : type === "diagnosis"
-            ? "encounter_diagnosis"
-            : "problem_list_item",
-      onset: { onset_datetime: "2026-09-08" },
-      note: "Captured by Scribe",
-    };
-    const other = {
-      ...row,
-      code: {
-        ...row.code,
-        code: `another-${type}`,
-        display: `Another ${type}`,
+  test(
+    `Scribe ${type} rows append and update without replacing other answers`,
+    {
+      tag: ["@coupled", "@mocked", "@cap:questionnaire.fill.scribe"],
+      annotation: {
+        type: "coupled",
+        description:
+          "Needs the Vite dev server (vite-modules project) to import source modules",
       },
-    };
-    const existing = (await getClinicalRows(page, type))[0];
-    const table = page
-      .locator(`[data-question-id="${type}"]`)
-      .getByRole("table");
-
-    await test.step("Append to a saved legacy row without revalidating it", async () => {
-      expect(await setAnswer(page, type, [row])).toEqual({ ok: true });
-      const rows = await getClinicalRows(page, type);
-      expect(rows).toHaveLength(2);
-      expect(rows[0]).toEqual(existing);
-      await expect(table.getByText(label, { exact: true })).toBeVisible();
-      await expect(
-        table.getByText(`Existing ${type}`, { exact: true }),
-      ).toBeVisible();
-    });
-
-    await test.step("Append another row without resending the unsaved answer", async () => {
-      expect(await setAnswer(page, type, [other])).toEqual({ ok: true });
-      const rows = await getClinicalRows(page, type);
-      expect(rows).toHaveLength(3);
-      expect(rows[0]).toEqual(existing);
-      expect(rows[1]).toMatchObject(row);
-      expect(rows[2]).toMatchObject(other);
-      await expect(table.getByText(label, { exact: true })).toBeVisible();
-      await expect(
-        table.getByText(`Another ${type}`, { exact: true }),
-      ).toBeVisible();
-    });
-
-    await test.step("Update the saved row by code and retain its record id", async () => {
-      const updated = {
+    },
+    async ({ page }) => {
+      const label = `Scribe ${type}`;
+      const row = {
+        code: { code: `scribe-${type}`, system: "test", display: label },
+        clinical_status: "active",
+        verification_status: "confirmed",
+        severity: "moderate",
+        criticality: "low",
+        category:
+          type === "allergy_intolerance"
+            ? "food"
+            : type === "diagnosis"
+              ? "encounter_diagnosis"
+              : "problem_list_item",
+        onset: { onset_datetime: "2026-09-08" },
+        note: "Captured by Scribe",
+      };
+      const other = {
         ...row,
         code: {
           ...row.code,
-          code: `existing-${type}`,
-          display: `Existing ${type}`,
+          code: `another-${type}`,
+          display: `Another ${type}`,
         },
-        note: "Updated by code",
       };
-      expect(await setAnswer(page, type, [updated])).toEqual({ ok: true });
-      const rows = await getClinicalRows(page, type);
-      expect(rows).toHaveLength(3);
-      expect(rows[0]).toMatchObject({ ...updated, id: `existing-${type}` });
-      expect(rows[1]).toMatchObject(row);
-      expect(rows[2]).toMatchObject(other);
-      await expect(
-        table.getByText(`Existing ${type}`, { exact: true }),
-      ).toHaveCount(1);
-    });
+      const existing = (await getClinicalRows(page, type))[0];
+      const table = page
+        .locator(`[data-question-id="${type}"]`)
+        .getByRole("table");
 
-    await test.step("Update the saved row by id when its code changes", async () => {
-      const updated = {
-        ...row,
-        id: `existing-${type}`,
-        code: {
-          ...row.code,
-          code: `corrected-${type}`,
-          display: `Corrected ${type}`,
-        },
-        note: "Updated by id",
-      };
-      expect(await setAnswer(page, type, [updated])).toEqual({ ok: true });
-      const rows = await getClinicalRows(page, type);
-      expect(rows).toHaveLength(3);
-      expect(rows[0]).toMatchObject(updated);
-      expect(rows[1]).toMatchObject(row);
-      expect(rows[2]).toMatchObject(other);
-      await expect(
-        table.getByText(`Corrected ${type}`, { exact: true }),
-      ).toHaveCount(1);
-      await expect(
-        table.getByText(`Existing ${type}`, { exact: true }),
-      ).toHaveCount(0);
-    });
-
-    await test.step("Update an unsaved row by code without duplicating it", async () => {
-      const updated = { ...row, note: "Updated unsaved answer" };
-      expect(await setAnswer(page, type, [updated])).toEqual({ ok: true });
-      expect(await setAnswer(page, type, [updated])).toEqual({ ok: true });
-      const rows = await getClinicalRows(page, type);
-      expect(rows).toHaveLength(3);
-      expect(rows[1]).toMatchObject(updated);
-      expect(rows[2]).toMatchObject(other);
-      await expect(table.getByText(label, { exact: true })).toHaveCount(1);
-    });
-
-    await test.step("Reject malformed updates and duplicate batch rows atomically", async () => {
-      const before = await getClinicalRows(page, type);
-      expect(
-        (
-          await setAnswer(page, type, [
-            { ...row, code: { ...row.code, system: "" } },
-          ])
-        ).ok,
-      ).toBe(false);
-      expect(await getClinicalRows(page, type)).toEqual(before);
-      expect(await setAnswer(page, type, [row, other, other])).toMatchObject({
-        ok: false,
-        error: expect.stringContaining("Duplicate"),
+      await test.step("Append to a saved legacy row without revalidating it", async () => {
+        expect(await setAnswer(page, type, [row])).toEqual({ ok: true });
+        const rows = await getClinicalRows(page, type);
+        expect(rows).toHaveLength(2);
+        expect(rows[0]).toEqual(existing);
+        await expect(table.getByText(label, { exact: true })).toBeVisible();
+        await expect(
+          table.getByText(`Existing ${type}`, { exact: true }),
+        ).toBeVisible();
       });
-      expect(await getClinicalRows(page, type)).toEqual(before);
-      expect(await setAnswer(page, type, [])).toEqual({ ok: true });
-      expect(await getClinicalRows(page, type)).toEqual(before);
-    });
-  });
+
+      await test.step("Append another row without resending the unsaved answer", async () => {
+        expect(await setAnswer(page, type, [other])).toEqual({ ok: true });
+        const rows = await getClinicalRows(page, type);
+        expect(rows).toHaveLength(3);
+        expect(rows[0]).toEqual(existing);
+        expect(rows[1]).toMatchObject(row);
+        expect(rows[2]).toMatchObject(other);
+        await expect(table.getByText(label, { exact: true })).toBeVisible();
+        await expect(
+          table.getByText(`Another ${type}`, { exact: true }),
+        ).toBeVisible();
+      });
+
+      await test.step("Update the saved row by code and retain its record id", async () => {
+        const updated = {
+          ...row,
+          code: {
+            ...row.code,
+            code: `existing-${type}`,
+            display: `Existing ${type}`,
+          },
+          note: "Updated by code",
+        };
+        expect(await setAnswer(page, type, [updated])).toEqual({ ok: true });
+        const rows = await getClinicalRows(page, type);
+        expect(rows).toHaveLength(3);
+        expect(rows[0]).toMatchObject({ ...updated, id: `existing-${type}` });
+        expect(rows[1]).toMatchObject(row);
+        expect(rows[2]).toMatchObject(other);
+        await expect(
+          table.getByText(`Existing ${type}`, { exact: true }),
+        ).toHaveCount(1);
+      });
+
+      await test.step("Update the saved row by id when its code changes", async () => {
+        const updated = {
+          ...row,
+          id: `existing-${type}`,
+          code: {
+            ...row.code,
+            code: `corrected-${type}`,
+            display: `Corrected ${type}`,
+          },
+          note: "Updated by id",
+        };
+        expect(await setAnswer(page, type, [updated])).toEqual({ ok: true });
+        const rows = await getClinicalRows(page, type);
+        expect(rows).toHaveLength(3);
+        expect(rows[0]).toMatchObject(updated);
+        expect(rows[1]).toMatchObject(row);
+        expect(rows[2]).toMatchObject(other);
+        await expect(
+          table.getByText(`Corrected ${type}`, { exact: true }),
+        ).toHaveCount(1);
+        await expect(
+          table.getByText(`Existing ${type}`, { exact: true }),
+        ).toHaveCount(0);
+      });
+
+      await test.step("Update an unsaved row by code without duplicating it", async () => {
+        const updated = { ...row, note: "Updated unsaved answer" };
+        expect(await setAnswer(page, type, [updated])).toEqual({ ok: true });
+        expect(await setAnswer(page, type, [updated])).toEqual({ ok: true });
+        const rows = await getClinicalRows(page, type);
+        expect(rows).toHaveLength(3);
+        expect(rows[1]).toMatchObject(updated);
+        expect(rows[2]).toMatchObject(other);
+        await expect(table.getByText(label, { exact: true })).toHaveCount(1);
+      });
+
+      await test.step("Reject malformed updates and duplicate batch rows atomically", async () => {
+        const before = await getClinicalRows(page, type);
+        expect(
+          (
+            await setAnswer(page, type, [
+              { ...row, code: { ...row.code, system: "" } },
+            ])
+          ).ok,
+        ).toBe(false);
+        expect(await getClinicalRows(page, type)).toEqual(before);
+        expect(await setAnswer(page, type, [row, other, other])).toMatchObject({
+          ok: false,
+          error: expect.stringContaining("Duplicate"),
+        });
+        expect(await getClinicalRows(page, type)).toEqual(before);
+        expect(await setAnswer(page, type, [])).toEqual({ ok: true });
+        expect(await getClinicalRows(page, type)).toEqual(before);
+      });
+    },
+  );
 }

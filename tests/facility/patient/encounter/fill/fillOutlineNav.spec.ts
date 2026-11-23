@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
+import { addQuestionnaireViaUi } from "tests/helper/questionnaire";
 import {
   KITCHEN_SINK_FACILITY_SLUG,
   getQuestionnaireIdBySlug,
@@ -70,194 +71,225 @@ test.describe("Fill outline overlay", () => {
     await expect(questionBlock(page, "Primary symptom")).toBeVisible();
   });
 
-  test("collapsed by default: the canvas takes the full width behind a tick rail", async ({
-    page,
-  }) => {
-    await test.step("the panel starts closed", async () => {
-      await expect(outlineToggle(page)).toHaveAttribute(
-        "aria-expanded",
-        "false",
-      );
-      await expect(outlinePanel(page)).toHaveCSS("opacity", "0");
-      await expect(outlinePanel(page)).toHaveCSS("pointer-events", "none");
-    });
-
-    await test.step("no reserved outline column — the canvas starts at the shell's left edge", async () => {
-      const canvas = await page
-        .getByRole("region", { name: "Form canvas" })
-        .boundingBox();
-      // The old fixed aside was 288px wide; the canvas now starts inside
-      // the card border (single-digit-to-few-px offset, not a column).
-      expect(canvas).not.toBeNull();
-      expect(canvas!.x).toBeLessThan(60);
-    });
-
-    await test.step("one tick per visible top-level question", async () => {
-      await expect(railTicks(page)).toHaveCount(DEFAULT_VISIBLE_TOP_LEVEL);
-      // Exactly one tick tracks the question currently in view.
-      await expect(activeTick(page)).toHaveCount(1);
-    });
-  });
-
-  test("click opens the panel; a row scrolls its question into view and takes the active state", async ({
-    page,
-  }) => {
-    await openOutline(page);
-
-    await test.step("rows use question titles and land on their question", async () => {
-      const nav = outlineNav(page);
-      await expect(nav).toBeVisible();
-      const row = nav.getByRole("button", {
-        name: /Medications taken \(repeats\)/,
+  test(
+    "collapsed by default: the canvas takes the full width behind a tick rail",
+    { tag: ["@atomic", "@cap:questionnaire.fill.outline.view"] },
+    async ({ page }) => {
+      await test.step("the panel starts closed", async () => {
+        await expect(outlineToggle(page)).toHaveAttribute(
+          "aria-expanded",
+          "false",
+        );
+        await expect(outlinePanel(page)).toHaveCSS("opacity", "0");
+        await expect(outlinePanel(page)).toHaveCSS("pointer-events", "none");
       });
-      await expect(row).toHaveAccessibleName("Medications taken (repeats)");
-      await row.click();
-      await expect(
-        questionBlock(page, "Medications taken (repeats)"),
-      ).toBeInViewport();
-    });
 
-    await test.step("scroll-spy follows: the clicked row becomes current, the rail tick moves with it", async () => {
-      await expect(
-        outlineNav(page).getByRole("button", {
+      await test.step("no reserved outline column — the canvas starts at the shell's left edge", async () => {
+        const canvas = await page
+          .getByRole("region", { name: "Form canvas" })
+          .boundingBox();
+        // The old fixed aside was 288px wide; the canvas now starts inside
+        // the card border (single-digit-to-few-px offset, not a column).
+        expect(canvas).not.toBeNull();
+        expect(canvas!.x).toBeLessThan(60);
+      });
+
+      await test.step("one tick per visible top-level question", async () => {
+        await expect(railTicks(page)).toHaveCount(DEFAULT_VISIBLE_TOP_LEVEL);
+        // Exactly one tick tracks the question currently in view.
+        await expect(activeTick(page)).toHaveCount(1);
+      });
+    },
+  );
+
+  test(
+    "click opens the panel; a row scrolls its question into view and takes the active state",
+    { tag: ["@atomic", "@cap:questionnaire.fill.outline.navigate"] },
+    async ({ page }) => {
+      await openOutline(page);
+
+      await test.step("rows use question titles and land on their question", async () => {
+        const nav = outlineNav(page);
+        await expect(nav).toBeVisible();
+        const row = nav.getByRole("button", {
           name: /Medications taken \(repeats\)/,
-        }),
-      ).toHaveAttribute("aria-current", "true");
-      await expect(activeTick(page)).toHaveCount(1);
-    });
+        });
+        await expect(row).toHaveAccessibleName("Medications taken (repeats)");
+        await row.click();
+        await expect(
+          questionBlock(page, "Medications taken (repeats)"),
+        ).toBeInViewport();
+      });
 
-    await test.step("Escape closes and returns focus to the rail", async () => {
-      await page.keyboard.press("Escape");
+      await test.step("scroll-spy follows: the clicked row becomes current, the rail tick moves with it", async () => {
+        await expect(
+          outlineNav(page).getByRole("button", {
+            name: /Medications taken \(repeats\)/,
+          }),
+        ).toHaveAttribute("aria-current", "true");
+        await expect(activeTick(page)).toHaveCount(1);
+      });
+
+      await test.step("Escape closes and returns focus to the rail", async () => {
+        await page.keyboard.press("Escape");
+        await expect(outlineToggle(page)).toHaveAttribute(
+          "aria-expanded",
+          "false",
+        );
+        await expect(outlineToggle(page)).toBeFocused();
+      });
+    },
+  );
+
+  test(
+    "hover opens; leaving both rail and panel closes after the grace delay",
+    { tag: ["@atomic", "@cap:questionnaire.fill.outline.navigate"] },
+    async ({ page }) => {
+      await outlineToggle(page).hover();
+      await expect(outlineToggle(page)).toHaveAttribute(
+        "aria-expanded",
+        "true",
+      );
+
+      // Crossing from the rail into the panel must not close it.
+      await outlineNav(page)
+        .getByRole("button", { name: /Detailed history/ })
+        .hover();
+      await expect(outlineToggle(page)).toHaveAttribute(
+        "aria-expanded",
+        "true",
+      );
+
+      // Leaving for the canvas closes it (200ms grace + transition).
+      await page.mouse.move(900, 400);
       await expect(outlineToggle(page)).toHaveAttribute(
         "aria-expanded",
         "false",
       );
-      await expect(outlineToggle(page)).toBeFocused();
-    });
-  });
+    },
+  );
 
-  test("hover opens; leaving both rail and panel closes after the grace delay", async ({
-    page,
-  }) => {
-    await outlineToggle(page).hover();
-    await expect(outlineToggle(page)).toHaveAttribute("aria-expanded", "true");
+  test(
+    "focusing the rail opens the panel for keyboard users",
+    { tag: ["@atomic", "@cap:questionnaire.fill.outline.navigate"] },
+    async ({ page }) => {
+      await outlineToggle(page).focus();
+      await expect(outlineToggle(page)).toHaveAttribute(
+        "aria-expanded",
+        "true",
+      );
+      await expect(outlineNav(page)).toBeVisible();
+    },
+  );
 
-    // Crossing from the rail into the panel must not close it.
-    await outlineNav(page)
-      .getByRole("button", { name: /Detailed history/ })
-      .hover();
-    await expect(outlineToggle(page)).toHaveAttribute("aria-expanded", "true");
-
-    // Leaving for the canvas closes it (200ms grace + transition).
-    await page.mouse.move(900, 400);
-    await expect(outlineToggle(page)).toHaveAttribute("aria-expanded", "false");
-  });
-
-  test("focusing the rail opens the panel for keyboard users", async ({
-    page,
-  }) => {
-    await outlineToggle(page).focus();
-    await expect(outlineToggle(page)).toHaveAttribute("aria-expanded", "true");
-    await expect(outlineNav(page)).toBeVisible();
-  });
-
-  test("group children indent under their section and navigate the nested block", async ({
-    page,
-  }) => {
-    await openOutline(page);
-    const nav = outlineNav(page);
-    await expect(
-      nav.getByRole("button", { name: /Examination findings/ }),
-    ).toBeVisible();
-    const child = nav.getByRole("button", { name: /General appearance/ });
-    await expect(child).toHaveAccessibleName("General appearance");
-    await child.click();
-    await expect(questionBlock(page, "General appearance")).toBeInViewport();
-  });
-
-  test("completion adornments: answering a question flips its dot to the double-check", async ({
-    page,
-  }) => {
-    await openOutline(page);
-    const row = outlineNav(page).getByRole("button", {
-      name: /Primary symptom/,
-    });
-    await expect(row.locator("svg.lucide-check-check")).toHaveCount(0);
-
-    // The panel overlays the canvas — close it before typing so the click
-    // lands on the input, then reopen to read the adornment.
-    await page.keyboard.press("Escape");
-    await questionBlock(page, "Primary symptom")
-      .getByRole("textbox")
-      .fill("Persistent cough");
-
-    await openOutline(page);
-    await expect(row.locator("svg.lucide-check-check")).toHaveCount(1);
-  });
-
-  test("enable_when: rows and ticks appear exactly when their condition turns true", async ({
-    page,
-  }) => {
-    await openOutline(page);
-    const nav = outlineNav(page);
-    await expect(
-      nav.getByRole("button", { name: /Stability notes/ }),
-    ).toHaveCount(0);
-    await expect(railTicks(page)).toHaveCount(DEFAULT_VISIBLE_TOP_LEVEL);
-
-    await test.step('answer "Is the patient stable?" = Yes', async () => {
-      await page.keyboard.press("Escape");
-      const block = questionBlock(page, "Is the patient stable?");
-      await block.scrollIntoViewIfNeeded();
-      await block.getByRole("radio", { name: "Yes", exact: true }).click();
-    });
-
-    await test.step("the dependent question gains a row and a tick", async () => {
+  test(
+    "group children indent under their section and navigate the nested block",
+    { tag: ["@atomic", "@cap:questionnaire.fill.outline.navigate"] },
+    async ({ page }) => {
       await openOutline(page);
+      const nav = outlineNav(page);
+      await expect(
+        nav.getByRole("button", { name: /Examination findings/ }),
+      ).toBeVisible();
+      const child = nav.getByRole("button", { name: /General appearance/ });
+      await expect(child).toHaveAccessibleName("General appearance");
+      await child.click();
+      await expect(questionBlock(page, "General appearance")).toBeInViewport();
+    },
+  );
+
+  test(
+    "completion adornments: answering a question flips its dot to the double-check",
+    { tag: ["@atomic", "@cap:questionnaire.fill.outline.view"] },
+    async ({ page }) => {
+      await openOutline(page);
+      const row = outlineNav(page).getByRole("button", {
+        name: /Primary symptom/,
+      });
+      await expect(row.locator("svg.lucide-check-check")).toHaveCount(0);
+
+      // The panel overlays the canvas — close it before typing so the click
+      // lands on the input, then reopen to read the adornment.
+      await page.keyboard.press("Escape");
+      await questionBlock(page, "Primary symptom")
+        .getByRole("textbox")
+        .fill("Persistent cough");
+
+      await openOutline(page);
+      await expect(row.locator("svg.lucide-check-check")).toHaveCount(1);
+    },
+  );
+
+  test(
+    "enable_when: rows and ticks appear exactly when their condition turns true",
+    { tag: ["@atomic", "@cap:questionnaire.fill.outline.view"] },
+    async ({ page }) => {
+      await openOutline(page);
+      const nav = outlineNav(page);
       await expect(
         nav.getByRole("button", { name: /Stability notes/ }),
-      ).toBeVisible();
-      await expect(railTicks(page)).toHaveCount(DEFAULT_VISIBLE_TOP_LEVEL + 2);
-    });
-  });
+      ).toHaveCount(0);
+      await expect(railTicks(page)).toHaveCount(DEFAULT_VISIBLE_TOP_LEVEL);
+
+      await test.step('answer "Is the patient stable?" = Yes', async () => {
+        await page.keyboard.press("Escape");
+        const block = questionBlock(page, "Is the patient stable?");
+        await block.scrollIntoViewIfNeeded();
+        await block.getByRole("radio", { name: "Yes", exact: true }).click();
+      });
+
+      await test.step("the dependent question gains a row and a tick", async () => {
+        await openOutline(page);
+        await expect(
+          nav.getByRole("button", { name: /Stability notes/ }),
+        ).toBeVisible();
+        await expect(railTicks(page)).toHaveCount(
+          DEFAULT_VISIBLE_TOP_LEVEL + 2,
+        );
+      });
+    },
+  );
 });
 
 test.describe("Fill outline overlay — multi-questionnaire sessions", () => {
-  test("each form contributes its own outline section and rail segment", async ({
-    page,
-  }) => {
-    const questionnaireId = await getQuestionnaireIdBySlug(
-      "respiratory_status-v3",
-    );
-    await page.goto(
-      `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`,
-    );
-    await expect(
-      questionBlock(page, "Is bilateral air entry present?"),
-    ).toBeVisible();
-    const primaryTicks = await railTicks(page).count();
-
-    await test.step("add a second questionnaire to the session", async () => {
-      await page.getByRole("button", { name: "Add questionnaire" }).click();
-      await page.getByPlaceholder("Search Forms").fill("Feedback");
-      await page.getByRole("option", { name: /Feedback Form/ }).click();
-      await expect(page.locator("[data-form-key]")).toHaveCount(2);
-    });
-
-    await test.step("the panel stacks one titled nav per form", async () => {
-      await outlineToggle(page).click();
-      // With several forms each outline landmark takes its form's title,
-      // so the stacked navs stay distinguishable to a screen reader.
+  test(
+    "each form contributes its own outline section and rail segment",
+    { tag: ["@atomic", "@cap:questionnaire.fill.outline.view"] },
+    async ({ page }) => {
+      const questionnaireId = await getQuestionnaireIdBySlug(
+        "respiratory_status-v3",
+      );
+      await page.goto(
+        `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`,
+      );
       await expect(
-        page.getByRole("navigation", { name: /Respiratory/ }),
+        questionBlock(page, "Is bilateral air entry present?"),
       ).toBeVisible();
-      await expect(
-        page.getByRole("navigation", { name: /Feedback Form/ }),
-      ).toBeVisible();
-    });
+      const primaryTicks = await railTicks(page).count();
 
-    await test.step("the rail carries both forms' ticks", async () => {
-      expect(await railTicks(page).count()).toBeGreaterThan(primaryTicks);
-    });
-  });
+      await test.step("add a second questionnaire to the session", async () => {
+        await addQuestionnaireViaUi(page, {
+          search: "Feedback",
+          title: /Feedback Form/,
+        });
+        await expect(page.locator("[data-form-key]")).toHaveCount(2);
+      });
+
+      await test.step("the panel stacks one titled nav per form", async () => {
+        await outlineToggle(page).click();
+        // With several forms each outline landmark takes its form's title,
+        // so the stacked navs stay distinguishable to a screen reader.
+        await expect(
+          page.getByRole("navigation", { name: /Respiratory/ }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("navigation", { name: /Feedback Form/ }),
+        ).toBeVisible();
+      });
+
+      await test.step("the rail carries both forms' ticks", async () => {
+        expect(await railTicks(page).count()).toBeGreaterThan(primaryTicks);
+      });
+    },
+  );
 });

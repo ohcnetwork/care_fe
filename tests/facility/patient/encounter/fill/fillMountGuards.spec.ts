@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
-import { type Page, expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { trackBatchRequests } from "tests/helper/questionnaire";
 import {
   adminApiHeaders,
   apiBaseUrl,
@@ -35,23 +36,6 @@ const SUBJECT_TYPE_MISMATCH_MESSAGE =
   "This questionnaire is for a different subject type and can't be filled here.";
 const PATIENT_ENCOUNTER_MISMATCH_MESSAGE =
   "This encounter belongs to a different patient. Check the link and try again.";
-
-/** Tracks POSTs to the batch endpoint from the moment it's called —
- *  registering the listener AFTER an interaction would only prove no
- *  request had arrived YET, not that the action never sends one (same
- *  pattern as fillHardBlock.spec.ts / fillSubmitGuards.spec.ts). */
-function trackBatchRequests(page: Page): string[] {
-  const urls: string[] = [];
-  page.on("request", (request) => {
-    if (
-      request.method() === "POST" &&
-      request.url().includes("/api/v1/batch_requests/")
-    ) {
-      urls.push(request.url());
-    }
-  });
-  return urls;
-}
 
 /** Creates a fresh patient through the same API shape the backend E2E
  *  fixtures use, so the spec doesn't have to depend on a second patient
@@ -135,83 +119,87 @@ async function createEncounter(
 }
 
 test.describe("Fill mount guards", () => {
-  test("P1-1: a location-subject questionnaire mounted on the encounter fill route renders the mismatch guard, not the form", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
-    const patientId = getPatientId();
-    const encounterId = getEncounterId();
-    const questionnaireId = await getQuestionnaireIdBySlug(
-      LOCATION_QUESTIONNAIRE_SLUG,
-    );
+  test(
+    "P1-1: a location-subject questionnaire mounted on the encounter fill route renders the mismatch guard, not the form",
+    { tag: ["@atomic", "@cap:questionnaire.fill.mount-guard"] },
+    async ({ page }) => {
+      const facilityId = getFacilityId();
+      const patientId = getPatientId();
+      const encounterId = getEncounterId();
+      const questionnaireId = await getQuestionnaireIdBySlug(
+        LOCATION_QUESTIONNAIRE_SLUG,
+      );
 
-    const posts = trackBatchRequests(page);
+      const posts = trackBatchRequests(page);
 
-    await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,
-    );
+      await page.goto(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,
+      );
 
-    await expect(
-      page.getByRole("alert").getByText(SUBJECT_TYPE_MISMATCH_MESSAGE),
-    ).toBeVisible();
+      await expect(
+        page.getByRole("alert").getByText(SUBJECT_TYPE_MISMATCH_MESSAGE),
+      ).toBeVisible();
 
-    // No form canvas at all — no canvas region, no question blocks, no
-    // Save/Cancel actions the clinician could act on.
-    await expect(page.getByRole("region", { name: "Form canvas" })).toHaveCount(
-      0,
-    );
-    await expect(page.locator("[data-question-id]")).toHaveCount(0);
-    await expect(
-      page.getByRole("button", { name: "Save Changes" }),
-    ).toHaveCount(0);
+      // No form canvas at all — no canvas region, no question blocks, no
+      // Save/Cancel actions the clinician could act on.
+      await expect(
+        page.getByRole("region", { name: "Form canvas" }),
+      ).toHaveCount(0);
+      await expect(page.locator("[data-question-id]")).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Save Changes" }),
+      ).toHaveCount(0);
 
-    // Whatever IS on screen (the guard's only control is "Back") must
-    // never reach the submit path if clicked.
-    const buttons = page.getByRole("button");
-    const buttonCount = await buttons.count();
-    if (buttonCount > 0) {
-      await buttons.first().click();
-    }
-    await page.waitForLoadState("networkidle");
-    expect(
-      posts,
-      "a subject-family mismatch must never reach batch_requests, even after an interaction",
-    ).toHaveLength(0);
-  });
+      // Whatever IS on screen (the guard's only control is "Back") must
+      // never reach the submit path if clicked.
+      const buttons = page.getByRole("button");
+      const buttonCount = await buttons.count();
+      if (buttonCount > 0) {
+        await buttons.first().click();
+      }
+      await page.waitForLoadState("networkidle");
+      expect(
+        posts,
+        "a subject-family mismatch must never reach batch_requests, even after an interaction",
+      ).toHaveLength(0);
+    },
+  );
 
-  test("P1-2: a URL pairing one patient with a different patient's encounter renders the mismatch guard, not the patient's data", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
-    const patientId = getPatientId();
-    const otherPatient = await createPatient();
-    const otherPatientEncounterId = await createEncounter(
-      facilityId,
-      otherPatient.id,
-    );
-    const questionnaireId = await getQuestionnaireIdBySlug(
-      ENCOUNTER_QUESTIONNAIRE_SLUG,
-    );
+  test(
+    "P1-2: a URL pairing one patient with a different patient's encounter renders the mismatch guard, not the patient's data",
+    { tag: ["@atomic", "@cap:questionnaire.fill.mount-guard"] },
+    async ({ page }) => {
+      const facilityId = getFacilityId();
+      const patientId = getPatientId();
+      const otherPatient = await createPatient();
+      const otherPatientEncounterId = await createEncounter(
+        facilityId,
+        otherPatient.id,
+      );
+      const questionnaireId = await getQuestionnaireIdBySlug(
+        ENCOUNTER_QUESTIONNAIRE_SLUG,
+      );
 
-    // The route's patientId is the fixture patient; the encounterId
-    // belongs to `otherPatient` instead.
-    await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${otherPatientEncounterId}/questionnaire/${questionnaireId}`,
-    );
+      // The route's patientId is the fixture patient; the encounterId
+      // belongs to `otherPatient` instead.
+      await page.goto(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${otherPatientEncounterId}/questionnaire/${questionnaireId}`,
+      );
 
-    await expect(
-      page.getByRole("alert").getByText(PATIENT_ENCOUNTER_MISMATCH_MESSAGE),
-    ).toBeVisible();
+      await expect(
+        page.getByRole("alert").getByText(PATIENT_ENCOUNTER_MISMATCH_MESSAGE),
+      ).toBeVisible();
 
-    // No patient banner, no clinical history tab, and — the safety-relevant
-    // check — the OTHER patient's name never reaches the DOM beside the
-    // route's patientId.
-    await expect(
-      page.getByRole("tab", { name: "Patient Clinical History" }),
-    ).toHaveCount(0);
-    await expect(page.getByRole("region", { name: "Form canvas" })).toHaveCount(
-      0,
-    );
-    await expect(page.getByText(otherPatient.name)).toHaveCount(0);
-  });
+      // No patient banner, no clinical history tab, and — the safety-relevant
+      // check — the OTHER patient's name never reaches the DOM beside the
+      // route's patientId.
+      await expect(
+        page.getByRole("tab", { name: "Patient Clinical History" }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("region", { name: "Form canvas" }),
+      ).toHaveCount(0);
+      await expect(page.getByText(otherPatient.name)).toHaveCount(0);
+    },
+  );
 });

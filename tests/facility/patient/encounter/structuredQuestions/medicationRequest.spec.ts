@@ -1,116 +1,21 @@
 import { faker } from "@faker-js/faker";
-import { expect, test, type Page } from "@playwright/test";
 import { getFieldErrorMessage } from "tests/helper/error";
-import { getEncounterId } from "tests/support/encounterId";
-import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
+import {
+  type EncounterTarget,
+  MEDICATION_DOSAGE_UNITS,
+  MEDICATION_DURATION_UNITS,
+  MEDICATION_FREQUENCIES,
+  MEDICATION_INT_MAX,
+  MEDICATION_OPTIONS,
+  addMedicationRequestViaUi,
+  selectMedication,
+} from "tests/helper/structuredQuestions";
+import { expect, test } from "tests/support/test";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-// Duration is a native input with plain <button> suggestions in the popover;
-// exact-match avoids catching the range / period action buttons. The popover
-// trigger wrapping the input is itself a button named by the typed value, so
-// the suggestion is scoped to the popover content.
-async function selectDuration(page: Page, duration: number, unit: string) {
-  const field = page.getByRole("textbox", { name: "Duration" });
-  await field.click();
-  await field.fill(`${duration} ${unit}`);
-  await page
-    .locator('[data-slot="popover-content"]')
-    .getByRole("button", { name: `${duration} ${unit}`, exact: true })
-    .click();
-}
-
-const INT_MAX = 70; // Arbitrary upper limit for integer fields
-const DOSAGE_UNITS = [
-  "tablets",
-  "gram",
-  "milligram",
-  "microgram",
-  "milliliter",
-  "drop",
-  "international unit",
-  "count",
-];
-
-const DURATION_UNITS = ["days", "hours", "weeks", "months", "years"];
-
-const INTENT_OPTIONS = [
-  "proposal",
-  "plan",
-  "order",
-  "original order",
-  "reflex order",
-  "filler order",
-  "instance order",
-];
-
-const medicationOptions = [
-  "Senna 15 mg oral tablet",
-  "Zinc 50 mg oral capsule",
-  "Zinc 25 mg oral capsule",
-  "Doxepin 3 mg oral tablet",
-  "Doxepin 6 mg oral tablet",
-  "Estriol 1 mg oral tablet",
-  "Mesna 400 mg oral tablet",
-  "Mesna 600 mg oral tablet",
-  "Senna 7.5 mg oral tablet",
-  "Apixaban 5 mg oral tablet",
-];
-
-export const frequencies = [
-  { input: "1-0-1", display: "1-0-1 (Twice a day)" },
-  { input: "1-1-1", display: "1-1-1 (Thrice a day)" },
-  { input: "1-1-1-1", display: "1-1-1-1 (Four times a day)" },
-  { input: "Q2H", display: "Q2H (Every 2 hours)" },
-  { input: "Q1H", display: "Q1H (Every 1 hour)" },
-];
-
-const instructionOptions = [
-  "Until symptoms improve",
-  "Until next appointment",
-  "Take on an empty stomach",
-  "Use with caution",
-  "Then stop",
-  "Until finished",
-  "Follow directions",
-  "Then discontinue",
-  "Until gone",
-  "To be spread thinly",
-];
-
-const routeOptions = [
-  "Sublabial route",
-  "Subretinal route",
-  "Posterior juxtascleral route",
-  "Peritumoural route",
-  "Intraportal route",
-];
-
-const siteOptions = [
-  "Structure of product of conception of ectopic pregnancy",
-  "Structure of left deltoid muscle",
-  "Structure of right deltoid muscle",
-  "Structure of right supraclavicular lymph node",
-  "Structure of left supraclavicular lymph node",
-  "Structure of colonic submucosa and/or colonic muscularis propria",
-];
-
-const methodOptions = [
-  "Bathe",
-  "Dialysis system",
-  "Insufflate",
-  "Implantation",
-  "Orodisperse",
-  "Rinse or wash",
-  "Gargle",
-  "Rinse",
-];
-
 test.describe("Medication Request Questionnaire", () => {
-  let facilityId: string;
-  let patientId: string;
-  let encounterId: string;
+  let encounter: EncounterTarget;
   let questionnaireUrl: string;
   let medicationName: string;
   let dosageQuantity: number;
@@ -119,250 +24,158 @@ test.describe("Medication Request Questionnaire", () => {
   let duration: number;
   let frequencyData: { input: string; display: string };
 
-  test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
-    patientId = getPatientId();
-    encounterId = getEncounterId();
-    medicationName = faker.helpers.arrayElement(medicationOptions);
-    dosageQuantity = faker.number.int(INT_MAX);
-    dosageUnit = faker.helpers.arrayElement(DOSAGE_UNITS);
-    frequencyData = faker.helpers.arrayElement(frequencies);
-    durationUnit = faker.helpers.arrayElement(DURATION_UNITS);
+  test.beforeEach(async ({ facilityId, isolatedEncounter }) => {
+    const { patientId, encounterId } = isolatedEncounter;
+    encounter = { facilityId, patientId, encounterId };
+    medicationName = faker.helpers.arrayElement(MEDICATION_OPTIONS);
+    dosageQuantity = faker.number.int(MEDICATION_INT_MAX);
+    dosageUnit = faker.helpers.arrayElement(MEDICATION_DOSAGE_UNITS);
+    frequencyData = faker.helpers.arrayElement(MEDICATION_FREQUENCIES);
+    durationUnit = faker.helpers.arrayElement(MEDICATION_DURATION_UNITS);
     // min: 2 keeps us in the plural range — the new DurationInput renders
     // proper singulars ("1 day") which would break exact-match option lookups.
-    duration = faker.number.int({ min: 2, max: INT_MAX });
+    duration = faker.number.int({ min: 2, max: MEDICATION_INT_MAX });
 
     questionnaireUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`;
-
-    await page.goto(questionnaireUrl);
   });
 
-  test("should add medication filling all fields and verify it appears in medication history", async ({
-    page,
-  }) => {
-    await page.waitForLoadState("networkidle");
+  test(
+    "should add medication filling all fields and verify it appears in medication history",
+    {
+      tag: [
+        "@atomic",
+        "@cap:questionnaire.structured.medication-request.create",
+      ],
+    },
+    async ({ page }) => {
+      await addMedicationRequestViaUi(page, {
+        ...encounter,
+        medicationName,
+        dosageQuantity,
+        dosageUnit,
+        frequency: frequencyData,
+        duration,
+        durationUnit,
+        advanced: {},
+      });
 
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: /Add Medication/i })
-      .click();
-    await page.getByRole("tab", { name: "Medication" }).click();
-    await page.getByPlaceholder(/Search Medications/i).fill(medicationName);
-    await page
-      .getByRole("option", { name: medicationName, exact: true })
-      .click();
+      await page.goto(questionnaireUrl);
+      await page.getByRole("button", { name: "Medication History" }).click();
 
-    await page
-      .locator('input[placeholder="Enter a number..."]:not([disabled])')
-      .fill(dosageQuantity.toString());
+      const historyDialog = page.getByRole("dialog", {
+        name: "Medication History",
+      });
+      await historyDialog.waitFor({ state: "visible" });
+      const medicationRow = page
+        .locator('[data-slot="table-body"] tr')
+        .filter({ hasText: medicationName })
+        .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
+        .filter({ hasText: frequencyData.display })
+        .filter({ hasText: `${duration} ${durationUnit}` });
 
-    // Select random dosage unit - click the visible option in the dropdown
-    await page
-      .getByRole("option", {
-        name: `${dosageQuantity} ${dosageUnit}`,
-        exact: true,
-      })
-      .click();
+      await expect(medicationRow).toBeVisible();
+    },
+  );
 
-    await page
-      .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: "eg. 1-0-1" })
-      .click();
-    await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
-    await page.getByRole("option", { name: frequencyData.display }).click();
+  test(
+    "add medication with only required fields and verify it appears in medication history",
+    {
+      tag: [
+        "@atomic",
+        "@cap:questionnaire.structured.medication-request.create",
+      ],
+    },
+    async ({ page }) => {
+      await addMedicationRequestViaUi(page, {
+        ...encounter,
+        medicationName,
+        dosageQuantity,
+        dosageUnit,
+        frequency: frequencyData,
+        duration,
+        durationUnit,
+      });
 
-    await selectDuration(page, duration, durationUnit);
+      await page.goto(questionnaireUrl);
+      await page.getByRole("button", { name: "Medication History" }).click();
 
-    // Select random additional instruction - target only enabled button
-    const instruction = faker.helpers.arrayElement(instructionOptions);
+      const historyDialog = page.getByRole("dialog", {
+        name: "Medication History",
+      });
+      await historyDialog.waitFor({ state: "visible" });
+      const medicationRow = page
+        .locator('[data-slot="table-body"] tr')
+        .filter({ hasText: medicationName })
+        .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
+        .filter({ hasText: frequencyData.display })
+        .filter({ hasText: `${duration} ${durationUnit}` });
 
-    await page.getByTitle("Show Advanced Fields").first().click();
-    await page
-      .locator("button:not([disabled])")
-      .filter({ hasText: "No instructions selected" })
-      .click();
-    await page
-      .getByPlaceholder(/Select additional instructions/i)
-      .fill(instruction);
-    await page.getByRole("option", { name: instruction, exact: true }).click();
+      await expect(medicationRow).toBeVisible();
+    },
+  );
 
-    const route = faker.helpers.arrayElement(routeOptions);
-    await page
-      .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: "Select Route" })
-      .click();
-    await page.getByPlaceholder(/Select Route/i).fill(route);
-    await page.getByRole("option", { name: route, exact: true }).click();
+  test(
+    "should show validation errors when required fields are missing",
+    {
+      tag: [
+        "@atomic",
+        "@cap:questionnaire.structured.medication-request.create",
+      ],
+    },
+    async ({ page }) => {
+      await page.goto(questionnaireUrl);
+      await page.waitForLoadState("networkidle");
 
-    const site = faker.helpers.arrayElement(siteOptions);
-    await page
-      .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: "Select site" })
-      .click();
-    await page.getByPlaceholder(/Select site/i).fill(site);
-    await page.getByRole("option", { name: site, exact: true }).click();
+      await selectMedication(page, medicationName);
 
-    const method = faker.helpers.arrayElement(methodOptions);
-    await page
-      .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: "Select method" })
-      .click();
-    await page.getByRole("option", { name: method, exact: true }).click();
+      await page.getByRole("button", { name: "Save Changes" }).click();
 
-    // Select intent - scroll to the end horizontally and target only enabled combobox
-    await page
-      .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: "order" })
-      .click();
-    const intent = faker.helpers.arrayElement(INTENT_OPTIONS);
-    await page.getByRole("option", { name: intent, exact: true }).click();
+      await expect(
+        page.getByText("Dosage*This field is required"),
+      ).toBeVisible();
 
-    // Add notes - scroll to the end and target the active notes field
-    const notes = faker.lorem.sentence();
-    await page
-      .getByRole("textbox", { name: "Enter additional notes" })
-      .last()
-      .fill(notes);
+      await expect(
+        page.getByText("Frequency*eg. 1-0-1This field"),
+      ).toBeVisible();
+    },
+  );
 
-    await page.getByRole("button", { name: "Save Changes" }).click();
+  test(
+    "should reject whitespace-only input in required text fields",
+    {
+      tag: [
+        "@atomic",
+        "@cap:questionnaire.structured.medication-template.create",
+      ],
+    },
+    async ({ page }) => {
+      await page.goto(questionnaireUrl);
 
-    await expect(
-      page.getByText("Questionnaire submitted successfully"),
-    ).toBeVisible();
+      // The response template form opens only when there is a medication to save.
+      await test.step("Add a medication", async () => {
+        await selectMedication(page, medicationName);
+      });
 
-    await page.goto(questionnaireUrl);
-    await page.getByRole("button", { name: "Medication History" }).click();
+      await test.step("Open the save template form", async () => {
+        await page.getByRole("button", { name: /^Templates/ }).click();
+        await page.getByRole("button", { name: /^Save Current/ }).click();
+      });
 
-    const historyDialog = page.getByRole("dialog", {
-      name: "Medication History",
-    });
-    await historyDialog.waitFor({ state: "visible" });
-    const medicationRow = page
-      .locator('[data-slot="table-body"] tr')
-      .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
-      .filter({ hasText: frequencyData.display })
-      .filter({ hasText: `${duration} ${durationUnit}` });
+      const templateSheet = page.getByRole("dialog", {
+        name: "Save as Template",
+      });
+      const nameField = templateSheet.getByRole("textbox", {
+        name: "Template Name",
+      });
+      await nameField.fill("   ");
 
-    await expect(medicationRow).toBeVisible();
-  });
-
-  test("add medication with only required fields and verify it appears in medication history", async ({
-    page,
-  }) => {
-    await page.waitForLoadState("networkidle");
-
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: /Add Medication/i })
-      .click();
-    await page.getByRole("tab", { name: "Medication" }).click();
-    await page.getByPlaceholder(/Search Medications/i).fill(medicationName);
-    await page
-      .getByRole("option", { name: medicationName, exact: true })
-      .click();
-
-    await page
-      .locator('input[placeholder="Enter a number..."]:not([disabled])')
-      .fill(dosageQuantity.toString());
-
-    // Select random dosage unit - click the visible option in the dropdown
-    await page
-      .getByRole("option", {
-        name: `${dosageQuantity} ${dosageUnit}`,
-        exact: true,
-      })
-      .click();
-
-    await page
-      .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: "eg. 1-0-1" })
-      .click();
-    await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
-    await page.getByRole("option", { name: frequencyData.display }).click();
-
-    await selectDuration(page, duration, durationUnit);
-
-    await page.getByRole("button", { name: "Save Changes" }).click();
-
-    await expect(
-      page.getByText("Questionnaire submitted successfully"),
-    ).toBeVisible();
-
-    await page.goto(questionnaireUrl);
-    await page.getByRole("button", { name: "Medication History" }).click();
-
-    const historyDialog = page.getByRole("dialog", {
-      name: "Medication History",
-    });
-    await historyDialog.waitFor({ state: "visible" });
-    const medicationRow = page
-      .locator('[data-slot="table-body"] tr')
-      .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
-      .filter({ hasText: frequencyData.display })
-      .filter({ hasText: `${duration} ${durationUnit}` });
-
-    await expect(medicationRow).toBeVisible();
-  });
-
-  test("should show validation errors when required fields are missing", async ({
-    page,
-  }) => {
-    await page.waitForLoadState("networkidle");
-
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: /Add Medication/i })
-      .click();
-    await page.getByRole("tab", { name: "Medication" }).click();
-    await page.getByPlaceholder(/Search Medications/i).fill(medicationName);
-    await page
-      .getByRole("option", { name: medicationName, exact: true })
-      .click();
-
-    await page.getByRole("button", { name: "Save Changes" }).click();
-
-    await expect(page.getByText("Dosage*This field is required")).toBeVisible();
-
-    await expect(page.getByText("Frequency*eg. 1-0-1This field")).toBeVisible();
-  });
-
-  test("should reject whitespace-only input in required text fields", async ({
-    page,
-  }) => {
-    // The response template form opens only when there is a medication to save.
-    await test.step("Add a medication", async () => {
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: /Add Medication/i })
+      await templateSheet
+        .getByRole("button", { name: "Create Template" })
         .click();
-      await page.getByRole("tab", { name: "Medication" }).click();
-      await page.getByPlaceholder(/Search Medications/i).fill(medicationName);
-      await page
-        .getByRole("option", { name: medicationName, exact: true })
-        .click();
-    });
 
-    await test.step("Open the save template form", async () => {
-      await page.getByRole("button", { name: /^Templates/ }).click();
-      await page.getByRole("button", { name: /^Save Current/ }).click();
-    });
-
-    const templateSheet = page.getByRole("dialog", {
-      name: "Save as Template",
-    });
-    const nameField = templateSheet.getByRole("textbox", {
-      name: "Template Name",
-    });
-    await nameField.fill("   ");
-
-    await templateSheet
-      .getByRole("button", { name: "Create Template" })
-      .click();
-
-    // Text not asserted: this schema's message is resolved at module load,
-    // before translations are ready, so it does not read "Name is required".
-    await expect(getFieldErrorMessage(nameField)).toBeVisible();
-  });
+      // Text not asserted: this schema's message is resolved at module load,
+      // before translations are ready, so it does not read "Name is required".
+      await expect(getFieldErrorMessage(nameField)).toBeVisible();
+    },
+  );
 });
