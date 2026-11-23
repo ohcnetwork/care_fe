@@ -1,13 +1,14 @@
+import { Link } from "@tanstack/react-router";
 import {
   ArrowLeftRight,
   BadgeCheck,
   ChevronDown,
+  EllipsisVerticalIcon,
   PauseCircle,
   PrinterIcon,
   RotateCcw,
   WrenchIcon,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -25,16 +26,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+} from "@/components/ui/button-group";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import useUpdateDispenseOrderStatus from "@/pages/Facility/services/pharmacy/hooks/useUpdateDispenseOrderStatus";
 import { MedicationReturnSheet } from "@/pages/Facility/services/pharmacy/MedicationReturnSheet";
@@ -52,6 +52,7 @@ import {
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
 
+import { navigate } from "@/lib/router/navigate";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface Props {
@@ -142,9 +143,10 @@ export function DispenseOrderViewFooter({
       {
         onSuccess: () => {
           setPutOnHoldDialogOpen(false);
-          navigate(
-            `/facility/${facilityId}/locations/${locationId}/medication_requests`,
-          );
+          navigate({
+            to: "/facility/$facilityId/locations/$locationId/medication_requests",
+            params: { facilityId, locationId },
+          });
         },
       },
     );
@@ -207,61 +209,44 @@ export function DispenseOrderViewFooter({
               >
                 <PauseCircle className="size-4" />
                 {t("put_on_hold")}
+                <ShortcutBadge actionId="put-on-hold-action" />
               </Button>
             )}
-            <div className="flex">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
-                    <Button
-                      variant={
-                        canCompleteDispense ? "primary" : "outline_primary"
-                      }
-                      className="rounded-r-none"
-                      onClick={() =>
-                        updateStatus({
-                          newStatus: DispenseOrderStatus.completed,
-                        })
-                      }
-                      disabled={isUpdatingStatus || !canCompleteDispense}
-                    >
-                      {t("complete_dispense")}
-                      <ShortcutBadge actionId="dispense-button" />
-                    </Button>
-                  </span>
-                </TooltipTrigger>
-                {!canCompleteDispense && (
-                  <TooltipContent>
-                    {t("settle_pending_invoices_before_completion")}
-                  </TooltipContent>
-                )}
-              </Tooltip>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={
-                      canCompleteDispense ? "primary" : "outline_primary"
-                    }
-                    size="icon"
-                    className="rounded-l-none border-l border-l-white/20"
+            <Button
+              variant={canCompleteDispense ? "primary" : "outline_primary"}
+              onClick={() =>
+                updateStatus({
+                  newStatus: DispenseOrderStatus.completed,
+                })
+              }
+              disabled={isUpdatingStatus || !canCompleteDispense}
+            >
+              {t("complete_dispense")}
+              <ShortcutBadge actionId="submit-action" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={isUpdatingStatus}
+                  aria-label={t("more_actions")}
+                >
+                  <CareIcon icon="l-ellipsis-v" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {cancelStatusOptions.map((s) => (
+                  <DropdownMenuItem
+                    key={s}
+                    onClick={() => setConfirmStatusChange(s)}
                     disabled={isUpdatingStatus}
                   >
-                    <ChevronDown className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {cancelStatusOptions.map((s) => (
-                    <DropdownMenuItem
-                      key={s}
-                      onClick={() => setConfirmStatusChange(s)}
-                      disabled={isUpdatingStatus}
-                    >
-                      {t(`mark_as_${s}`)}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                    {t(`mark_as_${s}`)}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       )}
@@ -291,9 +276,15 @@ export function DispenseOrderViewFooter({
                 locationId={locationId}
                 patient={dispenseOrder.patient}
                 onSuccess={(deliveryOrder) => {
-                  navigate(
-                    `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}/?dispenseOrderIds=${dispenseOrder.id}`,
-                  );
+                  navigate({
+                    to: "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId",
+                    params: {
+                      facilityId,
+                      locationId,
+                      deliveryOrderId: deliveryOrder.id,
+                    },
+                    search: { dispenseOrderIds: dispenseOrder.id },
+                  });
                 }}
                 trigger={
                   <Button variant="outline">
@@ -306,30 +297,36 @@ export function DispenseOrderViewFooter({
             <Button
               variant="outline"
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}/print`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/print",
+                  params: {
+                    facilityId,
+                    locationId,
+                    dispenseOrderId: dispenseOrder.id,
+                  },
+                })
               }
             >
               <PrinterIcon className="size-4" />
               {t("print")}
             </Button>
             {/* Next pharmacy actions — primary split button */}
-            <div className="flex">
-              <Button variant="primary" className="rounded-r-none" asChild>
+            <ButtonGroup>
+              <Button variant="primary" asChild>
                 <Link
-                  href={`/facility/${facilityId}/locations/${locationId}/medication_requests`}
-                  basePath="/"
+                  to="/facility/$facilityId/locations/$locationId/medication_requests"
+                  params={{ facilityId, locationId }}
                 >
                   {t("prescription_queue")}
+                  <ShortcutBadge actionId="cancel-action" />
                 </Link>
               </Button>
+              <ButtonGroupSeparator />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="primary"
                     size="icon"
-                    className="rounded-l-none border-l border-l-white/20"
                     aria-label={t("next_pharmacy_action_question")}
                   >
                     <ChevronDown className="size-4" />
@@ -338,23 +335,23 @@ export function DispenseOrderViewFooter({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
                     <Link
-                      href={`/facility/${facilityId}/locations/${locationId}/medication_dispense`}
-                      basePath="/"
+                      to="/facility/$facilityId/locations/$locationId/medication_dispense"
+                      params={{ facilityId, locationId }}
                     >
                       {t("go_to_dispenses")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
-                      href={`/facility/${facilityId}/locations/${locationId}/medication_return`}
-                      basePath="/"
+                      to="/facility/$facilityId/locations/$locationId/medication_return"
+                      params={{ facilityId, locationId }}
                     >
                       {t("medicine_returns")}
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
+            </ButtonGroup>
             {/* Cancel options */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -364,7 +361,7 @@ export function DispenseOrderViewFooter({
                   disabled={isUpdatingStatus}
                   aria-label={t("more_actions")}
                 >
-                  <CareIcon icon="l-ellipsis-v" />
+                  <EllipsisVerticalIcon />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -398,6 +395,7 @@ export function DispenseOrderViewFooter({
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isUpdatingStatus}>
               {t("stay_on_this_page")}
+              <ShortcutBadge actionId="cancel-action" />
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
@@ -408,6 +406,7 @@ export function DispenseOrderViewFooter({
             >
               <ArrowLeftRight className="size-4" />
               {t("put_on_hold")}
+              <ShortcutBadge actionId="submit-action" />
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import { getFieldErrorMessage } from "tests/helper/error";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -7,12 +8,15 @@ import { getPatientId } from "tests/support/patientId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 // Duration is a native input with plain <button> suggestions in the popover;
-// exact-match avoids catching the range / period action buttons.
+// exact-match avoids catching the range / period action buttons. The popover
+// trigger wrapping the input is itself a button named by the typed value, so
+// the suggestion is scoped to the popover content.
 async function selectDuration(page: Page, duration: number, unit: string) {
   const field = page.getByRole("textbox", { name: "Duration" });
   await field.click();
   await field.fill(`${duration} ${unit}`);
   await page
+    .locator('[data-slot="popover-content"]')
     .getByRole("button", { name: `${duration} ${unit}`, exact: true })
     .click();
 }
@@ -220,7 +224,7 @@ test.describe("Medication Request Questionnaire", () => {
       .last()
       .fill(notes);
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -236,7 +240,7 @@ test.describe("Medication Request Questionnaire", () => {
     const medicationRow = page
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
+      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
       .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
@@ -279,7 +283,7 @@ test.describe("Medication Request Questionnaire", () => {
 
     await selectDuration(page, duration, durationUnit);
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -295,7 +299,7 @@ test.describe("Medication Request Questionnaire", () => {
     const medicationRow = page
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
+      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
       .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
@@ -317,10 +321,48 @@ test.describe("Medication Request Questionnaire", () => {
       .getByRole("option", { name: medicationName, exact: true })
       .click();
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(page.getByText("Dosage*This field is required")).toBeVisible();
 
     await expect(page.getByText("Frequency*eg. 1-0-1This field")).toBeVisible();
+  });
+
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    // The response template form opens only when there is a medication to save.
+    await test.step("Add a medication", async () => {
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: /Add Medication/i })
+        .click();
+      await page.getByRole("tab", { name: "Medication" }).click();
+      await page.getByPlaceholder(/Search Medications/i).fill(medicationName);
+      await page
+        .getByRole("option", { name: medicationName, exact: true })
+        .click();
+    });
+
+    await test.step("Open the save template form", async () => {
+      await page.getByRole("button", { name: /^Templates/ }).click();
+      await page.getByRole("button", { name: /^Save Current/ }).click();
+    });
+
+    const templateSheet = page.getByRole("dialog", {
+      name: "Save as Template",
+    });
+    const nameField = templateSheet.getByRole("textbox", {
+      name: "Template Name",
+    });
+    await nameField.fill("   ");
+
+    await templateSheet
+      .getByRole("button", { name: "Create Template" })
+      .click();
+
+    // Text not asserted: this schema's message is resolved at module load,
+    // before translations are ready, so it does not read "Name is required".
+    await expect(getFieldErrorMessage(nameField)).toBeVisible();
   });
 });

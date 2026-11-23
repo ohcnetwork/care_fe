@@ -1,3 +1,4 @@
+import { usePathname } from "@/lib/router/location";
 import facilityApi from "@/types/facility/facilityApi";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 import locationApi from "@/types/location/locationApi";
@@ -7,7 +8,6 @@ import {
 } from "@/types/scheduling/schedule";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
-import { useFullPath } from "raviger";
 
 const resourceTypePathSlugToResourceType = {
   practitioner: SchedulableResourceType.Practitioner,
@@ -44,12 +44,12 @@ const extractPathParams = (path: string) => {
 };
 
 export function useScheduleResourceFromPath() {
-  const path = useFullPath();
+  const path = usePathname();
   return extractPathParams(path);
 }
 
 export function useScheduleResource(): ScheduleResource | undefined {
-  const path = useFullPath();
+  const path = usePathname();
   const { facilityId, resourceType, resourceId } = extractPathParams(path);
 
   const practitionerQuery = useQuery({

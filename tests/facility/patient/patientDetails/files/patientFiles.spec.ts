@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import { format, subDays } from "date-fns";
+import { filterSelectButton } from "tests/helper/searchParams";
 import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -89,28 +90,8 @@ test.describe("Patient Files", () => {
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
-
-    // Navigate to encounters page and open first in-progress encounter
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
-    );
-
-    // Open first encounter details - wait for the link to be visible
-    const viewEncounterLink = page
-      .getByRole("link", { name: "View Encounter" })
-      .first();
-    await expect(viewEncounterLink).toBeVisible({ timeout: 10000 });
-    await viewEncounterLink.click();
-
-    // Wait for encounter page to load and get URL
-    await expect(page).toHaveURL(/\/encounter\//, { timeout: 10000 });
-    const currentUrl = page.url();
-    const patientUrl = currentUrl.split("/encounter/")[0];
-
-    // Navigate to patient details page
-    await page.goto(patientUrl);
+    // Open the saved patient fixture; list navigation is covered separately.
+    await page.goto(`/facility/${facilityId}/patient/${getPatientId()}`);
 
     // Wait for Files tab to be visible and click it
     const filesTab = page.getByRole("tab", { name: "Files" });
@@ -231,26 +212,20 @@ test.describe("Patient Files", () => {
     const newFileName = faker.system.fileName();
 
     // Filter for active files first
-    await page.getByRole("button", { name: "Filter" }).click();
-    await expect(
-      page.getByRole("menuitem", { name: "Active Files" }),
-    ).toBeVisible({ timeout: 5000 });
-    await page.getByRole("menuitem", { name: "Active Files" }).click();
-
     const filterPromise = page.waitForResponse(
       (response) =>
         response.url().includes("/api/v1/files/") &&
+        response.url().includes("is_archived=false") &&
         response.request().method() === "GET",
       { timeout: 15000 },
     );
+    await filterSelectButton(page, "Status").click();
+    await page
+      .getByRole("menuitemradio", { name: "Active", exact: true })
+      .click();
 
     const filterResponse = await filterPromise;
     expect(filterResponse.status()).toBe(200);
-
-    // Wait for filter to be applied and active files badge to appear
-    await expect(page.getByText("Active Files")).toBeVisible({
-      timeout: 10000,
-    });
 
     // Upload a single file using helper
     await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
@@ -295,26 +270,20 @@ test.describe("Patient Files", () => {
     const archiveReason = faker.lorem.sentence();
 
     // Filter for active files first
-    await page.getByRole("button", { name: "Filter" }).click();
-    await expect(
-      page.getByRole("menuitem", { name: "Active Files" }),
-    ).toBeVisible({ timeout: 5000 });
-    await page.getByRole("menuitem", { name: "Active Files" }).click();
-
     const filterPromise = page.waitForResponse(
       (response) =>
         response.url().includes("/api/v1/files/") &&
+        response.url().includes("is_archived=false") &&
         response.request().method() === "GET",
       { timeout: 15000 },
     );
+    await filterSelectButton(page, "Status").click();
+    await page
+      .getByRole("menuitemradio", { name: "Active", exact: true })
+      .click();
 
     const filterResponse = await filterPromise;
     expect(filterResponse.status()).toBe(200);
-
-    // Wait for filter to be applied and active files badge to appear
-    await expect(page.getByText("Active Files")).toBeVisible({
-      timeout: 10000,
-    });
 
     // Upload a single file using helper
     await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);

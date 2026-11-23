@@ -1,3 +1,3 @@
 ## Plugs Versioning
 
-Issue: Currently there is no way to identify which versions of plugs is compaitibe which versions of CARE,
+For the proposed compatibility-branch model, see [Care Plugin Versioning](https://openhealthcarenetwork.atlassian.net/wiki/spaces/CareEngineering/pages/19038441/Care+Versioning#Care-Plugin-Versioning).

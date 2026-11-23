@@ -1,16 +1,26 @@
-import { developerModeAtom } from "@/atoms/developerMode";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import LanguageSelector from "@/components/Common/LanguageSelector";
-import UserColumns, { userChildProps } from "@/components/Common/UserColumns";
+import { useQuery } from "@tanstack/react-query";
+import {
+  GraduationCap,
+  Languages,
+  Mail,
+  MapPin,
+  Pencil,
+  RefreshCw,
+  Star,
+  UserRound,
+} from "lucide-react";
+import { useTranslation } from "react-i18next";
+
+import { UserProfileEditSection } from "@/components/Users/UserForm";
+
+import { userChildProps } from "@/components/Common/UserColumns";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { SectionTitle } from "@/components/ui/typography";
 import ServiceTokenSection from "@/components/Users/ServiceTokenSection";
-import { TwoFactorAuth } from "@/components/Users/TwoFactorAuth";
-import UserAvatar from "@/components/Users/UserAvatar";
-import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
-import UserResetPassword from "@/components/Users/UserResetPassword";
+import { useUserLanguages } from "@/components/Users/UserLanguageSelect";
+import { UserProfileEmptyState } from "@/components/Users/UserProfileEmptyState";
+import { UserProfileSection } from "@/components/Users/UserProfileSection";
 import { RoleOrgAccessSummary } from "@/components/Users/UserRoleOrganizationAccess";
 import UserSoftwareUpdate from "@/components/Users/UserSoftwareUpdate";
 import {
@@ -19,249 +29,230 @@ import {
   GeoOrgDetails,
 } from "@/components/Users/UserViewDetails";
 import useAuthUser from "@/hooks/useAuthUser";
-import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
 import { PLUGIN_Component } from "@/PluginEngine";
-import { useAtom } from "jotai";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import userApi from "@/types/user/userApi";
+import query from "@/Utils/request/query";
 
-export default function UserSummaryTab({
-  userData,
-  permissions,
-}: userChildProps) {
-  const { t } = useTranslation();
-  const authUser = useAuthUser();
-  const [showEditUserSheet, setShowEditUserSheet] = useState(false);
-
-  if (!userData) {
-    return <></>;
-  }
-
-  const userColumnsData = {
-    userData,
-    username: userData.username,
-    permissions,
-  };
-  const isOwnAccount = authUser.username === userData.username;
-  const canEditUser = authUser.is_superuser || isOwnAccount;
-  const canResetPassword = isOwnAccount;
-
-  const renderBasicInformation = () => {
-    return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
-        <BasicInfoDetails user={userData} />
-      </div>
-    );
-  };
-
-  const renderContactInformation = () => {
-    return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
-        <ContactInfoDetails user={userData} />
-      </div>
-    );
-  };
-
-  const renderGeoOrgDetails = () => {
-    return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
-        <GeoOrgDetails user={userData} />
-      </div>
-    );
-  };
-
-  const renderRoleOrganizationAccess = () => {
-    return (
-      <RoleOrgAccessSummary
-        userId={userData.id}
-        memberships={userData.role_orgs || []}
-      />
-    );
-  };
-
-  return (
-    <>
-      <EditUserSheet
-        existingUsername={userData.username}
-        open={showEditUserSheet}
-        setOpen={setShowEditUserSheet}
-      />
-      <div className="mt-10 flex flex-col gap-y-6">
-        {canEditUser && (
-          <Button
-            variant="outline"
-            className="w-fit self-end"
-            onClick={() => setShowEditUserSheet(true)}
-          >
-            <CareIcon icon="l-pen" className="mr-2 size-4" />
-            {t("edit_user")}
-          </Button>
-        )}
-        {userData.is_service_account &&
-          userData.created_by?.username === authUser.username && (
-            <UserColumns
-              heading={t("manage_token")}
-              note={t("manage_service_account_token_for", {
-                username: userData.username,
-              })}
-              Child={() => <ServiceTokenSection userData={userData} />}
-              childProps={userColumnsData}
-            />
-          )}
-        {canEditUser && (
-          <UserColumns
-            heading={t("edit_avatar")}
-            note={
-              authUser.username === userData.username
-                ? t("edit_avatar_note_self")
-                : t("edit_avatar_note")
-            }
-            Child={UserAvatar}
-            childProps={userColumnsData}
-          />
-        )}
-        <UserColumns
-          heading={t("personal_information")}
-          note={
-            authUser.username === userData.username
-              ? t("personal_information_note_self")
-              : canEditUser
-                ? t("personal_information_note")
-                : t("personal_information_note_view")
-          }
-          Child={renderBasicInformation}
-          childProps={userColumnsData}
-        />
-        <UserColumns
-          heading={t("contact_info")}
-          note={
-            authUser.username === userData.username
-              ? t("contact_info_note_self")
-              : canEditUser
-                ? t("contact_info_note")
-                : t("contact_info_note_view")
-          }
-          Child={renderContactInformation}
-          childProps={userColumnsData}
-        />
-        {"geo_organization" in userData && (
-          <UserColumns
-            heading={t("location_info")}
-            note={
-              authUser.username === userData.username
-                ? t("location_info_note_self")
-                : canEditUser
-                  ? t("location_info_note")
-                  : t("location_info_note_view")
-            }
-            Child={renderGeoOrgDetails}
-            childProps={userColumnsData}
-          />
-        )}
-        <UserColumns
-          heading={t("role_organizations")}
-          note={
-            authUser.username === userData.username
-              ? t("role_organization_access_note_self")
-              : canEditUser
-                ? t("role_organization_access_note")
-                : t("role_organization_access_note_view")
-          }
-          Child={renderRoleOrganizationAccess}
-          childProps={userColumnsData}
-        />
-        {canResetPassword && (
-          <UserColumns
-            heading={t("reset_password")}
-            note={t("reset_password_note_self")}
-            Child={UserResetPassword}
-            childProps={userColumnsData}
-          />
-        )}
-        {authUser.username === userData.username && (
-          <>
-            <UserColumns
-              heading={t("two_factor_authentication")}
-              note={t("two_factor_authentication_note")}
-              Child={TwoFactorAuth}
-              childProps={userColumnsData}
-            />
-            <UserColumns
-              heading={t("language_selection")}
-              note={t("set_your_local_language")}
-              Child={LanguageSelector}
-              childProps={userColumnsData}
-            />
-            <UserColumns
-              heading={t("software_update_cache")}
-              note={t("check_for_available_update")}
-              Child={UserSoftwareUpdate}
-              childProps={userColumnsData}
-            />
-          </>
-        )}
-        <PLUGIN_Component
-          __name="UserProfileSections"
-          user={userData}
-          isOwnProfile={isOwnAccount}
-        />
-        {authUser.is_superuser && (
-          <Card className="border-red-500">
-            <CardHeader className="px-4 sm:px-6">
-              <CardTitle className="text-destructive">
-                {t("danger_zone")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="gap-4 px-4 sm:px-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-3 sm:p-4">
-                <div className="space-y-1">
-                  <h3 className="text-sm font-medium">{t("delete_account")}</h3>
-                  <p className="text-sm text-gray-700">
-                    {t("delete_account_note")}
-                  </p>
-                </div>
-                <UserDeleteDialog user={userData} isOwnAccount={isOwnAccount} />
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        {authUser.username === userData.username && <DeveloperModeSection />}
-      </div>
-    </>
-  );
+interface UserSummaryProps extends userChildProps {
+  onEdit?: (section?: UserProfileEditSection) => void;
 }
 
-function DeveloperModeSection() {
+export default function UserSummaryTab({ userData, onEdit }: UserSummaryProps) {
   const { t } = useTranslation();
-  const [developerMode, setDeveloperMode] = useAtom(developerModeAtom);
+  const authUser = useAuthUser();
+  const { languageName } = useUserLanguages();
+  const { data: degrees } = useQuery({
+    queryKey: ["userDegrees"],
+    queryFn: query(userApi.degrees),
+    staleTime: 5 * 60 * 1000,
+    enabled: !userData.is_service_account && !!userData.qualification?.length,
+  });
+  const editAction = (label: string, section: UserProfileEditSection) =>
+    onEdit && (
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="-mr-2 shrink-0"
+        aria-label={t("profile_edit_section", { section: label })}
+        onClick={() => onEdit(section)}
+      >
+        <Pencil className="size-3.5" aria-hidden="true" />
+        {t("edit")}
+      </Button>
+    );
 
   return (
-    <Card className="border-amber-500">
-      <CardHeader className="px-4 sm:px-6">
-        <CardTitle className="text-amber-600">{t("developer_mode")}</CardTitle>
-      </CardHeader>
-      <CardContent className="gap-4 px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-3 sm:p-4">
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium">
-              {t("production_environment_warning")}
-            </h3>
-            <p className="text-sm text-gray-700">
-              {t("production_environment_warning_description")}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch
-              id="developer-mode"
-              checked={developerMode}
-              onCheckedChange={setDeveloperMode}
+    <div className="space-y-6 pt-6">
+      <SectionTitle className="sr-only">{t("profile")}</SectionTitle>
+      {userData.is_service_account &&
+        userData.created_by?.username === authUser.username && (
+          <UserProfileSection
+            title={t("manage_token")}
+            description={t("manage_service_account_token_for", {
+              username: userData.username,
+            })}
+          >
+            <ServiceTokenSection userData={userData} />
+          </UserProfileSection>
+        )}
+      <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1.4fr)_minmax(14rem,1fr)] md:gap-8">
+        <div className="contents md:block md:space-y-8">
+          <UserProfileSection
+            title={t("personal_information")}
+            className="order-1"
+            icon={UserRound}
+            action={editAction(t("personal_information"), "personal")}
+          >
+            <BasicInfoDetails user={userData} />
+          </UserProfileSection>
+          {!userData.is_service_account && (
+            <UserProfileSection
+              title={t("profile_qualifications")}
+              className="order-3"
+              icon={GraduationCap}
+              action={
+                userData.qualification?.length
+                  ? editAction(t("profile_qualifications"), "qualification")
+                  : undefined
+              }
+            >
+              {userData.qualification?.length ? (
+                <ul className="divide-y divide-border/70">
+                  {userData.qualification.map((qualification, index) => {
+                    const degree = degrees?.find(
+                      (degree) =>
+                        degree.code === qualification.degree.code &&
+                        degree.system === qualification.degree.system,
+                    );
+                    return (
+                      <li
+                        key={index}
+                        className="flex gap-4 py-5 first:pt-1 last:pb-0"
+                      >
+                        <div className="flex size-11 shrink-0 items-center justify-center rounded-lg border border-primary/10 bg-primary/5 text-primary">
+                          <GraduationCap
+                            className="size-5"
+                            strokeWidth={1.5}
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <div className="min-w-0 space-y-1.5 break-words">
+                          <p className="text-base font-semibold tracking-tight">
+                            {degree?.display || qualification.degree.code}
+                          </p>
+                          {qualification.issuer && (
+                            <p className="text-sm text-soft-foreground">
+                              {qualification.issuer}
+                            </p>
+                          )}
+                          {qualification.registration_number && (
+                            <p className="pt-1 text-xs text-soft-foreground">
+                              {t("registration_number")}
+                              <span
+                                className="mx-2 text-border"
+                                aria-hidden="true"
+                              >
+                                /
+                              </span>
+                              <span className="font-mono text-foreground">
+                                {qualification.registration_number}
+                              </span>
+                            </p>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <UserProfileEmptyState
+                  icon={GraduationCap}
+                  title={t("profile_no_qualifications")}
+                  description={t("profile_qualifications_empty_description")}
+                  actionLabel={t("profile_add_qualification")}
+                  onAction={onEdit ? () => onEdit("qualification") : undefined}
+                />
+              )}
+            </UserProfileSection>
+          )}
+          <div className="order-5">
+            <RoleOrgAccessSummary
+              userId={userData.id}
+              memberships={userData.role_orgs || []}
             />
-            <Label htmlFor="developer-mode" className="sr-only">
-              {t("developer_mode")}
-            </Label>
           </div>
         </div>
-      </CardContent>
-    </Card>
+        <div className="contents md:block md:space-y-8 md:border-l md:border-border md:pl-8">
+          <UserProfileSection
+            title={t("contact")}
+            className="order-2"
+            icon={Mail}
+            action={editAction(t("contact_info"), "contact")}
+          >
+            <ContactInfoDetails user={userData} />
+          </UserProfileSection>
+          {!userData.is_service_account && (
+            <UserProfileSection
+              title={t("profile_communication")}
+              className="order-4"
+              icon={Languages}
+              action={
+                userData.communication?.length
+                  ? editAction(t("profile_communication"), "communication")
+                  : undefined
+              }
+            >
+              {userData.communication?.length ? (
+                <ul className="divide-y divide-border/70">
+                  {userData.communication.map((entry) => (
+                    <li
+                      key={entry.language.code}
+                      className="space-y-2 py-4 first:pt-0 last:pb-0"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-sm font-semibold">
+                          {languageName(entry.language.code)}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs text-soft-foreground">
+                        {entry.proficiency && (
+                          <Badge
+                            variant="secondary"
+                            className="text-xs font-normal"
+                          >
+                            {t(`profile_cefr_${entry.proficiency}`)}
+                          </Badge>
+                        )}
+                        {entry.preferred && (
+                          <span className="inline-flex items-center gap-1.5 text-primary">
+                            <Star
+                              className="size-3 fill-primary/15"
+                              aria-hidden="true"
+                            />
+                            {t("profile_preferred_language")}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <UserProfileEmptyState
+                  icon={Languages}
+                  title={t("profile_no_languages")}
+                  description={t("profile_languages_empty_description")}
+                  actionLabel={t("profile_add_language")}
+                  onAction={onEdit ? () => onEdit("communication") : undefined}
+                />
+              )}
+            </UserProfileSection>
+          )}
+          {userData.geo_organization && (
+            <UserProfileSection
+              title={t("location_info")}
+              icon={MapPin}
+              className="order-6"
+            >
+              <GeoOrgDetails user={userData} />
+            </UserProfileSection>
+          )}
+        </div>
+      </div>
+      <PLUGIN_Component
+        __name="UserProfileSections"
+        user={userData}
+        isOwnProfile={authUser.username === userData.username}
+      />
+      {authUser.username === userData.username && (
+        <UserProfileSection
+          title={t("software_update_cache")}
+          icon={RefreshCw}
+          description={t("check_for_available_update")}
+        >
+          <UserSoftwareUpdate />
+        </UserProfileSection>
+      )}
+    </div>
   );
 }

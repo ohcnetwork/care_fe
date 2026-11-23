@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -10,7 +9,6 @@ import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -22,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
+  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
@@ -34,6 +33,9 @@ import {
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
+import { ScheduleValidityField } from "@/pages/Scheduling/components/ScheduleValidityField";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -60,12 +62,12 @@ export default function CreateScheduleExceptionSheet({
   const queryClient = useQueryClient();
 
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
-  const [qParams, _setQParams] = useQueryParams<QueryParams>();
+  const [qParams, _setQParams] = useQueryParams(scheduleHomeSearch);
   const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
 
   const formSchema = z
     .object({
-      reason: z.string().min(1, t("field_required")),
+      reason: z.string().trim().min(1, t("field_required")),
       valid_from: z
         .date({ error: t("field_required") })
         .min(dayjs().startOf("day").toDate(), {
@@ -133,15 +135,18 @@ export default function CreateScheduleExceptionSheet({
     },
   });
 
+  // The URL holds local calendar dates (YYYY-MM-DD). `new Date()` would read
+  // them as UTC midnight, the previous day west of UTC; dayjs reads them as
+  // local midnight.
   useEffect(() => {
     if (qParams.valid_from) {
-      form.setValue("valid_from", new Date(qParams.valid_from));
+      form.setValue("valid_from", dayjs(qParams.valid_from).toDate());
     }
   }, [qParams.valid_from, form]);
 
   useEffect(() => {
     if (qParams.valid_to) {
-      form.setValue("valid_to", new Date(qParams.valid_to));
+      form.setValue("valid_to", dayjs(qParams.valid_to).toDate());
     }
   }, [qParams.valid_to, form]);
 
@@ -206,7 +211,7 @@ export default function CreateScheduleExceptionSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[45rem]">
+      <SheetContent size="lg" className="overflow-hidden bg-gray-100">
         <SheetHeader>
           <SheetTitle>{t("add_schedule_exceptions")}</SheetTitle>
           <SheetDescription>
@@ -214,10 +219,11 @@ export default function CreateScheduleExceptionSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="-mx-6 mb-16 overflow-auto px-6 pb-16 pt-6">
+        <SheetBody>
           <div className="rounded-md bg-white p-4 shadow-sm">
             <Form {...form}>
               <form
+                id="schedule-exception-form"
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
@@ -238,43 +244,7 @@ export default function CreateScheduleExceptionSheet({
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                  <FormField
-                    control={form.control}
-                    name="valid_from"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel aria-required>{t("valid_from")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
-                          }
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="valid_to"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel aria-required>{t("valid_to")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
-                          }
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <ScheduleValidityField disablePast />
 
                 <FormField
                   control={form.control}
@@ -333,27 +303,31 @@ export default function CreateScheduleExceptionSheet({
                     )}
                   />
                 </div>
-
-                <SheetFooter>
-                  <SheetClose asChild>
-                    <Button
-                      variant="outline"
-                      className="mt-2 md:mt-0"
-                      type="button"
-                      disabled={isPending}
-                      onClick={() => form.reset()}
-                    >
-                      {t("cancel")}
-                    </Button>
-                  </SheetClose>
-                  <Button variant="primary" type="submit" disabled={isPending}>
-                    {t("confirm_unavailability")}
-                  </Button>
-                </SheetFooter>
               </form>
             </Form>
           </div>
-        </div>
+        </SheetBody>
+
+        <SheetFooter>
+          <SheetClose asChild>
+            <Button
+              variant="outline"
+              type="button"
+              disabled={isPending}
+              onClick={() => form.reset()}
+            >
+              {t("cancel")}
+            </Button>
+          </SheetClose>
+          <Button
+            variant="primary"
+            type="submit"
+            form="schedule-exception-form"
+            disabled={isPending}
+          >
+            {t("confirm_unavailability")}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

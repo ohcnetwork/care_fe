@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -45,6 +45,9 @@ import query from "@/Utils/request/query";
 import { formatName, mergeAutocompleteOptions, valuesOf } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import BackButton from "@/components/Common/BackButton";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { resourceFormSearch } from "@/lib/router/search/resource";
 import patientApi from "@/types/emr/patient/patientApi";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
@@ -58,14 +61,14 @@ import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 interface ResourceProps {
-  facilityId: number;
+  facilityId: string;
   id?: string;
 }
 
 export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const [facilitySearch, setFacilitySearch] = useState("");
   const { t } = useTranslation();
-  const [{ related_patient }] = useQueryParams();
+  const [{ related_patient }] = useQueryParams(resourceFormSearch);
   const [assignedToUser, setAssignedToUser] = useState<UserReadMinimal>();
   const authUser = useAuthUser();
 
@@ -79,13 +82,17 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       })
       .nullable(),
     emergency: z.enum(["true", "false"]),
-    title: z.string().min(1, { message: t("field_required") }),
+    title: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
     reason: z
       .string()
       .trim()
       .min(1, { message: t("field_required") }),
     referring_facility_contact_name: z
       .string()
+      .trim()
       .min(1, { message: t("field_required") }),
     referring_facility_contact_number: validators().phoneNumber.required,
     priority: z.number().default(1),
@@ -152,7 +159,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     mutationFn: mutate(resourceRequestApi.create),
     onSuccess: (data: ResourceRequestRead) => {
       toast.success(t("resource_created_successfully"));
-      navigate(`/facility/${facilityId}/resource/${data.id}`, {
+      navigate({
+        to: "/facility/$facilityId/resource/$id",
+        params: { facilityId, id: data.id },
         replace: true,
       });
     },
@@ -164,7 +173,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }),
     onSuccess: (data: ResourceRequestRead) => {
       toast.success(t("resource_updated_successfully"));
-      navigate(`/facility/${facilityId}/resource/${data.id}`, {
+      navigate({
+        to: "/facility/$facilityId/resource/$id",
+        params: { facilityId, id: data.id },
         replace: true,
       });
     },
@@ -183,7 +194,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       reason: data.reason,
       referring_facility_contact_name: data.referring_facility_contact_name,
       referring_facility_contact_number: data.referring_facility_contact_number,
-      related_patient: related_patient,
+      // Without a patient in the URL, the body leaves the key out.
+      related_patient: related_patient as string | null,
       priority: data.priority,
     };
 
@@ -246,7 +258,12 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
             <Alert>
               <div className="flex items-center gap-2">
                 <Link
-                  href={`/facility/${facilityId}/patient/${related_patient}/resource_requests`}
+                  to="/facility/$facilityId/patient/$patientId/{-$tab}"
+                  params={{
+                    facilityId,
+                    patientId: String(related_patient),
+                    tab: "resource_requests",
+                  }}
                   className="flex items-center gap-2"
                 >
                   <CareIcon icon="l-user" className="size-5 text-blue-700" />
@@ -548,17 +565,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
             <Button
               type="submit"
               variant="primary"
-              disabled={
-                id ? isUpdatePending || !form.formState.isDirty : isPending
-              }
+              disabled={!!id && !form.formState.isDirty}
             >
-              {isPending && (
-                <CareIcon
-                  icon="l-spinner"
-                  className="mr-2 size-4 animate-spin"
-                />
-              )}
-              {isPending ? t("submitting") : t("submit")}
+              {t("submit")}
             </Button>
           </div>
         </form>

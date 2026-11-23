@@ -13,10 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { buttonVariants } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
-
-import { cn } from "@/lib/utils";
 
 import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
@@ -169,7 +166,7 @@ export function useInvoiceStatusActions({
             <AlertDialogAction
               onClick={handleConfirm}
               disabled={isCancelPending}
-              className={cn(buttonVariants({ variant: "destructive" }))}
+              variant="destructive"
             >
               {t("confirm")}
               <ShortcutBadge actionId="submit-action" />
@@ -276,7 +273,7 @@ export function useInvoiceStatusActions({
                 setActivePaymentsDialogOpen(false);
                 setReasonDialogOpen(true);
               }}
-              className={cn(buttonVariants({ variant: "destructive" }))}
+              variant="destructive"
             >
               {t("proceed")}
               <ShortcutBadge actionId="submit-action" />
