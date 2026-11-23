@@ -1,9 +1,16 @@
-import { DialogDescription } from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
-import { Hash, MoreVertical } from "lucide-react";
-import { Link, navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { Hash, Info, MoreVertical } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -14,12 +21,6 @@ import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +36,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
@@ -58,12 +64,13 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
-import { isPositive, roundWhole } from "@/Utils/decimal";
+import { isPositive, isZero, roundWhole } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { navigate } from "@/lib/router/navigate";
 import {
   isAccountActiveAndBillable,
   isAccountBillingClosed,
@@ -118,13 +125,16 @@ function AccountShow({
   const { t } = useTranslation();
   const [sheetOpen, setSheetOpen] = useState(false);
   const openPaymentSheet = (type: AccountPaymentType) => {
-    navigate(
-      `/facility/${facilityId}/billing/account/${accountId}/${tab}/payment/${type}`,
-      { replace: true },
-    );
+    navigate({
+      to: "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType",
+      params: { facilityId, accountId, tab, paymentType: type },
+      replace: true,
+    });
   };
   const closePaymentSheet = () => {
-    navigate(`/facility/${facilityId}/billing/account/${accountId}/${tab}`, {
+    navigate({
+      to: "/facility/$facilityId/billing/account/$accountId/$tab",
+      params: { facilityId, accountId, tab },
       replace: true,
     });
   };
@@ -138,10 +148,11 @@ function AccountShow({
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
-  const { canUpdateAccount } = getPermissions(
-    hasPermission,
-    facility?.permissions || [],
-  );
+  const {
+    canUpdateAccount,
+    canCreateChargeItem,
+    canWritePaymentReconciliation,
+  } = getPermissions(hasPermission, facility?.permissions || []);
 
   useShortcutSubContext("facility:account:show");
 
@@ -177,16 +188,16 @@ function AccountShow({
 
   const isBillingClosed = !!account && isAccountBillingClosed(account);
 
-  useEffect(() => {
-    if (account) {
-      setCloseAccountStatus({
-        sheetOpen: false,
-        reason: isBillingClosed
-          ? account?.billing_status
-          : AccountBillingStatus.closed_baddebt,
-      });
-    }
-  }, [account, isBillingClosed]);
+  const defaultCloseReason = (): AccountBillingStatus => {
+    if (!account) return AccountBillingStatus.closed_baddebt;
+    if (isBillingClosed) return account.billing_status;
+    return isZero(account.total_balance)
+      ? AccountBillingStatus.closed_completed
+      : AccountBillingStatus.closed_baddebt;
+  };
+
+  const openCloseDialog = () =>
+    setCloseAccountStatus({ sheetOpen: true, reason: defaultCloseReason() });
 
   const rebalanceMutation = useMutation({
     mutationFn: mutate(accountApi.rebalanceAccount, {
@@ -277,17 +288,16 @@ function AccountShow({
           <h2 className="text-2xl font-bold">{t("account_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("account_may_not_exist")}</p>
           <Button asChild className="mt-4">
-            <Link href={`/facility/${facilityId}/billing/account`}>
+            <HrefLink href={`/facility/${facilityId}/billing/account`} back>
               {t("back_to_accounts")}
-            </Link>
+            </HrefLink>
           </Button>
         </div>
       </div>
     );
   }
 
-  const isAccountBillableAndActive =
-    !!account && isAccountActiveAndBillable(account);
+  const isAccountBillableAndActive = isAccountActiveAndBillable(account);
 
   const roundedBalance = roundWhole(account.total_balance);
   const roundedBilledGross = roundWhole(account.total_gross);
@@ -313,6 +323,7 @@ function AccountShow({
           accountId={accountId}
           patientId={account.patient.id}
           canAddChargeItems={isAccountBillableAndActive}
+          canChangeAccount={canCreateChargeItem}
         />
       ),
       shortcutId: "switch-to-charge-items-tab",
@@ -325,6 +336,7 @@ function AccountShow({
           accountId={accountId}
           patientId={account.patient.id}
           hideAccountColumn
+          canChangeAccount={canWritePaymentReconciliation}
         />
       ),
       shortcutId: "switch-to-payments-tab",
@@ -370,12 +382,7 @@ function AccountShow({
               <Button
                 variant="ghost"
                 className="text-gray-950 gap-1 flex flex-row items-center justify-between"
-                onClick={() =>
-                  setCloseAccountStatus({
-                    ...closeAccountStatus,
-                    sheetOpen: true,
-                  })
-                }
+                onClick={openCloseDialog}
               >
                 <CareIcon icon="l-check" className="size-5" />
                 <span className="underline">{t("settle_close")}</span>
@@ -385,9 +392,10 @@ function AccountShow({
                 variant="outline"
                 className="border-gray-400 text-gray-950"
                 onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                  )
+                  navigate({
+                    to: "/facility/$facilityId/billing/account/$accountId/invoices/create",
+                    params: { facilityId, accountId },
+                  })
                 }
               >
                 <CareIcon icon="l-plus" className="mr-2 size-4" />
@@ -407,9 +415,10 @@ function AccountShow({
                 variant="outline"
                 className="border-gray-400 text-gray-950"
                 onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                  )
+                  navigate({
+                    to: "/facility/$facilityId/billing/account/$accountId/invoices/create",
+                    params: { facilityId, accountId },
+                  })
                 }
               >
                 <CareIcon icon="l-plus" className="size-4" />
@@ -439,12 +448,7 @@ function AccountShow({
                   <>
                     <DropdownMenuItem
                       className="lg:hidden"
-                      onClick={() =>
-                        setCloseAccountStatus({
-                          ...closeAccountStatus,
-                          sheetOpen: true,
-                        })
-                      }
+                      onClick={openCloseDialog}
                     >
                       {t("settle_close")}
                       <ShortcutBadge actionId="settle-close-account" />
@@ -541,7 +545,12 @@ function AccountShow({
           <div className="flex items-center gap-2">
             <Button variant="link" asChild className="text-gray-950 underline">
               <Link
-                href={`/facility/${facilityId}/patient/${account.patient.id}/accounts`}
+                to="/facility/$facilityId/patient/$patientId/{-$tab}"
+                params={{
+                  facilityId,
+                  patientId: account.patient.id,
+                  tab: "accounts",
+                }}
               >
                 {t("past_accounts")}
               </Link>
@@ -567,8 +576,16 @@ function AccountShow({
         <div className="flex flex-col md:flex-row rounded-lg border border-gray-200 bg-white flex-wrap">
           <div className="flex-1 p-6 border-b md:border-r border-gray-200">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-sm font-medium text-gray-500 flex items-center gap-1">
                 {t("amount_due")}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="size-3.5 text-gray-400 cursor-pointer" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <MonetaryDisplay amount={account.total_balance} />
+                  </TooltipContent>
+                </Tooltip>
               </p>
               <div className="flex items-end">
                 <p
@@ -606,8 +623,16 @@ function AccountShow({
 
           <div className="flex-1 p-6 border-b md:border-r border-gray-200">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-sm font-medium text-gray-500 flex items-center gap-1">
                 {t("billed_gross")}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="size-3.5 text-gray-400 cursor-pointer" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <MonetaryDisplay amount={account.total_gross} />
+                  </TooltipContent>
+                </Tooltip>
               </p>
               <div className="flex items-end">
                 <p className="text-3xl font-bold text-gray-900">
@@ -690,12 +715,7 @@ function AccountShow({
               isAccountBillingClosed={isBillingClosed}
               canUpdateAccount={canUpdateAccount}
               onAdvance={advanceBillingStatus}
-              onSettleClose={() =>
-                setCloseAccountStatus((prev) => ({
-                  ...prev,
-                  sheetOpen: true,
-                }))
-              }
+              onSettleClose={openCloseDialog}
             />
           </div>
         </div>
@@ -708,9 +728,10 @@ function AccountShow({
         tabs={tabs}
         currentTab={tab}
         onTabChange={(value) =>
-          navigate(
-            `/facility/${facilityId}/billing/account/${accountId}/${value}`,
-          )
+          navigate({
+            to: "/facility/$facilityId/billing/account/$accountId/$tab",
+            params: { facilityId, accountId, tab: value },
+          })
         }
         setPageTitle={false}
         showMoreAfterIndex={showMoreAfterIndex}
@@ -872,17 +893,21 @@ function BillingLifecycleStepper({
                 )}
               />
             )}
-            <button
+            <Button
+              variant="ghost"
               type="button"
               disabled={!isClickable}
               onClick={() => handleStepClick(index)}
               title={stepLabels[step]}
               className={cn(
-                "flex items-center gap-1 group transition-all rounded-full px-1.5 py-0.5 text-xs",
-                isClickable
-                  ? "cursor-pointer hover:bg-gray-100"
-                  : "cursor-default",
-                isNext && "hover:ring-1 hover:ring-primary-300",
+                "h-auto",
+                cn(
+                  "flex items-center gap-1 group transition-all rounded-full px-1.5 py-0.5 text-xs",
+                  isClickable
+                    ? "cursor-pointer hover:bg-gray-100"
+                    : "cursor-default",
+                  isNext && "hover:ring-1 hover:ring-primary-300",
+                ),
               )}
             >
               <div
@@ -917,7 +942,7 @@ function BillingLifecycleStepper({
                   {stepLabels[step]}
                 </span>
               )}
-            </button>
+            </Button>
           </div>
         );
       })}

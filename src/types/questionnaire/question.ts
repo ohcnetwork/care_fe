@@ -1,24 +1,34 @@
-import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
+import { StructuredTypeValue } from "@/types/questionnaire/structured";
 
 import { Code } from "@/types/base/code/code";
+import { ValueSetConfig } from "@/types/valueSet/valueSet";
 
-export type QuestionType =
-  | "group"
-  | "display"
-  | "boolean"
-  | "decimal"
-  | "integer"
-  | "date"
-  | "dateTime"
-  | "time"
-  | "string"
-  | "text"
-  | "url"
-  | "choice"
-  | "quantity"
-  | "structured";
+/** Runtime source of truth for `QuestionType` — validation (e.g. the builder
+ *  import flow) checks membership against this array. */
+export const QUESTION_TYPES = [
+  "group",
+  "display",
+  "boolean",
+  "decimal",
+  "integer",
+  "date",
+  "dateTime",
+  "time",
+  "string",
+  "text",
+  "url",
+  "choice",
+  "quantity",
+  "structured",
+] as const;
 
-export const SUPPORTED_QUESTION_TYPES = [
+export type QuestionType = (typeof QUESTION_TYPES)[number];
+
+export const SUPPORTED_QUESTION_TYPES: {
+  name: string;
+  value: QuestionType;
+  description: string;
+}[] = [
   {
     name: "Group",
     value: "group",
@@ -106,9 +116,25 @@ type EnableWhenString = {
   answer: string;
 };
 
+/** Value-set choice targets are matched by `answer.system` and `answer.code`;
+ *  `display` is kept so the builder can label the rule. Fixed answer options
+ *  stay value-based: the backend does not persist their coding. */
+type EnableWhenCoding = {
+  operator: "equals" | "not_equals";
+  answer: Code;
+};
+
 export type EnableWhen = {
   question: string;
-} & (EnableWhenNumeric | EnableWhenBoolean | EnableWhenString);
+} & (
+  EnableWhenNumeric | EnableWhenBoolean | EnableWhenString | EnableWhenCoding
+);
+
+export function isCodedEnableWhenAnswer(
+  answer: EnableWhen["answer"] | null | undefined,
+): answer is Code {
+  return typeof answer === "object" && answer !== null;
+}
 
 export interface AnswerOption {
   value: string;
@@ -137,7 +163,7 @@ export interface Question {
   text: string;
   description?: string;
   type: QuestionType;
-  structured_type?: StructuredQuestionType;
+  structured_type?: StructuredTypeValue;
   styling_metadata?: {
     classes?: string;
     containerClasses?: string;
@@ -156,7 +182,7 @@ export interface Question {
   max_length?: number;
   answer_constraint?: string;
   answer_option?: AnswerOption[];
-  answer_value_set?: string;
+  answer_value_set?: ValueSetConfig;
   answer_unit?: Code;
   is_observation?: boolean;
   unit?: Code;

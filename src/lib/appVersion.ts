@@ -19,6 +19,9 @@ export interface AppVersionInfo {
 export interface BuildMeta {
   version: string;
   built_at: string;
+  /** Set in GitHub Actions builds; absent elsewhere */
+  commit?: string;
+  ref?: string;
 }
 
 /**
@@ -81,7 +84,8 @@ export async function fetchBuildMeta(): Promise<BuildMeta> {
 }
 
 /**
- * Clear all caches including browser caches, service workers, and query cache
+ * Clear browser caches, service workers and query caches. Questionnaire
+ * drafts are unsaved user work and must survive cache maintenance/updates.
  */
 export async function clearAllCaches(): Promise<void> {
   // Clear browser caches

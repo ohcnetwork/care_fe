@@ -8,7 +8,7 @@ export interface BatchRequestResponse<T = unknown> {
   results: BatchRequestResult<T>[];
 }
 
-export interface BatchRequestBody<T = any> {
+export interface BatchRequestBody<T = unknown> {
   requests: Array<{
     url: string;
     method: string;

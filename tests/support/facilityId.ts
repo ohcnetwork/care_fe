@@ -16,7 +16,7 @@ export function getFacilityId(): string {
     console.warn("⚠️ Facility meta missing — running facility setup...");
     try {
       execSync(
-        "npx playwright test --project=setup tests/setup/facility.setup.ts",
+        "npx playwright test --project=setup-facility tests/setup/facility.setup.ts",
         {
           stdio: "inherit",
           cwd: process.cwd(),

@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { Card } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { facilitiesPageSearch } from "@/lib/router/search/facility";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
@@ -22,7 +23,9 @@ import { FacilityCard } from "./components/FacilityCard";
 export function FacilitiesPage() {
   const { mainLogo } = careConfig;
   const { qParams, updateQuery, advancedFilter, Pagination } = useFilters({
+    schema: facilitiesPageSearch,
     limit: RESULTS_PER_PAGE_LIMIT,
+    cache: true,
   });
 
   const { t } = useTranslation();
@@ -48,7 +51,7 @@ export function FacilitiesPage() {
   return (
     <div className="container px-4 py-8 mx-auto">
       <div className="flex items-start justify-between w-full">
-        <Link href="/" className="">
+        <Link to="/" className="">
           <img src={mainLogo?.dark} alt="Care Logo" className="w-auto h-12" />
         </Link>
         <LoginHeader />

@@ -1,14 +1,19 @@
 import { faker } from "@faker-js/faker";
 import { expect, type Page } from "@playwright/test";
 import { ENCOUNTER_CLASSES } from "tests/facility/patient/encounter/encounterClasses";
+import { createTestPatient } from "tests/helper/patient";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
 
-export async function openCreateEncounterDialog(page: Page) {
+export async function openCreateEncounterDialog(
+  page: Page,
+  patientId?: string,
+) {
   const facilityId = getFacilityId();
-  const patientId = getPatientId();
+  // A fresh patient by default: these specs leave their encounters active,
+  // and the backend caps active encounters per patient in a facility.
+  const encounterPatientId = patientId ?? (await createTestPatient());
 
-  await page.goto(`/facility/${facilityId}/patient/${patientId}`);
+  await page.goto(`/facility/${facilityId}/patient/${encounterPatientId}`);
   await page.getByRole("link", { name: "Patient Home" }).first().click();
 
   await expect(
@@ -20,13 +25,6 @@ export async function openCreateEncounterDialog(page: Page) {
 export async function selectRandomEncounterClass(page: Page) {
   const randomClass = faker.helpers.arrayElement(ENCOUNTER_CLASSES);
   await page.getByRole("button", { name: randomClass }).click();
-}
-
-export async function selectStatusInCreateDialog(page: Page, status: string) {
-  await getEncounterCreateDialog(page)
-    .getByRole("combobox", { name: "Status", exact: true })
-    .click();
-  await page.getByRole("option", { name: status, exact: true }).click();
 }
 
 export async function openCalendarAndGetNextMonthButton(page: Page) {
@@ -52,4 +50,20 @@ export function getFutureDateButtonFromCalendar(page: Page) {
 
 export function getEncounterCreateDialog(page: Page) {
   return page.getByRole("dialog", { name: "Initiate Patient Encounter" });
+}
+
+function comboboxByLabel(page: Page, label: string | RegExp) {
+  return page
+    .locator('label[data-slot="label"]')
+    .filter({ hasText: label })
+    .locator("..")
+    .getByRole("combobox");
+}
+
+export function encounterStatusCombobox(page: Page) {
+  return comboboxByLabel(page, /^Encounter Status$/);
+}
+
+export function dischargeDispositionCombobox(page: Page) {
+  return comboboxByLabel(page, /^Discharge Disposition/);
 }

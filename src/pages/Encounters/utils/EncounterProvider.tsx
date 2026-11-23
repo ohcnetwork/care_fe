@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
 import { createContext, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -12,6 +11,9 @@ import { getPermissions, Permissions } from "@/common/Permissions";
 
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { encounterShowSearch } from "@/lib/router/search/encounter";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
 import {
@@ -45,6 +47,7 @@ type EncounterContextType = {
   canReadPrimaryEncounter: boolean;
   canReadSelectedEncounter: boolean;
   canReadClinicalData: boolean;
+  canReadPatientHistory: boolean;
 
   canWritePrimaryEncounter: boolean;
   canWriteSelectedEncounter: boolean;
@@ -92,7 +95,7 @@ export function EncounterProvider({
   const [
     { selectedEncounter: selectedEncounterId = primaryEncounterId },
     setQParams,
-  ] = useQueryParams();
+  ] = useQueryParams(encounterShowSearch);
 
   const { data: patient, isLoading: isPatientLoading } = useQuery({
     queryKey: ["patient", patientId, facilityId],
@@ -203,9 +206,15 @@ export function EncounterProvider({
         queryKey: ["encounter", selectedEncounter?.id],
       });
       if (selectedEncounter) {
-        navigate(
-          `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/updates`,
-        );
+        navigate({
+          to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
+          params: {
+            facilityId: selectedEncounter.facility.id,
+            patientId: selectedEncounter.patient.id,
+            encounterId: selectedEncounter.id,
+            tab: "updates",
+          },
+        });
       }
     },
     onError: () => {
@@ -236,6 +245,7 @@ export function EncounterProvider({
         canReadPrimaryEncounter,
         canWritePrimaryEncounter,
         canReadClinicalData,
+        canReadPatientHistory: patientPermissions.canViewClinicalData,
         canWriteClinicalData,
         actions: {
           markAsCompleted: (completeEverythingToMark = false) => {
@@ -244,9 +254,16 @@ export function EncounterProvider({
               return;
             }
             if (encounterRequiresDischarge(selectedEncounter)) {
-              navigate(
-                `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/questionnaire/encounter?toDischarge=true`,
-              );
+              navigate({
+                to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId",
+                params: {
+                  facilityId: selectedEncounter.facility.id,
+                  patientId: selectedEncounter.patient.id,
+                  encounterId: selectedEncounter.id,
+                  questionnaireId: "encounter",
+                },
+                search: { toDischarge: "true" },
+              });
               return;
             }
             setCompleteEverything(completeEverythingToMark);
@@ -290,6 +307,7 @@ export function EncounterProvider({
             completeEverythingToMark={completeEverything}
           />
           <LocationSheet
+            readOnly={!canWriteSelectedEncounter}
             open={
               activeAction === EncounterAction.AssignLocation ||
               activeAction === EncounterAction.LocationHistory
@@ -347,4 +365,9 @@ export function useEncounter() {
     throw new Error("useEncounter must be used within an EncounterProvider");
   }
   return context;
+}
+
+/** Encounter context when rendered inside an EncounterProvider, otherwise undefined. */
+export function useEncounterSilently() {
+  return useContext(encounterContext);
 }

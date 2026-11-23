@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Coins, EllipsisVertical, FileIcon, Pencil } from "lucide-react";
-import { navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -33,6 +32,8 @@ import { usePermissions } from "@/context/PermissionContext";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { ResourceCategoryForm } from "@/components/Common/ResourceCategoryForm";
 import useFilters from "@/hooks/useFilters";
+import { navigate } from "@/lib/router/navigate";
+import { resourceCategoryListSearch } from "@/lib/router/search/settings";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ResourceCategoryParent,
@@ -42,6 +43,7 @@ import {
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import query from "@/Utils/request/query";
 import queryClient from "@/Utils/request/queryClient";
+import { QueryParams } from "@/Utils/request/types";
 
 export interface BaseSearchableItem {
   id: string;
@@ -225,7 +227,7 @@ function ResourceCategoryBreadcrumb({
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink
-            onClick={() => navigate(basePath)}
+            onClick={() => navigate({ href: basePath })}
             className="cursor-pointer hover:underline hover:underline-offset-2"
           >
             {baseTitle}
@@ -264,7 +266,7 @@ interface ItemSearchConfig<T extends BaseSearchableItem> {
       TRes: { results: T[]; count: number };
     };
     pathParams?: Record<string, string>;
-    queryParams?: Record<string, unknown>;
+    queryParams?: QueryParams;
   };
   searchParamName?: string;
   queryKeyPrefix: string;
@@ -322,8 +324,8 @@ export function ResourceCategoryList<
   const [monetaryComponentsCategory, setMonetaryComponentsCategory] =
     React.useState<ResourceCategoryRead | null>(null);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: resourceCategoryListSearch,
     limit: RESULTS_PER_PAGE_LIMIT,
-    disableCache: true,
   });
 
   // Fetch current category by slug
@@ -411,7 +413,7 @@ export function ResourceCategoryList<
       <div className="mb-4">
         {/* Breadcrumb Navigation */}
 
-        <div className="flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
+        <div className="flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4 sm:flex-wrap">
           <div className="flex flex-col items-start space-x-2">
             <h1 className="text-2xl font-bold text-gray-700">{baseTitle}</h1>
             <ResourceCategoryBreadcrumb
@@ -515,7 +517,9 @@ export function ResourceCategoryList<
                   <ItemCard
                     key={item.id}
                     item={item}
-                    onItemClick={() => navigate(`${basePath}/${item.slug}`)}
+                    onItemClick={() =>
+                      navigate({ href: `${basePath}/${item.slug}` })
+                    }
                   />
                 ))}
               </>

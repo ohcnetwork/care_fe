@@ -1,4 +1,5 @@
-import { ChevronRight, Loader2, Search, XIcon } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { ChevronRight, Search, XIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -96,17 +97,15 @@ export function LocationNavigation({
                 {t("selected_bed")}:{" "}
                 <span className="font-medium">{selectedBed.name}</span>
               </span>
-              {selectedBed && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-gray-950 border-gray-400 font-semibold"
-                  onClick={onClearSelection}
-                >
-                  <XIcon className="size-4" />
-                  {t("clear_selection")}
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-gray-950 border-gray-400 font-semibold"
+                onClick={onClearSelection}
+              >
+                <XIcon className="size-4" />
+                {t("clear_selection")}
+              </Button>
             </p>
           </div>
         )}
@@ -154,7 +153,7 @@ export function LocationNavigation({
 
         {isLoadingLocations || isLoadingBeds ? (
           <div className="flex justify-center my-4">
-            <Loader2 className="size-6 animate-spin text-gray-400" />
+            <Spinner className="size-6 animate-spin text-gray-400" />
           </div>
         ) : (
           hasMore && (

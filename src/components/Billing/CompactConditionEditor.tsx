@@ -75,7 +75,7 @@ function TagSelector({
   };
 
   return (
-    <div className="flex min-w-0 gap-1 items-center">
+    <div className="flex gap-1 items-center">
       <TagSelectorPopover
         selected={selectedTags}
         resource={resource}
@@ -309,7 +309,7 @@ function RenderInput({
         control={form.control}
         name="value"
         render={({ field }) => (
-          <FormItem className="min-w-0 flex-1">
+          <FormItem className="flex-1">
             <FormControl>
               <TagSelector
                 value={field.value as TagOperationValue}
@@ -591,9 +591,11 @@ export function CompactConditionEditor({
                     if (typeof error.message === "string") {
                       errorMessage[key] = error.message;
                     } else if (typeof error === "object") {
-                      Object.entries(error).forEach(([k, v]: [string, any]) => {
-                        if (v && typeof v.message === "string") {
-                          errorMessage[k] = v.message;
+                      Object.entries(error).forEach(([k, v]) => {
+                        const message = (v as { message?: unknown } | null)
+                          ?.message;
+                        if (v && typeof message === "string") {
+                          errorMessage[k] = message;
                         }
                       });
                     }

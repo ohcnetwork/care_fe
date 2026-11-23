@@ -176,7 +176,7 @@ function DispenseItemsTable({
                     !expiryDate && "hidden",
                   )}
                 >
-                  <span>{t("expiry_abbrevated")}: </span>
+                  <span>{t("expiry_abbreviated")}: </span>
                   {expiryDate && (
                     <span className="font-medium text-gray-900">
                       {format(new Date(expiryDate), "dd/MM/yyyy")}

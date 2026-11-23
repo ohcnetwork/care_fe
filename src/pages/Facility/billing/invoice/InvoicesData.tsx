@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { ArrowUpRightSquare, PrinterIcon } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -35,6 +35,8 @@ import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilte
 
 import useFilters from "@/hooks/useFilters";
 
+import { invoiceListSearch } from "@/lib/router/search/billing";
+
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import {
@@ -65,8 +67,8 @@ export default function InvoicesData({
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: invoiceListSearch,
     limit: RESULTS_PER_PAGE_LIMIT,
-    disableCache: true,
   });
 
   const { created_date_after, created_date_before } = qParams;
@@ -74,7 +76,7 @@ export default function InvoicesData({
   const { data: createdByUser } = useQuery({
     queryKey: ["facilityUser", facilityId, qParams.created_by],
     queryFn: query(facilityApi.getUser, {
-      pathParams: { facilityId, userId: qParams.created_by },
+      pathParams: { facilityId, userId: qParams.created_by ?? "" },
     }),
     enabled: !!qParams.created_by,
   });
@@ -247,7 +249,11 @@ export default function InvoicesData({
                     <TableCell>
                       <Button variant="link" asChild>
                         <Link
-                          href={`/facility/${facilityId}/billing/account/${invoice.account?.id}`}
+                          to="/facility/$facilityId/billing/account/$accountId"
+                          params={{
+                            facilityId,
+                            accountId: invoice.account?.id,
+                          }}
                           className="hover:text-primary "
                           target="_blank"
                           rel="noopener noreferrer"
@@ -290,7 +296,8 @@ export default function InvoicesData({
                         asChild
                       >
                         <Link
-                          href={`/facility/${facilityId}/billing/invoice/${invoice.id}/print`}
+                          to="/facility/$facilityId/billing/invoice/$invoiceId/print"
+                          params={{ facilityId, invoiceId: invoice.id }}
                         >
                           <PrinterIcon strokeWidth={1.5} />
                           {t("print")}
@@ -302,7 +309,8 @@ export default function InvoicesData({
                         asChild
                       >
                         <Link
-                          href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
+                          to="/facility/$facilityId/billing/invoices/$invoiceId"
+                          params={{ facilityId, invoiceId: invoice.id }}
                         >
                           <ArrowUpRightSquare strokeWidth={1.5} />
                           {t("see_invoice")}

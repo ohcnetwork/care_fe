@@ -7,12 +7,15 @@ import { getPatientId } from "tests/support/patientId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 // Duration is a native input with plain <button> suggestions in the popover;
-// exact-match avoids catching the range / period action buttons.
+// exact-match avoids catching the range / period action buttons. The popover
+// trigger wrapping the input is itself a button named by the typed value, so
+// the suggestion is scoped to the popover content.
 async function selectDuration(page: Page, duration: number, unit: string) {
   const field = page.getByRole("textbox", { name: "Duration" });
   await field.click();
   await field.fill(`${duration} ${unit}`);
   await page
+    .locator('[data-slot="popover-content"]')
     .getByRole("button", { name: `${duration} ${unit}`, exact: true })
     .click();
 }
@@ -220,7 +223,7 @@ test.describe("Medication Request Questionnaire", () => {
       .last()
       .fill(notes);
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -279,7 +282,7 @@ test.describe("Medication Request Questionnaire", () => {
 
     await selectDuration(page, duration, durationUnit);
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -317,7 +320,7 @@ test.describe("Medication Request Questionnaire", () => {
       .getByRole("option", { name: medicationName, exact: true })
       .click();
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(page.getByText("Dosage*This field is required")).toBeVisible();
 

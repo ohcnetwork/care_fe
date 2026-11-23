@@ -16,7 +16,7 @@ export function getPatientId(): string {
     console.warn("⚠️ Patient meta missing — running patient setup...");
     try {
       execSync(
-        "npx playwright test --project=setup tests/setup/patient.setup.ts",
+        "npx playwright test --project=setup-patient tests/setup/patient.setup.ts",
         {
           stdio: "inherit",
           cwd: process.cwd(),

@@ -4,6 +4,8 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+import { richTextMarkdown } from "@/Utils/markdown";
+
 const md = new MarkdownIt({
   html: true,
   breaks: true,
@@ -11,9 +13,14 @@ const md = new MarkdownIt({
   typographer: true,
   quotes: "“”‘’",
 });
+// linkify-it 6 (markdown-it 15) disabled fuzzy links by default; keep linking
+// bare domains like "www.example.com" as before.
+md.linkify.set({ fuzzyLink: true });
 
 export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
   content: string;
+  /** Render the supported rich-text editor formats with arbitrary HTML disabled. */
+  richText?: boolean;
   /**
    * Whether to wrap the content in article tags with prose styling
    * @default true
@@ -24,14 +31,15 @@ export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
 function Markdown({
   className,
   content,
+  richText = false,
   prose = true,
   ref,
   ...props
 }: React.ComponentProps<"div"> & MarkdownProps) {
   const html = React.useMemo(() => {
-    const renderedHtml = md.render(content);
+    const renderedHtml = (richText ? richTextMarkdown : md).render(content);
     return DOMPurify.sanitize(renderedHtml);
-  }, [content]);
+  }, [content, richText]);
 
   if (prose) {
     return (
