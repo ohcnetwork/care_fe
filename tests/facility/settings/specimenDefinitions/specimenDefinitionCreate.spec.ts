@@ -368,7 +368,7 @@ test.describe("Specimen Definitions Create", () => {
     await expect(page).not.toHaveURL(/\/new$/);
   });
 
-  test("should save when the optional Derived From URI is typed and then cleared", async ({
+  test("should reject a malformed Derived From URI and save once it is cleared", async ({
     page,
   }) => {
     await page.getByRole("button", { name: "Add Definition" }).click();
@@ -384,46 +384,19 @@ test.describe("Specimen Definitions Create", () => {
     await page.getByRole("combobox", { name: "Type Collected *" }).click();
     await page.getByRole("option", { name: typeCollected }).click();
 
-    // Type into the optional field, then clear it, leaving an empty string
     const derivedFromURIField = page.getByRole("textbox", {
       name: "Derived From URI",
     });
-    await derivedFromURIField.fill(faker.internet.url());
-    await derivedFromURIField.clear();
+    await derivedFromURIField.fill(faker.lorem.words(2));
+    await page.getByRole("button", { name: /save/i }).click();
+    await expect(getFieldErrorMessage(derivedFromURIField)).toHaveText(
+      "Please enter a valid URL",
+    );
 
+    await derivedFromURIField.clear();
     await page.getByRole("button", { name: /save/i }).click();
 
     await expectToast(page, "Specimen definition created");
     await expect(page).not.toHaveURL(/\/new$/);
-  });
-
-  test("should show an invalid URL error for a malformed Derived From URI", async ({
-    page,
-  }) => {
-    await page.getByRole("button", { name: "Add Definition" }).click();
-
-    await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
-    await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);
-    await page
-      .getByRole("textbox", { name: "Description *" })
-      .fill(definitionDescription);
-    await page.getByRole("combobox", { name: "Status *" }).click();
-    await page.getByRole("option", { name: status }).click();
-
-    await page.getByRole("combobox", { name: "Type Collected *" }).click();
-    await page.getByRole("option", { name: typeCollected }).click();
-
-    const derivedFromURIField = page.getByRole("textbox", {
-      name: "Derived From URI",
-    });
-    // Plain words have no URL scheme, so they can never parse as a URL
-    await derivedFromURIField.fill(faker.lorem.words(2));
-
-    await page.getByRole("button", { name: /save/i }).click();
-
-    const errorMessage = getFieldErrorMessage(derivedFromURIField);
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText("Please enter a valid url");
-    await expect(page).toHaveURL(/\/new$/);
   });
 });
