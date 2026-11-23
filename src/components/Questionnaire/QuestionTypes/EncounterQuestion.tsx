@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -16,9 +16,9 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
-
 import query from "@/Utils/request/query";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { questionnaireFillSearch } from "@/lib/router/search/questionnaire";
 import { cn } from "@/lib/utils";
 import {
   ENCOUNTER_ADMIT_SOURCE,
@@ -47,7 +47,6 @@ import {
   validateFields,
 } from "@/types/questionnaire/validation";
 import careConfig from "@careConfig";
-import { useQueryParams } from "raviger";
 
 interface EncounterQuestionProps {
   question: Question;
@@ -58,6 +57,7 @@ interface EncounterQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   clearError: () => void;
   organizations?: string[];
@@ -104,9 +104,9 @@ export function validateEncounterQuestion(
 }
 
 export function EncounterQuestion({
-  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   clearError,
   encounterId,
@@ -123,13 +123,18 @@ export function EncounterQuestion({
     enabled: !!encounterId,
   });
   const { t } = useTranslation();
-  const [{ toDischarge }] = useQueryParams();
+  const [{ toDischarge }] = useQueryParams(questionnaireFillSearch);
   const { hasError, getError } = useFieldError(
     questionnaireResponse.question_id,
     errors,
   );
+  const responseBeforeInitializationRef = useRef<QuestionnaireResponse | null>(
+    null,
+  );
 
-  const [encounter, setEncounter] = useState<EncounterEdit>({
+  const encounter = (
+    questionnaireResponse.values[0]?.value as EncounterEdit[] | undefined
+  )?.[0] ?? {
     status: EncounterStatus.UNKNOWN,
     period: {
       start: new Date().toISOString(),
@@ -144,38 +149,10 @@ export function EncounterQuestion({
       diet_preference: "none",
     },
     discharge_summary_advice: null,
-  });
-
-  useEffect(() => {
-    if (
-      encounter.status === EncounterStatus.DISCHARGED ||
-      encounter.status === EncounterStatus.COMPLETED ||
-      encounter.status === EncounterStatus.CANCELLED ||
-      encounter.status === EncounterStatus.DISCONTINUED ||
-      encounter.status === EncounterStatus.ENTERED_IN_ERROR
-    ) {
-      if (!encounter.period.end) {
-        handleUpdateEncounter({
-          period: {
-            ...encounter.period,
-            end: new Date().toISOString(),
-          },
-        });
-      }
-    } else {
-      handleUpdateEncounter({
-        period: {
-          ...encounter.period,
-          end: undefined,
-        },
-      });
-    }
-  }, [encounter.status]);
+  };
 
   // Transform EncounterRead to EncounterEdit format
-  const transformEncounterForUpdate = (
-    read: EncounterRead,
-  ): Partial<EncounterEdit> => {
+  const transformEncounterForUpdate = (read: EncounterRead): EncounterEdit => {
     return {
       status: read.status,
       period: read.period,
@@ -186,32 +163,100 @@ export function EncounterQuestion({
     };
   };
 
-  // Update encounter state when data is loaded
-  useEffect(() => {
-    if (encounterData) {
-      const updates = transformEncounterForUpdate(encounterData);
-      if (toDischarge === "true") {
-        updates.status = EncounterStatus.DISCHARGED;
-      }
-      handleUpdateEncounter(updates);
+  const initializeResponse = useEffectEvent(() => {
+    if (!encounterData) return;
+    const initialEncounter = transformEncounterForUpdate(encounterData);
+    if (toDischarge === "true") {
+      initialEncounter.status = EncounterStatus.DISCHARGED;
+      initialEncounter.period = {
+        ...initialEncounter.period,
+        end: initialEncounter.period.end || new Date().toISOString(),
+      };
     }
-  }, [encounterData]);
+    if (initialEncounter.status === EncounterStatus.DISCHARGED) {
+      initialEncounter.hospitalization = {
+        ...initialEncounter.hospitalization,
+        discharge_disposition:
+          initialEncounter.hospitalization?.discharge_disposition ??
+          careConfig.defaultDischargeDisposition,
+      };
+    }
+    if (
+      !HOSPITALIZATION_ENCOUNTER_CLASSES.includes(encounterData.encounter_class)
+    ) {
+      initialEncounter.hospitalization = {};
+    }
+    const values: ResponseValue[] = [
+      { type: "encounter", value: [initialEncounter] },
+    ];
+    if (initializeQuestionnaireResponseCB) {
+      responseBeforeInitializationRef.current = questionnaireResponse;
+      initializeQuestionnaireResponseCB(values);
+    } else if (questionnaireResponse.values.length === 0) {
+      updateQuestionnaireResponseCB(values, questionnaireResponse.question_id);
+    }
+  });
 
   useEffect(() => {
-    const formStateValue = (
-      questionnaireResponse.values[0]?.value as EncounterEdit[]
-    )?.[0];
-    if (formStateValue) {
-      setEncounter(() => ({
-        ...formStateValue,
-      }));
+    initializeResponse();
+  }, [encounterData, toDischarge]);
+
+  // Normalize older drafts' hospitalization fields after reconciliation; skip the pre-initialization response.
+  useEffect(() => {
+    if (
+      !encounterData ||
+      questionnaireResponse === responseBeforeInitializationRef.current
+    ) {
+      return;
     }
-  }, [questionnaireResponse]);
+    const current = (
+      questionnaireResponse.values[0]?.value as EncounterEdit[] | undefined
+    )?.[0];
+    if (!current) return;
+
+    const hasIncompatibleHospitalization =
+      !HOSPITALIZATION_ENCOUNTER_CLASSES.includes(
+        encounterData.encounter_class,
+      ) && Object.keys(current.hospitalization ?? {}).length > 0;
+    if (!("encounter_class" in current) && !hasIncompatibleHospitalization) {
+      return;
+    }
+
+    const normalized: EncounterEdit & { encounter_class?: EncounterClass } = {
+      ...current,
+    };
+    delete normalized.encounter_class;
+    if (hasIncompatibleHospitalization) normalized.hospitalization = {};
+    updateQuestionnaireResponseCB(
+      [
+        {
+          ...questionnaireResponse.values[0],
+          type: "encounter",
+          value: [normalized],
+        },
+      ],
+      questionnaireResponse.question_id,
+    );
+  }, [encounterData, questionnaireResponse, updateQuestionnaireResponseCB]);
 
   const handleUpdateEncounter = (updates: Partial<EncounterEdit>) => {
     if (!encounterData) return;
     clearError();
     const newEncounter = { ...encounter, ...updates };
+    // Cancellation and invalidation do not represent a clinical end.
+    const hasEnded = [
+      EncounterStatus.DISCHARGED,
+      EncounterStatus.COMPLETED,
+      EncounterStatus.DISCONTINUED,
+    ].includes(newEncounter.status);
+    newEncounter.period = {
+      ...newEncounter.period,
+      end: hasEnded
+        ? newEncounter.period.end ||
+          encounterData.period.end ||
+          new Date().toISOString()
+        : undefined,
+    };
     const encounterClass = encounterData.encounter_class;
     if (!HOSPITALIZATION_ENCOUNTER_CLASSES.includes(encounterClass)) {
       newEncounter.hospitalization = {};
@@ -226,7 +271,7 @@ export function EncounterQuestion({
       newEncounter.hospitalization = {
         ...newEncounter.hospitalization,
         discharge_disposition:
-          encounterData?.hospitalization?.discharge_disposition,
+          encounterData.hospitalization?.discharge_disposition,
       };
     }
 
@@ -256,6 +301,12 @@ export function EncounterQuestion({
 
   const selectableEncounterStatuses = Object.values(EncounterStatus).filter(
     (encounterStatus) => {
+      if (encounter.status === EncounterStatus.DISCHARGED) {
+        return (
+          encounterStatus === EncounterStatus.DISCHARGED ||
+          encounterStatus === EncounterStatus.IN_PROGRESS
+        );
+      }
       if (isCurrentStatusNonSelectable) {
         return encounterStatus === encounter.status;
       }
@@ -265,7 +316,6 @@ export function EncounterQuestion({
 
   return (
     <div className="space-y-6">
-      <QuestionLabel question={question} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Details */}
         <div className="space-y-2">
@@ -277,9 +327,7 @@ export function EncounterQuestion({
                 status: value,
               })
             }
-            disabled={
-              disabled || encounter.status === EncounterStatus.DISCHARGED
-            }
+            disabled={disabled}
           >
             <SelectTrigger>
               <SelectValue placeholder={t("select_status")} />

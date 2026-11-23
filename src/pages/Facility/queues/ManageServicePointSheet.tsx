@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -64,31 +64,30 @@ export default function ManageServicePointSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("manage_service_points")}</SheetTitle>
         </SheetHeader>
-        <Separator className="my-3" />
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-950 font-medium">
-            {subQueues.length} {t("service_points_available")}
+        <SheetBody>
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-950 font-medium">
+              {subQueues.length} {t("service_points_available")}
+            </div>
+            <SubQueueFormSheet
+              facilityId={facilityId}
+              resourceType={resourceType}
+              resourceId={resourceId}
+              onSuccess={handleSuccess}
+              trigger={
+                <Button size="sm" className="h-8">
+                  <Plus className="size-4 mr-2" />
+                  {t("add_service_point")}
+                </Button>
+              }
+            />
           </div>
-          <SubQueueFormSheet
-            facilityId={facilityId}
-            resourceType={resourceType}
-            resourceId={resourceId}
-            onSuccess={handleSuccess}
-            trigger={
-              <Button size="sm" className="h-8">
-                <Plus className="size-4 mr-2" />
-                {t("add_service_point")}
-              </Button>
-            }
-          />
-        </div>
 
-        <ScrollArea className="h-[calc(100vh-12rem)] mt-4">
-          <div className="space-y-3">
+          <div className="mt-4 space-y-3">
             {subQueues.map((subQueue) => (
               <SubQueueCard
                 key={subQueue.id}
@@ -97,7 +96,7 @@ export default function ManageServicePointSheet({
               />
             ))}
           </div>
-        </ScrollArea>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

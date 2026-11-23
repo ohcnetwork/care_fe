@@ -1,5 +1,4 @@
 import { t } from "i18next";
-import { useQueryParams } from "raviger";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -9,6 +8,8 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 import { useCareAppTabs } from "@/hooks/useCareApps";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { fileListSearch } from "@/lib/router/search/patient";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -31,7 +32,7 @@ export const FilesTab = ({
   encounter,
   readOnly,
 }: FilesTabsProps) => {
-  const [qParams, setQParams] = useQueryParams();
+  const [qParams, setQParams] = useQueryParams(fileListSearch);
 
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(
@@ -45,7 +46,8 @@ export const FilesTab = ({
 
   const pluginTabs = useCareAppTabs<FilesTabsProps>("encounterFileTabs");
   const allowedTabs = ["all", "reports", ...Object.keys(pluginTabs)];
-  const tabValue = allowedTabs.includes(qParams.file) ? qParams.file : "all";
+  const tabValue =
+    qParams.file && allowedTabs.includes(qParams.file) ? qParams.file : "all";
 
   const canWriteCurrentEncounter =
     canWriteEncounter &&
@@ -71,24 +73,10 @@ export const FilesTab = ({
         }
       >
         <TabsList className={type != "encounter" ? "mt-2" : ""}>
-          <TabsTrigger
-            value="all"
-            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-          >
-            {t("files")}
-          </TabsTrigger>
-          <TabsTrigger
-            value="reports"
-            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-          >
-            {t("reports")}
-          </TabsTrigger>
+          <TabsTrigger value="all">{t("files")}</TabsTrigger>
+          <TabsTrigger value="reports">{t("reports")}</TabsTrigger>
           {Object.keys(pluginTabs).map((tab) => (
-            <TabsTrigger
-              key={tab}
-              value={tab}
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold capitalize"
-            >
+            <TabsTrigger key={tab} value={tab} className="capitalize">
               {t(tab)}
             </TabsTrigger>
           ))}

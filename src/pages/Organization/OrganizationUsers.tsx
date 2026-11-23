@@ -1,27 +1,43 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { Bot, ChevronRight } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
+import { Avatar } from "@/components/Common/Avatar";
+import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import SearchInput from "@/components/Common/SearchInput";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
-import { UserCard } from "@/components/Users/UserListAndCard";
+import { SectionHeader } from "@/components/Common/SectionHeader";
 
 import useFilters from "@/hooks/useFilters";
+import { organizationUserListSearch } from "@/lib/router/search/organization";
 
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
+import { UserReadMinimal } from "@/types/user/user";
 
 import AddUserSheet from "./components/AddUserSheet";
 import EditUserRoleSheet from "./components/EditUserRoleSheet";
-import EntityBadge from "./components/EntityBadge";
 import LinkUserSheet from "./components/LinkUserSheet";
 import OrganizationLayout, {
   type RouteContext,
@@ -34,6 +50,44 @@ interface Props {
   routeContext?: RouteContext;
 }
 
+function UserStatusBadge({ user }: { user: UserReadMinimal }) {
+  const { t } = useTranslation();
+
+  if (user.deleted) {
+    return (
+      <Badge variant="neutral" size="sm">
+        <span className="size-1.5 shrink-0 rounded-full bg-current" />
+        {t("archived")}
+      </Badge>
+    );
+  }
+
+  if (user.is_service_account) {
+    return (
+      <Badge variant="secondary" size="sm">
+        <Bot />
+        {t("service_account")}
+      </Badge>
+    );
+  }
+
+  if (!user.last_login) {
+    return (
+      <Badge variant="warning" size="sm">
+        <span className="size-1.5 shrink-0 rounded-full bg-current" />
+        {t("never_logged_in")}
+      </Badge>
+    );
+  }
+
+  return (
+    <Badge variant="success" size="sm">
+      <span className="size-1.5 shrink-0 rounded-full bg-current" />
+      {t("active")}
+    </Badge>
+  );
+}
+
 export default function OrganizationUsers({
   id,
   navOrganizationId,
@@ -41,8 +95,8 @@ export default function OrganizationUsers({
   routeContext,
 }: Props) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: organizationUserListSearch,
     limit: 15,
-    disableCache: true,
   });
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -133,110 +187,228 @@ export default function OrganizationUsers({
             canCreateServiceAccount,
           } = getPermissions(hasPermission, orgPermissions);
           return (
-            <div className="space-y-6">
-              <div className="justify-between items-center flex flex-wrap">
-                <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
-                  <EntityBadge
-                    title={
-                      isServiceAccount ? t("service_accounts") : t("users")
-                    }
-                    count={users?.count}
-                    isFetching={isFetchingUsers}
-                    translationParams={{
-                      entity: isServiceAccount
-                        ? t("service_account")
-                        : t("user"),
-                    }}
-                  />
-                </div>
-                <div className="gap-2 flex flex-wrap mt-2">
-                  {(canCreateUser || canCreateServiceAccount) && (
-                    <AddUserSheet
-                      open={openAddUserSheet}
-                      setOpen={(open) => {
-                        updateQuery({ sheet: open ? "add" : "" });
-                      }}
-                      onUserCreated={(user, meta) => {
-                        const skipLinkingCurrentOrganization =
-                          organization?.org_type === "role" &&
-                          !!meta?.roleOrgIds.includes(id);
+            <div className="space-y-4">
+              <SectionHeader
+                title={isServiceAccount ? t("service_accounts") : t("users")}
+                description={t(
+                  isServiceAccount
+                    ? "organization_service_accounts_description"
+                    : "organization_users_description",
+                )}
+                count={users?.count}
+                isFetching={isFetchingUsers}
+                actions={
+                  <div className="flex flex-wrap gap-2">
+                    {(canCreateUser || canCreateServiceAccount) && (
+                      <AddUserSheet
+                        open={openAddUserSheet}
+                        setOpen={(open) => {
+                          updateQuery({ sheet: open ? "add" : "" });
+                        }}
+                        onUserCreated={(user, meta) => {
+                          const skipLinkingCurrentOrganization =
+                            organization?.org_type === "role" &&
+                            !!meta?.roleOrgIds.includes(id);
 
-                        updateQuery({
-                          sheet: skipLinkingCurrentOrganization ? "" : "link",
-                          username: skipLinkingCurrentOrganization
-                            ? ""
-                            : user.username,
-                        });
-                      }}
-                      organizationId={id}
-                      isServiceAccount={isServiceAccount}
-                    />
-                  )}
-                  {canManageOrganizationUsers && (
-                    <LinkUserSheet
-                      organizationId={id}
-                      open={openLinkUserSheet}
-                      setOpen={(open) => {
-                        updateQuery({
-                          sheet: open ? "link" : "",
-                          username: "",
-                        });
-                      }}
-                      preSelectedUsername={qParams.username}
-                      isServiceAccount={isServiceAccount}
-                    />
-                  )}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <SearchInput
-                  options={searchOptions}
-                  onSearch={handleSearch}
-                  onFieldChange={handleFieldChange}
-                  className="w-full"
-                />
-              </div>
-              {isFetchingUsers ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                  <CardGridSkeleton count={6} />
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {users?.results?.length === 0 ? (
-                    <Card className="col-span-full">
-                      <CardContent className="p-6 text-center text-gray-500">
-                        {t("no_users_found")}
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    users?.results?.map((userRole) => (
-                      <UserCard
-                        key={userRole.user.id}
-                        user={userRole.user}
-                        roleName={userRole.role.name}
-                        editRoleAction={
-                          canManageOrganizationUsers && (
-                            <EditUserRoleSheet
-                              organizationId={id}
-                              userRole={userRole}
-                              trigger={
-                                <Button
-                                  variant="link"
-                                  size="sm"
-                                  className="underline text-gray-500"
-                                >
-                                  <span>{t("edit")}</span>
-                                </Button>
-                              }
-                            />
-                          )
-                        }
+                          updateQuery({
+                            sheet: skipLinkingCurrentOrganization ? "" : "link",
+                            username: skipLinkingCurrentOrganization
+                              ? ""
+                              : user.username,
+                          });
+                        }}
+                        organizationId={id}
                         isServiceAccount={isServiceAccount}
                       />
-                    ))
-                  )}
-                </div>
-              )}
+                    )}
+                    {canManageOrganizationUsers && (
+                      <LinkUserSheet
+                        organizationId={id}
+                        open={openLinkUserSheet}
+                        setOpen={(open) => {
+                          updateQuery({
+                            sheet: open ? "link" : "",
+                            username: "",
+                          });
+                        }}
+                        preSelectedUsername={qParams.username}
+                        isServiceAccount={isServiceAccount}
+                      />
+                    )}
+                  </div>
+                }
+              />
+              <Frame>
+                <FrameHeader className="p-1 md:p-2">
+                  <SearchInput
+                    options={searchOptions}
+                    onSearch={handleSearch}
+                    onFieldChange={handleFieldChange}
+                    selectorVariant="select"
+                    className="w-full sm:max-w-xl"
+                  />
+                </FrameHeader>
+                <FramePanel className="overflow-hidden p-0 **:data-[slot=table-container]:rounded-none **:data-[slot=table-container]:border-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="px-4">{t("user")}</TableHead>
+                        <TableHead className="px-4">
+                          {organization?.name
+                            ? t("role_in_organization", {
+                                organization: organization.name,
+                              })
+                            : t("role")}
+                        </TableHead>
+                        {!isServiceAccount && (
+                          <TableHead className="px-4">
+                            {t("last_login")}
+                          </TableHead>
+                        )}
+                        <TableHead className="px-4">{t("status")}</TableHead>
+                        <TableHead className="px-4">
+                          <span className="sr-only">{t("actions")}</span>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="bg-background">
+                      {isFetchingUsers ? (
+                        Array.from({ length: 5 }, (_, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <Skeleton className="size-9 rounded-md" />
+                                <div className="space-y-1.5">
+                                  <Skeleton className="h-4 w-32" />
+                                  <Skeleton className="h-3 w-20" />
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="px-4 py-3">
+                              <Skeleton className="h-4 w-24" />
+                            </TableCell>
+                            {!isServiceAccount && (
+                              <TableCell className="px-4 py-3">
+                                <Skeleton className="h-4 w-20" />
+                              </TableCell>
+                            )}
+                            <TableCell className="px-4 py-3">
+                              <Skeleton className="h-5 w-16 rounded-full" />
+                            </TableCell>
+                            <TableCell className="px-4 py-3">
+                              <Skeleton className="ml-auto h-12 w-44 md:h-10" />
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : !users?.results?.length ? (
+                        <TableRow>
+                          <TableCell
+                            colSpan={isServiceAccount ? 4 : 5}
+                            className="p-6 text-center text-sm text-muted-foreground"
+                          >
+                            {t("no_users_found")}
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        users.results.map((userRole) => {
+                          const { user } = userRole;
+                          const isViewable = !user.deleted;
+                          return (
+                            <TableRow
+                              key={user.id}
+                              onClick={
+                                isViewable
+                                  ? () =>
+                                      navigate({
+                                        to: "/users/$username",
+                                        params: { username: user.username },
+                                      })
+                                  : undefined
+                              }
+                              className={
+                                isViewable
+                                  ? "cursor-pointer hover:bg-muted/50"
+                                  : undefined
+                              }
+                            >
+                              <TableCell className="px-4 py-3">
+                                <div className="flex items-center gap-3">
+                                  {!isServiceAccount && (
+                                    <Avatar
+                                      name={formatName(user, true)}
+                                      imageUrl={user.profile_picture_url}
+                                      className="size-9 shrink-0"
+                                    />
+                                  )}
+                                  <div className="flex min-w-0 flex-col">
+                                    <span className="font-semibold">
+                                      {formatName(user)}
+                                    </span>
+                                    <span className="font-mono text-xs text-muted-foreground">
+                                      @{user.username}
+                                    </span>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell className="px-4 py-3">
+                                {userRole.role.name}
+                              </TableCell>
+                              {!isServiceAccount && (
+                                <TableCell className="px-4 py-3 text-muted-foreground">
+                                  {user.last_login ? (
+                                    <RelativeDateTooltip
+                                      date={user.last_login}
+                                    />
+                                  ) : (
+                                    t("never")
+                                  )}
+                                </TableCell>
+                              )}
+                              <TableCell className="px-4 py-3">
+                                <UserStatusBadge user={user} />
+                              </TableCell>
+                              <TableCell className="px-4 py-3">
+                                <div className="flex items-center justify-end gap-2">
+                                  {canManageOrganizationUsers && (
+                                    // The sheet is portalled, but React events still bubble to the row.
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                      <EditUserRoleSheet
+                                        organizationId={id}
+                                        userRole={userRole}
+                                        trigger={
+                                          <Button
+                                            variant="tertiary"
+                                            aria-label={`${t("change_role")} ${formatName(user)}`}
+                                          >
+                                            {t("change_role")}
+                                          </Button>
+                                        }
+                                      />
+                                    </div>
+                                  )}
+                                  {isViewable && (
+                                    <Button variant="tertiary" asChild>
+                                      <Link
+                                        to="/users/$username"
+                                        params={{ username: user.username }}
+                                        aria-label={`${t("view")} ${formatName(user)}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        {t("view")}
+                                        <ChevronRight data-icon="inline-end" />
+                                      </Link>
+                                    </Button>
+                                  )}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      )}
+                    </TableBody>
+                  </Table>
+                </FramePanel>
+              </Frame>
               <Pagination totalCount={users?.count || 0} />
             </div>
           );

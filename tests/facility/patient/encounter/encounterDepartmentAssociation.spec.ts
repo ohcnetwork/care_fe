@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { format, subDays } from "date-fns";
+import { selectFirstAvailableDepartment } from "tests/helper/departmentSelect";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -39,20 +40,6 @@ test.describe("Manage departments/teams association to an encounter", () => {
     ).toBeVisible({ timeout: 10000 });
   }
 
-  async function selectAllOrganizationsTab(page: Page) {
-    await page.getByRole("tab", { name: "All Organizations" }).click();
-    await page.getByRole("combobox").click();
-  }
-
-  async function selectDepartment(page: Page, departmentName?: string) {
-    // Select specific department or first available department from dropdown
-    if (departmentName) {
-      await page.getByRole("option", { name: departmentName }).click();
-    } else {
-      await page.getByRole("option").first().click();
-    }
-  }
-
   async function submitAddOrganization(page: Page) {
     await page.getByRole("button", { name: "Add Organizations" }).click();
   }
@@ -74,11 +61,13 @@ test.describe("Manage departments/teams association to an encounter", () => {
   test("Add additional organization to existing encounter", async ({
     page,
   }) => {
-    // Select all organizations tab and open dropdown
-    await selectAllOrganizationsTab(page);
-
-    // Select department from dropdown
-    await selectDepartment(page);
+    // Pick a department that is not already linked to the encounter
+    await selectFirstAvailableDepartment(
+      page,
+      page.getByRole("dialog").filter({
+        has: page.getByRole("heading", { name: "Manage Organizations" }),
+      }),
+    );
 
     await submitAddOrganization(page);
     await verifyOrganizationAdded(page);

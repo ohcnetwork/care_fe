@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useFullPath } from "raviger";
 
 import query from "@/Utils/request/query";
+import { usePathname } from "@/lib/router/location";
 import locationApi from "@/types/location/locationApi";
 
 const extractFacilityLocationId = (path: string) => {
@@ -22,10 +22,10 @@ const extractFacilityLocationId = (path: string) => {
 };
 
 export default function useCurrentLocation() {
-  const path = useFullPath();
+  const path = usePathname();
   const [facilityId, locationId] = extractFacilityLocationId(path);
 
-  const { data: location } = useQuery({
+  const { data: location, isLoading } = useQuery({
     queryKey: ["location", facilityId, locationId],
     queryFn: query(locationApi.get, {
       pathParams: { facility_id: facilityId, id: locationId },
@@ -33,5 +33,5 @@ export default function useCurrentLocation() {
     staleTime: 1000 * 60 * 30, // cache for 30 minutes
   });
 
-  return { facilityId, locationId, location };
+  return { facilityId, locationId, location, isLoading };
 }

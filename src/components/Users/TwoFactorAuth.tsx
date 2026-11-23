@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -6,17 +7,17 @@ import { toast } from "sonner";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { UserProfileSection } from "@/components/Users/UserProfileSection";
 
 import { PasswordDialog } from "@/components/Common/PasswordDialog";
 import { userChildProps } from "@/components/Common/UserColumns";
 import { BackupCodesDialog } from "@/components/Users/BackupCodesDialog";
 import { TOTPSetupDialog } from "@/components/Users/TOTPSetupDialog";
 
-import mutate from "@/Utils/request/mutate";
-import { HTTPError, StructuredError } from "@/Utils/request/types";
 import { BackupCodesResponse, TotpSetupResponse } from "@/types/auth/auth";
 import authApi from "@/types/auth/authApi";
+import mutate from "@/Utils/request/mutate";
+import { HTTPError, StructuredError } from "@/Utils/request/types";
 
 interface DialogState {
   password: boolean;
@@ -160,76 +161,74 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
 
   return (
     <>
-      <Card className="w-full">
-        <CardHeader className="px-4 sm:px-5">
-          <CardTitle>{t("two_factor_authentication")}</CardTitle>
-        </CardHeader>
-        <CardContent className="px-4 sm:px-5">
-          <div className="space-y-3">
-            {!userData.mfa_enabled ? (
-              <>
-                <p className="text-sm text-gray-700">
-                  {t("two_factor_authentication_not_active")}
-                </p>
+      <UserProfileSection
+        title={t("two_factor_authentication")}
+        icon={ShieldCheck}
+      >
+        <div className="space-y-3">
+          {!userData.mfa_enabled ? (
+            <>
+              <p className="text-sm text-soft-foreground">
+                {t("two_factor_authentication_not_active")}
+              </p>
+              <Button
+                onClick={handleSetup}
+                variant="outline"
+                className="w-fit max-w-full whitespace-normal text-left"
+                disabled={isSettingUp}
+              >
+                {isSettingUp ? (
+                  <>
+                    <CareIcon
+                      icon="l-spinner"
+                      className="mr-2 size-4 animate-spin"
+                    />
+                  </>
+                ) : (
+                  t("two_factor_authentication_enable")
+                )}
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-soft-foreground">
+                {t("two_factor_authentication_active")}
+              </p>
+              <div className="flex flex-col md:flex-row gap-2">
                 <Button
-                  onClick={handleSetup}
                   variant="outline"
-                  className="border-blue-600 text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed block mx-auto sm:mx-0"
-                  disabled={isSettingUp}
+                  onClick={() => openRegenerateConfirm()}
+                  disabled={isRegenerating}
+                  className="w-auto max-w-full whitespace-normal"
                 >
-                  {isSettingUp ? (
+                  {isRegenerating ? (
                     <>
                       <CareIcon
                         icon="l-spinner"
                         className="mr-2 size-4 animate-spin"
                       />
+                      <span>{t("regenerating")}</span>
                     </>
                   ) : (
-                    t("two_factor_authentication_enable")
+                    <>
+                      <CareIcon icon="l-refresh" className="mr-2 size-4" />
+                      {t("two_factor_authentication_regenerating_codes")}
+                    </>
                   )}
                 </Button>
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-gray-700">
-                  {t("two_factor_authentication_active")}
-                </p>
-                <div className="flex flex-col md:flex-row gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => openRegenerateConfirm()}
-                    disabled={isRegenerating}
-                    className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 w-auto"
-                  >
-                    {isRegenerating ? (
-                      <>
-                        <CareIcon
-                          icon="l-spinner"
-                          className="mr-2 size-4 animate-spin"
-                        />
-                        <span>{t("regenerating")}</span>
-                      </>
-                    ) : (
-                      <>
-                        <CareIcon icon="l-refresh" className="mr-2 size-4" />
-                        {t("two_factor_authentication_regenerating_codes")}
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => openDisableDialog()}
-                    className="hover:bg-red-600 w-auto"
-                  >
-                    <CareIcon icon="l-shield" className="mr-2 size-4" />
-                    {t("two_factor_authentication_disable")}
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                <Button
+                  variant="destructive"
+                  onClick={() => openDisableDialog()}
+                  className="hover:bg-red-600 w-auto"
+                >
+                  <CareIcon icon="l-shield" className="mr-2 size-4" />
+                  {t("two_factor_authentication_disable")}
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </UserProfileSection>
 
       {/* Password Dialog for Setup */}
       <PasswordDialog

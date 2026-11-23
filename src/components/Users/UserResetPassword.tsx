@@ -92,19 +92,16 @@ export default function UserResetPassword({
   };
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6 sm:py-6">
+    <div className="space-y-4">
       {!isEditing && (
-        <div className="flex justify-center sm:justify-start">
+        <div className="flex justify-start">
           <Button
             onClick={() => setIsEditing(true)}
             type="button"
             id="change-edit-password-button"
             variant="primary"
           >
-            <CareIcon
-              icon={isEditing ? "l-times" : "l-pen"}
-              className="size-4"
-            />
+            <CareIcon icon="l-pen" className="size-4" />
             {t("update_password")}
           </Button>
         </div>
@@ -215,7 +212,7 @@ export default function UserResetPassword({
               </div>
             </div>
 
-            <div className="flex justify-center sm:justify-start gap-3 mt-4">
+            <div className="flex justify-start gap-3 mt-4">
               <Button
                 type="button"
                 disabled={isPending}

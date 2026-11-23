@@ -1,9 +1,10 @@
-import { navigate } from "raviger";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
+import { SpecimenRetrieve } from "@/types/emr/specimen/specimen";
 import specimenApi from "@/types/emr/specimen/specimenApi";
 
 import GenericQRScanDialog from "./GenericQRScanDialog";
@@ -27,12 +28,13 @@ function QRScanDialog({
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [specimenData, setSpecimenData] = useState<any>(null);
-  const [lastScannedId, setLastScannedId] = useState("");
+  const [scanResult, setScanResult] = useState<{
+    scannedId: string;
+    specimen: SpecimenRetrieve;
+  } | null>(null);
+  const latestLookupId = useRef(0);
 
   async function handleScanSuccess(scannedId: string) {
-    setLastScannedId(scannedId);
-
     // If no facilityId provided, just return the string (simple mode)
     if (!facilityId) {
       if (onScanSuccess) {
@@ -42,6 +44,7 @@ function QRScanDialog({
     }
 
     // Full API mode - make API call and return specimen object
+    const lookupId = ++latestLookupId.current;
     setLoading(true);
     const signal = new AbortController().signal;
 
@@ -58,24 +61,29 @@ function QRScanDialog({
         })({ signal });
       }
 
-      setSpecimenData(result);
+      if (lookupId !== latestLookupId.current) return;
+      setScanResult({ scannedId, specimen: result });
       setShowSuccess(true);
     } catch {
-      toast.error(t("specimen_not_found"));
+      if (lookupId === latestLookupId.current) {
+        toast.error(t("specimen_not_found"));
+      }
     } finally {
-      setLoading(false);
+      if (lookupId === latestLookupId.current) {
+        setLoading(false);
+      }
     }
   }
 
   function handleSuccessContinue() {
-    const serviceRequestId = specimenData?.service_request?.id;
+    const serviceRequestId = scanResult?.specimen.service_request?.id;
     if (!serviceRequestId) {
       toast.error(t("service_request_not_found"));
       return;
     }
-    navigate(
-      `/facility/${facilityId}/locations/${locationId}/service_requests/${serviceRequestId}`,
-    );
+    navigate({
+      href: `/facility/${facilityId}/locations/${locationId}/service_requests/${serviceRequestId}`,
+    });
     setShowSuccess(false);
     onOpenChange(false);
   }
@@ -95,14 +103,14 @@ function QRScanDialog({
       <SpecimenIDScanSuccessDialog
         open={showSuccess}
         onOpenChange={setShowSuccess}
-        specimenId={specimenData?.external_id || lastScannedId}
+        specimenId={scanResult?.scannedId || ""}
         cap={
-          specimenData?.specimen_definition?.type_tested?.container?.cap
+          scanResult?.specimen.specimen_definition?.type_tested?.container?.cap
             ?.display || "Unknown"
         }
-        specimen={specimenData?.specimen_type?.display || "Unknown"}
-        serviceRequestTitle={specimenData?.service_request?.title}
-        serviceRequestId={specimenData?.service_request?.id}
+        specimen={scanResult?.specimen.specimen_type?.display || "Unknown"}
+        serviceRequestTitle={scanResult?.specimen.service_request?.title}
+        serviceRequestId={scanResult?.specimen.service_request?.id}
         onContinue={handleSuccessContinue}
       />
     </>

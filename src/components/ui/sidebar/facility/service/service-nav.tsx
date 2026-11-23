@@ -1,11 +1,9 @@
+import { CalendarClock, CalendarDays, MapPin, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import useCurrentService from "@/pages/Facility/services/utils/useCurrentService";
-import { Logs } from "lucide-react";
 
 export function ServiceNav() {
   const { t } = useTranslation();
@@ -18,24 +16,26 @@ export function ServiceNav() {
     <NavMain
       links={[
         {
+          section: t("services"),
           name: t("locations"),
           url: `${baseUrl}/locations`,
-          icon: <CareIcon icon="l-map-pin" />,
+          icon: <MapPin />,
         },
         {
+          section: t("scheduling"),
           name: t("schedule"),
           url: `${baseUrl}/schedule`,
-          icon: <CareIcon icon="l-calender" />,
+          icon: <CalendarClock />,
         },
         {
           name: t("appointments"),
           url: `${baseUrl}/appointments`,
-          icon: <CareIcon icon="d-calendar" />,
+          icon: <CalendarDays />,
         },
         {
           name: t("queues"),
           url: `${baseUrl}/queues`,
-          icon: <Logs />,
+          icon: <Users />,
         },
       ]}
     />
