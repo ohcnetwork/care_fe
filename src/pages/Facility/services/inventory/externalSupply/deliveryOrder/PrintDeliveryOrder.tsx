@@ -93,10 +93,6 @@ export const PrintDeliveryOrder = ({
     const value = getExtensionValue(
       deliveryOrder.extensions as NamespacedExtensionData,
       field,
-      {
-        delivery_order: deliveryOrder,
-        supply_deliveries: supplyDeliveries.results,
-      },
     );
     if (value === undefined || value === null) return [];
     return [

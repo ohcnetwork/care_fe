@@ -10,6 +10,7 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { PatientAge } from "@/components/Patient/PatientAge";
 import { Separator } from "@/components/ui/separator";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import {
@@ -18,7 +19,6 @@ import {
 } from "@/types/scheduling/schedule";
 import { renderTokenNumber, TokenRetrieve } from "@/types/tokens/token/token";
 import { PrinterIcon } from "lucide-react";
-import { Link } from "raviger";
 
 interface Props {
   id?: string;
@@ -175,11 +175,11 @@ const TokenCard = ({
                 asChild
                 className="text-base font-semibold underline capitalize text-gray-950"
               >
-                <Link
+                <HrefLink
                   href={`/facility/${facility.id}/${resourceTypeToResourcePathSlug[token.resource_type]}/${token.resource.id}/queues/${token.queue.id}`}
                 >
                   {t("queue_board")}
-                </Link>
+                </HrefLink>
               </Button>
               <Button
                 variant="outline"

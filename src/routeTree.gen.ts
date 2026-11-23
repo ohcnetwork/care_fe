@@ -15,7 +15,7 @@ import { Route as PatientRouteImport } from "./routes/_patient";
 import { Route as PublicRouteImport } from "./routes/_public";
 import { Route as LicensesRouteImport } from "./routes/licenses";
 import { Route as SessionExpiredRouteImport } from "./routes/session-expired";
-import { Route as AppLegacyRouteImport } from "./routes/_app/_legacy";
+import { Route as AppSplatRouteImport } from "./routes/_app/$";
 import { Route as AppAdminRouteImport } from "./routes/_app/admin";
 import { Route as AppIconsRouteImport } from "./routes/_app/icons";
 import { Route as AppNotFoundRouteImport } from "./routes/_app/not-found";
@@ -26,7 +26,6 @@ import { Route as PublicForgotPasswordRouteImport } from "./routes/_public/forgo
 import { Route as PublicInvalidResetRouteImport } from "./routes/_public/invalid-reset";
 import { Route as PublicLoginRouteImport } from "./routes/_public/login";
 import { Route as PatientHomeRouteImport } from "./routes/patient.home";
-import { Route as AppLegacySplatRouteImport } from "./routes/_app/_legacy/$";
 import { Route as AppAdminSplatRouteImport } from "./routes/_app/admin.$";
 import { Route as AppFacilityIndexRouteImport } from "./routes/_app/facility.index";
 import { Route as AppOrganizationIndexRouteImport } from "./routes/_app/organization.index";
@@ -114,6 +113,7 @@ import { Route as AppFacilityFacilityIdSettingsImmunizationPoliciesRouteImport }
 import { Route as AppFacilityFacilityIdSettingsLocationsRouteImport } from "./routes/_app/facility.$facilityId.settings/locations";
 import { Route as AppFacilityFacilityIdSettingsObservation_definitionsRouteImport } from "./routes/_app/facility.$facilityId.settings/observation_definitions";
 import { Route as AppFacilityFacilityIdSettingsPatient_identifier_configRouteImport } from "./routes/_app/facility.$facilityId.settings/patient_identifier_config";
+import { Route as AppFacilityFacilityIdSettingsPrintTemplatesRouteImport } from "./routes/_app/facility.$facilityId.settings/print-templates";
 import { Route as AppFacilityFacilityIdSettingsProductRouteImport } from "./routes/_app/facility.$facilityId.settings/product";
 import { Route as AppFacilityFacilityIdSettingsProduct_knowledgeRouteImport } from "./routes/_app/facility.$facilityId.settings/product_knowledge";
 import { Route as AppFacilityFacilityIdSettingsQuestionnairesRouteImport } from "./routes/_app/facility.$facilityId.settings/questionnaires";
@@ -387,8 +387,9 @@ const SessionExpiredRoute = SessionExpiredRouteImport.update({
   path: "/session-expired",
   getParentRoute: () => rootRouteImport,
 } as any);
-const AppLegacyRoute = AppLegacyRouteImport.update({
-  id: "/_legacy",
+const AppSplatRoute = AppSplatRouteImport.update({
+  id: "/$",
+  path: "/$",
   getParentRoute: () => AppRoute,
 } as any);
 const AppAdminRoute = AppAdminRouteImport.update({
@@ -441,11 +442,6 @@ const PatientHomeRoute = PatientHomeRouteImport.update({
   id: "/patient/home",
   path: "/patient/home",
   getParentRoute: () => rootRouteImport,
-} as any);
-const AppLegacySplatRoute = AppLegacySplatRouteImport.update({
-  id: "/$",
-  path: "/$",
-  getParentRoute: () => AppLegacyRoute,
 } as any);
 const AppAdminSplatRoute = AppAdminSplatRouteImport.update({
   id: "/$",
@@ -944,6 +940,12 @@ const AppFacilityFacilityIdSettingsPatient_identifier_configRoute =
   AppFacilityFacilityIdSettingsPatient_identifier_configRouteImport.update({
     id: "/patient_identifier_config",
     path: "/patient_identifier_config",
+    getParentRoute: () => AppFacilityFacilityIdSettingsRouteRoute,
+  } as any);
+const AppFacilityFacilityIdSettingsPrintTemplatesRoute =
+  AppFacilityFacilityIdSettingsPrintTemplatesRouteImport.update({
+    id: "/print-templates",
+    path: "/print-templates",
     getParentRoute: () => AppFacilityFacilityIdSettingsRouteRoute,
   } as any);
 const AppFacilityFacilityIdSettingsProductRoute =
@@ -2668,6 +2670,7 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/licenses": typeof LicensesRoute;
   "/session-expired": typeof SessionExpiredRoute;
+  "/$": typeof AppSplatRoute;
   "/admin": typeof AppAdminRouteWithChildren;
   "/icons": typeof AppIconsRoute;
   "/not-found": typeof AppNotFoundRoute;
@@ -2678,7 +2681,6 @@ export interface FileRoutesByFullPath {
   "/invalid-reset": typeof PublicInvalidResetRoute;
   "/login": typeof PublicLoginRoute;
   "/patient/home": typeof PatientHomeRoute;
-  "/$": typeof AppLegacySplatRoute;
   "/admin/$": typeof AppAdminSplatRoute;
   "/user/$tab": typeof AppUserTabRoute;
   "/facility/$id": typeof PublicFacilityIdRoute;
@@ -2755,6 +2757,7 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/settings/locations": typeof AppFacilityFacilityIdSettingsLocationsRouteWithChildren;
   "/facility/$facilityId/settings/observation_definitions": typeof AppFacilityFacilityIdSettingsObservation_definitionsRouteWithChildren;
   "/facility/$facilityId/settings/patient_identifier_config": typeof AppFacilityFacilityIdSettingsPatient_identifier_configRouteWithChildren;
+  "/facility/$facilityId/settings/print-templates": typeof AppFacilityFacilityIdSettingsPrintTemplatesRoute;
   "/facility/$facilityId/settings/product": typeof AppFacilityFacilityIdSettingsProductRouteWithChildren;
   "/facility/$facilityId/settings/product_knowledge": typeof AppFacilityFacilityIdSettingsProduct_knowledgeRouteWithChildren;
   "/facility/$facilityId/settings/questionnaires": typeof AppFacilityFacilityIdSettingsQuestionnairesRouteWithChildren;
@@ -3016,6 +3019,7 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/licenses": typeof LicensesRoute;
   "/session-expired": typeof SessionExpiredRoute;
+  "/$": typeof AppSplatRoute;
   "/admin": typeof AppAdminRouteWithChildren;
   "/icons": typeof AppIconsRoute;
   "/not-found": typeof AppNotFoundRoute;
@@ -3026,7 +3030,6 @@ export interface FileRoutesByTo {
   "/invalid-reset": typeof PublicInvalidResetRoute;
   "/login": typeof PublicLoginRoute;
   "/patient/home": typeof PatientHomeRoute;
-  "/$": typeof AppLegacySplatRoute;
   "/admin/$": typeof AppAdminSplatRoute;
   "/user/$tab": typeof AppUserTabRoute;
   "/facility/$id": typeof PublicFacilityIdRoute;
@@ -3088,6 +3091,7 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdService_requestsServiceRequestIdRoute;
   "/facility/$facilityId/settings/$": typeof AppFacilityFacilityIdSettingsSplatRoute;
   "/facility/$facilityId/settings/general": typeof AppFacilityFacilityIdSettingsGeneralRoute;
+  "/facility/$facilityId/settings/print-templates": typeof AppFacilityFacilityIdSettingsPrintTemplatesRoute;
   "/facility/$facilityId/settings/referrals": typeof AppFacilityFacilityIdSettingsReferralsRoute;
   "/facility/$facilityId/settings/responses": typeof AppFacilityFacilityIdSettingsResponsesRoute;
   "/facility/$facilityId/settings/token_category": typeof AppFacilityFacilityIdSettingsToken_categoryRoute;
@@ -3345,7 +3349,7 @@ export interface FileRoutesById {
   "/_public": typeof PublicRouteWithChildren;
   "/licenses": typeof LicensesRoute;
   "/session-expired": typeof SessionExpiredRoute;
-  "/_app/_legacy": typeof AppLegacyRouteWithChildren;
+  "/_app/$": typeof AppSplatRoute;
   "/_app/admin": typeof AppAdminRouteWithChildren;
   "/_app/icons": typeof AppIconsRoute;
   "/_app/not-found": typeof AppNotFoundRoute;
@@ -3356,7 +3360,6 @@ export interface FileRoutesById {
   "/_public/invalid-reset": typeof PublicInvalidResetRoute;
   "/_public/login": typeof PublicLoginRoute;
   "/patient/home": typeof PatientHomeRoute;
-  "/_app/_legacy/$": typeof AppLegacySplatRoute;
   "/_app/admin/$": typeof AppAdminSplatRoute;
   "/_app/user/$tab": typeof AppUserTabRoute;
   "/_public/facility/$id": typeof PublicFacilityIdRoute;
@@ -3433,6 +3436,7 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/settings/locations": typeof AppFacilityFacilityIdSettingsLocationsRouteWithChildren;
   "/_app/facility/$facilityId/settings/observation_definitions": typeof AppFacilityFacilityIdSettingsObservation_definitionsRouteWithChildren;
   "/_app/facility/$facilityId/settings/patient_identifier_config": typeof AppFacilityFacilityIdSettingsPatient_identifier_configRouteWithChildren;
+  "/_app/facility/$facilityId/settings/print-templates": typeof AppFacilityFacilityIdSettingsPrintTemplatesRoute;
   "/_app/facility/$facilityId/settings/product": typeof AppFacilityFacilityIdSettingsProductRouteWithChildren;
   "/_app/facility/$facilityId/settings/product_knowledge": typeof AppFacilityFacilityIdSettingsProduct_knowledgeRouteWithChildren;
   "/_app/facility/$facilityId/settings/questionnaires": typeof AppFacilityFacilityIdSettingsQuestionnairesRouteWithChildren;
@@ -3696,6 +3700,7 @@ export interface FileRouteTypes {
     | "/"
     | "/licenses"
     | "/session-expired"
+    | "/$"
     | "/admin"
     | "/icons"
     | "/not-found"
@@ -3706,7 +3711,6 @@ export interface FileRouteTypes {
     | "/invalid-reset"
     | "/login"
     | "/patient/home"
-    | "/$"
     | "/admin/$"
     | "/user/$tab"
     | "/facility/$id"
@@ -3783,6 +3787,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/locations"
     | "/facility/$facilityId/settings/observation_definitions"
     | "/facility/$facilityId/settings/patient_identifier_config"
+    | "/facility/$facilityId/settings/print-templates"
     | "/facility/$facilityId/settings/product"
     | "/facility/$facilityId/settings/product_knowledge"
     | "/facility/$facilityId/settings/questionnaires"
@@ -4044,6 +4049,7 @@ export interface FileRouteTypes {
     | "/"
     | "/licenses"
     | "/session-expired"
+    | "/$"
     | "/admin"
     | "/icons"
     | "/not-found"
@@ -4054,7 +4060,6 @@ export interface FileRouteTypes {
     | "/invalid-reset"
     | "/login"
     | "/patient/home"
-    | "/$"
     | "/admin/$"
     | "/user/$tab"
     | "/facility/$id"
@@ -4116,6 +4121,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/service_requests/$serviceRequestId"
     | "/facility/$facilityId/settings/$"
     | "/facility/$facilityId/settings/general"
+    | "/facility/$facilityId/settings/print-templates"
     | "/facility/$facilityId/settings/referrals"
     | "/facility/$facilityId/settings/responses"
     | "/facility/$facilityId/settings/token_category"
@@ -4372,7 +4378,7 @@ export interface FileRouteTypes {
     | "/_public"
     | "/licenses"
     | "/session-expired"
-    | "/_app/_legacy"
+    | "/_app/$"
     | "/_app/admin"
     | "/_app/icons"
     | "/_app/not-found"
@@ -4383,7 +4389,6 @@ export interface FileRouteTypes {
     | "/_public/invalid-reset"
     | "/_public/login"
     | "/patient/home"
-    | "/_app/_legacy/$"
     | "/_app/admin/$"
     | "/_app/user/$tab"
     | "/_public/facility/$id"
@@ -4460,6 +4465,7 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/settings/locations"
     | "/_app/facility/$facilityId/settings/observation_definitions"
     | "/_app/facility/$facilityId/settings/patient_identifier_config"
+    | "/_app/facility/$facilityId/settings/print-templates"
     | "/_app/facility/$facilityId/settings/product"
     | "/_app/facility/$facilityId/settings/product_knowledge"
     | "/_app/facility/$facilityId/settings/questionnaires"
@@ -4775,11 +4781,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof SessionExpiredRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/_app/_legacy": {
-      id: "/_app/_legacy";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof AppLegacyRouteImport;
+    "/_app/$": {
+      id: "/_app/$";
+      path: "/$";
+      fullPath: "/$";
+      preLoaderRoute: typeof AppSplatRouteImport;
       parentRoute: typeof AppRoute;
     };
     "/_app/admin": {
@@ -4851,13 +4857,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/patient/home";
       preLoaderRoute: typeof PatientHomeRouteImport;
       parentRoute: typeof rootRouteImport;
-    };
-    "/_app/_legacy/$": {
-      id: "/_app/_legacy/$";
-      path: "/$";
-      fullPath: "/$";
-      preLoaderRoute: typeof AppLegacySplatRouteImport;
-      parentRoute: typeof AppLegacyRoute;
     };
     "/_app/admin/$": {
       id: "/_app/admin/$";
@@ -5466,6 +5465,13 @@ declare module "@tanstack/react-router" {
       path: "/patient_identifier_config";
       fullPath: "/facility/$facilityId/settings/patient_identifier_config";
       preLoaderRoute: typeof AppFacilityFacilityIdSettingsPatient_identifier_configRouteImport;
+      parentRoute: typeof AppFacilityFacilityIdSettingsRouteRoute;
+    };
+    "/_app/facility/$facilityId/settings/print-templates": {
+      id: "/_app/facility/$facilityId/settings/print-templates";
+      path: "/print-templates";
+      fullPath: "/facility/$facilityId/settings/print-templates";
+      preLoaderRoute: typeof AppFacilityFacilityIdSettingsPrintTemplatesRouteImport;
       parentRoute: typeof AppFacilityFacilityIdSettingsRouteRoute;
     };
     "/_app/facility/$facilityId/settings/product": {
@@ -7186,18 +7192,6 @@ declare module "@tanstack/react-router" {
   }
 }
 
-interface AppLegacyRouteChildren {
-  AppLegacySplatRoute: typeof AppLegacySplatRoute;
-}
-
-const AppLegacyRouteChildren: AppLegacyRouteChildren = {
-  AppLegacySplatRoute: AppLegacySplatRoute,
-};
-
-const AppLegacyRouteWithChildren = AppLegacyRoute._addFileChildren(
-  AppLegacyRouteChildren,
-);
-
 interface AppAdminRouteChildren {
   AppAdminSplatRoute: typeof AppAdminSplatRoute;
   AppAdminActionsIdRoute: typeof AppAdminActionsIdRoute;
@@ -7732,6 +7726,7 @@ interface AppFacilityFacilityIdSettingsRouteRouteChildren {
   AppFacilityFacilityIdSettingsLocationsRoute: typeof AppFacilityFacilityIdSettingsLocationsRouteWithChildren;
   AppFacilityFacilityIdSettingsObservation_definitionsRoute: typeof AppFacilityFacilityIdSettingsObservation_definitionsRouteWithChildren;
   AppFacilityFacilityIdSettingsPatient_identifier_configRoute: typeof AppFacilityFacilityIdSettingsPatient_identifier_configRouteWithChildren;
+  AppFacilityFacilityIdSettingsPrintTemplatesRoute: typeof AppFacilityFacilityIdSettingsPrintTemplatesRoute;
   AppFacilityFacilityIdSettingsProductRoute: typeof AppFacilityFacilityIdSettingsProductRouteWithChildren;
   AppFacilityFacilityIdSettingsProduct_knowledgeRoute: typeof AppFacilityFacilityIdSettingsProduct_knowledgeRouteWithChildren;
   AppFacilityFacilityIdSettingsQuestionnairesRoute: typeof AppFacilityFacilityIdSettingsQuestionnairesRouteWithChildren;
@@ -7773,6 +7768,8 @@ const AppFacilityFacilityIdSettingsRouteRouteChildren: AppFacilityFacilityIdSett
       AppFacilityFacilityIdSettingsObservation_definitionsRouteWithChildren,
     AppFacilityFacilityIdSettingsPatient_identifier_configRoute:
       AppFacilityFacilityIdSettingsPatient_identifier_configRouteWithChildren,
+    AppFacilityFacilityIdSettingsPrintTemplatesRoute:
+      AppFacilityFacilityIdSettingsPrintTemplatesRoute,
     AppFacilityFacilityIdSettingsProductRoute:
       AppFacilityFacilityIdSettingsProductRouteWithChildren,
     AppFacilityFacilityIdSettingsProduct_knowledgeRoute:
@@ -8077,7 +8074,7 @@ const AppFacilityFacilityIdLocationsLocationIdRouteWithChildren =
   );
 
 interface AppRouteChildren {
-  AppLegacyRoute: typeof AppLegacyRouteWithChildren;
+  AppSplatRoute: typeof AppSplatRoute;
   AppAdminRoute: typeof AppAdminRouteWithChildren;
   AppIconsRoute: typeof AppIconsRoute;
   AppNotFoundRoute: typeof AppNotFoundRoute;
@@ -8199,7 +8196,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppLegacyRoute: AppLegacyRouteWithChildren,
+  AppSplatRoute: AppSplatRoute,
   AppAdminRoute: AppAdminRouteWithChildren,
   AppIconsRoute: AppIconsRoute,
   AppNotFoundRoute: AppNotFoundRoute,

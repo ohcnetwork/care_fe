@@ -28,6 +28,8 @@ import {
   FileReadMinimal,
   getVideoMimeType,
 } from "@/types/files/file";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { Printer } from "lucide-react";
 
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
 export interface StateInterface {
@@ -104,6 +106,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
   const [index, setIndex] = useState<number>(currentIndex);
   const transformRef = useRef<ReactZoomPanPinchRef>(null);
   const [isPanning, setIsPanning] = useState(false);
+  const [parsedPdfUrl, setParsedPdfUrl] = useState<string | null>(null);
 
   // Browser detection function
   const isSafari = () => {
@@ -157,6 +160,12 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
   const isVideo = (FILE_EXTENSIONS.VIDEO as unknown as string[]).includes(
     file_state.extension,
   );
+
+  // Print only files rendered by the PDF viewer that pdf.js parsed.
+  const canPrint =
+    !file_state.isImage &&
+    file_state.extension === "pdf" &&
+    parsedPdfUrl === fileUrl;
 
   const handleNext = (newIndex: number) => {
     if (
@@ -245,6 +254,53 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                   )}
               </div>
               <div className="flex gap-2">
+                {canPrint && (
+                  <Button
+                    variant="outline"
+                    aria-label={t("print")}
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(fileUrl);
+                        if (!response.ok) throw new Error();
+                        const bytes = await response.arrayBuffer();
+                        // Never trust the storage Content-Type: only print
+                        // real PDFs, as an inert application/pdf blob. Like
+                        // pdf.js, accept the header in the first 1024 bytes.
+                        const header = new TextDecoder("latin1").decode(
+                          bytes.slice(0, 1024),
+                        );
+                        if (!header.includes("%PDF-")) throw new Error();
+                        const blob = new Blob([bytes], {
+                          type: "application/pdf",
+                        });
+                        const blobUrl = window.URL.createObjectURL(blob);
+                        const iframe = document.createElement("iframe");
+                        iframe.style.display = "none";
+                        iframe.src = blobUrl;
+
+                        iframe.onload = () => {
+                          try {
+                            iframe.contentWindow?.print();
+                          } catch {
+                            toast.error(t("print_failed"));
+                          }
+                          setTimeout(() => {
+                            document.body.removeChild(iframe);
+                            window.URL.revokeObjectURL(blobUrl);
+                          }, 10000);
+                        };
+
+                        document.body.appendChild(iframe);
+                      } catch {
+                        toast.error(t("print_failed"));
+                      }
+                    }}
+                  >
+                    <Printer className="size-4" />
+                    <span className="hidden sm:block">{t("print")}</span>
+                    <ShortcutBadge actionId="print-button" />
+                  </Button>
+                )}
                 {file_state.extension === "pdf" && fileUrl && (
                   <Button
                     variant="outline"
@@ -319,6 +375,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                         onDocumentLoadSuccess={(numPages: number) => {
                           setPage(1);
                           setNumPages(numPages);
+                          setParsedPdfUrl(fileUrl);
                         }}
                         pageNumber={page}
                         scale={1}

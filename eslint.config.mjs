@@ -4,6 +4,7 @@ import tsParser from "@typescript-eslint/parser";
 import i18nextPlugin from "eslint-plugin-i18next";
 import i18nextNoUndefinedTranslationKeysPlugin from "eslint-plugin-i18next-no-undefined-translation-keys";
 import noRelativeImportPaths from "eslint-plugin-no-relative-import-paths";
+import playwright from "eslint-plugin-playwright";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
@@ -51,7 +52,11 @@ const config = [
     ignores: [
       "**/dist",
       "**/public",
-      "**/lib",
+      "**/lib/*",
+      // Lint the search schemas: their import rule keeps them small.
+      "!src/lib/router",
+      "src/lib/router/*",
+      "!src/lib/router/search",
       "**/build",
       "**/*.css",
       "**/*.csv",
@@ -62,6 +67,8 @@ const config = [
       ".opencode/**",
       ".codex/**",
       ".cursor/**",
+      // Test fixtures (e.g. Vite-served harnesses) are not in any tsconfig.
+      "tests/fixtures/**",
     ],
   },
   eslint.configs.recommended,
@@ -127,6 +134,20 @@ const config = [
       }),
       "no-undef": "off",
 
+      // The app routes with TanStack Router. raviger is not installed.
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "raviger",
+              message:
+                'Use `Link` from "@tanstack/react-router" and the helpers in "@/lib/router/" (see docs/architecture.md, Routing).',
+            },
+          ],
+        },
+      ],
+
       // Require rendering components to pass an ExtensionContexts.* value when rendering
       // extensions. Warns by default, errors on pre-commit.
       "no-restricted-syntax": [
@@ -144,9 +165,9 @@ const config = [
             "Pass `context: ExtensionContexts.<slot>` in the options. Create a new context if needed.",
         },
         {
-          // Route files: `Route.useParams()` in a lazy route component makes
-          // its chunk import the route file, and every route definition then
-          // loads as a separate chunk at startup.
+          // Route files: `Route.useX()` makes a route component depend on its
+          // route module. With `autoCodeSplitting` on, every route definition
+          // then loads as a separate chunk at startup.
           selector:
             "CallExpression[callee.object.name='Route'][callee.property.name=/^use[A-Z]/]",
           message:
@@ -196,6 +217,26 @@ const config = [
     },
   },
 
+  // Search schemas load with the route tree at startup: `validateSearch` is
+  // not code-split. Keep pages, components and their imports out of them.
+  {
+    files: ["src/lib/router/search/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: "^@/(?!types/|lib/router/search/)",
+              message:
+                "A search schema loads at startup. Import only zod, the search fields and `@/types`.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // i18next plugin rules
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
@@ -238,11 +279,63 @@ const config = [
   // Playwright-specific rules
   {
     files: ["tests/**/*.ts", "playwright.config.ts"],
+    plugins: { playwright },
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         project: "./tests/tsconfig.json",
       },
+    },
+    rules: {
+      // Explicit allow-list of eslint-plugin-playwright rules; `flat/recommended`
+      // is not spread. `no-nth-methods` stays off: `.first()/.last()/.nth()`
+      // are idiomatic Playwright.
+      //
+      // No existing violations: errors, so they gate new code.
+      "playwright/max-nested-describe": "error",
+      "playwright/missing-playwright-await": "error",
+      "playwright/no-duplicate-hooks": "error",
+      "playwright/no-duplicate-slow": "error",
+      "playwright/no-element-handle": "error",
+      "playwright/no-eval": "error",
+      "playwright/no-focused-test": "error",
+      "playwright/no-nested-step": "error",
+      "playwright/no-page-pause": "error",
+      "playwright/no-standalone-expect": "error",
+      "playwright/no-unnecessary-assertions": "error",
+      "playwright/no-unsafe-references": "error",
+      "playwright/no-wait-for-navigation": "error",
+      "playwright/no-wait-for-selector": "error",
+      "playwright/prefer-hooks-on-top": "error",
+      "playwright/valid-describe-callback": "error",
+      "playwright/valid-expect": "error",
+      "playwright/valid-expect-in-promise": "error",
+      "playwright/valid-test-tags": "error",
+      "playwright/valid-title": "error",
+      // Existing violations: warnings until the tests are migrated, then
+      // promote each rule to "error".
+      "playwright/consistent-spacing-between-blocks": "warn",
+      "playwright/no-force-option": "warn",
+      "playwright/no-networkidle": "warn",
+      "playwright/no-unused-locators": "warn",
+      "playwright/no-useless-await": "warn",
+      "playwright/no-useless-not": "warn",
+      "playwright/no-wait-for-timeout": "warn",
+      "playwright/prefer-hooks-in-order": "warn",
+      "playwright/prefer-locator": "warn",
+      "playwright/prefer-to-have-count": "warn",
+      "playwright/prefer-to-have-length": "warn",
+      "playwright/prefer-web-first-assertions": "warn",
+      "playwright/no-restricted-locators": [
+        "warn",
+        [
+          {
+            type: "getByTestId",
+            message:
+              "Avoid test IDs — use role/label/text locators (getByRole, getByLabel, getByText).",
+          },
+        ],
+      ],
     },
   },
 

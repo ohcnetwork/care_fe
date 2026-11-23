@@ -2,13 +2,13 @@ import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Stethoscope } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -74,8 +74,8 @@ interface Props {
   facilityId: string;
   patientName: string;
   appointment?: string;
-  /** The appointment's schedule defaults: departments are prefilled and the
-   * care team is assigned once the encounter is created. */
+  /** The appointment's schedule defaults: the encounter type and departments
+   * are prefilled and the care team is assigned once the encounter is created. */
   scheduleDefaults?: ScheduleEncounterDefaults;
   trigger?: React.ReactNode;
   onSuccess?: (encounter: EncounterRead) => void;
@@ -107,6 +107,14 @@ export default function CreateEncounterForm({
   useShortcutSubContext();
   const defaultOrganizations = scheduleDefaults?.organizations ?? [];
   const defaultCareTeam = scheduleDefaults?.care_team ?? [];
+  // Fall back to the deployment default if this deployment doesn't offer the
+  // schedule's encounter type.
+  const scheduleEncounterType = scheduleDefaults?.encounter_type;
+  const defaultEncounterClass =
+    scheduleEncounterType &&
+    careConfig.encounterClasses.includes(scheduleEncounterType)
+      ? scheduleEncounterType
+      : careConfig.defaultEncounterType;
 
   const encounterFormSchema = z
     .object({
@@ -143,7 +151,7 @@ export default function CreateEncounterForm({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
       status: defaultStatus,
-      encounter_class: careConfig.defaultEncounterType,
+      encounter_class: defaultEncounterClass,
       priority: "routine",
       organizations: defaultOrganizations.map(({ id }) => id),
       start_date: new Date().toISOString(),
@@ -151,11 +159,12 @@ export default function CreateEncounterForm({
     },
   });
 
-  // Re-read the schedule's departments on every reset: the appointment may
-  // have been refetched with different defaults since the form mounted.
+  // Re-read the schedule's defaults on every reset: the appointment may have
+  // been refetched with different defaults since the form mounted.
   const resetForm = () =>
     form.reset({
       ...form.formState.defaultValues,
+      encounter_class: defaultEncounterClass,
       organizations: defaultOrganizations.map(({ id }) => id),
     });
 
@@ -188,14 +197,16 @@ export default function CreateEncounterForm({
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.(data);
       if (!disableRedirectOnSuccess) {
-        const params = new URLSearchParams(
-          Object.entries(redirectQueryParams ?? {}).filter(
-            (entry): entry is [string, string] => entry[1] !== undefined,
-          ),
-        );
-        navigate(
-          `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates${params.size ? `?${params}` : ""}`,
-        );
+        navigate({
+          to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab",
+          params: {
+            facilityId,
+            patientId,
+            encounterId: data.id,
+            tab: "updates",
+          },
+          search: redirectQueryParams,
+        });
       }
     },
   });
@@ -318,6 +329,7 @@ export default function CreateEncounterForm({
                             <Button
                               key={value}
                               type="button"
+                              aria-pressed={field.value === value}
                               className={cn(
                                 "h-auto min-h-24 w-full justify-center text-lg",
                                 field.value === value &&

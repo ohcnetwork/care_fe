@@ -5,6 +5,7 @@ import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientProfile } from "@/components/Patient/PatientProfile";
 
 import { staffOrPatient } from "@/lib/router/auth";
+import { patientShowSearch } from "@/lib/router/search/patient";
 import { useArea } from "@/Routers/AreaChrome";
 
 type PatientTab = React.ComponentProps<typeof PatientProfile>["page"];
@@ -19,6 +20,7 @@ type PatientTab = React.ComponentProps<typeof PatientProfile>["page"];
  */
 export const Route = createFileRoute("/patient/$id/{-$tab}")({
   beforeLoad: staffOrPatient,
+  validateSearch: patientShowSearch,
   component: RouteComponent,
 });
 

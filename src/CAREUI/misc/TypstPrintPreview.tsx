@@ -1,3 +1,4 @@
+import { useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Printer, Share2, TriangleAlert } from "lucide-react";
 import {
   type ReactNode,
@@ -49,6 +50,7 @@ export default function TypstPrintPreview<TContent>({
   ...options
 }: Props<TContent>) {
   const { t } = useTranslation();
+  const router = useRouter();
   useShortcutSubContext();
 
   const { pdf, error, isLoading, isFetching, retry, failedAssets, autoPrint } =
@@ -101,10 +103,10 @@ export default function TypstPrintPreview<TContent>({
       autoPrinted.current = true;
       print();
       void waitForPrintDialogToClose().then(() => {
-        if (!isTouchDevice && window.history.length > 1) window.history.go(-1);
+        if (!isTouchDevice && router.history.canGoBack()) router.history.back();
       });
     }
-  }, [autoPrint, printDisabled, method, iframeLoaded, print]);
+  }, [autoPrint, printDisabled, method, iframeLoaded, print, router]);
 
   return (
     <div className="min-w-0">

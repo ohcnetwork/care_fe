@@ -1,5 +1,4 @@
 import { SquarePen } from "lucide-react";
-import { Link, useFullPath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +8,9 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
+import { HrefLink } from "@/lib/router/HrefLink";
+import { usePathname } from "@/lib/router/location";
+
 interface HospitalizationDetailsProps {
   title?: string;
 }
@@ -17,7 +19,7 @@ export const HospitalizationDetails = ({
   title,
 }: HospitalizationDetailsProps = {}) => {
   const { t } = useTranslation();
-  const returnPage = useFullPath().split("/").pop() ?? "updates";
+  const returnPage = usePathname().split("/").pop() ?? "updates";
   const {
     selectedEncounter: encounter,
     selectedEncounterId: encounterId,
@@ -46,12 +48,12 @@ export const HospitalizationDetails = ({
         </span>
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" className="shrink-0" asChild>
-            <Link
+            <HrefLink
               href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter?${new URLSearchParams({ return_page: returnPage })}`}
               aria-label={t("edit")}
             >
               <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
-            </Link>
+            </HrefLink>
           </Button>
         )}
       </div>

@@ -4,7 +4,8 @@ import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
-import { getRouter } from "@/compat/routerRef";
+import { navigate } from "@/lib/router/navigate";
+import { getRouter } from "@/lib/router/routerRef";
 import {
   PatientListRead,
   PatientRead,
@@ -159,11 +160,13 @@ export const formatPatientAge = (
   obj: PatientRead | PatientListRead | PublicPatientRead,
   abbreviated = false,
 ) => {
-  const start = dayjs(
-    obj.date_of_birth
-      ? new Date(obj.date_of_birth)
-      : new Date(obj.year_of_birth!, 0, 1),
-  );
+  // date_of_birth is date-only ("YYYY-MM-DD"). new Date() reads that as UTC
+  // midnight, which lands on the previous day in any timezone behind UTC and
+  // shifts the age by a day; dayjs parses it as local midnight, which is what
+  // formatPatientAgeBreakdown already does.
+  const start = obj.date_of_birth
+    ? dayjs(obj.date_of_birth)
+    : dayjs(new Date(obj.year_of_birth!, 0, 1));
   const end =
     "deceased_datetime" in obj && obj.deceased_datetime
       ? dayjs(obj.deceased_datetime)
@@ -399,7 +402,7 @@ export const goBack = (fallback?: string) => {
     .slice()
     .reverse()
     .find((match) => match.pathname !== current)?.pathname;
-  void router.navigate({ to: fallback ?? parent ?? "/", replace: true });
+  navigate({ href: fallback ?? parent ?? "/", replace: true });
 };
 
 /**

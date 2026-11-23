@@ -27,7 +27,7 @@ import {
 import {
   fieldTriggerLayout,
   fieldTriggerSurface,
-  invalidTriggerOutline,
+  invalidTriggerRing,
   triggerFocus,
 } from "@/components/ui/field-trigger-styles";
 import { Label } from "@/components/ui/label";
@@ -82,7 +82,9 @@ export function MultiSelect({
     setOpen(nextOpen);
   };
 
-  const optionByValue = new Map(options.map((option) => [option.value, option]));
+  const optionByValue = new Map(
+    options.map((option) => [option.value, option]),
+  );
   const committed = new Set(value);
   const draft = new Set(selectedValues);
   const groups = [
@@ -93,8 +95,7 @@ export function MultiSelect({
     },
   ].filter((group) => group.items.length > 0);
   const allSelected =
-    options.length > 0 &&
-    options.every((option) => draft.has(option.value));
+    options.length > 0 && options.every((option) => draft.has(option.value));
 
   const trigger = (
     <button
@@ -106,7 +107,7 @@ export function MultiSelect({
         fieldTriggerLayout,
         fieldTriggerSurface,
         triggerFocus,
-        invalidTriggerOutline,
+        invalidTriggerRing,
         "h-auto min-h-12 w-full min-w-0 justify-between py-1 text-start font-normal md:h-auto md:min-h-10",
         className,
       )}
@@ -167,7 +168,9 @@ export function MultiSelect({
           checked={allSelected}
           onCheckedChange={() =>
             setSelectedValues(
-              allSelected ? [] : [...new Set([...draft, ...optionByValue.keys()])],
+              allSelected
+                ? []
+                : [...new Set([...draft, ...optionByValue.keys()])],
             )
           }
         />

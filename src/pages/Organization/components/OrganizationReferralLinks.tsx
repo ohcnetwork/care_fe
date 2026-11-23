@@ -1,11 +1,12 @@
 import { GitPullRequestArrow, Settings2 } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { buttonVariants } from "@/components/ui/button";
 
 import { usePermissions } from "@/context/PermissionContext";
 import { Organization } from "@/types/organization/organization";
+
+import { HrefLink } from "@/lib/router/HrefLink";
 
 export function OrganizationReferralLinks({
   organization,
@@ -25,22 +26,22 @@ export function OrganizationReferralLinks({
   return (
     <div className="flex flex-wrap gap-2">
       {canRead && (
-        <Link
+        <HrefLink
           href={`/${base}/${organization.id}/referrals`}
           className={buttonVariants({ variant: "outline", size: "sm" })}
         >
           <GitPullRequestArrow className="size-4" />
           {t("referrals")}
-        </Link>
+        </HrefLink>
       )}
       {canManage && (
-        <Link
+        <HrefLink
           href={`/${base}/${organization.id}/settings/referrals`}
           className={buttonVariants({ variant: "outline", size: "sm" })}
         >
           <Settings2 className="size-4" />
           {t("referral_availability_settings")}
-        </Link>
+        </HrefLink>
       )}
     </div>
   );

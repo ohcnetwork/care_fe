@@ -1,7 +1,7 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -14,7 +14,6 @@ import WeekdayCheckbox, {
 } from "@/CAREUI/interactive/WeekdayCheckbox";
 
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -45,7 +44,10 @@ import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
 import { ScheduleEncounterDefaultsFields } from "@/pages/Scheduling/components/ScheduleEncounterDefaultsFields";
+import { ScheduleValidityField } from "@/pages/Scheduling/components/ScheduleValidityField";
 import {
   calculateSlotDuration,
   getSlotsPerSession,
@@ -80,7 +82,7 @@ export default function CreateScheduleTemplateSheet({
   const queryClient = useQueryClient();
 
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
-  const [qParams, _setQParams] = useQueryParams<QueryParams>();
+  const [qParams, _setQParams] = useQueryParams(scheduleHomeSearch);
   const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
 
   const weekdayFormat = useBreakpoints({
@@ -98,6 +100,7 @@ export default function CreateScheduleTemplateSheet({
         }),
       valid_to: z.date({ error: t("field_required") }),
       is_public: z.boolean(),
+      encounter_type: z.enum(careConfig.encounterClasses).nullable(),
       organizations: z.array(z.string()),
       care_team: z.array(z.custom<CareTeamResponse>()),
 
@@ -215,6 +218,7 @@ export default function CreateScheduleTemplateSheet({
       valid_to: undefined,
       weekdays: [],
       is_public: false,
+      encounter_type: null,
       organizations: [],
       care_team: [],
       availabilities: [
@@ -255,6 +259,7 @@ export default function CreateScheduleTemplateSheet({
       resource_type: resourceType,
       resource_id: resourceId,
       is_public: values.is_public,
+      encounter_type: values.encounter_type,
       organizations: values.organizations,
       care_team: toCareTeamMembers(values.care_team),
       availabilities: values.availabilities.map(
@@ -265,6 +270,7 @@ export default function CreateScheduleTemplateSheet({
             slot_size_in_minutes: availability.slot_size_in_minutes,
             tokens_per_slot: availability.tokens_per_slot,
             reason: availability.reason,
+
             availability: values.weekdays.map((day) => ({
               day_of_week: day,
               start_time: availability.start_time,
@@ -385,43 +391,7 @@ export default function CreateScheduleTemplateSheet({
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="valid_from"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel aria-required>{t("valid_from")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
-                          }
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="valid_to"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel aria-required>{t("valid_to")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
-                          }
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <ScheduleValidityField disablePast />
 
                 <div>
                   <FormLabel className="text-lg font-semibold">
@@ -475,6 +445,12 @@ export default function CreateScheduleTemplateSheet({
                 />
                 <ScheduleEncounterDefaultsFields
                   facilityId={facilityId}
+                  encounterType={form.watch("encounter_type")}
+                  onEncounterTypeChange={(value) =>
+                    form.setValue("encounter_type", value, {
+                      shouldDirty: true,
+                    })
+                  }
                   organizations={form.watch("organizations")}
                   onOrganizationsChange={(value) =>
                     form.setValue("organizations", value, { shouldDirty: true })

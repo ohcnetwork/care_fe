@@ -53,6 +53,8 @@ export interface LocationDetail extends LocationBase {
   has_children: boolean;
   has_sub_locations: boolean;
   has_beds: boolean;
+  parent?: LocationRead;
+  current_encounter?: EncounterRead;
   organizations: FacilityOrganizationRead[];
   sort_index: number;
   system_availability_status: SystemAvailabilityStatus;

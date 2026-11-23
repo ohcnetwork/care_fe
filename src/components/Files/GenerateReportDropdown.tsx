@@ -1,5 +1,4 @@
 import { FileText, Plus, SearchIcon } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -18,6 +17,9 @@ import {
   ReportTemplateOption,
   useReportTemplateOptions,
 } from "@/components/Files/reportTemplateOptions";
+
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 
 import { PERMISSION_LIST_TEMPLATE } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
@@ -65,10 +67,10 @@ export function ReportTemplateSearchList({
         ) : (
           templates.map(({ template, url }) => (
             <DropdownMenuItem key={template.id} asChild>
-              <Link href={url}>
+              <HrefLink href={url}>
                 <FileText className="mr-2 size-4 shrink-0" />
                 <span className="truncate">{template.name}</span>
-              </Link>
+              </HrefLink>
             </DropdownMenuItem>
           ))
         )}
@@ -115,7 +117,9 @@ export function GenerateReportDropdown({
       <Button
         variant="outline_primary"
         disabled={!singleTemplateUrl}
-        onClick={() => singleTemplateUrl && navigate(singleTemplateUrl)}
+        onClick={() =>
+          singleTemplateUrl && navigate({ href: singleTemplateUrl })
+        }
       >
         {isLoading ? (
           <CareIcon icon="l-spinner" className="size-4 animate-spin" />

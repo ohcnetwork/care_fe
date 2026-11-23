@@ -2,7 +2,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isWithinInterval } from "date-fns";
 
-import { navigate as ravigerNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -350,15 +349,14 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   if (appointmentId && appointment) {
                     handleRescheduleAppointment(appointment);
                   } else {
-                    ravigerNavigate(
-                      `/facility/${facilityId}/appointments/${staffId}/patient-select`,
-                      {
-                        query: {
-                          slotId: selectedSlot?.id,
-                          reason: reason,
-                        },
+                    navigate({
+                      to: "/facility/$facilityId/appointments/$staffId/patient-select",
+                      params: { facilityId, staffId },
+                      search: {
+                        slotId: selectedSlot?.id,
+                        reason: reason,
                       },
-                    );
+                    });
                   }
                 }}
               >

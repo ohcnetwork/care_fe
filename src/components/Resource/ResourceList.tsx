@@ -28,6 +28,7 @@ import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { resourceListSearch } from "@/lib/router/search/resource";
 
 import query from "@/Utils/request/query";
 import {
@@ -60,13 +61,18 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
   const { t } = useTranslation();
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: resourceListSearch,
     limit: 15,
+    cache: true,
     cacheBlacklist: ["title"],
   });
   const { status, title, incoming } = qParams;
 
   const isActive =
-    !status || !RESOURCE_REQUEST_COMPLETED_STATUSES.includes(status);
+    !status ||
+    !(
+      RESOURCE_REQUEST_COMPLETED_STATUSES as readonly ResourceRequestStatus[]
+    ).includes(status);
   const currentStatuses = isActive
     ? RESOURCE_REQUEST_ACTIVE_STATUSES
     : RESOURCE_REQUEST_COMPLETED_STATUSES;
@@ -220,7 +226,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
               <Tabs value={currentStatus} className="hidden sm:block w-full">
                 <TabsList
                   variant="line"
-                  className="h-auto max-w-full flex-wrap justify-start gap-y-2"
+                  className="h-auto w-full max-w-full flex-wrap gap-y-2"
                 >
                   {currentStatuses.map((statusOption) => (
                     <TabsTrigger

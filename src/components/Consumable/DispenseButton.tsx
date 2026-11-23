@@ -1,4 +1,3 @@
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -19,6 +18,8 @@ import { LocationRead } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
 
 import DispenseDrawer from "./DispenseDrawer";
+
+import { navigate } from "@/lib/router/navigate";
 
 export const DispenseButton = ({
   open,
@@ -53,9 +54,9 @@ export const DispenseButton = ({
         `/encounter/${selectedEncounter.id}/updates`,
         facilityId,
       );
-      navigate(
-        `/facility/${facilityId}/billing/invoices/${invoice.id}?sourceUrl=${sourceUrl}`,
-      );
+      navigate({
+        href: `/facility/${facilityId}/billing/invoices/${invoice.id}?sourceUrl=${sourceUrl}`,
+      });
     },
   });
 

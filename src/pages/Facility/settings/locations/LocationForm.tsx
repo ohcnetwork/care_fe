@@ -1,13 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Info, RotateCcw } from "lucide-react";
-import { useEffect } from "react";
+import { type ReactNode, useEffect, useId } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -26,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SheetBody, SheetFooter } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
@@ -45,18 +47,31 @@ import locationApi from "@/types/location/locationApi";
 interface Props {
   facilityId: string;
   onSuccess?: () => void;
+  onCancel: () => void;
   locationId?: string;
   parentId?: string;
+  /** Shown below the fields, outside the form element. */
+  children?: ReactNode;
 }
 
+const checkboxRow =
+  "flex flex-row items-start space-x-3 space-y-0 rounded-md border border-border p-4";
+
+/**
+ * The body and footer of the location sheet: the fields, whatever the sheet
+ * adds below them, and the buttons that save or leave.
+ */
 export default function LocationForm({
   facilityId,
   onSuccess,
+  onCancel,
   locationId,
   parentId,
+  children,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const formId = useId();
 
   const formSchema = z.object({
     name: z
@@ -76,7 +91,10 @@ export default function LocationForm({
     bedNames: z
       .array(
         z.object({
-          name: z.string().min(1, { message: t("field_required") }),
+          name: z
+            .string()
+            .trim()
+            .min(1, { message: t("field_required") }),
         }),
       )
       .default([]),
@@ -173,18 +191,23 @@ export default function LocationForm({
 
   useEffect(() => {
     if (location) {
-      form.reset({
-        name: location.name,
-        description: location.description,
-        status: location.status,
-        operational_status: location.operational_status,
-        form: location.form,
-        inventory_usage: location.inventory_usage ?? "none",
-        parent: parentId || null,
-        organizations: [],
-        customizeNames: false,
-        bedNames: [],
-      });
+      form.reset(
+        {
+          name: location.name,
+          description: location.description,
+          status: location.status,
+          operational_status: location.operational_status,
+          form: location.form,
+          inventory_usage: location.inventory_usage ?? "none",
+          parent: parentId || null,
+          organizations: [],
+          customizeNames: false,
+          bedNames: [],
+        },
+        // The location is read again when its tags or departments change in
+        // this sheet. Fields the user has edited and not saved must stay.
+        { keepDirtyValues: true },
+      );
     }
   }, [location, form, parentId]);
 
@@ -248,161 +271,88 @@ export default function LocationForm({
     submitForm(data);
   }
 
-  const statusOptions: { value: Status; label: string }[] = [
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-    { value: "unknown", label: "Unknown" },
-  ];
-
-  const operationalStatusOptions: {
-    value: OperationalStatus;
-    label: string;
-  }[] = [
-    { value: "C", label: "Closed" },
-    { value: "H", label: "Housekeeping" },
-    { value: "I", label: "Isolated" },
-    { value: "K", label: "Contaminated" },
-    { value: "O", label: "Occupied" },
-    { value: "U", label: "Unoccupied" },
+  const statusOptions: Status[] = ["active", "inactive", "unknown"];
+  const operationalStatusOptions: OperationalStatus[] = [
+    "C",
+    "H",
+    "I",
+    "K",
+    "O",
+    "U",
   ];
 
   if (locationId && isLoading) {
     return (
-      <output className="p-4" aria-live="polite">
-        <span className="sr-only">{t("loading")}</span>
-        <FormSkeleton rows={6} />
-      </output>
+      <SheetBody>
+        <output aria-live="polite">
+          <span className="sr-only">{t("loading")}</span>
+          <FormSkeleton rows={6} />
+        </output>
+      </SheetBody>
     );
   }
 
   const showBedOptions = form.watch("form") === "bd" && !isEditMode;
+  const isSaving = isPending || isBatchPending;
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="form"
-          render={({ field }) => (
-            <FormItem
-              className={showBedOptions ? "md:col-span-1" : "md:col-span-2"}
-            >
-              <FormLabel>{t("location_form")}</FormLabel>
-              <Select
-                onValueChange={(value) => {
-                  if (value === "bd" && !parentId) {
-                    toast.error(t("bed_requires_parent_location"));
-                    return;
-                  }
-                  field.onChange(value);
-                  if (value !== "bd") {
-                    form.setValue("enableBulkCreation", false);
-                    form.setValue("numberOfBeds", "2");
-                    form.setValue("customizeNames", false);
-                  }
-                }}
-                value={field.value}
-                disabled={!!locationId}
-              >
-                <FormControl>
-                  <SelectTrigger className="w-full" ref={field.ref}>
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent className="max-h-[46vh]">
-                  {LocationFormOptions.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {t(`location_form__${option}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Checkbox Field (Hidden when `showBedOptions` is false) */}
-        {showBedOptions && (
-          <FormField
-            control={form.control}
-            name="enableBulkCreation"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>{t("create_multiple_beds")}</FormLabel>
-                  <p className="text-sm text-gray-500">
-                    {t("create_multiple_beds_description")}
-                  </p>
-                </div>
-              </FormItem>
-            )}
-          />
-        )}
-
-        {showBedOptions && form.watch("enableBulkCreation") && (
-          <FormField
-            control={form.control}
-            name="numberOfBeds"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("number_of_beds")}</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger ref={field.ref}>
-                      <SelectValue placeholder={t("select_number_of_beds")} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Array.from({ length: 14 }, (_, i) => i + 2).map((num) => (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num} {t("beds")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel aria-required>{t("name")}</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {showBedOptions &&
-          form.watch("enableBulkCreation") &&
-          form.watch("name").trim() !== "" && (
-            <div className="space-y-4 mt-4">
-              <Alert className="bg-blue-50 border-blue-200">
-                <Info className="size-4 text-blue-500" />
-                <AlertDescription className="text-blue-700">
-                  {t("bulk_bed_creation_info")}
-                </AlertDescription>
-              </Alert>
-
+      <SheetBody>
+        <div className="space-y-8">
+          <form
+            id={formId}
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-5"
+          >
+            {/* What a location is cannot change once it exists; the sheet's
+                header names it instead of a field nobody can use. */}
+            {!locationId && (
               <FormField
                 control={form.control}
-                name="customizeNames"
+                name="form"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
+                  <FormItem>
+                    <FormLabel>{t("location_form")}</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        if (value === "bd" && !parentId) {
+                          toast.error(t("bed_requires_parent_location"));
+                          return;
+                        }
+                        field.onChange(value);
+                        if (value !== "bd") {
+                          form.setValue("enableBulkCreation", false);
+                          form.setValue("numberOfBeds", "2");
+                          form.setValue("customizeNames", false);
+                        }
+                      }}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full" ref={field.ref}>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-[46vh]">
+                        {LocationFormOptions.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {t(`location_form__${option}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {showBedOptions && (
+              <FormField
+                control={form.control}
+                name="enableBulkCreation"
+                render={({ field }) => (
+                  <FormItem className={checkboxRow}>
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -410,190 +360,281 @@ export default function LocationForm({
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>{t("customize_bed_names")}</FormLabel>
-                      <p className="text-sm text-gray-500">
-                        {t("customize_bed_names_description")}
+                      <FormLabel>{t("create_multiple_beds")}</FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        {t("create_multiple_beds_description")}
                       </p>
                     </div>
                   </FormItem>
                 )}
               />
+            )}
 
-              {form.watch("customizeNames") ? (
-                <div className="space-y-4 border border-gray-200 rounded-md p-4">
-                  <div className="flex justify-between items-center flex-wrap gap-2">
-                    <h4 className="font-medium">{t("individual_bed_names")}</h4>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={resetToDefaultNames}
-                    >
-                      <RotateCcw className="size-4 mr-2" />
-                      {t("reset_to_default")}
-                    </Button>
-                  </div>
-
-                  <span className="text-sm font-medium">
-                    {t("edit_bed_names", {
-                      count: Number(form.watch("numberOfBeds")),
-                    })}
-                  </span>
-
-                  <div className="space-y-3 mt-2">
-                    {bedFields.map((field, index) => (
-                      <FormField
-                        key={field.id}
-                        control={form.control}
-                        name={`bedNames.${index}.name`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <div className="flex items-center gap-2">
-                              <FormLabel className="text-sm font-medium min-w-[60px]">
-                                {t("bed_number", { number: index + 1 })}:
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  {...field}
-                                  placeholder={t("bed_name_placeholder", {
-                                    number: index + 1,
-                                  })}
-                                  className="flex-1"
-                                />
-                              </FormControl>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
+            {showBedOptions && form.watch("enableBulkCreation") && (
+              <FormField
+                control={form.control}
+                name="numberOfBeds"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("number_of_beds")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger ref={field.ref}>
+                          <SelectValue
+                            placeholder={t("select_number_of_beds")}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Array.from({ length: 14 }, (_, i) => i + 2).map(
+                          (num) => (
+                            <SelectItem key={num} value={num.toString()}>
+                              {num} {t("beds")}
+                            </SelectItem>
+                          ),
                         )}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-md p-4">
-                  <h4 className="font-medium mb-2">{t("preview_bed_names")}</h4>
-                  <div className="text-sm text-gray-700 flex flex-wrap gap-2">
-                    {bedFields.map((field) => (
-                      <div
-                        key={field.id}
-                        className="px-3 py-1 bg-gray-100 rounded-md shadow-xs"
-                      >
-                        {field.name}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel aria-required>{t("name")}</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {showBedOptions &&
+              form.watch("enableBulkCreation") &&
+              form.watch("name").trim() !== "" && (
+                <div className="space-y-4">
+                  <Alert variant="info">
+                    <Info className="size-4" aria-hidden="true" />
+                    <AlertDescription>
+                      {t("bulk_bed_creation_info")}
+                    </AlertDescription>
+                  </Alert>
+
+                  <FormField
+                    control={form.control}
+                    name="customizeNames"
+                    render={({ field }) => (
+                      <FormItem className={checkboxRow}>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>{t("customize_bed_names")}</FormLabel>
+                          <p className="text-sm text-muted-foreground">
+                            {t("customize_bed_names_description")}
+                          </p>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+
+                  {form.watch("customizeNames") ? (
+                    <div className="space-y-4 rounded-md border border-border p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <h4 className="font-medium">
+                          {t("individual_bed_names")}
+                        </h4>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={resetToDefaultNames}
+                        >
+                          <RotateCcw aria-hidden="true" />
+                          {t("reset_to_default")}
+                        </Button>
                       </div>
-                    ))}
-                  </div>
+
+                      <span className="text-sm font-medium">
+                        {t("edit_bed_names", {
+                          count: Number(form.watch("numberOfBeds")),
+                        })}
+                      </span>
+
+                      <div className="mt-2 space-y-3">
+                        {bedFields.map((field, index) => (
+                          <FormField
+                            key={field.id}
+                            control={form.control}
+                            name={`bedNames.${index}.name`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <div className="flex items-center gap-2">
+                                  <FormLabel className="min-w-[60px] text-sm font-medium">
+                                    {t("bed_number", { number: index + 1 })}:
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      placeholder={t("bed_name_placeholder", {
+                                        number: index + 1,
+                                      })}
+                                      className="flex-1"
+                                    />
+                                  </FormControl>
+                                </div>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">
+                        {t("preview_bed_names")}
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {bedFields.map((field) => (
+                          <Badge key={field.id} variant="secondary">
+                            {field.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("description")}</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder={t("description")} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("status")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger ref={field.ref}>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {statusOptions.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {t(status)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="operational_status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("operational_status")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger ref={field.ref}>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {operationalStatusOptions.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {t(`location_operational_status__${status}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="inventory_usage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("inventory_usage")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger ref={field.ref}>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {InventoryUsageOptions.map((usage) => (
+                          <SelectItem key={usage} value={usage}>
+                            {t(`inventory_usage__${usage}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-          )}
+          </form>
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("description")}</FormLabel>
-              <FormControl>
-                <Textarea {...field} placeholder={t("description")} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="inventory_usage"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("inventory_usage")}</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger className="w-full" ref={field.ref}>
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {InventoryUsageOptions.map((usage) => (
-                    <SelectItem key={usage} value={usage}>
-                      {t(`inventory_usage__${usage}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("status")}</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger ref={field.ref}>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {statusOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="operational_status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("operational_status")}</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger ref={field.ref}>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {operationalStatusOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {children}
         </div>
+      </SheetBody>
 
+      <SheetFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSaving}
+        >
+          {t("cancel")}
+        </Button>
         <Button
           type="submit"
+          form={formId}
           disabled={
-            isPending ||
-            isBatchPending ||
+            isSaving ||
             !form.formState.isValid ||
             (!!location?.id && !form.formState.isDirty)
           }
         >
-          {isPending || isBatchPending ? (
-            <>{isEditMode ? t("updating") : t("creating")}</>
-          ) : (
-            <>{isEditMode ? t("update") : t("create")}</>
-          )}
+          {isSaving
+            ? t(isEditMode ? "updating" : "creating")
+            : t(isEditMode ? "update" : "create")}
         </Button>
-      </form>
+      </SheetFooter>
     </Form>
   );
 }

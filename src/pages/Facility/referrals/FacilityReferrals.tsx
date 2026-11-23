@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
+import { useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
@@ -20,7 +20,9 @@ export default function FacilityReferrals({
   facilityId,
 }: FacilityReferralsProps) {
   const { t } = useTranslation();
-  const [queryParams] = useQueryParams();
+  const queryParams = useSearch({
+    from: "/_app/facility/$facilityId/referrals",
+  });
   const departmentId =
     queryParams.referralDestination === "facility"
       ? null

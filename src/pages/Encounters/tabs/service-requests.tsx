@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { PlusIcon, SearchIcon } from "lucide-react";
+import { ClipboardListIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
@@ -22,6 +23,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable";
 
 import useFilters from "@/hooks/useFilters";
+import { encounterServiceRequestListSearch } from "@/lib/router/search/encounter";
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -43,8 +45,8 @@ export const EncounterServiceRequestTab = () => {
     Pagination: Pagination,
     resultsPerPage,
   } = useFilters({
+    schema: encounterServiceRequestListSearch,
     limit: 20,
-    disableCache: true,
   });
 
   const { data, isLoading } = useQuery({
@@ -73,7 +75,7 @@ export const EncounterServiceRequestTab = () => {
 
   return (
     <div className="@container min-w-0 space-y-4">
-      <div className="hidden border-b @min-[30rem]:block">
+      <div className="hidden @min-[30rem]:block">
         <FilterTabs
           value={qParams.status || ""}
           onValueChange={(value) => updateQuery({ status: value })}
@@ -161,9 +163,15 @@ export const EncounterServiceRequestTab = () => {
               readOnly={!canWriteClinicalData}
             />
           ) : (
-            <div className="p-6 text-center text-muted-foreground">
-              {t("no_service_requests_found")}
-            </div>
+            <EmptyState
+              icon={<ClipboardListIcon aria-hidden="true" />}
+              title={t("no_service_requests_found")}
+              description={
+                qParams.search || qParams.status || qParams.priority
+                  ? t("adjust_service_request_filters")
+                  : undefined
+              }
+            />
           )}
         </FramePanel>
 

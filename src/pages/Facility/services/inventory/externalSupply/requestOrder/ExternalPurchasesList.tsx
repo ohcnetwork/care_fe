@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -12,6 +11,9 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { externalSupplyListSearch } from "@/lib/router/search/inventory";
 import { RequestOrderPriority } from "@/types/inventory/requestOrder/requestOrder";
 import query from "@/Utils/request/query";
 
@@ -33,7 +35,7 @@ export function ExternalPurchasesList({
 }: Props) {
   const { t } = useTranslation();
 
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams, setQueryParams] = useQueryParams(externalSupplyListSearch);
   const TABS_CONFIG = isRequester
     ? [
         { value: "draft,pending", label: "requested" },
@@ -51,10 +53,13 @@ export function ExternalPurchasesList({
       ] as const);
 
   type Tab = (typeof TABS_CONFIG)[number]["value"];
-  const currentTab = (qParams.tab as Tab) || TABS_CONFIG[0].value;
+  // An unknown `tab` selects the first tab, as the request does.
+  const currentTab: Tab =
+    TABS_CONFIG.find((tab) => tab.value === qParams.tab)?.value ??
+    TABS_CONFIG[0].value;
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: externalSupplyListSearch,
     limit: 14,
-    disableCache: true,
   });
 
   const handleTabChange = (value: string) => {
@@ -111,8 +116,8 @@ export function ExternalPurchasesList({
               <Button
                 variant="primary"
                 onClick={() =>
-                  navigate(
-                    getInventoryBasePath(
+                  navigate({
+                    href: getInventoryBasePath(
                       facilityId,
                       locationId,
                       false,
@@ -120,7 +125,7 @@ export function ExternalPurchasesList({
                       isRequester,
                       "new",
                     ),
-                  )
+                  })
                 }
               >
                 <CareIcon icon="l-plus" />
@@ -132,10 +137,10 @@ export function ExternalPurchasesList({
         </div>
 
         <Tabs value={currentTab} onValueChange={handleTabChange}>
-          <div className="w-full overflow-x-auto pb-1">
+          <div className="w-full overflow-x-auto">
             <TabsList
               variant="line"
-              className="w-full justify-evenly border-b border-border sm:justify-start"
+              className="justify-evenly sm:justify-start"
             >
               {TABS_CONFIG.map((tab) => (
                 <TabsTrigger key={tab.value} value={tab.value}>

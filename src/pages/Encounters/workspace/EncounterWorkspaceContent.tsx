@@ -1,13 +1,4 @@
-import {
-  Activity,
-  ClipboardList,
-  HeartPulse,
-  LayoutDashboard,
-  PanelsTopLeft,
-  Stethoscope,
-  type LucideIcon,
-} from "lucide-react";
-import { navigate } from "raviger";
+import { LayoutDashboard } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
+import { TAB_ICONS } from "@/components/Workspace/workspaceTabIcons";
 
 import EncounterNavigation, {
   EncounterTab,
@@ -27,14 +19,7 @@ import { EncounterWorkspacePage } from "./EncounterWorkspacePage";
 import { parseEncounterWorkspace } from "./parseEncounterWorkspace";
 import { useEncounterWorkspaces } from "./useEncounterWorkspaces";
 
-const customPageIcons: Record<string, LucideIcon> = {
-  stethoscope: Stethoscope,
-  "clipboard-list": ClipboardList,
-  "layout-dashboard": LayoutDashboard,
-  "panels-top-left": PanelsTopLeft,
-  activity: Activity,
-  "heart-pulse": HeartPulse,
-};
+import { navigate } from "@/lib/router/navigate";
 
 interface EncounterWorkspaceContentProps {
   systemTabs: Record<string, EncounterTab>;
@@ -70,8 +55,8 @@ export function EncounterWorkspaceContent({
           label: page.title,
           visible: !page.hidden,
           icon:
-            page.icon && Object.hasOwn(customPageIcons, page.icon)
-              ? customPageIcons[page.icon]
+            page.icon && Object.hasOwn(TAB_ICONS, page.icon)
+              ? TAB_ICONS[page.icon]
               : LayoutDashboard,
           component: <EncounterWorkspacePage page={page} />,
         };
@@ -140,13 +125,14 @@ export function EncounterWorkspaceContent({
     }
     target.searchParams.delete("workspace");
     if (target.href !== window.location.href)
-      navigate(
-        appendReferralNativeContext(
+      navigate({
+        href: appendReferralNativeContext(
           `${target.pathname}${target.search}`,
           window.location.search,
         ),
-        { replace },
-      );
+
+        replace,
+      });
   };
 
   useEffect(() => {

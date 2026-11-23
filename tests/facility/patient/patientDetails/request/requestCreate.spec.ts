@@ -1,20 +1,20 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { format, subDays } from "date-fns";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import { selectComboboxOption } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Resource Request Creation", () => {
   let facilityId: string;
+  let patientId: string;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async () => {
+    // A patient of this test's own, not the first encounter in a shared list
+    // that parallel tests keep changing.
     facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
-    );
+    ({ patientId } = await createQuestionnaireEncounter(facilityId));
   });
 
   test("Create a new resource request and verify it in patient resources tab", async ({
@@ -26,14 +26,7 @@ test.describe("Resource Request Creation", () => {
     const category = "Medicines";
 
     await test.step("Navigate to patient details", async () => {
-      await page.getByText("View Encounter").first().click();
-      await page
-        .locator("[data-slot='patient-info-hover-card-trigger']")
-        .last()
-        .click();
-      const viewProfileLink = page.getByRole("link", { name: "View Profile" });
-      await viewProfileLink.waitFor({ state: "visible" });
-      await viewProfileLink.click();
+      await page.goto(`/facility/${facilityId}/patient/${patientId}`);
     });
 
     await test.step("Navigate to Requests tab and create request", async () => {
@@ -42,16 +35,17 @@ test.describe("Resource Request Creation", () => {
     });
 
     await test.step("Fill and submit resource request form", async () => {
-      await page.getByRole("combobox", { name: "Category" }).click();
-      await page.getByRole("option", { name: category }).click();
+      await selectComboboxOption(
+        page.getByRole("combobox", { name: "Category" }),
+        { name: category },
+      );
       await page.getByRole("textbox", { name: "Title" }).fill(title);
       await page.getByRole("textbox", { name: "Reason" }).fill(reason);
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Start typing to search..." })
-        .click();
-      await page.getByRole("option").first().waitFor({ state: "visible" });
-      await page.getByRole("option").first().click();
+      await selectComboboxOption(
+        page
+          .getByRole("combobox")
+          .filter({ hasText: "Start typing to search..." }),
+      );
       await page
         .getByRole("textbox", { name: "Name of Contact Person at" })
         .fill(faker.person.fullName());

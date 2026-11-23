@@ -1,7 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { PlusIcon, Search } from "lucide-react";
-// `basePath="/"` keeps absolute links independent of the nested facility router.
-import { Link } from "raviger";
 import { ReactNode, useId } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -40,7 +38,9 @@ import {
 } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { valueSetListSearch } from "@/lib/router/search/admin";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import {
   VALUESET_STATUS_COLORS,
   VALUESET_STATUS_ICONS,
@@ -221,8 +221,8 @@ export function ValueSetList({ scope }: { scope: ValueSetScope }) {
   const isFacility = scope.authContext === "facility";
   const { canWrite } = useCanWriteValueSet(scope);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: valueSetListSearch,
     limit: 15,
-    disableCache: true,
   });
 
   // The admin area only ever lists instance sets; inside a facility the
@@ -281,10 +281,10 @@ export function ValueSetList({ scope }: { scope: ValueSetScope }) {
         {/* The shared catalogue only offers customization, not instance creation. */}
         {canWrite && (!isFacility || source === "facility") && (
           <Button asChild className="h-10 shrink-0 sm:h-9">
-            <Link href={`${scope.basePath}/create`} basePath="/">
+            <HrefLink href={`${scope.basePath}/create`}>
               <PlusIcon className="size-4" aria-hidden="true" />
               {t("create_valueset")}
-            </Link>
+            </HrefLink>
           </Button>
         )}
       </div>
@@ -315,7 +315,7 @@ export function ValueSetList({ scope }: { scope: ValueSetScope }) {
             </p>
           </div>
         ) : (
-          <div className="w-full overflow-x-auto pb-1">
+          <div className="w-full overflow-x-auto">
             <Tabs
               value={qParams.status || ValueSetStatus.ACTIVE}
               onValueChange={(value) => updateQuery({ status: value, page: 1 })}

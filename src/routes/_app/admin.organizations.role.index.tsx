@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import AdminOrganizationList from "@/pages/Admin/organizations/AdminOrganizationList";
+import ResponsibilitiesIndex from "@/pages/Admin/organizations/ResponsibilitiesIndex";
 
 export const Route = createFileRoute("/_app/admin/organizations/role/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  return <AdminOrganizationList organizationType="role" />;
+  return <ResponsibilitiesIndex />;
 }

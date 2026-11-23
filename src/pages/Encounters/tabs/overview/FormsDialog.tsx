@@ -1,4 +1,5 @@
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +10,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -16,12 +18,13 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
-import { navigate } from "raviger";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import careConfig from "@careConfig";
+
+import { useQuestionnaireFavorites } from "./useQuestionnaireFavorites";
 
 export const FormDialog = ({
   subjectType,
@@ -44,34 +47,24 @@ export const FormDialog = ({
   } = useEncounter();
 
   const { data: questionnaires, isLoading } = useQuery({
-    queryKey: ["questionnaires", search, subjectType],
+    queryKey: ["questionnaires", search, subjectType, facilityId],
     queryFn: query.debounced(questionnaireApi.list, {
       queryParams: {
         limit: 15,
         title: search,
         status: "active",
         subject_type: subjectType,
+        facility_or_instance: facilityId,
       },
     }),
   });
 
-  // Fetch favorites - use main list endpoint with favorite_list query param
-  const { data: favoritesResponse } = useQuery({
-    queryKey: ["questionnaire-favorites", facilityId],
-    queryFn: query(questionnaireApi.list, {
-      queryParams: {
-        favorite_list: "favorites_form",
-        silent: true,
-        status: "active",
-        limit: careConfig.maxFormDialogFavorites,
-      },
-    }),
-  });
-
-  const favorites = useMemo(() => {
-    if (!favoritesResponse?.results) return [];
-    return favoritesResponse.results;
-  }, [favoritesResponse]);
+  const {
+    data: favorites = [],
+    isFetching: isFetchingFavorites,
+    isError: isFavoritesError,
+    refetch: refetchFavorites,
+  } = useQuestionnaireFavorites(facilityId, subjectType);
 
   const addFavoriteMutation = useMutation({
     mutationFn: (id: string) =>
@@ -80,7 +73,7 @@ export const FormDialog = ({
       })({ favorite_list: "favorites_form" }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["questionnaire-favorites", facilityId],
+        queryKey: ["questionnaire-favorites"],
       });
     },
   });
@@ -92,7 +85,7 @@ export const FormDialog = ({
       })({ favorite_list: "favorites_form" }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["questionnaire-favorites", facilityId],
+        queryKey: ["questionnaire-favorites"],
       });
     },
   });
@@ -149,6 +142,12 @@ export const FormDialog = ({
           />
         </div>
         <CommandList className="w-full md:max-h-[min(24rem,calc(75dvh-8rem))]">
+          {isFavoritesError && (
+            <ClinicalListError
+              isFetching={isFetchingFavorites}
+              onRetry={refetchFavorites}
+            />
+          )}
           {isLoading ? (
             <CardListSkeleton count={10} />
           ) : questionnaireList.length === 0 ? (
@@ -162,17 +161,23 @@ export const FormDialog = ({
                     value={`${questionnaire.slug} - ${questionnaire.title}`}
                     className="flex justify-between rounded-md cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100 [&>svg:last-child]:hidden"
                     onSelect={() => {
-                      navigate(
-                        appendReferralNativeContext(
+                      navigate({
+                        href: appendReferralNativeContext(
                           `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`,
                           window.location.search,
                         ),
-                      );
+                      });
                       setOpen(false);
                     }}
                   >
                     <span className="flex-1">{questionnaire.title}</span>
                     <Button
+                      disabled={
+                        isFetchingFavorites ||
+                        isFavoritesError ||
+                        addFavoriteMutation.isPending ||
+                        removeFavoriteMutation.isPending
+                      }
                       onClick={(e) => handleToggleFavorite(e, questionnaire.id)}
                       aria-label={
                         favorites.some((f) => f.id === questionnaire.id)

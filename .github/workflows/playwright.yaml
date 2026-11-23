@@ -4,14 +4,15 @@ name: Playwright Tests
 # - Triggers on push to main branches and PRs
 # - Uses path filtering to skip unnecessary runs
 # - Runs tests in parallel using shards
-# - Caches Docker images and Playwright browsers
+# - Runs the published care backend image on a cached, migrated DB snapshot
+# - Caches Playwright browsers
 # - Provides detailed test reports as artifacts
 
 on:
   push:
-    branches: [main, develop, production, playwright-actions]
+    branches: [develop, "3.*"]
   pull_request:
-    branches: [develop, production, "3.1/**"]
+    branches: [develop, "3.*"]
   workflow_dispatch:
     inputs:
       backend_ref:
@@ -28,10 +29,14 @@ env:
   REACT_CARE_API_URL: http://localhost:9000
   REACT_ENABLE_QUESTIONNAIRE_DRAFT: "true"
   BACKEND_STARTUP_TIMEOUT: 120
-  TEST_SHARDS: 3
-  # Questionnaire actions require this companion backend. Restore develop
-  # once that dependency lands, independently of the frontend branch name.
-  CARE_BACKEND_REF: ENG-737-backup
+  TEST_SHARDS: 8
+  TEST_WORKERS: 6
+  # care backend ref to test against. `develop` uses the published
+  # ghcr.io/ohcnetwork/care:latest image; any other branch, tag or commit is
+  # built from source. Override per run with the `backend_ref` input.
+  CARE_BACKEND_REF: develop
+  # Backend stack: care's db/redis/minio plus the CI backend services.
+  COMPOSE_FILE: care/docker-compose.yaml:.github/runner-files/docker-compose.ci.yaml
 
 jobs:
   # Detect if test-related files changed
@@ -41,7 +46,7 @@ jobs:
     outputs:
       tests: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.tests == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: dorny/paths-filter@v3
         id: filter
@@ -55,6 +60,7 @@ jobs:
               - 'package-lock.json'
               - 'playwright.config.ts'
               - '.github/workflows/playwright.yaml'
+              - '.github/runner-files/**'
 
   # Build application once and cache for all test shards
   build:
@@ -64,16 +70,25 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
+        id: node
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
+      - name: Cache installed dependencies
+        id: modules
+        uses: actions/cache@v6
+        with:
+          path: node_modules/
+          key: playwright-modules-${{ runner.os }}-${{ runner.arch }}-${{ steps.node.outputs.node-version }}-${{ hashFiles('package-lock.json', 'package.json', 'scripts/install-platform-deps.ts', '.npmrc') }}
+
       - name: Install dependencies
-        run: npm ci --prefer-offline
+        if: steps.modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit --no-fund
 
       - name: Build application
         run: npm run build
@@ -81,107 +96,191 @@ jobs:
           NODE_ENV: production
 
       - name: Save build and node_modules to cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: |
             build/
             node_modules/
           key: build-${{ github.sha }}
 
-  # Run E2E tests with backend integration
-  test:
+  # Resolve the backend image and prepare a migrated database snapshot once,
+  # in parallel with the build, for all test shards to restore
+  backend:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
-    needs: [changes, build]
-    timeout-minutes: 30
+    needs: changes
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3]
-
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+      revision: ${{ steps.revision.outputs.sha }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+
+      - name: Resolve backend image
+        id: image
+        env:
+          BACKEND_REF: ${{ inputs.backend_ref || env.CARE_BACKEND_REF }}
+        run: |
+          if [ "$BACKEND_REF" = develop ]; then
+            # care publishes :latest from develop. Pin its digest so every
+            # shard runs the same image even if :latest moves during this run,
+            # and check out the commit it was built from.
+            digest=$(docker buildx imagetools inspect ghcr.io/ohcnetwork/care:latest --format '{{json .Manifest}}' | jq -r .digest)
+            image=ghcr.io/ohcnetwork/care@$digest
+            # Read the revision from the pinned digest, not :latest, so the
+            # image, checkout and snapshot key always describe the same build.
+            ref=$(docker buildx imagetools inspect "$image" --format '{{json .Image}}' \
+              | jq -r '."linux/amd64".config.Labels."org.opencontainers.image.revision"')
+            echo "image=$image" >> "$GITHUB_OUTPUT"
+          else
+            # Other refs have no published image, so build one below.
+            ref=$BACKEND_REF
+            echo "image=care-ci:local" >> "$GITHUB_OUTPUT"
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
 
       - name: Checkout care
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ohcnetwork/care
           path: care
-          ref: ${{ inputs.backend_ref || env.CARE_BACKEND_REF }}
+          ref: ${{ steps.image.outputs.ref }}
 
       - name: Resolve backend revision
-        id: backend-revision
+        id: revision
         run: echo "sha=$(git -C care rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Cache Docker images
-        id: docker-cache
-        uses: actions/cache@v4
+      - name: Build backend image
+        if: steps.image.outputs.build == 'true'
+        run: |
+          docker build -f care/docker/prod.Dockerfile -t care-ci:local care
+          mkdir -p care-backend
+          docker save care-ci:local | gzip -1 > care-backend/care-image.tar.gz
+
+      - name: Restore database snapshot
+        id: snapshot
+        uses: actions/cache/restore@v6
         with:
-          path: /tmp/docker-cache
-          key: ${{ runner.os }}-docker-care-${{ steps.backend-revision.outputs.sha }}
+          path: care-backend/care-db.dump
+          key: care-db-v1-${{ steps.revision.outputs.sha }}
 
-      - name: Load cached Docker images
-        run: |
-          if [ -d /tmp/docker-cache ]; then
-            for f in /tmp/docker-cache/*.tar; do
-              docker load -i "$f" 2>/dev/null || true
-            done
-          fi
-
-      - name: Start care docker containers
-        run: |
-          cd care
-          echo DISABLE_RATELIMIT=True >> docker/.local.env
-          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
-          echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
-          # Shards reuse the setup logins for longer than the default
-          # 10-minute access token, so keep tokens valid for the whole job.
-          echo JWT_ACCESS_TOKEN_LIFETIME=60 >> docker/.local.env
-          echo JWT_REFRESH_TOKEN_LIFETIME=120 >> docker/.local.env
-          make docker_config_file=docker-compose.local.yaml up load-fixtures
-          cd ..
+      - name: Create database snapshot
+        if: steps.snapshot.outputs.cache-hit != 'true'
         env:
-          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
-
-      - name: Save Docker images to cache
-        if: steps.docker-cache.outputs.cache-hit != 'true'
+          CARE_IMAGE: ${{ steps.image.outputs.image }}
         run: |
-          mkdir -p /tmp/docker-cache
-          # Only cache images used by the CARE backend services (not base images)
-          docker compose -f care/docker-compose.local.yaml config --images 2>/dev/null | while read -r img; do
-            filename=$(echo "$img" | tr '/:' '_')
-            if [ ! -f "/tmp/docker-cache/${filename}.tar" ]; then
-              docker save -o "/tmp/docker-cache/${filename}.tar" "$img" 2>/dev/null || true
-            fi
-          done
+          JWKS_BASE64=$(cat .github/runner-files/jwks.b64.txt)
+          export JWKS_BASE64
+          mkdir -p care-backend
+          docker compose up -d --wait db redis
+          docker compose run --rm --no-deps backend sh -c \
+            "python manage.py migrate --noinput && python manage.py sync_permissions_roles && python manage.py sync_valueset"
+          docker compose exec -T db pg_dump -U postgres -Fc care > care-backend/care-db.dump
+
+      - name: Save database snapshot
+        if: steps.snapshot.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: care-backend/care-db.dump
+          key: ${{ steps.snapshot.outputs.cache-primary-key }}
+
+      - name: Upload backend snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: care-backend
+          path: care-backend/
+          retention-days: 1
+
+  # Run E2E tests with backend integration
+  test:
+    if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
+    needs: [changes, backend]
+    timeout-minutes: 30
+    runs-on: ubuntu-latest-m
+    permissions:
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Checkout care
+        uses: actions/checkout@v7
+        with:
+          repository: ohcnetwork/care
+          path: care
+          ref: ${{ needs.backend.outputs.revision }}
+
+      - name: Download backend snapshot
+        uses: actions/download-artifact@v4
+        with:
+          name: care-backend
+          path: care-backend
+
+      # The backend finishes starting while the Node.js steps below run.
+      - name: Start backend
+        env:
+          CARE_IMAGE: ${{ needs.backend.outputs.image }}
+        run: |
+          JWKS_BASE64=$(cat .github/runner-files/jwks.b64.txt)
+          export JWKS_BASE64
+          if [ -f care-backend/care-image.tar.gz ]; then
+            docker load < care-backend/care-image.tar.gz
+          fi
+          docker compose pull --quiet --policy missing
+          docker compose up -d --wait db
+          docker compose exec -T db pg_restore -U postgres -d care --no-owner --exit-on-error < care-backend/care-db.dump
+          docker compose up -d backend celery
+          # Fixtures are relative to today (schedules, tomorrow's token queue),
+          # so they load on every run instead of living in the snapshot. The
+          # published image has no dev packages, so install Faker for them.
+          faker=$(jq -r .develop.faker.version care/Pipfile.lock)
+          docker compose run -d --name care-fixtures --no-deps backend \
+            sh -c "pip install --quiet 'faker$faker' && python manage.py load_fixtures"
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
+          package-manager-cache: false
+
+      - name: Wait for build cache producer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          deadline=$((SECONDS + 960))
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            build_job=$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?per_page=100" \
+              --jq '.jobs[] | select(.name == "build") | [.status, (.conclusion // "")] | @tsv' \
+              || true)
+            read -r status conclusion <<< "$build_job" || true
+
+            if [ "$status" = "completed" ]; then
+              if [ "$conclusion" = "success" ]; then
+                exit 0
+              fi
+              echo "::error::Build job completed with conclusion: $conclusion"
+              exit 1
+            fi
+
+            sleep 20
+          done
+
+          echo "::error::Timed out waiting for the build job to finish"
+          exit 1
 
       - name: Restore build cache
-        id: cache-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            build/
-            node_modules/
-          key: build-${{ github.sha }}
-
-      - name: Retry cache restore after delay
-        if: steps.cache-restore.outputs.cache-hit != 'true'
-        id: cache-retry
-        run: |
-          echo "Cache miss on first attempt, waiting 30s for propagation..."
-          sleep 30
-
-      - name: Restore build cache (retry)
-        if: steps.cache-restore.outputs.cache-hit != 'true'
-        id: cache-restore-retry
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: |
             build/
@@ -196,7 +295,7 @@ jobs:
           fi
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}-${{ hashFiles('playwright.config.ts') }}
@@ -205,23 +304,61 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps --only-shell chromium
 
-      - name: Run setup tests (serial)
-        run: npx playwright test --project=setup --workers=1
+      - name: Wait for backend
+        run: |
+          status=$(timeout "$BACKEND_STARTUP_TIMEOUT" docker wait care-fixtures) || status=timeout
+          if [ "$status" != 0 ]; then
+            docker logs care-fixtures
+            echo "::error::Installing Faker or loading fixtures failed (exit status: $status)"
+            exit 1
+          fi
+          if ! timeout "$BACKEND_STARTUP_TIMEOUT" bash -c 'until curl -fsS http://localhost:9000/ping/ > /dev/null; do sleep 1; done'; then
+            docker logs care-backend-1
+            echo "::error::Backend did not respond within ${BACKEND_STARTUP_TIMEOUT}s"
+            exit 1
+          fi
+
+      - name: Run setup tests (parallel where independent)
+        run: >-
+          npx playwright test
+          --project=setup-auth
+          --project=setup-facility
+          --project=setup-patient
+          --project=setup-account
+          --project=setup-data
+          --workers=4
+          --reporter=list
         env:
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
       - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
         id: test
-        run: npx playwright test --project=chromium --workers=4 --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
+        run: npx playwright test --project=chromium --workers="$TEST_WORKERS" --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
         env:
+          TEST_WORKERS: ${{ env.TEST_WORKERS }}
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
+      # The vite-modules specs need a Vite dev server, which pre-bundles
+      # dependencies as soon as it starts. Run them once, on shard 1, instead
+      # of starting that server on every shard. Separate report and output
+      # paths keep shard 1's own results.
+      - name: Run Vite module tests
+        id: vite-modules
+        if: ${{ !cancelled() && matrix.shard == 1 }}
+        run: npx playwright test --project=vite-modules --workers=2 --output=test-results-vite
+        env:
+          NODE_ENV: production
+          REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
+          PLAYWRIGHT_BLOB_OUTPUT_DIR: blob-report-vite
+          PLAYWRIGHT_BLOB_OUTPUT_NAME: report-vite-modules.zip
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results-vite.json
+
       - name: Annotate test failure
-        if: failure() && steps.test.conclusion == 'failure'
+        if: failure() && (steps.test.conclusion == 'failure' || steps.vite-modules.conclusion == 'failure')
         run: |
           echo "::error::Playwright tests failed in shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }}"
 
@@ -231,21 +368,19 @@ jobs:
         with:
           name: playwright-results-shard-${{ matrix.shard }}
           path: |
+            blob-report/
+            blob-report-vite/
             playwright-report/
             test-results/
+            test-results-vite/
             test-results.json
+            test-results-vite.json
           retention-days: 7
-
-      - name: Stop backend services
-        if: always()
-        run: |
-          cd care
-          make docker_config_file=docker-compose.local.yaml down || true
 
   # Aggregate results and create final report
   report:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe'"
-    needs: [changes, test]
+    needs: [changes, build, test]
     runs-on: ubuntu-latest
     steps:
       - name: Check if tests were skipped
@@ -276,12 +411,43 @@ jobs:
           <sub>Run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})</sub>
           EOF
 
+      - name: Checkout
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/checkout@v7
+
       - name: Download all test results
         if: steps.skipped.outputs.skipped == 'false'
         uses: actions/download-artifact@v4
         with:
           pattern: playwright-results-shard-*
           path: all-results
+
+      - name: Setup Node.js
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      - name: Restore build cache for report merge
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            build/
+            node_modules/
+          key: build-${{ github.sha }}
+
+      - name: Merge Playwright blob reports
+        if: steps.skipped.outputs.skipped == 'false'
+        run: |
+          mkdir -p all-blob-reports
+          find all-results -type f -name 'report-*.zip' -exec cp {} all-blob-reports/ \;
+          if find all-blob-reports -type f -name 'report-*.zip' -print -quit | grep -q .; then
+            npx playwright merge-reports --reporter=html all-blob-reports
+          else
+            echo "::warning::No Playwright blob reports were uploaded"
+          fi
 
       - name: Merge test results
         if: steps.skipped.outputs.skipped == 'false'
@@ -293,17 +459,17 @@ jobs:
           SKIPPED_TESTS=0
 
           # Parse test results from each shard
-          for dir in all-results/playwright-results-shard-*/; do
-            if [ -f "$dir/test-results.json" ]; then
-              echo "Processing results from $dir"
+          for file in all-results/playwright-results-shard-*/test-results*.json; do
+            if [ -f "$file" ]; then
+              echo "Processing results from $file"
               # Use jq to parse JSON if available, otherwise use basic parsing
               if command -v jq &> /dev/null; then
                 # Count unique tests (including nested test.describe blocks)
                 # Use recursive descent to handle nested suites
-                SHARD_TOTAL=$(jq '[.. | objects | select(has("tests")) | .tests[]] | length' "$dir/test-results.json")
-                SHARD_PASSED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "passed")] | length' "$dir/test-results.json")
-                SHARD_FAILED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "failed" or .results[-1].status == "timedOut" or .results[-1].status == "interrupted")] | length' "$dir/test-results.json")
-                SHARD_SKIPPED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "skipped")] | length' "$dir/test-results.json")
+                SHARD_TOTAL=$(jq '[.. | objects | select(has("tests")) | .tests[]] | length' "$file")
+                SHARD_PASSED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "passed")] | length' "$file")
+                SHARD_FAILED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "failed" or .results[-1].status == "timedOut" or .results[-1].status == "interrupted")] | length' "$file")
+                SHARD_SKIPPED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "skipped")] | length' "$file")
 
                 TOTAL_TESTS=$((TOTAL_TESTS + SHARD_TOTAL))
                 PASSED_TESTS=$((PASSED_TESTS + SHARD_PASSED))
@@ -331,7 +497,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-final-report
-          path: all-results/
+          path: |
+            all-results/
+            playwright-report/
           retention-days: 14
 
       - name: Generate PR comment
@@ -342,6 +510,7 @@ jobs:
 
           **Status:** ${{ steps.merge.outputs.status }}
           **Test Shards:** ${{ env.TEST_SHARDS }}
+          **Workers per Shard:** ${{ env.TEST_WORKERS }}
 
           | Metric | Count |
           |--------|-------|

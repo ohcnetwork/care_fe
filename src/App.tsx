@@ -6,6 +6,7 @@ import { AppearanceProvider } from "@/context/AppearanceContext";
 import { ShortcutProvider } from "@/context/ShortcutContext";
 import Integrations from "@/Integrations";
 import { OverrideProvider } from "@/lib/override";
+import { useLocationChange } from "@/lib/router/location";
 import PluginEngine from "@/PluginEngine";
 import AuthUserProvider from "@/Providers/AuthUserProvider";
 import { router } from "@/router";
@@ -15,7 +16,6 @@ import careConfig from "@careConfig";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { RouterProvider } from "@tanstack/react-router";
-import { useLocationChange } from "raviger";
 import { Suspense, useEffect } from "react";
 
 const ScrollToTop = () => {

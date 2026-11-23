@@ -106,16 +106,15 @@ export default function useFileManager(
     file: FileReadMinimal,
     associating_id: string,
   ) => {
-    return queryClient.fetchQuery({
+    return queryClient.query({
       queryKey: ["file", fileType, associating_id, file.id],
-      queryFn: () =>
-        query(fileApi.get, {
-          queryParams: {
-            file_type: fileType,
-            associating_id,
-          },
-          pathParams: { fileId: file.id || "" },
-        })({} as any),
+      queryFn: query(fileApi.get, {
+        queryParams: {
+          file_type: fileType,
+          associating_id,
+        },
+        pathParams: { fileId: file.id || "" },
+      }),
     });
   };
 
@@ -146,7 +145,7 @@ export default function useFileManager(
     setFileUrl(signedUrl);
   };
 
-  const validateArchiveReason = (name: any) => {
+  const validateArchiveReason = (name: string) => {
     if (name.trim() === "") {
       setArchiveReasonError(t("please_enter_a_valid_reason"));
       return false;
@@ -158,10 +157,9 @@ export default function useFileManager(
 
   const { mutateAsync: archiveUpload } = useMutation({
     mutationFn: (body: { id: string; archive_reason: string }) =>
-      query(fileApi.archive, {
-        body: { archive_reason: body.archive_reason },
+      mutate(fileApi.archive, {
         pathParams: { fileId: body.id },
-      })({} as any),
+      })({ archive_reason: body.archive_reason }),
     onSuccess: () => {
       toast.success(t("file_archived_successfully"));
       queryClient.invalidateQueries({
@@ -338,7 +336,7 @@ export default function useFileManager(
           </DialogHeader>
 
           <form
-            onSubmit={(event: any) => {
+            onSubmit={(event) => {
               event.preventDefault();
               handleFileArchive(archiveDialogueOpen);
             }}
@@ -456,7 +454,7 @@ export default function useFileManager(
             </DialogTitle>
           </DialogHeader>
           <form
-            onSubmit={(event: any) => {
+            onSubmit={(event) => {
               event.preventDefault();
               setEditing(true);
               if (editDialogueOpen) partialupdateFileName(editDialogueOpen);

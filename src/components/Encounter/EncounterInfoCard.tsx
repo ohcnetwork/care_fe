@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { Link as RavigerLink } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { EncounterActions } from "@/components/Encounter/EncounterActions";
@@ -51,6 +50,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
 
   return (
     <Card
+      data-cy="encounter-card"
       data-status={encounter.status}
       key={props.encounter.id}
       className={cn(
@@ -184,17 +184,18 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
 
       <CardFooter className="flex flex-wrap justify-end items-center px-2 py-2 gap-x-1 gap-y-2 mt-auto">
         <Button variant="link" aria-label={t("patient_home")} asChild>
-          <RavigerLink
-            basePath="/"
-            href={`/facility/${facilityId}/patients/home?${new URLSearchParams({
+          <Link
+            to="/facility/$facilityId/patients/home"
+            params={{ facilityId }}
+            search={{
               phone_number: encounter.patient.phone_number,
               year_of_birth: encounter.patient.year_of_birth?.toString() || "",
               partial_id: encounter.patient.id.slice(0, 5),
-            }).toString()}`}
+            }}
             className="text-gray-700 underline hover:text-gray-900 text-sm font-medium"
           >
             {t("patient_home")}
-          </RavigerLink>
+          </Link>
         </Button>
         <Button variant="outline" aria-label={t("view_encounter")} asChild>
           <Link

@@ -23,6 +23,9 @@ test.describe("Product Edit", () => {
     await expect(page).toHaveURL(/\/settings\/product\/[0-9a-fA-F-]{36}$/);
 
     await expect(page.getByText("Back to list")).toBeVisible();
+    const updatedToast = page.getByText("Product updated successfully");
+    await expect(updatedToast).toBeVisible();
+    await expect(updatedToast).toBeHidden();
 
     // Revert status to active as part of cleanup
     await page.getByRole("button", { name: "Edit" }).click();
@@ -30,6 +33,8 @@ test.describe("Product Edit", () => {
     await page.getByRole("option", { name: "Active", exact: true }).click();
     await page.getByRole("button", { name: "Update" }).click();
 
-    await expect(page.getByText("Product updated successfully")).toBeVisible();
+    await expect(updatedToast).toBeVisible();
+    await page.getByRole("button", { name: "Edit" }).click();
+    await expect(page.getByLabel("Status")).toHaveText("Active");
   });
 });

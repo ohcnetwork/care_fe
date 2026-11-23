@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { ChevronLeft, Settings, X } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -30,8 +30,8 @@ export function FacilitySettingsSidebarHeader() {
             )}
           >
             <Link
-              href={`/facility/${facilityId}/overview`}
-              basePath="/"
+              to="/facility/$facilityId/overview"
+              params={{ facilityId }}
               aria-label={t("back_to_facility")}
               onClick={() => {
                 if (isMobile) setOpenMobile(false);

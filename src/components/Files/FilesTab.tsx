@@ -1,5 +1,4 @@
 import { t } from "i18next";
-import { useQueryParams } from "raviger";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -9,6 +8,8 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 import { useCareAppTabs } from "@/hooks/useCareApps";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { fileListSearch } from "@/lib/router/search/patient";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -25,13 +26,15 @@ export interface FilesTabsProps {
   readOnly?: boolean;
 }
 
+const TAB_SCOPED_PARAMS = ["name", "is_archived", "page", "limit"];
+
 export const FilesTab = ({
   patient,
   type,
   encounter,
   readOnly,
 }: FilesTabsProps) => {
-  const [qParams, setQParams] = useQueryParams();
+  const [qParams, setQParams] = useQueryParams(fileListSearch);
 
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(
@@ -45,7 +48,8 @@ export const FilesTab = ({
 
   const pluginTabs = useCareAppTabs<FilesTabsProps>("encounterFileTabs");
   const allowedTabs = ["all", "reports", ...Object.keys(pluginTabs)];
-  const tabValue = allowedTabs.includes(qParams.file) ? qParams.file : "all";
+  const tabValue =
+    qParams.file && allowedTabs.includes(qParams.file) ? qParams.file : "all";
 
   const canWriteCurrentEncounter =
     canWriteEncounter &&
@@ -66,9 +70,16 @@ export const FilesTab = ({
     <div className="space-y-4">
       <Tabs
         value={tabValue}
-        onValueChange={(value) =>
-          setQParams({ file: value }, { overwrite: false })
-        }
+        onValueChange={(value) => {
+          // Search, status and page belong to the tab that set them; carrying
+          // them over could land the other tab on an empty or out-of-range page.
+          const rest = Object.fromEntries(
+            Object.entries(qParams).filter(
+              ([key]) => !TAB_SCOPED_PARAMS.includes(key),
+            ),
+          );
+          setQParams({ ...rest, file: value }, { overwrite: true });
+        }}
       >
         <TabsList className={type != "encounter" ? "mt-2" : ""}>
           <TabsTrigger value="all">{t("files")}</TabsTrigger>

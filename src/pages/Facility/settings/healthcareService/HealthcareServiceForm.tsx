@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate as ravigerNavigate } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -32,10 +31,9 @@ import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 
 import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 
-// import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
-
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import { navigate } from "@/lib/router/navigate";
 import {
   type HealthcareServiceCreateSpec,
@@ -46,7 +44,7 @@ import {
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().trim().min(1, "Name is required"),
   //   service_type: z.object({
   //     code: z.string().min(1, "Code is required"),
   //     display: z.string().min(1, "Display name is required"),
@@ -193,12 +191,12 @@ function HealthcareServiceFormContent({
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["healthcareServices"] });
         toast.success(t("healthcare_service_updated_successfully"));
-        ravigerNavigate(
-          `/facility/${facilityId}/settings/healthcare_services/${healthcareServiceId}`,
-          {
-            replace: true,
-          },
-        );
+        if (!healthcareServiceId) return;
+        navigate({
+          to: "/facility/$facilityId/settings/healthcare_services/$id",
+          params: { facilityId, id: healthcareServiceId },
+          replace: true,
+        });
       },
     });
 
@@ -474,10 +472,7 @@ function HealthcareServiceFormContent({
               <Button
                 variant="outline"
                 onClick={() =>
-                  navigate({
-                    to: "/facility/$facilityId/settings/healthcare_services",
-                    params: { facilityId },
-                  })
+                  goBack(`/facility/${facilityId}/settings/healthcare_services`)
                 }
               >
                 {t("cancel")}
