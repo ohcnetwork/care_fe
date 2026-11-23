@@ -215,11 +215,14 @@ function SpecimenDefinitionFormContent({
   const isEditMode = Boolean(specimenSlug);
 
   const formSchema = z.object({
-    title: z.string().min(1, t("field_required")),
+    title: z.string().trim().min(1, t("field_required")),
     slug_value: slugValueSchema(),
     status: z.enum(SpecimenDefinitionStatus),
-    description: z.string().min(1, t("field_required")),
-    derived_from_uri: z.url({ message: t("field_required") }).optional(),
+    description: z.string().trim().min(1, t("field_required")),
+    derived_from_uri: z
+      .url({ message: t("invalid_url") })
+      .or(z.literal(""))
+      .optional(),
     type_collected: CodeSchema,
     patient_preparation: z.array(CodeSchema).min(0),
     collection: z

@@ -12,6 +12,7 @@ import {
   typeCollectedOptions,
 } from "tests/facility/settings/specimenDefinitions/specimenDefinitionConstants";
 import { getFieldErrorMessage } from "tests/helper/error";
+import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -305,6 +306,29 @@ test.describe("Specimen Definitions Create", () => {
     ).toBeVisible();
   });
 
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: "Add Definition" }).click();
+
+    const whitespace = "   ";
+    const fields = ["Title *", "Description *"];
+
+    for (const field of fields) {
+      await page.getByRole("textbox", { name: field }).fill(whitespace);
+    }
+
+    await page.getByRole("button", { name: /save/i }).click();
+
+    for (const field of fields) {
+      const errorMessage = getFieldErrorMessage(
+        page.getByRole("textbox", { name: field }),
+      );
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("This field is required");
+    }
+  });
+
   test("should auto-populate slug from title", async ({ page }) => {
     await page.getByRole("button", { name: "Add Definition" }).click();
 
@@ -364,6 +388,38 @@ test.describe("Specimen Definitions Create", () => {
     await page.getByRole("textbox", { name: "Slug *" }).fill(validSlug);
     await page.getByRole("button", { name: /save/i }).click();
 
+    await expect(page).not.toHaveURL(/\/new$/);
+  });
+
+  test("should reject a malformed Derived From URI and save once it is cleared", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: "Add Definition" }).click();
+
+    await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
+    await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);
+    await page
+      .getByRole("textbox", { name: "Description *" })
+      .fill(definitionDescription);
+    await page.getByRole("combobox", { name: "Status *" }).click();
+    await page.getByRole("option", { name: status }).click();
+
+    await page.getByRole("combobox", { name: "Type Collected *" }).click();
+    await page.getByRole("option", { name: typeCollected }).click();
+
+    const derivedFromURIField = page.getByRole("textbox", {
+      name: "Derived From URI",
+    });
+    await derivedFromURIField.fill(faker.lorem.words(2));
+    await page.getByRole("button", { name: /save/i }).click();
+    await expect(getFieldErrorMessage(derivedFromURIField)).toHaveText(
+      "Please enter a valid URL",
+    );
+
+    await derivedFromURIField.clear();
+    await page.getByRole("button", { name: /save/i }).click();
+
+    await expectToast(page, "Specimen definition created");
     await expect(page).not.toHaveURL(/\/new$/);
   });
 });

@@ -316,6 +316,8 @@ docker build -t care_fe .
 docker run -p 8080:80 care_fe
 ```
 
+To deploy without building, download the `build/` folder that CI publishes for `develop`, the `3.*` branches and each release. See [Prebuilt bundles](docs/prebuilt-bundles.md).
+
 > [!IMPORTANT]
 > Vite reads the `REACT_*` variables at build time, so set them before you build. For the Docker image, put them in `.env.local` before you run `docker build`: the build reads the files in the repository, not the variables in your shell. To change most settings without a rebuild, serve your own `/runtime-env.js` or pass them to the container with `docker run -e`: see [Runtime configuration](docs/runtime-configuration.md). When you upgrade an existing installation, check [UPGRADING.md](UPGRADING.md) for breaking changes.
 

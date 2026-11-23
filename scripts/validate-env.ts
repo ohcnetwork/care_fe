@@ -164,6 +164,7 @@ export const envSchema = z
     REACT_RECAPTCHA_SITE_KEY: z.string(),
     REACT_APP_RESEND_OTP_TIMEOUT: positiveNumberAsString.optional(),
     REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: positiveNumberAsString.optional(),
+    REACT_APP_MAX_FILE_UPLOAD_SIZE_MB: positiveNumberAsString.optional(),
     REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT: positiveNumberAsString.optional(),
     REACT_JWT_TOKEN_REFRESH_INTERVAL: positiveNumberAsString.optional(),
     REACT_DISABLE_PATIENT_LOGIN: booleanAsStringSchema.optional(),

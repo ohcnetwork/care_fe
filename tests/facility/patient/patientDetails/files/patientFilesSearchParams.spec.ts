@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { filterSelectButton } from "tests/helper/searchParams";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
@@ -38,11 +39,7 @@ test.describe("Patient files search params", () => {
       );
     });
 
-  const filterBadge = (page: Page, name: string) =>
-    page
-      .getByRole("tabpanel", { name: "Files", exact: true })
-      .locator('[data-slot="badge"]')
-      .filter({ hasText: name });
+  const statusFilter = (page: Page) => filterSelectButton(page, "Status");
 
   test("writes the archived filter to the URL and the list request", async ({
     page,
@@ -56,12 +53,14 @@ test.describe("Patient files search params", () => {
       page,
       (params) => params.get("is_archived") === "true",
     );
-    await page.getByRole("button", { name: "Filter", exact: true }).click();
-    await page.getByRole("menuitem", { name: "Archived Files" }).click();
+    await statusFilter(page).click();
+    await page
+      .getByRole("menuitemradio", { name: "Archived", exact: true })
+      .click();
     await request;
 
     await expect(page).toHaveURL(/[?&]is_archived=true(&|$)/);
-    await expect(filterBadge(page, "Archived Files")).toBeVisible();
+    await expect(statusFilter(page)).toContainText("Archived");
   });
 
   test("restores the archived filter from a bookmarked URL", async ({
@@ -74,7 +73,7 @@ test.describe("Patient files search params", () => {
     await page.goto(filesUrl({ is_archived: "false" }));
     await request;
 
-    await expect(filterBadge(page, "Active Files")).toBeVisible();
+    await expect(statusFilter(page)).toContainText("Active");
   });
 
   test("ignores invalid values in a bookmarked URL", async ({ page }) => {
@@ -87,8 +86,7 @@ test.describe("Patient files search params", () => {
     await expect(
       page.getByRole("textbox", { name: /search files/i }),
     ).toBeVisible();
-    await expect(filterBadge(page, "Active Files")).toBeHidden();
-    await expect(filterBadge(page, "Archived Files")).toBeHidden();
+    await expect(statusFilter(page)).toHaveText("Status");
   });
 
   test("opens the reports sub tab named in the URL", async ({ page }) => {

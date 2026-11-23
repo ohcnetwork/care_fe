@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { addDays } from "date-fns";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
-import { expectToast } from "tests/helper/ui";
+import { expectAndDismissToast, expectToast } from "tests/helper/ui";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -70,10 +70,10 @@ async function submitQuestionnaire(page: Page) {
   await page.getByRole("button", { name: "Save Changes", exact: true }).click();
 }
 
+// Closes the toast too: a test that saves the form again (the cleanup
+// steps) must see that save's own toast, not this one.
 async function expectSubmissionSuccess(page: Page) {
-  await expect(
-    page.getByText("Questionnaire submitted successfully"),
-  ).toBeVisible();
+  await expectAndDismissToast(page, "Questionnaire submitted successfully");
 }
 
 async function cancelEncounterFromCurrentForm(page: Page) {

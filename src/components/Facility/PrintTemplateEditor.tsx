@@ -20,6 +20,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -30,19 +36,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 
 import mutate from "@/Utils/request/mutate";
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { FacilityRead } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 import {
@@ -50,47 +47,42 @@ import {
   type PrintTemplate,
 } from "@/types/facility/printTemplate";
 
-interface Props {
+interface PrintTemplateEditorProps {
   facility: FacilityRead;
-  trigger?: React.ReactNode;
 }
 
-const EMPTY_TEMPLATE: PrintTemplate = {
-  slug: "",
-};
-
 const URL_PLACEHOLDER = "https://...";
+const TEMPLATE_TYPES = Object.values(PrintTemplateType);
 
-export default function PrintTemplateSheet({ facility, trigger }: Props) {
+export function PrintTemplateEditor({ facility }: PrintTemplateEditorProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [templates, setTemplates] = useState<PrintTemplate[]>([]);
-
-  const handleOpen = (isOpen: boolean) => {
-    if (isOpen) {
-      setTemplates(
-        facility.print_templates?.length
-          ? structuredClone(facility.print_templates)
-          : [],
-      );
-    }
-    setOpen(isOpen);
-  };
+  const [draft, setDraft] = useState<PrintTemplate[] | null>(null);
+  const persistedTemplates = facility.print_templates ?? [];
+  const templates = draft ?? persistedTemplates;
+  const isDirty = draft !== null;
+  useNavigationBlocker(isDirty, t("unsaved_changes_warning"));
+  const configuredTypes = templates
+    .map((template) => template.slug)
+    .filter(Boolean);
+  const usedTypes = new Set(configuredTypes);
+  const hasDuplicateTypes = usedTypes.size !== configuredTypes.length;
+  const availableTypes = TEMPLATE_TYPES.filter((type) => !usedTypes.has(type));
 
   const { mutate: updateFacility, isPending } = useMutation({
     mutationFn: mutate(facilityApi.update, {
       pathParams: { facilityId: facility.id },
     }),
-    onSuccess: () => {
-      toast.success(t("print_templates_updated"));
+    onSuccess: (updatedFacility) => {
+      queryClient.setQueryData(["facility", facility.id], updatedFacility);
+      setDraft(null);
       queryClient.invalidateQueries({ queryKey: ["facility", facility.id] });
-      setOpen(false);
+      toast.success(t("print_templates_updated"));
     },
   });
 
   const handleSave = () => {
-    const validTemplates = templates.filter((tpl) => tpl.slug.trim());
+    if (hasDuplicateTypes || isPending || !isDirty) return;
     updateFacility({
       name: facility.name,
       description: facility.description,
@@ -104,88 +96,127 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
       pincode: facility.pincode,
       geo_organization: facility.geo_organization.id,
       features: facility.features,
-      print_templates: validTemplates,
+      print_templates: templates.filter((template) => template.slug.trim()),
     });
   };
 
-  const addTemplate = () => {
-    setTemplates((prev) => [...prev, { ...EMPTY_TEMPLATE }]);
+  const setTemplates = (
+    updater: (previous: PrintTemplate[]) => PrintTemplate[],
+  ) => {
+    setDraft((previous) => {
+      if (isPending) return previous;
+      const next = updater(previous ?? persistedTemplates);
+      return JSON.stringify(next) === JSON.stringify(persistedTemplates)
+        ? null
+        : next;
+    });
   };
 
+  const addTemplate = (slug: PrintTemplateType) => {
+    setTemplates((prev) =>
+      prev.some((template) => template.slug === slug)
+        ? prev
+        : [...prev, { slug }],
+    );
+  };
   const removeTemplate = (index: number) => {
     setTemplates((prev) => prev.filter((_, i) => i !== index));
   };
-
   const updateTemplate = (
     index: number,
-    updater: (tpl: PrintTemplate) => PrintTemplate,
+    updater: (template: PrintTemplate) => PrintTemplate,
   ) => {
     setTemplates((prev) =>
-      prev.map((tpl, i) => (i === index ? updater(tpl) : tpl)),
+      prev.map((template, i) => (i === index ? updater(template) : template)),
     );
   };
 
   return (
-    <Sheet open={open} onOpenChange={handleOpen}>
-      <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent size="lg" className="overflow-hidden">
-        <SheetHeader>
-          <SheetTitle>{t("print_templates")}</SheetTitle>
-          <SheetDescription>
-            {t("print_templates_description")}
-          </SheetDescription>
-        </SheetHeader>
-
-        <SheetBody>
-          <div className="space-y-4">
-            {templates.length === 0 && (
-              <div className="text-center py-8 text-gray-500 border border-dashed rounded-lg">
-                <Printer className="mx-auto mb-2 size-8 text-gray-400" />
-                <p className="text-sm">{t("no_print_templates")}</p>
-                <p className="text-xs mt-1">{t("no_print_templates_hint")}</p>
-              </div>
-            )}
-
-            {templates.map((template, index) => (
-              <TemplateEditor
-                key={index}
-                template={template}
-                onUpdate={(updater) => updateTemplate(index, updater)}
-                onRemove={() => removeTemplate(index)}
-              />
-            ))}
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={addTemplate}
+    <form
+      noValidate
+      aria-label={t("print_templates")}
+      onSubmit={(event) => {
+        event.preventDefault();
+        handleSave();
+      }}
+    >
+      <fieldset disabled={isPending} className="min-w-0 space-y-4">
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={availableTypes.length === 0}
+              >
+                <Plus className="size-4" aria-hidden="true" />
+                {t("add_print_template")}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="max-h-80 overflow-y-auto"
             >
-              <Plus className="mr-2 size-4" />
-              {t("add_print_template")}
-            </Button>
+              {availableTypes.map((slug) => (
+                <DropdownMenuItem key={slug} onSelect={() => addTemplate(slug)}>
+                  {t(slug)}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        {templates.length === 0 && (
+          <div className="rounded-lg border border-dashed py-8 text-center text-muted-foreground">
+            <Printer className="mx-auto mb-2 size-8" aria-hidden="true" />
+            <p>{t("no_print_templates")}</p>
+            <p className="mt-1 text-sm">{t("no_print_templates_hint")}</p>
           </div>
-        </SheetBody>
-
-        <SheetFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            {t("cancel")}
+        )}
+        {templates.map((template, index) => (
+          <TemplateEditor
+            key={index}
+            template={template}
+            disabled={isPending}
+            availableTypes={TEMPLATE_TYPES.filter(
+              (type) => type === template.slug || !usedTypes.has(type),
+            )}
+            onUpdate={(updater) => updateTemplate(index, updater)}
+            onRemove={() => removeTemplate(index)}
+          />
+        ))}
+        {hasDuplicateTypes && (
+          <p role="alert" className="text-sm text-destructive">
+            {t("print_template_types_must_be_unique")}
+          </p>
+        )}
+        <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={!isDirty}
+            onClick={() => setDraft(null)}
+          >
+            {t("discard_changes")}
           </Button>
-          <Button onClick={handleSave} disabled={isPending}>
+          <Button type="submit" disabled={!isDirty || hasDuplicateTypes}>
             {isPending ? t("saving") : t("save")}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </div>
+      </fieldset>
+    </form>
   );
 }
 
 function TemplateEditor({
   template,
+  availableTypes,
+  disabled,
   onUpdate,
   onRemove,
 }: {
   template: PrintTemplate;
+  availableTypes: PrintTemplateType[];
+  disabled: boolean;
   onUpdate: (updater: (tpl: PrintTemplate) => PrintTemplate) => void;
   onRemove: () => void;
 }) {
@@ -206,7 +237,7 @@ function TemplateEditor({
               <SelectValue placeholder={t("template_slug_placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              {Object.values(PrintTemplateType).map((slug) => (
+              {availableTypes.map((slug) => (
                 <SelectItem key={slug} value={slug}>
                   {t(slug)}
                 </SelectItem>
@@ -249,7 +280,11 @@ function TemplateEditor({
             </span>
           </AccordionTrigger>
           <AccordionContent>
-            <PrintSetupSection template={template} onUpdate={onUpdate} />
+            <PrintSetupSection
+              template={template}
+              onUpdate={onUpdate}
+              disabled={disabled}
+            />
           </AccordionContent>
         </AccordionItem>
 
@@ -275,7 +310,11 @@ function TemplateEditor({
             </span>
           </AccordionTrigger>
           <AccordionContent>
-            <WatermarkSection template={template} onUpdate={onUpdate} />
+            <WatermarkSection
+              template={template}
+              onUpdate={onUpdate}
+              disabled={disabled}
+            />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -284,6 +323,7 @@ function TemplateEditor({
 }
 
 type SectionProps = {
+  disabled?: boolean;
   template: PrintTemplate;
   onUpdate: (updater: (tpl: PrintTemplate) => PrintTemplate) => void;
 };
@@ -420,7 +460,7 @@ function PageSection({ template, onUpdate }: SectionProps) {
   );
 }
 
-function PrintSetupSection({ template, onUpdate }: SectionProps) {
+function PrintSetupSection({ template, onUpdate, disabled }: SectionProps) {
   const { t } = useTranslation();
 
   return (
@@ -450,6 +490,8 @@ function PrintSetupSection({ template, onUpdate }: SectionProps) {
           <p className="text-xs text-gray-500">{t("auto_print_description")}</p>
         </div>
         <Switch
+          disabled={disabled}
+          aria-label={t("auto_print")}
           checked={template.print_setup?.auto_print ?? false}
           onCheckedChange={(checked) =>
             onUpdate((tpl) => ({
@@ -773,7 +815,7 @@ function BrandingSection({ template, onUpdate }: SectionProps) {
   );
 }
 
-function WatermarkSection({ template, onUpdate }: SectionProps) {
+function WatermarkSection({ template, onUpdate, disabled }: SectionProps) {
   const { t } = useTranslation();
   const watermark = template.watermark;
 
@@ -809,6 +851,8 @@ function WatermarkSection({ template, onUpdate }: SectionProps) {
           </p>
         </div>
         <Switch
+          disabled={disabled}
+          aria-label={t("enable_watermark")}
           checked={watermark?.enabled ?? false}
           onCheckedChange={(checked) =>
             onUpdate((tpl) => ({

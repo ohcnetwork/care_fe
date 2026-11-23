@@ -55,10 +55,11 @@ export async function applyCustomDateFilterRange(
   await openMultiFilter(page, filterName);
   await page.getByRole("menuitem", { name: /custom date range/i }).click();
 
-  const dateInputs = page.locator('input[type="date"]');
-  await dateInputs.first().fill(after);
-  await dateInputs.nth(1).fill(before);
-  await page.getByRole("button", { name: /confirm/i }).click();
+  const dateInputs = page.locator('[data-slot="date-range-picker"] input');
+  const localFormat = (date: string) => date.split("-").reverse().join("/");
+  await dateInputs.first().fill(localFormat(after));
+  await dateInputs.nth(1).fill(localFormat(before));
+  await page.getByRole("button", { name: /^apply$/i }).click();
   await page.keyboard.press("Escape");
 }
 

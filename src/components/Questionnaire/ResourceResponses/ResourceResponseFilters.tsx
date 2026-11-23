@@ -139,14 +139,14 @@ export default function ResourceResponseFilters({
           >
             <Command
               shouldFilter={false}
-              className="text-neutral-950 [&_[data-slot=command-input-wrapper]]:m-1 [&_[data-slot=command-input-wrapper]]:h-12 [&_[data-slot=command-input-wrapper]]:rounded-lg [&_[data-slot=command-input-wrapper]]:border-0 [&_[data-slot=command-input-wrapper]]:bg-neutral-100 [&_[data-slot=command-input-wrapper]]:focus-within:outline-2 [&_[data-slot=command-input-wrapper]]:focus-within:outline-indigo-500 md:[&_[data-slot=command-input-wrapper]]:h-10 [&_[cmdk-item]]:min-h-12 [&_[cmdk-item]]:data-[selected=true]:bg-neutral-100 [&_[cmdk-item]]:data-[selected=true]:text-neutral-950 md:[&_[cmdk-item]]:min-h-10"
+              className="text-neutral-950 [&_[cmdk-item]]:min-h-12 [&_[cmdk-item]]:data-[selected=true]:bg-neutral-100 [&_[cmdk-item]]:data-[selected=true]:text-neutral-950 md:[&_[cmdk-item]]:min-h-10"
             >
               <CommandInput
                 aria-label={t("search_forms")}
                 placeholder={t("search_forms")}
                 value={formSearch}
                 onValueChange={setFormSearch}
-                className="h-full border-none text-base text-neutral-950 shadow-none ring-0 outline-hidden placeholder:text-neutral-500 md:text-sm"
+                className="text-base text-neutral-950 placeholder:text-neutral-500 md:text-sm"
               />
               <CommandList>
                 <CommandGroup>

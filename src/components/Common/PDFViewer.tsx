@@ -18,6 +18,7 @@ export default function PDFViewer(
       <div className="overflow-auto max-w-full max-h-full max-md:max-w-[50vw]">
         <Document
           file={props.url}
+          suspense={false}
           onLoadSuccess={({ numPages }) =>
             props.onDocumentLoadSuccess(numPages)
           }

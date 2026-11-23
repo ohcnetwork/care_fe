@@ -56,11 +56,11 @@ export function QuestionCodingCard({
   };
 
   const content = code?.code ? (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-gray-200 bg-gray-50 p-3">
+    <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-gray-200 bg-gray-50 p-3">
       {/* Bare (tab) mode has no card title carrying "LOINC: 8867-4" — the
           row itself shows the combined system+code string. */}
       {bare ? (
-        <span className="font-mono text-sm font-semibold text-gray-900">
+        <span className="max-w-full break-all font-mono text-sm font-semibold text-gray-900">
           {`${systemLabel(code.system)}: ${code.code}`}
         </span>
       ) : (
@@ -78,7 +78,7 @@ export function QuestionCodingCard({
       <span className="w-full min-w-0 break-words text-sm text-gray-600">
         {code.display}
       </span>
-      <div className="flex shrink-0 items-center gap-1">
+      <div className="flex max-w-full flex-wrap items-center gap-1">
         <ValueSetSelect
           system={OBSERVATION_VALUESET_SLUG}
           value={null}
@@ -88,7 +88,7 @@ export function QuestionCodingCard({
           showCode
           variant="ghost"
           size="sm"
-          className="font-medium text-gray-700"
+          className="w-auto max-w-full font-medium text-gray-700"
         />
         <Button
           type="button"

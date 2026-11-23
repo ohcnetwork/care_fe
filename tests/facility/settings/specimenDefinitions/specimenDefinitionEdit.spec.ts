@@ -207,6 +207,7 @@ test.describe("Specimen Definitions Edit", () => {
     await page
       .getByRole("button", { name: "Remove Collection", exact: true })
       .click();
+    await page.getByRole("textbox", { name: "Derived From URI" }).clear();
     const saved = page.waitForResponse(
       (res) =>
         res.url().includes("/specimen_definition/") &&
@@ -216,6 +217,7 @@ test.describe("Specimen Definitions Edit", () => {
     const response = await saved;
     expect(response.ok()).toBeTruthy();
     expect(response.request().postDataJSON().collection).toEqual({});
+    expect(response.request().postDataJSON().derived_from_uri).toBe("");
     await expect(
       page.getByRole("heading", { name: `${definitionTitle}-edited` }),
     ).toBeVisible();
@@ -226,5 +228,6 @@ test.describe("Specimen Definitions Edit", () => {
     await expect(page.getByText(collectionOption, { exact: true })).toHaveCount(
       0,
     );
+    await expect(page.getByText(derivedFromURI)).toHaveCount(0);
   });
 });

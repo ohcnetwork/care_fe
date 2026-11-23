@@ -4,18 +4,23 @@ import {
   addTopLevelQuestion,
   createQuestionnaireAndOpenBuilder,
 } from "tests/helper/questionnaireV2";
+import { mockRegisteredGroupPlugin } from "tests/helper/testPlugin";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 import type { Question } from "@/types/questionnaire/question";
 
 test.use({ storageState: "tests/.auth/user.json" });
-test.skip(
-  process.env.CARE_DENTAL_E2E !== "1",
-  "Requires the care_dental_fe plugin",
-);
 
-test("registered dental groups save one tooth and finding per repeated row", async ({
+// Core's registered-group support, exercised through a fixture plugin
+// (tests/fixtures/plugin/registeredGroupRemoteEntry.js) that registers
+// `care_test_plugin.slot_chart`: a required `slot` choice (S1–S6) and an
+// optional `type` finding (flag, note) per row.
+test.beforeEach(async ({ page }) => {
+  await mockRegisteredGroupPlugin(page);
+});
+
+test("registered groups save one slot and finding per repeated row", async ({
   page,
 }) => {
   const facilityId = getFacilityId();
@@ -26,23 +31,21 @@ test("registered dental groups save one tooth and finding per repeated row", asy
   await test.step("Create a registered group through the group picker", async () => {
     const detailUrl = await createQuestionnaireAndOpenBuilder(page, {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
-      title: `QV2 Dental ${stamp}`,
+      title: `QV2 Slot Chart ${stamp}`,
       status: "Active",
     });
     questionnaireId = detailUrl.split("/").at(-1)!;
-    await addTopLevelQuestion(page, `Dental findings ${stamp}`);
+    await addTopLevelQuestion(page, `Slot findings ${stamp}`);
     await page
       .getByRole("combobox", { name: "Question Type", exact: true })
       .click();
     await page
       .locator('[data-slot="command-item"][data-value="group"]')
       .click();
-    await page
-      .getByRole("option", { name: "Dental chart", exact: true })
-      .click();
+    await page.getByRole("option", { name: "Slot chart", exact: true }).click();
     await page
       .getByRole("checkbox", {
-        name: "Require at least one tooth",
+        name: "Require at least one slot",
         exact: true,
       })
       .check();
@@ -65,7 +68,7 @@ test("registered dental groups save one tooth and finding per repeated row", asy
       type: "group",
       repeats: true,
       required: true,
-      structured_type: "care_dental_fe.tooth_chart",
+      structured_type: "care_test_plugin.slot_chart",
     });
     expect(group.questions).toHaveLength(2);
     expect(
@@ -75,14 +78,14 @@ test("registered dental groups save one tooth and finding per repeated row", asy
         repeats: !!repeats,
       })),
     ).toEqual([
-      { link_id: `${group.link_id}__tooth`, type: "choice", repeats: false },
+      { link_id: `${group.link_id}__slot`, type: "choice", repeats: false },
       { link_id: `${group.link_id}__type`, type: "choice", repeats: false },
     ]);
     await expectToast(page, "Questionnaire updated successfully");
     await page.reload();
     await expect(
       page.getByRole("checkbox", {
-        name: "Require at least one tooth",
+        name: "Require at least one slot",
         exact: true,
       }),
     ).toBeChecked();
@@ -94,8 +97,8 @@ test("registered dental groups save one tooth and finding per repeated row", asy
   await test.step("The fill renderer preserves and removes independent rows", async () => {
     await page.getByRole("button", { name: "Preview", exact: true }).click();
     const canvas = page.getByRole("region", { name: "Form canvas" });
-    const first = canvas.locator('button[data-tooth="11"]');
-    const second = canvas.locator('button[data-tooth="21"]');
+    const first = canvas.locator('button[data-chart-slot="S1"]');
+    const second = canvas.locator('button[data-chart-slot="S2"]');
     await first.click();
     await second.click();
     await expect(first).toHaveAttribute("aria-pressed", "true");
@@ -105,22 +108,22 @@ test("registered dental groups save one tooth and finding per repeated row", asy
     await expect(second).toHaveAttribute("aria-pressed", "true");
   });
 
-  await test.step("Submit two findings on one tooth and a plain selection as ordinary rows", async () => {
+  await test.step("Submit two findings on one slot and a plain selection as ordinary rows", async () => {
     const { patientId, encounterId } =
       await createQuestionnaireEncounter(facilityId);
     await page.goto(
       `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,
     );
-    const chart = page.locator(".care-dental-fe");
-    await chart.getByRole("radio", { name: "Caries", exact: true }).click();
-    await chart.locator('button[data-tooth="11"]').click();
-    await chart.getByRole("radio", { name: "Mobile", exact: true }).click();
-    await chart.locator('button[data-tooth="11"]').click();
+    const chart = page.locator(".care-test-plugin-slot-chart");
+    await chart.getByRole("radio", { name: "Flag", exact: true }).click();
+    await chart.locator('button[data-chart-slot="S1"]').click();
+    await chart.getByRole("radio", { name: "Note", exact: true }).click();
+    await chart.locator('button[data-chart-slot="S1"]').click();
     await chart.getByRole("radio", { name: "Select", exact: true }).click();
-    await chart.locator('button[data-tooth="21"]').click();
+    await chart.locator('button[data-chart-slot="S2"]').click();
 
-    const tooth = group.questions!.find(
-      (child) => child.link_id === `${group.link_id}__tooth`,
+    const slot = group.questions!.find(
+      (child) => child.link_id === `${group.link_id}__slot`,
     )!;
     const type = group.questions!.find(
       (child) => child.link_id === `${group.link_id}__type`,
@@ -160,8 +163,8 @@ test("registered dental groups save one tooth and finding per repeated row", asy
     expect(result.question_id).toBe(group.id);
     expect(result.sub_results).toHaveLength(3);
     const rowValues = result.sub_results.map((row) => ({
-      tooth: row
-        .find((answer) => answer.question_id === tooth.id)
+      slot: row
+        .find((answer) => answer.question_id === slot.id)
         ?.values.map(({ value }) => value),
       type: row
         .find((answer) => answer.question_id === type.id)
@@ -169,9 +172,9 @@ test("registered dental groups save one tooth and finding per repeated row", asy
     }));
     expect(rowValues).toEqual(
       expect.arrayContaining([
-        { tooth: ["11"], type: ["caries"] },
-        { tooth: ["11"], type: ["mobile"] },
-        { tooth: ["21"], type: undefined },
+        { slot: ["S1"], type: ["flag"] },
+        { slot: ["S1"], type: ["note"] },
+        { slot: ["S2"], type: undefined },
       ]),
     );
     const batch = (await response.json()) as {
@@ -187,9 +190,9 @@ test("registered dental groups save one tooth and finding per repeated row", asy
     expect(submitted.status_code).toBe(200);
     expect(submitted.data.cleaned_response[group.link_id]).toEqual(
       expect.arrayContaining([
-        { [tooth.link_id]: "11", [type.link_id]: "caries" },
-        { [tooth.link_id]: "11", [type.link_id]: "mobile" },
-        { [tooth.link_id]: "21" },
+        { [slot.link_id]: "S1", [type.link_id]: "flag" },
+        { [slot.link_id]: "S1", [type.link_id]: "note" },
+        { [slot.link_id]: "S2" },
       ]),
     );
     await expectToast(page, /questionnaire submitted successfully/i);
@@ -202,7 +205,7 @@ test("repair aligns a registered group's child schema while preserving matching 
   const facilityId = getFacilityId();
   await createQuestionnaireAndOpenBuilder(page, {
     basePath: `/facility/${facilityId}/settings/questionnaires`,
-    title: `QV2 Dental Repair ${Date.now()}`,
+    title: `QV2 Slot Chart Repair ${Date.now()}`,
   });
   await page.getByRole("button", { name: "Import Questions" }).click();
   await page.locator('input[type="file"]').setInputFiles({
@@ -212,17 +215,17 @@ test("repair aligns a registered group's child schema while preserving matching 
       JSON.stringify({
         questions: [
           {
-            text: "Dental findings",
+            text: "Slot findings",
             type: "group",
-            structured_type: "care_dental_fe.tooth_chart",
+            structured_type: "care_test_plugin.slot_chart",
             link_id: "chart",
             repeats: false,
             required: true,
             questions: [
               {
-                link_id: "chart__tooth",
+                link_id: "chart__slot",
                 type: "string",
-                text: "Old tooth field",
+                text: "Old slot field",
                 max_length: 3,
               },
               {
@@ -273,12 +276,12 @@ test("repair aligns a registered group's child schema while preserving matching 
   expect(repaired.questions![0]).toMatchObject({
     id: original.questions![0].id,
     link_id: original.questions![0].link_id,
-    text: "Tooth",
+    text: "Slot",
     type: "choice",
     required: true,
   });
   expect(repaired.questions![0].max_length ?? null).toBeNull();
-  expect(repaired.questions![0].answer_option).toHaveLength(52);
+  expect(repaired.questions![0].answer_option).toHaveLength(6);
   expect(repaired.questions![1]).toMatchObject({
     link_id: `${original.link_id}__type`,
     text: "Finding",
@@ -290,7 +293,7 @@ test("repair aligns a registered group's child schema while preserving matching 
   await page.reload();
   await expect(
     page.getByRole("checkbox", {
-      name: "Require at least one tooth",
+      name: "Require at least one slot",
       exact: true,
     }),
   ).toBeChecked();

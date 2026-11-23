@@ -661,7 +661,7 @@ export function WorkspaceStudio({
               );
             })}
           </div>
-          <p className="min-w-0 flex-1 text-xs leading-relaxed text-soft-foreground">
+          <p className="min-w-0 flex-[1_1_16rem] text-xs leading-relaxed text-soft-foreground">
             {t(`workspace_studio_surface_${surface}_hint`)}
           </p>
         </div>

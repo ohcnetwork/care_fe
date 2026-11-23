@@ -38,6 +38,9 @@ export function CancelTokenDialog({
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, token.queue.id],
       });
+      queryClient.invalidateQueries({ queryKey: ["token", token.id] });
+      queryClient.invalidateQueries({ queryKey: ["appointment"] });
+      queryClient.invalidateQueries({ queryKey: ["infinite-appointments"] });
       onOpenChange(false);
     },
   });

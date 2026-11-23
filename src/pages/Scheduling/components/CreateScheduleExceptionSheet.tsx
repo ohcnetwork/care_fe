@@ -9,7 +9,6 @@ import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -36,6 +35,7 @@ import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { useQueryParams } from "@/lib/router/queryParams";
 import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
+import { ScheduleValidityField } from "@/pages/Scheduling/components/ScheduleValidityField";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -67,7 +67,7 @@ export default function CreateScheduleExceptionSheet({
 
   const formSchema = z
     .object({
-      reason: z.string().min(1, t("field_required")),
+      reason: z.string().trim().min(1, t("field_required")),
       valid_from: z
         .date({ error: t("field_required") })
         .min(dayjs().startOf("day").toDate(), {
@@ -135,15 +135,18 @@ export default function CreateScheduleExceptionSheet({
     },
   });
 
+  // The URL holds local calendar dates (YYYY-MM-DD). `new Date()` would read
+  // them as UTC midnight, the previous day west of UTC; dayjs reads them as
+  // local midnight.
   useEffect(() => {
     if (qParams.valid_from) {
-      form.setValue("valid_from", new Date(qParams.valid_from));
+      form.setValue("valid_from", dayjs(qParams.valid_from).toDate());
     }
   }, [qParams.valid_from, form]);
 
   useEffect(() => {
     if (qParams.valid_to) {
-      form.setValue("valid_to", new Date(qParams.valid_to));
+      form.setValue("valid_to", dayjs(qParams.valid_to).toDate());
     }
   }, [qParams.valid_to, form]);
 
@@ -241,43 +244,7 @@ export default function CreateScheduleExceptionSheet({
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                  <FormField
-                    control={form.control}
-                    name="valid_from"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel aria-required>{t("valid_from")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
-                          }
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="valid_to"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel aria-required>{t("valid_to")}</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
-                          }
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <ScheduleValidityField disablePast />
 
                 <FormField
                   control={form.control}

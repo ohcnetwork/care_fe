@@ -113,6 +113,7 @@ import { Route as AppFacilityFacilityIdSettingsImmunizationPoliciesRouteImport }
 import { Route as AppFacilityFacilityIdSettingsLocationsRouteImport } from "./routes/_app/facility.$facilityId.settings/locations";
 import { Route as AppFacilityFacilityIdSettingsObservation_definitionsRouteImport } from "./routes/_app/facility.$facilityId.settings/observation_definitions";
 import { Route as AppFacilityFacilityIdSettingsPatient_identifier_configRouteImport } from "./routes/_app/facility.$facilityId.settings/patient_identifier_config";
+import { Route as AppFacilityFacilityIdSettingsPrintTemplatesRouteImport } from "./routes/_app/facility.$facilityId.settings/print-templates";
 import { Route as AppFacilityFacilityIdSettingsProductRouteImport } from "./routes/_app/facility.$facilityId.settings/product";
 import { Route as AppFacilityFacilityIdSettingsProduct_knowledgeRouteImport } from "./routes/_app/facility.$facilityId.settings/product_knowledge";
 import { Route as AppFacilityFacilityIdSettingsQuestionnairesRouteImport } from "./routes/_app/facility.$facilityId.settings/questionnaires";
@@ -935,6 +936,12 @@ const AppFacilityFacilityIdSettingsPatient_identifier_configRoute =
   AppFacilityFacilityIdSettingsPatient_identifier_configRouteImport.update({
     id: "/patient_identifier_config",
     path: "/patient_identifier_config",
+    getParentRoute: () => AppFacilityFacilityIdSettingsRouteRoute,
+  } as any);
+const AppFacilityFacilityIdSettingsPrintTemplatesRoute =
+  AppFacilityFacilityIdSettingsPrintTemplatesRouteImport.update({
+    id: "/print-templates",
+    path: "/print-templates",
     getParentRoute: () => AppFacilityFacilityIdSettingsRouteRoute,
   } as any);
 const AppFacilityFacilityIdSettingsProductRoute =
@@ -2718,6 +2725,7 @@ export interface FileRoutesByFullPath {
   "/facility/$facilityId/settings/locations": typeof AppFacilityFacilityIdSettingsLocationsRouteWithChildren;
   "/facility/$facilityId/settings/observation_definitions": typeof AppFacilityFacilityIdSettingsObservation_definitionsRouteWithChildren;
   "/facility/$facilityId/settings/patient_identifier_config": typeof AppFacilityFacilityIdSettingsPatient_identifier_configRouteWithChildren;
+  "/facility/$facilityId/settings/print-templates": typeof AppFacilityFacilityIdSettingsPrintTemplatesRoute;
   "/facility/$facilityId/settings/product": typeof AppFacilityFacilityIdSettingsProductRouteWithChildren;
   "/facility/$facilityId/settings/product_knowledge": typeof AppFacilityFacilityIdSettingsProduct_knowledgeRouteWithChildren;
   "/facility/$facilityId/settings/questionnaires": typeof AppFacilityFacilityIdSettingsQuestionnairesRouteWithChildren;
@@ -3047,6 +3055,7 @@ export interface FileRoutesByTo {
   "/facility/$facilityId/service_requests/$serviceRequestId": typeof AppFacilityFacilityIdService_requestsServiceRequestIdRoute;
   "/facility/$facilityId/settings/$": typeof AppFacilityFacilityIdSettingsSplatRoute;
   "/facility/$facilityId/settings/general": typeof AppFacilityFacilityIdSettingsGeneralRoute;
+  "/facility/$facilityId/settings/print-templates": typeof AppFacilityFacilityIdSettingsPrintTemplatesRoute;
   "/facility/$facilityId/settings/referrals": typeof AppFacilityFacilityIdSettingsReferralsRoute;
   "/facility/$facilityId/settings/responses": typeof AppFacilityFacilityIdSettingsResponsesRoute;
   "/facility/$facilityId/settings/token_category": typeof AppFacilityFacilityIdSettingsToken_categoryRoute;
@@ -3387,6 +3396,7 @@ export interface FileRoutesById {
   "/_app/facility/$facilityId/settings/locations": typeof AppFacilityFacilityIdSettingsLocationsRouteWithChildren;
   "/_app/facility/$facilityId/settings/observation_definitions": typeof AppFacilityFacilityIdSettingsObservation_definitionsRouteWithChildren;
   "/_app/facility/$facilityId/settings/patient_identifier_config": typeof AppFacilityFacilityIdSettingsPatient_identifier_configRouteWithChildren;
+  "/_app/facility/$facilityId/settings/print-templates": typeof AppFacilityFacilityIdSettingsPrintTemplatesRoute;
   "/_app/facility/$facilityId/settings/product": typeof AppFacilityFacilityIdSettingsProductRouteWithChildren;
   "/_app/facility/$facilityId/settings/product_knowledge": typeof AppFacilityFacilityIdSettingsProduct_knowledgeRouteWithChildren;
   "/_app/facility/$facilityId/settings/questionnaires": typeof AppFacilityFacilityIdSettingsQuestionnairesRouteWithChildren;
@@ -3733,6 +3743,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/settings/locations"
     | "/facility/$facilityId/settings/observation_definitions"
     | "/facility/$facilityId/settings/patient_identifier_config"
+    | "/facility/$facilityId/settings/print-templates"
     | "/facility/$facilityId/settings/product"
     | "/facility/$facilityId/settings/product_knowledge"
     | "/facility/$facilityId/settings/questionnaires"
@@ -4062,6 +4073,7 @@ export interface FileRouteTypes {
     | "/facility/$facilityId/service_requests/$serviceRequestId"
     | "/facility/$facilityId/settings/$"
     | "/facility/$facilityId/settings/general"
+    | "/facility/$facilityId/settings/print-templates"
     | "/facility/$facilityId/settings/referrals"
     | "/facility/$facilityId/settings/responses"
     | "/facility/$facilityId/settings/token_category"
@@ -4401,6 +4413,7 @@ export interface FileRouteTypes {
     | "/_app/facility/$facilityId/settings/locations"
     | "/_app/facility/$facilityId/settings/observation_definitions"
     | "/_app/facility/$facilityId/settings/patient_identifier_config"
+    | "/_app/facility/$facilityId/settings/print-templates"
     | "/_app/facility/$facilityId/settings/product"
     | "/_app/facility/$facilityId/settings/product_knowledge"
     | "/_app/facility/$facilityId/settings/questionnaires"
@@ -5396,6 +5409,13 @@ declare module "@tanstack/react-router" {
       path: "/patient_identifier_config";
       fullPath: "/facility/$facilityId/settings/patient_identifier_config";
       preLoaderRoute: typeof AppFacilityFacilityIdSettingsPatient_identifier_configRouteImport;
+      parentRoute: typeof AppFacilityFacilityIdSettingsRouteRoute;
+    };
+    "/_app/facility/$facilityId/settings/print-templates": {
+      id: "/_app/facility/$facilityId/settings/print-templates";
+      path: "/print-templates";
+      fullPath: "/facility/$facilityId/settings/print-templates";
+      preLoaderRoute: typeof AppFacilityFacilityIdSettingsPrintTemplatesRouteImport;
       parentRoute: typeof AppFacilityFacilityIdSettingsRouteRoute;
     };
     "/_app/facility/$facilityId/settings/product": {
@@ -7622,6 +7642,7 @@ interface AppFacilityFacilityIdSettingsRouteRouteChildren {
   AppFacilityFacilityIdSettingsLocationsRoute: typeof AppFacilityFacilityIdSettingsLocationsRouteWithChildren;
   AppFacilityFacilityIdSettingsObservation_definitionsRoute: typeof AppFacilityFacilityIdSettingsObservation_definitionsRouteWithChildren;
   AppFacilityFacilityIdSettingsPatient_identifier_configRoute: typeof AppFacilityFacilityIdSettingsPatient_identifier_configRouteWithChildren;
+  AppFacilityFacilityIdSettingsPrintTemplatesRoute: typeof AppFacilityFacilityIdSettingsPrintTemplatesRoute;
   AppFacilityFacilityIdSettingsProductRoute: typeof AppFacilityFacilityIdSettingsProductRouteWithChildren;
   AppFacilityFacilityIdSettingsProduct_knowledgeRoute: typeof AppFacilityFacilityIdSettingsProduct_knowledgeRouteWithChildren;
   AppFacilityFacilityIdSettingsQuestionnairesRoute: typeof AppFacilityFacilityIdSettingsQuestionnairesRouteWithChildren;
@@ -7663,6 +7684,8 @@ const AppFacilityFacilityIdSettingsRouteRouteChildren: AppFacilityFacilityIdSett
       AppFacilityFacilityIdSettingsObservation_definitionsRouteWithChildren,
     AppFacilityFacilityIdSettingsPatient_identifier_configRoute:
       AppFacilityFacilityIdSettingsPatient_identifier_configRouteWithChildren,
+    AppFacilityFacilityIdSettingsPrintTemplatesRoute:
+      AppFacilityFacilityIdSettingsPrintTemplatesRoute,
     AppFacilityFacilityIdSettingsProductRoute:
       AppFacilityFacilityIdSettingsProductRouteWithChildren,
     AppFacilityFacilityIdSettingsProduct_knowledgeRoute:
