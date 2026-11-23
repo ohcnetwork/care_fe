@@ -90,7 +90,6 @@ export function FacilityHomeActions({
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-
       <EditFacilitySheet
         facilityId={facilityData.id}
         open={editOpen}

@@ -96,8 +96,9 @@ test.beforeEach(async ({ page }) => {
       await route.fulfill({ json: user });
     } else if (path === `/api/v1/facility/${facility.id}/`) {
       if (route.request().method() === "PUT") {
-        const { print_templates }: Pick<FacilityRead, "print_templates"> =
-          route.request().postDataJSON();
+        const { print_templates }: Pick<FacilityRead, "print_templates"> = route
+          .request()
+          .postDataJSON();
         savedTemplates.push(print_templates);
         facility = { ...facility, print_templates };
       } else {
