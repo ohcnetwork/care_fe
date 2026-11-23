@@ -19,94 +19,108 @@ test.describe("User Management in Departments", () => {
     await page.getByRole("tab", { name: "Users" }).click();
   });
 
-  test("Create and link a new user to department", async ({ page }) => {
-    const firstName = faker.person.firstName();
-    const lastName = faker.person.lastName();
-    const username = `${firstName.toLowerCase()}${faker.string.numeric(4)}`;
-    const email = faker.internet.email({ firstName, lastName });
-    const password = "Test@123";
-    const phoneNumber = `${faker.helpers.arrayElement([7, 8, 9])}${faker.string.numeric(9)}`;
+  test(
+    "Create and link a new user to department",
+    {
+      tag: ["@atomic", "@cap:department.user.create"],
+    },
+    async ({ page }) => {
+      const firstName = faker.person.firstName();
+      const lastName = faker.person.lastName();
+      const username = `${firstName.toLowerCase()}${faker.string.numeric(4)}`;
+      const email = faker.internet.email({ firstName, lastName });
+      const password = "Test@123";
+      const phoneNumber = `${faker.helpers.arrayElement([7, 8, 9])}${faker.string.numeric(9)}`;
 
-    await test.step("Navigate to user creation form", async () => {
+      await test.step("Navigate to user creation form", async () => {
+        await page.getByRole("button", { name: "Add User" }).click();
+        await expect(
+          page.getByRole("heading", { name: "Add New User" }),
+        ).toBeVisible();
+      });
+
+      await test.step("Fill and submit user creation form", async () => {
+        const userType = faker.helpers.arrayElement(USER_TYPES);
+        const gender = faker.helpers.arrayElement(GENDERS);
+        await page
+          .getByRole("textbox", { name: "First Name *" })
+          .fill(firstName);
+        await page.getByRole("textbox", { name: "Last Name *" }).fill(lastName);
+        await page.getByRole("textbox", { name: "Username" }).fill(username);
+        await page.getByRole("textbox", { name: "Email *" }).fill(email);
+        await page
+          .getByRole("textbox", { name: "Password", exact: true })
+          .fill(password);
+        await page
+          .getByRole("textbox", { name: "Confirm Password *" })
+          .fill(password);
+        await page
+          .getByRole("textbox", { name: "Phone Number *" })
+          .fill(phoneNumber);
+        await page.getByRole("radio", { name: gender, exact: true }).check();
+
+        await page
+          .getByRole("combobox")
+          .filter({ hasText: "Select organization" })
+          .click();
+        await page.getByPlaceholder("Search organization").fill(userType);
+        await page.getByRole("option", { name: userType }).click();
+        await page
+          .getByRole("combobox")
+          .filter({ hasText: "Select designation" })
+          .click();
+        await page.getByPlaceholder("Search Roles").fill("Member");
+        await page.getByRole("option", { name: "Member" }).click();
+
+        const createButton = page.getByRole("button", { name: "Create User" });
+        await createButton.click();
+      });
+
+      await test.step("Link user to organization", async () => {
+        const role = faker.helpers.arrayElement(ROLES);
+        await page
+          .getByRole("combobox")
+          .filter({ hasText: "Select Role" })
+          .click();
+        await page.getByPlaceholder("Search Roles").fill(role);
+        await page.getByRole("option", { name: role }).click();
+        await page.getByRole("button", { name: "Add to Organization" }).click();
+
+        await expect(
+          page
+            .getByRole("region", { name: "Notifications" })
+            .getByText("User added successfully"),
+        ).toBeVisible({ timeout: 10000 });
+        await expect(
+          page
+            .getByRole("region", { name: "Notifications" })
+            .getByText("User added to organization successfully"),
+        ).toBeVisible({ timeout: 10000 });
+      });
+
+      await test.step("Verify user appears in department users list", async () => {
+        await page
+          .getByRole("textbox", { name: "Search by username" })
+          .fill(username);
+        await expect(page.getByText(username)).toBeVisible();
+      });
+    },
+  );
+
+  test(
+    "Open user creation form with default values",
+    {
+      tag: ["@atomic", "@cap:department.user.create"],
+    },
+    async ({ page }) => {
       await page.getByRole("button", { name: "Add User" }).click();
+
       await expect(
         page.getByRole("heading", { name: "Add New User" }),
       ).toBeVisible();
-    });
-
-    await test.step("Fill and submit user creation form", async () => {
-      const userType = faker.helpers.arrayElement(USER_TYPES);
-      const gender = faker.helpers.arrayElement(GENDERS);
-      await page.getByRole("textbox", { name: "First Name *" }).fill(firstName);
-      await page.getByRole("textbox", { name: "Last Name *" }).fill(lastName);
-      await page.getByRole("textbox", { name: "Username" }).fill(username);
-      await page.getByRole("textbox", { name: "Email *" }).fill(email);
-      await page
-        .getByRole("textbox", { name: "Password", exact: true })
-        .fill(password);
-      await page
-        .getByRole("textbox", { name: "Confirm Password *" })
-        .fill(password);
-      await page
-        .getByRole("textbox", { name: "Phone Number *" })
-        .fill(phoneNumber);
-      await page.getByRole("radio", { name: gender, exact: true }).check();
-
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Select organization" })
-        .click();
-      await page.getByPlaceholder("Search organization").fill(userType);
-      await page.getByRole("option", { name: userType }).click();
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Select designation" })
-        .click();
-      await page.getByPlaceholder("Search Roles").fill("Member");
-      await page.getByRole("option", { name: "Member" }).click();
-
-      const createButton = page.getByRole("button", { name: "Create User" });
-      await createButton.click();
-    });
-
-    await test.step("Link user to organization", async () => {
-      const role = faker.helpers.arrayElement(ROLES);
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Select Role" })
-        .click();
-      await page.getByPlaceholder("Search Roles").fill(role);
-      await page.getByRole("option", { name: role }).click();
-      await page.getByRole("button", { name: "Add to Organization" }).click();
-
       await expect(
-        page
-          .getByRole("region", { name: "Notifications" })
-          .getByText("User added successfully"),
-      ).toBeVisible({ timeout: 10000 });
-      await expect(
-        page
-          .getByRole("region", { name: "Notifications" })
-          .getByText("User added to organization successfully"),
-      ).toBeVisible({ timeout: 10000 });
-    });
-
-    await test.step("Verify user appears in department users list", async () => {
-      await page
-        .getByRole("textbox", { name: "Search by username" })
-        .fill(username);
-      await expect(page.getByText(username)).toBeVisible();
-    });
-  });
-
-  test("Open user creation form with default values", async ({ page }) => {
-    await page.getByRole("button", { name: "Add User" }).click();
-
-    await expect(
-      page.getByRole("heading", { name: "Add New User" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("radio", { name: "Set password now" }),
-    ).toBeChecked();
-  });
+        page.getByRole("radio", { name: "Set password now" }),
+      ).toBeChecked();
+    },
+  );
 });

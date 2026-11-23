@@ -12,16 +12,18 @@ test.describe("Healthcare Service Create", () => {
     await page.goto(`/facility/${facilityId}/settings/healthcare_services/new`);
   });
 
-  test("should reject whitespace-only input in required text fields", async ({
-    page,
-  }) => {
-    const nameInput = page.getByRole("textbox", { name: "Name" });
-    await nameInput.fill("   ");
+  test(
+    "should reject whitespace-only input in required text fields",
+    { tag: ["@atomic", "@cap:service.create"] },
+    async ({ page }) => {
+      const nameInput = page.getByRole("textbox", { name: "Name" });
+      await nameInput.fill("   ");
 
-    await page.getByRole("button", { name: "Create" }).click();
+      await page.getByRole("button", { name: "Create" }).click();
 
-    const errorMessage = getFieldErrorMessage(nameInput);
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText("Name is required");
-  });
+      const errorMessage = getFieldErrorMessage(nameInput);
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("Name is required");
+    },
+  );
 });

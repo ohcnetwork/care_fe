@@ -1,34 +1,32 @@
-import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import {
+  createDepartmentViaApi,
+  createUserViaApi,
+  linkUserToDepartmentViaUi,
+  searchAndOpenDepartment,
+} from "tests/helper/facilitySettings";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Department User Management", () => {
-  // Tests share state (users in the same department) — run serially to avoid conflicts
-  test.describe.configure({ mode: "serial" });
-
   let facilityId: string;
+  // Each test links its own user to its own department, so the tests share
+  // nothing and run in parallel. The roles are fixed, non-admin facility roles.
+  let departmentName: string;
+  let username: string;
 
-  const testUsers = ["care-volunteer"];
-
-  const testRoles = ["Doctor", "Staff", "Facility Admin"];
+  const linkRole = "Doctor";
+  const updatedRole = "Staff";
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
+    ({ name: departmentName } = await createDepartmentViaApi({ facilityId }));
+    ({ username } = await createUserViaApi({
+      usernamePrefix: "dept-user",
+    }));
     await page.goto(`/facility/${facilityId}/settings/departments`);
   });
-
-  async function searchDepartment(page: Page, departmentName: string) {
-    await page
-      .getByRole("textbox", { name: "Search by department/team name" })
-      .fill(departmentName);
-  }
-
-  async function openFirstDepartment(page: Page, departmentName: string) {
-    await searchDepartment(page, departmentName);
-    await page.getByRole("row").filter({ hasText: departmentName }).click();
-  }
 
   async function navigateToUsersTab(page: Page) {
     await page.getByRole("tab", { name: "Users" }).click();
@@ -42,22 +40,6 @@ test.describe("Department User Management", () => {
     await page.getByRole("combobox").click();
     await page.locator("[cmdk-input]").fill(userName);
     await page.getByRole("option", { name: userName }).first().click();
-  }
-
-  async function selectRole(page: Page, role: string) {
-    await page.getByRole("combobox").filter({ hasText: "Select Role" }).click();
-    await page.getByPlaceholder("Search Roles").fill(role);
-    await page.getByRole("option", { name: role }).first().click();
-  }
-
-  async function submitAddUser(page: Page) {
-    await page.getByRole("button", { name: "Add to Organization" }).click();
-    // Wait for the success toast to confirm the operation completed
-    await expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText("User added to organization successfully"),
-    ).toBeVisible();
   }
 
   async function searchUserInTable(page: Page, userName: string) {
@@ -114,114 +96,106 @@ test.describe("Department User Management", () => {
     await expect(page.getByText("No Users Found")).toBeVisible();
   }
 
-  test("Cancel linking user without assigning role", async ({ page }) => {
-    const userName = faker.helpers.arrayElement(testUsers);
-    const departmentName = "Administration";
+  test(
+    "Cancel linking user without assigning role",
+    { tag: ["@atomic", "@cap:department.user.link"] },
+    async ({ page }) => {
+      // Navigate to department and open users tab
+      await searchAndOpenDepartment(page, departmentName);
+      await navigateToUsersTab(page);
 
-    // Navigate to department and open users tab
-    await openFirstDepartment(page, departmentName);
-    await navigateToUsersTab(page);
+      // Open link user dialog and select user but don't select role
+      await openLinkUserDialog(page);
+      await selectUser(page, username);
 
-    // Open link user dialog and select user but don't select role
-    await openLinkUserDialog(page);
-    await selectUser(page, userName);
+      // Close dialog without submitting
+      await closeDialog(page);
 
-    // Close dialog without submitting
-    await closeDialog(page);
+      // Verify user was not added to department
+      await searchUserInTable(page, username);
+      await verifyUserNotInList(page);
+    },
+  );
 
-    // Verify user was not added to department
-    await searchUserInTable(page, userName);
-    await verifyUserNotInList(page);
-  });
+  test(
+    "Link user and verify they appear in list",
+    { tag: ["@atomic", "@cap:department.user.link"] },
+    async ({ page }) => {
+      // Link the user to the department from its users tab
+      await linkUserToDepartmentViaUi(page, {
+        facilityId,
+        departmentName,
+        username,
+        role: linkRole,
+      });
 
-  test("Link user and verify they appear in list", async ({ page }) => {
-    const userName = faker.helpers.arrayElement(testUsers);
-    const role = faker.helpers.arrayElement(testRoles);
-    const departmentName = "Administration";
+      // Verify user exists in department list
+      await searchUserInTable(page, username);
+      await verifyUserInList(page, username);
+      await verifyUserRole(page, linkRole);
 
-    // Navigate to department and open users tab
-    await openFirstDepartment(page, departmentName);
-    await navigateToUsersTab(page);
+      // Cleanup: Remove user for rerun
+      await openEditRoleDialog(page);
+      await removeUser(page);
+      await verifyUserRemovalSuccess(page);
+    },
+  );
 
-    // Link existing user to department
-    await openLinkUserDialog(page);
-    await selectUser(page, userName);
-    await selectRole(page, role);
-    await submitAddUser(page);
+  test(
+    "Update linked user role",
+    { tag: ["@atomic", "@cap:department.user.role.edit"] },
+    async ({ page }) => {
+      // Link user to department
+      await linkUserToDepartmentViaUi(page, {
+        facilityId,
+        departmentName,
+        username,
+        role: linkRole,
+      });
 
-    // Verify user exists in department list
-    await searchUserInTable(page, userName);
-    await verifyUserInList(page, userName);
-    await verifyUserRole(page, role);
+      // Search and verify user with initial role
+      await searchUserInTable(page, username);
+      await verifyUserRole(page, linkRole);
 
-    // Cleanup: Remove user for rerun
-    await openEditRoleDialog(page);
-    await removeUser(page);
-    await verifyUserRemovalSuccess(page);
-  });
+      // Update user role
+      await openEditRoleDialog(page);
+      await updateRole(page, updatedRole);
+      await verifyRoleUpdateSuccess(page);
 
-  test("Update linked user role", async ({ page }) => {
-    const userName = faker.helpers.arrayElement(testUsers);
-    const initialRole = faker.helpers.arrayElement(testRoles);
-    const updatedRole = faker.helpers.arrayElement(
-      testRoles.filter((role) => role !== initialRole),
-    );
-    const departmentName = "Administration";
+      // Verify role was updated
+      await searchUserInTable(page, username);
+      await verifyUserRole(page, updatedRole);
 
-    // Navigate to department and open users tab
-    await openFirstDepartment(page, departmentName);
-    await navigateToUsersTab(page);
+      // Cleanup: Remove user for rerun
+      await openEditRoleDialog(page);
+      await removeUser(page);
+      await verifyUserRemovalSuccess(page);
+    },
+  );
 
-    // Link user to department
-    await openLinkUserDialog(page);
-    await selectUser(page, userName);
-    await selectRole(page, initialRole);
-    await submitAddUser(page);
+  test(
+    "Remove linked user from department",
+    { tag: ["@atomic", "@cap:department.user.unlink"] },
+    async ({ page }) => {
+      // Link user to department
+      await linkUserToDepartmentViaUi(page, {
+        facilityId,
+        departmentName,
+        username,
+        role: linkRole,
+      });
 
-    // Search and verify user with initial role
-    await searchUserInTable(page, userName);
-    await verifyUserRole(page, initialRole);
+      // Verify user is in list
+      await searchUserInTable(page, username);
+      await verifyUserInList(page, username);
 
-    // Update user role
-    await openEditRoleDialog(page);
-    await updateRole(page, updatedRole);
-    await verifyRoleUpdateSuccess(page);
+      // Remove user from department
+      await openEditRoleDialog(page);
+      await removeUser(page);
+      await verifyUserRemovalSuccess(page);
 
-    // Verify role was updated
-    await searchUserInTable(page, userName);
-    await verifyUserRole(page, updatedRole);
-
-    // Cleanup: Remove user for rerun
-    await openEditRoleDialog(page);
-    await removeUser(page);
-    await verifyUserRemovalSuccess(page);
-  });
-
-  test("Remove linked user from department", async ({ page }) => {
-    const userName = faker.helpers.arrayElement(testUsers);
-    const role = faker.helpers.arrayElement(testRoles);
-    const departmentName = "Administration";
-
-    // Navigate to department and open users tab
-    await openFirstDepartment(page, departmentName);
-    await navigateToUsersTab(page);
-
-    // Link user to department
-    await openLinkUserDialog(page);
-    await selectUser(page, userName);
-    await selectRole(page, role);
-    await submitAddUser(page);
-
-    // Verify user is in list
-    await searchUserInTable(page, userName);
-    await verifyUserInList(page, userName);
-
-    // Remove user from department
-    await openEditRoleDialog(page);
-    await removeUser(page);
-    await verifyUserRemovalSuccess(page);
-
-    // Verify user is no longer in list
-    await verifyUserNotInList(page);
-  });
+      // Verify user is no longer in list
+      await verifyUserNotInList(page);
+    },
+  );
 });

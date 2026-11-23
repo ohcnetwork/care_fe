@@ -1,130 +1,116 @@
 import { expect, test } from "@playwright/test";
+import {
+  createFacilityViaApi,
+  deleteFacilityCoverViaUi,
+  uploadFacilityCoverViaUi,
+} from "tests/helper/facilitySettings";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Facility Image Settings", () => {
-  // All tests edit the cover of the shared facility. Run them in order in one
-  // worker: an upload in a parallel test would make the popup show that image
-  // instead of the empty upload area the last test expects.
-  test.describe.configure({ mode: "default" });
-
+  // Each test edits the cover of a facility of its own, so an upload in one
+  // test can't show up in another, and the shared facility keeps its cover.
   let facilityId: string;
 
   test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
+    ({ facilityId } = await createFacilityViaApi({
+      templateFacilityId: getFacilityId(),
+    }));
 
     await page.goto(`/facility/${facilityId}/settings/general`);
   });
 
-  test("Upload and Remove facility image", async ({ page }) => {
-    const banner = page.locator('[data-cy="facility-cover"]');
-    await expect(banner).toBeVisible();
-    const originalHeight = await banner.evaluate(
-      (element) => element.getBoundingClientRect().height,
-    );
-    await page
-      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
-      .click();
+  test(
+    "Upload and Remove facility image",
+    { tag: ["@atomic", "@cap:facility.settings.cover.upload"] },
+    async ({ page }) => {
+      const banner = page.locator('[data-cy="facility-cover"]');
+      await expect(banner).toBeVisible();
+      const originalHeight = await banner.evaluate(
+        (element) => element.getBoundingClientRect().height,
+      );
+      await uploadFacilityCoverViaUi(page, {
+        facilityId,
+        filePath: "tests/fixtures/images/test-image.jpg",
+      });
 
-    const fileInput = page.locator("input[type='file']");
-    await fileInput.setInputFiles("tests/fixtures/images/test-image.jpg");
+      const cover = page.locator('[data-cy="facility-cover-image"]');
+      await expect(cover).toBeVisible();
+      await expect
+        .poll(() =>
+          banner.evaluate((element) => element.getBoundingClientRect().height),
+        )
+        .toBe(originalHeight);
+      await expect(cover).toHaveCSS("object-fit", "cover");
 
-    await page.getByRole("button", { name: "Crop" }).click();
-    await page.getByRole("button", { name: "Upload", exact: true }).click();
+      await deleteFacilityCoverViaUi(page, { facilityId });
 
-    await expect(page.getByText("Cover image updated")).toBeVisible();
-    const cover = page.locator('[data-cy="facility-cover-image"]');
-    await expect(cover).toBeVisible();
-    await expect
-      .poll(() =>
-        banner.evaluate((element) => element.getBoundingClientRect().height),
-      )
-      .toBe(originalHeight);
-    await expect(cover).toHaveCSS("object-fit", "cover");
+      await expect(
+        page.getByRole("button", { name: "Add cover photo", exact: true }),
+      ).toBeVisible();
+      await expect(cover).toHaveCount(0);
+    },
+  );
 
-    await page
-      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
-      .click();
-    await page.getByRole("button", { name: "Delete" }).click();
+  test(
+    "Replace existing facility image with a new one",
+    { tag: ["@atomic", "@cap:facility.settings.cover.upload"] },
+    async ({ page }) => {
+      // Upload first image
+      await uploadFacilityCoverViaUi(page, {
+        facilityId,
+        filePath: "tests/fixtures/images/test-image.jpg",
+      });
 
-    await expect(page.getByText("Cover image deleted")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Add cover photo", exact: true }),
-    ).toBeVisible();
-    await expect(cover).toHaveCount(0);
-  });
+      // Replace with second image
+      await uploadFacilityCoverViaUi(page, {
+        facilityId,
+        filePath: "tests/fixtures/images/test-image-2.jpg",
+      });
 
-  test("Replace existing facility image with a new one", async ({ page }) => {
-    // Upload first image
-    await page
-      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
-      .click();
+      // Cleanup
+      await deleteFacilityCoverViaUi(page, { facilityId });
+    },
+  );
 
-    await page
-      .locator("input[type='file']")
-      .setInputFiles("tests/fixtures/images/test-image.jpg");
+  test(
+    "Invalid image selection is cleared when upload popup is closed",
+    { tag: ["@atomic", "@cap:facility.settings.cover.upload"] },
+    async ({ page }) => {
+      await page
+        .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
+        .click();
 
-    await page.getByRole("button", { name: "Crop" }).click();
-    await page.getByRole("button", { name: "Upload", exact: true }).click();
+      await page
+        .locator("input[type='file']")
+        .setInputFiles("tests/fixtures/images/test-image.jpg");
 
-    await expect(page.getByText("Cover image updated")).toBeVisible();
+      await page.getByRole("button", { name: "Crop" }).click();
 
-    // Replace with second image
-    await page
-      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
-      .click();
+      // Close without uploading
+      await page.getByRole("button", { name: "Cancel" }).click();
 
-    await page
-      .locator("input[type='file']")
-      .setInputFiles("tests/fixtures/images/test-image-2.jpg");
+      // Wait for dialog to fully close
+      await expect(page.getByRole("dialog")).toBeHidden();
 
-    await page.getByRole("button", { name: "Crop" }).click();
-    await page.getByRole("button", { name: "Upload", exact: true }).click();
+      // Reopen and verify state was reset
+      await page
+        .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
+        .click();
+      const dialog = page.getByRole("dialog");
+      await expect(dialog).toBeVisible();
 
-    await expect(page.getByText("Cover image updated")).toBeVisible();
+      await expect(dialog.getByText("Drag & drop image to upload")).toBeVisible(
+        {
+          timeout: 15_000,
+        },
+      );
+      await expect(dialog.getByText("No image found.")).toBeVisible({
+        timeout: 15_000,
+      });
 
-    // Cleanup
-    await page
-      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
-      .click();
-    await page.getByRole("button", { name: "Delete" }).click();
-    await expect(page.getByText("Cover image deleted")).toBeVisible();
-  });
-
-  test("Invalid image selection is cleared when upload popup is closed", async ({
-    page,
-  }) => {
-    await page
-      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
-      .click();
-
-    await page
-      .locator("input[type='file']")
-      .setInputFiles("tests/fixtures/images/test-image.jpg");
-
-    await page.getByRole("button", { name: "Crop" }).click();
-
-    // Close without uploading
-    await page.getByRole("button", { name: "Cancel" }).click();
-
-    // Wait for dialog to fully close
-    await expect(page.getByRole("dialog")).toBeHidden();
-
-    // Reopen and verify state was reset
-    await page
-      .getByRole("button", { name: /^(Add|Edit) cover photo$/i })
-      .click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-
-    await expect(dialog.getByText("Drag & drop image to upload")).toBeVisible({
-      timeout: 15_000,
-    });
-    await expect(dialog.getByText("No image found.")).toBeVisible({
-      timeout: 15_000,
-    });
-
-    await page.getByRole("button", { name: "Cancel" }).click();
-  });
+      await page.getByRole("button", { name: "Cancel" }).click();
+    },
+  );
 });
