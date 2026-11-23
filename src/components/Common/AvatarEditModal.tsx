@@ -255,7 +255,7 @@ export default function AvatarEditModal({
                         <div className="relative w-full h-[400px]">
                           <Cropper
                             image={
-                              preview && preview.startsWith("blob:")
+                              preview.startsWith("blob:")
                                 ? DOMPurify.sanitize(preview)
                                 : preview
                             }
@@ -285,7 +285,7 @@ export default function AvatarEditModal({
                         <div className="w-full h-[400px] bg-gray-100 rounded-lg flex items-center justify-center">
                           {croppedPreview ? (
                             <img
-                              src={croppedPreview || "/placeholder.svg"}
+                              src={croppedPreview}
                               alt="Cropped preview"
                               loading="lazy"
                               decoding="async"
@@ -314,7 +314,7 @@ export default function AvatarEditModal({
                   </>
                 ) : imageUrl ? (
                   <img
-                    src={imageUrl || "/placeholder.svg"}
+                    src={imageUrl}
                     alt="saved-photo"
                     loading="lazy"
                     decoding="async"

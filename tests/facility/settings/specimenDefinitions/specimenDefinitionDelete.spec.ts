@@ -50,8 +50,10 @@ test.describe("Specimen Definitions Delete", () => {
     await page.getByRole("button", { name: /save/i }).click();
 
     // Apply status filter before searching
-    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
-    await page.getByRole("option", { name: status.toLowerCase() }).click();
+    await page.getByRole("button", { name: /^Status/ }).click();
+    await page
+      .getByRole("menuitemradio", { name: status.toLowerCase() })
+      .click();
 
     // Search for the newly created definition
     await page
@@ -71,9 +73,9 @@ test.describe("Specimen Definitions Delete", () => {
     await expect(tableBody).toBeVisible();
 
     // Filter by retired status
-    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
+    await page.getByRole("button", { name: /^Status/ }).click();
     await page
-      .getByRole("option", { name: DELETED_STATUS, exact: true })
+      .getByRole("menuitemradio", { name: DELETED_STATUS, exact: true })
       .click();
 
     // Wait for filter to apply

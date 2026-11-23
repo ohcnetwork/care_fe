@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -32,6 +31,7 @@ import CircularProgress from "@/components/Common/CircularProgress";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
+import { navigate } from "@/lib/router/navigate";
 import { LoginByOtpResponse, TokenData } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
 import mutate from "@/Utils/request/mutate";
@@ -69,16 +69,20 @@ export default function PatientLogin({
     Object.keys(tokenData).length > 0 &&
     dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
   ) {
-    navigate(
-      `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
-    );
+    navigate({
+      to: "/facility/$facilityId/appointments/$staffId/book-appointment",
+      params: { facilityId, staffId },
+    });
   }
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
     mutationFn: mutate(otpApi.send),
     onSuccess: () => {
       toast.success(t("send_otp_success"));
       if (page === "send") {
-        navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
+        navigate({
+          to: "/facility/$facilityId/appointments/$staffId/otp/$page",
+          params: { facilityId, staffId, page: "verify" },
+        });
       }
     },
   });
@@ -243,9 +247,10 @@ export default function PatientLogin({
         onClick={() =>
           page === "send"
             ? goBack(`/facility/${facilityId}`)
-            : navigate(
-                `/facility/${facilityId}/appointments/${staffId}/otp/send`,
-              )
+            : navigate({
+                to: "/facility/$facilityId/appointments/$staffId/otp/$page",
+                params: { facilityId, staffId, page: "send" },
+              })
         }
       >
         <CareIcon icon="l-arrow-left" className="size-4 mr-1" />

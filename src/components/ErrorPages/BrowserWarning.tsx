@@ -1,30 +1,32 @@
-import bowser from "bowser";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
-import supportedBrowsers from "@/supportedBrowsers";
+/**
+ * Detects support for the platform features the app's styles depend on,
+ * instead of sniffing the user agent. Tailwind CSS v4 relies on cascade
+ * layers, `@property`, `color-mix()` and `oklch()` colors, which together
+ * require Chrome 111, Safari 16.4 or Firefox 128.
+ *
+ * @see https://tailwindcss.com/docs/compatibility
+ */
+const isBrowserSupported = () =>
+  typeof CSS !== "undefined" &&
+  "CSSLayerBlockRule" in window &&
+  "CSSPropertyRule" in window &&
+  CSS.supports("color", "oklch(0% 0 0)") &&
+  CSS.supports("color", "color-mix(in oklab, red, blue)");
 
 const BrowserWarning = () => {
   const { t } = useTranslation();
 
-  const notSupported = React.useMemo(() => {
-    const userAgent = window.navigator.userAgent;
-    if (!supportedBrowsers.test(userAgent)) {
-      const browser = bowser.getParser(userAgent).getBrowser();
-      return {
-        name: browser.name || "Unknown",
-        version: browser.version || "Unknown",
-      };
-    }
-    return null;
-  }, []);
+  const [isSupported] = useState(isBrowserSupported);
 
   const [showUnsupportedBrowserDialog, setShowUnsupportedBrowserDialog] =
     useState(true);
 
-  if (!notSupported) {
+  if (isSupported) {
     return null;
   }
 
@@ -34,7 +36,7 @@ const BrowserWarning = () => {
         open={showUnsupportedBrowserDialog}
         onOpenChange={setShowUnsupportedBrowserDialog}
         title={t("unsupported_browser")}
-        description={t("unsupported_browser_description", notSupported)}
+        description={t("unsupported_browser_features_description")}
         onConfirm={() => setShowUnsupportedBrowserDialog(false)}
         confirmText={t("close")}
         hideCancel
@@ -44,7 +46,7 @@ const BrowserWarning = () => {
         <div>
           <h2 className="text-lg font-medium">{t("unsupported_browser")}</h2>
           <p className="text-sm">
-            {t("unsupported_browser_description", notSupported)}
+            {t("unsupported_browser_features_description")}
           </p>
         </div>
       </div>

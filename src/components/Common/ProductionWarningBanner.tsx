@@ -4,16 +4,18 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { developerModeAtom } from "@/atoms/developerMode";
-import { useQueryParams } from "raviger";
+
+import { useQueryParams } from "@/lib/router/queryParams";
+import { appSearch } from "@/lib/router/search/app";
 
 export default function ProductionWarningBanner() {
   const { t } = useTranslation();
   const [developerMode, setDeveloperMode] = useAtom(developerModeAtom);
-  const [{ debug }] = useQueryParams();
+  const [{ debug }] = useQueryParams(appSearch);
 
   useEffect(() => {
     // Auto-enable developer mode if ?debug=true is in the URL
-    if (debug === "true") {
+    if (debug === true) {
       setDeveloperMode(true);
     }
   }, [debug, setDeveloperMode]);

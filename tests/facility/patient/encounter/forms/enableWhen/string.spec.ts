@@ -3,17 +3,16 @@ import { expect, test } from "@playwright/test";
 import {
   checkVisibility,
   clearStringField,
+  createQuestionnaireEncounter,
   expectFieldError,
   fillStringField,
   submitAndExpectSuccess,
   submitForm,
   verifySubmittedValues,
 } from "tests/helper/questionnaire";
-import { getEncounterId } from "tests/support/encounterId";
+import { questionBlock } from "tests/helper/questionnaireV2";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
-
-const QUESTIONNAIRE_SLUG = "enable-when-test";
+import { getQuestionnaireId } from "tests/support/questionnaireId";
 
 // Values that trigger (show) or keep safe (hide) dependent fields
 const EQUALS_TRIGGER = "Doctor"; // equals "Doctor" → dependents show
@@ -26,13 +25,21 @@ test.describe("Enable When — String Operators", () => {
 
   test.beforeEach(async ({ page }) => {
     const facilityId = getFacilityId();
-    const patientId = getPatientId();
-    const encounterId = getEncounterId();
+    const { patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId);
+    // The fill route fetches by external_id (slug lookup is not supported).
+    const questionnaireId = await getQuestionnaireId();
 
     await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${QUESTIONNAIRE_SLUG}`,
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,
     );
-    await expect(page.getByText("Patient Name", { exact: true })).toBeVisible();
+    await expect(questionBlock(page, "Patient Name")).toBeVisible();
+
+    // "Self-Pay Reason" (exists.spec.ts) is required whenever "Insurance
+    // Provider" is unanswered — none of this file's tests touch that field,
+    // so it would otherwise become a visible, required, empty question and
+    // every submission below would fail validation.
+    await fillStringField(page, "Insurance Provider", "N/A");
   });
 
   // ──────────────────────────────────────────────

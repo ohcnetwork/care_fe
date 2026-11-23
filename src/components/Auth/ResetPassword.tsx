@@ -1,10 +1,13 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+
+import { AuthCard } from "@/components/Auth/AuthCard";
+import { AuthLayout } from "@/components/Auth/AuthLayout";
 
 import {
   PasswordErrors,
@@ -16,6 +19,7 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import authApi from "@/types/auth/authApi";
 
 interface ResetPasswordProps {
@@ -43,13 +47,13 @@ const ResetPassword = (props: ResetPasswordProps) => {
     setForm(fieldValue);
   };
 
-  const { mutate: resetPassword } = useMutation({
+  const { mutate: resetPassword, isPending } = useMutation({
     mutationFn: mutate(authApi.resetPassword),
     onSuccess: () => {
       localStorage.removeItem(LocalStorageKeys.accessToken);
       localStorage.removeItem(LocalStorageKeys.refreshToken);
       toast.success(t("password_reset_success"));
-      navigate("/login");
+      navigate({ to: "/login" });
     },
     onError: (error) => {
       if (error.cause) {
@@ -75,42 +79,35 @@ const ResetPassword = (props: ResetPasswordProps) => {
     enabled: !!props.token,
   });
 
-  if (isError) navigate("/invalid-reset");
+  if (isError) navigate({ to: "/invalid-reset" });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form
-        className="w-full max-w-md mx-auto rounded-lg bg-white shadow-lg p-6"
-        onSubmit={handleSubmit}
+    <AuthLayout>
+      <AuthCard
+        back={{
+          label: t("back_to_login"),
+          onClick: () => navigate({ to: "/login" }),
+        }}
+        title={t("reset_password")}
       >
-        <div className="py-4 text-center text-xl font-bold">
-          {t("reset_password")}
-        </div>
-
-        <PasswordFields
-          password={form.password}
-          confirm={form.confirm}
-          errors={errors}
-          onChange={handleChange}
-          isPasswordFieldFocused={isPasswordFieldFocused}
-          onPasswordFocusChange={setIsPasswordFieldFocused}
-        />
-
-        <div className="grid p-4 sm:flex sm:justify-between gap-4 mt-6">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => navigate("/login")}
-            className="w-full sm:w-auto"
-          >
-            <span>{t("cancel")}</span>
+        <form noValidate className="grid gap-6" onSubmit={handleSubmit}>
+          <PasswordFields
+            password={form.password}
+            confirm={form.confirm}
+            errors={errors}
+            onChange={handleChange}
+            isPasswordFieldFocused={isPasswordFieldFocused}
+            onPasswordFocusChange={setIsPasswordFieldFocused}
+          />
+          <Button type="submit" disabled={isPending}>
+            {isPending && (
+              <Spinner data-icon="inline-start" aria-hidden="true" />
+            )}
+            {t("reset_password")}
           </Button>
-          <Button variant="primary" type="submit" className="w-full sm:w-auto">
-            <span>{t("reset")}</span>
-          </Button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </AuthCard>
+    </AuthLayout>
   );
 };
 

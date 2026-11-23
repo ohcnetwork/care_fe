@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
+
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -203,7 +204,7 @@ export function LocationCardWrapper({
                   disabled={isPending}
                 >
                   {isPending && (
-                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    <Spinner className="mr-2 size-4 animate-spin" />
                   )}
                   {isCompletingStay ? t("complete") : t("save")}
                 </Button>

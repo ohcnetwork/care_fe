@@ -1,5 +1,6 @@
-import { navigate } from "raviger";
 import { useEffect } from "react";
+
+import { navigate } from "@/lib/router/navigate";
 
 interface ClinicalHistoryProps {
   patientId: string;
@@ -15,7 +16,7 @@ export function ClinicalHistory({
       ? `/facility/${facilityId}/patient/${patientId}/history/responses`
       : `/patient/${patientId}/history/responses`;
 
-    navigate(historyUrl);
+    navigate({ href: historyUrl });
   }, [patientId, facilityId]);
 
   return null;

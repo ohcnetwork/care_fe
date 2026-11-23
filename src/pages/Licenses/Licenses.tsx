@@ -39,15 +39,26 @@ export const LicensesPage = () => {
         {t("licenses_description")}
       </p>
 
-      <div className="p-4">
+      <div className="sm:p-4">
         <div className="mb-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
           <Tabs
             value={tab}
             onValueChange={(value) => setTab(value as "frontend" | "backend")}
           >
-            <TabsList>
-              <TabsTrigger value="frontend">{t("care_frontend")}</TabsTrigger>
-              <TabsTrigger value="backend">{t("care_backend")}</TabsTrigger>
+            {/* Long translations wrap onto two lines instead of overflowing narrow screens. */}
+            <TabsList className="h-auto min-h-(--tabs-list-height) items-stretch">
+              <TabsTrigger
+                value="frontend"
+                className="h-auto flex-auto whitespace-normal text-center"
+              >
+                {t("care_frontend")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="backend"
+                className="h-auto flex-auto whitespace-normal text-center"
+              >
+                {t("care_backend")}
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

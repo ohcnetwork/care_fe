@@ -1,5 +1,4 @@
 import { t } from "i18next";
-import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 
 import { handleHttpError } from "./errorHandler";
@@ -7,7 +6,7 @@ import { HTTPError } from "./types";
 
 function handleUploadPercentage(
   event: ProgressEvent,
-  setUploadPercent: Dispatch<SetStateAction<number>>,
+  setUploadPercent: (percent: number) => void,
 ) {
   if (event.lengthComputable) {
     const percentComplete = Math.round((event.loaded / event.total) * 100);
@@ -21,7 +20,7 @@ const uploadFile = async (
   reqMethod: string,
   headers: object,
   onLoad: (xhr: XMLHttpRequest) => void,
-  setUploadPercent: Dispatch<SetStateAction<number>> | null,
+  setUploadPercent: ((percent: number) => void) | null,
   onError: () => void,
 ): Promise<void> => {
   return new Promise((resolve, reject) => {

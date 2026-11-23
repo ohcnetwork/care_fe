@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import actionsJson from "@/config/keyboardShortcuts.json";
 import { useShortcuts } from "@/context/ShortcutContext";
 import {
+  canRunFromCommandDialog,
   formatKeyboardShortcut,
   shortcutActionHandler,
 } from "@/Utils/keyboardShortcutUtils";
@@ -67,11 +68,8 @@ export function ShortcutCommandDialog({
             return false;
           }
 
-          // Only include actions if the corresponding element exists on the page
-          const element = document.querySelector(
-            `[data-shortcut-id='${action.action}']`,
-          );
-          return element !== null;
+          // Only include actions that can run from here right now
+          return canRunFromCommandDialog(action.action);
         })
         .map((action) => ({
           id: action.action,
@@ -93,7 +91,7 @@ export function ShortcutCommandDialog({
 
   const handleSelect = useCallback(
     (actionId: string) => {
-      shortcutActionHandler(actionId)();
+      shortcutActionHandler(actionId, { fromCommandDialog: true })();
       onOpenChange(false);
     },
     [onOpenChange],
@@ -107,38 +105,41 @@ export function ShortcutCommandDialog({
         onOpenChange={onOpenChange}
         className="md:max-w-2xl"
       >
-        <div className="border-b border-gray-100 shadow-xs">
-          <CommandInput
-            placeholder={t("search")}
-            className="border-none focus:ring-0 text-base sm:text-sm"
-          />
+        {/* Marker lets shortcut handling distinguish this dialog from other cmdk pickers */}
+        <div data-shortcut-command-dialog className="contents">
+          <div className="border-b border-gray-100 shadow-xs">
+            <CommandInput
+              placeholder={t("search_page_actions")}
+              className="text-base border-none focus:ring-0 sm:text-sm"
+            />
+          </div>
+          <CommandList className="w-full md:max-h-[min(24rem,calc(75dvh-8rem))]">
+            <CommandEmpty>{t("no_results")}</CommandEmpty>
+            {facilityActions.map((group) => (
+              <div key={group.group}>
+                <CommandGroup heading={group.group} className="px-2">
+                  {group.items.map((action) => (
+                    <CommandItem
+                      key={action.id}
+                      value={action.id}
+                      onSelect={() => handleSelect(action.id)}
+                      className="flex justify-between rounded-md cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100"
+                      autoFocus={false}
+                    >
+                      <span className="flex-1">{action.label}</span>
+                      {action.shortcut && (
+                        <CommandShortcut className="ml-2 text-xs text-gray-500 bg-white border border-gray-200 shadow-xs px-1.5 py-0.5 rounded">
+                          {action.shortcut}
+                        </CommandShortcut>
+                      )}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+                <CommandSeparator />
+              </div>
+            ))}
+          </CommandList>
         </div>
-        <CommandList className="h-[80vh] max-h-[80vh] w-full">
-          <CommandEmpty>{t("no_results")}</CommandEmpty>
-          {facilityActions.map((group) => (
-            <div key={group.group}>
-              <CommandGroup heading={group.group} className="px-2">
-                {group.items.map((action) => (
-                  <CommandItem
-                    key={action.id}
-                    value={action.id}
-                    onSelect={() => handleSelect(action.id)}
-                    className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
-                    autoFocus={false}
-                  >
-                    <span className="flex-1">{action.label}</span>
-                    {action.shortcut && (
-                      <CommandShortcut className="ml-2 text-xs text-gray-500 bg-white border border-gray-200 shadow-xs px-1.5 py-0.5 rounded">
-                        {action.shortcut}
-                      </CommandShortcut>
-                    )}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-              <CommandSeparator />
-            </div>
-          ))}
-        </CommandList>
       </CommandDialog>
     </>
   );
