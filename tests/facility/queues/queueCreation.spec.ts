@@ -75,7 +75,8 @@ test.describe("Queue Creation & Editing", () => {
     await name.clear();
     await name.pressSequentially(modifiedQueueName);
     await expect(name).toHaveValue(modifiedQueueName);
-    await expect(page.getByRole("menu")).toHaveCount(0);
+    // A menu left open behind the sheet is hidden from the accessibility tree.
+    await expect(page.locator('[role="menu"]')).toHaveCount(0);
     await name.press("Escape");
     await expect(name).toBeHidden();
     await page.getByRole("button", { name: /^settings$/i }).press("Enter");
@@ -84,7 +85,7 @@ test.describe("Queue Creation & Editing", () => {
     await expect(editItem).toBeFocused();
     await page.keyboard.press("Enter");
     await expect(name).toHaveValue(queueName);
-    await expect(page.getByRole("menu")).toHaveCount(0);
+    await expect(page.locator('[role="menu"]')).toHaveCount(0);
     await expect(name).toBeFocused();
     await name.clear();
     await name.pressSequentially(modifiedQueueName);
@@ -151,9 +152,71 @@ test.describe("Queue Creation & Editing", () => {
       await expect(checkbox).toBeChecked();
       await checkbox.press("Space");
       await expect(checkbox).not.toBeChecked();
+      // A menu left open behind the dialog would take letter and arrow keys,
+      // moving focus to its items.
+      await checkbox.press("e");
+      await checkbox.press("ArrowDown");
+      await expect(checkbox).toBeFocused();
     });
 
     await expectEscapeRestoresFocus(page, dialog, settings);
+  });
+
+  test("should show empty and error states in the service points dialog", async ({
+    page,
+  }) => {
+    const queueName = faker.lorem.words(3);
+    await createQueue(page, queueName);
+    const boardUrl = await page
+      .getByRole("row")
+      .filter({ hasText: queueName })
+      .getByRole("link", { name: /^open$/i })
+      .getAttribute("href");
+
+    let failServicePoints = false;
+    await page.route(
+      `**/facility/${facilityId}/token/sub_queue/?*`,
+      async (route) => {
+        if (failServicePoints) {
+          await route.fulfill({
+            status: 500,
+            json: { detail: "Server error" },
+          });
+        } else {
+          await route.fulfill({ json: { count: 0, results: [] } });
+        }
+      },
+    );
+
+    const settings = page.getByRole("button", { name: /^settings$/i });
+    const dialog = page.getByRole("dialog", {
+      name: /assigned service points/i,
+    });
+    for (const failed of [false, true]) {
+      await test.step(
+        failed ? "Request fails" : "No service points",
+        async () => {
+          failServicePoints = failed;
+          await page.goto(boardUrl!.replace(/\/ongoing$/, "/completed"));
+          await openOverlayFromMenu(
+            page,
+            settings,
+            /manage service points/i,
+            dialog,
+          );
+          await expect(
+            dialog.getByText(
+              failed
+                ? "Unable to load service points."
+                : "No service points found",
+              { exact: true },
+            ),
+          ).toBeVisible();
+          await expect(dialog.locator('[data-slot="skeleton"]')).toHaveCount(0);
+          await expect(dialog.getByRole("checkbox")).toHaveCount(0);
+        },
+      );
+    }
   });
 
   test("should not allow editing queue name when no changes made", async ({

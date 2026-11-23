@@ -35,7 +35,11 @@ export function ObservationHistorySheet({
   const { t } = useTranslation();
 
   // Fetch the full diagnostic report to get all observations
-  const { data: fullReport, isLoading } = useQuery({
+  const {
+    data: fullReport,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["diagnosticReport", diagnosticReportId],
     queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
       pathParams: {
@@ -62,6 +66,16 @@ export function ObservationHistorySheet({
           <div className="space-y-4">
             {isLoading ? (
               <CardListSkeleton count={2} />
+            ) : isError ? (
+              <EmptyState
+                icon={
+                  <CareIcon
+                    icon="l-exclamation-triangle"
+                    className="text-destructive size-6"
+                  />
+                }
+                title={t("error_loading_observation_history")}
+              />
             ) : deletedObservations.length === 0 ? (
               <EmptyState
                 icon={

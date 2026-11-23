@@ -169,7 +169,11 @@ export function CollectedSpecimenHeader({
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               className="text-red-600 focus:text-red-600 focus:bg-red-50"
-              onSelect={() => setDiscardOpen(true)}
+              onSelect={() => {
+                // The radio group starts empty each time, so the reason must too.
+                setSelectedDiscardReason(null);
+                setDiscardOpen(true);
+              }}
               onClick={(e) => {
                 e.stopPropagation();
               }}

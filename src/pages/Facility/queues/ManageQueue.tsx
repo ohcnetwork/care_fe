@@ -220,7 +220,7 @@ export function ManageQueuePage({
                   <SettingsIcon className="mr-2 size-4" />
                   {t("manage_service_points")}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                <DropdownMenuItem onSelect={() => setEditOpen(true)}>
                   <Edit3 className="mr-2 size-4" />
                   {t("edit_queue_name")}
                 </DropdownMenuItem>
@@ -359,8 +359,21 @@ function ManageServicePointsDialog({
 }
 
 function ManageServicePointsList() {
-  const { allServicePoints, assignedServicePointIds, toggleServicePoint } =
-    useQueueServicePoints();
+  const { t } = useTranslation();
+  const {
+    allServicePoints,
+    isError,
+    assignedServicePointIds,
+    toggleServicePoint,
+  } = useQueueServicePoints();
+
+  if (isError) {
+    return (
+      <p className="p-3 text-sm text-muted-foreground">
+        {t("error_loading_service_points")}
+      </p>
+    );
+  }
 
   if (!allServicePoints) {
     return (
@@ -372,6 +385,14 @@ function ManageServicePointsList() {
           </div>
         ))}
       </div>
+    );
+  }
+
+  if (allServicePoints.length === 0) {
+    return (
+      <p className="p-3 text-sm text-muted-foreground">
+        {t("no_service_points_found")}
+      </p>
     );
   }
 

@@ -248,8 +248,11 @@ test.describe("Service request report workflow", () => {
       exact: true,
     });
 
-    await test.step("Dismiss the confirmation", async () => {
+    await test.step("Dismiss the confirmation after choosing a reason", async () => {
       await openOverlayFromMenu(page, actions, "Discard", confirmation);
+      await confirmation
+        .getByRole("radio", { name: /^Unsatisfactory/ })
+        .click();
       await expectEscapeRestoresFocus(page, confirmation, actions);
     });
 
@@ -259,6 +262,10 @@ test.describe("Service request report workflow", () => {
         name: "Discard",
         exact: true,
       });
+      // The dismissed reason must not carry over into the reopened dialog.
+      await expect(
+        confirmation.getByRole("radio", { checked: true }),
+      ).toHaveCount(0);
       await expect(discard).toBeDisabled();
       await confirmation
         .getByRole("radio", { name: /^Unsatisfactory/ })
