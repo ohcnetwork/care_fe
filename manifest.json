@@ -13,9 +13,10 @@
   ],
   "17285": [
     {
-      "before": "print/nov049-before.png",
-      "after": "print/nov049-after.png",
-      "caption": "Each print row excludes types configured elsewhere while keeping its current selection."
+      "before": "print/review-before.png",
+      "after": "print/review-after.png",
+      "caption": "Reviewed sheet automatically appends a Default row. The revised settings page asks for an unused identifier before adding a row.",
+      "mobile": "print/review-after-mobile.png"
     }
   ],
   "17286": [
