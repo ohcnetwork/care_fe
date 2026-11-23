@@ -342,8 +342,23 @@ jobs:
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
+      # The vite-modules specs need a Vite dev server, which pre-bundles
+      # dependencies as soon as it starts. Run them once, on shard 1, instead
+      # of starting that server on every shard. Separate report and output
+      # paths keep shard 1's own results.
+      - name: Run Vite module tests
+        id: vite-modules
+        if: ${{ !cancelled() && matrix.shard == 1 }}
+        run: npx playwright test --project=vite-modules --workers=2 --output=test-results-vite
+        env:
+          NODE_ENV: production
+          REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
+          PLAYWRIGHT_BLOB_OUTPUT_DIR: blob-report-vite
+          PLAYWRIGHT_BLOB_OUTPUT_NAME: report-vite-modules.zip
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results-vite.json
+
       - name: Annotate test failure
-        if: failure() && steps.test.conclusion == 'failure'
+        if: failure() && (steps.test.conclusion == 'failure' || steps.vite-modules.conclusion == 'failure')
         run: |
           echo "::error::Playwright tests failed in shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }}"
 
@@ -354,9 +369,12 @@ jobs:
           name: playwright-results-shard-${{ matrix.shard }}
           path: |
             blob-report/
+            blob-report-vite/
             playwright-report/
             test-results/
+            test-results-vite/
             test-results.json
+            test-results-vite.json
           retention-days: 7
 
   # Aggregate results and create final report
@@ -441,17 +459,17 @@ jobs:
           SKIPPED_TESTS=0
 
           # Parse test results from each shard
-          for dir in all-results/playwright-results-shard-*/; do
-            if [ -f "$dir/test-results.json" ]; then
-              echo "Processing results from $dir"
+          for file in all-results/playwright-results-shard-*/test-results*.json; do
+            if [ -f "$file" ]; then
+              echo "Processing results from $file"
               # Use jq to parse JSON if available, otherwise use basic parsing
               if command -v jq &> /dev/null; then
                 # Count unique tests (including nested test.describe blocks)
                 # Use recursive descent to handle nested suites
-                SHARD_TOTAL=$(jq '[.. | objects | select(has("tests")) | .tests[]] | length' "$dir/test-results.json")
-                SHARD_PASSED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "passed")] | length' "$dir/test-results.json")
-                SHARD_FAILED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "failed" or .results[-1].status == "timedOut" or .results[-1].status == "interrupted")] | length' "$dir/test-results.json")
-                SHARD_SKIPPED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "skipped")] | length' "$dir/test-results.json")
+                SHARD_TOTAL=$(jq '[.. | objects | select(has("tests")) | .tests[]] | length' "$file")
+                SHARD_PASSED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "passed")] | length' "$file")
+                SHARD_FAILED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "failed" or .results[-1].status == "timedOut" or .results[-1].status == "interrupted")] | length' "$file")
+                SHARD_SKIPPED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "skipped")] | length' "$file")
 
                 TOTAL_TESTS=$((TOTAL_TESTS + SHARD_TOTAL))
                 PASSED_TESTS=$((PASSED_TESTS + SHARD_PASSED))

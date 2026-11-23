@@ -4,9 +4,10 @@ import path from "node:path";
 
 // There is no host UI for invoking a federated Scribe action. This browser
 // integration harness mounts the real hook and questionnaire renderer, with
-// fixture clinical API responses. Run against `npm run dev`; preview builds
-// intentionally do not expose their source modules.
-test.use({ storageState: "tests/.auth/user.json" });
+// fixture clinical API responses. Preview builds intentionally do not expose
+// their source modules, so playwright.config.ts runs this spec in the
+// `vite-modules` project against a Vite dev server. The harness answers every
+// API call itself, so it needs no signed-in user.
 
 const harnessFilename = `fillActionHarness-${crypto.randomUUID()}.tsx`;
 const clinicalTypes = ["diagnosis", "symptom", "allergy_intolerance"] as const;
@@ -123,11 +124,13 @@ async function getClinicalRows(page: Page, linkId: string) {
 }
 
 test.beforeEach(async ({ page, request }, testInfo) => {
+  // Runs in the `vite-modules` project. Fail, not skip, if the server does not
+  // serve source modules, so a misconfigured run cannot pass silently.
   const source = await request.get("/src/lib/actions/index.ts");
-  test.skip(
-    !source.headers()["content-type"]?.includes("javascript"),
-    "Scribe action integration requires the Vite dev server (npm run dev)",
-  );
+  expect(
+    source.headers()["content-type"],
+    "this spec needs the Vite dev server (the vite-modules project)",
+  ).toContain("javascript");
   const fixturePath = testInfo.outputPath(harnessFilename);
   await mkdir(path.dirname(fixturePath), { recursive: true });
   await writeFile(fixturePath, harnessSource);
@@ -156,7 +159,12 @@ test.beforeEach(async ({ page, request }, testInfo) => {
     }),
   );
   await page.goto("/__fill_action_harness");
-  await expect(page.locator('[data-question-id="time"] input')).toBeVisible();
+  // The first load on a cold dev server pre-bundles dependencies and compiles
+  // the questionnaire module graph on demand, which takes longer than the
+  // default expect timeout on CI runners. Later loads are fast.
+  await expect(page.locator('[data-question-id="time"] input')).toBeVisible({
+    timeout: 45_000,
+  });
   await expect
     .poll(() =>
       page.evaluate(() => !!(window as HarnessWindow).fillActionHarness),

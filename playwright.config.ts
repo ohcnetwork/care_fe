@@ -9,6 +9,56 @@ import path from "path";
 dotenv.config({ path: path.resolve(__dirname, ".env.local") });
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
+/** Dev server for the `vite-modules` project. */
+const VITE_DEV_PORT = 4100;
+const VITE_DEV_URL = `http://localhost:${VITE_DEV_PORT}`;
+const VITE_MODULE_SPECS = [
+  /fill\/fillScribeActions\.spec\.ts$/,
+  /questionnaires\/questionnaireGroupValidation\.spec\.ts$/,
+];
+
+/**
+ * Projects named with --project. Playwright starts every webServer entry, and
+ * the dev server pre-bundles dependencies as soon as it starts, so only start
+ * it when the run can include the vite-modules project.
+ */
+function readSelectedProjects(argv: string[]): string[] {
+  const names: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg.startsWith("--project=")) {
+      names.push(arg.slice("--project=".length));
+    } else if (arg === "--project") {
+      // Playwright declares --project as variadic: take values up to the next flag.
+      while (i + 1 < argv.length && !argv[i + 1].startsWith("-")) {
+        names.push(argv[++i]);
+      }
+    }
+  }
+  return names;
+}
+
+// Same matching as Playwright's filterProjects: case-insensitive, `*` wildcards.
+function projectNameMatches(pattern: string, name: string): boolean {
+  const escaped = pattern
+    .toLowerCase()
+    .split("*")
+    .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  return new RegExp(`^${escaped.join(".*")}$`).test(name.toLowerCase());
+}
+
+const selectedProjects = readSelectedProjects(process.argv);
+const runsViteModules =
+  selectedProjects.length === 0 ||
+  selectedProjects.some((pattern) =>
+    projectNameMatches(pattern, "vite-modules"),
+  );
+// The other projects use the preview build. Skip it only when every selected
+// name is exactly vite-modules (a wildcard may also select other projects).
+const runsPreviewProjects =
+  selectedProjects.length === 0 ||
+  selectedProjects.some((name) => name.toLowerCase() !== "vite-modules");
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -82,6 +132,7 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+      testIgnore: VITE_MODULE_SPECS,
       dependencies: process.env.CI
         ? []
         : [
@@ -91,6 +142,19 @@ export default defineConfig({
             "setup-account",
             "setup-data",
           ],
+    },
+    // Specs that import source modules (`/src/...`) into the page. Only the
+    // Vite dev server serves those; the preview build does not.
+    {
+      name: "vite-modules",
+      testMatch: VITE_MODULE_SPECS,
+      use: { ...devices["Desktop Chrome"], baseURL: VITE_DEV_URL },
+      // The first spec to load on a cold dev server waits up to 45s for
+      // dependency pre-bundling inside beforeEach, which counts against this.
+      timeout: 120000,
+      // These specs answer every API call themselves, so they need neither a
+      // signed-in user nor backend fixtures.
+      dependencies: [],
     },
     // {
     //   name: "firefox",
@@ -126,10 +190,29 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: "npm run preview",
-    url: "http://localhost:4000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
+  webServer: [
+    ...(runsPreviewProjects
+      ? [
+          {
+            command: "npm run preview",
+            url: "http://localhost:4000",
+            reuseExistingServer: !process.env.CI,
+            timeout: 120000,
+          },
+        ]
+      : []),
+    ...(runsViteModules
+      ? [
+          {
+            command: `npm run dev -- --port ${VITE_DEV_PORT} --strictPort`,
+            url: VITE_DEV_URL,
+            // CI runs Playwright with NODE_ENV=production, which would put the dev
+            // server in production mode and flip import.meta.env.DEV for the specs.
+            env: { NODE_ENV: "development" },
+            reuseExistingServer: !process.env.CI,
+            timeout: 120000,
+          },
+        ]
+      : []),
+  ],
 });
