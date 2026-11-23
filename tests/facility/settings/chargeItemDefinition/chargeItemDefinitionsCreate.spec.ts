@@ -1,5 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import {
+  createChargeItemDefinitionViaUi,
+  fillChargeItemDefinitionForm,
+  openChargeItemDefinitionCategory,
+} from "tests/helper/definitions";
 import { expectedSlug } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -41,250 +46,263 @@ test.describe("Charge Item Definition Creation", () => {
     url = faker.internet.url();
     categoryName = "Medications";
 
-    await page.goto(
-      `/facility/${facilityId}/settings/charge_item_definitions/`,
-    );
-    await page.getByRole("textbox", { name: "Search" }).fill(categoryName);
-    await page.getByRole("heading", { name: categoryName }).click();
+    await openChargeItemDefinitionCategory(page, { facilityId, categoryName });
   });
 
-  test("validate required fields", async ({ page }) => {
-    await page.getByRole("button", { name: /add definition/i }).click();
-    await page.getByRole("button", { name: /create/i }).click();
+  test(
+    "validate required fields",
+    { tag: ["@atomic", "@cap:definition.chargeitem.create"] },
+    async ({ page }) => {
+      await page.getByRole("button", { name: /add definition/i }).click();
+      await page.getByRole("button", { name: /create/i }).click();
 
-    // Title required
-    await expect(page.getByText(/title.*required/i)).toBeVisible();
-    // Slug required/length
-    await expect(page.getByText(/slug.*at least 5.*at most 50/i)).toBeVisible();
-    // Base Price required/invalid
-    await expect(page.getByText(/base price.*required/i)).toBeVisible();
-  });
+      // Title required
+      await expect(page.getByText(/title.*required/i)).toBeVisible();
+      // Slug required/length
+      await expect(
+        page.getByText(/slug.*at least 5.*at most 50/i),
+      ).toBeVisible();
+      // Base Price required/invalid
+      await expect(page.getByText(/base price.*required/i)).toBeVisible();
+    },
+  );
 
-  test("rejects a whitespace-only title", async ({ page }) => {
-    await page.getByRole("button", { name: /add definition/i }).click();
-    // Title is only spaces; slug and base price are valid, so the title
-    // validation is the only thing that can block creation.
-    await page.getByRole("textbox", { name: /title/i }).fill("   ");
-    await page.getByRole("textbox", { name: /slug/i }).fill(slug);
-    await page.getByRole("textbox", { name: /base price/i }).fill(basePrice);
-    await page.getByRole("button", { name: /create/i }).click();
+  test(
+    "rejects a whitespace-only title",
+    { tag: ["@atomic", "@cap:definition.chargeitem.create"] },
+    async ({ page }) => {
+      await page.getByRole("button", { name: /add definition/i }).click();
+      // Title is only spaces; slug and base price are valid, so the title
+      // validation is the only thing that can block creation.
+      await page.getByRole("textbox", { name: /title/i }).fill("   ");
+      await page.getByRole("textbox", { name: /slug/i }).fill(slug);
+      await page.getByRole("textbox", { name: /base price/i }).fill(basePrice);
+      await page.getByRole("button", { name: /create/i }).click();
 
-    // A whitespace-only title must be treated as empty: required error, no creation.
-    await expect(page.getByText(/title.*required/i)).toBeVisible();
-    await expect(
-      page.getByText(/charge item definition.*created successfully/i),
-    ).toHaveCount(0);
-  });
+      // A whitespace-only title must be treated as empty: required error, no creation.
+      await expect(page.getByText(/title.*required/i)).toBeVisible();
+      await expect(
+        page.getByText(/charge item definition.*created successfully/i),
+      ).toHaveCount(0);
+    },
+  );
 
-  test("keeps the form usable while a partial base price is typed", async ({
-    page,
-  }) => {
-    await page.getByRole("button", { name: /add definition/i }).click();
-    const basePriceInput = page.getByRole("textbox", { name: /base price/i });
-    const summaryBasePrice = page
-      .locator("div")
-      .filter({ has: page.getByRole("heading", { name: /price summary/i }) })
-      .last()
-      .locator("div")
-      .filter({ hasText: /^Base Price/ })
-      .last();
+  test(
+    "keeps the form usable while a partial base price is typed",
+    { tag: ["@atomic", "@cap:definition.chargeitem.create"] },
+    async ({ page }) => {
+      await page.getByRole("button", { name: /add definition/i }).click();
+      const basePriceInput = page.getByRole("textbox", { name: /base price/i });
+      const summaryBasePrice = page
+        .locator("div")
+        .filter({ has: page.getByRole("heading", { name: /price summary/i }) })
+        .last()
+        .locator("div")
+        .filter({ hasText: /^Base Price/ })
+        .last();
 
-    // Type one key at a time. Partial input ("-", ".", "-.") is not a number
-    // yet, so the summary shows "-" and the page must not crash.
-    const sequences: { keys: string; summaries: (number | null)[] }[] = [
-      { keys: "-12.5", summaries: [null, -1, -12, -12, -12.5] },
-      { keys: "-.5", summaries: [null, null, -0.5] },
-      { keys: ".5", summaries: [null, 0.5] },
-    ];
-    for (const { keys, summaries } of sequences) {
-      await basePriceInput.clear();
-      for (const [index, key] of [...keys].entries()) {
-        await basePriceInput.pressSequentially(key);
-        await expect(basePriceInput).toHaveValue(keys.slice(0, index + 1));
-        const amount = summaries[index];
-        await expect(summaryBasePrice).toHaveText(
-          `Base Price${amount === null ? "-" : formatCurrency(amount)}`,
-        );
+      // Type one key at a time. Partial input ("-", ".", "-.") is not a number
+      // yet, so the summary shows "-" and the page must not crash.
+      const sequences: { keys: string; summaries: (number | null)[] }[] = [
+        { keys: "-12.5", summaries: [null, -1, -12, -12, -12.5] },
+        { keys: "-.5", summaries: [null, null, -0.5] },
+        { keys: ".5", summaries: [null, 0.5] },
+      ];
+      for (const { keys, summaries } of sequences) {
+        await basePriceInput.clear();
+        for (const [index, key] of [...keys].entries()) {
+          await basePriceInput.pressSequentially(key);
+          await expect(basePriceInput).toHaveValue(keys.slice(0, index + 1));
+          const amount = summaries[index];
+          await expect(summaryBasePrice).toHaveText(
+            `Base Price${amount === null ? "-" : formatCurrency(amount)}`,
+          );
+        }
       }
-    }
 
-    // Submit with partial input: show the validation error, do not crash.
-    await basePriceInput.clear();
-    await basePriceInput.pressSequentially("-");
-    await page.getByRole("button", { name: /create/i }).click();
-    await expect(page.getByText(/base price.*required/i)).toBeVisible();
-    await expect(basePriceInput).toHaveValue("-");
-  });
+      // Submit with partial input: show the validation error, do not crash.
+      await basePriceInput.clear();
+      await basePriceInput.pressSequentially("-");
+      await page.getByRole("button", { name: /create/i }).click();
+      await expect(page.getByText(/base price.*required/i)).toBeVisible();
+      await expect(basePriceInput).toHaveValue("-");
+    },
+  );
 
-  test("create charge item definition with a negative base price", async ({
-    page,
-  }) => {
-    await page.getByRole("button", { name: /add definition/i }).click();
-    await page.getByRole("textbox", { name: /title/i }).fill(title);
-    await page.getByRole("textbox", { name: /slug/i }).fill(slug);
-    await page
-      .getByRole("textbox", { name: /base price/i })
-      .pressSequentially("-25.5");
+  test(
+    "create charge item definition with a negative base price",
+    { tag: ["@atomic", "@cap:definition.chargeitem.create"] },
+    async ({ page }) => {
+      await page.getByRole("button", { name: /add definition/i }).click();
+      await page.getByRole("textbox", { name: /title/i }).fill(title);
+      await page.getByRole("textbox", { name: /slug/i }).fill(slug);
+      await page
+        .getByRole("textbox", { name: /base price/i })
+        .pressSequentially("-25.5");
 
-    await page.getByRole("button", { name: /create/i }).click();
+      await page.getByRole("button", { name: /create/i }).click();
 
-    await expect(
-      page.getByText(/charge item definition.*created successfully/i),
-    ).toBeVisible();
+      await expect(
+        page.getByText(/charge item definition.*created successfully/i),
+      ).toBeVisible();
 
-    await expect(async () => {
-      await page.getByRole("textbox", { name: /search/i }).clear();
-      await page.getByRole("textbox", { name: /search/i }).fill(title);
-      await expect(page.getByRole("table").getByText(title)).toBeVisible();
-    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
+      await expect(async () => {
+        await page.getByRole("textbox", { name: /search/i }).clear();
+        await page.getByRole("textbox", { name: /search/i }).fill(title);
+        await expect(page.getByRole("table").getByText(title)).toBeVisible();
+      }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
 
-    await page.getByRole("link", { name: "View" }).click();
-    await page.waitForURL("**/charge_item_definitions/**");
-    await expect(page.getByRole("heading", { name: title })).toBeVisible();
+      await page.getByRole("link", { name: "View" }).click();
+      await page.waitForURL("**/charge_item_definitions/**");
+      await expect(page.getByRole("heading", { name: title })).toBeVisible();
 
-    await page.getByRole("button", { name: "Edit" }).first().click();
-    await expect(
-      page.getByRole("textbox", { name: /base price/i }),
-    ).toHaveValue("-25.50");
-  });
+      await page.getByRole("button", { name: "Edit" }).first().click();
+      await expect(
+        page.getByRole("textbox", { name: /base price/i }),
+      ).toHaveValue("-25.50");
+    },
+  );
 
-  test("create charge item definition with required fields only", async ({
-    page,
-  }) => {
-    await page.getByRole("button", { name: /add definition/i }).click();
-    await page.getByRole("textbox", { name: /title/i }).fill(title);
-    await page.getByRole("textbox", { name: /slug/i }).fill(slug);
-    await page.getByRole("textbox", { name: /base price/i }).fill(basePrice);
+  test(
+    "create charge item definition with required fields only",
+    { tag: ["@atomic", "@cap:definition.chargeitem.create"] },
+    async ({ page }) => {
+      await createChargeItemDefinitionViaUi(page, {
+        facilityId,
+        categoryName,
+        title,
+        slug,
+        basePrice,
+      });
 
-    await page.getByRole("button", { name: /create/i }).click();
+      // Verify in search results (retry to handle search indexing delay)
+      await expect(async () => {
+        await page.getByRole("textbox", { name: /search/i }).clear();
+        await page.getByRole("textbox", { name: /search/i }).fill(title);
+        await expect(page.getByRole("table").getByText(title)).toBeVisible();
+      }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
 
-    await expect(
-      page.getByText(/charge item definition.*created successfully/i),
-    ).toBeVisible();
+      await page.getByRole("link", { name: "View" }).click();
+      await page.waitForURL("**/charge_item_definitions/**");
+      await expect(page.getByRole("heading", { name: title })).toBeVisible();
 
-    // Verify in search results (retry to handle search indexing delay)
-    await expect(async () => {
-      await page.getByRole("textbox", { name: /search/i }).clear();
-      await page.getByRole("textbox", { name: /search/i }).fill(title);
-      await expect(page.getByRole("table").getByText(title)).toBeVisible();
-    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
+      await page.getByRole("button", { name: "Edit" }).first().click();
+      await expect(page.getByRole("textbox", { name: /title/i })).toHaveValue(
+        title,
+      );
+      await expect(page.getByRole("textbox", { name: /slug/i })).toHaveValue(
+        slug.toLowerCase(),
+      );
+      await expect(
+        page.getByRole("textbox", { name: /base price/i }),
+      ).toHaveValue(Number(basePrice).toFixed(2));
+    },
+  );
 
-    await page.getByRole("link", { name: "View" }).click();
-    await page.waitForURL("**/charge_item_definitions/**");
-    await expect(page.getByRole("heading", { name: title })).toBeVisible();
+  test(
+    "create charge item definition with all fields",
+    { tag: ["@atomic", "@cap:definition.chargeitem.create"] },
+    async ({ page }) => {
+      const cgstRate = "9";
+      const sgstRate = "6";
+      await page.getByRole("button", { name: /add definition/i }).click();
+      await fillChargeItemDefinitionForm(page, {
+        title,
+        slug,
+        description,
+        purpose,
+        uri: url,
+        basePrice,
+        mrp,
+        purchasePrice,
+      });
 
-    await page.getByRole("button", { name: "Edit" }).first().click();
-    await expect(page.getByRole("textbox", { name: /title/i })).toHaveValue(
-      title,
-    );
-    await expect(page.getByRole("textbox", { name: /slug/i })).toHaveValue(
-      slug.toLowerCase(),
-    );
-    await expect(
-      page.getByRole("textbox", { name: /base price/i }),
-    ).toHaveValue(Number(basePrice).toFixed(2));
-  });
+      await page
+        .locator("div")
+        .filter({ hasText: /^Add tax$/ })
+        .first()
+        .click();
 
-  test("create charge item definition with all fields", async ({ page }) => {
-    const cgstRate = "9";
-    const sgstRate = "6";
-    await page.getByRole("button", { name: /add definition/i }).click();
-    await page.getByRole("textbox", { name: /title/i }).fill(title);
-    await page.getByRole("textbox", { name: /slug/i }).fill(slug);
-    await page.getByRole("textbox", { name: /description/i }).fill(description);
-    await page.getByRole("textbox", { name: /purpose/i }).fill(purpose);
-    await page.getByRole("textbox", { name: /uri/i }).fill(url);
-    await page.getByRole("textbox", { name: /base price/i }).fill(basePrice);
-    await page.getByRole("textbox", { name: /mrp/i }).fill(mrp);
-    await page
-      .getByRole("textbox", { name: /purchase price/i })
-      .fill(purchasePrice);
+      await page
+        .getByRole("textbox", { name: "Search for tax code" })
+        .fill(cgstRate);
 
-    await page
-      .locator("div")
-      .filter({ hasText: /^Add tax$/ })
-      .first()
-      .click();
+      // Select 9% under CGST section - find exact "cgst" text, navigate to container, find radio button
+      await page
+        .getByText("cgst", { exact: true })
+        .locator("../..")
+        .getByRole("radio", { name: taxRateOption(cgstRate) })
+        .click();
 
-    await page
-      .getByRole("textbox", { name: "Search for tax code" })
-      .fill(cgstRate);
+      await page
+        .getByRole("textbox", { name: "Search for tax code" })
+        .fill(sgstRate);
 
-    // Select 9% under CGST section - find exact "cgst" text, navigate to container, find radio button
-    await page
-      .getByText("cgst", { exact: true })
-      .locator("../..")
-      .getByRole("radio", { name: taxRateOption(cgstRate) })
-      .click();
+      // Select 6% under SGST section - find exact "sgst" text, navigate to container, find radio button
+      await page
+        .getByText("sgst", { exact: true })
+        .locator("../..")
+        .getByRole("radio", { name: taxRateOption(sgstRate) })
+        .click();
+      const doneButton = page.getByRole("button", { name: "Done" });
+      await doneButton.scrollIntoViewIfNeeded();
+      await doneButton.click();
 
-    await page
-      .getByRole("textbox", { name: "Search for tax code" })
-      .fill(sgstRate);
+      await page
+        .locator("div")
+        .filter({ hasText: /^Add Discount$/ })
+        .first()
+        .click();
+      // Pick the first discount in the opened picker (not a form checkbox
+      // behind its modal backdrop).
+      await page.getByRole("dialog").getByRole("checkbox").first().click();
+      await page.getByRole("button", { name: "Done" }).click();
+      const switchElement = page.getByRole("switch", {
+        name: "Use facility global value",
+      });
+      if (await switchElement.isChecked()) {
+        await switchElement.click();
+      }
+      await page.waitForLoadState("networkidle");
+      await page.getByRole("button", { name: "Add Condition" }).click();
+      // To do: make this metric agnostic/otherwise might have to adjust everytime we add a new metric
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: /^Metric|Encounter/ })
+        .click();
+      await page.getByRole("option", { name: "Patient Age" }).click();
+      await page.getByRole("combobox").filter({ hasText: "In range" }).click();
+      await page.getByRole("option", { name: "In range" }).click();
+      await page.getByPlaceholder("Min").fill("60");
+      await page.getByPlaceholder("Max").fill("120");
+      await page.getByRole("button", { name: "Add" }).click();
 
-    // Select 6% under SGST section - find exact "sgst" text, navigate to container, find radio button
-    await page
-      .getByText("sgst", { exact: true })
-      .locator("../..")
-      .getByRole("radio", { name: taxRateOption(sgstRate) })
-      .click();
-    const doneButton = page.getByRole("button", { name: "Done" });
-    await doneButton.scrollIntoViewIfNeeded();
-    await doneButton.click();
+      await page.getByRole("button", { name: /create/i }).click();
 
-    await page
-      .locator("div")
-      .filter({ hasText: /^Add Discount$/ })
-      .first()
-      .click();
-    // Pick the first discount in the opened picker (not a form checkbox
-    // behind its modal backdrop).
-    await page.getByRole("dialog").getByRole("checkbox").first().click();
-    await page.getByRole("button", { name: "Done" }).click();
-    const switchElement = page.getByRole("switch", {
-      name: "Use facility global value",
-    });
-    if (await switchElement.isChecked()) {
-      await switchElement.click();
-    }
-    await page.waitForLoadState("networkidle");
-    await page.getByRole("button", { name: "Add Condition" }).click();
-    // To do: make this metric agnostic/otherwise might have to adjust everytime we add a new metric
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: /^Metric|Encounter/ })
-      .click();
-    await page.getByRole("option", { name: "Patient Age" }).click();
-    await page.getByRole("combobox").filter({ hasText: "In range" }).click();
-    await page.getByRole("option", { name: "In range" }).click();
-    await page.getByPlaceholder("Min").fill("60");
-    await page.getByPlaceholder("Max").fill("120");
-    await page.getByRole("button", { name: "Add" }).click();
+      await expect(
+        page.getByText(/charge item definition.*created successfully/i),
+      ).toBeVisible();
 
-    await page.getByRole("button", { name: /create/i }).click();
+      // Verify in search results (retry to handle search indexing delay)
+      await expect(async () => {
+        await page.getByRole("textbox", { name: /search/i }).clear();
+        await page.getByRole("textbox", { name: /search/i }).fill(title);
+        await expect(page.getByRole("table").getByText(title)).toBeVisible();
+      }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
 
-    await expect(
-      page.getByText(/charge item definition.*created successfully/i),
-    ).toBeVisible();
-
-    // Verify in search results (retry to handle search indexing delay)
-    await expect(async () => {
-      await page.getByRole("textbox", { name: /search/i }).clear();
-      await page.getByRole("textbox", { name: /search/i }).fill(title);
-      await expect(page.getByRole("table").getByText(title)).toBeVisible();
-    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
-
-    await page.getByRole("link", { name: "View" }).click();
-    await page.waitForURL("**/charge_item_definitions/**");
-    await expect(page.getByRole("heading", { name: title })).toBeVisible();
-    await expect(page.getByText(description)).toBeVisible();
-    await expect(page.getByText(purpose).last()).toBeVisible();
-    await expect(page.getByText(url)).toBeVisible();
-    await expect(page.getByText(formatCurrency(mrp))).toBeVisible();
-    await expect(page.getByText(formatCurrency(purchasePrice))).toBeVisible();
-    await expect(page.getByText("9.00%")).toBeVisible();
-    await expect(page.getByText("6.00%")).toBeVisible();
-    await expect(
-      page.getByText("Patient Age is in range 60 to 120 years"),
-    ).toBeVisible();
-  });
+      await page.getByRole("link", { name: "View" }).click();
+      await page.waitForURL("**/charge_item_definitions/**");
+      await expect(page.getByRole("heading", { name: title })).toBeVisible();
+      await expect(page.getByText(description)).toBeVisible();
+      await expect(page.getByText(purpose).last()).toBeVisible();
+      await expect(page.getByText(url)).toBeVisible();
+      await expect(page.getByText(formatCurrency(mrp))).toBeVisible();
+      await expect(page.getByText(formatCurrency(purchasePrice))).toBeVisible();
+      await expect(page.getByText("9.00%")).toBeVisible();
+      await expect(page.getByText("6.00%")).toBeVisible();
+      await expect(
+        page.getByText("Patient Age is in range 60 to 120 years"),
+      ).toBeVisible();
+    },
+  );
 });

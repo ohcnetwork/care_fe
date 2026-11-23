@@ -42,113 +42,123 @@ test.describe("Activity definition search params", () => {
     return results[0].slug;
   }
 
-  test("writes the category search to the URL and the API request", async ({
-    page,
-  }) => {
-    const searchText = faker.string.alpha({ length: 8, casing: "lower" });
-    await page.goto(listPath());
-    await expect(
-      page.getByRole("heading", { name: "Activity Definition" }),
-    ).toBeVisible();
+  test(
+    "writes the category search to the URL and the API request",
+    { tag: ["@atomic", "@cap:definition.activity.category.search"] },
+    async ({ page }) => {
+      const searchText = faker.string.alpha({ length: 8, casing: "lower" });
+      await page.goto(listPath());
+      await expect(
+        page.getByRole("heading", { name: "Activity Definition" }),
+      ).toBeVisible();
 
-    const request = waitForApiList(
-      page,
-      "/resource_category/",
-      (params) => params.get("title") === searchText,
-    );
-    await page.getByRole("textbox", { name: "Search" }).fill(searchText);
-    await request;
+      const request = waitForApiList(
+        page,
+        "/resource_category/",
+        (params) => params.get("title") === searchText,
+      );
+      await page.getByRole("textbox", { name: "Search" }).fill(searchText);
+      await request;
 
-    await expect(page).toHaveURL(queryParam("searchCategory", searchText));
-  });
+      await expect(page).toHaveURL(queryParam("searchCategory", searchText));
+    },
+  );
 
-  test("restores the category search from a bookmarked URL", async ({
-    page,
-  }) => {
-    const searchText = faker.string.alpha({ length: 8, casing: "lower" });
-    const request = waitForApiList(
-      page,
-      "/resource_category/",
-      (params) => params.get("title") === searchText,
-    );
-    await page.goto(withSearch(listPath(), { searchCategory: searchText }));
-    await request;
+  test(
+    "restores the category search from a bookmarked URL",
+    { tag: ["@atomic", "@cap:definition.activity.category.search"] },
+    async ({ page }) => {
+      const searchText = faker.string.alpha({ length: 8, casing: "lower" });
+      const request = waitForApiList(
+        page,
+        "/resource_category/",
+        (params) => params.get("title") === searchText,
+      );
+      await page.goto(withSearch(listPath(), { searchCategory: searchText }));
+      await request;
 
-    await expect(page.getByRole("textbox", { name: "Search" })).toHaveValue(
-      searchText,
-    );
-  });
+      await expect(page.getByRole("textbox", { name: "Search" })).toHaveValue(
+        searchText,
+      );
+    },
+  );
 
-  test("writes the status filter of a category to the URL and the API request", async ({
-    page,
-  }) => {
-    const slug = await firstCategorySlug(page);
-    await page.goto(`${listPath()}/categories/${slug}`);
-    await expect(page).toHaveURL(queryParam("status", "active"));
+  test(
+    "writes the status filter of a category to the URL and the API request",
+    { tag: ["@atomic", "@cap:definition.activity.filter"] },
+    async ({ page }) => {
+      const slug = await firstCategorySlug(page);
+      await page.goto(`${listPath()}/categories/${slug}`);
+      await expect(page).toHaveURL(queryParam("status", "active"));
 
-    const request = waitForApiList(
-      page,
-      "/activity_definition/",
-      (params) =>
-        params.get("category") === slug && params.get("status") === "draft",
-    );
-    await selectFromFilterSelect(page, /status/i, "^draft$");
-    await request;
+      const request = waitForApiList(
+        page,
+        "/activity_definition/",
+        (params) =>
+          params.get("category") === slug && params.get("status") === "draft",
+      );
+      await selectFromFilterSelect(page, /status/i, "^draft$");
+      await request;
 
-    await expect(page).toHaveURL(queryParam("status", "draft"));
-    await expect(filterSelectButton(page, /status\s*draft/i)).toBeVisible();
-  });
+      await expect(page).toHaveURL(queryParam("status", "draft"));
+      await expect(filterSelectButton(page, /status\s*draft/i)).toBeVisible();
+    },
+  );
 
-  test("restores the filters of a category from a bookmarked URL", async ({
-    page,
-  }) => {
-    const slug = await firstCategorySlug(page);
-    const request = waitForApiList(
-      page,
-      "/activity_definition/",
-      (params) =>
-        params.get("status") === "retired" &&
-        params.get("classification") === "laboratory",
-    );
-    await page.goto(
-      withSearch(`${listPath()}/categories/${slug}`, {
-        status: "retired",
-        classification: "laboratory",
-      }),
-    );
-    await request;
+  test(
+    "restores the filters of a category from a bookmarked URL",
+    { tag: ["@atomic", "@cap:definition.activity.filter"] },
+    async ({ page }) => {
+      const slug = await firstCategorySlug(page);
+      const request = waitForApiList(
+        page,
+        "/activity_definition/",
+        (params) =>
+          params.get("status") === "retired" &&
+          params.get("classification") === "laboratory",
+      );
+      await page.goto(
+        withSearch(`${listPath()}/categories/${slug}`, {
+          status: "retired",
+          classification: "laboratory",
+        }),
+      );
+      await request;
 
-    await expect(filterSelectButton(page, /status\s*retired/i)).toBeVisible();
-    await expect(
-      filterSelectButton(page, /category\s*laboratory/i),
-    ).toBeVisible();
-  });
+      await expect(filterSelectButton(page, /status\s*retired/i)).toBeVisible();
+      await expect(
+        filterSelectButton(page, /category\s*laboratory/i),
+      ).toBeVisible();
+    },
+  );
 
-  test("uses the active status in place of invalid filters", async ({
-    page,
-  }) => {
-    const slug = await firstCategorySlug(page);
-    const api = recordApiQueries(page);
-    const request = waitForApiList(
-      page,
-      "/activity_definition/",
-      (params) =>
-        params.get("status") === "active" &&
-        params.get("offset") === "0" &&
-        !params.has("classification"),
-    );
-    await page.goto(
-      withSearch(`${listPath()}/categories/${slug}`, {
-        status: "bogus",
-        classification: "bogus",
-        page: "abc",
-      }),
-    );
-    await request;
+  test(
+    "uses the active status in place of invalid filters",
+    { tag: ["@atomic", "@cap:definition.activity.filter"] },
+    async ({ page }) => {
+      const slug = await firstCategorySlug(page);
+      const api = recordApiQueries(page);
+      const request = waitForApiList(
+        page,
+        "/activity_definition/",
+        (params) =>
+          params.get("status") === "active" &&
+          params.get("offset") === "0" &&
+          !params.has("classification"),
+      );
+      await page.goto(
+        withSearch(`${listPath()}/categories/${slug}`, {
+          status: "bogus",
+          classification: "bogus",
+          page: "abc",
+        }),
+      );
+      await request;
 
-    await expect(page).toHaveURL(queryParam("status", "active"));
-    await expect(filterSelectButton(page, /status\s*active/i)).toBeVisible();
-    api.expectNotSent("bogus");
-    api.expectNotSent("abc");
-  });
+      await expect(page).toHaveURL(queryParam("status", "active"));
+      await expect(filterSelectButton(page, /status\s*active/i)).toBeVisible();
+      api.expectNotSent("bogus");
+      api.expectNotSent("abc");
+    },
+  );
 });

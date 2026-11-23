@@ -32,287 +32,320 @@ function generateCategoryData() {
 }
 
 test.describe("Activity Definition Resource Category List", () => {
-  test("should show validation errors when trying to create without required fields", async ({
-    page,
-  }) => {
-    await page.getByRole("button", { name: /add category/i }).click();
-
-    await expect(
-      page.getByRole("heading", { name: /create category/i }),
-    ).toBeVisible();
-
-    await page.getByRole("button", { name: /create category/i }).click();
-
-    await expect(
-      getFieldErrorMessage(page.getByPlaceholder(/enter category title/i)),
-    ).toContainText(/required/i);
-
-    const slugInput = page.getByPlaceholder(/enter category slug/i);
-    await expect(getFieldErrorMessage(slugInput)).toContainText(
-      /at least 5.*at most 50/i,
-    );
-
-    await slugInput.click();
-    await slugInput.fill("abc");
-    await expect(getFieldErrorMessage(slugInput)).toContainText(
-      /at least 5.*at most 50/i,
-    );
-  });
-
-  test("should reject whitespace-only input in required text fields", async ({
-    page,
-  }) => {
-    await page.getByRole("button", { name: /add category/i }).click();
-
-    await expect(
-      page.getByRole("heading", { name: /create category/i }),
-    ).toBeVisible();
-
-    const titleInput = page.getByPlaceholder(/enter category title/i);
-    await titleInput.fill("   ");
-
-    await page.getByRole("button", { name: /create category/i }).click();
-
-    const errorMessage = getFieldErrorMessage(titleInput);
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText("This field is required");
-  });
-
-  test("should create category with required fields only", async ({ page }) => {
-    const testData = generateCategoryData();
-
-    await page.getByRole("button", { name: /add category/i }).click();
-
-    await expect(
-      page.getByRole("heading", { name: /create category/i }),
-    ).toBeVisible();
-
-    await page.getByLabel(/name/i).fill(testData.title);
-
-    await expect(page.getByLabel(/slug/i)).toHaveValue(
-      expectedSlug(testData.title),
-    );
-
-    await page.getByRole("button", { name: /create category/i }).click();
-
-    await expectToast(page, /category created successfully/i);
-
-    await expect(
-      page.getByRole("heading", { name: /create category/i }),
-    ).not.toBeVisible();
-
-    await expect(page).toHaveURL(
-      `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}?status=active`,
-    );
-
-    await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
-
-    await expect(page.getByText(testData.title)).toBeVisible();
-  });
-
-  test("should create category with all the fields", async ({ page }) => {
-    const testData = generateCategoryData();
-
-    await page.getByRole("button", { name: /add category/i }).click();
-
-    await expect(
-      page.getByRole("heading", { name: /create category/i }),
-    ).toBeVisible();
-
-    await page.getByLabel(/name/i).fill(testData.title);
-
-    await expect(page.getByLabel(/slug/i)).toHaveValue(
-      expectedSlug(testData.title),
-    );
-
-    await page.getByLabel(/description/i).fill(testData.description);
-
-    await expect(
-      page.locator('[data-slot="select-value"]').filter({ hasText: /other/i }),
-    ).toBeVisible();
-
-    await page.getByRole("button", { name: /create category/i }).click();
-
-    await expectToast(page, /category created successfully/i);
-
-    await expect(
-      page.getByRole("heading", { name: /create category/i }),
-    ).not.toBeVisible();
-
-    await expect(page).toHaveURL(
-      `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}?status=active`,
-    );
-
-    await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
-
-    await expect(page.getByText(testData.title)).toBeVisible();
-  });
-
-  test("should cancel category creation and close form when clicking on cancel button", async ({
-    page,
-  }) => {
-    await page.getByRole("button", { name: /add category/i }).click();
-
-    await expect(
-      page.getByRole("heading", { name: /create category/i }),
-    ).toBeVisible();
-
-    await page.getByRole("button", { name: /cancel/i }).click();
-
-    await expect(
-      page.getByRole("heading", { name: /create category/i }),
-    ).not.toBeVisible();
-  });
-
-  test("should edit category", async ({ page }) => {
-    const testData = generateCategoryData();
-
-    await page.getByRole("button", { name: /add category/i }).click();
-
-    await page.getByLabel(/name/i).fill(testData.title);
-    await page.getByRole("button", { name: /create category/i }).click();
-
-    await expectToast(page, /category created successfully/i);
-
-    await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
-
-    await page
-      .locator('[data-slot="card"]')
-      .filter({ hasText: testData.title })
-      .getByRole("button")
-      .click();
-
-    const updatedData = generateCategoryData();
-    await page.getByLabel(/name/i).clear();
-    await page.getByLabel(/name/i).fill(updatedData.title);
-    await page.getByLabel(/description/i).clear();
-    await page.getByLabel(/description/i).fill(updatedData.description);
-
-    await page.getByRole("button", { name: /update category/i }).click();
-
-    await expectToast(page, /category updated successfully/i);
-
-    await expect(
-      page.getByRole("heading", { name: /edit category/i }),
-    ).not.toBeVisible();
-
-    await expect(page.getByText(updatedData.title)).toBeVisible();
-    await expect(page.getByText(testData.title)).not.toBeVisible();
-  });
-
-  test("should navigate to activity definitions list when clicking on category card", async ({
-    page,
-  }) => {
-    const categoryCard = page
-      .locator('[data-slot="card"]')
-      .filter({ has: page.locator("h3", { hasText: RESOURCE_CATEGORY_NAME }) });
-    await categoryCard.click();
-
-    await expect(page).toHaveURL(
-      `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}?status=active`,
-    );
-  });
-
-  test("should show existing category when searching", async ({ page }) => {
-    const testData = generateCategoryData();
-
-    await page.getByRole("button", { name: /add category/i }).click();
-
-    await expect(
-      page.getByRole("heading", { name: /create category/i }),
-    ).toBeVisible();
-
-    await page.getByLabel(/name/i).fill(testData.title);
-
-    await expect(page.getByLabel(/slug/i)).toHaveValue(
-      expectedSlug(testData.title),
-    );
-
-    await page.getByRole("button", { name: /create category/i }).click();
-
-    await expectToast(page, /category created successfully/i);
-
-    await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
-
-    const searchInput = page.getByPlaceholder(/search/i);
-    await searchInput.fill(testData.title);
-
-    await expect(page.getByText(testData.title)).toBeVisible();
-
-    await searchInput.clear();
-    await searchInput.fill(faker.string.uuid());
-
-    await expect(page.getByText(testData.title)).not.toBeVisible();
-
-    await searchInput.clear();
-
-    await expect(page.getByText(testData.title)).toBeVisible();
-  });
-
-  test("should show no results message when searching for non-existent category", async ({
-    page,
-  }) => {
-    await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
-
-    await page.getByPlaceholder(/search/i).fill(faker.string.alphanumeric(10));
-
-    await expect(page.getByText(/no results/i)).toBeVisible();
-  });
-});
-
-test("an obsolete category type must be explicitly replaced before saving", async ({
-  page,
-  request,
-}) => {
-  const title = `Legacy category ${faker.string.alphanumeric(8)}`;
-  const created = await request.post(
-    `${getApiUrl()}/api/v1/facility/${facilityId}/resource_category/`,
-    {
-      headers: getApiHeaders(),
-      data: {
-        title,
-        slug_value: faker.string.uuid(),
-        resource_type: "activity_definition",
-        resource_sub_type: "other",
-      },
+  test(
+    "should show validation errors when trying to create without required fields",
+    { tag: ["@atomic", "@cap:definition.activity.category.create"] },
+    async ({ page }) => {
+      await page.getByRole("button", { name: /add category/i }).click();
+
+      await expect(
+        page.getByRole("heading", { name: /create category/i }),
+      ).toBeVisible();
+
+      await page.getByRole("button", { name: /create category/i }).click();
+
+      await expect(
+        getFieldErrorMessage(page.getByPlaceholder(/enter category title/i)),
+      ).toContainText(/required/i);
+
+      const slugInput = page.getByPlaceholder(/enter category slug/i);
+      await expect(getFieldErrorMessage(slugInput)).toContainText(
+        /at least 5.*at most 50/i,
+      );
+
+      await slugInput.click();
+      await slugInput.fill("abc");
+      await expect(getFieldErrorMessage(slugInput)).toContainText(
+        /at least 5.*at most 50/i,
+      );
     },
   );
-  expect(created.ok(), await created.text()).toBe(true);
-  const category = (await created.json()) as { slug: string };
-  await page.reload();
-  const card = page
-    .locator('[data-slot="card"]')
-    .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
-  await card.getByRole("button").click();
-  const sheet = page.getByRole("dialog");
-  const save = sheet.getByRole("button", {
-    name: "Update Category",
-    exact: true,
-  });
-  await expect(save).toBeDisabled();
-  await expect(
-    sheet.getByText(/saved category type is no longer available/),
-  ).toBeVisible();
-  await sheet.getByRole("combobox").click();
-  await page.getByRole("option", { name: "Other", exact: true }).click();
-  await sheet
-    .getByRole("textbox", { name: "Name", exact: true })
-    .fill(`${title} renamed`);
-  const saved = page.waitForResponse(
-    (response) =>
-      response.request().method() === "PUT" &&
-      response.url().endsWith(`/resource_category/${category.slug}/`),
+
+  test(
+    "should reject whitespace-only input in required text fields",
+    { tag: ["@atomic", "@cap:definition.activity.category.create"] },
+    async ({ page }) => {
+      await page.getByRole("button", { name: /add category/i }).click();
+
+      await expect(
+        page.getByRole("heading", { name: /create category/i }),
+      ).toBeVisible();
+
+      const titleInput = page.getByPlaceholder(/enter category title/i);
+      await titleInput.fill("   ");
+
+      await page.getByRole("button", { name: /create category/i }).click();
+
+      const errorMessage = getFieldErrorMessage(titleInput);
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("This field is required");
+    },
   );
-  await expect(save).toBeEnabled();
-  await save.click();
-  const response = await saved;
-  expect(response.ok(), await response.text()).toBe(true);
-  expect(response.request().postDataJSON().resource_sub_type).toBe("all:other");
-  await expect(
-    page.getByText(`${title} renamed`, { exact: true }),
-  ).toBeVisible();
-  await page.reload();
-  await expect(
-    page.getByText(`${title} renamed`, { exact: true }),
-  ).toBeVisible();
+
+  test(
+    "should create category with required fields only",
+    { tag: ["@atomic", "@cap:definition.activity.category.create"] },
+    async ({ page }) => {
+      const testData = generateCategoryData();
+
+      await page.getByRole("button", { name: /add category/i }).click();
+
+      await expect(
+        page.getByRole("heading", { name: /create category/i }),
+      ).toBeVisible();
+
+      await page.getByLabel(/name/i).fill(testData.title);
+
+      await expect(page.getByLabel(/slug/i)).toHaveValue(
+        expectedSlug(testData.title),
+      );
+
+      await page.getByRole("button", { name: /create category/i }).click();
+
+      await expectToast(page, /category created successfully/i);
+
+      await expect(
+        page.getByRole("heading", { name: /create category/i }),
+      ).toBeHidden();
+
+      await expect(page).toHaveURL(
+        `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}?status=active`,
+      );
+
+      await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
+
+      await expect(page.getByText(testData.title)).toBeVisible();
+    },
+  );
+
+  test(
+    "should create category with all the fields",
+    { tag: ["@atomic", "@cap:definition.activity.category.create"] },
+    async ({ page }) => {
+      const testData = generateCategoryData();
+
+      await page.getByRole("button", { name: /add category/i }).click();
+
+      await expect(
+        page.getByRole("heading", { name: /create category/i }),
+      ).toBeVisible();
+
+      await page.getByLabel(/name/i).fill(testData.title);
+
+      await expect(page.getByLabel(/slug/i)).toHaveValue(
+        expectedSlug(testData.title),
+      );
+
+      await page.getByLabel(/description/i).fill(testData.description);
+
+      await expect(
+        page
+          .locator('[data-slot="select-value"]')
+          .filter({ hasText: /other/i }),
+      ).toBeVisible();
+
+      await page.getByRole("button", { name: /create category/i }).click();
+
+      await expectToast(page, /category created successfully/i);
+
+      await expect(
+        page.getByRole("heading", { name: /create category/i }),
+      ).toBeHidden();
+
+      await expect(page).toHaveURL(
+        `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}?status=active`,
+      );
+
+      await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
+
+      await expect(page.getByText(testData.title)).toBeVisible();
+    },
+  );
+
+  test(
+    "should cancel category creation and close form when clicking on cancel button",
+    { tag: ["@atomic", "@cap:definition.activity.category.create"] },
+    async ({ page }) => {
+      await page.getByRole("button", { name: /add category/i }).click();
+
+      await expect(
+        page.getByRole("heading", { name: /create category/i }),
+      ).toBeVisible();
+
+      await page.getByRole("button", { name: /cancel/i }).click();
+
+      await expect(
+        page.getByRole("heading", { name: /create category/i }),
+      ).toBeHidden();
+    },
+  );
+
+  test(
+    "should edit category",
+    { tag: ["@atomic", "@cap:definition.activity.category.edit"] },
+    async ({ page }) => {
+      const testData = generateCategoryData();
+
+      await page.getByRole("button", { name: /add category/i }).click();
+
+      await page.getByLabel(/name/i).fill(testData.title);
+      await page.getByRole("button", { name: /create category/i }).click();
+
+      await expectToast(page, /category created successfully/i);
+
+      await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
+
+      await page
+        .locator('[data-slot="card"]')
+        .filter({ hasText: testData.title })
+        .getByRole("button")
+        .click();
+
+      const updatedData = generateCategoryData();
+      await page.getByLabel(/name/i).clear();
+      await page.getByLabel(/name/i).fill(updatedData.title);
+      await page.getByLabel(/description/i).clear();
+      await page.getByLabel(/description/i).fill(updatedData.description);
+
+      await page.getByRole("button", { name: /update category/i }).click();
+
+      await expectToast(page, /category updated successfully/i);
+
+      await expect(
+        page.getByRole("heading", { name: /edit category/i }),
+      ).toBeHidden();
+
+      await expect(page.getByText(updatedData.title)).toBeVisible();
+      await expect(page.getByText(testData.title)).toBeHidden();
+    },
+  );
+
+  test(
+    "should navigate to activity definitions list when clicking on category card",
+    { tag: ["@atomic", "@cap:definition.activity.navigate"] },
+    async ({ page }) => {
+      const categoryCard = page.locator('[data-slot="card"]').filter({
+        has: page.locator("h3", { hasText: RESOURCE_CATEGORY_NAME }),
+      });
+      await categoryCard.click();
+
+      await expect(page).toHaveURL(
+        `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}?status=active`,
+      );
+    },
+  );
+
+  test(
+    "should show existing category when searching",
+    { tag: ["@atomic", "@cap:definition.activity.category.search"] },
+    async ({ page }) => {
+      const testData = generateCategoryData();
+
+      await page.getByRole("button", { name: /add category/i }).click();
+
+      await expect(
+        page.getByRole("heading", { name: /create category/i }),
+      ).toBeVisible();
+
+      await page.getByLabel(/name/i).fill(testData.title);
+
+      await expect(page.getByLabel(/slug/i)).toHaveValue(
+        expectedSlug(testData.title),
+      );
+
+      await page.getByRole("button", { name: /create category/i }).click();
+
+      await expectToast(page, /category created successfully/i);
+
+      await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
+
+      const searchInput = page.getByPlaceholder(/search/i);
+      await searchInput.fill(testData.title);
+
+      await expect(page.getByText(testData.title)).toBeVisible();
+
+      await searchInput.clear();
+      await searchInput.fill(faker.string.uuid());
+
+      await expect(page.getByText(testData.title)).toBeHidden();
+
+      await searchInput.clear();
+
+      await expect(page.getByText(testData.title)).toBeVisible();
+    },
+  );
+
+  test(
+    "should show no results message when searching for non-existent category",
+    { tag: ["@atomic", "@cap:definition.activity.category.search"] },
+    async ({ page }) => {
+      await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
+
+      await page
+        .getByPlaceholder(/search/i)
+        .fill(faker.string.alphanumeric(10));
+
+      await expect(page.getByText(/no results/i)).toBeVisible();
+    },
+  );
 });
+
+test(
+  "an obsolete category type must be explicitly replaced before saving",
+  { tag: ["@atomic", "@cap:definition.activity.category.edit"] },
+  async ({ page, request }) => {
+    const title = `Legacy category ${faker.string.alphanumeric(8)}`;
+    const created = await request.post(
+      `${getApiUrl()}/api/v1/facility/${facilityId}/resource_category/`,
+      {
+        headers: getApiHeaders(),
+        data: {
+          title,
+          slug_value: faker.string.uuid(),
+          resource_type: "activity_definition",
+          resource_sub_type: "other",
+        },
+      },
+    );
+    expect(created.ok(), await created.text()).toBe(true);
+    const category = (await created.json()) as { slug: string };
+    await page.reload();
+    const card = page
+      .locator('[data-slot="card"]')
+      .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
+    await card.getByRole("button").click();
+    const sheet = page.getByRole("dialog");
+    const save = sheet.getByRole("button", {
+      name: "Update Category",
+      exact: true,
+    });
+    await expect(save).toBeDisabled();
+    await expect(
+      sheet.getByText(/saved category type is no longer available/),
+    ).toBeVisible();
+    await sheet.getByRole("combobox").click();
+    await page.getByRole("option", { name: "Other", exact: true }).click();
+    await sheet
+      .getByRole("textbox", { name: "Name", exact: true })
+      .fill(`${title} renamed`);
+    const saved = page.waitForResponse(
+      (response) =>
+        response.request().method() === "PUT" &&
+        response.url().endsWith(`/resource_category/${category.slug}/`),
+    );
+    await expect(save).toBeEnabled();
+    await save.click();
+    const response = await saved;
+    expect(response.ok(), await response.text()).toBe(true);
+    expect(response.request().postDataJSON().resource_sub_type).toBe(
+      "all:other",
+    );
+    await expect(
+      page.getByText(`${title} renamed`, { exact: true }),
+    ).toBeVisible();
+    await page.reload();
+    await expect(
+      page.getByText(`${title} renamed`, { exact: true }),
+    ).toBeVisible();
+  },
+);

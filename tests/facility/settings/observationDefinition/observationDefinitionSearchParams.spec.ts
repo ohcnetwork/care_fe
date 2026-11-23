@@ -26,67 +26,75 @@ test.describe("Observation definition list search params", () => {
   const listPath = () =>
     `/facility/${facilityId}/settings/observation_definitions`;
 
-  test("writes the category filter to the URL and the API request", async ({
-    page,
-  }) => {
-    await page.goto(listPath());
-    await expect(page).toHaveURL(queryParam("status", "active"));
+  test(
+    "writes the category filter to the URL and the API request",
+    { tag: ["@atomic", "@cap:definition.observation.filter"] },
+    async ({ page }) => {
+      await page.goto(listPath());
+      await expect(page).toHaveURL(queryParam("status", "active"));
 
-    const request = waitForApiList(
-      page,
-      "/observation_definition/",
-      (params) => params.get("category") === "vital_signs",
-    );
-    await selectFromFilterSelect(page, /category/i, "^vital signs$");
-    await request;
+      const request = waitForApiList(
+        page,
+        "/observation_definition/",
+        (params) => params.get("category") === "vital_signs",
+      );
+      await selectFromFilterSelect(page, /category/i, "^vital signs$");
+      await request;
 
-    await expect(page).toHaveURL(queryParam("category", "vital_signs"));
-    await expect(page).toHaveURL(queryParam("status", "active"));
-  });
+      await expect(page).toHaveURL(queryParam("category", "vital_signs"));
+      await expect(page).toHaveURL(queryParam("status", "active"));
+    },
+  );
 
-  test("restores the filters from a bookmarked URL", async ({ page }) => {
-    const request = waitForApiList(
-      page,
-      "/observation_definition/",
-      (params) =>
-        params.get("status") === "draft" &&
-        params.get("category") === "laboratory",
-    );
-    await page.goto(
-      withSearch(listPath(), { status: "draft", category: "laboratory" }),
-    );
-    await request;
+  test(
+    "restores the filters from a bookmarked URL",
+    { tag: ["@atomic", "@cap:definition.observation.filter"] },
+    async ({ page }) => {
+      const request = waitForApiList(
+        page,
+        "/observation_definition/",
+        (params) =>
+          params.get("status") === "draft" &&
+          params.get("category") === "laboratory",
+      );
+      await page.goto(
+        withSearch(listPath(), { status: "draft", category: "laboratory" }),
+      );
+      await request;
 
-    await expect(filterSelectButton(page, /status\s*draft/i)).toBeVisible();
-    await expect(
-      filterSelectButton(page, /category\s*laboratory/i),
-    ).toBeVisible();
-  });
+      await expect(filterSelectButton(page, /status\s*draft/i)).toBeVisible();
+      await expect(
+        filterSelectButton(page, /category\s*laboratory/i),
+      ).toBeVisible();
+    },
+  );
 
-  test("uses the active status in place of invalid filters", async ({
-    page,
-  }) => {
-    const api = recordApiQueries(page);
-    const request = waitForApiList(
-      page,
-      "/observation_definition/",
-      (params) =>
-        params.get("status") === "active" &&
-        params.get("offset") === "0" &&
-        !params.has("category"),
-    );
-    await page.goto(
-      withSearch(listPath(), {
-        status: "bogus",
-        category: "bogus",
-        page: "abc",
-      }),
-    );
-    await request;
+  test(
+    "uses the active status in place of invalid filters",
+    { tag: ["@atomic", "@cap:definition.observation.filter"] },
+    async ({ page }) => {
+      const api = recordApiQueries(page);
+      const request = waitForApiList(
+        page,
+        "/observation_definition/",
+        (params) =>
+          params.get("status") === "active" &&
+          params.get("offset") === "0" &&
+          !params.has("category"),
+      );
+      await page.goto(
+        withSearch(listPath(), {
+          status: "bogus",
+          category: "bogus",
+          page: "abc",
+        }),
+      );
+      await request;
 
-    await expect(page).toHaveURL(queryParam("status", "active"));
-    await expect(filterSelectButton(page, /status\s*active/i)).toBeVisible();
-    api.expectNotSent("bogus");
-    api.expectNotSent("abc");
-  });
+      await expect(page).toHaveURL(queryParam("status", "active"));
+      await expect(filterSelectButton(page, /status\s*active/i)).toBeVisible();
+      api.expectNotSent("bogus");
+      api.expectNotSent("abc");
+    },
+  );
 });

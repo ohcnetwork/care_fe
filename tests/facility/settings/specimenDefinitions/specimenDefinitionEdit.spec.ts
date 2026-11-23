@@ -10,6 +10,7 @@ import {
   preparationOptions,
   typeCollectedOptions,
 } from "tests/facility/settings/specimenDefinitions/specimenDefinitionConstants";
+import { createSpecimenDefinitionViaUi } from "tests/helper/definitions";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -24,7 +25,7 @@ test.describe("Specimen Definitions Edit", () => {
   let status: string;
   let typeCollected: string;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(() => {
     facilityId = getFacilityId();
 
     definitionTitle = faker.company.name();
@@ -35,199 +36,200 @@ test.describe("Specimen Definitions Edit", () => {
     definitionSlug = `${faker.science.chemicalElement().symbol.toLowerCase()}-${randomHex}`;
     status = faker.helpers.arrayElement(STATUS_OPTIONS);
     typeCollected = faker.helpers.arrayElement(typeCollectedOptions);
-
-    const targetUrl = `/facility/${facilityId}/settings/specimen_definitions`;
-    await page.goto(targetUrl);
   });
 
-  test("edit specimen definition and verify changes", async ({ page }) => {
-    // Create a specimen definition with only required fields to edit it
-    await page.getByRole("button", { name: "Add Definition" }).click();
+  test(
+    "edit specimen definition and verify changes",
+    { tag: ["@atomic", "@cap:definition.specimen.edit"] },
+    async ({ page }) => {
+      // Create a specimen definition with only required fields to edit it
+      await createSpecimenDefinitionViaUi(page, {
+        facilityId,
+        title: definitionTitle,
+        slug: definitionSlug,
+        description: definitionDescription,
+        status,
+        typeCollected,
+      });
 
-    await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
-    await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);
-    await page
-      .getByRole("textbox", { name: "Description *" })
-      .fill(definitionDescription);
-    await page.getByRole("combobox", { name: "Status *" }).click();
-    await page.getByRole("option", { name: status }).click();
+      // Apply status filter before searching
+      await page.getByRole("button", { name: /^Status/ }).click();
+      await page
+        .getByRole("menuitemradio", { name: status.toLowerCase() })
+        .click();
 
-    await page.getByRole("combobox", { name: "Type Collected *" }).click();
-    await page.getByRole("option", { name: typeCollected }).click();
+      // Search for the newly created definition
+      await page
+        .getByRole("textbox", { name: "Search definitions" })
+        .fill(definitionTitle);
 
-    await page.getByRole("button", { name: /save/i }).click();
+      await page.getByRole("link", { name: /edit/i }).first().click();
 
-    // Apply status filter before searching
-    await page.getByRole("button", { name: /^Status/ }).click();
-    await page
-      .getByRole("menuitemradio", { name: status.toLowerCase() })
-      .click();
+      // Edit all fields
+      await page
+        .getByRole("textbox", { name: "Title *" })
+        .fill(`${definitionTitle}-edited`);
+      await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);
+      await page
+        .getByRole("textbox", { name: "Description *" })
+        .fill(`${definitionDescription}-edited`);
+      await page.getByRole("combobox", { name: "Status *" }).click();
+      await page.getByRole("option", { name: status }).click();
 
-    // Search for the newly created definition
-    await page
-      .getByRole("textbox", { name: "Search definitions" })
-      .fill(definitionTitle);
+      await page.getByRole("combobox", { name: "Type Collected *" }).click();
+      await page.getByRole("option", { name: typeCollected }).click();
 
-    await page.getByRole("link", { name: /edit/i }).first().click();
+      const derivedFromURI = faker.internet.url();
+      await page
+        .getByRole("textbox", { name: "Derived From URI" })
+        .fill(derivedFromURI);
 
-    // Edit all fields
-    await page
-      .getByRole("textbox", { name: "Title *" })
-      .fill(`${definitionTitle}-edited`);
-    await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);
-    await page
-      .getByRole("textbox", { name: "Description *" })
-      .fill(`${definitionDescription}-edited`);
-    await page.getByRole("combobox", { name: "Status *" }).click();
-    await page.getByRole("option", { name: status }).click();
+      const collectionOption = faker.helpers.arrayElement(collectionOptions);
+      await page
+        .getByRole("combobox", { name: "Collection", exact: true })
+        .click();
+      await page.getByRole("option", { name: collectionOption }).click();
 
-    await page.getByRole("combobox", { name: "Type Collected *" }).click();
-    await page.getByRole("option", { name: typeCollected }).click();
+      const preparationOption = faker.helpers.arrayElement(preparationOptions);
+      await page.getByRole("button", { name: "Add" }).click();
+      await page.getByRole("combobox", { name: "Patient Preparation" }).click();
+      await page.getByRole("option", { name: preparationOption }).click();
 
-    const derivedFromURI = faker.internet.url();
-    await page
-      .getByRole("textbox", { name: "Derived From URI" })
-      .fill(derivedFromURI);
+      const isDerived = faker.datatype.boolean();
+      if (isDerived) {
+        await page.getByRole("switch", { name: "Is Derived" }).click();
+      }
 
-    const collectionOption = faker.helpers.arrayElement(collectionOptions);
-    await page
-      .getByRole("combobox", { name: "Collection", exact: true })
-      .click();
-    await page.getByRole("option", { name: collectionOption }).click();
+      const isSingleUse = faker.datatype.boolean();
+      if (isSingleUse) {
+        await page.getByRole("switch", { name: "Single Use" }).click();
+      }
 
-    const preparationOption = faker.helpers.arrayElement(preparationOptions);
-    await page.getByRole("button", { name: "Add" }).click();
-    await page.getByRole("combobox", { name: "Patient Preparation" }).click();
-    await page.getByRole("option", { name: preparationOption }).click();
+      await page.getByRole("combobox", { name: "Preference" }).click();
+      const preferenceOption = faker.helpers.arrayElement(preferenceOptions);
+      await page.getByRole("option", { name: preferenceOption }).click();
 
-    const isDerived = faker.datatype.boolean();
-    if (isDerived) {
-      await page.getByRole("switch", { name: "Is Derived" }).click();
-    }
+      const retentionTime = faker.number.int(INT_MAX);
+      await page
+        .getByPlaceholder("Enter Retention Time", { exact: true })
+        .fill(retentionTime.toString());
+      // Pick the unit to commit the quantity and close the suggestions.
+      await page
+        .getByRole("option", { name: `${retentionTime} hours`, exact: true })
+        .click();
 
-    const isSingleUse = faker.datatype.boolean();
-    if (isSingleUse) {
-      await page.getByRole("switch", { name: "Single Use" }).click();
-    }
+      const requirement = faker.lorem.sentence();
+      await page
+        .getByRole("textbox", { name: "Requirement" })
+        .fill(requirement);
 
-    await page.getByRole("combobox", { name: "Preference" }).click();
-    const preferenceOption = faker.helpers.arrayElement(preferenceOptions);
-    await page.getByRole("option", { name: preferenceOption }).click();
+      const containerDescription = faker.lorem.sentence();
+      await page
+        .getByRole("textbox", { name: "Description", exact: true })
+        .fill(containerDescription);
 
-    const retentionTime = faker.number.int(INT_MAX);
-    await page
-      .getByPlaceholder("Enter Retention Time", { exact: true })
-      .fill(retentionTime.toString());
-    // Pick the unit to commit the quantity and close the suggestions.
-    await page
-      .getByRole("option", { name: `${retentionTime} hours`, exact: true })
-      .click();
+      const capOption = faker.helpers.arrayElement(capOptions);
+      // Exact: the Capacity quantity input below is a combobox too.
+      await page.getByRole("combobox", { name: "Cap", exact: true }).click();
+      await page.getByRole("option", { name: capOption }).click();
 
-    const requirement = faker.lorem.sentence();
-    await page.getByRole("textbox", { name: "Requirement" }).fill(requirement);
+      const capacity = faker.number.int(INT_MAX);
+      await page
+        .getByPlaceholder("Enter Capacity", { exact: true })
+        .fill(capacity.toString());
+      // Pick the unit to commit the quantity and close the suggestions.
+      await page
+        .getByRole("option", { name: `${capacity} milliliter`, exact: true })
+        .click();
 
-    const containerDescription = faker.lorem.sentence();
-    await page
-      .getByRole("textbox", { name: "Description", exact: true })
-      .fill(containerDescription);
+      const minimumVolume = faker.number.int(INT_MAX);
+      await page
+        .getByRole("textbox", { name: "Enter Minimum Volume" })
+        .fill(minimumVolume.toString());
 
-    const capOption = faker.helpers.arrayElement(capOptions);
-    // Exact: the Capacity quantity input below is a combobox too.
-    await page.getByRole("combobox", { name: "Cap", exact: true }).click();
-    await page.getByRole("option", { name: capOption }).click();
+      const preparationDescription = faker.lorem.sentence();
+      await page
+        .getByRole("textbox", { name: "Preparation" })
+        .fill(preparationDescription);
 
-    const capacity = faker.number.int(INT_MAX);
-    await page
-      .getByPlaceholder("Enter Capacity", { exact: true })
-      .fill(capacity.toString());
-    // Pick the unit to commit the quantity and close the suggestions.
-    await page
-      .getByRole("option", { name: `${capacity} milliliter`, exact: true })
-      .click();
+      // Submit form
+      await page.getByRole("button", { name: /save/i }).click();
 
-    const minimumVolume = faker.number.int(INT_MAX);
-    await page
-      .getByRole("textbox", { name: "Enter Minimum Volume" })
-      .fill(minimumVolume.toString());
+      // Verify success notification
+      await expect(
+        page
+          .getByRole("region", { name: "Notifications alt+T" })
+          .getByRole("listitem"),
+      ).toContainText(/updated/i);
 
-    const preparationDescription = faker.lorem.sentence();
-    await page
-      .getByRole("textbox", { name: "Preparation" })
-      .fill(preparationDescription);
-
-    // Submit form
-    await page.getByRole("button", { name: /save/i }).click();
-
-    // Verify success notification
-    await expect(
-      page
-        .getByRole("region", { name: "Notifications alt+T" })
-        .getByRole("listitem"),
-    ).toContainText(/updated/i);
-
-    // Verify all fields on detail page
-    await expect(
-      page.getByRole("heading", { name: `${definitionTitle}-edited` }),
-    ).toBeVisible();
-    await expect(
-      page.getByText(`${definitionDescription}-edited`),
-    ).toBeVisible();
-    await expect(page.getByText(status)).toBeVisible();
-    await expect(page.getByText(derivedFromURI)).toBeVisible();
-    await expect(page.getByText(typeCollected)).toBeVisible();
-    await expect(page.getByText(collectionOption)).toBeVisible();
-    await expect(page.getByText(preparationOption)).toBeVisible();
-    await expect(
-      page.getByText(new RegExp(`Is Derived${isDerived ? "Yes" : "No"}`, "i")),
-    ).toBeVisible();
-    await expect(
-      page.getByText(
-        new RegExp(`Single Use${isSingleUse ? "Yes" : "No"}`, "i"),
-      ),
-    ).toBeVisible();
-    await expect(page.getByText(requirement)).toBeVisible();
-    await expect(
-      page.getByText(new RegExp(`${retentionTime.toFixed(2)}\\s+(hours|days)`)),
-    ).toBeVisible();
-    await expect(page.getByText(containerDescription)).toBeVisible();
-    await expect(page.getByText(preparationDescription)).toBeVisible();
-    await expect(
-      page.getByText(
-        new RegExp(
-          `${capacity.toFixed(2)}\\s+(milligram|gram|milliliter|drop|microgram)`,
+      // Verify all fields on detail page
+      await expect(
+        page.getByRole("heading", { name: `${definitionTitle}-edited` }),
+      ).toBeVisible();
+      await expect(
+        page.getByText(`${definitionDescription}-edited`),
+      ).toBeVisible();
+      await expect(page.getByText(status)).toBeVisible();
+      await expect(page.getByText(derivedFromURI)).toBeVisible();
+      await expect(page.getByText(typeCollected)).toBeVisible();
+      await expect(page.getByText(collectionOption)).toBeVisible();
+      await expect(page.getByText(preparationOption)).toBeVisible();
+      await expect(
+        page.getByText(
+          new RegExp(`Is Derived${isDerived ? "Yes" : "No"}`, "i"),
         ),
-      ),
-    ).toBeVisible();
-    await expect(page.getByText(capOption)).toBeVisible();
-    await expect(
-      page.getByText(minimumVolume.toString(), { exact: true }),
-    ).toBeVisible();
+      ).toBeVisible();
+      await expect(
+        page.getByText(
+          new RegExp(`Single Use${isSingleUse ? "Yes" : "No"}`, "i"),
+        ),
+      ).toBeVisible();
+      await expect(page.getByText(requirement)).toBeVisible();
+      await expect(
+        page.getByText(
+          new RegExp(`${retentionTime.toFixed(2)}\\s+(hours|days)`),
+        ),
+      ).toBeVisible();
+      await expect(page.getByText(containerDescription)).toBeVisible();
+      await expect(page.getByText(preparationDescription)).toBeVisible();
+      await expect(
+        page.getByText(
+          new RegExp(
+            `${capacity.toFixed(2)}\\s+(milligram|gram|milliliter|drop|microgram)`,
+          ),
+        ),
+      ).toBeVisible();
+      await expect(page.getByText(capOption)).toBeVisible();
+      await expect(
+        page.getByText(minimumVolume.toString(), { exact: true }),
+      ).toBeVisible();
 
-    await page.getByRole("link", { name: "Edit", exact: true }).click();
-    await page
-      .getByRole("button", { name: "Remove Collection", exact: true })
-      .click();
-    await page.getByRole("textbox", { name: "Derived From URI" }).clear();
-    const saved = page.waitForResponse(
-      (res) =>
-        res.url().includes("/specimen_definition/") &&
-        res.request().method() === "PUT",
-    );
-    await page.getByRole("button", { name: /save/i }).click();
-    const response = await saved;
-    expect(response.ok()).toBeTruthy();
-    expect(response.request().postDataJSON().collection).toEqual({});
-    expect(response.request().postDataJSON().derived_from_uri).toBe("");
-    await expect(
-      page.getByRole("heading", { name: `${definitionTitle}-edited` }),
-    ).toBeVisible();
-    await page.reload();
-    await expect(
-      page.getByRole("heading", { name: `${definitionTitle}-edited` }),
-    ).toBeVisible();
-    await expect(page.getByText(collectionOption, { exact: true })).toHaveCount(
-      0,
-    );
-    await expect(page.getByText(derivedFromURI)).toHaveCount(0);
-  });
+      await page.getByRole("link", { name: "Edit", exact: true }).click();
+      await page
+        .getByRole("button", { name: "Remove Collection", exact: true })
+        .click();
+      await page.getByRole("textbox", { name: "Derived From URI" }).clear();
+      const saved = page.waitForResponse(
+        (res) =>
+          res.url().includes("/specimen_definition/") &&
+          res.request().method() === "PUT",
+      );
+      await page.getByRole("button", { name: /save/i }).click();
+      const response = await saved;
+      expect(response.ok()).toBeTruthy();
+      expect(response.request().postDataJSON().collection).toEqual({});
+      expect(response.request().postDataJSON().derived_from_uri).toBe("");
+      await expect(
+        page.getByRole("heading", { name: `${definitionTitle}-edited` }),
+      ).toBeVisible();
+      await page.reload();
+      await expect(
+        page.getByRole("heading", { name: `${definitionTitle}-edited` }),
+      ).toBeVisible();
+      await expect(
+        page.getByText(collectionOption, { exact: true }),
+      ).toHaveCount(0);
+      await expect(page.getByText(derivedFromURI)).toHaveCount(0);
+    },
+  );
 });

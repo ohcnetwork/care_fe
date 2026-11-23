@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { createProductKnowledgeViaUi } from "tests/helper/definitions";
 import { expectedSlug } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -22,7 +23,7 @@ test.describe("Product Knowledge Delete operations", () => {
     "international unit",
   ];
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(() => {
     facilityId = getFacilityId();
     const productName = faker.commerce.productName();
 
@@ -30,35 +31,35 @@ test.describe("Product Knowledge Delete operations", () => {
     slug = expectedSlug(productName);
     baseUnit = faker.helpers.arrayElement(baseUnitOptions);
     categoryName = "Medications";
-
-    await page.goto(`/facility/${facilityId}/settings/product_knowledge`);
-    await page.getByRole("heading", { name: categoryName }).click();
   });
 
-  test("quick create and delete product knowledge", async ({ page }) => {
-    await page.getByRole("button", { name: /add product/i }).click();
-    await page.getByRole("textbox", { name: /name/i }).fill(name);
-    await page.getByRole("textbox", { name: /slug/i }).fill(slug);
-    await page.getByText(/Base Unit/).click();
-    await page.getByRole("option", { name: baseUnit }).click();
-    await page.keyboard.press("Escape");
-    await page.getByRole("button", { name: "Remove Definition" }).click();
-    await page.getByRole("button", { name: /create/i }).click();
+  test(
+    "quick create and delete product knowledge",
+    { tag: ["@atomic", "@cap:product.knowledge.delete"] },
+    async ({ page }) => {
+      // Without a medication definition: no dosage form to pick.
+      await createProductKnowledgeViaUi(page, {
+        facilityId,
+        categoryName,
+        name,
+        slug,
+        baseUnit,
+        dosageForm: null,
+      });
 
-    await expect(page.getByText(/created successfully/i)).toBeVisible();
+      await page.getByRole("textbox", { name: "Search products" }).fill(name);
+      await expect(page.getByRole("table").getByText(name)).toBeVisible();
+      await page.getByRole("link", { name: "View" }).first().click();
+      await expect(page.getByRole("button", { name: "Delete" })).toBeVisible();
+      await page.getByRole("button", { name: "Delete" }).click();
+      await page.getByRole("button", { name: "Confirm" }).click();
 
-    await page.getByRole("textbox", { name: "Search products" }).fill(name);
-    await expect(page.getByRole("table").getByText(name)).toBeVisible();
-    await page.getByRole("link", { name: "View" }).first().click();
-    await expect(page.getByRole("button", { name: "Delete" })).toBeVisible();
-    await page.getByRole("button", { name: "Delete" }).click();
-    await page.getByRole("button", { name: "Confirm" }).click();
+      await expect(
+        page.getByText(/product knowledge.*deleted successfully/i),
+      ).toBeVisible();
 
-    await expect(
-      page.getByText(/product knowledge.*deleted successfully/i),
-    ).toBeVisible();
-
-    await page.getByRole("textbox", { name: "Search products" }).fill(name);
-    await expect(page.getByRole("table").getByText(name)).not.toBeVisible();
-  });
+      await page.getByRole("textbox", { name: "Search products" }).fill(name);
+      await expect(page.getByRole("table").getByText(name)).toBeHidden();
+    },
+  );
 });

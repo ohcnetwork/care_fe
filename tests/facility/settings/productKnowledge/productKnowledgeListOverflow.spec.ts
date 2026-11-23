@@ -73,96 +73,109 @@ test.describe("Product Knowledge list with long values", () => {
     await page.getByRole("heading", { name: "Medications" }).click();
   }
 
-  test("desktop table keeps long values within the table", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await openCategory(page);
-
-    const table = page.getByRole("table");
-    const row = table.getByRole("row").filter({ hasText: longName });
-    await expect(row).toBeVisible();
-    await expect(row.getByText(longIdentifier)).toBeVisible();
-
-    await expect(row.getByRole("link", { name: "View" })).toBeInViewport();
-    expect(
-      await getHorizontalOverflow(
-        page.locator('[data-slot="table-container"]'),
-      ),
-    ).toBeLessThanOrEqual(1);
-  });
-
-  test("mobile card keeps long values within the card", async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await openCategory(page);
-
-    const card = page
-      .locator('[data-slot="card"]')
-      .filter({ hasText: longName });
-    await expect(card).toBeVisible();
-    await expect(card.getByText(longIdentifier)).toBeVisible();
-    await expect(card.getByText(longCode)).toBeVisible();
-
-    expect(await getHorizontalOverflow(card)).toBeLessThanOrEqual(1);
-    const hasPageHorizontalScroll = await page.evaluate(
-      () =>
-        document.documentElement.scrollWidth >
-        document.documentElement.clientWidth,
-    );
-    expect(hasPageHorizontalScroll).toBe(false);
-  });
-
-  for (const width of [320, 390, 768, 1024, 1280, 1920]) {
-    test(`filters stay within the page at ${width}px with selected values`, async ({
-      page,
-    }) => {
-      await page.setViewportSize({ width, height: 800 });
+  test(
+    "desktop table keeps long values within the table",
+    { tag: ["@atomic", "@cap:product.knowledge.list"] },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 800 });
       await openCategory(page);
-      await expect(page.getByPlaceholder("Search products")).toBeVisible();
 
-      const url = new URL(page.url());
-      url.searchParams.set("status", "active");
-      url.searchParams.set("product_type", "nutritional_product");
-      await page.goto(url.toString());
+      const table = page.getByRole("table");
+      const row = table.getByRole("row").filter({ hasText: longName });
+      await expect(row).toBeVisible();
+      await expect(row.getByText(longIdentifier)).toBeVisible();
 
-      const search = page.getByPlaceholder("Search products");
-      await expect(search).toBeVisible();
-      const filterRow = search.locator("xpath=../..");
-      const filterButtons = filterRow
-        .locator('[data-slot="filter-select"]')
-        .getByRole("button");
-      await expect(filterButtons).toHaveCount(2);
-      for (const button of await filterButtons.all()) {
-        await button.scrollIntoViewIfNeeded();
-        await expect(button).toBeInViewport();
-      }
+      await expect(row.getByRole("link", { name: "View" })).toBeInViewport();
+      expect(
+        await getHorizontalOverflow(
+          page.locator('[data-slot="table-container"]'),
+        ),
+      ).toBeLessThanOrEqual(1);
+    },
+  );
 
-      const { rowRight, groupRight, filtersRight } = await filterRow.evaluate(
-        (row) => {
-          const group = row.lastElementChild!;
-          return {
-            rowRight: row.getBoundingClientRect().right,
-            groupRight: group.getBoundingClientRect().right,
-            filtersRight: group.lastElementChild!.getBoundingClientRect().right,
-          };
-        },
-      );
-      expect(groupRight).toBeLessThanOrEqual(rowRight + 1);
+  test(
+    "mobile card keeps long values within the card",
+    { tag: ["@atomic", "@cap:product.knowledge.list"] },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await openCategory(page);
 
-      if (width >= 1280) {
-        const searchBox = await search.boundingBox();
-        for (const button of await filterButtons.all()) {
-          const buttonBox = await button.boundingBox();
-          expect(Math.abs(buttonBox!.y - searchBox!.y)).toBeLessThanOrEqual(2);
-        }
-        // Search stays first and the filters are pushed to the end.
-        expect(Math.abs(rowRight - filtersRight)).toBeLessThanOrEqual(1);
-      }
+      const card = page
+        .locator('[data-slot="card"]')
+        .filter({ hasText: longName });
+      await expect(card).toBeVisible();
+      await expect(card.getByText(longIdentifier)).toBeVisible();
+      await expect(card.getByText(longCode)).toBeVisible();
 
+      expect(await getHorizontalOverflow(card)).toBeLessThanOrEqual(1);
       const hasPageHorizontalScroll = await page.evaluate(
         () =>
           document.documentElement.scrollWidth >
           document.documentElement.clientWidth,
       );
       expect(hasPageHorizontalScroll).toBe(false);
-    });
+    },
+  );
+
+  for (const width of [320, 390, 768, 1024, 1280, 1920]) {
+    test(
+      `filters stay within the page at ${width}px with selected values`,
+      { tag: ["@atomic", "@cap:product.knowledge.filter"] },
+      async ({ page }) => {
+        await page.setViewportSize({ width, height: 800 });
+        await openCategory(page);
+        await expect(page.getByPlaceholder("Search products")).toBeVisible();
+
+        const url = new URL(page.url());
+        url.searchParams.set("status", "active");
+        url.searchParams.set("product_type", "nutritional_product");
+        await page.goto(url.toString());
+
+        const search = page.getByPlaceholder("Search products");
+        await expect(search).toBeVisible();
+        const filterRow = search.locator("xpath=../..");
+        const filterButtons = filterRow
+          .locator('[data-slot="filter-select"]')
+          .getByRole("button");
+        await expect(filterButtons).toHaveCount(2);
+        for (const button of await filterButtons.all()) {
+          await button.scrollIntoViewIfNeeded();
+          await expect(button).toBeInViewport();
+        }
+
+        const { rowRight, groupRight, filtersRight } = await filterRow.evaluate(
+          (row) => {
+            const group = row.lastElementChild!;
+            return {
+              rowRight: row.getBoundingClientRect().right,
+              groupRight: group.getBoundingClientRect().right,
+              filtersRight:
+                group.lastElementChild!.getBoundingClientRect().right,
+            };
+          },
+        );
+        expect(groupRight).toBeLessThanOrEqual(rowRight + 1);
+
+        if (width >= 1280) {
+          const searchBox = await search.boundingBox();
+          for (const button of await filterButtons.all()) {
+            const buttonBox = await button.boundingBox();
+            expect(Math.abs(buttonBox!.y - searchBox!.y)).toBeLessThanOrEqual(
+              2,
+            );
+          }
+          // Search stays first and the filters are pushed to the end.
+          expect(Math.abs(rowRight - filtersRight)).toBeLessThanOrEqual(1);
+        }
+
+        const hasPageHorizontalScroll = await page.evaluate(
+          () =>
+            document.documentElement.scrollWidth >
+            document.documentElement.clientWidth,
+        );
+        expect(hasPageHorizontalScroll).toBe(false);
+      },
+    );
   }
 });

@@ -1,40 +1,40 @@
-import { expect, test } from "@playwright/test";
-import { getFacilityId } from "tests/support/facilityId";
+import { createProductViaApi } from "tests/helper/definitions";
+import { expect, test } from "tests/support/test";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Product Edit", () => {
-  let facilityId: string;
+  test(
+    "should update product status and revert",
+    { tag: ["@atomic", "@cap:product.edit"] },
+    async ({ page, facilityId }) => {
+      // Edit a product of this test's own: toggling a fixture product's status
+      // hides it from the specs that stock, bill or dispense it.
+      const { productId } = await createProductViaApi({ facilityId });
+      await page.goto(`/facility/${facilityId}/settings/product/${productId}`);
 
-  test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
-    await page.goto(`/facility/${facilityId}/settings/product`);
-  });
+      await page.getByRole("button", { name: "Edit" }).click();
 
-  test("should update product status and revert", async ({ page }) => {
-    await page.getByRole("link", { name: "View" }).first().click();
+      await page.getByLabel("Status").click();
+      await page.getByRole("option", { name: "Inactive" }).click();
+      await page.getByRole("button", { name: "Update" }).click();
 
-    await page.getByRole("button", { name: "Edit" }).click();
+      await expect(page).toHaveURL(/\/settings\/product\/[0-9a-fA-F-]{36}$/);
 
-    await page.getByLabel("Status").click();
-    await page.getByRole("option", { name: "Inactive" }).click();
-    await page.getByRole("button", { name: "Update" }).click();
+      await expect(page.getByText("Back to list")).toBeVisible();
+      const updatedToast = page.getByText("Product updated successfully");
+      await expect(updatedToast).toBeVisible();
+      await expect(updatedToast).toBeHidden();
 
-    await expect(page).toHaveURL(/\/settings\/product\/[0-9a-fA-F-]{36}$/);
+      // Revert status to active
+      await page.getByRole("button", { name: "Edit" }).click();
+      await page.getByLabel("Status").click();
+      await page.getByRole("option", { name: "Active", exact: true }).click();
+      await page.getByRole("button", { name: "Update" }).click();
 
-    await expect(page.getByText("Back to list")).toBeVisible();
-    const updatedToast = page.getByText("Product updated successfully");
-    await expect(updatedToast).toBeVisible();
-    await expect(updatedToast).toBeHidden();
-
-    // Revert status to active as part of cleanup
-    await page.getByRole("button", { name: "Edit" }).click();
-    await page.getByLabel("Status").click();
-    await page.getByRole("option", { name: "Active", exact: true }).click();
-    await page.getByRole("button", { name: "Update" }).click();
-
-    await expect(updatedToast).toBeVisible();
-    await page.getByRole("button", { name: "Edit" }).click();
-    await expect(page.getByLabel("Status")).toHaveText("Active");
-  });
+      await expect(updatedToast).toBeVisible();
+      await page.getByRole("button", { name: "Edit" }).click();
+      await expect(page.getByLabel("Status")).toHaveText("Active");
+    },
+  );
 });
