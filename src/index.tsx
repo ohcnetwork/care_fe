@@ -9,6 +9,7 @@ import React, { Context } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import { z } from "zod";
+import { initNotificationClickHandoff } from "./lib/notificationClick";
 import { initZod } from "./lib/zod";
 
 // Extend Window interface to include CARE_API_URL
@@ -36,6 +37,8 @@ if (window.__CARE_RUNTIME_ENV__ === undefined) {
 window.CARE_API_URL = careConfig.apiUrl;
 window.AuthUserContext = AuthUserContext;
 window.__CORE_ENV__ = careConfig;
+
+initNotificationClickHandoff();
 
 if ("serviceWorker" in navigator) {
   registerSW({ immediate: false });

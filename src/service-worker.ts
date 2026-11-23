@@ -8,13 +8,14 @@
 import { clientsClaim } from "workbox-core";
 import { precacheAndRoute } from "workbox-precaching";
 
-declare const self: ServiceWorkerGlobalScope;
+import {
+  NOTIFICATION_CLICK_CACHE,
+  NOTIFICATION_CLICK_HASH_KEY,
+  NOTIFICATION_CLICK_MESSAGE,
+  notificationClickCacheKey,
+} from "./lib/notificationClick";
 
-// Keep in sync with the identical constants in
-// care_notifications_fe/src/lib/notificationClickListener.ts.
-const NOTIFICATION_CLICK_CACHE = "care-notification-click-data-v1";
-const notificationClickCacheKey = (id: string) =>
-  `/__notification_click__/${id}`;
+declare const self: ServiceWorkerGlobalScope;
 
 precacheAndRoute(self.__WB_MANIFEST);
 
@@ -74,10 +75,6 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (e) => {
   e.notification.close();
   const data = (e.notification.data as Record<string, unknown>) || {};
-  const facilityId = data.facility_id as string | undefined;
-  const fallbackUrl = facilityId
-    ? `/facility/${facilityId}/notifications`
-    : "/";
 
   e.waitUntil(
     self.clients
@@ -101,37 +98,41 @@ self.addEventListener("notificationclick", (e) => {
           ) ??
           sameOriginClients[0];
 
-        // Stash the payload in Cache Storage and pass only an opaque id via
-        // the hash, so PHI never lands in the URL or browser history —
-        // postMessage-ing an open client instead can race its listener mount.
-        let targetUrl = fallbackUrl;
-        try {
-          const clickId = crypto.randomUUID();
-          const cache = await caches.open(NOTIFICATION_CLICK_CACHE);
-          await cache.put(
-            notificationClickCacheKey(clickId),
-            new Response(JSON.stringify(data)),
-          );
-          targetUrl = `${fallbackUrl}#notification_click=${clickId}`;
-        } catch (err) {
-          console.warn("Failed to stash notification click data", err);
-        }
-
+        // Message instead of navigating, so the open page keeps its state
+        // (for example an unsaved form). The app decides where to go.
         if (existingClient) {
           try {
-            const navigatedClient = await existingClient.navigate(targetUrl);
-            await navigatedClient?.focus();
+            existingClient.postMessage({
+              type: NOTIFICATION_CLICK_MESSAGE,
+              data,
+            });
+            await existingClient.focus();
             return;
           } catch (err) {
-            // navigate() may be unsupported, or the client closed mid-navigation.
             console.warn(
-              "Failed to navigate existing client, opening a new window instead",
+              "Failed to reach existing client, opening a new window instead",
               err,
             );
           }
         }
 
-        // The notifications plugin reads the payload back once this window loads.
+        // A new window cannot receive messages before it loads, so keep the
+        // payload in Cache Storage and pass only an opaque id in the hash.
+        let targetUrl = "/";
+        try {
+          const clickId = crypto.randomUUID();
+          const cache = await caches.open(NOTIFICATION_CLICK_CACHE);
+          // Entries left by earlier clicks that never loaded are stale.
+          await Promise.all((await cache.keys()).map((k) => cache.delete(k)));
+          await cache.put(
+            notificationClickCacheKey(clickId),
+            new Response(JSON.stringify(data)),
+          );
+          targetUrl = `/#${NOTIFICATION_CLICK_HASH_KEY}=${clickId}`;
+        } catch (err) {
+          console.warn("Failed to stash notification click data", err);
+        }
+
         const windowClient = await self.clients.openWindow(targetUrl);
         await windowClient?.focus();
       })
