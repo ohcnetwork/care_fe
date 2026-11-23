@@ -18,98 +18,108 @@ test.use({ storageState: "tests/.auth/user.json" });
 test.describe("Value set list search params", () => {
   const listPath = "/admin/valuesets";
 
-  test("writes the status tab to the URL and the API request", async ({
-    page,
-  }) => {
-    await page.goto(listPath);
-    await expect(
-      page.getByRole("heading", { name: "ValueSets" }),
-    ).toBeVisible();
+  test(
+    "writes the status tab to the URL and the API request",
+    { tag: ["@atomic", "@cap:valueset.list.filter"] },
+    async ({ page }) => {
+      await page.goto(listPath);
+      await expect(
+        page.getByRole("heading", { name: "ValueSets" }),
+      ).toBeVisible();
 
-    const request = waitForApiList(
-      page,
-      "/valueset/",
-      (params) => params.get("status") === "draft",
-    );
-    await page.getByRole("tab", { name: "Draft" }).click();
-    await request;
-
-    await expect(page).toHaveURL(queryParam("status", "draft"));
-  });
-
-  test("restores the filters from a bookmarked URL", async ({ page }) => {
-    const name = faker.string.alpha({ length: 8, casing: "lower" });
-    const request = waitForApiList(
-      page,
-      "/valueset/",
-      (params) =>
-        params.get("status") === "retired" && params.get("name") === name,
-    );
-    await page.goto(withSearch(listPath, { status: "retired", name }));
-    await request;
-
-    await expect(page.getByRole("tab", { name: "Retired" })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-    await expect(
-      page.getByRole("textbox", { name: "Search ValueSets" }),
-    ).toHaveValue(name);
-  });
-
-  test("lists the active value sets for an invalid status", async ({
-    page,
-  }) => {
-    const api = recordApiQueries(page);
-    const request = waitForApiList(
-      page,
-      "/valueset/",
-      (params) =>
-        params.get("status") === "active" && params.get("offset") === "0",
-    );
-    await page.goto(withSearch(listPath, { status: "bogus", page: "abc" }));
-    await request;
-
-    await expect(page.getByRole("tab", { name: "Active" })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-    api.expectNotSent("bogus");
-    api.expectNotSent("abc");
-  });
-
-  test("opens the catalogue of the URL in the facility settings", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
-    const facilityPath = `/facility/${facilityId}/settings/valuesets`;
-
-    await test.step("The shared catalogue", async () => {
       const request = waitForApiList(
         page,
         "/valueset/",
-        (params) => params.get("auth_context") === "instance",
+        (params) => params.get("status") === "draft",
       );
-      await page.goto(withSearch(facilityPath, { source: "instance" }));
+      await page.getByRole("tab", { name: "Draft" }).click();
       await request;
 
-      await expect(
-        page.getByRole("tab", { name: "Shared catalogue" }),
-      ).toHaveAttribute("aria-selected", "true");
-    });
+      await expect(page).toHaveURL(queryParam("status", "draft"));
+    },
+  );
 
-    await test.step("An invalid catalogue opens the facility's", async () => {
+  test(
+    "restores the filters from a bookmarked URL",
+    { tag: ["@atomic", "@cap:valueset.list.filter"] },
+    async ({ page }) => {
+      const name = faker.string.alpha({ length: 8, casing: "lower" });
       const request = waitForApiList(
         page,
         "/valueset/",
-        (params) => params.get("facility") === facilityId,
+        (params) =>
+          params.get("status") === "retired" && params.get("name") === name,
       );
-      await page.goto(withSearch(facilityPath, { source: "bogus" }));
+      await page.goto(withSearch(listPath, { status: "retired", name }));
       await request;
 
+      await expect(page.getByRole("tab", { name: "Retired" })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
       await expect(
-        page.getByRole("tab", { name: "This facility" }),
-      ).toHaveAttribute("aria-selected", "true");
-    });
-  });
+        page.getByRole("textbox", { name: "Search ValueSets" }),
+      ).toHaveValue(name);
+    },
+  );
+
+  test(
+    "lists the active value sets for an invalid status",
+    { tag: ["@atomic", "@cap:valueset.list.filter"] },
+    async ({ page }) => {
+      const api = recordApiQueries(page);
+      const request = waitForApiList(
+        page,
+        "/valueset/",
+        (params) =>
+          params.get("status") === "active" && params.get("offset") === "0",
+      );
+      await page.goto(withSearch(listPath, { status: "bogus", page: "abc" }));
+      await request;
+
+      await expect(page.getByRole("tab", { name: "Active" })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      api.expectNotSent("bogus");
+      api.expectNotSent("abc");
+    },
+  );
+
+  test(
+    "opens the catalogue of the URL in the facility settings",
+    { tag: ["@atomic", "@cap:valueset.list.filter"] },
+    async ({ page }) => {
+      const facilityId = getFacilityId();
+      const facilityPath = `/facility/${facilityId}/settings/valuesets`;
+
+      await test.step("The shared catalogue", async () => {
+        const request = waitForApiList(
+          page,
+          "/valueset/",
+          (params) => params.get("auth_context") === "instance",
+        );
+        await page.goto(withSearch(facilityPath, { source: "instance" }));
+        await request;
+
+        await expect(
+          page.getByRole("tab", { name: "Shared catalogue" }),
+        ).toHaveAttribute("aria-selected", "true");
+      });
+
+      await test.step("An invalid catalogue opens the facility's", async () => {
+        const request = waitForApiList(
+          page,
+          "/valueset/",
+          (params) => params.get("facility") === facilityId,
+        );
+        await page.goto(withSearch(facilityPath, { source: "bogus" }));
+        await request;
+
+        await expect(
+          page.getByRole("tab", { name: "This facility" }),
+        ).toHaveAttribute("aria-selected", "true");
+      });
+    },
+  );
 });

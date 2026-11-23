@@ -1,3 +1,4 @@
+import { test, type Page } from "@playwright/test";
 import { adminApiHeaders, apiBaseUrl } from "tests/helper/questionnaireV2";
 
 interface ValueSetSummary {
@@ -188,14 +189,45 @@ async function expandFirstCode(slug: string, facilityId: string) {
   };
 }
 
-/** Resolves an instance value set by slug (the list has no slug filter). */
-export async function getInstanceValueSetIdBySlug(
-  slug: string,
-): Promise<string> {
-  const valuesets = await listValueSets({ auth_context: "instance" });
-  const match = valuesets.find((valueset) => valueset.slug === slug);
-  if (!match) {
-    throw new Error(`instance value set ${slug} not found`);
-  }
-  return match.id;
+/**
+ * Creates an instance value set through the admin create form ("Create
+ * ValueSet" on `/admin/valuesets`, opened first when the page is elsewhere)
+ * and waits for the redirect back to the list. `description` and `status`
+ * (an option label such as "Draft") are only set when given.
+ */
+export async function createValueSetViaUi(
+  page: Page,
+  {
+    name,
+    slug,
+    description,
+    status,
+  }: { name: string; slug: string; description?: string; status?: string },
+): Promise<{ name: string; slug: string }> {
+  await test.step(
+    "valueset.create",
+    async () => {
+      if (!/\/admin\/valuesets\/?$/.test(new URL(page.url()).pathname)) {
+        await page.goto("/admin/valuesets");
+      }
+      await page.getByRole("link", { name: "Create ValueSet" }).click();
+      await page.getByRole("textbox", { name: "Name *" }).fill(name);
+      await page.getByRole("textbox", { name: "Slug *" }).fill(slug);
+      if (description !== undefined) {
+        await page
+          .getByRole("textbox", { name: "Description" })
+          .fill(description);
+      }
+      if (status) {
+        await page.getByRole("combobox", { name: "Status *" }).click();
+        await page.getByRole("option", { name: status }).click();
+      }
+      await page.getByRole("button", { name: "Save ValueSet" }).click();
+      // Wait for redirect back to valueset list
+      await page.waitForURL("**/admin/valuesets");
+    },
+    { box: true },
+  );
+
+  return { name, slug };
 }

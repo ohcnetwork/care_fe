@@ -4,8 +4,11 @@ import {
   adminApiHeaders,
   apiBaseUrl,
   createQuestionnaireAndOpenBuilder,
-  getQuestionnaireIdBySlug,
+  jumpToQuestion,
+  openQuestionnairePreview,
+  pickQuestionType,
   questionBlock,
+  saveQuestionnaireBuilderViaUi,
 } from "tests/helper/questionnaireV2";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
@@ -30,198 +33,185 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 const UNITS_FIXTURE_SLUG = "e2e-units";
 
-/** Picks a question type by its cmdk data-value token (see builder matrix). */
-async function pickType(page: Page, type: string): Promise<void> {
-  await page.getByRole("combobox").first().click();
-  await page.locator('[data-slot="command-input"]').last().fill(type);
-  await page
-    .locator(`[data-slot="command-item"][data-value="${type}"]`)
-    .click();
-}
-
 /** Opens the units fixture questionnaire straight into preview mode. */
-async function openUnitsFixturePreview(page: Page): Promise<void> {
-  const facilityId = getFacilityId();
-  const id = await getQuestionnaireIdBySlug(UNITS_FIXTURE_SLUG);
-  await page.goto(
-    `/facility/${facilityId}/settings/questionnaires/${id}/edit?mode=preview`,
-  );
-  await expect(page.getByRole("navigation")).toBeVisible();
-}
-
-/** Jumps to a top-level question via the renderer's tree nav. */
-async function jumpTo(page: Page, questionText: string): Promise<void> {
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: questionText })
-    .click();
-}
+const openUnitsFixturePreview = (page: Page) =>
+  openQuestionnairePreview(page, {
+    facilityId: getFacilityId(),
+    slug: UNITS_FIXTURE_SLUG,
+  });
 
 test.describe("Questionnaire v2 unit semantics", () => {
-  test("fixture preview: integer/decimal label units and bounded quantity unit chips", async ({
-    page,
-  }) => {
-    await openUnitsFixturePreview(page);
+  test(
+    "fixture preview: integer/decimal label units and bounded quantity unit chips",
+    { tag: ["@atomic", "@cap:questionnaire.author.preview"] },
+    async ({ page }) => {
+      await openUnitsFixturePreview(page);
 
-    await test.step("Integer question shows its unit next to the label", async () => {
-      await jumpTo(page, "Resting heart rate");
-      const integerBlock = questionBlock(page, "Resting heart rate");
-      await expect(
-        integerBlock.locator("label").filter({ hasText: "Resting heart rate" }),
-      ).toBeVisible();
-      await expect(integerBlock.getByText("(/min)")).toBeVisible();
-      await expect(integerBlock.getByRole("spinbutton")).toBeVisible();
-    });
-
-    await test.step("Decimal question shows its unit next to the label", async () => {
-      await jumpTo(page, "Body temperature");
-      const decimalBlock = questionBlock(page, "Body temperature");
-      await expect(decimalBlock.getByText("(Cel)")).toBeVisible();
-      await expect(decimalBlock.getByRole("spinbutton")).toBeVisible();
-    });
-
-    await test.step("Quantity renders every unit of the bounded valueset as chips", async () => {
-      await jumpTo(page, "Dose given");
-      // All three e2e-dose-units members are visible — nothing hidden
-      // behind a search popover.
-      for (const unit of ["milligram", "gram", "kilogram"]) {
+      await test.step("Integer question shows its unit next to the label", async () => {
+        await jumpToQuestion(page, "Resting heart rate");
+        const integerBlock = questionBlock(page, "Resting heart rate");
         await expect(
-          page.getByRole("radio", { name: unit, exact: true }),
+          integerBlock
+            .locator("label")
+            .filter({ hasText: "Resting heart rate" }),
         ).toBeVisible();
-      }
-      await expect(
-        page.getByRole("combobox", { name: "Unit", exact: true }),
-      ).not.toBeVisible();
-    });
+        await expect(integerBlock.getByText("(/min)")).toBeVisible();
+        await expect(integerBlock.getByRole("spinbutton")).toBeVisible();
+      });
 
-    await test.step("The author's default unit is pre-selected", async () => {
-      await expect(
-        page.getByRole("radio", { name: "milligram", exact: true }),
-      ).toHaveAttribute("aria-checked", "true");
-    });
+      await test.step("Decimal question shows its unit next to the label", async () => {
+        await jumpToQuestion(page, "Body temperature");
+        const decimalBlock = questionBlock(page, "Body temperature");
+        await expect(decimalBlock.getByText("(Cel)")).toBeVisible();
+        await expect(decimalBlock.getByRole("spinbutton")).toBeVisible();
+      });
 
-    await test.step("Picking a chip writes the unit; the value sticks", async () => {
-      await questionBlock(page, "Dose given")
-        .getByRole("spinbutton")
-        .fill("250");
-      await page.getByRole("radio", { name: "gram", exact: true }).click();
-      await expect(
-        page.getByRole("radio", { name: "gram", exact: true }),
-      ).toHaveAttribute("aria-checked", "true");
-      await expect(
-        page.getByRole("radio", { name: "milligram", exact: true }),
-      ).toHaveAttribute("aria-checked", "false");
-      await expect(
-        questionBlock(page, "Dose given").getByRole("spinbutton"),
-      ).toHaveValue("250");
-    });
-  });
+      await test.step("Quantity renders every unit of the bounded valueset as chips", async () => {
+        await jumpToQuestion(page, "Dose given");
+        // All three e2e-dose-units members are visible — nothing hidden
+        // behind a search popover.
+        for (const unit of ["milligram", "gram", "kilogram"]) {
+          await expect(
+            page.getByRole("radio", { name: unit, exact: true }),
+          ).toBeVisible();
+        }
+        await expect(
+          page.getByRole("combobox", { name: "Unit", exact: true }),
+        ).toBeHidden();
+      });
 
-  test("integer and decimal units round-trip through save + reload", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
-    const stamp = Date.now();
-    const integerTitle = `Heart rate ${stamp}`;
-    const decimalTitle = `Temperature ${stamp}`;
+      await test.step("The author's default unit is pre-selected", async () => {
+        await expect(
+          page.getByRole("radio", { name: "milligram", exact: true }),
+        ).toHaveAttribute("aria-checked", "true");
+      });
 
-    const detailUrl = await createQuestionnaireAndOpenBuilder(page, {
-      basePath: `/facility/${facilityId}/settings/questionnaires`,
-      title: `QV2 Number Units ${stamp}`,
-    });
-    const questionnaireId =
-      detailUrl.match(/questionnaires\/([0-9a-f-]+)/)?.[1] ?? "";
-    expect(questionnaireId).not.toBe("");
+      await test.step("Picking a chip writes the unit; the value sticks", async () => {
+        await questionBlock(page, "Dose given")
+          .getByRole("spinbutton")
+          .fill("250");
+        await page.getByRole("radio", { name: "gram", exact: true }).click();
+        await expect(
+          page.getByRole("radio", { name: "gram", exact: true }),
+        ).toHaveAttribute("aria-checked", "true");
+        await expect(
+          page.getByRole("radio", { name: "milligram", exact: true }),
+        ).toHaveAttribute("aria-checked", "false");
+        await expect(
+          questionBlock(page, "Dose given").getByRole("spinbutton"),
+        ).toHaveValue("250");
+      });
+    },
+  );
 
-    const unitTrigger = page.getByRole("combobox", { name: "Unit" });
+  test(
+    "integer and decimal units round-trip through save + reload",
+    { tag: ["@atomic", "@cap:questionnaire.author.unit.configure"] },
+    async ({ page }) => {
+      const facilityId = getFacilityId();
+      const stamp = Date.now();
+      const integerTitle = `Heart rate ${stamp}`;
+      const decimalTitle = `Temperature ${stamp}`;
 
-    await test.step("Author an integer question with a unit", async () => {
-      await addTopLevelQuestion(page, integerTitle);
-      await pickType(page, "integer");
-      await expect(unitTrigger).toBeVisible();
-      await selectFromValueSet(page, unitTrigger, { search: "milligram" });
-      await expect(unitTrigger).toContainText("milligram");
-    });
+      const detailUrl = await createQuestionnaireAndOpenBuilder(page, {
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+        title: `QV2 Number Units ${stamp}`,
+      });
+      const questionnaireId =
+        detailUrl.match(/questionnaires\/([0-9a-f-]+)/)?.[1] ?? "";
+      expect(questionnaireId).not.toBe("");
 
-    await test.step("Author a decimal question with a unit", async () => {
-      await addTopLevelQuestion(page, decimalTitle);
-      await pickType(page, "decimal");
-      await selectFromValueSet(page, unitTrigger, { search: "kilogram" });
-      await expect(unitTrigger).toContainText("kilogram");
-    });
+      const unitTrigger = page.getByRole("combobox", { name: "Unit" });
 
-    await test.step("Save", async () => {
+      await test.step("Author an integer question with a unit", async () => {
+        await addTopLevelQuestion(page, integerTitle);
+        await pickQuestionType(page, { type: "integer", filter: true });
+        await expect(unitTrigger).toBeVisible();
+        await selectFromValueSet(page, unitTrigger, { search: "milligram" });
+        await expect(unitTrigger).toContainText("milligram");
+      });
+
+      await test.step("Author a decimal question with a unit", async () => {
+        await addTopLevelQuestion(page, decimalTitle);
+        await pickQuestionType(page, { type: "decimal", filter: true });
+        await selectFromValueSet(page, unitTrigger, { search: "kilogram" });
+        await expect(unitTrigger).toContainText("kilogram");
+      });
+
+      await test.step("Save", async () => {
+        await saveQuestionnaireBuilderViaUi(page);
+      });
+
+      await test.step("Full reload: the builder unit rows show persisted units", async () => {
+        await page.reload();
+        await page
+          .getByRole("navigation")
+          .getByRole("button", { name: integerTitle })
+          .click();
+        await expect(unitTrigger).toContainText("milligram");
+        await page
+          .getByRole("navigation")
+          .getByRole("button", { name: decimalTitle })
+          .click();
+        await expect(unitTrigger).toContainText("kilogram");
+      });
+
+      await test.step("API: units persisted on both questions", async () => {
+        const res = await fetch(
+          `${apiBaseUrl()}/api/v1/questionnaire/${questionnaireId}/`,
+          { headers: adminApiHeaders() },
+        );
+        expect(res.ok).toBe(true);
+        const data = (await res.json()) as {
+          questions: {
+            text: string;
+            type: string;
+            unit?: { system: string; code: string };
+          }[];
+        };
+        const integerQ = data.questions.find((q) => q.text === integerTitle);
+        const decimalQ = data.questions.find((q) => q.text === decimalTitle);
+        expect(integerQ?.unit?.code).toBe("mg");
+        expect(integerQ?.unit?.system).toBe("http://unitsofmeasure.org");
+        expect(decimalQ?.unit?.code).toBe("kg");
+      });
+
+      await test.step("Preview: number inputs show the unit as a label suffix", async () => {
+        await page.getByRole("button", { name: "Preview" }).click();
+        await page
+          .getByRole("navigation")
+          .getByRole("button", { name: integerTitle })
+          .click();
+        await expect(page.getByText("(mg)")).toBeVisible();
+        await page
+          .getByRole("navigation")
+          .getByRole("button", { name: decimalTitle })
+          .click();
+        await expect(page.getByText("(kg)")).toBeVisible();
+      });
+    },
+  );
+
+  test(
+    "a quantity question without a unit value set cannot be saved",
+    { tag: ["@atomic", "@cap:questionnaire.author.unit.configure"] },
+    async ({ page }) => {
+      const facilityId = getFacilityId();
+      const stamp = Date.now();
+
+      await createQuestionnaireAndOpenBuilder(page, {
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+        title: `QV2 Quantity Guard ${stamp}`,
+      });
+      await addTopLevelQuestion(page, `Dose amount ${stamp}`);
+      await pickQuestionType(page, { type: "quantity", filter: true });
+
       await page.getByRole("button", { name: "Save Changes" }).click();
-      await expectToast(page, "Questionnaire updated successfully");
-    });
-
-    await test.step("Full reload: the builder unit rows show persisted units", async () => {
-      await page.reload();
-      await page
-        .getByRole("navigation")
-        .getByRole("button", { name: integerTitle })
-        .click();
-      await expect(unitTrigger).toContainText("milligram");
-      await page
-        .getByRole("navigation")
-        .getByRole("button", { name: decimalTitle })
-        .click();
-      await expect(unitTrigger).toContainText("kilogram");
-    });
-
-    await test.step("API: units persisted on both questions", async () => {
-      const res = await fetch(
-        `${apiBaseUrl()}/api/v1/questionnaire/${questionnaireId}/`,
-        { headers: adminApiHeaders() },
+      // Blocked client-side (the backend would reject it with a 400).
+      await expectToast(
+        page,
+        "Quantity questions need a unit value set — pick one under Unit Options",
       );
-      expect(res.ok).toBe(true);
-      const data = (await res.json()) as {
-        questions: {
-          text: string;
-          type: string;
-          unit?: { system: string; code: string };
-        }[];
-      };
-      const integerQ = data.questions.find((q) => q.text === integerTitle);
-      const decimalQ = data.questions.find((q) => q.text === decimalTitle);
-      expect(integerQ?.unit?.code).toBe("mg");
-      expect(integerQ?.unit?.system).toBe("http://unitsofmeasure.org");
-      expect(decimalQ?.unit?.code).toBe("kg");
-    });
-
-    await test.step("Preview: number inputs show the unit as a label suffix", async () => {
-      await page.getByRole("button", { name: "Preview" }).click();
-      await page
-        .getByRole("navigation")
-        .getByRole("button", { name: integerTitle })
-        .click();
-      await expect(page.getByText("(mg)")).toBeVisible();
-      await page
-        .getByRole("navigation")
-        .getByRole("button", { name: decimalTitle })
-        .click();
-      await expect(page.getByText("(kg)")).toBeVisible();
-    });
-  });
-
-  test("a quantity question without a unit value set cannot be saved", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
-    const stamp = Date.now();
-
-    await createQuestionnaireAndOpenBuilder(page, {
-      basePath: `/facility/${facilityId}/settings/questionnaires`,
-      title: `QV2 Quantity Guard ${stamp}`,
-    });
-    await addTopLevelQuestion(page, `Dose amount ${stamp}`);
-    await pickType(page, "quantity");
-
-    await page.getByRole("button", { name: "Save Changes" }).click();
-    // Blocked client-side (the backend would reject it with a 400).
-    await expectToast(
-      page,
-      "Quantity questions need a unit value set — pick one under Unit Options",
-    );
-  });
+    },
+  );
 });

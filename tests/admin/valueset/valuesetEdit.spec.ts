@@ -1,5 +1,7 @@
 import { faker } from "@faker-js/faker";
-import { expect, Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { createValueSetViaUi } from "tests/helper/valueSet";
+
 import {
   LOINC_CODE_NAME,
   SNOMED_CODE_NAME,
@@ -20,15 +22,6 @@ let description: string;
 let code: string;
 let system: string;
 let codeName: string;
-
-async function createBasicValueSet(page: Page) {
-  await page.getByRole("link", { name: "Create ValueSet" }).click();
-  await page.getByRole("textbox", { name: "Name *" }).fill(name);
-  await page.getByRole("textbox", { name: "Slug *" }).fill(slug);
-  await page.getByRole("button", { name: "Save ValueSet" }).click();
-  // Wait for redirect back to valueset list
-  await page.waitForURL("**/admin/valuesets");
-}
 
 test.describe("ValueSet Edit", () => {
   test.beforeEach(async ({ page }) => {
@@ -54,71 +47,79 @@ test.describe("ValueSet Edit", () => {
         codeName = UCUM_CODE_NAME[code];
         break;
     }
-    await createBasicValueSet(page);
+    await createValueSetViaUi(page, { name, slug });
   });
 
-  test("should edit valueset fields while preserving its slug", async ({
-    page,
-  }) => {
-    await page.getByRole("textbox", { name: "Search ValueSets" }).fill(name);
-    await page.getByRole("button", { name: /edit/i }).first().click();
-    await expect(
-      page.getByRole("heading", { name: /edit valueset/i }),
-    ).toBeVisible();
-    const slugInput = page.getByRole("textbox", { name: "Slug *" });
-    await expect(slugInput).toBeDisabled();
-    await expect(slugInput).toHaveValue(slug);
-    await expect(
-      page.getByText(
-        "The slug cannot be changed after this value set is created.",
-      ),
-    ).toBeVisible();
-    await page.getByRole("textbox", { name: "Name *" }).fill(`${name}-edited`);
-    await expect(slugInput).toHaveValue(slug);
-    await page.getByRole("textbox", { name: "Description" }).fill(description);
-    await page.getByRole("combobox", { name: "Status *" }).click();
-    await page.getByRole("option", { name: status }).click();
-    await page.getByRole("button", { name: "Add Rule" }).first().click();
-    await page.getByRole("combobox", { name: "System" }).click();
-    await page.getByRole("option", { name: system }).click();
-    await page.getByRole("button", { name: "Add Concept" }).click();
-    await page.getByRole("textbox", { name: "Code" }).fill(code);
-    await page.getByLabel("Verify code").click();
+  test(
+    "should edit valueset fields while preserving its slug",
+    { tag: ["@atomic", "@cap:valueset.edit"] },
+    async ({ page }) => {
+      await page.getByRole("textbox", { name: "Search ValueSets" }).fill(name);
+      await page.getByRole("button", { name: /edit/i }).first().click();
+      await expect(
+        page.getByRole("heading", { name: /edit valueset/i }),
+      ).toBeVisible();
+      const slugInput = page.getByRole("textbox", { name: "Slug *" });
+      await expect(slugInput).toBeDisabled();
+      await expect(slugInput).toHaveValue(slug);
+      await expect(
+        page.getByText(
+          "The slug cannot be changed after this value set is created.",
+        ),
+      ).toBeVisible();
+      await page
+        .getByRole("textbox", { name: "Name *" })
+        .fill(`${name}-edited`);
+      await expect(slugInput).toHaveValue(slug);
+      await page
+        .getByRole("textbox", { name: "Description" })
+        .fill(description);
+      await page.getByRole("combobox", { name: "Status *" }).click();
+      await page.getByRole("option", { name: status }).click();
+      await page.getByRole("button", { name: "Add Rule" }).first().click();
+      await page.getByRole("combobox", { name: "System" }).click();
+      await page.getByRole("option", { name: system }).click();
+      await page.getByRole("button", { name: "Add Concept" }).click();
+      await page.getByRole("textbox", { name: "Code" }).fill(code);
+      await page.getByLabel("Verify code").click();
 
-    await expect(
-      page
-        .getByRole("listitem")
-        .filter({ hasText: "Code verified successfully" }),
-    ).toBeVisible();
+      await expect(
+        page
+          .getByRole("listitem")
+          .filter({ hasText: "Code verified successfully" }),
+      ).toBeVisible();
 
-    // Verify the code name is present in the display value
-    const displayValue = await page
-      .getByRole("textbox", { name: "Display name" })
-      .inputValue();
-    expect(displayValue).toContain(codeName);
+      // Verify the code name is present in the display value
+      const displayValue = await page
+        .getByRole("textbox", { name: "Display name" })
+        .inputValue();
+      expect(displayValue).toContain(codeName);
 
-    const [updateRequest] = await Promise.all([
-      page.waitForRequest(
-        (request) =>
-          request.method() === "PUT" &&
-          request.url().includes("/api/v1/valueset/"),
-      ),
-      page.getByRole("button", { name: "Save ValueSet" }).click(),
-    ]);
-    expect(updateRequest.postDataJSON()).toMatchObject({ slug });
+      const [updateRequest] = await Promise.all([
+        page.waitForRequest(
+          (request) =>
+            request.method() === "PUT" &&
+            request.url().includes("/api/v1/valueset/"),
+        ),
+        page.getByRole("button", { name: "Save ValueSet" }).click(),
+      ]);
+      expect(updateRequest.postDataJSON()).toMatchObject({ slug });
 
-    await expect(page.getByText("ValueSet updated successfully")).toBeVisible();
+      await expect(
+        page.getByText("ValueSet updated successfully"),
+      ).toBeVisible();
 
-    await page.getByRole("tab", { name: status }).click();
+      await page.getByRole("tab", { name: status }).click();
 
-    await page
-      .getByRole("textbox", { name: "Search ValueSets" })
-      .fill(`${name}-edited`);
+      await page
+        .getByRole("textbox", { name: "Search ValueSets" })
+        .fill(`${name}-edited`);
 
-    await expect(
-      page.getByRole("cell", { name: `${name}-edited` }),
-    ).toBeVisible();
-    await expect(page.getByRole("cell", { name: description })).toBeVisible();
-    await expect(page.getByRole("cell", { name: status })).toBeVisible();
-  });
+      await expect(
+        page.getByRole("cell", { name: `${name}-edited` }),
+      ).toBeVisible();
+      await expect(page.getByRole("cell", { name: description })).toBeVisible();
+      await expect(page.getByRole("cell", { name: status })).toBeVisible();
+    },
+  );
 });
