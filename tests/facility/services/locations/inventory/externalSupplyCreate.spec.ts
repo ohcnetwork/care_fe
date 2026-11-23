@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
-import { openServiceLocation } from "tests/facility/services/helpers";
 import { getFieldErrorMessage } from "tests/helper/error";
+import { openServiceLocation } from "tests/helper/healthcareService";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -22,37 +22,41 @@ test.beforeAll(async ({ browser }) => {
 });
 
 test.describe("Purchase order create", () => {
-  test("should reject whitespace-only input in required text fields", async ({
-    page,
-  }) => {
-    await page.goto(`${pharmacyPath}/inventory/external/orders/outgoing/new`);
+  test(
+    "should reject whitespace-only input in required text fields",
+    { tag: ["@atomic", "@cap:inventory.purchase-order.create"] },
+    async ({ page }) => {
+      await page.goto(`${pharmacyPath}/inventory/external/orders/outgoing/new`);
 
-    const nameField = page.getByRole("textbox", { name: "Name" });
-    await nameField.fill("   ");
+      const nameField = page.getByRole("textbox", { name: "Name" });
+      await nameField.fill("   ");
 
-    await page.getByRole("button", { name: "Create" }).click();
+      await page.getByRole("button", { name: "Create" }).click();
 
-    const errorMessage = getFieldErrorMessage(nameField);
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText("Name is required");
-  });
+      const errorMessage = getFieldErrorMessage(nameField);
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("Name is required");
+    },
+  );
 });
 
 test.describe("Delivery order create", () => {
-  test("should reject whitespace-only input in required text fields", async ({
-    page,
-  }) => {
-    await page.goto(
-      `${pharmacyPath}/inventory/external/deliveries/incoming/new`,
-    );
+  test(
+    "should reject whitespace-only input in required text fields",
+    { tag: ["@atomic", "@cap:inventory.delivery.create"] },
+    async ({ page }) => {
+      await page.goto(
+        `${pharmacyPath}/inventory/external/deliveries/incoming/new`,
+      );
 
-    const nameField = page.getByRole("textbox", { name: "Name" });
-    await nameField.fill("   ");
+      const nameField = page.getByRole("textbox", { name: "Name" });
+      await nameField.fill("   ");
 
-    await page.getByRole("button", { name: "Create" }).click();
+      await page.getByRole("button", { name: "Create" }).click();
 
-    const errorMessage = getFieldErrorMessage(nameField);
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText("Name is required");
-  });
+      const errorMessage = getFieldErrorMessage(nameField);
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("Name is required");
+    },
+  );
 });
