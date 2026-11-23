@@ -1,5 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { createTestEncounter } from "tests/helper/encounter";
+import { createTestPatient } from "tests/helper/patient";
 import { trackBatchRequests } from "tests/helper/questionnaire";
 import {
   adminApiHeaders,
@@ -37,44 +39,14 @@ const SUBJECT_TYPE_MISMATCH_MESSAGE =
 const PATIENT_ENCOUNTER_MISMATCH_MESSAGE =
   "This encounter belongs to a different patient. Check the link and try again.";
 
-/** Creates a fresh patient through the same API shape the backend E2E
- *  fixtures use, so the spec doesn't have to depend on a second patient
- *  existing in the fixture set. */
+/** Creates a fresh patient so the spec doesn't depend on a second patient
+ *  existing in the fixture set. `createTestPatient` retries the backend's
+ *  "try again after a while" patient-creation lock, which parallel specs hit. */
 async function createPatient(): Promise<{ id: string; name: string }> {
-  const phone = `+91${faker.helpers.fromRegExp(/[6-9][0-9]{9}/)}`;
-  const orgRes = await fetch(
-    `${apiBaseUrl()}/api/v1/organization/?org_type=govt&limit=1`,
-    { headers: adminApiHeaders() },
-  );
-  if (!orgRes.ok) {
-    throw new Error(`Failed to fetch organizations: ${orgRes.status}`);
-  }
-  const orgData = (await orgRes.json()) as { results: { id: string }[] };
-  const geoOrg = orgData.results[0]?.id;
-  if (!geoOrg) {
-    throw new Error("No govt organization found for geo_organization");
-  }
-
+  // The stored name is `${name} <random suffix>`; `getByText` matches
+  // substrings, so this unique prefix finds the patient's name in the page.
   const name = `Mount Guard Other Patient ${faker.string.alphanumeric(6)}`;
-  const res = await fetch(`${apiBaseUrl()}/api/v1/patient/`, {
-    method: "POST",
-    headers: adminApiHeaders(),
-    body: JSON.stringify({
-      name,
-      gender: "male",
-      phone_number: phone,
-      date_of_birth: "1990-01-15",
-      geo_organization: geoOrg,
-      identifiers: [],
-    }),
-  });
-  if (!res.ok) {
-    throw new Error(
-      `Failed to create patient: ${res.status} — ${await res.text()}`,
-    );
-  }
-  const data = (await res.json()) as { id: string };
-  return { id: data.id, name };
+  return { id: await createTestPatient(name), name };
 }
 
 /** Creates an encounter for the given patient — the "different patient's
@@ -96,26 +68,10 @@ async function createEncounter(
     throw new Error(`No organization found for facility ${facilityId}`);
   }
 
-  const res = await fetch(`${apiBaseUrl()}/api/v1/encounter/`, {
-    method: "POST",
-    headers: adminApiHeaders(),
-    body: JSON.stringify({
-      patient: patientId,
-      facility: facilityId,
-      status: "in_progress",
-      encounter_class: "amb",
-      period: { start: new Date().toISOString() },
-      priority: "routine",
-      organizations: [organizationId],
-    }),
+  // Retries the backend's per-facility encounter-creation lock.
+  return createTestEncounter(facilityId, patientId, {
+    organizations: [organizationId],
   });
-  if (!res.ok) {
-    throw new Error(
-      `Failed to create encounter: ${res.status} — ${await res.text()}`,
-    );
-  }
-  const data = (await res.json()) as { id: string };
-  return data.id;
 }
 
 test.describe("Fill mount guards", () => {

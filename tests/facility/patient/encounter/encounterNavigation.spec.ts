@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Request } from "@playwright/test";
+import { createTestEncounter } from "tests/helper/encounter";
 import { navigateInApp } from "tests/helper/history";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
-import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 import type { EncounterRead } from "../../../../src/types/emr/encounter/encounter";
@@ -21,26 +21,17 @@ test.describe("Encounter navigation", () => {
   let primaryEncounterId: string;
   let pastEncounterId: string;
 
-  test.beforeAll(async ({ request }) => {
+  test.beforeAll(async () => {
     const encounter = await createQuestionnaireEncounter(getFacilityId());
     patientId = encounter.patientId;
     primaryEncounterId = encounter.encounterId;
 
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const response = await request.post(`${getApiUrl()}/api/v1/encounter/`, {
-      headers: getApiHeaders(),
-      data: {
-        patient: patientId,
-        facility: getFacilityId(),
-        status: "completed",
-        encounter_class: "amb",
-        period: { start: yesterday, end: yesterday },
-        priority: "routine",
-        organizations: [],
-      },
+    // createTestEncounter retries the backend's encounter-creation lock.
+    pastEncounterId = await createTestEncounter(getFacilityId(), patientId, {
+      status: "completed",
+      period: { start: yesterday, end: yesterday },
     });
-    expect(response.ok()).toBeTruthy();
-    pastEncounterId = (await response.json()).id;
   });
 
   test.afterEach(async ({ page }) => {

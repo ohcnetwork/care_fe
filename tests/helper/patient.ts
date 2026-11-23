@@ -209,15 +209,45 @@ export async function fillPatientAdditionalDetails(
   });
 }
 
-/** Submits the registration form and waits for the success toast. */
-export async function submitPatientRegistration(page: Page) {
-  await test.step("Submit patient registration", async () => {
-    await page.getByRole("button", { name: /register patient/i }).click();
-    await expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText(/patient registered successfully/i),
-    ).toBeVisible({ timeout: 15000 });
+/**
+ * Submits the registration form, waits for the success toast and returns the
+ * new patient's id (read from the create response; the app only navigates
+ * with a partial id). The backend serializes patient creation with a global
+ * lock and rejects a create that arrives while it is held; like
+ * `createTestPatient`, this resubmits only that explicit rejection, so any
+ * other failure surfaces with its status and body.
+ */
+export async function submitPatientRegistration(page: Page): Promise<string> {
+  return test.step("Submit patient registration", async () => {
+    for (let attempt = 0; ; attempt++) {
+      const createResponse = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === "/api/v1/patient/" &&
+          response.request().method() === "POST",
+        { timeout: 15000 },
+      );
+      await page.getByRole("button", { name: /register patient/i }).click();
+      const response = await createResponse;
+      if (response.ok()) {
+        await expect(
+          page
+            .locator("li[data-sonner-toast]")
+            .getByText(/patient registered successfully/i),
+        ).toBeVisible({ timeout: 15000 });
+        return ((await response.json()) as { id: string }).id;
+      }
+      const error = await response.text();
+      if (
+        attempt >= 4 ||
+        response.status() !== 400 ||
+        !error.includes("Patient creation failed, try again after a while")
+      ) {
+        throw new Error(
+          `Patient registration failed: ${response.status()} — ${error}`,
+        );
+      }
+      await delay(250 * (attempt + 1));
+    }
   });
 }
 
@@ -245,15 +275,7 @@ export async function registerPatientViaUi(
       await fillPatientDateOfBirth(page, data.dateOfBirth);
       await selectPatientBloodGroup(page, data.bloodGroup);
       await fillPatientAdditionalDetails(page, data);
-      // The app navigates to the patients home with only a partial id, so
-      // read the id from the create response.
-      const createResponse = page.waitForResponse(
-        (response) =>
-          new URL(response.url()).pathname === "/api/v1/patient/" &&
-          response.request().method() === "POST",
-      );
-      await submitPatientRegistration(page);
-      patientId = ((await (await createResponse).json()) as { id: string }).id;
+      patientId = await submitPatientRegistration(page);
     },
     { box: true },
   );
