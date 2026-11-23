@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { useEffect, useEffectEvent } from "react";
+import { useEffect, useEffectEvent, useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -97,6 +97,9 @@ export function FilesQuestion(props: FilesQuestionProps) {
     props;
 
   const { t } = useTranslation();
+  // The same question can render more than once (repeating group rows), so
+  // the question id alone does not give unique element ids.
+  const idPrefix = useId();
 
   const values =
     (questionnaireResponse.values?.[0]?.value as FileUploadQuestion[]) || [];
@@ -174,8 +177,9 @@ export function FilesQuestion(props: FilesQuestionProps) {
               error.field_key === FILE_UPLOAD_FIELDS.FILE_DATA.key,
           );
         // The name input is the row's focusable control, so it carries the
-        // aria association with the message.
-        const sizeErrorId = `${props.question.id}-file-${index}-size-error`;
+        // aria association with the message. It is not marked invalid: the
+        // name itself is fine.
+        const sizeErrorId = `${idPrefix}-file-${index}-size-error`;
         return (
           <div key={index} className="flex flex-col gap-1">
             <div className="flex items-stretch gap-2">
@@ -185,7 +189,6 @@ export function FilesQuestion(props: FilesQuestionProps) {
                 disabled={props.disabled}
                 value={value.name}
                 onChange={(e) => handleUpdate({ name: e.target.value }, index)}
-                aria-invalid={!!sizeError}
                 aria-describedby={showSizeError ? sizeErrorId : undefined}
               />
               <div
@@ -220,7 +223,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
               <p
                 id={sizeErrorId}
                 role="alert"
-                className="text-sm font-medium text-red-500 break-words"
+                className="text-sm text-red-600 break-words"
               >
                 {sizeError}
               </p>
