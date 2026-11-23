@@ -63,12 +63,6 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
   {
     label: "facility",
     pages: [
-      {
-        path: "settings/print-templates",
-        title: "print_templates",
-        icon: Printer,
-        permission: "canUpdateFacility",
-      },
       { path: "settings/departments", title: "departments", icon: Network },
       { path: "settings/locations", title: "locations", icon: MapPin },
       { path: "settings/devices", title: "devices", icon: Monitor },
@@ -85,6 +79,12 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
         permission: "canReadPatientIdentifierConfig",
       },
       { path: "settings/tag_config", title: "tag_config", icon: Tags },
+      {
+        path: "settings/print-templates",
+        title: "print_templates",
+        icon: Printer,
+        permission: "canUpdateFacility",
+      },
     ],
   },
   {
