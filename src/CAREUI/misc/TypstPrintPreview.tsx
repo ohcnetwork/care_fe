@@ -1,5 +1,5 @@
 import { useRouter } from "@tanstack/react-router";
-import { ArrowLeft, Printer, Share2, TriangleAlert } from "lucide-react";
+import { ArrowLeft, Info, Printer, Share2, TriangleAlert } from "lucide-react";
 import {
   type ReactNode,
   useCallback,
@@ -19,6 +19,7 @@ import PageTitle from "@/components/Common/PageTitle";
 import PrintLoading from "@/CAREUI/misc/PrintLoading";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { PdfPages } from "@/print/PdfPages";
+import { PAPER_LABELS } from "@/print/printLayout";
 import {
   getPdfPrintMethod,
   sharePdf,
@@ -53,8 +54,16 @@ export default function TypstPrintPreview<TContent>({
   const router = useRouter();
   useShortcutSubContext();
 
-  const { pdf, error, isLoading, isFetching, retry, failedAssets, autoPrint } =
-    useTypstPdf(options);
+  const {
+    pdf,
+    paper,
+    error,
+    isLoading,
+    isFetching,
+    retry,
+    failedAssets,
+    autoPrint,
+  } = useTypstPdf(options);
 
   const [url, setUrl] = useState<string>();
   useEffect(() => {
@@ -184,6 +193,16 @@ export default function TypstPrintPreview<TContent>({
             <PrintLoading />
           ) : (
             <>
+              {paper && (
+                <Alert variant="info">
+                  <Info />
+                  <AlertDescription>
+                    {t("print_paper_size_hint", {
+                      size: t(PAPER_LABELS[paper]),
+                    })}
+                  </AlertDescription>
+                </Alert>
+              )}
               <PdfPages url={url} />
               {method === "iframe" && (
                 <iframe

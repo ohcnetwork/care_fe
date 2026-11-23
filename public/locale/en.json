@@ -3684,6 +3684,7 @@
   "print_page_orientation_unset": "Document default",
   "print_page_settings_description": "Paper size, orientation and margins.",
   "print_page_size_unset": "Default (A4)",
+  "print_paper_size_hint": "This document is {{size}}. In the print dialog, make sure Paper size is set to {{size}} (under More settings).",
   "print_prescription": "Print Prescription",
   "print_qr_codes": "Print QR Codes",
   "print_receipt": "Print Receipt",
