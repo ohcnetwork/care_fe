@@ -132,6 +132,8 @@ export default function useFileUpload(
         return;
       }
       const selectedFiles = Array.from(e.target.files);
+      // Reset the input so picking the same file again fires another change.
+      e.target.value = "";
       setFiles((prev) => [...prev, ...selectedFiles]);
       if (options.compress) {
         selectedFiles.forEach((file) => {

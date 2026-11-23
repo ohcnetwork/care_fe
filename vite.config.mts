@@ -538,9 +538,12 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         "decimal.js",
       ],
     },
-    // optimizeDeps: {
-    //   include: getPluginDependencies(),
-    // },
+    optimizeDeps: {
+      // `virtual:pwa-register` imports workbox-window. The dependency scanner
+      // cannot follow virtual modules, so without this the dev server finds it
+      // on first load, re-optimizes and reloads the page.
+      include: ["workbox-window"],
+    },
     worker: {
       // The print worker (src/print) loads the Typst compiler with a dynamic
       // import, which needs ES module workers.
