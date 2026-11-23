@@ -86,74 +86,80 @@ async function finishCancelledImport(page: Page) {
   });
 }
 
-test("cancelled URL imports cannot restore confirmation after reopening", async ({
-  page,
-}) => {
-  const dialog = await startDelayedImport(page);
-  await dialog.getByRole("button", { name: "Cancel" }).click();
-  await expect(dialog).not.toBeVisible();
-  await page.getByRole("button", { name: "Import Questions" }).click();
-  await finishCancelledImport(page);
+test(
+  "cancelled URL imports cannot restore confirmation after reopening",
+  { tag: ["@atomic", "@cap:questionnaire.author.import"] },
+  async ({ page }) => {
+    const dialog = await startDelayedImport(page);
+    await dialog.getByRole("button", { name: "Cancel" }).click();
+    await expect(dialog).toBeHidden();
+    await page.getByRole("button", { name: "Import Questions" }).click();
+    await finishCancelledImport(page);
 
-  await expect(dialog.getByRole("combobox")).toHaveText(
-    "Import from a JSON file",
-  );
-  await expect(dialog.getByText(/Question count/)).not.toBeVisible();
-  await expect(
-    dialog.getByRole("button", { name: "Import", exact: true }),
-  ).toBeDisabled();
-});
+    await expect(dialog.getByRole("combobox")).toHaveText(
+      "Import from a JSON file",
+    );
+    await expect(dialog.getByText(/Question count/)).toBeHidden();
+    await expect(
+      dialog.getByRole("button", { name: "Import", exact: true }),
+    ).toBeDisabled();
+  },
+);
 
-test("a delayed URL response cannot overwrite a newer file import", async ({
-  page,
-}) => {
-  const dialog = await startDelayedImport(page);
-  await dialog.getByRole("combobox").click();
-  await page.getByRole("option", { name: "Import from a JSON file" }).click();
-  const questionTitle = `Selected file ${Date.now()}`;
-  await dialog.locator('input[type="file"]').setInputFiles({
-    name: "selected.json",
-    mimeType: "application/json",
-    buffer: Buffer.from(
-      JSON.stringify({
-        questions: [
-          { text: questionTitle, type: "string", link_id: "file-one" },
-          {
-            text: "Another file question",
-            type: "boolean",
-            link_id: "file-two",
-          },
-        ],
-      }),
-    ),
-  });
-  await expect(dialog.getByText("Question count: 2")).toBeVisible();
-  await finishCancelledImport(page);
-  await expect(dialog.getByText("Question count: 2")).toBeVisible();
-  await dialog.getByRole("button", { name: "Import", exact: true }).click();
-  await expect(
-    page.getByRole("textbox", { name: "Question Title" }),
-  ).toHaveValue(questionTitle);
-  await expect(page.getByText("Stale URL question")).not.toBeVisible();
-});
+test(
+  "a delayed URL response cannot overwrite a newer file import",
+  { tag: ["@atomic", "@cap:questionnaire.author.import"] },
+  async ({ page }) => {
+    const dialog = await startDelayedImport(page);
+    await dialog.getByRole("combobox").click();
+    await page.getByRole("option", { name: "Import from a JSON file" }).click();
+    const questionTitle = `Selected file ${Date.now()}`;
+    await dialog.locator('input[type="file"]').setInputFiles({
+      name: "selected.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(
+        JSON.stringify({
+          questions: [
+            { text: questionTitle, type: "string", link_id: "file-one" },
+            {
+              text: "Another file question",
+              type: "boolean",
+              link_id: "file-two",
+            },
+          ],
+        }),
+      ),
+    });
+    await expect(dialog.getByText("Question count: 2")).toBeVisible();
+    await finishCancelledImport(page);
+    await expect(dialog.getByText("Question count: 2")).toBeVisible();
+    await dialog.getByRole("button", { name: "Import", exact: true }).click();
+    await expect(
+      page.getByRole("textbox", { name: "Question Title" }),
+    ).toHaveValue(questionTitle);
+    await expect(page.getByText("Stale URL question")).toBeHidden();
+  },
+);
 
-test("editing a URL invalidates the response for the previous address", async ({
-  page,
-}) => {
-  const dialog = await startDelayedImport(page);
-  const urlInput = dialog.getByRole("textbox", {
-    name: "Paste a questionnaire JSON URL",
-  });
-  await urlInput.fill(
-    "https://questionnaire-fixtures.example/replacement.json",
-  );
-  await finishCancelledImport(page);
+test(
+  "editing a URL invalidates the response for the previous address",
+  { tag: ["@atomic", "@cap:questionnaire.author.import"] },
+  async ({ page }) => {
+    const dialog = await startDelayedImport(page);
+    const urlInput = dialog.getByRole("textbox", {
+      name: "Paste a questionnaire JSON URL",
+    });
+    await urlInput.fill(
+      "https://questionnaire-fixtures.example/replacement.json",
+    );
+    await finishCancelledImport(page);
 
-  await expect(urlInput).toHaveValue(
-    "https://questionnaire-fixtures.example/replacement.json",
-  );
-  await expect(dialog.getByText(/Question count/)).not.toBeVisible();
-  await expect(
-    dialog.getByRole("button", { name: "Import", exact: true }),
-  ).toBeEnabled();
-});
+    await expect(urlInput).toHaveValue(
+      "https://questionnaire-fixtures.example/replacement.json",
+    );
+    await expect(dialog.getByText(/Question count/)).toBeHidden();
+    await expect(
+      dialog.getByRole("button", { name: "Import", exact: true }),
+    ).toBeEnabled();
+  },
+);

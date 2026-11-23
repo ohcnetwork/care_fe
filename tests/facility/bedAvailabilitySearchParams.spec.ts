@@ -23,50 +23,64 @@ test.describe("Bed availability search params", () => {
   const heading = (page: Page) =>
     page.getByRole("heading", { name: "Bed Availability Dashboard" });
 
-  test("writes the status filter to the URL", async ({ page }) => {
-    await page.goto(dashboardUrl);
-    await expect(heading(page)).toBeVisible();
+  test(
+    "writes the status filter to the URL",
+    { tag: ["@atomic", "@cap:facility.bed-availability.filter"] },
+    async ({ page }) => {
+      await page.goto(dashboardUrl);
+      await expect(heading(page)).toBeVisible();
 
-    const status = await openFilters(page);
-    await status.click();
-    await page.getByRole("option", { name: "Occupied", exact: true }).click();
+      const status = await openFilters(page);
+      await status.click();
+      await page.getByRole("option", { name: "Occupied", exact: true }).click();
 
-    await expect(page).toHaveURL(/[?&]status=occupied(&|$)/);
-    await expect(status).toHaveText("Occupied");
-  });
+      await expect(page).toHaveURL(/[?&]status=occupied(&|$)/);
+      await expect(status).toHaveText("Occupied");
+    },
+  );
 
-  test("restores the filters from a bookmarked URL", async ({ page }) => {
-    await page.goto(`${dashboardUrl}?status=reserved&search=ward`);
-    await expect(heading(page)).toBeVisible();
+  test(
+    "restores the filters from a bookmarked URL",
+    { tag: ["@atomic", "@cap:facility.bed-availability.filter"] },
+    async ({ page }) => {
+      await page.goto(`${dashboardUrl}?status=reserved&search=ward`);
+      await expect(heading(page)).toBeVisible();
 
-    await expect(
-      page.getByRole("textbox", { name: "Search wards/units..." }),
-    ).toHaveValue("ward");
-    await expect(await openFilters(page)).toHaveText("Reserved");
-    await expect(page).toHaveURL(/[?&]status=reserved(&|$)/);
-  });
+      await expect(
+        page.getByRole("textbox", { name: "Search wards/units..." }),
+      ).toHaveValue("ward");
+      await expect(await openFilters(page)).toHaveText("Reserved");
+      await expect(page).toHaveURL(/[?&]status=reserved(&|$)/);
+    },
+  );
 
-  test("ignores an invalid status", async ({ page }) => {
-    await page.goto(`${dashboardUrl}?status=bogus`);
-    await expect(heading(page)).toBeVisible();
+  test(
+    "ignores an invalid status",
+    { tag: ["@atomic", "@cap:facility.bed-availability.filter"] },
+    async ({ page }) => {
+      await page.goto(`${dashboardUrl}?status=bogus`);
+      await expect(heading(page)).toBeVisible();
 
-    await expect(await openFilters(page)).toHaveText("All Statuses");
-    await expect(page).not.toHaveURL(/status=/);
-  });
+      await expect(await openFilters(page)).toHaveText("All Statuses");
+      await expect(page).not.toHaveURL(/status=/);
+    },
+  );
 
-  test("restores the cached filters without the refresh time", async ({
-    page,
-  }) => {
-    await page.goto(`${dashboardUrl}?status=occupied`);
-    await expect(heading(page)).toBeVisible();
-    await page.getByRole("button", { name: "Refresh", exact: true }).click();
-    await expect(page).toHaveURL(/[?&]refresh=\d+(&|$)/);
+  test(
+    "restores the cached filters without the refresh time",
+    { tag: ["@atomic", "@cap:facility.bed-availability.filter"] },
+    async ({ page }) => {
+      await page.goto(`${dashboardUrl}?status=occupied`);
+      await expect(heading(page)).toBeVisible();
+      await page.getByRole("button", { name: "Refresh", exact: true }).click();
+      await expect(page).toHaveURL(/[?&]refresh=\d+(&|$)/);
 
-    await page.goto(`/facility/${getFacilityId()}/overview`);
-    await expect(page).toHaveURL(/\/overview$/);
-    await page.goto(dashboardUrl);
+      await page.goto(`/facility/${getFacilityId()}/overview`);
+      await expect(page).toHaveURL(/\/overview$/);
+      await page.goto(dashboardUrl);
 
-    await expect(page).toHaveURL(/[?&]status=occupied(&|$)/);
-    await expect(page).not.toHaveURL(/refresh=/);
-  });
+      await expect(page).toHaveURL(/[?&]status=occupied(&|$)/);
+      await expect(page).not.toHaveURL(/refresh=/);
+    },
+  );
 });

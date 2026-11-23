@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import fs from "fs";
+import { openPinPageDialog, pinCurrentPageViaUi } from "tests/helper/facility";
 import { getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -61,16 +62,6 @@ async function getPinnedLinks(): Promise<PinnedLink[]> {
   return user.preferences?.facility_quick_links?.custom_links ?? [];
 }
 
-async function openPinDialog(page: Page) {
-  await expect(
-    page.getByRole("button", { name: "Pin page", exact: true }),
-  ).toBeAttached();
-  await page.keyboard.press("Shift+B");
-  const dialog = page.getByRole("dialog", { name: "Pin/Add to Overview" });
-  await expect(dialog).toBeVisible();
-  return dialog;
-}
-
 test.describe("Pinned links limit per facility", () => {
   let facilityId: string;
   let otherFacilityId: string;
@@ -87,77 +78,73 @@ test.describe("Pinned links limit per facility", () => {
     await setPinnedLinks([...otherFacilityLinks, ...facilityLinks]);
   });
 
-  test("allows pinning up to the limit in each facility", async ({ page }) => {
-    const title = `Pinned ${faker.string.alphanumeric(8)}`;
+  test(
+    "allows pinning up to the limit in each facility",
+    { tag: ["@atomic", "@cap:facility.pinned-link.create"] },
+    async ({ page }) => {
+      const title = `Pinned ${faker.string.alphanumeric(8)}`;
 
-    await test.step("Overview shows only this facility's links", async () => {
-      await page.goto(`/facility/${facilityId}/overview`);
+      await test.step("Overview shows only this facility's links", async () => {
+        await page.goto(`/facility/${facilityId}/overview`);
 
-      await expect(
-        page.getByRole("heading", { name: "Pinned Links" }),
-      ).toBeVisible();
-      for (const link of facilityLinks) {
         await expect(
-          page.getByRole("link", { name: link.title }),
+          page.getByRole("heading", { name: "Pinned Links" }),
         ).toBeVisible();
-      }
-      await expect(
-        page.getByRole("link", { name: otherFacilityLinks[0].title }),
-      ).toHaveCount(0);
-    });
+        for (const link of facilityLinks) {
+          await expect(
+            page.getByRole("link", { name: link.title }),
+          ).toBeVisible();
+        }
+        await expect(
+          page.getByRole("link", { name: otherFacilityLinks[0].title }),
+        ).toHaveCount(0);
+      });
 
-    await test.step("Pin a page although another facility is full", async () => {
-      await page.goto(`/facility/${facilityId}/users`);
-      const dialog = await openPinDialog(page);
+      await test.step("Pin a page although another facility is full", async () => {
+        await page.goto(`/facility/${facilityId}/users`);
+        await pinCurrentPageViaUi(page, { title });
+      });
 
-      await dialog.getByRole("textbox", { name: "Title" }).fill(title);
-      await Promise.all([
-        page.waitForResponse(
-          (res) =>
-            res.url().includes("/api/v1/users/set_preferences/") && res.ok(),
-        ),
-        dialog.getByRole("button", { name: "Bookmark Page" }).click(),
-      ]);
-      await expect(dialog).toBeHidden();
-    });
+      await test.step("Block pinning once this facility is full", async () => {
+        await page.goto(`/facility/${facilityId}/encounters`);
+        const dialog = await openPinPageDialog(page);
 
-    await test.step("Block pinning once this facility is full", async () => {
-      await page.goto(`/facility/${facilityId}/encounters`);
-      const dialog = await openPinDialog(page);
+        await expect(
+          dialog.getByText(
+            `You have reached the maximum of ${MAX_PINNED_LINKS} pinned links for this facility.`,
+          ),
+        ).toBeVisible();
+        await expect(
+          dialog.getByRole("button", { name: "Bookmark Page" }),
+        ).toBeDisabled();
+        await dialog.getByRole("button", { name: "Cancel" }).click();
+        await expect(dialog).toBeHidden();
+      });
 
-      await expect(
-        dialog.getByText(
-          `You have reached the maximum of ${MAX_PINNED_LINKS} pinned links for this facility.`,
-        ),
-      ).toBeVisible();
-      await expect(
-        dialog.getByRole("button", { name: "Bookmark Page" }),
-      ).toBeDisabled();
-      await dialog.getByRole("button", { name: "Cancel" }).click();
-      await expect(dialog).toBeHidden();
-    });
+      await test.step("Reset clears only this facility's links", async () => {
+        await page.goto(`/facility/${facilityId}/overview`);
 
-    await test.step("Reset clears only this facility's links", async () => {
-      await page.goto(`/facility/${facilityId}/overview`);
+        const pinnedHeading = page.getByRole("heading", {
+          name: "Pinned Links",
+        });
+        await expect(pinnedHeading).toBeVisible();
+        await pinnedHeading.locator("..").getByRole("button").click();
+        await Promise.all([
+          page.waitForResponse(
+            (res) =>
+              res.url().includes("/api/v1/users/set_preferences/") && res.ok(),
+          ),
+          page.getByRole("menuitem", { name: "Reset Pinned Links" }).click(),
+        ]);
 
-      const pinnedHeading = page.getByRole("heading", { name: "Pinned Links" });
-      await expect(pinnedHeading).toBeVisible();
-      await pinnedHeading.locator("..").getByRole("button").click();
-      await Promise.all([
-        page.waitForResponse(
-          (res) =>
-            res.url().includes("/api/v1/users/set_preferences/") && res.ok(),
-        ),
-        page.getByRole("menuitem", { name: "Reset Pinned Links" }).click(),
-      ]);
+        await expect(pinnedHeading).toBeHidden();
+        await expect(page.getByRole("link", { name: title })).toHaveCount(0);
 
-      await expect(pinnedHeading).toBeHidden();
-      await expect(page.getByRole("link", { name: title })).toHaveCount(0);
-
-      const remaining = await getPinnedLinks();
-      expect(remaining.map((link) => link.link).sort()).toEqual(
-        otherFacilityLinks.map((link) => link.link).sort(),
-      );
-    });
-  });
+        const remaining = await getPinnedLinks();
+        expect(remaining.map((link) => link.link).sort()).toEqual(
+          otherFacilityLinks.map((link) => link.link).sort(),
+        );
+      });
+    },
+  );
 });

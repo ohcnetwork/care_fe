@@ -65,26 +65,32 @@ test.describe("Healthcare Service details - managing organization", () => {
   const detailsUrl = (serviceId: string) =>
     `/facility/${facilityId}/settings/healthcare_services/${serviceId}`;
 
-  test("hides the managing organization section when none is set", async ({
-    page,
-  }) => {
-    await page.goto(detailsUrl(serviceWithoutOrg.id));
+  test(
+    "hides the managing organization section when none is set",
+    { tag: ["@atomic", "@cap:service.view"] },
+    async ({ page }) => {
+      await page.goto(detailsUrl(serviceWithoutOrg.id));
 
-    await expect(page.getByText(serviceWithoutOrg.name).first()).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Managing Organization" }),
-    ).toHaveCount(0);
-  });
+      await expect(
+        page.getByText(serviceWithoutOrg.name).first(),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Managing Organization" }),
+      ).toHaveCount(0);
+    },
+  );
 
-  test("shows the managing organization section when one is set", async ({
-    page,
-  }) => {
-    await page.goto(detailsUrl(serviceWithOrg.id));
+  test(
+    "shows the managing organization section when one is set",
+    { tag: ["@atomic", "@cap:service.view"] },
+    async ({ page }) => {
+      await page.goto(detailsUrl(serviceWithOrg.id));
 
-    await expect(page.getByText(serviceWithOrg.name).first()).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Managing Organization" }),
-    ).toBeVisible();
-    await expect(page.getByText(organizationName)).toBeVisible();
-  });
+      await expect(page.getByText(serviceWithOrg.name).first()).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Managing Organization" }),
+      ).toBeVisible();
+      await expect(page.getByText(organizationName)).toBeVisible();
+    },
+  );
 });

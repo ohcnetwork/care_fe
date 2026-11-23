@@ -13,62 +13,64 @@ test.describe("Token Category List - Permission Tests", () => {
     // Use admin authenticated state
     test.use({ storageState: "tests/.auth/user.json" });
 
-    test("Admin can see Token Category in sidebar and list token", async ({
-      page,
-    }) => {
-      // Step 1: Navigate directly to token category page
-      await page.goto(`/facility/${facilityId}/settings/token_category`);
+    test(
+      "Admin can see Token Category in sidebar and list token",
+      { tag: ["@atomic", "@cap:queue.token-category.list"] },
+      async ({ page }) => {
+        // Step 1: Navigate directly to token category page
+        await page.goto(`/facility/${facilityId}/settings/token_category`);
 
-      // Wait for page heading to be visible instead of networkidle
-      await expect(
-        page.getByRole("heading", { name: "Token Categories" }),
-      ).toBeVisible({ timeout: 10000 });
-
-      // Verify we're on the token category list page
-      await expect(page).toHaveURL(
-        /\/facility\/[^/]+\/settings\/token_category/,
-      );
-
-      // Verify the page heading is visible
-      await expect(
-        page.getByRole("heading", { name: "Token Categories" }),
-      ).toBeVisible();
-
-      // Verify categories are grouped into one section per resource type
-      for (const resourceType of [
-        "Practitioner",
-        "Location",
-        "Healthcare Service",
-      ]) {
+        // Wait for page heading to be visible instead of networkidle
         await expect(
-          page.getByRole("region", { name: resourceType, exact: true }),
+          page.getByRole("heading", { name: "Token Categories" }),
+        ).toBeVisible({ timeout: 10000 });
+
+        // Verify we're on the token category list page
+        await expect(page).toHaveURL(
+          /\/facility\/[^/]+\/settings\/token_category/,
+        );
+
+        // Verify the page heading is visible
+        await expect(
+          page.getByRole("heading", { name: "Token Categories" }),
         ).toBeVisible();
-      }
 
-      // Verify at least one category is listed with its actions
-      const firstCategory = page
-        .locator('[data-cy^="token-category-group-"]')
-        .getByRole("listitem")
-        .first();
-      await expect(firstCategory).toBeVisible();
-      await expect(
-        firstCategory.getByRole("button", { name: /^Edit / }),
-      ).toBeVisible();
+        // Verify categories are grouped into one section per resource type
+        for (const resourceType of [
+          "Practitioner",
+          "Location",
+          "Healthcare Service",
+        ]) {
+          await expect(
+            page.getByRole("region", { name: resourceType, exact: true }),
+          ).toBeVisible();
+        }
 
-      // Verify Token Category is visible in sidebar
-      const sidebarToggle = page
-        .locator('[data-cy="facility-settings-page-header"]')
-        .getByRole("button", { name: "Toggle Sidebar", exact: true });
-      await expect(sidebarToggle).toBeVisible();
-      if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
-        await sidebarToggle.click();
-      }
+        // Verify at least one category is listed with its actions
+        const firstCategory = page
+          .locator('[data-cy^="token-category-group-"]')
+          .getByRole("listitem")
+          .first();
+        await expect(firstCategory).toBeVisible();
+        await expect(
+          firstCategory.getByRole("button", { name: /^Edit / }),
+        ).toBeVisible();
 
-      const tokenCategoryLink = page
-        .locator('[data-sidebar="sidebar"]')
-        .getByRole("link", { name: "Token Category", exact: true });
-      await expect(tokenCategoryLink).toBeVisible();
-    });
+        // Verify Token Category is visible in sidebar
+        const sidebarToggle = page
+          .locator('[data-cy="facility-settings-page-header"]')
+          .getByRole("button", { name: "Toggle Sidebar", exact: true });
+        await expect(sidebarToggle).toBeVisible();
+        if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
+          await sidebarToggle.click();
+        }
+
+        const tokenCategoryLink = page
+          .locator('[data-sidebar="sidebar"]')
+          .getByRole("link", { name: "Token Category", exact: true });
+        await expect(tokenCategoryLink).toBeVisible();
+      },
+    );
   });
 
   test.describe("Volunteer Access", () => {
@@ -90,38 +92,42 @@ test.describe("Token Category List - Permission Tests", () => {
       ).toBeVisible();
     });
 
-    test("Volunteer cannot see Token Category in sidebar and list", async ({
-      page,
-    }) => {
-      // Step 1: Navigate directly to token category page
-      await page.goto(`/facility/${facilityId}/settings/token_category`);
+    test(
+      "Volunteer cannot see Token Category in sidebar and list",
+      { tag: ["@atomic", "@cap:queue.token-category.list"] },
+      async ({ page }) => {
+        // Step 1: Navigate directly to token category page
+        await page.goto(`/facility/${facilityId}/settings/token_category`);
 
-      // Wait for access denied message to be visible instead of networkidle
-      const accessDeniedMessage = page.getByText(
-        "Access Denied to Token Category",
-      );
-      await expect(accessDeniedMessage).toBeVisible({ timeout: 10000 });
+        // Wait for access denied message to be visible instead of networkidle
+        const accessDeniedMessage = page.getByText(
+          "Access Denied to Token Category",
+        );
+        await expect(accessDeniedMessage).toBeVisible({ timeout: 10000 });
 
-      // Step 2: Verify access denied message is shown
+        // Step 2: Verify access denied message is shown
 
-      // Step 3: Verify categories and actions are NOT visible
-      await expect(
-        page.locator('[data-cy^="token-category-group-"]'),
-      ).toHaveCount(0);
-      await expect(page.getByRole("button", { name: /^Edit / })).toHaveCount(0);
+        // Step 3: Verify categories and actions are NOT visible
+        await expect(
+          page.locator('[data-cy^="token-category-group-"]'),
+        ).toHaveCount(0);
+        await expect(page.getByRole("button", { name: /^Edit / })).toHaveCount(
+          0,
+        );
 
-      // Step 4: Verify Token Category link is NOT visible in sidebar
-      const sidebarToggle = page
-        .locator('[data-cy="facility-settings-page-header"]')
-        .getByRole("button", { name: "Toggle Sidebar", exact: true });
-      await expect(sidebarToggle).toBeVisible();
-      if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
-        await sidebarToggle.click();
-      }
-      const tokenCategoryLink = page
-        .locator('[data-sidebar="sidebar"]')
-        .getByRole("link", { name: "Token Category", exact: true });
-      await expect(tokenCategoryLink).toHaveCount(0);
-    });
+        // Step 4: Verify Token Category link is NOT visible in sidebar
+        const sidebarToggle = page
+          .locator('[data-cy="facility-settings-page-header"]')
+          .getByRole("button", { name: "Toggle Sidebar", exact: true });
+        await expect(sidebarToggle).toBeVisible();
+        if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
+          await sidebarToggle.click();
+        }
+        const tokenCategoryLink = page
+          .locator('[data-sidebar="sidebar"]')
+          .getByRole("link", { name: "Token Category", exact: true });
+        await expect(tokenCategoryLink).toHaveCount(0);
+      },
+    );
   });
 });

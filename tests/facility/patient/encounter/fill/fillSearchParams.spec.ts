@@ -19,27 +19,33 @@ test.describe("Questionnaire fill search params", () => {
   const pickerUrl = (returnPage: string) =>
     `${encounterPath}/questionnaire?${new URLSearchParams({ return_page: returnPage })}`;
 
-  test("closes to the encounter page in return_page", async ({ page }) => {
-    await page.goto(pickerUrl("files"));
-    await expect(
-      page.getByRole("heading", { name: "Select a questionnaire to fill" }),
-    ).toBeVisible();
+  test(
+    "closes to the encounter page in return_page",
+    { tag: ["@atomic", "@cap:questionnaire.fill.navigate"] },
+    async ({ page }) => {
+      await page.goto(pickerUrl("files"));
+      await expect(
+        page.getByRole("heading", { name: "Select a questionnaire to fill" }),
+      ).toBeVisible();
 
-    await page.getByRole("button", { name: "Close", exact: true }).click();
+      await page.getByRole("button", { name: "Close", exact: true }).click();
 
-    await expect(page).toHaveURL(`${encounterPath}/files`);
-  });
+      await expect(page).toHaveURL(`${encounterPath}/files`);
+    },
+  );
 
-  test("closes to the updates page for an invalid return_page", async ({
-    page,
-  }) => {
-    await page.goto(pickerUrl("../bogus"));
-    await expect(
-      page.getByRole("heading", { name: "Select a questionnaire to fill" }),
-    ).toBeVisible();
+  test(
+    "closes to the updates page for an invalid return_page",
+    { tag: ["@atomic", "@cap:questionnaire.fill.navigate"] },
+    async ({ page }) => {
+      await page.goto(pickerUrl("../bogus"));
+      await expect(
+        page.getByRole("heading", { name: "Select a questionnaire to fill" }),
+      ).toBeVisible();
 
-    await page.getByRole("button", { name: "Close", exact: true }).click();
+      await page.getByRole("button", { name: "Close", exact: true }).click();
 
-    await expect(page).toHaveURL(`${encounterPath}/updates`);
-  });
+      await expect(page).toHaveURL(`${encounterPath}/updates`);
+    },
+  );
 });

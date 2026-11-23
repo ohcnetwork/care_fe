@@ -38,34 +38,42 @@ test.describe("Account list search params", () => {
     return `/facility/${facilityId}/billing/account${search ? `?${search}` : ""}`;
   };
 
-  test("opens with the active status filter", async ({ page }) => {
-    await page.goto(listUrl());
+  test(
+    "opens with the active status filter",
+    { tag: ["@atomic", "@cap:billing.account.filter"] },
+    async ({ page }) => {
+      await page.goto(listUrl());
 
-    await expect(page).toHaveURL(/[?&]status=active(&|$)/);
-    await expect(statusFilterBar(page)).toContainText(/active/i);
-  });
+      await expect(page).toHaveURL(/[?&]status=active(&|$)/);
+      await expect(statusFilterBar(page)).toContainText(/active/i);
+    },
+  );
 
-  test("restores the account status filter from a bookmarked URL", async ({
-    page,
-  }) => {
-    const request = accountListRequest(
-      page,
-      (params) => params.get("status") === "on_hold",
-    );
-    await page.goto(listUrl({ status: "on_hold" }));
-    await request;
+  test(
+    "restores the account status filter from a bookmarked URL",
+    { tag: ["@atomic", "@cap:billing.account.filter"] },
+    async ({ page }) => {
+      const request = accountListRequest(
+        page,
+        (params) => params.get("status") === "on_hold",
+      );
+      await page.goto(listUrl({ status: "on_hold" }));
+      await request;
 
-    await expect(statusFilterBar(page)).toContainText(/on hold/i);
-    await expect(page).toHaveURL(/[?&]status=on_hold(&|$)/);
-  });
+      await expect(statusFilterBar(page)).toContainText(/on hold/i);
+      await expect(page).toHaveURL(/[?&]status=on_hold(&|$)/);
+    },
+  );
 
-  test("uses the active status in place of an invalid one", async ({
-    page,
-  }) => {
-    await page.goto(listUrl({ status: "bogus" }));
+  test(
+    "uses the active status in place of an invalid one",
+    { tag: ["@atomic", "@cap:billing.account.filter"] },
+    async ({ page }) => {
+      await page.goto(listUrl({ status: "bogus" }));
 
-    await expect(page).toHaveURL(/[?&]status=active(&|$)/);
-    await expect(statusFilterBar(page)).toContainText(/active/i);
-    await expect(page).not.toHaveURL(/bogus/);
-  });
+      await expect(page).toHaveURL(/[?&]status=active(&|$)/);
+      await expect(statusFilterBar(page)).toContainText(/active/i);
+      await expect(page).not.toHaveURL(/bogus/);
+    },
+  );
 });

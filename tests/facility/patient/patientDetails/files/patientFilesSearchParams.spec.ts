@@ -41,59 +41,71 @@ test.describe("Patient files search params", () => {
 
   const statusFilter = (page: Page) => filterSelectButton(page, "Status");
 
-  test("writes the archived filter to the URL and the list request", async ({
-    page,
-  }) => {
-    await page.goto(filesUrl());
-    await expect(
-      page.getByRole("textbox", { name: /search files/i }),
-    ).toBeVisible();
+  test(
+    "writes the archived filter to the URL and the list request",
+    { tag: ["@atomic", "@cap:patient.files.filter"] },
+    async ({ page }) => {
+      await page.goto(filesUrl());
+      await expect(
+        page.getByRole("textbox", { name: /search files/i }),
+      ).toBeVisible();
 
-    const request = fileListRequest(
-      page,
-      (params) => params.get("is_archived") === "true",
-    );
-    await statusFilter(page).click();
-    await page
-      .getByRole("menuitemradio", { name: "Archived", exact: true })
-      .click();
-    await request;
+      const request = fileListRequest(
+        page,
+        (params) => params.get("is_archived") === "true",
+      );
+      await statusFilter(page).click();
+      await page
+        .getByRole("menuitemradio", { name: "Archived", exact: true })
+        .click();
+      await request;
 
-    await expect(page).toHaveURL(/[?&]is_archived=true(&|$)/);
-    await expect(statusFilter(page)).toContainText("Archived");
-  });
+      await expect(page).toHaveURL(/[?&]is_archived=true(&|$)/);
+      await expect(statusFilter(page)).toContainText("Archived");
+    },
+  );
 
-  test("restores the archived filter from a bookmarked URL", async ({
-    page,
-  }) => {
-    const request = fileListRequest(
-      page,
-      (params) => params.get("is_archived") === "false",
-    );
-    await page.goto(filesUrl({ is_archived: "false" }));
-    await request;
+  test(
+    "restores the archived filter from a bookmarked URL",
+    { tag: ["@atomic", "@cap:patient.files.filter"] },
+    async ({ page }) => {
+      const request = fileListRequest(
+        page,
+        (params) => params.get("is_archived") === "false",
+      );
+      await page.goto(filesUrl({ is_archived: "false" }));
+      await request;
 
-    await expect(statusFilter(page)).toContainText("Active");
-  });
+      await expect(statusFilter(page)).toContainText("Active");
+    },
+  );
 
-  test("ignores invalid values in a bookmarked URL", async ({ page }) => {
-    const request = fileListRequest(page, () => true);
-    await page.goto(filesUrl({ is_archived: "bogus", page: "abc" }));
-    const params = new URL((await request).url()).searchParams;
+  test(
+    "ignores invalid values in a bookmarked URL",
+    { tag: ["@atomic", "@cap:patient.files.filter"] },
+    async ({ page }) => {
+      const request = fileListRequest(page, () => true);
+      await page.goto(filesUrl({ is_archived: "bogus", page: "abc" }));
+      const params = new URL((await request).url()).searchParams;
 
-    expect(params.get("is_archived")).toBeNull();
-    expect(params.get("offset")).toBe("0");
-    await expect(
-      page.getByRole("textbox", { name: /search files/i }),
-    ).toBeVisible();
-    await expect(statusFilter(page)).toHaveText("Status");
-  });
+      expect(params.get("is_archived")).toBeNull();
+      expect(params.get("offset")).toBe("0");
+      await expect(
+        page.getByRole("textbox", { name: /search files/i }),
+      ).toBeVisible();
+      await expect(statusFilter(page)).toHaveText("Status");
+    },
+  );
 
-  test("opens the reports sub tab named in the URL", async ({ page }) => {
-    await page.goto(filesUrl({ file: "reports" }));
+  test(
+    "opens the reports sub tab named in the URL",
+    { tag: ["@atomic", "@cap:patient.files.navigate"] },
+    async ({ page }) => {
+      await page.goto(filesUrl({ file: "reports" }));
 
-    await expect(
-      page.getByRole("tab", { name: "Reports", exact: true }),
-    ).toHaveAttribute("aria-selected", "true");
-  });
+      await expect(
+        page.getByRole("tab", { name: "Reports", exact: true }),
+      ).toHaveAttribute("aria-selected", "true");
+    },
+  );
 });

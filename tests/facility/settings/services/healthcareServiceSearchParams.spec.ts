@@ -25,50 +25,62 @@ test.describe("Healthcare service list search params", () => {
   const searchBox = (page: Page) =>
     page.getByRole("textbox", { name: "Search healthcare services..." });
 
-  test("writes the search to the URL and the API request", async ({ page }) => {
-    const searchText = faker.string.alpha({ length: 8, casing: "lower" });
-    await page.goto(listPath());
-    await expect(
-      page.getByRole("heading", { name: "Healthcare Services" }),
-    ).toBeVisible();
+  test(
+    "writes the search to the URL and the API request",
+    { tag: ["@atomic", "@cap:service.search"] },
+    async ({ page }) => {
+      const searchText = faker.string.alpha({ length: 8, casing: "lower" });
+      await page.goto(listPath());
+      await expect(
+        page.getByRole("heading", { name: "Healthcare Services" }),
+      ).toBeVisible();
 
-    const request = waitForApiList(
-      page,
-      "/healthcare_service/",
-      (params) => params.get("name") === searchText,
-    );
-    await searchBox(page).fill(searchText);
-    await request;
+      const request = waitForApiList(
+        page,
+        "/healthcare_service/",
+        (params) => params.get("name") === searchText,
+      );
+      await searchBox(page).fill(searchText);
+      await request;
 
-    await expect(page).toHaveURL(queryParam("search", searchText));
-  });
+      await expect(page).toHaveURL(queryParam("search", searchText));
+    },
+  );
 
-  test("restores the search from a bookmarked URL", async ({ page }) => {
-    const searchText = faker.string.alpha({ length: 8, casing: "lower" });
-    const request = waitForApiList(
-      page,
-      "/healthcare_service/",
-      (params) => params.get("name") === searchText,
-    );
-    await page.goto(withSearch(listPath(), { search: searchText }));
-    await request;
+  test(
+    "restores the search from a bookmarked URL",
+    { tag: ["@atomic", "@cap:service.search"] },
+    async ({ page }) => {
+      const searchText = faker.string.alpha({ length: 8, casing: "lower" });
+      const request = waitForApiList(
+        page,
+        "/healthcare_service/",
+        (params) => params.get("name") === searchText,
+      );
+      await page.goto(withSearch(listPath(), { search: searchText }));
+      await request;
 
-    await expect(searchBox(page)).toHaveValue(searchText);
-  });
+      await expect(searchBox(page)).toHaveValue(searchText);
+    },
+  );
 
-  test("reads an invalid page number as the first page", async ({ page }) => {
-    const api = recordApiQueries(page);
-    const request = waitForApiList(
-      page,
-      "/healthcare_service/",
-      (params) => params.get("offset") === "0",
-    );
-    await page.goto(withSearch(listPath(), { page: "abc" }));
-    await request;
+  test(
+    "reads an invalid page number as the first page",
+    { tag: ["@atomic", "@cap:service.list"] },
+    async ({ page }) => {
+      const api = recordApiQueries(page);
+      const request = waitForApiList(
+        page,
+        "/healthcare_service/",
+        (params) => params.get("offset") === "0",
+      );
+      await page.goto(withSearch(listPath(), { page: "abc" }));
+      await request;
 
-    await expect(
-      page.getByRole("heading", { name: "Healthcare Services" }),
-    ).toBeVisible();
-    api.expectNotSent("abc");
-  });
+      await expect(
+        page.getByRole("heading", { name: "Healthcare Services" }),
+      ).toBeVisible();
+      api.expectNotSent("abc");
+    },
+  );
 });

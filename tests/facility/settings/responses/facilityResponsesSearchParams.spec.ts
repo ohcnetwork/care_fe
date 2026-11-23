@@ -38,45 +38,55 @@ test.describe("Facility responses search params", () => {
   const statusFilter = (page: Page) =>
     page.getByRole("combobox", { name: "Status", exact: true });
 
-  test("writes the status filter to the URL and the list request", async ({
-    page,
-  }) => {
-    await page.goto(responsesUrl());
-    await expect(statusFilter(page)).toContainText("All Statuses");
+  test(
+    "writes the status filter to the URL and the list request",
+    { tag: ["@atomic", "@cap:facility.responses.filter"] },
+    async ({ page }) => {
+      await page.goto(responsesUrl());
+      await expect(statusFilter(page)).toContainText("All Statuses");
 
-    const request = responseListRequest(
-      page,
-      (params) => params.get("status") === "entered_in_error",
-    );
-    await statusFilter(page).click();
-    await page
-      .getByRole("option", { name: "Entered in Error", exact: true })
-      .click();
-    await request;
+      const request = responseListRequest(
+        page,
+        (params) => params.get("status") === "entered_in_error",
+      );
+      await statusFilter(page).click();
+      await page
+        .getByRole("option", { name: "Entered in Error", exact: true })
+        .click();
+      await request;
 
-    await expect(page).toHaveURL(/[?&]status=entered_in_error(&|$)/);
-  });
+      await expect(page).toHaveURL(/[?&]status=entered_in_error(&|$)/);
+    },
+  );
 
-  test("restores the status filter from a bookmarked URL", async ({ page }) => {
-    const request = responseListRequest(
-      page,
-      (params) => params.get("status") === "completed",
-    );
-    await page.goto(responsesUrl({ status: "completed" }));
-    await request;
+  test(
+    "restores the status filter from a bookmarked URL",
+    { tag: ["@atomic", "@cap:facility.responses.filter"] },
+    async ({ page }) => {
+      const request = responseListRequest(
+        page,
+        (params) => params.get("status") === "completed",
+      );
+      await page.goto(responsesUrl({ status: "completed" }));
+      await request;
 
-    await expect(statusFilter(page)).toContainText("Completed");
-  });
+      await expect(statusFilter(page)).toContainText("Completed");
+    },
+  );
 
-  test("ignores invalid values in a bookmarked URL", async ({ page }) => {
-    const request = responseListRequest(page, () => true);
-    await page.goto(responsesUrl({ status: "bogus", page: "abc" }));
-    const params = new URL((await request).url()).searchParams;
-    // The router drops the invalid values when the page loads.
-    await expect(page).not.toHaveURL(/status=bogus|page=abc/);
+  test(
+    "ignores invalid values in a bookmarked URL",
+    { tag: ["@atomic", "@cap:facility.responses.filter"] },
+    async ({ page }) => {
+      const request = responseListRequest(page, () => true);
+      await page.goto(responsesUrl({ status: "bogus", page: "abc" }));
+      const params = new URL((await request).url()).searchParams;
+      // The router drops the invalid values when the page loads.
+      await expect(page).not.toHaveURL(/status=bogus|page=abc/);
 
-    expect(params.get("status")).toBeNull();
-    expect(params.get("offset")).toBe("0");
-    await expect(statusFilter(page)).toContainText("All Statuses");
-  });
+      expect(params.get("status")).toBeNull();
+      expect(params.get("offset")).toBe("0");
+      await expect(statusFilter(page)).toContainText("All Statuses");
+    },
+  );
 });

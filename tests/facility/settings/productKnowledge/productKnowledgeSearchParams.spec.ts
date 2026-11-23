@@ -39,79 +39,85 @@ test.describe("Product knowledge search params", () => {
     return results[0].slug;
   }
 
-  test("writes the product type filter to the URL and the API request", async ({
-    page,
-  }) => {
-    const slug = await firstCategorySlug(page);
-    await page.goto(`${listPath()}/categories/${slug}`);
-    await expect(page).toHaveURL(queryParam("status", "active"));
+  test(
+    "writes the product type filter to the URL and the API request",
+    { tag: ["@atomic", "@cap:product.knowledge.filter"] },
+    async ({ page }) => {
+      const slug = await firstCategorySlug(page);
+      await page.goto(`${listPath()}/categories/${slug}`);
+      await expect(page).toHaveURL(queryParam("status", "active"));
 
-    const request = waitForApiList(
-      page,
-      "/product_knowledge/",
-      (params) =>
-        params.get("category") === slug &&
-        params.get("product_type") === "consumable",
-    );
-    await selectFromFilterSelect(page, /product type/i, "^consumable$");
-    await request;
+      const request = waitForApiList(
+        page,
+        "/product_knowledge/",
+        (params) =>
+          params.get("category") === slug &&
+          params.get("product_type") === "consumable",
+      );
+      await selectFromFilterSelect(page, /product type/i, "^consumable$");
+      await request;
 
-    await expect(page).toHaveURL(queryParam("product_type", "consumable"));
-    await expect(page).toHaveURL(queryParam("status", "active"));
-  });
+      await expect(page).toHaveURL(queryParam("product_type", "consumable"));
+      await expect(page).toHaveURL(queryParam("status", "active"));
+    },
+  );
 
-  test("restores the filters of a category from a bookmarked URL", async ({
-    page,
-  }) => {
-    const slug = await firstCategorySlug(page);
-    const request = waitForApiList(
-      page,
-      "/product_knowledge/",
-      (params) =>
-        params.get("category") === slug &&
-        params.get("status") === "retired" &&
-        params.get("product_type") === "medication",
-    );
-    await page.goto(
-      withSearch(`${listPath()}/categories/${slug}`, {
-        status: "retired",
-        product_type: "medication",
-      }),
-    );
-    await request;
+  test(
+    "restores the filters of a category from a bookmarked URL",
+    { tag: ["@atomic", "@cap:product.knowledge.filter"] },
+    async ({ page }) => {
+      const slug = await firstCategorySlug(page);
+      const request = waitForApiList(
+        page,
+        "/product_knowledge/",
+        (params) =>
+          params.get("category") === slug &&
+          params.get("status") === "retired" &&
+          params.get("product_type") === "medication",
+      );
+      await page.goto(
+        withSearch(`${listPath()}/categories/${slug}`, {
+          status: "retired",
+          product_type: "medication",
+        }),
+      );
+      await request;
 
-    await expect(filterSelectButton(page, /status\s*retired/i)).toBeVisible();
-    await expect(
-      filterSelectButton(page, /product type\s*medication/i),
-    ).toBeVisible();
-  });
+      await expect(filterSelectButton(page, /status\s*retired/i)).toBeVisible();
+      await expect(
+        filterSelectButton(page, /product type\s*medication/i),
+      ).toBeVisible();
+    },
+  );
 
-  test("uses the active status in place of invalid filters", async ({
-    page,
-  }) => {
-    const slug = await firstCategorySlug(page);
-    const api = recordApiQueries(page);
-    const request = waitForApiList(
-      page,
-      "/product_knowledge/",
-      (params) =>
-        params.get("category") === slug &&
-        params.get("status") === "active" &&
-        params.get("offset") === "0" &&
-        !params.has("product_type"),
-    );
-    await page.goto(
-      withSearch(`${listPath()}/categories/${slug}`, {
-        status: "bogus",
-        product_type: "bogus",
-        page: "abc",
-      }),
-    );
-    await request;
+  test(
+    "uses the active status in place of invalid filters",
+    { tag: ["@atomic", "@cap:product.knowledge.filter"] },
+    async ({ page }) => {
+      const slug = await firstCategorySlug(page);
+      const api = recordApiQueries(page);
+      const request = waitForApiList(
+        page,
+        "/product_knowledge/",
+        (params) =>
+          params.get("category") === slug &&
+          params.get("status") === "active" &&
+          params.get("offset") === "0" &&
+          !params.has("product_type"),
+      );
+      await page.goto(
+        withSearch(`${listPath()}/categories/${slug}`, {
+          status: "bogus",
+          product_type: "bogus",
+          page: "abc",
+        }),
+      );
+      await request;
 
-    await expect(page).toHaveURL(queryParam("status", "active"));
-    await expect(page).not.toHaveURL(/product_type=/);
-    api.expectNotSent("bogus");
-    api.expectNotSent("abc");
-  });
+      await expect(page).toHaveURL(queryParam("status", "active"));
+      await expect(page).not.toHaveURL(/product_type=/);
+      api.expectNotSent("bogus");
+      api.expectNotSent("abc");
+    },
+  );
 });

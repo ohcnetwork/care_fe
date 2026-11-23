@@ -49,94 +49,114 @@ test.describe("Facility referrals search params", () => {
     return search ? `${listPath()}?${search}` : listPath();
   };
 
-  test("writes the status filter to the URL and the request", async ({
-    page,
-  }) => {
-    await page.goto(listUrl());
-    await expect(
-      page.getByRole("heading", { name: "Referrals", level: 1, exact: true }),
-    ).toBeVisible();
+  test(
+    "writes the status filter to the URL and the request",
+    { tag: ["@atomic", "@cap:referral.list.filter"] },
+    async ({ page }) => {
+      await page.goto(listUrl());
+      await expect(
+        page.getByRole("heading", { name: "Referrals", level: 1, exact: true }),
+      ).toBeVisible();
 
-    const request = referralListRequest(
-      page,
-      (params) =>
-        params.get("entity_id") === facilityId &&
-        params.get("status") === "completed",
-    );
-    await selectReferralStatus(page, "Completed");
-    await request;
+      const request = referralListRequest(
+        page,
+        (params) =>
+          params.get("entity_id") === facilityId &&
+          params.get("status") === "completed",
+      );
+      await selectReferralStatus(page, "Completed");
+      await request;
 
-    await expect(page).toHaveURL(/[?&]referralStatus=completed(&|$)/);
-    await expect(page).toHaveURL(/[?&]referralPage=1(&|$)/);
-    await expect(statusFilterBar(page)).toContainText("Completed");
-  });
+      await expect(page).toHaveURL(/[?&]referralStatus=completed(&|$)/);
+      await expect(page).toHaveURL(/[?&]referralPage=1(&|$)/);
+      await expect(statusFilterBar(page)).toContainText("Completed");
+    },
+  );
 
-  test("restores the filters from a bookmarked URL", async ({ page }) => {
-    const request = referralListRequest(
-      page,
-      (params) =>
-        params.get("entity_id") === facilityId &&
-        params.get("status") === "completed" &&
-        params.get("assigned_to_me") === "true",
-    );
-    await page.goto(
-      listUrl({ referralStatus: "completed", referralAssignedToMe: "true" }),
-    );
-    await request;
+  test(
+    "restores the filters from a bookmarked URL",
+    { tag: ["@atomic", "@cap:referral.list.filter"] },
+    async ({ page }) => {
+      const request = referralListRequest(
+        page,
+        (params) =>
+          params.get("entity_id") === facilityId &&
+          params.get("status") === "completed" &&
+          params.get("assigned_to_me") === "true",
+      );
+      await page.goto(
+        listUrl({ referralStatus: "completed", referralAssignedToMe: "true" }),
+      );
+      await request;
 
-    await expect(statusFilterBar(page)).toContainText("Completed");
-    await expect(
-      selectedMultiFilterBar(page, /^Assigned to me$/),
-    ).toContainText("Yes");
-  });
+      await expect(statusFilterBar(page)).toContainText("Completed");
+      await expect(
+        selectedMultiFilterBar(page, /^Assigned to me$/),
+      ).toContainText("Yes");
+    },
+  );
 
-  test("ignores invalid values in a bookmarked URL", async ({ page }) => {
-    const request = referralListRequest(
-      page,
-      (params) => params.get("entity_id") === facilityId,
-    );
-    await page.goto(
-      listUrl({
-        referralStatus: "bogus",
-        referralAssignedToMe: "maybe",
-        referralDestination: "bogus",
-        referralPage: "abc",
-      }),
-    );
-    const params = new URL((await request).url()).searchParams;
+  test(
+    "ignores invalid values in a bookmarked URL",
+    { tag: ["@atomic", "@cap:referral.list.filter"] },
+    async ({ page }) => {
+      const request = referralListRequest(
+        page,
+        (params) => params.get("entity_id") === facilityId,
+      );
+      await page.goto(
+        listUrl({
+          referralStatus: "bogus",
+          referralAssignedToMe: "maybe",
+          referralDestination: "bogus",
+          referralPage: "abc",
+        }),
+      );
+      const params = new URL((await request).url()).searchParams;
 
-    expect(params.get("entity_type")).toBe("facility");
-    expect(params.get("status")).toBeNull();
-    expect(params.get("assigned_to_me")).toBeNull();
-    expect(params.get("offset")).toBe("0");
-    await expect(statusFilterBar(page)).toBeHidden();
-    await expect(selectedMultiFilterBar(page, /^Assigned to me$/)).toBeHidden();
-  });
+      expect(params.get("entity_type")).toBe("facility");
+      expect(params.get("status")).toBeNull();
+      expect(params.get("assigned_to_me")).toBeNull();
+      expect(params.get("offset")).toBe("0");
+      await expect(statusFilterBar(page)).toBeHidden();
+      await expect(
+        selectedMultiFilterBar(page, /^Assigned to me$/),
+      ).toBeHidden();
+    },
+  );
 });
 
 test.describe("Referral page search params", () => {
-  test("goes back to the page in sourceUrl", async ({ page }) => {
-    const facilityId = getFacilityId();
-    const sourceUrl = `/facility/${facilityId}/referrals?referralStatus=completed`;
-    await page.goto(
-      `/referrals/${faker.string.uuid()}?${new URLSearchParams({ sourceUrl })}`,
-    );
+  test(
+    "goes back to the page in sourceUrl",
+    { tag: ["@atomic", "@cap:referral.detail.navigate"] },
+    async ({ page }) => {
+      const facilityId = getFacilityId();
+      const sourceUrl = `/facility/${facilityId}/referrals?referralStatus=completed`;
+      await page.goto(
+        `/referrals/${faker.string.uuid()}?${new URLSearchParams({ sourceUrl })}`,
+      );
 
-    await page.getByRole("link", { name: "Back", exact: true }).click();
+      await page.getByRole("link", { name: "Back", exact: true }).click();
 
-    await expect(page).toHaveURL(sourceUrl);
-    await expect(statusFilterBar(page)).toContainText("Completed");
-  });
+      await expect(page).toHaveURL(sourceUrl);
+      await expect(statusFilterBar(page)).toContainText("Completed");
+    },
+  );
 
-  test("goes home when sourceUrl is on another origin", async ({ page }) => {
-    await page.goto(
-      `/referrals/${faker.string.uuid()}?${new URLSearchParams({
-        sourceUrl: "https://example.com/facility",
-      })}`,
-    );
+  test(
+    "goes home when sourceUrl is on another origin",
+    { tag: ["@atomic", "@cap:referral.detail.navigate"] },
+    async ({ page }) => {
+      await page.goto(
+        `/referrals/${faker.string.uuid()}?${new URLSearchParams({
+          sourceUrl: "https://example.com/facility",
+        })}`,
+      );
 
-    await expect(
-      page.getByRole("link", { name: "Back", exact: true }),
-    ).toHaveAttribute("href", "/");
-  });
+      await expect(
+        page.getByRole("link", { name: "Back", exact: true }),
+      ).toHaveAttribute("href", "/");
+    },
+  );
 });

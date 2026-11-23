@@ -56,44 +56,46 @@ async function expectNoHorizontalOverflow(page: Page) {
 
 test.describe("Structured question rendering on the fill page", () => {
   for (const { slug, text } of STRUCTURED_FIXED_FORMS) {
-    test(`${slug}: widget mounts with one aligned header and no layout break`, async ({
-      page,
-    }) => {
-      await page.goto(
-        `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${slug}`,
-      );
+    test(
+      `${slug}: widget mounts with one aligned header and no layout break`,
+      { tag: ["@atomic", "@cap:questionnaire.structured.widget.view"] },
+      async ({ page }) => {
+        await page.goto(
+          `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${slug}`,
+        );
 
-      const block = questionBlock(page, text);
-      await expect(block).toBeVisible();
+        const block = questionBlock(page, text);
+        await expect(block).toBeVisible();
 
-      await test.step("no degradation notice — the real input mounted", async () => {
-        for (const notice of DEGRADATION_NOTICES) {
-          await expect(block.getByText(notice)).toHaveCount(0);
-        }
-        // The widget put SOMETHING interactive on screen. Waiting on this
-        // also settles the lazy/suspense mount before the checks below.
-        // `:visible` matters: FileQuestion's first input is a deliberately
-        // hidden file input behind a styled trigger.
-        await expect(
-          block
-            .locator(
-              "button:visible, input:visible, textarea:visible, [role='combobox']:visible",
-            )
-            .first(),
-        ).toBeVisible();
-      });
+        await test.step("no degradation notice — the real input mounted", async () => {
+          for (const notice of DEGRADATION_NOTICES) {
+            await expect(block.getByText(notice)).toHaveCount(0);
+          }
+          // The widget put SOMETHING interactive on screen. Waiting on this
+          // also settles the lazy/suspense mount before the checks below.
+          // `:visible` matters: FileQuestion's first input is a deliberately
+          // hidden file input behind a styled trigger.
+          await expect(
+            block
+              .locator(
+                "button:visible, input:visible, textarea:visible, [role='combobox']:visible",
+              )
+              .first(),
+          ).toBeVisible();
+        });
 
-      await test.step("exactly one question header", async () => {
-        // The renderer's label is the only one; the widgets' internal
-        // QuestionLabel used to render a second, misaligned copy.
-        await expect(
-          block.locator("label").filter({ hasText: new RegExp(`^${text}$`) }),
-        ).toHaveCount(1);
-      });
+        await test.step("exactly one question header", async () => {
+          // The renderer's label is the only one; the widgets' internal
+          // QuestionLabel used to render a second, misaligned copy.
+          await expect(
+            block.locator("label").filter({ hasText: new RegExp(`^${text}$`) }),
+          ).toHaveCount(1);
+        });
 
-      await test.step("layout holds", async () => {
-        await expectNoHorizontalOverflow(page);
-      });
-    });
+        await test.step("layout holds", async () => {
+          await expectNoHorizontalOverflow(page);
+        });
+      },
+    );
   }
 });

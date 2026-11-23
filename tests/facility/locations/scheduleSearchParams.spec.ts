@@ -35,60 +35,37 @@ test.describe("Location schedule search params", () => {
     schedulePath = `/facility/${facilityId}/locations/${location.id}/schedule`;
   });
 
-  test("writes the view to the URL", async ({ page }) => {
-    await page.goto(schedulePath);
-    await expect(
-      page.getByRole("button", { name: "Create Template", exact: true }),
-    ).toBeVisible();
+  test(
+    "writes the view to the URL",
+    { tag: ["@atomic", "@cap:location.schedule.navigate"] },
+    async ({ page }) => {
+      await page.goto(schedulePath);
+      await expect(
+        page.getByRole("button", { name: "Create Template", exact: true }),
+      ).toBeVisible();
 
-    await page.getByRole("button", { name: "Exceptions", exact: true }).click();
+      await page
+        .getByRole("button", { name: "Exceptions", exact: true })
+        .click();
 
-    await expect(page).toHaveURL(`${schedulePath}?tab=exceptions`);
-    await expect(
-      page.getByRole("button", { name: "Add Exception", exact: true }),
-    ).toBeVisible();
-
-    await page.getByRole("button", { name: "Schedule", exact: true }).click();
-
-    await expect(page).toHaveURL(`${schedulePath}?tab=schedule`);
-    await expect(
-      page.getByRole("button", { name: "Create Template", exact: true }),
-    ).toBeVisible();
-  });
-
-  test("opens the add exception sheet with its dates from a bookmarked URL", async ({
-    page,
-  }) => {
-    await page.goto(
-      `${schedulePath}?${new URLSearchParams({
-        tab: "exceptions",
-        sheet: "add_exception",
-        valid_from: "2099-03-15",
-        valid_to: "2099-03-16",
-      })}`,
-    );
-
-    const sheet = addExceptionSheet(page);
-    await expect(sheet).toBeVisible();
-    // The validity range picker shows both dates from the URL.
-    await expect(validPeriod(sheet)).toHaveText("Mar 15 – Mar 16, 2099");
-
-    await test.step("Closing the sheet drops it and its dates from the URL", async () => {
-      await page.keyboard.press("Escape");
-
-      await expect(sheet).toBeHidden();
       await expect(page).toHaveURL(`${schedulePath}?tab=exceptions`);
-    });
-  });
+      await expect(
+        page.getByRole("button", { name: "Add Exception", exact: true }),
+      ).toBeVisible();
 
-  test.describe("west of UTC", () => {
-    // URL dates are local calendar dates. Read as UTC midnight, they would
-    // show the previous day here.
-    test.use({ timezoneId: "America/Los_Angeles" });
+      await page.getByRole("button", { name: "Schedule", exact: true }).click();
 
-    test("shows the bookmarked exception dates as written", async ({
-      page,
-    }) => {
+      await expect(page).toHaveURL(`${schedulePath}?tab=schedule`);
+      await expect(
+        page.getByRole("button", { name: "Create Template", exact: true }),
+      ).toBeVisible();
+    },
+  );
+
+  test(
+    "opens the add exception sheet with its dates from a bookmarked URL",
+    { tag: ["@atomic", "@cap:location.schedule.navigate"] },
+    async ({ page }) => {
       await page.goto(
         `${schedulePath}?${new URLSearchParams({
           tab: "exceptions",
@@ -100,29 +77,68 @@ test.describe("Location schedule search params", () => {
 
       const sheet = addExceptionSheet(page);
       await expect(sheet).toBeVisible();
+      // The validity range picker shows both dates from the URL.
       await expect(validPeriod(sheet)).toHaveText("Mar 15 – Mar 16, 2099");
-    });
-  });
 
-  test("ignores invalid values in a bookmarked URL", async ({ page }) => {
-    await page.goto(
-      `${schedulePath}?${new URLSearchParams({
-        tab: "bogus",
-        sheet: "bogus",
-        valid_from: "bogus",
-      })}`,
+      await test.step("Closing the sheet drops it and its dates from the URL", async () => {
+        await page.keyboard.press("Escape");
+
+        await expect(sheet).toBeHidden();
+        await expect(page).toHaveURL(`${schedulePath}?tab=exceptions`);
+      });
+    },
+  );
+
+  test.describe("west of UTC", () => {
+    // URL dates are local calendar dates. Read as UTC midnight, they would
+    // show the previous day here.
+    test.use({ timezoneId: "America/Los_Angeles" });
+
+    test(
+      "shows the bookmarked exception dates as written",
+      { tag: ["@atomic", "@cap:location.schedule.navigate"] },
+      async ({ page }) => {
+        await page.goto(
+          `${schedulePath}?${new URLSearchParams({
+            tab: "exceptions",
+            sheet: "add_exception",
+            valid_from: "2099-03-15",
+            valid_to: "2099-03-16",
+          })}`,
+        );
+
+        const sheet = addExceptionSheet(page);
+        await expect(sheet).toBeVisible();
+        await expect(validPeriod(sheet)).toHaveText("Mar 15 – Mar 16, 2099");
+      },
     );
-    // The router drops the invalid values when the page loads.
-    await expect(page).not.toHaveURL(/bogus/);
-
-    // The schedule view, with no sheet open.
-    await expect(
-      page.getByRole("button", { name: "Create Template", exact: true }),
-    ).toBeVisible();
-    await expect(page.getByRole("dialog")).toHaveCount(0);
-
-    await page.getByRole("button", { name: "Exceptions", exact: true }).click();
-
-    await expect(page).toHaveURL(`${schedulePath}?tab=exceptions`);
   });
+
+  test(
+    "ignores invalid values in a bookmarked URL",
+    { tag: ["@atomic", "@cap:location.schedule.navigate"] },
+    async ({ page }) => {
+      await page.goto(
+        `${schedulePath}?${new URLSearchParams({
+          tab: "bogus",
+          sheet: "bogus",
+          valid_from: "bogus",
+        })}`,
+      );
+      // The router drops the invalid values when the page loads.
+      await expect(page).not.toHaveURL(/bogus/);
+
+      // The schedule view, with no sheet open.
+      await expect(
+        page.getByRole("button", { name: "Create Template", exact: true }),
+      ).toBeVisible();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+
+      await page
+        .getByRole("button", { name: "Exceptions", exact: true })
+        .click();
+
+      await expect(page).toHaveURL(`${schedulePath}?tab=exceptions`);
+    },
+  );
 });

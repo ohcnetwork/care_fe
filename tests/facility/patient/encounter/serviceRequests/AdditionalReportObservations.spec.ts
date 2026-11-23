@@ -6,14 +6,14 @@ import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
-import type { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
-import type { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
-import type { ObservationRead } from "@/types/emr/observation/observation";
+import type { ActivityDefinitionReadSpec } from "../../../../../src/types/emr/activityDefinition/activityDefinition";
+import type { DiagnosticReportRead } from "../../../../../src/types/emr/diagnosticReport/diagnosticReport";
+import type { ObservationRead } from "../../../../../src/types/emr/observation/observation";
 import type {
   ObservationDefinitionCreate,
   ObservationDefinitionRead,
   QuestionType,
-} from "@/types/emr/observationDefinition/observationDefinition";
+} from "../../../../../src/types/emr/observationDefinition/observationDefinition";
 
 import { createServiceRequest, reportTypeCombobox } from "./serviceRequest";
 
@@ -107,7 +107,7 @@ async function saveResults(page: Page, entry: Locator) {
     .click();
   await expect(
     entry.getByRole("button", { name: "Save Results", exact: true }),
-  ).not.toBeVisible();
+  ).toBeHidden();
   await expect(
     page.getByText("Test results saved successfully", { exact: true }).last(),
   ).toBeVisible();
@@ -241,240 +241,264 @@ test.describe("Additional diagnostic report observations", () => {
     }
   });
 
-  test("saves independent extra observations and repeats them after reopening reports", async ({
-    page,
-  }, testInfo) => {
-    test.setTimeout(120000);
-    const patientId = getPatientId();
-    const [firstReportType, secondReportType] = reportTypes;
-    const firstEntry = getEntry(page, firstReportType);
-    const secondEntry = getEntry(page, secondReportType);
-    const numericCard = getObservationGroup(firstEntry, numericDefinition);
-    const textCard = getObservationGroup(firstEntry, textDefinition);
-    const componentCard = getObservationGroup(secondEntry, componentDefinition);
-    const componentInputs = componentCard.getByRole("spinbutton", {
-      name: componentDefinition.component![0].code.display,
-      exact: true,
-    });
-    let firstReportId: string;
-    let secondReportId: string;
-
-    const readObservations = async (reportId: string) => {
-      const response = await page.request.get(
-        `${apiOrigin}/api/v1/patient/${patientId}/diagnostic_report/${reportId}/`,
-        { headers },
+  test(
+    "saves independent extra observations and repeats them after reopening reports",
+    {
+      tag: ["@journey", "@cap:encounter.diagnosticreport.observation.add"],
+      annotation: {
+        type: "journey",
+        description:
+          "Creates a service request and two reports, adds extra observations, saves, reopens, repeats, corrects and removes them",
+      },
+    },
+    async ({ page }, testInfo) => {
+      test.setTimeout(120000);
+      const patientId = getPatientId();
+      const [firstReportType, secondReportType] = reportTypes;
+      const firstEntry = getEntry(page, firstReportType);
+      const secondEntry = getEntry(page, secondReportType);
+      const numericCard = getObservationGroup(firstEntry, numericDefinition);
+      const textCard = getObservationGroup(firstEntry, textDefinition);
+      const componentCard = getObservationGroup(
+        secondEntry,
+        componentDefinition,
       );
-      await expect(response).toBeOK();
-      return ((await response.json()) as DiagnosticReportRead).observations;
-    };
-    const resultsFor = (
-      observations: ObservationRead[],
-      definition: ObservationDefinitionRead,
-    ) =>
-      observations.filter(
-        (observation) =>
-          observation.observation_definition?.id === definition.id,
-      );
-
-    await test.step("Create reports with no shared observation requirements", async () => {
-      await createServiceRequest(
-        page,
-        facilityId,
-        patientId,
-        getEncounterId(),
-        false,
-        { activityDefinition: activityTitle },
-      );
-      await clickTabOrMenuItem(page, /service requests/i);
-      await page
-        .getByRole("row")
-        .filter({ hasText: activityTitle })
-        .getByRole("button", { name: "See Details" })
-        .click();
-      firstReportId = await createReport(page, firstReportType);
-      await page
-        .getByRole("button", { name: "Another Diagnostic Report" })
-        .click();
-      secondReportId = await createReport(page, secondReportType);
-      const serviceRequestUrlPath = testInfo.outputPath(
-        "service-request-url.txt",
-      );
-      await writeFile(serviceRequestUrlPath, page.url());
-      await testInfo.attach("service-request-url", {
-        path: serviceRequestUrlPath,
-        contentType: "text/plain",
-      });
-    });
-
-    await test.step("Search facility definitions and add independent report content", async () => {
-      const addObservationButton = firstEntry.getByRole("button", {
-        name: "Add observation",
+      const componentInputs = componentCard.getByRole("spinbutton", {
+        name: componentDefinition.component![0].code.display,
         exact: true,
       });
-      await addObservationButton.focus();
-      await addObservationButton.press("Enter");
-      const search = page.getByRole("combobox", {
-        name: "Search observations",
-        exact: true,
-      });
-      await search.fill(numericDefinition.title);
-      await expect(
-        page.getByRole("option", { name: numericDefinition.title }),
-      ).toBeVisible();
-      await page.screenshot({
-        path: testInfo.outputPath("extra-observations-picker.png"),
-      });
-      await page.getByRole("option", { name: numericDefinition.title }).click();
-      await expect(search).toHaveCount(0);
-      await numericCard.getByPlaceholder("Result value").fill("108.5");
-      await addObservation(page, firstEntry, textDefinition);
-      await textCard
-        .getByPlaceholder("Result value")
-        .fill("No growth detected");
-      await expect(secondEntry.getByText(numericDefinition.title)).toHaveCount(
-        0,
-      );
-      await expect(secondEntry.getByText(textDefinition.title)).toHaveCount(0);
+      let firstReportId: string;
+      let secondReportId: string;
 
-      await addObservation(page, secondEntry, componentDefinition);
-      await componentInputs.fill(COMPONENT_RESULT);
-      await expect(firstEntry.getByText(componentDefinition.title)).toHaveCount(
-        0,
-      );
-      await page.screenshot({
-        path: testInfo.outputPath("extra-observations-reports.png"),
-        fullPage: true,
-      });
-    });
+      const readObservations = async (reportId: string) => {
+        const response = await page.request.get(
+          `${apiOrigin}/api/v1/patient/${patientId}/diagnostic_report/${reportId}/`,
+          { headers },
+        );
+        await expect(response).toBeOK();
+        return ((await response.json()) as DiagnosticReportRead).observations;
+      };
+      const resultsFor = (
+        observations: ObservationRead[],
+        definition: ObservationDefinitionRead,
+      ) =>
+        observations.filter(
+          (observation) =>
+            observation.observation_definition?.id === definition.id,
+        );
 
-    await test.step("Saving one report preserves the other's added draft", async () => {
-      await saveResults(page, firstEntry);
-      await expect(componentInputs).toHaveValue(COMPONENT_RESULT);
-      await saveResults(page, secondEntry);
-      const firstResults = await readObservations(firstReportId);
-      expect(firstResults).toHaveLength(2);
-      expect(resultsFor(firstResults, numericDefinition)[0]).toMatchObject({
-        value_type: "decimal",
-        value: { value: "108.5", unit: numericDefinition.permitted_unit },
+      await test.step("Create reports with no shared observation requirements", async () => {
+        await createServiceRequest(
+          page,
+          facilityId,
+          patientId,
+          getEncounterId(),
+          false,
+          { activityDefinition: activityTitle },
+        );
+        await clickTabOrMenuItem(page, /service requests/i);
+        await page
+          .getByRole("row")
+          .filter({ hasText: activityTitle })
+          .getByRole("button", { name: "See Details" })
+          .click();
+        firstReportId = await createReport(page, firstReportType);
+        await page
+          .getByRole("button", { name: "Another Diagnostic Report" })
+          .click();
+        secondReportId = await createReport(page, secondReportType);
+        const serviceRequestUrlPath = testInfo.outputPath(
+          "service-request-url.txt",
+        );
+        await writeFile(serviceRequestUrlPath, page.url());
+        await testInfo.attach("service-request-url", {
+          path: serviceRequestUrlPath,
+          contentType: "text/plain",
+        });
       });
-      expect(resultsFor(firstResults, textDefinition)[0]).toMatchObject({
-        value_type: "string",
-        value: { value: "No growth detected" },
+
+      await test.step("Search facility definitions and add independent report content", async () => {
+        const addObservationButton = firstEntry.getByRole("button", {
+          name: "Add observation",
+          exact: true,
+        });
+        await addObservationButton.focus();
+        await addObservationButton.press("Enter");
+        const search = page.getByRole("combobox", {
+          name: "Search observations",
+          exact: true,
+        });
+        await search.fill(numericDefinition.title);
+        await expect(
+          page.getByRole("option", { name: numericDefinition.title }),
+        ).toBeVisible();
+        await page.screenshot({
+          path: testInfo.outputPath("extra-observations-picker.png"),
+        });
+        await page
+          .getByRole("option", { name: numericDefinition.title })
+          .click();
+        await expect(search).toHaveCount(0);
+        await numericCard.getByPlaceholder("Result value").fill("108.5");
+        await addObservation(page, firstEntry, textDefinition);
+        await textCard
+          .getByPlaceholder("Result value")
+          .fill("No growth detected");
+        await expect(
+          secondEntry.getByText(numericDefinition.title),
+        ).toHaveCount(0);
+        await expect(secondEntry.getByText(textDefinition.title)).toHaveCount(
+          0,
+        );
+
+        await addObservation(page, secondEntry, componentDefinition);
+        await componentInputs.fill(COMPONENT_RESULT);
+        await expect(
+          firstEntry.getByText(componentDefinition.title),
+        ).toHaveCount(0);
+        await page.screenshot({
+          path: testInfo.outputPath("extra-observations-reports.png"),
+          fullPage: true,
+        });
       });
-      const secondResults = await readObservations(secondReportId);
-      expect(secondResults).toHaveLength(1);
-      expect(resultsFor(secondResults, componentDefinition)[0]).toMatchObject({
-        component: [
+
+      await test.step("Saving one report preserves the other's added draft", async () => {
+        await saveResults(page, firstEntry);
+        await expect(componentInputs).toHaveValue(COMPONENT_RESULT);
+        await saveResults(page, secondEntry);
+        const firstResults = await readObservations(firstReportId);
+        expect(firstResults).toHaveLength(2);
+        expect(resultsFor(firstResults, numericDefinition)[0]).toMatchObject({
+          value_type: "decimal",
+          value: { value: "108.5", unit: numericDefinition.permitted_unit },
+        });
+        expect(resultsFor(firstResults, textDefinition)[0]).toMatchObject({
+          value_type: "string",
+          value: { value: "No growth detected" },
+        });
+        const secondResults = await readObservations(secondReportId);
+        expect(secondResults).toHaveLength(1);
+        expect(resultsFor(secondResults, componentDefinition)[0]).toMatchObject(
           {
-            code: componentDefinition.component![0].code,
-            value: {
-              value: COMPONENT_RESULT,
-              unit: componentDefinition.component![0].permitted_unit,
-            },
-          },
-        ],
-      });
-    });
-
-    await test.step("Reload and repeat added results with their original data types and units", async () => {
-      await page.reload();
-      await expect(numericCard.getByPlaceholder("Result value")).toHaveValue(
-        "108.5",
-      );
-      await expect(textCard.getByPlaceholder("Result value")).toHaveValue(
-        "No growth detected",
-      );
-      await expect(componentInputs).toHaveValue(COMPONENT_RESULT);
-
-      await page.screenshot({
-        path: testInfo.outputPath("extra-observations-saved.png"),
-        fullPage: true,
-      });
-
-      await selectResultAction(page, numericCard, "Add Another Result");
-      await numericCard.getByPlaceholder("Result value").nth(1).fill("112.25");
-      await selectResultAction(page, textCard, "Add Another Result");
-      await textCard
-        .getByPlaceholder("Result value")
-        .nth(1)
-        .fill("Reviewed sample");
-      await selectResultAction(page, componentCard, "Add Another Result");
-      await componentInputs.nth(1).fill("101.25");
-      await saveResults(page, firstEntry);
-      await expect(componentInputs.nth(1)).toHaveValue("101.25");
-      await saveResults(page, secondEntry);
-
-      const firstResults = await readObservations(firstReportId);
-      expect(firstResults).toHaveLength(4);
-      expect(resultsFor(firstResults, numericDefinition)).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            value_type: "decimal",
-            value: { value: "112.25", unit: numericDefinition.permitted_unit },
-          }),
-        ]),
-      );
-      expect(resultsFor(firstResults, textDefinition)).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            value_type: "string",
-            value: expect.objectContaining({ value: "Reviewed sample" }),
-          }),
-        ]),
-      );
-      const secondResults = await readObservations(secondReportId);
-      expect(secondResults).toHaveLength(2);
-      expect(resultsFor(secondResults, componentDefinition)).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
             component: [
-              expect.objectContaining({
+              {
                 code: componentDefinition.component![0].code,
                 value: {
-                  value: "101.25",
+                  value: COMPONENT_RESULT,
                   unit: componentDefinition.component![0].permitted_unit,
                 },
-              }),
+              },
             ],
-          }),
-        ]),
-      );
-    });
+          },
+        );
+      });
 
-    await test.step("Correct a saved extra observation without changing another report", async () => {
-      await page.reload();
-      await expect(textCard.getByPlaceholder("Result value")).toHaveCount(2);
-      await selectResultAction(page, textCard, "Remove observation");
-      await saveResults(page, firstEntry);
-      const corrected = resultsFor(
-        await readObservations(firstReportId),
-        textDefinition,
-      );
-      expect(corrected).toHaveLength(2);
-      expect(
-        corrected.filter((result) => result.status === "entered_in_error"),
-      ).toHaveLength(1);
-      expect(await readObservations(secondReportId)).toHaveLength(2);
-      await page.reload();
-      await expect(textCard.getByPlaceholder("Result value")).toHaveCount(1);
-      await expect(
-        firstEntry.getByRole("button", { name: /observation history/i }),
-      ).toBeVisible();
-    });
+      await test.step("Reload and repeat added results with their original data types and units", async () => {
+        await page.reload();
+        await expect(numericCard.getByPlaceholder("Result value")).toHaveValue(
+          "108.5",
+        );
+        await expect(textCard.getByPlaceholder("Result value")).toHaveValue(
+          "No growth detected",
+        );
+        await expect(componentInputs).toHaveValue(COMPONENT_RESULT);
 
-    await test.step("Keep correction history when the last extra definition is removed", async () => {
-      await selectResultAction(page, componentCard, "Remove observation");
-      await selectResultAction(page, componentCard, "Remove observation", 2);
-      await saveResults(page, secondEntry);
-      await page.reload();
-      await expect(componentCard).toHaveCount(0);
-      await expect(
-        secondEntry.getByRole("button", { name: /observation history/i }),
-      ).toBeVisible();
-      expect(await readObservations(secondReportId)).toEqual([
-        expect.objectContaining({ status: "entered_in_error" }),
-        expect.objectContaining({ status: "entered_in_error" }),
-      ]);
-    });
-  });
+        await page.screenshot({
+          path: testInfo.outputPath("extra-observations-saved.png"),
+          fullPage: true,
+        });
+
+        await selectResultAction(page, numericCard, "Add Another Result");
+        await numericCard
+          .getByPlaceholder("Result value")
+          .nth(1)
+          .fill("112.25");
+        await selectResultAction(page, textCard, "Add Another Result");
+        await textCard
+          .getByPlaceholder("Result value")
+          .nth(1)
+          .fill("Reviewed sample");
+        await selectResultAction(page, componentCard, "Add Another Result");
+        await componentInputs.nth(1).fill("101.25");
+        await saveResults(page, firstEntry);
+        await expect(componentInputs.nth(1)).toHaveValue("101.25");
+        await saveResults(page, secondEntry);
+
+        const firstResults = await readObservations(firstReportId);
+        expect(firstResults).toHaveLength(4);
+        expect(resultsFor(firstResults, numericDefinition)).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              value_type: "decimal",
+              value: {
+                value: "112.25",
+                unit: numericDefinition.permitted_unit,
+              },
+            }),
+          ]),
+        );
+        expect(resultsFor(firstResults, textDefinition)).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              value_type: "string",
+              value: expect.objectContaining({ value: "Reviewed sample" }),
+            }),
+          ]),
+        );
+        const secondResults = await readObservations(secondReportId);
+        expect(secondResults).toHaveLength(2);
+        expect(resultsFor(secondResults, componentDefinition)).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              component: [
+                expect.objectContaining({
+                  code: componentDefinition.component![0].code,
+                  value: {
+                    value: "101.25",
+                    unit: componentDefinition.component![0].permitted_unit,
+                  },
+                }),
+              ],
+            }),
+          ]),
+        );
+      });
+
+      await test.step("Correct a saved extra observation without changing another report", async () => {
+        await page.reload();
+        await expect(textCard.getByPlaceholder("Result value")).toHaveCount(2);
+        await selectResultAction(page, textCard, "Remove observation");
+        await saveResults(page, firstEntry);
+        const corrected = resultsFor(
+          await readObservations(firstReportId),
+          textDefinition,
+        );
+        expect(corrected).toHaveLength(2);
+        expect(
+          corrected.filter((result) => result.status === "entered_in_error"),
+        ).toHaveLength(1);
+        expect(await readObservations(secondReportId)).toHaveLength(2);
+        await page.reload();
+        await expect(textCard.getByPlaceholder("Result value")).toHaveCount(1);
+        await expect(
+          firstEntry.getByRole("button", { name: /observation history/i }),
+        ).toBeVisible();
+      });
+
+      await test.step("Keep correction history when the last extra definition is removed", async () => {
+        await selectResultAction(page, componentCard, "Remove observation");
+        await selectResultAction(page, componentCard, "Remove observation", 2);
+        await saveResults(page, secondEntry);
+        await page.reload();
+        await expect(componentCard).toHaveCount(0);
+        await expect(
+          secondEntry.getByRole("button", { name: /observation history/i }),
+        ).toBeVisible();
+        expect(await readObservations(secondReportId)).toEqual([
+          expect.objectContaining({ status: "entered_in_error" }),
+          expect.objectContaining({ status: "entered_in_error" }),
+        ]);
+      });
+    },
+  );
 });

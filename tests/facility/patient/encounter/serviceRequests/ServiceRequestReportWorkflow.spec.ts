@@ -148,148 +148,167 @@ async function mockReportWorkflow(
 }
 
 test.describe("Service request report workflow", () => {
-  test("does not copy a fractional template quantity into the draft", async ({
-    page,
-  }) => {
-    const fixture = await mockReportWorkflow(page, {
-      specimenScenario: "fractional-template",
-    });
-    await page.route(fixture.createDraftUrl, (route) =>
-      route.fulfill({ status: 201, json: {} }),
-    );
-    await page.goto(fixture.url);
-    const created = page.waitForRequest(fixture.createDraftUrl);
-    await page.getByRole("button", { name: "Collect Specimen" }).click();
-    const { specimen } = (await created).postDataJSON();
-    expect(specimen.collection.quantity).toBeNull();
-    await expect(page.getByPlaceholder("Value", { exact: true })).toHaveValue(
-      "0.5",
-    );
-  });
-
-  test("sends null when a collector clears the optional quantity", async ({
-    page,
-  }) => {
-    const fixture = await mockReportWorkflow(page, {
-      specimenScenario: "draft-without-quantity",
-    });
-    await page.route(fixture.updateSpecimenUrl, (route) =>
-      route.fulfill({ json: {} }),
-    );
-    await page.goto(fixture.url);
-    await page.getByRole("button", { name: "Collect Specimen" }).click();
-    const value = page.getByPlaceholder("Value", { exact: true });
-    // Reopening the draft must not reapply the definition's quantity.
-    await expect(value).toHaveValue("");
-    await value.fill("2");
-    await value.fill("");
-    const updated = page.waitForRequest(fixture.updateSpecimenUrl);
-    await page.getByRole("button", { name: "Mark as collected" }).click();
-    expect((await updated).postDataJSON().collection.quantity).toBeNull();
-  });
-
-  test("hides report entry for a template without observations, report codes, or existing reports", async ({
-    page,
-  }) => {
-    const fixture = await mockReportWorkflow(page);
-    await page.goto(fixture.url);
-    await expect(
-      page.getByRole("heading", { name: fixture.activity.title, exact: true }),
-    ).toBeVisible();
-
-    await expect(
-      page.getByRole("button", { name: "Test Results Entry", exact: true }),
-    ).toHaveCount(0);
-    await expect(
-      page.getByRole("button", { name: "Create Report", exact: true }),
-    ).toHaveCount(0);
-    await expect(
-      page.getByRole("button", { name: "Save Results", exact: true }),
-    ).toHaveCount(0);
-  });
-
-  test("allows report creation for a code-only template", async ({ page }) => {
-    const fixture = await mockReportWorkflow(page, { hasReportCode: true });
-    await page.goto(fixture.url);
-    await expect(
-      page.getByRole("button", { name: "Test Results Entry", exact: true }),
-    ).toBeVisible();
-    await reportTypeCombobox(page).click();
-    await page
-      .getByRole("option", {
-        name: `${fixture.report.code.display} (${fixture.report.code.code})`,
-        exact: true,
-      })
-      .click();
-
-    const created = page.waitForRequest(fixture.reportCollectionUrl);
-    await page
-      .getByRole("button", { name: "Create Report", exact: true })
-      .click();
-    expect((await created).postDataJSON()).toMatchObject({
-      code: fixture.report.code,
-      service_request: fixture.report.service_request.id,
-      status: "preliminary",
-    });
-    await expect(
-      page.getByRole("button", { name: "Save Results", exact: true }),
-    ).toBeVisible();
-  });
-
-  test("keeps an existing report editable after its template requirements are removed", async ({
-    page,
-  }) => {
-    const fixture = await mockReportWorkflow(page, { hasExistingReport: true });
-    await page.goto(fixture.url);
-    await expect(
-      page.getByRole("button", { name: "Save Results", exact: true }),
-    ).toBeEnabled();
-    await expect(
-      page.getByRole("textbox", { name: "Conclusion", exact: true }),
-    ).toHaveText(fixture.report.conclusion);
-    await expect(
-      page.getByRole("button", { name: "Create Report", exact: true }),
-    ).toHaveCount(0);
-  });
-
-  test("shows updates within the creation minute in collapsed and expanded reports", async ({
-    page,
-  }) => {
-    const fixture = await mockReportWorkflow(page, {
-      hasExistingReport: true,
-      reportStatus: "final",
-    });
-    await page.goto(fixture.url);
-    const expand = page
-      .locator("#service-request-section-review")
-      .getByRole("button", {
-        name: `Expand ${fixture.report.code.display}`,
-        exact: true,
+  test(
+    "does not copy a fractional template quantity into the draft",
+    { tag: ["@atomic", "@mocked", "@cap:encounter.specimen.collect"] },
+    async ({ page }) => {
+      const fixture = await mockReportWorkflow(page, {
+        specimenScenario: "fractional-template",
       });
-    await expect(expand).toContainText("Updated:");
-    await expect(expand.locator("time")).toHaveAttribute(
-      "datetime",
-      fixture.report.modified_date,
-    );
-    await expand.click();
+      await page.route(fixture.createDraftUrl, (route) =>
+        route.fulfill({ status: 201, json: {} }),
+      );
+      await page.goto(fixture.url);
+      const created = page.waitForRequest(fixture.createDraftUrl);
+      await page.getByRole("button", { name: "Collect Specimen" }).click();
+      const { specimen } = (await created).postDataJSON();
+      expect(specimen.collection.quantity).toBeNull();
+      await expect(page.getByPlaceholder("Value", { exact: true })).toHaveValue(
+        "0.5",
+      );
+    },
+  );
 
-    const review = page.locator("#service-request-section-review");
-    await expect(
-      review.getByRole("button", {
-        name: `Collapse ${fixture.report.code.display}`,
-        exact: true,
-      }),
-    ).toBeVisible();
-    await expect(review.getByText(/^Created:/)).toBeVisible();
-    await expect(review.getByText(/^Last Updated:/)).toBeVisible();
-    await expect(review.locator("time")).toHaveCount(2);
-    await expect(review.locator("time").first()).toHaveAttribute(
-      "datetime",
-      fixture.report.created_date,
-    );
-    await expect(review.locator("time").last()).toHaveAttribute(
-      "datetime",
-      fixture.report.modified_date,
-    );
-  });
+  test(
+    "sends null when a collector clears the optional quantity",
+    { tag: ["@atomic", "@mocked", "@cap:encounter.specimen.collect"] },
+    async ({ page }) => {
+      const fixture = await mockReportWorkflow(page, {
+        specimenScenario: "draft-without-quantity",
+      });
+      await page.route(fixture.updateSpecimenUrl, (route) =>
+        route.fulfill({ json: {} }),
+      );
+      await page.goto(fixture.url);
+      await page.getByRole("button", { name: "Collect Specimen" }).click();
+      const value = page.getByPlaceholder("Value", { exact: true });
+      // Reopening the draft must not reapply the definition's quantity.
+      await expect(value).toHaveValue("");
+      await value.fill("2");
+      await value.fill("");
+      const updated = page.waitForRequest(fixture.updateSpecimenUrl);
+      await page.getByRole("button", { name: "Mark as collected" }).click();
+      expect((await updated).postDataJSON().collection.quantity).toBeNull();
+    },
+  );
+
+  test(
+    "hides report entry for a template without observations, report codes, or existing reports",
+    { tag: ["@atomic", "@mocked", "@cap:encounter.diagnosticreport.create"] },
+    async ({ page }) => {
+      const fixture = await mockReportWorkflow(page);
+      await page.goto(fixture.url);
+      await expect(
+        page.getByRole("heading", {
+          name: fixture.activity.title,
+          exact: true,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        page.getByRole("button", { name: "Test Results Entry", exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Create Report", exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Save Results", exact: true }),
+      ).toHaveCount(0);
+    },
+  );
+
+  test(
+    "allows report creation for a code-only template",
+    { tag: ["@atomic", "@mocked", "@cap:encounter.diagnosticreport.create"] },
+    async ({ page }) => {
+      const fixture = await mockReportWorkflow(page, { hasReportCode: true });
+      await page.goto(fixture.url);
+      await expect(
+        page.getByRole("button", { name: "Test Results Entry", exact: true }),
+      ).toBeVisible();
+      await reportTypeCombobox(page).click();
+      await page
+        .getByRole("option", {
+          name: `${fixture.report.code.display} (${fixture.report.code.code})`,
+          exact: true,
+        })
+        .click();
+
+      const created = page.waitForRequest(fixture.reportCollectionUrl);
+      await page
+        .getByRole("button", { name: "Create Report", exact: true })
+        .click();
+      expect((await created).postDataJSON()).toMatchObject({
+        code: fixture.report.code,
+        service_request: fixture.report.service_request.id,
+        status: "preliminary",
+      });
+      await expect(
+        page.getByRole("button", { name: "Save Results", exact: true }),
+      ).toBeVisible();
+    },
+  );
+
+  test(
+    "keeps an existing report editable after its template requirements are removed",
+    { tag: ["@atomic", "@mocked", "@cap:encounter.diagnosticreport.edit"] },
+    async ({ page }) => {
+      const fixture = await mockReportWorkflow(page, {
+        hasExistingReport: true,
+      });
+      await page.goto(fixture.url);
+      await expect(
+        page.getByRole("button", { name: "Save Results", exact: true }),
+      ).toBeEnabled();
+      await expect(
+        page.getByRole("textbox", { name: "Conclusion", exact: true }),
+      ).toHaveText(fixture.report.conclusion);
+      await expect(
+        page.getByRole("button", { name: "Create Report", exact: true }),
+      ).toHaveCount(0);
+    },
+  );
+
+  test(
+    "shows updates within the creation minute in collapsed and expanded reports",
+    { tag: ["@atomic", "@mocked", "@cap:encounter.diagnosticreport.view"] },
+    async ({ page }) => {
+      const fixture = await mockReportWorkflow(page, {
+        hasExistingReport: true,
+        reportStatus: "final",
+      });
+      await page.goto(fixture.url);
+      const expand = page
+        .locator("#service-request-section-review")
+        .getByRole("button", {
+          name: `Expand ${fixture.report.code.display}`,
+          exact: true,
+        });
+      await expect(expand).toContainText("Updated:");
+      await expect(expand.locator("time")).toHaveAttribute(
+        "datetime",
+        fixture.report.modified_date,
+      );
+      await expand.click();
+
+      const review = page.locator("#service-request-section-review");
+      await expect(
+        review.getByRole("button", {
+          name: `Collapse ${fixture.report.code.display}`,
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(review.getByText(/^Created:/)).toBeVisible();
+      await expect(review.getByText(/^Last Updated:/)).toBeVisible();
+      await expect(review.locator("time")).toHaveCount(2);
+      await expect(review.locator("time").first()).toHaveAttribute(
+        "datetime",
+        fixture.report.created_date,
+      );
+      await expect(review.locator("time").last()).toHaveAttribute(
+        "datetime",
+        fixture.report.modified_date,
+      );
+    },
+  );
 });

@@ -58,65 +58,67 @@ test.describe("Department Selector Infinite Scroll", () => {
     console.log(`✅ Created ${toCreate} departments`);
   });
 
-  test("dropdown loads first page and scrolling loads more", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
+  test(
+    "dropdown loads first page and scrolling loads more",
+    { tag: ["@atomic", "@cap:user.department.link"] },
+    async ({ page }) => {
+      const facilityId = getFacilityId();
 
-    await test.step("Navigate to a user's Departments tab", async () => {
-      await page.goto(`/facility/${facilityId}/users`);
-      await expect(
-        page.getByRole("button", { name: "See Details" }).first(),
-      ).toBeVisible();
-      await page.getByRole("button", { name: "See Details" }).first().click();
-      await page.waitForLoadState("networkidle");
-      await page.getByText("Departments", { exact: true }).click();
-      await page.waitForLoadState("networkidle");
-    });
-
-    await test.step("Open Link Department sheet", async () => {
-      await page.getByRole("button", { name: "Link Department" }).click();
-      await expect(page.getByText("Link User to Department")).toBeVisible();
-      await page.waitForLoadState("networkidle");
-    });
-
-    await test.step("Open department dropdown", async () => {
-      await departmentTrigger(page).click();
-    });
-
-    const items = page.getByRole("treeitem");
-
-    await test.step("Verify first page of departments loads", async () => {
-      await expect(items.first()).toBeVisible();
-      const initialCount = await items.count();
-      expect(initialCount).toBeGreaterThan(0);
-    });
-
-    await test.step("Scroll to bottom to trigger infinite scroll", async () => {
-      const initialCount = await items.count();
-
-      // Set up listener for the next-page API request before scrolling
-      const nextPageRequest = page.waitForResponse(
-        (resp) =>
-          resp.url().includes("/organizations/") &&
-          resp.url().includes("offset=") &&
-          resp.status() === 200,
-      );
-
-      // Scroll the list to the bottom to trigger the sentinel
-      const list = page.locator('[data-slot="tree-select-list"]');
-      await list.evaluate((el) => {
-        el.scrollTop = el.scrollHeight;
+      await test.step("Navigate to a user's Departments tab", async () => {
+        await page.goto(`/facility/${facilityId}/users`);
+        await expect(
+          page.getByRole("button", { name: "See Details" }).first(),
+        ).toBeVisible();
+        await page.getByRole("button", { name: "See Details" }).first().click();
+        await page.waitForLoadState("networkidle");
+        await page.getByText("Departments", { exact: true }).click();
+        await page.waitForLoadState("networkidle");
       });
 
-      // Verify the paginated API request was fired
-      await nextPageRequest;
+      await test.step("Open Link Department sheet", async () => {
+        await page.getByRole("button", { name: "Link Department" }).click();
+        await expect(page.getByText("Link User to Department")).toBeVisible();
+        await page.waitForLoadState("networkidle");
+      });
 
-      // Verify more items rendered from the response
-      await expect(async () => {
-        const newCount = await items.count();
-        expect(newCount).toBeGreaterThan(initialCount);
-      }).toPass();
-    });
-  });
+      await test.step("Open department dropdown", async () => {
+        await departmentTrigger(page).click();
+      });
+
+      const items = page.getByRole("treeitem");
+
+      await test.step("Verify first page of departments loads", async () => {
+        await expect(items.first()).toBeVisible();
+        const initialCount = await items.count();
+        expect(initialCount).toBeGreaterThan(0);
+      });
+
+      await test.step("Scroll to bottom to trigger infinite scroll", async () => {
+        const initialCount = await items.count();
+
+        // Set up listener for the next-page API request before scrolling
+        const nextPageRequest = page.waitForResponse(
+          (resp) =>
+            resp.url().includes("/organizations/") &&
+            resp.url().includes("offset=") &&
+            resp.status() === 200,
+        );
+
+        // Scroll the list to the bottom to trigger the sentinel
+        const list = page.locator('[data-slot="tree-select-list"]');
+        await list.evaluate((el) => {
+          el.scrollTop = el.scrollHeight;
+        });
+
+        // Verify the paginated API request was fired
+        await nextPageRequest;
+
+        // Verify more items rendered from the response
+        await expect(async () => {
+          const newCount = await items.count();
+          expect(newCount).toBeGreaterThan(initialCount);
+        }).toPass();
+      });
+    },
+  );
 });

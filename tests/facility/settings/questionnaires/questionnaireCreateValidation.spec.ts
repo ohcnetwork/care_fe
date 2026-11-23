@@ -21,71 +21,79 @@ function trackCreateRequests(page: Page) {
 }
 
 test.describe("Questionnaire v2 create form validation", () => {
-  test("empty and whitespace-only titles block saving with field errors", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
-    const posts = trackCreateRequests(page);
+  test(
+    "empty and whitespace-only titles block saving with field errors",
+    { tag: ["@atomic", "@cap:questionnaire.author.create"] },
+    async ({ page }) => {
+      const facilityId = getFacilityId();
+      const posts = trackCreateRequests(page);
 
-    await page.goto(`/facility/${facilityId}/settings/questionnaires/new`);
-    for (const title of ["", "   "]) {
-      await page.getByRole("textbox", { name: "Title" }).fill(title);
-      // Title changes regenerate the slug; keep it valid so it cannot
-      // independently block a blank title.
-      await page
-        .getByRole("textbox", { name: "Slug" })
-        .fill(`blank-${Date.now()}`);
-      await page.getByRole("button", { name: "Save Questionnaire" }).click();
-
-      await expect(page.getByText("This field is required")).toBeVisible();
-      await expect(page).toHaveURL(/\/questionnaires\/new$/);
-      expect(posts).toHaveLength(0);
-    }
-  });
-
-  test("slug bounds and format are enforced", async ({ page }) => {
-    const facilityId = getFacilityId();
-    const posts = trackCreateRequests(page);
-    const title = `QV2 Slug Rules ${Date.now()} ${"x".repeat(60)}`;
-    const slugInput = page.getByRole("textbox", { name: "Slug" });
-
-    await page.goto(`/facility/${facilityId}/settings/questionnaires/new`);
-
-    await test.step("Typing a title auto-generates a slug", async () => {
-      await page
-        .getByRole("textbox", { name: "Title" })
-        .pressSequentially(title);
-      await expect(slugInput).not.toHaveValue("");
-      const generated = await slugInput.inputValue();
-      expect(generated).toHaveLength(50);
-      expect(generated).toMatch(/^[-\w]+$/);
-    });
-
-    for (const length of [4, 51]) {
-      await test.step(`A ${length}-character slug fails the length rule`, async () => {
-        await slugInput.fill("a".repeat(length));
+      await page.goto(`/facility/${facilityId}/settings/questionnaires/new`);
+      for (const title of ["", "   "]) {
+        await page.getByRole("textbox", { name: "Title" }).fill(title);
+        // Title changes regenerate the slug; keep it valid so it cannot
+        // independently block a blank title.
+        await page
+          .getByRole("textbox", { name: "Slug" })
+          .fill(`blank-${Date.now()}`);
         await page.getByRole("button", { name: "Save Questionnaire" }).click();
+
+        await expect(page.getByText("This field is required")).toBeVisible();
+        await expect(page).toHaveURL(/\/questionnaires\/new$/);
+        expect(posts).toHaveLength(0);
+      }
+    },
+  );
+
+  test(
+    "slug bounds and format are enforced",
+    { tag: ["@atomic", "@cap:questionnaire.author.create"] },
+    async ({ page }) => {
+      const facilityId = getFacilityId();
+      const posts = trackCreateRequests(page);
+      const title = `QV2 Slug Rules ${Date.now()} ${"x".repeat(60)}`;
+      const slugInput = page.getByRole("textbox", { name: "Slug" });
+
+      await page.goto(`/facility/${facilityId}/settings/questionnaires/new`);
+
+      await test.step("Typing a title auto-generates a slug", async () => {
+        await page
+          .getByRole("textbox", { name: "Title" })
+          .pressSequentially(title);
+        await expect(slugInput).not.toHaveValue("");
+        const generated = await slugInput.inputValue();
+        expect(generated).toHaveLength(50);
+        expect(generated).toMatch(/^[-\w]+$/);
+      });
+
+      for (const length of [4, 51]) {
+        await test.step(`A ${length}-character slug fails the length rule`, async () => {
+          await slugInput.fill("a".repeat(length));
+          await page
+            .getByRole("button", { name: "Save Questionnaire" })
+            .click();
+          await expect(
+            page.getByText(
+              "Must be at least 5 characters and at most 50 characters",
+            ),
+          ).toBeVisible();
+          expect(posts).toHaveLength(0);
+        });
+      }
+
+      await test.step("Invalid characters fail the format rule", async () => {
+        await slugInput.fill("bad slug!");
+        await page.getByRole("button", { name: "Save Questionnaire" }).click();
+        // The hint text also shows the format sentence, so expect two matches
+        // (description + error) once the rule fires.
         await expect(
           page.getByText(
-            "Must be at least 5 characters and at most 50 characters",
+            "Slug must only contain letters, numbers, underscores, and hyphens",
           ),
-        ).toBeVisible();
+        ).toHaveCount(2);
+        await expect(page).toHaveURL(/\/questionnaires\/new$/);
         expect(posts).toHaveLength(0);
       });
-    }
-
-    await test.step("Invalid characters fail the format rule", async () => {
-      await slugInput.fill("bad slug!");
-      await page.getByRole("button", { name: "Save Questionnaire" }).click();
-      // The hint text also shows the format sentence, so expect two matches
-      // (description + error) once the rule fires.
-      await expect(
-        page.getByText(
-          "Slug must only contain letters, numbers, underscores, and hyphens",
-        ),
-      ).toHaveCount(2);
-      await expect(page).toHaveURL(/\/questionnaires\/new$/);
-      expect(posts).toHaveLength(0);
-    });
-  });
+    },
+  );
 });

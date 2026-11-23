@@ -14,25 +14,27 @@ test.describe("Discount Component Settings", () => {
     );
   });
 
-  test("should reject whitespace-only input in required text fields", async ({
-    page,
-  }) => {
-    await page
-      .getByRole("button", { name: "Create Discount Component" })
-      .click();
+  test(
+    "should reject whitespace-only input in required text fields",
+    { tag: ["@atomic", "@cap:billing.discount-component.create"] },
+    async ({ page }) => {
+      await page
+        .getByRole("button", { name: "Create Discount Component" })
+        .click();
 
-    const sheet = page.getByRole("dialog");
-    await expect(
-      sheet.getByRole("heading", { name: "Create Discount Component" }),
-    ).toBeVisible();
+      const sheet = page.getByRole("dialog");
+      await expect(
+        sheet.getByRole("heading", { name: "Create Discount Component" }),
+      ).toBeVisible();
 
-    const nameInput = sheet.getByRole("textbox", { name: "Name" });
-    await nameInput.fill("   ");
+      const nameInput = sheet.getByRole("textbox", { name: "Name" });
+      await nameInput.fill("   ");
 
-    await sheet.getByRole("button", { name: "Save" }).click();
+      await sheet.getByRole("button", { name: "Save" }).click();
 
-    const errorMessage = getFieldErrorMessage(nameInput);
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText("This field is required");
-  });
+      const errorMessage = getFieldErrorMessage(nameInput);
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("This field is required");
+    },
+  );
 });

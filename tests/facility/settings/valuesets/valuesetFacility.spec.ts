@@ -28,168 +28,54 @@ test.describe("Facility value sets", () => {
     await page.goto(basePath);
   });
 
-  test("create a facility value set and land on its edit page with departments", async ({
-    page,
-  }) => {
-    const name = `Facility VS ${faker.word.words(2)} ${Date.now()}`;
-    const description = faker.lorem.sentence();
+  test(
+    "create a facility value set and land on its edit page with departments",
+    { tag: ["@atomic", "@cap:valueset.create"] },
+    async ({ page }) => {
+      const name = `Facility VS ${faker.word.words(2)} ${Date.now()}`;
+      const description = faker.lorem.sentence();
 
-    await test.step("List shows both sources and a create action", async () => {
-      await expect(
-        page.getByRole("heading", { name: "ValueSets", level: 1 }),
-      ).toBeVisible();
-      await expect(
-        page.getByRole("tab", { name: "This facility" }),
-      ).toBeVisible();
-      await expect(
-        page.getByRole("tab", { name: "Shared catalogue" }),
-      ).toBeVisible();
-      await page.getByRole("link", { name: "Create ValueSet" }).click();
-      await page.waitForURL(/\/settings\/valuesets\/create$/);
-    });
-
-    await test.step("Fill the form; a separate value set is selected by default", async () => {
-      await page.getByRole("textbox", { name: "Name *" }).fill(name);
-      await page
-        .getByRole("textbox", { name: "Description" })
-        .fill(description);
-      await expect(
-        page.getByRole("heading", { name: "Starting point", exact: true }),
-      ).toBeVisible();
-      await expect(usageModeRadio(page, "Separate value set")).toBeChecked();
-      await expect(
-        usageModeRadio(page, "Facility customization"),
-      ).toBeDisabled();
-
-      await page.getByRole("button", { name: "Add Rule" }).first().click();
-      await page.getByRole("combobox", { name: "System" }).click();
-      await page.getByRole("option", { name: "SNOMED" }).click();
-      await page.getByRole("button", { name: "Add Concept" }).click();
-      await page.getByRole("textbox", { name: "Code" }).fill("386661006");
-      await page.getByLabel("Verify code").click();
-      await expect(
-        page
-          .getByRole("listitem")
-          .filter({ hasText: "Code verified successfully" }),
-      ).toBeVisible();
-    });
-
-    await test.step("Save lands on the edit page, where departments are set", async () => {
-      const [createRequest] = await Promise.all([
-        page.waitForRequest(
-          (request) =>
-            request.method() === "POST" &&
-            new URL(request.url()).pathname === "/api/v1/valueset/",
-        ),
-        page.getByRole("button", { name: "Save ValueSet" }).click(),
-      ]);
-      expect(createRequest.postDataJSON()).toMatchObject({
-        disable_composition: false,
-        inherited: false,
-      });
-      await expectToast(page, /valueset created successfully/i);
-      await page.waitForURL(/\/settings\/valuesets\/[0-9a-f-]+\/edit$/);
-      await expect(page.getByText("Departments with access")).toBeVisible();
-      await expect(page.getByRole("textbox", { name: "Name *" })).toHaveValue(
-        name,
-      );
-      await expect(
-        page.getByRole("textbox", { name: "Slug *" }),
-      ).toBeDisabled();
-    });
-
-    await test.step("It is listed under This facility", async () => {
-      await page.goto(basePath);
-      await page.getByRole("textbox", { name: "Search ValueSets" }).fill(name);
-      const row = page.getByRole("row").filter({
-        has: page.getByText(name, { exact: true }),
-      });
-      await expect(row).toHaveCount(1);
-      await expect(row.getByText(name, { exact: true })).toBeVisible();
-      await expect(row.getByText(description, { exact: true })).toBeVisible();
-    });
-  });
-
-  test("customize an instance value set into a facility override", async ({
-    page,
-  }) => {
-    const parentSlug = "system-nutrients";
-    const parentName = "Nutrients";
-    const name = `${parentName} for facility ${Date.now()}`;
-    await deleteFacilityValueSetsBySlug(facilityId, parentSlug);
-
-    try {
-      await test.step("Shared catalogue offers Preview and Customize per row", async () => {
-        await page.getByRole("tab", { name: "Shared catalogue" }).click();
-        await page
-          .getByRole("textbox", { name: "Search ValueSets" })
-          .fill(parentName);
-        const row = page.getByRole("row").filter({
-          has: page.getByText(parentName, { exact: true }),
-        });
-        await expect(row).toHaveCount(1);
+      await test.step("List shows both sources and a create action", async () => {
         await expect(
-          row.getByRole("button", { name: "Preview" }),
+          page.getByRole("heading", { name: "ValueSets", level: 1 }),
         ).toBeVisible();
-        await row.getByRole("button", { name: "Customize" }).click();
-        await page.waitForURL(
-          /\/settings\/valuesets\/create\?parent=[0-9a-f-]+$/,
-        );
+        await expect(
+          page.getByRole("tab", { name: "This facility" }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("tab", { name: "Shared catalogue" }),
+        ).toBeVisible();
+        await page.getByRole("link", { name: "Create ValueSet" }).click();
+        await page.waitForURL(/\/settings\/valuesets\/create$/);
       });
 
-      await test.step("The create form is seeded as an override of the parent", async () => {
+      await test.step("Fill the form; a separate value set is selected by default", async () => {
+        await page.getByRole("textbox", { name: "Name *" }).fill(name);
+        await page
+          .getByRole("textbox", { name: "Description" })
+          .fill(description);
+        await expect(
+          page.getByRole("heading", { name: "Starting point", exact: true }),
+        ).toBeVisible();
+        await expect(usageModeRadio(page, "Separate value set")).toBeChecked();
         await expect(
           usageModeRadio(page, "Facility customization"),
-        ).toBeChecked();
-        const slug = page.getByRole("textbox", { name: "Slug *" });
-        await expect(slug).toBeDisabled();
-        await expect(slug).toHaveValue(parentSlug);
+        ).toBeDisabled();
+
+        await page.getByRole("button", { name: "Add Rule" }).first().click();
+        await page.getByRole("combobox", { name: "System" }).click();
+        await page.getByRole("option", { name: "SNOMED" }).click();
+        await page.getByRole("button", { name: "Add Concept" }).click();
+        await page.getByRole("textbox", { name: "Code" }).fill("386661006");
+        await page.getByLabel("Verify code").click();
         await expect(
-          page.getByRole("combobox").filter({ hasText: parentName }),
+          page
+            .getByRole("listitem")
+            .filter({ hasText: "Code verified successfully" }),
         ).toBeVisible();
       });
 
-      await test.step("Switching modes preserves a manually authored separate slug", async () => {
-        const useParentRules = page.getByRole("switch", {
-          name: "Use parent rules",
-          exact: true,
-        });
-        await expect(useParentRules).toBeChecked();
-        await useParentRules.click();
-        await expect(useParentRules).not.toBeChecked();
-        const slug = page.getByRole("textbox", { name: "Slug *" });
-        const separate = usageModeRadio(page, "Separate value set");
-        const customization = usageModeRadio(page, "Facility customization");
-        const separateSlug = `local-${Date.now()}`;
-
-        await separate.click();
-        await expect(separate).toBeChecked();
-        await expect(useParentRules).not.toBeChecked();
-        await expect(slug).toBeEnabled();
-        await page.getByRole("textbox", { name: "Name *" }).fill(name);
-        await expect(slug).toHaveValue(expectedSlug(name));
-        await slug.fill(separateSlug);
-
-        await customization.click();
-        await expect(customization).toBeChecked();
-        await expect(useParentRules).not.toBeChecked();
-        await expect(slug).toBeDisabled();
-        await expect(slug).toHaveValue(parentSlug);
-
-        await separate.click();
-        await expect(slug).toBeEnabled();
-        await expect(slug).toHaveValue(separateSlug);
-
-        await customization.click();
-        await expect(slug).toBeDisabled();
-        await expect(slug).toHaveValue(parentSlug);
-      });
-
-      await test.step("Naming it does not touch the inherited slug; save", async () => {
-        await page.getByRole("textbox", { name: "Name *" }).fill(name);
-        await expect(page.getByRole("textbox", { name: "Slug *" })).toHaveValue(
-          parentSlug,
-        );
+      await test.step("Save lands on the edit page, where departments are set", async () => {
         const [createRequest] = await Promise.all([
           page.waitForRequest(
             (request) =>
@@ -199,24 +85,21 @@ test.describe("Facility value sets", () => {
           page.getByRole("button", { name: "Save ValueSet" }).click(),
         ]);
         expect(createRequest.postDataJSON()).toMatchObject({
-          disable_composition: true,
-          inherited: true,
-          slug: parentSlug,
+          disable_composition: false,
+          inherited: false,
         });
         await expectToast(page, /valueset created successfully/i);
         await page.waitForURL(/\/settings\/valuesets\/[0-9a-f-]+\/edit$/);
+        await expect(page.getByText("Departments with access")).toBeVisible();
+        await expect(page.getByRole("textbox", { name: "Name *" })).toHaveValue(
+          name,
+        );
         await expect(
           page.getByRole("textbox", { name: "Slug *" }),
         ).toBeDisabled();
-        await expect(page.getByRole("textbox", { name: "Slug *" })).toHaveValue(
-          parentSlug,
-        );
-        await expect(
-          page.getByRole("switch", { name: "Use parent rules", exact: true }),
-        ).not.toBeChecked();
       });
 
-      await test.step("The override is listed for this facility under the parent's slug", async () => {
+      await test.step("It is listed under This facility", async () => {
         await page.goto(basePath);
         await page
           .getByRole("textbox", { name: "Search ValueSets" })
@@ -225,14 +108,137 @@ test.describe("Facility value sets", () => {
           has: page.getByText(name, { exact: true }),
         });
         await expect(row).toHaveCount(1);
-        await expect(
-          row.getByText(`Slug: ${parentSlug}`, { exact: true }),
-        ).toBeVisible();
+        await expect(row.getByText(name, { exact: true })).toBeVisible();
+        await expect(row.getByText(description, { exact: true })).toBeVisible();
       });
-    } finally {
+    },
+  );
+
+  test(
+    "customize an instance value set into a facility override",
+    { tag: ["@atomic", "@cap:valueset.override"] },
+    async ({ page }) => {
+      const parentSlug = "system-nutrients";
+      const parentName = "Nutrients";
+      const name = `${parentName} for facility ${Date.now()}`;
       await deleteFacilityValueSetsBySlug(facilityId, parentSlug);
-    }
-  });
+
+      try {
+        await test.step("Shared catalogue offers Preview and Customize per row", async () => {
+          await page.getByRole("tab", { name: "Shared catalogue" }).click();
+          await page
+            .getByRole("textbox", { name: "Search ValueSets" })
+            .fill(parentName);
+          const row = page.getByRole("row").filter({
+            has: page.getByText(parentName, { exact: true }),
+          });
+          await expect(row).toHaveCount(1);
+          await expect(
+            row.getByRole("button", { name: "Preview" }),
+          ).toBeVisible();
+          await row.getByRole("button", { name: "Customize" }).click();
+          await page.waitForURL(
+            /\/settings\/valuesets\/create\?parent=[0-9a-f-]+$/,
+          );
+        });
+
+        await test.step("The create form is seeded as an override of the parent", async () => {
+          await expect(
+            usageModeRadio(page, "Facility customization"),
+          ).toBeChecked();
+          const slug = page.getByRole("textbox", { name: "Slug *" });
+          await expect(slug).toBeDisabled();
+          await expect(slug).toHaveValue(parentSlug);
+          await expect(
+            page.getByRole("combobox").filter({ hasText: parentName }),
+          ).toBeVisible();
+        });
+
+        await test.step("Switching modes preserves a manually authored separate slug", async () => {
+          const useParentRules = page.getByRole("switch", {
+            name: "Use parent rules",
+            exact: true,
+          });
+          await expect(useParentRules).toBeChecked();
+          await useParentRules.click();
+          await expect(useParentRules).not.toBeChecked();
+          const slug = page.getByRole("textbox", { name: "Slug *" });
+          const separate = usageModeRadio(page, "Separate value set");
+          const customization = usageModeRadio(page, "Facility customization");
+          const separateSlug = `local-${Date.now()}`;
+
+          await separate.click();
+          await expect(separate).toBeChecked();
+          await expect(useParentRules).not.toBeChecked();
+          await expect(slug).toBeEnabled();
+          await page.getByRole("textbox", { name: "Name *" }).fill(name);
+          await expect(slug).toHaveValue(expectedSlug(name));
+          await slug.fill(separateSlug);
+
+          await customization.click();
+          await expect(customization).toBeChecked();
+          await expect(useParentRules).not.toBeChecked();
+          await expect(slug).toBeDisabled();
+          await expect(slug).toHaveValue(parentSlug);
+
+          await separate.click();
+          await expect(slug).toBeEnabled();
+          await expect(slug).toHaveValue(separateSlug);
+
+          await customization.click();
+          await expect(slug).toBeDisabled();
+          await expect(slug).toHaveValue(parentSlug);
+        });
+
+        await test.step("Naming it does not touch the inherited slug; save", async () => {
+          await page.getByRole("textbox", { name: "Name *" }).fill(name);
+          await expect(
+            page.getByRole("textbox", { name: "Slug *" }),
+          ).toHaveValue(parentSlug);
+          const [createRequest] = await Promise.all([
+            page.waitForRequest(
+              (request) =>
+                request.method() === "POST" &&
+                new URL(request.url()).pathname === "/api/v1/valueset/",
+            ),
+            page.getByRole("button", { name: "Save ValueSet" }).click(),
+          ]);
+          expect(createRequest.postDataJSON()).toMatchObject({
+            disable_composition: true,
+            inherited: true,
+            slug: parentSlug,
+          });
+          await expectToast(page, /valueset created successfully/i);
+          await page.waitForURL(/\/settings\/valuesets\/[0-9a-f-]+\/edit$/);
+          await expect(
+            page.getByRole("textbox", { name: "Slug *" }),
+          ).toBeDisabled();
+          await expect(
+            page.getByRole("textbox", { name: "Slug *" }),
+          ).toHaveValue(parentSlug);
+          await expect(
+            page.getByRole("switch", { name: "Use parent rules", exact: true }),
+          ).not.toBeChecked();
+        });
+
+        await test.step("The override is listed for this facility under the parent's slug", async () => {
+          await page.goto(basePath);
+          await page
+            .getByRole("textbox", { name: "Search ValueSets" })
+            .fill(name);
+          const row = page.getByRole("row").filter({
+            has: page.getByText(name, { exact: true }),
+          });
+          await expect(row).toHaveCount(1);
+          await expect(
+            row.getByText(`Slug: ${parentSlug}`, { exact: true }),
+          ).toBeVisible();
+        });
+      } finally {
+        await deleteFacilityValueSetsBySlug(facilityId, parentSlug);
+      }
+    },
+  );
 });
 
 const RETIRED_SHARED_VALUE_SET = {
@@ -295,57 +301,65 @@ async function mockSharedCatalogue(
 }
 
 test.describe("Facility value-set slug safeguards (mocked, no writes)", () => {
-  test("a separate value set cannot use a retired shared identifier", async ({
-    page,
-  }) => {
-    const { mutations, catalogueQueries } = await mockSharedCatalogue(page);
-    await page.goto(`/facility/${getFacilityId()}/settings/valuesets/create`);
+  test(
+    "a separate value set cannot use a retired shared identifier",
+    { tag: ["@atomic", "@cap:valueset.create", "@mocked"] },
+    async ({ page }) => {
+      const { mutations, catalogueQueries } = await mockSharedCatalogue(page);
+      await page.goto(`/facility/${getFacilityId()}/settings/valuesets/create`);
 
-    await expect(usageModeRadio(page, "Separate value set")).toBeChecked();
-    await expect(usageModeRadio(page, "Facility customization")).toBeDisabled();
-    await page.getByRole("textbox", { name: "Name *" }).fill("Local options");
-    const slug = page.getByRole("textbox", { name: "Slug *" });
-    await slug.fill(RETIRED_SHARED_VALUE_SET.slug);
-    const conflict =
-      "This slug belongs to a shared value set. Choose a different slug, or select that value set as the parent and use Facility customization.";
-    await expect(slug).toHaveAttribute("aria-invalid", "true");
-    await expect(page.getByText(conflict, { exact: true })).toBeVisible();
+      await expect(usageModeRadio(page, "Separate value set")).toBeChecked();
+      await expect(
+        usageModeRadio(page, "Facility customization"),
+      ).toBeDisabled();
+      await page.getByRole("textbox", { name: "Name *" }).fill("Local options");
+      const slug = page.getByRole("textbox", { name: "Slug *" });
+      await slug.fill(RETIRED_SHARED_VALUE_SET.slug);
+      const conflict =
+        "This slug belongs to a shared value set. Choose a different slug, or select that value set as the parent and use Facility customization.";
+      await expect(slug).toHaveAttribute("aria-invalid", "true");
+      await expect(page.getByText(conflict, { exact: true })).toBeVisible();
 
-    await page.getByRole("button", { name: "Save ValueSet" }).click();
-    await expect(
-      page.getByText("Review these fields before saving", { exact: true }),
-    ).toBeVisible();
-    await expect(page).toHaveURL(/\/settings\/valuesets\/create$/);
-    expect(catalogueQueries.length).toBeGreaterThan(0);
-    expect(mutations).toHaveLength(0);
-  });
+      await page.getByRole("button", { name: "Save ValueSet" }).click();
+      await expect(
+        page.getByText("Review these fields before saving", { exact: true }),
+      ).toBeVisible();
+      await expect(page).toHaveURL(/\/settings\/valuesets\/create$/);
+      expect(catalogueQueries.length).toBeGreaterThan(0);
+      expect(mutations).toHaveLength(0);
+    },
+  );
 
-  test("a failed shared catalogue check blocks saving until retry succeeds", async ({
-    page,
-  }) => {
-    let failCatalogue = true;
-    const { mutations, catalogueQueries } = await mockSharedCatalogue(
-      page,
-      () => failCatalogue,
-    );
-    await page.goto(`/facility/${getFacilityId()}/settings/valuesets/create`);
-    await page.getByRole("textbox", { name: "Name *" }).fill("Local options");
-    const save = page.getByRole("button", { name: "Save ValueSet" });
-    const failure = page.getByRole("alert").filter({
-      hasText:
-        "Could not check this slug. Retry before saving a separate value set.",
-    });
-    await expect(failure).toBeVisible();
-    await expect(save).toBeDisabled();
+  test(
+    "a failed shared catalogue check blocks saving until retry succeeds",
+    { tag: ["@atomic", "@cap:valueset.create", "@mocked"] },
+    async ({ page }) => {
+      let failCatalogue = true;
+      const { mutations, catalogueQueries } = await mockSharedCatalogue(
+        page,
+        () => failCatalogue,
+      );
+      await page.goto(`/facility/${getFacilityId()}/settings/valuesets/create`);
+      await page.getByRole("textbox", { name: "Name *" }).fill("Local options");
+      const save = page.getByRole("button", { name: "Save ValueSet" });
+      const failure = page.getByRole("alert").filter({
+        hasText:
+          "Could not check this slug. Retry before saving a separate value set.",
+      });
+      await expect(failure).toBeVisible();
+      await expect(save).toBeDisabled();
 
-    failCatalogue = false;
-    await page.getByRole("button", { name: "Try Again", exact: true }).click();
-    await expect(failure).not.toBeVisible();
-    await expect(save).toBeEnabled();
-    await expect(page.getByRole("textbox", { name: "Slug *" })).toHaveValue(
-      "local-options",
-    );
-    expect(catalogueQueries.length).toBeGreaterThanOrEqual(2);
-    expect(mutations).toHaveLength(0);
-  });
+      failCatalogue = false;
+      await page
+        .getByRole("button", { name: "Try Again", exact: true })
+        .click();
+      await expect(failure).toBeHidden();
+      await expect(save).toBeEnabled();
+      await expect(page.getByRole("textbox", { name: "Slug *" })).toHaveValue(
+        "local-options",
+      );
+      expect(catalogueQueries.length).toBeGreaterThanOrEqual(2);
+      expect(mutations).toHaveLength(0);
+    },
+  );
 });
