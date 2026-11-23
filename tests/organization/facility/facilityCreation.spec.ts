@@ -126,6 +126,20 @@ test.describe("Facility Creation", () => {
     await expect(page.getByText("Facility created successfully")).toBeVisible();
   }
 
+  /** Creates a facility with this test's data and opens its details page.
+   *  Tests that edit or read a facility must use their own: the first row of
+   *  the shared list is whichever facility a parallel test created last. */
+  async function openOwnFacility(page: Page) {
+    await createFacilityWithMandatoryFields(page);
+    await page
+      .getByRole("textbox", { name: "Search by facility name" })
+      .fill(facilityName);
+    await page.getByRole("link", { name: "View Facility" }).click();
+    await expect(
+      page.getByRole("heading", { name: facilityName }),
+    ).toBeVisible();
+  }
+
   test.beforeEach(async ({ page }) => {
     // Generate unique test data for each test run
     facilityType = faker.helpers.arrayElement(FACILITY_TYPES);
@@ -379,8 +393,15 @@ test.describe("Facility Creation", () => {
   });
 
   test("Edit a facility and verify changes", async ({ page }) => {
-    // Click on the first View Facility link
-    await page.getByRole("link", { name: "View Facility" }).first().click();
+    await openOwnFacility(page);
+    // Edit with fresh values, so the page can only show them once saved.
+    description = faker.lorem.sentence();
+    phoneNumber = `986${faker.string.numeric(7)}`.replace(
+      /(\d{5})(\d{5})/,
+      "$1 $2",
+    );
+    pinCode = `68${faker.string.numeric(4)}`;
+    address = faker.location.streetAddress();
 
     // Click Edit Facility Details button
     await openConfigurationsItem(page, "Edit Facility Details");
@@ -439,26 +460,28 @@ test.describe("Facility Creation", () => {
   test("Verify phone number link redirects to calling app from facility details page", async ({
     page,
   }) => {
-    // Click on the first View Facility link to open a random facility
-    await page.getByRole("link", { name: "View Facility" }).first().click();
+    await openOwnFacility(page);
 
-    // Find the phone number link - it should start with "Call +91"
-    const phoneLink = page.getByRole("link", { name: /^Call \+91/ });
-
-    // Verify the phone link is visible
-    await expect(phoneLink).toBeVisible();
-
+    const phoneLink = page.getByRole("link", {
+      name: `Call +91 ${phoneNumber}`,
+    });
     // The href uses the raw E.164 number; the formatted number is display-only
-    const href = await phoneLink.getAttribute("href");
-    expect(href).toMatch(/^tel:\+91\d{10}$/);
-    await expect(phoneLink).toHaveText(/^\+91 \d{5} \d{5}$/);
+    await expect(phoneLink).toHaveAttribute(
+      "href",
+      `tel:+91${phoneNumber.replace(/\s/g, "")}`,
+    );
+    await expect(phoneLink).toHaveText(`+91 ${phoneNumber}`);
   });
 
   test("Add location to an existing facility and verify Show on Map link redirection", async ({
     page,
   }) => {
-    // Click on the first View Facility link to open a random facility
-    await page.getByRole("link", { name: "View Facility" }).first().click();
+    await openOwnFacility(page);
+
+    // A facility created without a location has no map link yet
+    await expect(page.getByRole("link", { name: "Show on Map" })).toHaveCount(
+      0,
+    );
 
     // Click Edit Facility Details button
     await openConfigurationsItem(page, "Edit Facility Details");
