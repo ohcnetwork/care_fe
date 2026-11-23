@@ -5832,6 +5832,7 @@
   "workspace_template_structure_error": "Use schema version 1 or 2 with valid pages, unique page keys, and up to 4 columns with positive spans totaling at most 12.",
   "workspace_unavailable_pages_preserved": "These system pages are currently unavailable: {{pages}}. Their saved references are preserved, so you can still edit or archive this workspace.",
   "workspace_unsaved_changes": "Unsaved configuration changes",
+  "workspace_unsupported_tab_icon": "The {{name}} tab uses an unsupported icon ({{icon}}). Choose an available icon before saving.",
   "workspace_updated": "Workspace updated",
   "workspace_vitals_abnormal_only": "Abnormal only",
   "workspace_vitals_all_readings": "All readings",
