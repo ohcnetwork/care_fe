@@ -316,7 +316,7 @@ function AccountSheet({
                             onValueChange={field.onChange}
                           >
                             <SelectTrigger ref={field.ref}>
-                              <SelectValue />
+                              <SelectValue>{t(field.value)}</SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                               {[
