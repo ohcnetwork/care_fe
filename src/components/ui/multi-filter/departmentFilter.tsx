@@ -23,6 +23,7 @@ import {
   FilterMenuSearch,
   useFilterMenuSearch,
 } from "./filterMenuSearch";
+import { FilterOptionIndicator } from "./filterOptionIndicator";
 import { COLOR_PALETTE, FilterConfig, FilterDateRange } from "./utils/Utils";
 
 const getColorForOrg = (id: string) => {
@@ -81,12 +82,7 @@ function TreeViewItem({
           onChoose={() => onOrgToggle(org)}
           className="min-w-0 flex-1"
         >
-          <span
-            className={cn(
-              "size-3 shrink-0 rounded-full border",
-              getColorForOrg(org.id),
-            )}
-          />
+          <FilterOptionIndicator color={getColorForOrg(org.id)} />
           <span className="truncate">{org.name}</span>
         </FilterChoiceItem>
         {hasChildren && (
@@ -183,12 +179,7 @@ function DepartmentFilterDropdown({
         checked={checked}
         onChoose={() => handleOrgSelect(org)}
       >
-        <span
-          className={cn(
-            "size-3 shrink-0 rounded-full border",
-            getColorForOrg(org.id),
-          )}
-        />
+        <FilterOptionIndicator color={getColorForOrg(org.id)} />
         <span className="min-w-0">
           <span className="block truncate">{org.name}</span>
           {org.parent?.name &&

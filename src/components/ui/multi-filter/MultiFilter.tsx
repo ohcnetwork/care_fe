@@ -17,6 +17,7 @@ import {
   type CareFilterValue,
 } from "./careuiAdapter";
 import { DomainFilterValue } from "./domainFilterValue";
+import { FilterOptionIndicator } from "./filterOptionIndicator";
 import { useFilterI18n } from "./useFilterI18n";
 import { FilterState, FilterValues } from "./utils/Utils";
 
@@ -143,13 +144,7 @@ export default function MultiFilter({
         label: t(option.label),
         icon:
           filter.showColorIndicators === false ? undefined : (
-            <span
-              aria-hidden="true"
-              className={cn(
-                "size-3 shrink-0 rounded-full border",
-                option.color,
-              )}
-            />
+            <FilterOptionIndicator color={option.color} />
           ),
       })),
       disableClear: filter.disableClear,

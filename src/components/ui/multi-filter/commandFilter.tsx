@@ -1,7 +1,5 @@
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import { FilterChoiceItem } from "./filterChoiceItem";
 import FilterHeader from "./filterHeader";
 import {
@@ -9,6 +7,7 @@ import {
   FilterMenuSearch,
   useFilterMenuSearch,
 } from "./filterMenuSearch";
+import { FilterOptionIndicator } from "./filterOptionIndicator";
 import { FilterConfig, FilterValues } from "./utils/Utils";
 
 /** Fixed option lists (status, priority) in the same menu as the domain pickers. */
@@ -70,13 +69,7 @@ export default function RenderCommandFilter({
             onChoose={() => toggle(option.value)}
           >
             {filter.showColorIndicators !== false && (
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "size-3 shrink-0 rounded-full border",
-                  option.color,
-                )}
-              />
+              <FilterOptionIndicator color={option.color} />
             )}
             <span className="truncate">{t(option.label)}</span>
           </FilterChoiceItem>
