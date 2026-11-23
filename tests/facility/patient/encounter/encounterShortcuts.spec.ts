@@ -2,11 +2,11 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   dischargeDispositionCombobox,
   encounterStatusCombobox,
-  getEncounterCreateDialog,
-  openCreateEncounterDialog,
 } from "tests/facility/patient/encounter/encounterFormHelpers";
-import { createPatient } from "tests/helper/patient";
-import { submitAndExpectSuccess } from "tests/helper/questionnaire";
+import {
+  createQuestionnaireEncounter,
+  submitAndExpectSuccess,
+} from "tests/helper/questionnaire";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
@@ -14,22 +14,15 @@ import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-async function createEncounter(
-  page: Page,
-  encounterClass: "Ambulatory" | "Inpatient",
-) {
-  await openCreateEncounterDialog(page, await createPatient("Encounter Test"));
-  const dialog = getEncounterCreateDialog(page);
-  await dialog
-    .getByRole("button", { name: new RegExp(`^${encounterClass}`) })
-    .click();
-
-  await Promise.all([
-    page.waitForURL(/\/encounter\/[^/]+/),
-    dialog.getByRole("button", { name: /^Create Encounter/ }).click(),
-  ]);
-
-  await expect(page.getByText("Encounter created successfully")).toBeVisible();
+async function openNewEncounter(page: Page, encounterClass: "amb" | "imp") {
+  const facilityId = getFacilityId();
+  const { patientId, encounterId } = await createQuestionnaireEncounter(
+    facilityId,
+    { encounterClass },
+  );
+  await page.goto(
+    `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+  );
   await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
 }
 
@@ -186,7 +179,7 @@ test.describe("Encounter Keyboard Shortcuts", () => {
 
 test.describe("Mark as Completed Shortcut ('m c')", () => {
   test("should complete a non-inpatient encounter", async ({ page }) => {
-    await createEncounter(page, "Ambulatory");
+    await openNewEncounter(page, "amb");
 
     await markEncounterAsComplete(page);
   });
@@ -194,7 +187,7 @@ test.describe("Mark as Completed Shortcut ('m c')", () => {
   test("should navigate to update encounter page with Discharged status for an Inpatient encounter", async ({
     page,
   }) => {
-    await createEncounter(page, "Inpatient");
+    await openNewEncounter(page, "imp");
 
     await page.keyboard.press("m");
     await page.keyboard.press("c");
