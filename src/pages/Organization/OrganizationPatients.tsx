@@ -1,26 +1,35 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
+import { ChevronRight } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { Avatar } from "@/components/Common/Avatar";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import SearchInput from "@/components/Common/SearchInput";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import { SectionHeader } from "@/components/Common/SectionHeader";
 
 import useFilters from "@/hooks/useFilters";
+import { organizationPatientListSearch } from "@/lib/router/search/organization";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
-import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout, {
   type RouteContext,
 } from "./components/OrganizationLayout";
@@ -39,7 +48,10 @@ export default function OrganizationPatients({
   const { t } = useTranslation();
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 15, disableCache: true });
+    useFilters({
+      schema: organizationPatientListSearch,
+      limit: 15,
+    });
 
   const [organization, setOrganization] = useState<Organization | null>(null);
 
@@ -108,112 +120,130 @@ export default function OrganizationPatients({
     >
       {() => {
         return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
-                <EntityBadge
-                  title={t("patients")}
-                  count={patients?.count}
-                  isFetching={isFetching}
-                  translationParams={{ entity: "Patient" }}
-                />
-              </div>
-            </div>
-
-            <SearchInput
-              options={searchOptions}
-              onSearch={handleSearch}
-              onFieldChange={handleFieldChange}
+          <div className="space-y-4">
+            <SectionHeader
+              title={t("patients")}
+              description={t("organization_patients_description")}
+              count={patients?.count}
+              isFetching={isFetching}
             />
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              {isFetching ? (
-                <CardGridSkeleton count={6} />
-              ) : patients?.results?.length === 0 ? (
-                <Card className="col-span-full">
-                  <CardContent className="p-6 text-center text-gray-500">
-                    {t("no_patients_found")}
-                  </CardContent>
-                </Card>
-              ) : (
-                patients?.results?.map((patient) => (
-                  <Link
-                    key={patient.id}
-                    href={`/patient/${patient.id}`}
-                    className="block"
-                  >
-                    <Card className="h-full hover:border-primary/50 transition-colors">
-                      <CardContent className="p-6">
-                        <div className="flex flex-col h-full">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start space-x-4">
-                              <Avatar
-                                name={patient.name || ""}
-                                className="size-10"
-                              />
-                              <div>
-                                <h3 className="text-sm font-medium text-gray-900">
-                                  {patient.name}
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                  {formatPhoneNumberIntl(patient.phone_number)}
-                                </p>
-                              </div>
+            <Frame>
+              <FrameHeader className="p-1 md:p-2">
+                <SearchInput
+                  options={searchOptions}
+                  onSearch={handleSearch}
+                  onFieldChange={handleFieldChange}
+                  selectorVariant="select"
+                  className="w-full sm:max-w-xl"
+                />
+              </FrameHeader>
+              <FramePanel className="overflow-hidden p-0 **:data-[slot=table-container]:rounded-none **:data-[slot=table-container]:border-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="px-4">{t("patient")}</TableHead>
+                      <TableHead className="px-4">{t("phone")}</TableHead>
+                      <TableHead className="px-4">{t("gender")}</TableHead>
+                      <TableHead className="px-4">
+                        {t("last_modified")}
+                      </TableHead>
+                      <TableHead className="px-4">
+                        <span className="sr-only">{t("actions")}</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="bg-background">
+                    {isFetching ? (
+                      Array.from({ length: 5 }, (_, index) => (
+                        <TableRow key={index} aria-hidden="true">
+                          <TableCell className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="size-9 rounded-md" />
+                              <Skeleton className="h-4 w-36" />
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="shrink-0"
-                              asChild
-                            >
-                              <div>
-                                <CareIcon
-                                  icon="l-arrow-up-right"
-                                  className="size-4"
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <Skeleton className="h-4 w-28" />
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <Skeleton className="h-4 w-16" />
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <Skeleton className="h-4 w-20" />
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <Skeleton className="ml-auto h-12 w-20 md:h-10" />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : !patients?.results?.length ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={5}
+                          className="p-6 text-center text-sm text-muted-foreground"
+                        >
+                          {t("no_patients_found")}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      patients.results.map((patient) => {
+                        return (
+                          <TableRow
+                            key={patient.id}
+                            onClick={() =>
+                              navigate({
+                                to: "/patient/$id/{-$tab}",
+                                params: { id: patient.id },
+                              })
+                            }
+                            className="cursor-pointer hover:bg-muted/50"
+                          >
+                            <TableCell className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <Avatar
+                                  name={patient.name || ""}
+                                  className="size-9 shrink-0"
                                 />
+                                <span className="font-semibold text-foreground">
+                                  {patient.name}
+                                </span>
                               </div>
-                            </Button>
-                          </div>
-                          <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
-                            <div className="text-sm">
-                              <div className="text-gray-500">{t("phone")}</div>
-                              <div className="font-medium">
-                                {formatPhoneNumberIntl(patient.phone_number)}
-                              </div>
-                            </div>
-                            <div className="text-sm">
-                              <div className="text-gray-500">{t("gender")}</div>
-                              <div className="font-medium">
-                                {patient.gender}
-                              </div>
-                            </div>
-                            {patient.geo_organization && (
-                              <div className="col-span-2 text-sm">
-                                <div className="text-gray-500">
-                                  {t("organization")}
-                                </div>
-                                <div className="font-medium">
-                                  {patient.geo_organization.name}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          <div className="mt-4 pt-4 border-t border-gray-200">
-                            <div className="text-sm text-gray-500">
-                              {t("last_modified")}{" "}
+                            </TableCell>
+                            <TableCell className="px-4 py-3">
+                              {formatPhoneNumberIntl(patient.phone_number) ||
+                                patient.phone_number}
+                            </TableCell>
+                            <TableCell className="px-4 py-3">
+                              {t(`GENDER__${patient.gender}`)}
+                            </TableCell>
+                            <TableCell className="px-4 py-3 text-muted-foreground">
                               <RelativeDateTooltip
-                                className="underline underline-offset-2"
                                 date={patient.modified_date}
                               />
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))
-              )}
-            </div>
+                            </TableCell>
+                            <TableCell
+                              className="px-4 py-3 text-right"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Button variant="tertiary" asChild>
+                                <Link
+                                  to="/patient/$id/{-$tab}"
+                                  params={{ id: patient.id }}
+                                  aria-label={`${t("open")} ${patient.name}`}
+                                >
+                                  {t("open")}
+                                  <ChevronRight data-icon="inline-end" />
+                                </Link>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </FramePanel>
+            </Frame>
             <Pagination totalCount={patients?.count ?? 0} />
           </div>
         );

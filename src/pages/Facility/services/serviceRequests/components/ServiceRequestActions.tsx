@@ -1,4 +1,3 @@
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import BackButton from "@/components/Common/BackButton";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { navigate } from "@/lib/router/navigate";
 import {
   ServiceRequestReadSpec,
   Status,
@@ -15,8 +15,7 @@ import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
-import { navigate } from "raviger";
+import { ArrowLeft, Ban, CircleAlert, MoreVertical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -52,10 +51,7 @@ export function ServiceRequestActions({
 
   return (
     <div className="flex items-center justify-between gap-2">
-      <BackButton
-        variant="outline"
-        className="font-semibold border border-gray-400 text-gray-950 underline underline-offset-2"
-      >
+      <BackButton variant="outline">
         <ArrowLeft />
         {t("back")}
       </BackButton>
@@ -67,9 +63,14 @@ export function ServiceRequestActions({
               variant="primary"
               className="font-semibold"
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/patient/${request.encounter.patient.id}/service_request/${serviceRequestId}/diagnostic_reports/print`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/patient/$patientId/service_request/$serviceRequestId/diagnostic_reports/print",
+                  params: {
+                    facilityId,
+                    patientId: request.encounter.patient.id,
+                    serviceRequestId,
+                  },
+                })
               }
             >
               {t("view_full_report")}
@@ -83,41 +84,29 @@ export function ServiceRequestActions({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="border-gray-400 px-2"
+                  className="border-input px-2"
                   aria-label={t("more_actions")}
                   disabled={isCancellingServiceRequest}
                 >
-                  <CareIcon icon="l-ellipsis-v" />
+                  <MoreVertical className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild className="text-primary-900">
-                  <Button
-                    variant="ghost"
-                    onClick={() =>
-                      cancelServiceRequest({
-                        status: Status.entered_in_error,
-                      })
-                    }
-                    className="w-full flex flex-row "
-                  >
-                    <CareIcon icon="l-exclamation-circle" className="mr-1" />
-                    <span>{t("mark_as_entered_in_error")}</span>
-                  </Button>
+                <DropdownMenuItem
+                  onSelect={() =>
+                    cancelServiceRequest({ status: Status.entered_in_error })
+                  }
+                >
+                  <CircleAlert className="size-4" />
+                  {t("mark_as_entered_in_error")}
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="text-primary-900">
-                  <Button
-                    variant="ghost"
-                    onClick={() =>
-                      cancelServiceRequest({
-                        status: Status.revoked,
-                      })
-                    }
-                    className="w-full flex flex-row justify-stretch items-center"
-                  >
-                    <CareIcon icon="l-ban" className="mr-1" />
-                    {t("mark_as_revoked")}
-                  </Button>
+                <DropdownMenuItem
+                  onSelect={() =>
+                    cancelServiceRequest({ status: Status.revoked })
+                  }
+                >
+                  <Ban className="size-4" />
+                  {t("mark_as_revoked")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

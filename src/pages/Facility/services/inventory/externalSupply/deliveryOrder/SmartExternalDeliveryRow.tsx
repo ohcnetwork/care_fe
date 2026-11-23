@@ -1,6 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { ChevronDown, Plus, Trash2, Undo2 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -24,7 +24,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import {
   Popover,
+  PopoverAnchor,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
@@ -90,6 +97,7 @@ export function SmartExternalDeliveryRow({
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
   const [batchSelectorOpen, setBatchSelectorOpen] = useState(false);
+  const batchCommandRef = useRef<HTMLDivElement>(null);
 
   // Extension fields - each field in its own column, name-namespaced
   const renderExtensionCells = (fields: ExtensionFormField[]) =>
@@ -203,39 +211,61 @@ export function SmartExternalDeliveryRow({
       {/* Batch Number */}
       <TableCell className="align-top p-2 pb-4!">
         <Popover open={batchSelectorOpen} onOpenChange={setBatchSelectorOpen}>
-          <PopoverTrigger asChild>
-            <div
-              className={cn(
-                "flex items-center border rounded-md h-9 p-1! cursor-pointer hover:border-gray-400 transition-colors",
-                !productKnowledge && "opacity-50 pointer-events-none",
-                isCreatingNew && "border-green-500 bg-green-50",
-              )}
-            >
-              <Input
-                value={batchNumber || ""}
-                onChange={(e) => {
-                  setField("batch_number", e.target.value);
-                  markAsEdited();
-                  if (!batchSelectorOpen && e.target.value) {
-                    setBatchSelectorOpen(true);
-                  }
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setBatchSelectorOpen(true);
-                }}
-                placeholder={t("batch_no")}
-                disabled={!productKnowledge}
+          <PopoverAnchor
+            render={
+              <InputGroup
                 className={cn(
-                  "border-0 h-7 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-w-[100px] border-none! shadow-none!",
-                  isCreatingNew && "bg-green-50",
+                  "h-9",
+                  isCreatingNew && "border-green-500 bg-green-50",
                 )}
               />
-              <ChevronDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
-            </div>
-          </PopoverTrigger>
-          <PopoverContent className="w-[320px] p-0" align="start">
-            <Command>
+            }
+          >
+            <InputGroupInput
+              value={batchNumber || ""}
+              onChange={(e) => {
+                setField("batch_number", e.target.value);
+                markAsEdited();
+                if (!batchSelectorOpen && e.target.value) {
+                  setBatchSelectorOpen(true);
+                }
+              }}
+              onClick={() => setBatchSelectorOpen(true)}
+              onKeyDown={(event) => {
+                if (event.key !== "ArrowDown") return;
+                event.preventDefault();
+                setBatchSelectorOpen(true);
+                requestAnimationFrame(() => batchCommandRef.current?.focus());
+              }}
+              placeholder={t("batch_no")}
+              aria-label={t("batch_no")}
+              aria-haspopup="listbox"
+              aria-expanded={batchSelectorOpen}
+              disabled={!productKnowledge}
+              className="h-full min-w-[100px] px-2"
+            />
+            <InputGroupAddon align="inline-end">
+              <PopoverTrigger
+                disabled={!productKnowledge}
+                render={
+                  <InputGroupButton
+                    size="icon-xs"
+                    variant="ghost"
+                    className="size-8"
+                    aria-label={t("select_batch")}
+                  />
+                }
+              >
+                <ChevronDown className="size-4" />
+              </PopoverTrigger>
+            </InputGroupAddon>
+          </PopoverAnchor>
+          <PopoverContent
+            className="w-80 max-w-(--available-width) p-0"
+            align="start"
+            initialFocus={false}
+          >
+            <Command ref={batchCommandRef} tabIndex={-1}>
               <CommandList className="max-h-[250px]">
                 {batchNumber && (
                   <CommandGroup>

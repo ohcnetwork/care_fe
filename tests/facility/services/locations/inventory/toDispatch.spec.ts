@@ -1,5 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { openFacilityService } from "tests/facility/services/helpers";
+import { waitForOrderUpdate } from "tests/helper/inventory";
+
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -66,9 +69,11 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     let tableRow1 = page.locator("table tbody tr").nth(0);
     await expect(tableRow1).toContainText("Paracetamol");
     await expect(tableRow1).toContainText("5");
-    await page
-      .getByRole("button", { name: "Mark as Approved" })
-      .click({ timeout: 5000 });
+    const approveButton = page.getByRole("button", {
+      name: "Mark as Approved",
+    });
+    await expect(approveButton).toBeEnabled();
+    await waitForOrderUpdate(page, "pending", () => approveButton.click());
 
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     // verify item appears in table
@@ -84,8 +89,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     if (isInitialized) return;
     const facilityId = getFacilityId();
     const servicesUrl = `/facility/${facilityId}/services/`;
-    await page.goto(servicesUrl);
-    await page.getByRole("link", { name: "Main Pharmacy" }).click();
+    await openFacilityService(page, servicesUrl, "Main Pharmacy");
     await page.getByRole("link", { name: "Pharmacy" }).click();
     pharmacyLocationId =
       page
@@ -96,8 +100,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
           ),
         )?.[1] ?? "";
     pharmacybasePath = `/facility/${facilityId}/locations/${pharmacyLocationId}`;
-    await page.goto(servicesUrl);
-    await page.getByRole("link", { name: "Pathology Lab" }).click();
+    await openFacilityService(page, servicesUrl, "Pathology Lab");
     await page.getByRole("link", { name: "Bio-Chemistry" }).click();
     bioChemLabLocationId =
       page
@@ -120,6 +123,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
   });
 
   test("switch location and create delivery order", async ({ page }) => {
+    // Order and delivery round trips (plus setup on a fresh worker) can
+    // outlast 60s on a busy backend.
+    test.slow();
     const orderRow = page
       .locator("table tbody tr")
       .filter({ hasText: orderName });
@@ -134,7 +140,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       page.getByRole("button", { name: "Load from order" }),
     ).toBeVisible();
     await addRequestedStock(page);
-    await page.getByRole("button", { name: "Mark as Approved" }).click();
+    await waitForOrderUpdate(page, "pending", () =>
+      page.getByRole("button", { name: "Mark as Approved" }).click(),
+    );
     await page.goto(pharmacybasePath + "/inventory/internal/dispatch");
     await page.getByRole("tab", { name: "Outgoing Deliveries" }).click();
     const deliveryRow = page
@@ -144,6 +152,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
   });
 
   test("approve incoming delivery order", async ({ page }) => {
+    // Creates, approves, receives and completes a delivery: the longest
+    // journey here, and it overran 60s on a busy backend.
+    test.slow();
     const orderRow = page
       .locator("table tbody tr")
       .filter({ hasText: orderName });
@@ -158,7 +169,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       page.getByRole("button", { name: "Load from order" }),
     ).toBeVisible();
     await addRequestedStock(page);
-    await page.getByRole("button", { name: "Mark as Approved" }).click();
+    await waitForOrderUpdate(page, "pending", () =>
+      page.getByRole("button", { name: "Mark as Approved" }).click(),
+    );
     await page.goto(pharmacybasePath + "/inventory/internal/dispatch");
     await page.getByRole("tab", { name: "Outgoing Deliveries" }).click();
     const deliveryRow = page
@@ -190,7 +203,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       name: "Mark as Completed",
     });
     await expect(markAsCompletedButton).toBeEnabled();
-    await markAsCompletedButton.click();
+    await waitForOrderUpdate(page, "completed", () =>
+      markAsCompletedButton.click(),
+    );
 
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     await page.getByRole("tab", { name: "Incoming Deliveries" }).click();

@@ -5,6 +5,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -43,7 +44,7 @@ export default function AddUserSheet({
           {isServiceAccount ? t("add_service_account") : t("add_user")}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>
             {isServiceAccount
@@ -56,7 +57,7 @@ export default function AddUserSheet({
               : t("create_user_and_add_to_org")}
           </SheetDescription>
         </SheetHeader>
-        <div className="mt-6">
+        <SheetBody>
           <UserForm
             onSubmitSuccess={(user, meta) => {
               setOpen(false);
@@ -65,7 +66,7 @@ export default function AddUserSheet({
             organizationId={organizationId}
             isServiceAccount={isServiceAccount}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

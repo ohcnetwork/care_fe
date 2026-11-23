@@ -158,18 +158,21 @@ async function mockReviewPage(
     reportUrl,
     reportRequests: () => reportRequests,
     entry: page
+      .locator("#service-request-section-results")
       .locator('[data-slot="collapsible"]')
       .filter({
         has: page.locator('[data-slot="collapsible-trigger"]').filter({
           hasText: listReport.code.display,
         }),
-      })
-      .first(),
-    review: page.locator('[data-slot="collapsible"]').filter({
-      has: page.getByRole("button", {
-        name: new RegExp(`^(Expand|Collapse) ${report.code.display}$`),
       }),
-    }),
+    review: page
+      .locator("#service-request-section-review")
+      .locator('[data-slot="collapsible"]')
+      .filter({
+        has: page.getByRole("button", {
+          name: new RegExp(`^(Expand|Collapse) ${report.code.display}$`),
+        }),
+      }),
   };
 }
 
@@ -319,7 +322,7 @@ test.describe("Diagnostic report review", () => {
     });
     await conclusion.fill("Unsubmitted entry draft");
     await expect(save).toBeEnabled();
-    await page
+    await fixture.review
       .getByRole("button", {
         name: `Expand ${report.code.display}`,
         exact: true,
@@ -328,7 +331,10 @@ test.describe("Diagnostic report review", () => {
     await fixture.review
       .getByRole("button", { name: "Approve Results", exact: true })
       .click();
-    await page.getByRole("button", { name: "Approve", exact: true }).click();
+    await page
+      .getByRole("alertdialog", { name: "Confirm", exact: true })
+      .getByRole("button", { name: /^Approve(?:\s|$)/ })
+      .click();
 
     await expect(
       fixture.review.getByRole("link", { name: "Print Report" }),
@@ -390,7 +396,7 @@ test.describe("Diagnostic report review", () => {
         .getByRole("menuitem", { name: "Add Another Result", exact: true })
         .click();
       await group.getByPlaceholder("Result value").nth(1).fill("102");
-      await page
+      await fixture.review
         .getByRole("button", {
           name: `Expand ${report.code.display}`,
           exact: true,
@@ -406,7 +412,10 @@ test.describe("Diagnostic report review", () => {
       await catalogRequested;
 
       await approve.click();
-      await page.getByRole("button", { name: "Approve", exact: true }).click();
+      await page
+        .getByRole("alertdialog", { name: "Confirm", exact: true })
+        .getByRole("button", { name: /^Approve(?:\s|$)/ })
+        .click();
       await expect(
         fixture.review.getByRole("link", { name: "Print Report" }),
       ).toBeVisible();
@@ -443,7 +452,7 @@ test.describe("Diagnostic report review", () => {
     });
     try {
       await page.goto(fixture.url);
-      await page
+      await fixture.review
         .getByRole("button", {
           name: `Expand ${report.code.display}`,
           exact: true,
@@ -462,7 +471,7 @@ test.describe("Diagnostic report review", () => {
       });
       await conclusion.click();
       await fixture.review
-        .getByRole("radio", { name: "Bulleted list", exact: true })
+        .getByRole("button", { name: "Bulleted list", exact: true })
         .click();
       await expect(conclusion.getByRole("listitem")).toHaveCount(1);
       await expect(approve).toBeDisabled();
@@ -473,9 +482,9 @@ test.describe("Diagnostic report review", () => {
         exact: true,
       });
       await more.click();
-      await fixture.review
+      await page
         .getByRole("dialog", { name: "More formatting options", exact: true })
-        .getByRole("radio", { name: "Check list", exact: true })
+        .getByRole("button", { name: "Check list", exact: true })
         .click();
       await more.press("Escape");
       await expect(conclusion.getByRole("checkbox")).toHaveCount(1);
@@ -489,7 +498,7 @@ test.describe("Diagnostic report review", () => {
       await conclusion.fill("");
       await expect(conclusion).toHaveText("");
       await fixture.review
-        .getByRole("radio", { name: "Bold", exact: true })
+        .getByRole("button", { name: "Bold", exact: true })
         .click();
       await conclusion.pressSequentially("Final clinical conclusion");
       await expect(conclusion.locator("strong")).toHaveText(
@@ -498,10 +507,10 @@ test.describe("Diagnostic report review", () => {
       await conclusion.press("Enter");
       await expect(conclusion.locator("p")).toHaveCount(2);
       await fixture.review
-        .getByRole("radio", { name: "Remove bold", exact: true })
+        .getByRole("button", { name: "Bold", exact: true })
         .click();
       await fixture.review
-        .getByRole("radio", { name: "Bulleted list", exact: true })
+        .getByRole("button", { name: "Bulleted list", exact: true })
         .click();
       await conclusion.pressSequentially("First finding");
       await conclusion.press("Enter");
@@ -518,7 +527,10 @@ test.describe("Diagnostic report review", () => {
         (request) =>
           request.method() === "PUT" && request.url().includes(report.id),
       );
-      await page.getByRole("button", { name: "Approve", exact: true }).click();
+      await page
+        .getByRole("alertdialog", { name: "Confirm", exact: true })
+        .getByRole("button", { name: /^Approve(?:\s|$)/ })
+        .click();
       const savedReport = (await approvalRequest).postDataJSON();
       expect(savedReport.status).toBe("final");
       expect(savedReport.conclusion).toMatch(
@@ -554,7 +566,7 @@ test.describe("Diagnostic report review", () => {
     });
 
     await page.goto(fixture.url);
-    await page
+    await fixture.review
       .getByRole("button", {
         name: `Expand ${report.code.display}`,
         exact: true,
@@ -571,14 +583,14 @@ test.describe("Diagnostic report review", () => {
     await expect(approve).toBeDisabled();
 
     files = [completeFile];
-    await page
+    await fixture.review
       .getByRole("button", {
         name: `Collapse ${report.code.display}`,
         exact: true,
       })
       .click();
     const fileResponse = page.waitForResponse("**/api/v1/files/?*");
-    await page
+    await fixture.review
       .getByRole("button", {
         name: `Expand ${report.code.display}`,
         exact: true,
@@ -593,14 +605,14 @@ test.describe("Diagnostic report review", () => {
       releaseFiles = resolve;
     });
     try {
-      await page
+      await fixture.review
         .getByRole("button", {
           name: `Collapse ${report.code.display}`,
           exact: true,
         })
         .click();
       const pendingFiles = page.waitForRequest("**/api/v1/files/?*");
-      await page
+      await fixture.review
         .getByRole("button", {
           name: `Expand ${report.code.display}`,
           exact: true,
@@ -627,7 +639,7 @@ test.describe("Diagnostic report review", () => {
       route.fulfill({ json: { count: 0, results: [] } }),
     );
     await page.goto(fixture.url);
-    await page
+    await fixture.review
       .getByRole("button", {
         name: `Expand ${report.code.display}`,
         exact: true,
@@ -638,12 +650,10 @@ test.describe("Diagnostic report review", () => {
       exact: true,
     });
     await expect(conclusion).toHaveText("Saved conclusion");
-    const entryConclusion = page
-      .locator('[data-slot="collapsible"]')
-      .filter({
-        has: page.getByRole("button", { name: "Save Results", exact: true }),
-      })
-      .getByRole("textbox", { name: "Conclusion", exact: true });
+    const entryConclusion = fixture.entry.getByRole("textbox", {
+      name: "Conclusion",
+      exact: true,
+    });
     await expect(
       page.getByRole("textbox", { name: "Conclusion", exact: true }),
     ).toHaveCount(2);
@@ -651,14 +661,14 @@ test.describe("Diagnostic report review", () => {
     await conclusion.fill("Unsaved review draft");
     await expect(entryConclusion).toHaveText("Saved conclusion");
     report.conclusion = "Saved by another reviewer";
-    await page
+    await fixture.review
       .getByRole("button", {
         name: `Collapse ${report.code.display}`,
         exact: true,
       })
       .click();
     const reportResponse = page.waitForResponse(fixture.reportUrl);
-    await page
+    await fixture.review
       .getByRole("button", {
         name: `Expand ${report.code.display}`,
         exact: true,
@@ -679,7 +689,7 @@ test.describe("Diagnostic report review", () => {
       route.fulfill({ json: { count: 0, results: [] } }),
     );
     await page.goto(fixture.url);
-    await page
+    await fixture.review
       .getByRole("button", {
         name: `Expand ${report.code.display}`,
         exact: true,
@@ -730,20 +740,20 @@ test.describe("Diagnostic report review", () => {
 
     await conclusion.press("ControlOrMeta+a");
     await more.click();
-    const moreOptions = fixture.review.getByRole("dialog", {
+    const moreOptions = page.getByRole("dialog", {
       name: "More formatting options",
       exact: true,
     });
     await expect(
-      moreOptions.getByRole("radio", { name: /^Undo / }),
+      moreOptions.getByRole("button", { name: /^Undo / }),
     ).toBeEnabled();
     await moreOptions
-      .getByRole("radio", { name: "Highlight", exact: true })
+      .getByRole("button", { name: "Highlight", exact: true })
       .click();
     await more.press("Escape");
     await expect(moreOptions).not.toBeVisible();
     const blockType = toolbar.getByRole("combobox", {
-      name: "Block type",
+      name: "Select block type",
       exact: true,
     });
     await blockType.press("Space");
@@ -764,11 +774,11 @@ test.describe("Diagnostic report review", () => {
     await conclusion.press("Enter");
     await conclusion.pressSequentially("Follow-up finding");
     await toolbar
-      .getByRole("radio", { name: "Bulleted list", exact: true })
+      .getByRole("button", { name: "Bulleted list", exact: true })
       .click();
     await more.click();
     await expect(
-      moreOptions.getByRole("radio", { name: /^Undo / }),
+      moreOptions.getByRole("button", { name: /^Undo / }),
     ).toBeEnabled();
     await more.press("Escape");
     await expect(conclusion.getByRole("listitem")).toHaveText([
@@ -803,7 +813,7 @@ test.describe("Diagnostic report review", () => {
       });
     });
     await page.goto(fixture.url);
-    const toggle = page.getByRole("button", {
+    const toggle = fixture.review.getByRole("button", {
       name: `Expand ${report.code.display}`,
       exact: true,
     });
@@ -816,7 +826,7 @@ test.describe("Diagnostic report review", () => {
       fixture.review.getByRole("link", { name: "Print Report" }),
     ).toBeVisible();
     await expect(
-      fixture.review.getByRole("button", { name: "actions", exact: true }),
+      fixture.review.getByRole("button", { name: "Actions", exact: true }),
     ).toBeVisible();
     expect(fixture.reportRequests()).toBe(1);
     expect(fileRequests).toBe(1);
@@ -857,7 +867,7 @@ test.describe("Diagnostic report review", () => {
       fixture.review.getByRole("textbox", { name: "Conclusion", exact: true }),
     ).toHaveCount(0);
     await fixture.review
-      .getByRole("button", { name: "actions", exact: true })
+      .getByRole("button", { name: "Actions", exact: true })
       .click();
     await expect(
       page.getByRole("menuitem", { name: "Download", exact: true }),

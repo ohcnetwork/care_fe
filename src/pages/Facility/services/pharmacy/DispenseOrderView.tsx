@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   BanIcon,
   ChevronDown,
@@ -7,7 +8,6 @@ import {
   PlayCircle,
   PrinterIcon,
 } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -68,6 +68,9 @@ import {
 } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { dispenseOrderShowSearch } from "@/lib/router/search/pharmacy";
 import { AddDispenseMedicationRow } from "@/pages/Facility/services/pharmacy/components/AddDispenseMedicationRow";
 import { createAndIssueInvoice } from "@/pages/Facility/services/pharmacy/utils/createAndIssueInvoice";
 import { extractInvoicesFromDispenses } from "@/pages/Facility/services/pharmacy/utils/extractInvoicesFromDispenses";
@@ -114,10 +117,9 @@ export function DispenseOrderView({
 
   const [showCancelled, setShowCancelled] = useState(false);
 
-  const [{ autoAdvanceStatus }, setQParams] = useQueryParams<{
-    autoAdvanceStatus?: string;
-    collectPayment?: string;
-  }>();
+  const [{ autoAdvanceStatus }, setQParams] = useQueryParams(
+    dispenseOrderShowSearch,
+  );
 
   const { data: dispenseOrder, isLoading: isLoadingOrder } = useQuery({
     queryKey: ["dispenseOrder", facilityId, dispenseOrderId],
@@ -291,7 +293,7 @@ export function DispenseOrderView({
   const autoAdvanceTriggered = useRef(false);
   useEffect(() => {
     if (
-      autoAdvanceStatus === "true" &&
+      autoAdvanceStatus === true &&
       !autoAdvanceTriggered.current &&
       dispenseOrder?.status === DispenseOrderStatus.draft
     ) {
@@ -457,9 +459,10 @@ export function DispenseOrderView({
             <Button
               variant="outline"
               onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/print`,
-                )
+                navigate({
+                  to: "/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId/print",
+                  params: { facilityId, locationId, dispenseOrderId },
+                })
               }
             >
               <PrinterIcon className="size-4" />
@@ -467,16 +470,16 @@ export function DispenseOrderView({
             </Button>
             <Button variant="primary" asChild>
               <Link
-                href={`/facility/${facilityId}/locations/${locationId}/medication_requests`}
-                basePath="/"
+                to="/facility/$facilityId/locations/$locationId/medication_requests"
+                params={{ facilityId, locationId }}
               >
                 {t("prescription_queue")}
               </Link>
             </Button>
             <Button variant="outline" asChild>
               <Link
-                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense`}
-                basePath="/"
+                to="/facility/$facilityId/locations/$locationId/medication_dispense"
+                params={{ facilityId, locationId }}
               >
                 {t("go_to_dispenses")}
               </Link>
@@ -484,8 +487,8 @@ export function DispenseOrderView({
             {account?.id && (
               <Button variant="outline" asChild>
                 <Link
-                  href={`/facility/${facilityId}/billing/account/${account.id}`}
-                  basePath="/"
+                  to="/facility/$facilityId/billing/account/$accountId"
+                  params={{ facilityId, accountId: account.id }}
                 >
                   {t("view_account")}
                   <ExternalLinkIcon className="size-4" />
@@ -498,8 +501,8 @@ export function DispenseOrderView({
             {account?.id && (
               <Button variant="link" className="underline" asChild>
                 <Link
-                  href={`/facility/${facilityId}/billing/account/${account.id}`}
-                  basePath="/"
+                  to="/facility/$facilityId/billing/account/$accountId"
+                  params={{ facilityId, accountId: account.id }}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -532,19 +535,44 @@ export function DispenseOrderView({
           />
         </div>
         {!!relatedPrescriptionIds.length && (
-          <Button
-            variant="link"
-            asChild
-            className="text-gray-700 hover:text-gray-900"
-          >
-            <Link
-              href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${dispenseOrder.patient.id}/prescriptions/${relatedPrescriptionIds.join(",")}`}
-              basePath="/"
+          <div className="flex items-center">
+            <Button
+              variant="link"
+              asChild
+              className="text-gray-700 hover:text-gray-900"
             >
-              <EyeIcon className="size-4" />
-              {t("preview_rx")}
-            </Link>
-          </Button>
+              <Link
+                to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds"
+                params={{
+                  facilityId,
+                  locationId,
+                  patientId: dispenseOrder.patient.id,
+                  prescriptionIds: relatedPrescriptionIds.join(","),
+                }}
+              >
+                <EyeIcon className="size-4" />
+                {t("preview_rx")}
+              </Link>
+            </Button>
+            <Button
+              variant="link"
+              asChild
+              className="text-gray-700 hover:text-gray-900"
+            >
+              <Link
+                to="/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/prescriptions/$prescriptionIds/print"
+                params={{
+                  facilityId,
+                  locationId,
+                  patientId: dispenseOrder.patient.id,
+                  prescriptionIds: relatedPrescriptionIds.join(","),
+                }}
+              >
+                <PrinterIcon className="size-4" />
+                {t("print_rx")}
+              </Link>
+            </Button>
+          </div>
         )}
       </div>
 

@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { useQueryParams } from "@/lib/router/queryParams";
+import { resourceCommentListSearch } from "@/lib/router/search/resource";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,7 @@ const CommentSection = ({ id }: { id: string }) => {
   const [commentBox, setCommentBox] = useState("");
   const queryClient = useQueryClient();
 
-  const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
+  const [qParams, setQueryParams] = useQueryParams(resourceCommentListSearch);
 
   const { data: resourceComments, isLoading } = useQuery({
     queryKey: ["resourceComments", id, qParams],

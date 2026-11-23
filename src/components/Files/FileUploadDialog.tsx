@@ -1,30 +1,34 @@
-import { useEffect, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
+import { FileUp, Paperclip, Trash2, X } from "lucide-react";
+import { ReactNode, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 
 import { FileUploadReturn } from "@/hooks/useFileUpload";
 
-export default function FileUploadDialog({
-  open,
-  onOpenChange,
-  fileUpload,
-  associatingId,
-  type,
-  instanceId,
-}: {
+interface FileUploadCompletion {
+  pending: boolean;
+  message: string;
+  error?: string;
+  onRetry: () => void;
+  retryLabel: string;
+}
+
+interface FileUploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   fileUpload: FileUploadReturn;
@@ -34,21 +38,44 @@ export default function FileUploadDialog({
     | "consent"
     | "encounter"
     | "diagnostic_report"
-    | "service_request";
+    | "service_request"
+    | "referral";
+  description?: string;
+  children?: ReactNode;
+  uploadLabel?: string;
+  /** A completed upload can require a separate save/link operation. Retrying
+   * this action must never upload the selected file again. */
+  completion?: FileUploadCompletion;
   instanceId?: string;
-}) {
+}
+
+export default function FileUploadDialog({
+  open,
+  onOpenChange,
+  fileUpload,
+  associatingId,
+  type,
+  description,
+  children,
+  uploadLabel,
+  completion,
+  instanceId,
+}: FileUploadDialogProps) {
   const { t } = useTranslation();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const combineId = useId();
+  const descriptionId = useId();
   const [isPdf, setIsPdf] = useState(false);
   const idPrefix = instanceId ? `${instanceId}-` : "";
-
-  const handleDialogClose = (open: boolean) => {
-    if (!open) {
-      setIsPdf(false);
-    }
-    onOpenChange(open);
-  };
-
   const [previewUrls, setPreviewUrls] = useState<(string | null)[]>([]);
+  const pending = fileUpload.uploading || completion?.pending === true;
+  const hasFiles = fileUpload.files.length > 0;
+
+  const handleDialogClose = (nextOpen: boolean) => {
+    if (!nextOpen && pending) return;
+    if (!nextOpen) setIsPdf(false);
+    onOpenChange(nextOpen);
+  };
 
   useEffect(() => {
     const urls = fileUpload.files.map((file) =>
@@ -60,198 +87,175 @@ export default function FileUploadDialog({
     };
   }, [fileUpload.files]);
 
+  const fileNameField = (index: number) => (
+    <Field>
+      <FieldLabel htmlFor={`${idPrefix}upload-file-name-${index}`}>
+        {t("file_name")}
+      </FieldLabel>
+      <Input
+        name={`file_name_${index}`}
+        id={`${idPrefix}upload-file-name-${index}`}
+        required
+        value={fileUpload.fileNames[index] || ""}
+        disabled={pending}
+        onChange={(event) => {
+          fileUpload.setFileName(event.target.value, index);
+          fileUpload.setError(null);
+        }}
+        placeholder={t("enter_file_name")}
+      />
+    </Field>
+  );
+
   return (
-    <Dialog
-      open={open}
-      onOpenChange={handleDialogClose}
-      aria-labelledby="file-upload-dialog"
-    >
+    <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent
-        className="mb-8 rounded-lg p-5 max-w-fit md:max-w-[30rem] shadow-lg hover:shadow-xl transition-shadow duration-200"
-        aria-describedby="file-upload"
+        className="flex max-h-[90dvh] flex-col gap-5 overflow-hidden bg-background text-foreground sm:max-w-lg"
+        aria-describedby={description ? descriptionId : undefined}
       >
         <DialogHeader>
           <DialogTitle>
             {fileUpload.files.length > 1 ? t("upload_files") : t("upload_file")}
           </DialogTitle>
+          {description && (
+            <DialogDescription id={descriptionId}>
+              {description}
+            </DialogDescription>
+          )}
         </DialogHeader>
-        <div className="space-y-6 pr-5 max-h-[70vh] overflow-y-auto">
-          {isPdf ? (
-            <>
-              {fileUpload.files.map((file, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
-                    <span
-                      className="flex items-center text-sm truncate"
-                      title={file.name}
-                    >
-                      <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
-                      <span className="truncate hidden md:block">
-                        {file.name.length > 25
-                          ? `${file.name.substring(0, 25)}...`
-                          : file.name}
-                      </span>
-
-                      <span className="truncate block md:hidden">
-                        {file.name.length > 6
-                          ? `${file.name.substring(0, 6)}...`
-                          : file.name}
-                      </span>
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => fileUpload.removeFile(index)}
-                      disabled={fileUpload.uploading}
-                    >
-                      <CareIcon icon="l-times" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              <div>
-                <Label
-                  htmlFor={`${idPrefix}upload-file-name-0`}
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  {t("enter_file_name")}
-                </Label>
-                <Input
-                  name="file_name_0"
-                  type="text"
-                  id={`${idPrefix}upload-file-name-0`}
-                  required
-                  value={fileUpload.fileNames[0] || ""}
-                  disabled={fileUpload.uploading}
-                  onChange={(e) => {
-                    fileUpload.setFileName(e.target.value);
-                    fileUpload.setError(null);
-                  }}
-                  className="ml-0.5 mb-1"
-                />
-                {fileUpload.error && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {fileUpload.error}
-                  </p>
+        <div className="min-h-0 space-y-5 overflow-y-auto px-1">
+          {children}
+          {completion ? (
+            <div className="space-y-3 rounded-md border border-border p-4">
+              <p role="status" className="flex items-start gap-2 text-sm">
+                {completion.pending && (
+                  <Spinner className="mt-0.5 size-4 shrink-0 animate-spin" />
                 )}
-              </div>
-            </>
-          ) : (
-            fileUpload.files.map((file, index) => (
-              <div
-                key={index}
-                className="rounded-lg p-4 shadow-md border-2 border-primary-500 relative"
+                {completion.message}
+              </p>
+              {completion.error && (
+                <FieldError role="alert">{completion.error}</FieldError>
+              )}
+            </div>
+          ) : !hasFiles ? (
+            <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-border px-6 py-8">
+              <FileUp className="size-6 text-muted-foreground" />
+              <fileUpload.Input
+                ref={inputRef}
+                disabled={pending}
+                aria-label={t("choose_file")}
+              />
+              <Button
+                variant="outline"
+                onClick={() => inputRef.current?.click()}
+                disabled={pending}
               >
-                <div className="flex gap-4 items-start w-full">
-                  {file.type.startsWith("image/") && previewUrls[index] && (
-                    <div className="flex items-center justify-center mt-2 md:mt-0 rounded-lg border border-gray-300 shadow-md overflow-hidden">
-                      <img
-                        src={previewUrls[index]}
-                        alt="Preview"
-                        className="w-20 h-15 md:w-22 md:h-24 object-fit"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex flex-col gap-2 flex-1">
-                    <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-200 md:p-2 border border-gray-200">
-                      <span
-                        className="flex items-center text-sm truncate"
-                        title={file.name}
-                      >
-                        <CareIcon
-                          icon="l-paperclip"
-                          className="pl-2 pr-2 shrink-0"
+                {t("choose_file")}
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-3">
+                {fileUpload.files.map((file, index) => (
+                  <div
+                    key={`${file.name}-${index}`}
+                    className="space-y-3 rounded-md border border-border p-3"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      {!isPdf && previewUrls[index] ? (
+                        <img
+                          src={previewUrls[index]}
+                          alt={t("file_upload_preview_named", {
+                            name: file.name,
+                          })}
+                          className="size-16 shrink-0 rounded-md border border-border object-contain"
                         />
-                        <span className="truncate hidden md:block">
-                          {file.name.length > 25
-                            ? `${file.name.substring(0, 25)}...`
-                            : file.name}
-                        </span>
-
-                        <span className="truncate block md:hidden">
-                          {file.name.length > 6
-                            ? `${file.name.substring(0, 6)}...`
-                            : file.name}
-                        </span>
+                      ) : (
+                        <Paperclip className="size-4 shrink-0 text-muted-foreground" />
+                      )}
+                      <span className="min-w-0 flex-1 break-words text-sm">
+                        {file.name}
                       </span>
                       <Button
                         variant="ghost"
-                        size="icon"
-                        onClick={() => fileUpload.removeFile(index)}
-                        disabled={fileUpload.uploading}
+                        size="icon-sm"
+                        aria-label={t("file_upload_remove_named", {
+                          name: file.name,
+                        })}
+                        onClick={() => {
+                          fileUpload.removeFile(index);
+                          if (fileUpload.files.length <= 2) setIsPdf(false);
+                        }}
+                        disabled={pending}
                       >
-                        <CareIcon icon="l-times" />
+                        <X className="size-4" />
                       </Button>
                     </div>
-
-                    <div className="rounded-lg">
-                      <Input
-                        name={`file_name_${index}`}
-                        type="text"
-                        id={`${idPrefix}upload-file-name-${index}`}
-                        required
-                        value={fileUpload.fileNames[index] || ""}
-                        disabled={fileUpload.uploading}
-                        onChange={(e) => {
-                          fileUpload.setFileName(e.target.value, index);
-                          fileUpload.setError(null);
-                        }}
-                        placeholder={t("enter_file_name")}
-                        className="border border-gray-300 focus:border-gray-400 rounded-md px-3 py-2 w-full text-sm"
-                      />
-                      {fileUpload.error && (
-                        <p className="mt-2 text-sm text-red-600">
-                          {fileUpload.error}
-                        </p>
-                      )}
-                    </div>
+                    {!isPdf && fileNameField(index)}
                   </div>
-                </div>
+                ))}
               </div>
-            ))
+              {isPdf && fileNameField(0)}
+              {fileUpload.files.length > 1 && (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id={`${combineId}-${type}`}
+                    checked={isPdf}
+                    onCheckedChange={(checked) => setIsPdf(checked === true)}
+                    disabled={pending}
+                  />
+                  <Label
+                    htmlFor={`${combineId}-${type}`}
+                    className="cursor-pointer"
+                  >
+                    {t("combine_files_pdf")}
+                  </Label>
+                </div>
+              )}
+            </>
+          )}
+          {fileUpload.error && (
+            <FieldError role="alert">{fileUpload.error}</FieldError>
+          )}
+          {fileUpload.uploading && !completion && (
+            <div className="space-y-2">
+              <p role="status" className="flex items-center gap-2 text-sm">
+                <Spinner className="size-4 animate-spin" />
+                {t("file_upload_progress", {
+                  progress: fileUpload.progress ?? 0,
+                })}
+              </p>
+              <Progress
+                value={fileUpload.progress ?? 0}
+                aria-label={t("uploading")}
+              />
+            </div>
           )}
         </div>
-        {fileUpload.files.length > 1 && (
-          <div className="flex items-center gap-2 mt-4">
-            <Checkbox
-              id={`${idPrefix}combine_files_pdf_${type}`}
-              checked={isPdf}
-              onCheckedChange={(checked: boolean) => setIsPdf(checked)}
-              disabled={fileUpload.uploading}
-              className="cursor-pointer"
-            />
-            <Label
-              htmlFor={`${idPrefix}combine_files_pdf_${type}`}
-              className="cursor-pointer"
-            >
-              {t("combine_files_pdf")}
-            </Label>
-          </div>
-        )}
-
-        <div className="flex justify-end gap-2 mr-4">
+        <DialogFooter>
           <Button
-            variant="destructive"
-            onClick={fileUpload.clearFiles}
-            disabled={fileUpload.uploading}
+            variant="outline"
+            onClick={() => {
+              if (!completion) fileUpload.clearFiles();
+              handleDialogClose(false);
+            }}
+            disabled={pending}
           >
-            <CareIcon icon="l-trash-alt" className="mr-1" />
-            {t("discard")}
+            {!completion && hasFiles && <Trash2 className="size-4" />}
+            {!completion && hasFiles ? t("discard") : t("close")}
           </Button>
           <Button
-            variant="outline_primary"
-            onClick={() => fileUpload.handleFileUpload(associatingId, isPdf)}
-            disabled={fileUpload.uploading}
+            onClick={() => {
+              if (completion) completion.onRetry();
+              else void fileUpload.handleFileUpload(associatingId, isPdf);
+            }}
+            disabled={pending || (!completion && !hasFiles)}
             id={`${idPrefix}upload_file_button`}
           >
-            <CareIcon icon="l-check" className="mr-1" />
-            {t("upload")}
+            {pending && <Spinner className="size-4 animate-spin" />}
+            {completion ? completion.retryLabel : (uploadLabel ?? t("upload"))}
           </Button>
-        </div>
-        {!!fileUpload.progress && (
-          <Progress value={fileUpload.progress} className="mt-4" />
-        )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

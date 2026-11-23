@@ -28,6 +28,7 @@ export interface BillMedicationsMode {
     unbilledPrescriptionsFor?: {
       patientId: string;
       facilityId: string;
+      locationId: string;
       encounterId: string;
       excludePrescriptionIds: string[];
     };

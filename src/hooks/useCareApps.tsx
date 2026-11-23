@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { PluginManifest, PluginManifestWithMeta } from "@/pluginTypes";
-import { CableIcon, Loader2Icon } from "lucide-react";
+import { CableIcon } from "lucide-react";
 import { Suspense, createContext, useContext } from "react";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
@@ -57,7 +58,7 @@ const withSuspense = <T extends object>(
         <Suspense
           fallback={
             <div className="flex items-center justify-center gap-2">
-              <Loader2Icon
+              <Spinner
                 role="status"
                 aria-label="Loading"
                 className="size-4 animate-spin"
@@ -94,60 +95,35 @@ export const useCareAppTabs = <T extends object>(key: keyof PluginManifest) => {
   }, {});
 };
 
-// If required; Reduce plugin.routes to a single pluginRoutes object of type Record<string, () => React.ReactNode>
-export function usePluginRoutes() {
-  const careApps = useCareApps();
-  const routes = careApps.reduce((acc, plugin) => {
-    if (plugin.isLoading) {
-      return acc;
-    }
-
-    return { ...acc, ...(plugin.routes ?? {}) };
-  }, {});
-  if (!routes) {
-    throw new Error("'usePluginRoutes' must be used within 'AppRouter' only");
-  }
-  return routes;
-}
-
-export const useOrganizationRoutes = () => {
-  const careApps = useCareApps();
-
-  const pluginTabs = careApps.flatMap(
-    (c) => (!c.isLoading && c.organizationTabs) || [],
+/**
+ * Pages for a plugin's `organizationTabs`, keyed by path pattern, for one
+ * loaded plugin. Each tab renders in the organization layout.
+ */
+export const getOrganizationTabRoutes = (
+  app: PluginManifest,
+): Record<string, (params: Record<string, string>) => React.ReactNode> =>
+  Object.fromEntries(
+    (app.organizationTabs ?? []).flatMap((t) => [
+      [
+        `/organization/:id/${t.slug}`,
+        ({ id }: Record<string, string>) => (
+          <OrganizationLayout id={id}>
+            {() => <t.component contextId={id} />}
+          </OrganizationLayout>
+        ),
+      ],
+      [
+        `/organization/:navOrganizationId/children/:id/${t.slug}`,
+        ({ navOrganizationId, id }: Record<string, string>) => (
+          <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
+            {() => (
+              <t.component
+                contextId={id}
+                navOrganizationId={navOrganizationId}
+              />
+            )}
+          </OrganizationLayout>
+        ),
+      ],
+    ]),
   );
-
-  return {
-    ...Object.fromEntries(
-      pluginTabs.flatMap((t) => [
-        [
-          `/organization/:id/${t.slug}`,
-          ({ id }: { id: string }) => (
-            <OrganizationLayout id={id}>
-              {() => <t.component contextId={id} />}
-            </OrganizationLayout>
-          ),
-        ],
-        [
-          `/organization/:navOrganizationId/children/:id/${t.slug}`,
-          ({
-            navOrganizationId,
-            id,
-          }: {
-            navOrganizationId: string;
-            id: string;
-          }) => (
-            <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
-              {() => (
-                <t.component
-                  contextId={id}
-                  navOrganizationId={navOrganizationId}
-                />
-              )}
-            </OrganizationLayout>
-          ),
-        ],
-      ]),
-    ),
-  };
-};

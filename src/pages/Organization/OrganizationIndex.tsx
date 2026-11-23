@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -85,7 +85,8 @@ export default function OrganizationIndex() {
             <CardFooter>
               <Button variant="outline" asChild className="w-full">
                 <Link
-                  href={`/organization/${org.id}`}
+                  to="/organization/$id"
+                  params={{ id: org.id }}
                   className="flex items-center justify-center gap-2"
                 >
                   {t("view_details")}
