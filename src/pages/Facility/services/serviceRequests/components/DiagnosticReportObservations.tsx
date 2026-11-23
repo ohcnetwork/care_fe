@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
 import { ObservationDefinitionRead } from "@/types/emr/observationDefinition/observationDefinition";
 
 import { DiagnosticReportObservationGroup } from "./DiagnosticReportObservationGroup";
@@ -25,16 +26,12 @@ export function DiagnosticReportObservations({
   return (
     <section
       aria-labelledby={`observations-${reportId}`}
-      className="rounded-lg border border-border bg-background px-4"
+      className="rounded-lg border border-border bg-background px-3"
     >
-      <div className="flex flex-wrap items-center gap-2 border-b border-border py-3">
-        <h3
-          id={`observations-${reportId}`}
-          className="text-base font-semibold text-foreground"
-        >
-          {t("observations")}
-        </h3>
-      </div>
+      {/* The report's own header names it; the rows start right away. */}
+      <h3 id={`observations-${reportId}`} className="sr-only">
+        {t("observations")}
+      </h3>
       <div>
         {draft.reportDefinitions.map((definition) => (
           <DiagnosticReportObservationGroup
@@ -49,7 +46,12 @@ export function DiagnosticReportObservations({
           />
         ))}
       </div>
-      <div className="flex justify-end border-t border-border py-3">
+      <div
+        className={cn(
+          "flex py-2",
+          draft.reportDefinitions.length > 0 && "border-t border-border",
+        )}
+      >
         <DiagnosticReportObservationPicker
           facilityId={facilityId}
           selectedIds={draft.reportDefinitions.map(

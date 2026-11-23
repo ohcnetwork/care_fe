@@ -11,6 +11,7 @@ interface PrintableQRCodeAreaProps {
   logoSize: number;
   printSize: number;
   showDetails?: boolean;
+  getLabelText?: (specimen: SpecimenRead) => string;
 }
 
 export function PrintableQRCodeArea({
@@ -18,6 +19,7 @@ export function PrintableQRCodeArea({
   logoSize,
   printSize,
   showDetails = true,
+  getLabelText,
 }: PrintableQRCodeAreaProps) {
   const { t } = useTranslation();
 
@@ -73,6 +75,11 @@ export function PrintableQRCodeArea({
                   {specimen.id && (
                     <div className="font-semibold uppercase text-sm text-gray-700 print:text-xs">
                       {specimen.accession_identifier || specimen.id}
+                    </div>
+                  )}
+                  {getLabelText && (
+                    <div className="text-sm font-medium print:text-xs">
+                      {getLabelText(specimen)}
                     </div>
                   )}
                 </div>

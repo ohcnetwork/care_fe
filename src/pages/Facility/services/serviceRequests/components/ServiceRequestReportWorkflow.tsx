@@ -3,7 +3,6 @@ import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activ
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
   DiagnosticReportForm,
   type SavedReportSignal,
@@ -24,7 +23,6 @@ interface ServiceRequestReportWorkflowProps {
   request: ServiceRequestReadSpec;
   activityDefinition: ActivityDefinitionReadSpec;
   diagnosticReports: DiagnosticReportRead[];
-  pendingReports: number;
   activeSectionId: string | null;
   facilityId: string;
   serviceRequestId: string;
@@ -35,13 +33,11 @@ export function ServiceRequestReportWorkflow({
   request,
   activityDefinition,
   diagnosticReports,
-  pendingReports,
   activeSectionId,
   facilityId,
   serviceRequestId,
   disableEdit,
 }: ServiceRequestReportWorkflowProps) {
-  const { t } = useTranslation();
   const [expandedReport, setExpandedReport] =
     useState<SavedReportSignal | null>(null);
   const observationRequirements =
@@ -58,17 +54,11 @@ export function ServiceRequestReportWorkflow({
         <div
           id={SERVICE_REQUEST_REPORT_SECTION_IDS.results}
           className={cn(
-            "scroll-mt-20 space-y-3 transition-shadow duration-500",
+            "scroll-mt-20 transition-shadow duration-500",
             activeSectionId === SERVICE_REQUEST_REPORT_SECTION_IDS.results &&
               SECTION_HIGHLIGHT_CLASS,
           )}
         >
-          {pendingReports > 0 && (
-            <h5 className="text-foreground font-semibold">
-              {t("test_result_entries")}
-            </h5>
-          )}
-
           <DiagnosticReportForm
             patientId={request.encounter.patient.id}
             facilityId={facilityId}

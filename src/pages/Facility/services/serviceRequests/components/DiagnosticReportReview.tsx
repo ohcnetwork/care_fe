@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 
 import { type SavedReportSignal } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportForm";
@@ -36,23 +35,24 @@ export function DiagnosticReportReview({
 }: DiagnosticReportReviewProps) {
   const { t } = useTranslation();
   return (
-    <div className="space-y-4">
-      <h5 className="text-foreground font-semibold">
+    <section className="overflow-hidden rounded-lg border border-border bg-white shadow-xs">
+      <h5 className="px-4 py-3 font-semibold text-foreground sm:px-5">
         {diagnosticReports.some(
           (report) => report.status !== DiagnosticReportStatus.final,
         )
           ? t("review_test_results")
           : t("diagnostic_report", { count: diagnosticReports.length })}
       </h5>
-
-      {diagnosticReports.map((report) => (
-        <DiagnosticReportReviewItem
-          key={report.id}
-          report={report}
-          {...props}
-        />
-      ))}
-    </div>
+      <div className="divide-y divide-soft-border border-t border-border">
+        {diagnosticReports.map((report) => (
+          <DiagnosticReportReviewItem
+            key={report.id}
+            report={report}
+            {...props}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -107,12 +107,7 @@ function DiagnosticReportReviewItem({
   const currentReport = fullReport ?? report;
 
   return (
-    <Card
-      className={cn(
-        "shadow-none border-border rounded-lg bg-background",
-        isExpanded && "bg-muted",
-      )}
-    >
+    <div className={cn(isExpanded && "bg-muted")}>
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <DiagnosticReportHeader
           report={currentReport}
@@ -129,7 +124,7 @@ function DiagnosticReportReviewItem({
           }
         />
         <CollapsibleContent>
-          <CardContent className="px-2 pb-0">
+          <div className="px-4 sm:px-5">
             {isLoadingReport ? (
               <TableSkeleton count={4} />
             ) : isReportError || !fullReport ? (
@@ -153,9 +148,9 @@ function DiagnosticReportReviewItem({
                 onApprove={onApprove}
               />
             )}
-          </CardContent>
+          </div>
         </CollapsibleContent>
       </Collapsible>
-    </Card>
+    </div>
   );
 }

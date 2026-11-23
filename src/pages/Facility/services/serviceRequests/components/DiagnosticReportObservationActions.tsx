@@ -8,11 +8,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 
 interface DiagnosticReportObservationActionsProps {
   index: number;
-  hasComponents: boolean;
   canDelete: boolean;
   onAdd: () => void;
   onDelete: () => void;
@@ -20,7 +18,6 @@ interface DiagnosticReportObservationActionsProps {
 
 export function DiagnosticReportObservationActions({
   index,
-  hasComponents,
   canDelete,
   onAdd,
   onDelete,
@@ -33,10 +30,7 @@ export function DiagnosticReportObservationActions({
           type="button"
           variant="ghost"
           size="icon"
-          className={cn(
-            "size-10 shrink-0 text-muted-foreground",
-            hasComponents && "-mt-2",
-          )}
+          className="shrink-0 self-start text-muted-foreground"
           aria-label={`${t("result_actions")} ${index + 1}`}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ")

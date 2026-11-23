@@ -7,7 +7,6 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { RichTextEditor } from "@/components/Common/RichTextEditor";
 import { FileListTable } from "@/components/Files/FileListTable";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -52,7 +51,7 @@ export function DiagnosticReportReviewContent({
   const displayedConclusion = isFinal ? report.conclusion || "" : conclusion;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {observations.length === 0 && (
         <EmptyState
           title={t("no_observations_entered")}
@@ -62,49 +61,47 @@ export function DiagnosticReportReviewContent({
       <DiagnosticReportResultsTable observations={observations} />
 
       {(!isFinal || displayedConclusion) && (
-        <Card className="mb-4 shadow-none rounded-lg border-border bg-background">
-          <CardContent className="p-2 space-y-2">
-            <h6 className="font-medium text-foreground">{t("conclusion")}</h6>
-            {isFinal ? (
-              <Markdown
-                richText
-                content={displayedConclusion}
-                className="prose-sm wrap-anywhere [&>:first-child]:mt-0 [&>:last-child]:mb-0"
-              />
-            ) : (
-              <RichTextEditor
-                label={t("conclusion")}
-                placeholder={t("enter_conclusion_of_diagnostic_report")}
-                value={conclusion}
-                onChange={onConclusionChange}
-                disabled={disableEdit}
-              />
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {files.length > 0 && (
-        <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-2">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <h5 className="text-foreground font-semibold">
-                {t("uploaded_files")}
-              </h5>
-              <Badge variant="secondary">{files.length}</Badge>
-            </div>
-            <FileListTable
-              files={files}
-              type="diagnostic_report"
-              associatingId={report.id}
-              canEdit={!disableEdit && !isFinal}
+        <div className="space-y-1.5 rounded-lg border border-border bg-background px-3 py-2.5">
+          <h6 className="text-sm font-medium text-foreground">
+            {t("conclusion")}
+          </h6>
+          {isFinal ? (
+            <Markdown
+              richText
+              content={displayedConclusion}
+              className="prose-sm wrap-anywhere [&>:first-child]:mt-0 [&>:last-child]:mb-0"
             />
-          </div>
+          ) : (
+            <RichTextEditor
+              label={t("conclusion")}
+              placeholder={t("enter_conclusion_of_diagnostic_report")}
+              value={conclusion}
+              onChange={onConclusionChange}
+              disabled={disableEdit}
+            />
+          )}
         </div>
       )}
 
-      <div className="flex sm:flex-row flex-col-reverse justify-between bg-background/50 -mx-2 p-2 pt-3 border-t border-border rounded-b-lg gap-3">
-        <div className="flex justify-start items-end">
+      {files.length > 0 && (
+        <div className="space-y-2 rounded-lg border border-border bg-background px-3 py-2.5">
+          <div className="flex items-center gap-2">
+            <h5 className="text-sm font-medium text-foreground">
+              {t("uploaded_files")}
+            </h5>
+            <Badge variant="secondary">{files.length}</Badge>
+          </div>
+          <FileListTable
+            files={files}
+            type="diagnostic_report"
+            associatingId={report.id}
+            canEdit={!disableEdit && !isFinal}
+          />
+        </div>
+      )}
+
+      <div className="-mx-4 flex flex-col-reverse justify-between gap-3 border-t border-border bg-background/50 px-4 py-2 sm:-mx-5 sm:flex-row sm:items-center sm:px-5">
+        <div className="flex justify-start">
           <DiagnosticReportTimestamps report={report} />
         </div>
 

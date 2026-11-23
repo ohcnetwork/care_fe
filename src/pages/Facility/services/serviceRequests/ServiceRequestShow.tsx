@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import query from "@/Utils/request/query";
+import BackButton from "@/components/Common/BackButton";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
@@ -14,9 +16,9 @@ import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefini
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { EDITABLE_SERVICE_REQUEST_STATUSES } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
-import { ServiceRequestActions } from "./components/ServiceRequestActions";
 import { ServiceRequestCompletion } from "./components/ServiceRequestCompletion";
 import { ServiceRequestDetails } from "./components/ServiceRequestDetails";
+import { ServiceRequestHeader } from "./components/ServiceRequestHeader";
 import {
   SECTION_HIGHLIGHT_CLASS,
   SERVICE_REQUEST_REPORT_SECTION_IDS,
@@ -24,6 +26,7 @@ import {
 } from "./components/ServiceRequestReportWorkflow";
 import { ServiceRequestSpecimenWorkflow } from "./components/ServiceRequestSpecimenWorkflow";
 import { getDiagnosticReportCreationState } from "./components/diagnosticReportCreation";
+import { matchRequirements } from "./components/specimenCollection";
 
 const REQUEST_SECTION_ID = "service-request-section-request";
 const SPECIMEN_SECTION_ID = "service-request-section-specimen";
@@ -105,15 +108,26 @@ export default function ServiceRequestShow({
   useEffect(() => {
     if (!isMobile || mobileSections.length <= 1) return;
 
-    const onScroll = () => {
+    const onScroll = (event: Event) => {
       // Don't fight the smooth scroll started by a tab click
       if (Date.now() < ignoreScrollUntil.current) return;
+      const scroller =
+        event.target instanceof Element
+          ? event.target
+          : document.scrollingElement;
+      const firstSection = document.getElementById(mobileSections[0].id);
+      // At the end of the page the last sections can't scroll up to the line
+      const atEnd =
+        !!scroller &&
+        !!firstSection &&
+        scroller.contains(firstSection) &&
+        scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
+      const line = window.innerHeight * (atEnd ? 1 : 0.4);
       const focused = mobileSections
         .filter(
           ({ id }) =>
             (document.getElementById(id)?.getBoundingClientRect().top ??
-              Infinity) <=
-            window.innerHeight * 0.4,
+              Infinity) <= line,
         )
         .at(-1);
       setFocusedSectionId(focused?.id ?? mobileSections[0].id);
@@ -176,49 +190,54 @@ export default function ServiceRequestShow({
     hasFinalizedReport ||
     CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE.includes(request.category);
   const canShowMarkAsCompleteFootBar = canMarkAsComplete && !disableEdit;
+  // Counted like the specimens card: each requirement needs its own tube.
+  const collectedSpecimens = matchRequirements(request, specimenRequirements)
+    .collected.length;
+
+  const goToSection = (id: string) => {
+    ignoreScrollUntil.current = Date.now() + 800;
+    setFocusedSectionId(id);
+    setActiveSectionId(id);
+    document.getElementById(id)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
 
   return (
-    <div className="min-h-screen bg-soft-background relative">
+    <div className="@container relative min-h-screen bg-soft-background">
       <div
         className={cn(
-          "mx-auto w-full max-w-4xl pt-4",
+          "mx-auto w-full max-w-4xl pt-4 @7xl:max-w-7xl",
           canShowMarkAsCompleteFootBar ? "pb-28" : "pb-5",
         )}
       >
         <div className="space-y-6">
-          <ServiceRequestActions
-            request={request}
-            facilityId={facilityId}
-            serviceRequestId={serviceRequestId}
-            hasFinalizedReport={hasFinalizedReport}
-          />
-          <div className="px-2">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+            <BackButton variant="outline">
+              <ArrowLeft />
+              {t("back")}
+            </BackButton>
             <PatientHeader
               patient={request.encounter.patient}
               facilityId={facilityId}
+              variant="encounter"
+              className="min-w-0 flex-1"
             />
           </div>
 
           {mobileSections.length > 1 && (
             <Tabs
               value={focusedSectionId ?? mobileSections[0].id}
-              onValueChange={(id) => {
-                ignoreScrollUntil.current = Date.now() + 800;
-                setFocusedSectionId(id);
-                setActiveSectionId(id);
-                document.getElementById(id)?.scrollIntoView({
-                  behavior: "smooth",
-                  block: "start",
-                });
-              }}
+              onValueChange={goToSection}
               className="sticky top-0 z-20 -mx-2 bg-soft-background/95 px-2 py-1 backdrop-blur sm:hidden"
             >
-              <TabsList className="h-auto w-full">
+              <TabsList className="w-full">
                 {mobileSections.map((section) => (
                   <TabsTrigger
                     key={section.id}
                     value={section.id}
-                    className="h-9 flex-1 px-1"
+                    className="flex-1 px-1"
                   >
                     {section.label}
                   </TabsTrigger>
@@ -227,49 +246,72 @@ export default function ServiceRequestShow({
             </Tabs>
           )}
 
-          <div
-            id={REQUEST_SECTION_ID}
-            className={cn(
-              "scroll-mt-20 transition-shadow duration-500",
-              activeSectionId === REQUEST_SECTION_ID && SECTION_HIGHLIGHT_CLASS,
-            )}
-          >
-            <ServiceRequestDetails
-              request={request}
-              activityDefinition={activityDefinition}
-              facilityId={facilityId}
-              locationId={locationId}
-              disableEdit={disableEdit}
-            />
-          </div>
+          {/* The details column follows the header in the DOM so phones show it there */}
+          <div className="grid gap-6 @7xl:grid-cols-[minmax(0,1fr)_20rem] @7xl:grid-rows-[auto_auto_auto_1fr]">
+            <div
+              id={REQUEST_SECTION_ID}
+              className={cn(
+                "min-w-0 scroll-mt-20 transition-shadow duration-500 @7xl:col-start-1",
+                activeSectionId === REQUEST_SECTION_ID &&
+                  SECTION_HIGHLIGHT_CLASS,
+              )}
+            >
+              <ServiceRequestHeader
+                request={request}
+                activityDefinition={activityDefinition}
+                facilityId={facilityId}
+                serviceRequestId={serviceRequestId}
+                hasFinalizedReport={hasFinalizedReport}
+                locationId={locationId}
+                disableEdit={disableEdit}
+              />
+            </div>
 
-          <div
-            id={SPECIMEN_SECTION_ID}
-            className={cn(
-              "scroll-mt-20 transition-shadow duration-500",
-              activeSectionId === SPECIMEN_SECTION_ID &&
-                SECTION_HIGHLIGHT_CLASS,
-            )}
-          >
-            <ServiceRequestSpecimenWorkflow
-              request={request}
-              requirements={specimenRequirements}
-              facilityId={facilityId}
-              serviceRequestId={serviceRequestId}
-              disableEdit={disableEdit}
-            />
-          </div>
+            <aside
+              className={cn(
+                "min-w-0 space-y-4 @7xl:sticky @7xl:top-4 @7xl:col-start-2 @7xl:row-span-4 @7xl:row-start-1 @7xl:self-start @7xl:overflow-y-auto",
+                // Capped to the screen like EncounterNavigation, less the completion bar
+                canShowMarkAsCompleteFootBar
+                  ? "@7xl:max-h-[calc(100dvh-6rem)]"
+                  : "@7xl:max-h-[calc(100dvh-2rem)]",
+              )}
+            >
+              <ServiceRequestDetails
+                request={request}
+                activityDefinition={activityDefinition}
+                facilityId={facilityId}
+              />
+            </aside>
 
-          <ServiceRequestReportWorkflow
-            request={request}
-            activityDefinition={activityDefinition}
-            diagnosticReports={diagnosticReports}
-            pendingReports={pendingReports}
-            activeSectionId={activeSectionId}
-            facilityId={facilityId}
-            serviceRequestId={serviceRequestId}
-            disableEdit={disableEdit}
-          />
+            <div
+              id={SPECIMEN_SECTION_ID}
+              className={cn(
+                "min-w-0 scroll-mt-20 transition-shadow duration-500 @7xl:col-start-1",
+                activeSectionId === SPECIMEN_SECTION_ID &&
+                  SECTION_HIGHLIGHT_CLASS,
+              )}
+            >
+              <ServiceRequestSpecimenWorkflow
+                request={request}
+                requirements={specimenRequirements}
+                facilityId={facilityId}
+                serviceRequestId={serviceRequestId}
+                disableEdit={disableEdit}
+              />
+            </div>
+
+            <div className="min-w-0 space-y-6 @7xl:col-start-1">
+              <ServiceRequestReportWorkflow
+                request={request}
+                activityDefinition={activityDefinition}
+                diagnosticReports={diagnosticReports}
+                activeSectionId={activeSectionId}
+                facilityId={facilityId}
+                serviceRequestId={serviceRequestId}
+                disableEdit={disableEdit}
+              />
+            </div>
+          </div>
         </div>
       </div>
       {canShowMarkAsCompleteFootBar && (
@@ -279,6 +321,8 @@ export default function ServiceRequestShow({
           serviceRequestId={serviceRequestId}
           pendingReports={pendingReports}
           totalReports={totalReports}
+          collectedSpecimens={collectedSpecimens}
+          totalSpecimens={specimenRequirements.length}
         />
       )}
     </div>

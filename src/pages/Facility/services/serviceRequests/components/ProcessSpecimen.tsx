@@ -1,8 +1,9 @@
 import { t } from "i18next";
-import { Edit, Settings2 } from "lucide-react";
+import { CircleCheck, Pencil } from "lucide-react";
 import { useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,19 +19,21 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { Code } from "@/types/base/code/code";
-import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
   ProcessingReadSpec,
   ProcessingSpec,
 } from "@/types/emr/specimen/specimen";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { SpecimenProcessingSteps } from "./SpecimenProcessingSteps";
+import { formatDateTime, formatName } from "@/Utils/utils";
+
+import { COMPACT_PICKER } from "./specimenCollection";
 
 interface ProcessSpecimenProps {
   onAddProcessing: (processing: ProcessingSpec) => void;
   onUpdateProcessing: (index: number, processing: ProcessingSpec) => void;
   existingProcessing?: ProcessingReadSpec[];
-  diagnosticReports?: DiagnosticReportRead[];
+  /** Steps can't be added once a report exists. */
+  hasReport: boolean;
   disableEdit: boolean;
 }
 
@@ -38,7 +41,7 @@ export function ProcessSpecimen({
   onAddProcessing,
   onUpdateProcessing,
   existingProcessing = [],
-  diagnosticReports = [],
+  hasReport,
   disableEdit,
 }: ProcessSpecimenProps) {
   const [noteDialog, setNoteDialog] = useState<{
@@ -108,54 +111,89 @@ export function ProcessSpecimen({
     setNoteDialog({ open: false, index: -1, description: "", method: null });
   };
 
-  // If there are diagnostic reports, don't show the processing steps selection
-  const hasReport = diagnosticReports.length > 0;
-
   return (
     <>
-      <div>
-        <div className="flex-row items-center justify-between space-y-0 pb-2">
-          <div className="text-sm font-medium flex items-center gap-1">
-            <Settings2 className="h-4 w-4" />
-            {t("process_specimen")}
-            <Badge variant="primary">{existingProcessing.length}</Badge>
-          </div>
-        </div>
-        <div className="space-y-4">
-          <SpecimenProcessingSteps
-            steps={existingProcessing}
-            renderAction={(process, index) => (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="ml-auto h-auto p-1.5"
-                onClick={(e) =>
-                  handleOpenNote(e, index, process.description, process.method)
-                }
-                disabled={disableEdit}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            )}
-          />
+      {existingProcessing.length > 0 && (
+        <ul aria-label={t("processing")} className="space-y-1">
+          {existingProcessing.map((process, index) => {
+            const display = process.method?.display;
+            const name = display || process.method?.code || process.description;
+            // The add dialog starts the description with the step's name; drop
+            // it only as a whole word, so "Centrifuged at…" stays whole.
+            const rest =
+              display && process.description.startsWith(display)
+                ? process.description.slice(display.length)
+                : null;
+            const detail = !process.method
+              ? null
+              : rest !== null && /^($|[\s,.:;·-])/.test(rest)
+                ? rest.replace(/^[\s,.:;·-]+/, "") || null
+                : process.description || null;
+            const performed = [
+              process.time_date_time &&
+                formatDateTime(process.time_date_time, "hh:mm A, DD MMM YYYY"),
+              process.performer_object && formatName(process.performer_object),
+            ]
+              .filter(Boolean)
+              .join(" · ");
+            return (
+              <li key={index} className="flex min-h-7 items-center gap-2">
+                <CircleCheck
+                  aria-hidden="true"
+                  className="size-4 shrink-0 text-green-600"
+                />
+                <div className="min-w-0 flex-1 sm:flex sm:items-baseline sm:gap-3">
+                  <p
+                    className="text-sm break-words text-foreground sm:truncate"
+                    title={detail ? `${name} · ${detail}` : name}
+                  >
+                    <span className="font-medium">{name}</span>
+                    {detail && (
+                      <span className="text-soft-foreground"> · {detail}</span>
+                    )}
+                  </p>
+                  {performed && (
+                    <p className="shrink-0 text-sm text-soft-foreground sm:ml-auto">
+                      {performed}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-soft-foreground hover:text-foreground"
+                  onClick={(e) =>
+                    handleOpenNote(
+                      e,
+                      index,
+                      process.description,
+                      process.method,
+                    )
+                  }
+                  disabled={disableEdit}
+                  aria-label={t("edit")}
+                  title={t("edit")}
+                >
+                  <Pencil className="size-3.5" />
+                </Button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
-          {!hasReport && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                {t("process_specimen__step_heading")}
-              </label>
-              <ValueSetSelect
-                system="system-specimen-processing-method-code"
-                placeholder={t("process_specimen__valueset_select_placeholder")}
-                onSelect={handleSelectStep}
-                value={null}
-                disabled={disableEdit}
-              />
-            </div>
-          )}
+      {!hasReport && (
+        <div className={cn(COMPACT_PICKER, "w-full sm:w-72 [&>button]:w-full")}>
+          <ValueSetSelect
+            system="system-specimen-processing-method-code"
+            placeholder={t("process_specimen__valueset_select_placeholder")}
+            onSelect={handleSelectStep}
+            value={null}
+            disabled={disableEdit}
+          />
         </div>
-      </div>
+      )}
 
       <Dialog
         open={noteDialog.open}
@@ -177,8 +215,8 @@ export function ProcessSpecimen({
           </DialogHeader>
           <div className="space-y-4 py-4">
             {noteDialog.method && (
-              <div className="rounded-md bg-gray-50 p-3">
-                <Label className="text-sm text-gray-600">
+              <div className="rounded-md bg-soft-background p-3">
+                <Label className="text-sm text-soft-foreground">
                   {t("processing_method")}
                 </Label>
                 <div className="font-medium mt-1">
@@ -199,7 +237,7 @@ export function ProcessSpecimen({
                 placeholder={t("process_specimen__textarea_placeholder")}
                 className="min-h-[100px]"
               />
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-soft-foreground">
                 {t("process_specimen__dialog_text_area_description")}
               </p>
             </div>

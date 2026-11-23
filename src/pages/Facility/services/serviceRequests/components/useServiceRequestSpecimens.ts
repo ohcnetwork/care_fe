@@ -1,10 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { useBatchRequest } from "@/Utils/request/batch";
-import mutate from "@/Utils/request/mutate";
 import {
   ServiceRequestReadSpec,
   Status,
@@ -19,7 +18,7 @@ import {
   type SpecimenDefinitionRead,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 
-function createDraftPayload(
+export function createDraftPayload(
   requirement: SpecimenDefinitionRead,
 ): SpecimenFromDefinitionCreate {
   return {
@@ -65,24 +64,13 @@ export function useServiceRequestSpecimens({
       queryKey: ["serviceRequest", facilityId, serviceRequestId],
     });
   };
-  const onDraftError = () => toast.error(t("specimen_draft_create_error"));
-  const {
-    mutate: createDraftSpecimenFromDefinition,
-    isPending: isCreatingDraftSpecimen,
-  } = useMutation({
-    mutationFn: mutate(specimenApi.createSpecimenFromDefinition, {
-      pathParams: { facilityId, serviceRequestId },
-    }),
-    onSuccess: invalidateRequest,
-    onError: onDraftError,
-  });
   const { mutate: executeBatch, isPending: isPrintingAllQRCodes } =
     useBatchRequest({
       onSuccess: () => {
         invalidateRequest();
         setIsQRCodeSheetOpen(true);
       },
-      onError: onDraftError,
+      onError: () => toast.error(t("specimen_draft_create_error")),
     });
   const hasActiveSpecimen = (requirement: SpecimenDefinitionRead) =>
     request.specimens.some(
@@ -91,11 +79,6 @@ export function useServiceRequestSpecimens({
         (specimen.status === SpecimenStatus.available ||
           specimen.status === SpecimenStatus.draft),
     );
-  const createDraftSpecimen = (requirement: SpecimenDefinitionRead) => {
-    if (!hasActiveSpecimen(requirement)) {
-      createDraftSpecimenFromDefinition(createDraftPayload(requirement));
-    }
-  };
   const preparePrintAllQRCodes = () => {
     const missingDraftDefinitions =
       request.status === Status.completed
@@ -117,9 +100,7 @@ export function useServiceRequestSpecimens({
   return {
     isQRCodeSheetOpen,
     setIsQRCodeSheetOpen,
-    isCreatingDraftSpecimen,
     isPrintingAllQRCodes,
-    createDraftSpecimen,
     preparePrintAllQRCodes,
   };
 }

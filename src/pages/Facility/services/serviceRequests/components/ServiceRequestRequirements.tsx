@@ -1,7 +1,5 @@
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/ui/badge";
-
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 
 interface ServiceRequestRequirementsProps {
@@ -19,19 +17,24 @@ export function ServiceRequestRequirements({
   }
 
   return (
-    <dl className="space-y-1.5 text-sm">
-      <dt className="text-muted-foreground">{t("observation_definitions")}</dt>
-      <dd className="flex flex-wrap gap-1.5">
+    <div className="space-y-1.5 text-sm">
+      <h3 className="text-sm font-normal text-soft-foreground">
+        {t("observation_definitions")}
+      </h3>
+      <ul className="space-y-1">
         {observationRequirements.map((definition) => (
-          <Badge
+          <li
             key={definition.id}
-            variant="secondary"
-            className="max-w-full whitespace-normal wrap-break-word"
+            className="flex items-start gap-2 text-foreground"
           >
-            {definition.title}
-          </Badge>
+            <span
+              aria-hidden="true"
+              className="mt-2 size-1.5 shrink-0 rounded-full bg-stronger-border"
+            />
+            <span className="min-w-0 wrap-break-word">{definition.title}</span>
+          </li>
         ))}
-      </dd>
-    </dl>
+      </ul>
+    </div>
   );
 }
