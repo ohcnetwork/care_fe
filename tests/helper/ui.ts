@@ -471,6 +471,25 @@ export async function expectToast(
 }
 
 /**
+ * Asserts a toast is shown, then closes it and waits until it is gone.
+ *
+ * Use it when the same action (and so the same toast text) can follow in
+ * the same test: a toast stays for seconds, so without closing it the next
+ * assertion could match the earlier toast, or both of them.
+ */
+export async function expectAndDismissToast(page: Page, text: string | RegExp) {
+  const toast = page.locator("li[data-sonner-toast]").filter({ hasText: text });
+  await expect(toast).toBeVisible();
+  // Best effort: the toast can auto-dismiss (4s) before the click lands.
+  // The count check below is the real postcondition.
+  await toast
+    .getByRole("button", { name: "Close toast", exact: true })
+    .click({ timeout: 2000 })
+    .catch(() => {});
+  await expect(toast).toHaveCount(0);
+}
+
+/**
  * Gets a card element by its title
  * @param page - Playwright page object
  * @param title - Card title to search for (can be string or RegExp)
