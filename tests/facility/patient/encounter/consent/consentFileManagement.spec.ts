@@ -147,9 +147,14 @@ test.describe("Consent file management", () => {
     page,
   }) => {
     const fileName = uniqueName("single");
-    await createConsentWithFiles(page, [{ path: PNG, name: fileName }]);
 
-    await expect(consentCard(page).getByText(fileName)).toBeVisible();
+    await test.step("Create a consent with one attached file", async () => {
+      await createConsentWithFiles(page, [{ path: PNG, name: fileName }]);
+    });
+
+    await test.step("Verify the card shows the file name", async () => {
+      await expect(consentCard(page).getByText(fileName)).toBeVisible();
+    });
   });
 
   test('create consent with multiple files → card shows primary name + "+N more"', async ({
@@ -157,15 +162,22 @@ test.describe("Consent file management", () => {
   }) => {
     const first = uniqueName("multi-a");
     const second = uniqueName("multi-b");
-    await createConsentWithFiles(page, [
-      { path: PNG, name: first },
-      { path: PNG2, name: second },
-    ]);
 
-    const card = consentCard(page);
-    await expect(card.getByText(first)).toBeVisible();
-    await expect(card.getByText("+1 more file", { exact: true })).toBeVisible();
-    await expect(card.getByText(second)).toHaveCount(0);
+    await test.step("Create a consent with two attached files", async () => {
+      await createConsentWithFiles(page, [
+        { path: PNG, name: first },
+        { path: PNG2, name: second },
+      ]);
+    });
+
+    await test.step('Verify the card shows the first file and "+1 more file"', async () => {
+      const card = consentCard(page);
+      await expect(card.getByText(first)).toBeVisible();
+      await expect(
+        card.getByText("+1 more file", { exact: true }),
+      ).toBeVisible();
+      await expect(card.getByText(second)).toHaveCount(0);
+    });
   });
 
   test("create consent with file renamed before save → custom name on card and detail", async ({
@@ -173,37 +185,56 @@ test.describe("Consent file management", () => {
   }) => {
     // Custom name deliberately unrelated to the fixture's real filename.
     const customName = uniqueName("renamed");
-    await createConsentWithFiles(page, [{ path: PNG, name: customName }]);
 
-    const card = consentCard(page);
-    await expect(card.getByText(customName)).toBeVisible();
-    await expect(card.getByText(/sample_img1/)).toHaveCount(0);
+    await test.step("Create a consent with a renamed file", async () => {
+      await createConsentWithFiles(page, [{ path: PNG, name: customName }]);
+    });
 
-    await openConsentDetail(page);
-    await expect(detailFileRow(page, customName)).toBeVisible();
-    await expect(page.getByText(/sample_img1/)).toHaveCount(0);
+    await test.step("Verify the card shows the custom name", async () => {
+      const card = consentCard(page);
+      await expect(card.getByText(customName)).toBeVisible();
+      await expect(card.getByText(/sample_img1/)).toHaveCount(0);
+    });
+
+    await test.step("Verify the detail page shows the custom name", async () => {
+      await openConsentDetail(page);
+      await expect(detailFileRow(page, customName)).toBeVisible();
+      await expect(page.getByText(/sample_img1/)).toHaveCount(0);
+    });
   });
 
   test('create consent with file → See Details → file shows green "Uploaded" badge', async ({
     page,
   }) => {
     const fileName = uniqueName("badge");
-    await createConsentWithFiles(page, [{ path: PNG, name: fileName }]);
 
-    await openConsentDetail(page);
-    await expectUploadedBadge(page, fileName);
+    await test.step("Create a consent with one attached file", async () => {
+      await createConsentWithFiles(page, [{ path: PNG, name: fileName }]);
+    });
+
+    await test.step('Verify the detail page shows a green "Uploaded" badge', async () => {
+      await openConsentDetail(page);
+      await expectUploadedBadge(page, fileName);
+    });
   });
 
   test("create consent → See Details → upload file from detail page → file appears with badge", async ({
     page,
   }) => {
     const fileName = uniqueName("detail-upload");
-    await createConsentWithFiles(page, []);
-    await openConsentDetail(page);
 
-    await uploadFileFromDetail(page, PNG, fileName);
+    await test.step("Create a consent without files and open it", async () => {
+      await createConsentWithFiles(page, []);
+      await openConsentDetail(page);
+    });
 
-    await expectUploadedBadge(page, fileName);
+    await test.step("Upload a file from the detail page", async () => {
+      await uploadFileFromDetail(page, PNG, fileName);
+    });
+
+    await test.step('Verify the file is listed with an "Uploaded" badge', async () => {
+      await expectUploadedBadge(page, fileName);
+    });
   });
 
   test("upload two files sequentially on the detail page → both listed", async ({
@@ -211,106 +242,162 @@ test.describe("Consent file management", () => {
   }) => {
     const first = uniqueName("seq-a");
     const second = uniqueName("seq-b");
-    await createConsentWithFiles(page, []);
-    await openConsentDetail(page);
 
-    await uploadFileFromDetail(page, PNG, first);
-    await expect(detailFileRow(page, first)).toBeVisible();
+    await test.step("Create a consent without files and open it", async () => {
+      await createConsentWithFiles(page, []);
+      await openConsentDetail(page);
+    });
 
-    await uploadFileFromDetail(page, JPG, second);
-    await expect(detailFileRows(page)).toHaveCount(2);
-    await expectUploadedBadge(page, first);
-    await expectUploadedBadge(page, second);
+    await test.step("Upload the first file", async () => {
+      await uploadFileFromDetail(page, PNG, first);
+      await expect(detailFileRow(page, first)).toBeVisible();
+    });
+
+    await test.step("Upload the second file", async () => {
+      await uploadFileFromDetail(page, JPG, second);
+    });
+
+    await test.step("Verify both files are listed", async () => {
+      await expect(detailFileRows(page)).toHaveCount(2);
+      await expectUploadedBadge(page, first);
+      await expectUploadedBadge(page, second);
+    });
   });
 
   test("start file upload on the detail page → discard → list unchanged", async ({
     page,
   }) => {
-    await createConsentWithFiles(page, []);
-    await openConsentDetail(page);
-    await expect(page.getByText("No files attached")).toBeVisible();
+    await test.step("Create a consent without files and open it", async () => {
+      await createConsentWithFiles(page, []);
+      await openConsentDetail(page);
+      await expect(page.getByText("No files attached")).toBeVisible();
+    });
 
-    await pickFileOnDetail(page, PNG);
-    const dialog = uploadDialog(page);
-    await dialog.getByRole("button", { name: "Discard" }).click();
-    await expect(dialog).toBeHidden();
+    await test.step("Pick a file and discard the upload", async () => {
+      await pickFileOnDetail(page, PNG);
+      const dialog = uploadDialog(page);
+      await dialog.getByRole("button", { name: "Discard" }).click();
+      await expect(dialog).toBeHidden();
+    });
 
-    await expect(page.getByText("No files attached")).toBeVisible();
-    await expect(detailFileRows(page)).toHaveCount(0);
+    await test.step("Verify no file was added", async () => {
+      await expect(page.getByText("No files attached")).toBeVisible();
+      await expect(detailFileRows(page)).toHaveCount(0);
+    });
   });
 
   test("upload jpg, png and pdf separately → each accepted and displayed", async ({
     page,
   }) => {
     const files = [
-      { path: JPG, name: uniqueName("type-jpg") },
-      { path: PNG, name: uniqueName("type-png") },
-      { path: PDF, name: uniqueName("type-pdf") },
+      { type: "jpg", path: JPG, name: uniqueName("type-jpg") },
+      { type: "png", path: PNG, name: uniqueName("type-png") },
+      { type: "pdf", path: PDF, name: uniqueName("type-pdf") },
     ];
-    await createConsentWithFiles(page, []);
-    await openConsentDetail(page);
+
+    await test.step("Create a consent without files and open it", async () => {
+      await createConsentWithFiles(page, []);
+      await openConsentDetail(page);
+    });
 
     for (const file of files) {
-      await uploadFileFromDetail(page, file.path, file.name);
-      await expectUploadedBadge(page, file.name);
+      await test.step(`Upload a ${file.type} file and verify it is listed`, async () => {
+        await uploadFileFromDetail(page, file.path, file.name);
+        await expectUploadedBadge(page, file.name);
+      });
     }
-    await expect(detailFileRows(page)).toHaveCount(files.length);
+
+    await test.step("Verify all three files are listed", async () => {
+      await expect(detailFileRows(page)).toHaveCount(files.length);
+    });
   });
 
   test("click View on an image attachment → preview opens", async ({
     page,
   }) => {
     const fileName = uniqueName("view");
-    await createConsentWithFiles(page, [{ path: PNG, name: fileName }]);
-    await openConsentDetail(page);
 
-    await detailFileRow(page, fileName)
-      .getByRole("button", { name: "View" })
-      .click();
+    await test.step("Create a consent with an image and open it", async () => {
+      await createConsentWithFiles(page, [{ path: PNG, name: fileName }]);
+      await openConsentDetail(page);
+    });
 
-    const preview = page.getByRole("dialog", { name: "File Preview" });
-    await expect(preview).toBeVisible();
-    const image = preview.locator("img");
-    await expect(image).toBeVisible();
-    await expect(image).toHaveAttribute("src", /.+/);
+    await test.step("Click View on the image", async () => {
+      await detailFileRow(page, fileName)
+        .getByRole("button", { name: "View" })
+        .click();
+    });
+
+    await test.step("Verify the preview shows the loaded image", async () => {
+      const preview = page.getByRole("dialog", { name: "File Preview" });
+      await expect(preview).toBeVisible();
+      const image = preview.locator("img");
+      await expect(image).toBeVisible();
+      await expect(image).toHaveAttribute("src", /.+/);
+      // Visibility and src don't prove the image decoded; a broken image
+      // reports naturalWidth 0.
+      await expect
+        .poll(() =>
+          image.evaluate(
+            (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
+          ),
+        )
+        .toBe(true);
+    });
   });
 
   test("click Download on an attachment → download initiates", async ({
     page,
   }) => {
     const fileName = uniqueName("download");
-    await createConsentWithFiles(page, [{ path: PNG, name: fileName }]);
-    await openConsentDetail(page);
 
-    const downloadPromise = page.waitForEvent("download");
-    await detailFileRow(page, fileName)
-      .getByRole("button", { name: "Download" })
-      .click();
-    const download = await downloadPromise;
-    expect(download.suggestedFilename()).toContain(fileName);
+    await test.step("Create a consent with a file and open it", async () => {
+      await createConsentWithFiles(page, [{ path: PNG, name: fileName }]);
+      await openConsentDetail(page);
+    });
+
+    await test.step("Click Download and verify the download starts", async () => {
+      const downloadPromise = page.waitForEvent("download");
+      await detailFileRow(page, fileName)
+        .getByRole("button", { name: "Download" })
+        .click();
+      const download = await downloadPromise;
+      expect(download.suggestedFilename()).toContain(fileName);
+    });
   });
 
   test('create consent without files → card shows "No files attached"', async ({
     page,
   }) => {
-    await createConsentWithFiles(page, []);
+    await test.step("Create a consent without files", async () => {
+      await createConsentWithFiles(page, []);
+    });
 
-    await expect(
-      consentCard(page).getByText("No files attached"),
-    ).toBeVisible();
+    await test.step('Verify the card shows "No files attached"', async () => {
+      await expect(
+        consentCard(page).getByText("No files attached"),
+      ).toBeVisible();
+    });
   });
 
   test("file uploaded from the detail page is reflected on the consent card", async ({
     page,
   }) => {
     const fileName = uniqueName("card-sync");
-    await createConsentWithFiles(page, []);
-    await openConsentDetail(page);
 
-    await uploadFileFromDetail(page, PNG, fileName);
-    await expect(detailFileRow(page, fileName)).toBeVisible();
+    await test.step("Create a consent without files and open it", async () => {
+      await createConsentWithFiles(page, []);
+      await openConsentDetail(page);
+    });
 
-    await goToConsentsTab(page);
-    await expect(consentCard(page).getByText(fileName)).toBeVisible();
+    await test.step("Upload a file from the detail page", async () => {
+      await uploadFileFromDetail(page, PNG, fileName);
+      await expect(detailFileRow(page, fileName)).toBeVisible();
+    });
+
+    await test.step("Verify the consent card shows the file", async () => {
+      await goToConsentsTab(page);
+      await expect(consentCard(page).getByText(fileName)).toBeVisible();
+    });
   });
 });
