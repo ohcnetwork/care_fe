@@ -166,6 +166,48 @@ test.describe("Payment Reconciliation", () => {
     await expect(recordPayment).toBeDisabled();
   });
 
+  test("keeps the cash payment sheet usable while an amount is partial input", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: /advance/i }).click();
+    await page.locator("label").filter({ hasText: "Cash" }).click();
+    const amountPaid = page.getByRole("textbox", { name: "Amount Paid" });
+    const amountReceived = page.getByRole("textbox", {
+      name: "Amount Received",
+    });
+    const recordPayment = page.getByRole("button", {
+      name: /record payment/i,
+    });
+
+    // A lone "." is not a number yet. The change calculation must not crash.
+    await amountPaid.pressSequentially(".");
+    await expect(amountPaid).toHaveValue(".");
+    await expect(recordPayment).toBeDisabled();
+    await amountPaid.pressSequentially("5");
+    await expect(amountPaid).toHaveValue(".5");
+    await expect(recordPayment).toBeEnabled();
+
+    await amountPaid.fill("100");
+    await amountReceived.clear();
+    await amountReceived.pressSequentially(".");
+    await expect(amountReceived).toHaveValue(".");
+
+    // Submit with a partial amount received: show the error, do not crash.
+    await recordPayment.click();
+    await expect(page.getByText("Must be a valid number")).toBeVisible();
+    await expect(
+      page.getByText(/payment.*recorded.*successfully/i),
+    ).toHaveCount(0);
+
+    await amountReceived.fill("150");
+    await expect(page.getByText(/change to return/i)).toContainText(
+      new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+      }).format(50),
+    );
+  });
+
   test("should record payment twice without refreshing page with location cache", async ({
     page,
   }) => {
