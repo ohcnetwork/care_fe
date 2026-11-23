@@ -13,6 +13,7 @@ import {
   Building,
   CalendarFold,
   CircleDashed,
+  Hospital,
   MapPin,
   Tag,
   Users,
@@ -155,6 +156,7 @@ export const encounterClassFilter = (
       },
       getOperations: () => customOperations || [{ label: "is" }],
       mode,
+      icon: <Hospital className="size-4" />,
     },
   );
 
