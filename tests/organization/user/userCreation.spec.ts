@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import { getFieldErrorMessage } from "tests/helper/error";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -39,6 +40,29 @@ test.describe("User Creation", () => {
     await validateFieldError(page, "Username", "This field is required");
     await validateFieldError(page, "Phone Number", "This field is required");
     await validateFieldError(page, "Gender", "Gender is required");
+  });
+
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: "Add User" }).click();
+
+    const whitespace = "   ";
+    const fields = ["First Name", "Last Name"];
+
+    for (const field of fields) {
+      await page.getByRole("textbox", { name: field }).fill(whitespace);
+    }
+
+    await page.getByRole("button", { name: "Create User" }).click();
+
+    for (const field of fields) {
+      const errorMessage = getFieldErrorMessage(
+        page.getByRole("textbox", { name: field }),
+      );
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("This field is required");
+    }
   });
 
   test("Create a new user and link to organization", async ({ page }) => {
