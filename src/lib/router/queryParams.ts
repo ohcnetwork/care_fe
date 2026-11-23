@@ -77,7 +77,8 @@ export function useQueryParams(
       let href = location.pathname;
       if (serialized) href += "?" + serialized;
       if (!overwrite) href += location.hash;
-      navigate({ href, replace });
+      // Filters and selection update this page, so keep its scroll position.
+      navigate({ href, replace, resetScroll: false });
     },
     [],
   );
