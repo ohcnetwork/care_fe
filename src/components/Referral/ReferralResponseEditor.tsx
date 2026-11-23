@@ -742,10 +742,11 @@ export function ReferralResponseEditor({
             }}
             className="min-h-0 flex-1 gap-0"
           >
-            <div className="shrink-0 border-b border-border px-4 pt-2 sm:px-5">
+            <div className="shrink-0 overflow-x-auto pt-2">
               <TabsList
                 variant="line"
                 aria-label={t("referral_response_context")}
+                className="px-4 sm:px-5"
               >
                 <TabsTrigger value="response">
                   {t(

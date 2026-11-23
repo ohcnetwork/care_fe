@@ -18,7 +18,6 @@ import {
   SendIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -61,6 +60,8 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { DottedDivider } from "@/components/ui/dotted-divider";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { dispenseOrderShowSearch } from "@/lib/router/search/pharmacy";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -176,9 +177,9 @@ export function PaymentStatusBanner({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [{ collectPayment }, setQParams] = useQueryParams<{
-    collectPayment?: string;
-  }>();
+  const [{ collectPayment }, setQParams] = useQueryParams(
+    dispenseOrderShowSearch,
+  );
 
   const [paymentSheetOpen, setPaymentSheetOpen] = useState(false);
   const [markBalancedDialogOpen, setMarkBalancedDialogOpen] = useState(false);
@@ -692,17 +693,18 @@ export function PaymentStatusBanner({
                             {t("view_invoice")}
                           </Link>
                         </DropdownMenuItem>
-                        {accountId && (
-                          <DropdownMenuItem asChild>
-                            <Link
-                              to="/facility/$facilityId/billing/account/$accountId"
-                              params={{ facilityId, accountId }}
-                            >
-                              <BanknoteIcon className="size-4" />
-                              {t("go_to_account")}
-                            </Link>
-                          </DropdownMenuItem>
-                        )}
+                        <DropdownMenuItem asChild>
+                          <Link
+                            to="/facility/$facilityId/billing/account/$accountId"
+                            params={{
+                              facilityId,
+                              accountId: invoice.account.id,
+                            }}
+                          >
+                            <BanknoteIcon className="size-4" />
+                            {t("go_to_account")}
+                          </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => promptCancel()}
                           variant="destructive"

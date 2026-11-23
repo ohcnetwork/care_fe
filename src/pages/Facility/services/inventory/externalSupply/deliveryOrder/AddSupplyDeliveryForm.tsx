@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t as translate } from "i18next";
 import { AlertCircle, PlusCircle, Trash2 } from "lucide-react";
-import { useQueryParams } from "raviger";
 import {
   Ref,
   useCallback,
@@ -18,6 +17,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import careConfig from "@/../care.config";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { deliveryOrderPageSearch } from "@/lib/router/search/inventory";
 import { cn } from "@/lib/utils";
 
 import { DisablingCover } from "@/components/Common/DisablingCover";
@@ -234,7 +235,7 @@ export function AddSupplyDeliveryForm({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams, setQueryParams] = useQueryParams(deliveryOrderPageSearch);
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
   const [selectedRequestIds, setSelectedRequestIds] = useState<string[]>([]);
   const [requestOrderSearch, setRequestOrderSearch] = useState("");

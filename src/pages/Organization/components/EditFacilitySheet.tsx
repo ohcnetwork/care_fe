@@ -17,16 +17,26 @@ interface Props {
   organizationId?: string;
   facilityId: string;
   trigger?: React.ReactNode;
+  /** Control the sheet from outside, e.g. when opened from a menu item. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export default function EditFacilitySheet({ facilityId, trigger }: Props) {
+export default function EditFacilitySheet({
+  facilityId,
+  trigger,
+  open: controlledOpen,
+  onOpenChange,
+}: Props) {
   const { t } = useTranslation();
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>{trigger}</SheetTrigger>
+      {trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
       <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("edit_facility")}</SheetTitle>

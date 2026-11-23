@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,11 @@ import {
 import { cn } from "@/lib/utils";
 
 import { CareFilterValue, toDomainValues } from "./careuiAdapter";
-import { SelectedDateBadge } from "./dateFilter";
+import {
+  type DateFilterHandle,
+  SelectedDateBadge,
+  applyDateDraftOnClose,
+} from "./dateFilter";
 import FilterRenderer from "./filterRenderer";
 import { FilterDateRange, FilterState } from "./utils/Utils";
 
@@ -37,9 +42,16 @@ export function DomainFilterValue({
   const { t } = useTranslation();
   const selected = toDomainValues(state, values);
   const { filter } = state;
+  const dateDraftRef = useRef<DateFilterHandle>(null);
 
   return (
-    <DropdownMenu open={open} onOpenChange={onOpenChange}>
+    <DropdownMenu
+      open={open}
+      onOpenChange={(next, details) => {
+        applyDateDraftOnClose(dateDraftRef, next, details);
+        onOpenChange?.(next);
+      }}
+    >
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
@@ -69,6 +81,7 @@ export function DomainFilterValue({
       <DropdownMenuContent className="w-80 p-0" align="start">
         <FilterRenderer
           activeFilter={filter.key}
+          dateDraftRef={dateDraftRef}
           selectedFilters={{
             ...selectedFilters,
             [filter.key]: { ...state, selected },

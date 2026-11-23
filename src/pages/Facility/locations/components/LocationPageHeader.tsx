@@ -1,14 +1,15 @@
-import { usePath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { InnerPageHeader } from "@/components/Common/InnerPageHeader";
 
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 
+import { usePathname } from "@/lib/router/location";
+
 export function LocationPageHeader() {
   const { t } = useTranslation();
   const { facilityId, locationId, location } = useCurrentLocation();
-  const path = usePath() ?? "";
+  const path = usePathname();
   const baseUrl = `/facility/${facilityId}/locations/${locationId}`;
   const section = path.slice(baseUrl.length);
   const pageTitles = [

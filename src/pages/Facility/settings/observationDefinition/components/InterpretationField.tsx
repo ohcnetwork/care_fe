@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import { Highlighter } from "lucide-react";
-import { FieldValues, UseFormReturn } from "react-hook-form";
+import { FieldPath, FieldValues, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 export function InterpretationComponent<
@@ -46,7 +46,7 @@ export function InterpretationComponent<
       {!disableDisplay && (
         <FormField
           control={form.control}
-          name={`${fieldName}.display` as any}
+          name={`${fieldName}.display` as FieldPath<TFieldValues>}
           render={({ field }) => (
             <FormItem className="min-w-0 flex-1">
               <FormControl>

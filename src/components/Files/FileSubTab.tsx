@@ -38,6 +38,7 @@ import FileUploadDropdown from "@/components/Files/FileUploadDropdown";
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
+import { fileListSearch } from "@/lib/router/search/patient";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -78,8 +79,8 @@ export const FilesPage = ({
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: fileListSearch,
     limit: 15,
-    disableCache: true,
   });
   // const queryClient = useQueryClient();
   const { canViewClinicalData } = getPermissions(
@@ -269,17 +270,6 @@ export const FilesPage = ({
           </DropdownMenu>
         </div>
       </>
-    );
-  };
-
-  const FileUploadButtons = () => {
-    if (!canEdit) return <></>;
-    return (
-      <FileUploadDropdown
-        fileUpload={fileUpload}
-        buttonVariant="outline_primary"
-        buttonClassName="flex flex-row items-center mr-2"
-      />
     );
   };
 
@@ -564,7 +554,13 @@ export const FilesPage = ({
         </div>
 
         <div className="ml-auto">
-          <FileUploadButtons />
+          {canEdit && (
+            <FileUploadDropdown
+              fileUpload={fileUpload}
+              buttonVariant="outline_primary"
+              buttonClassName="flex flex-row items-center mr-2"
+            />
+          )}
         </div>
       </div>
       <FilterBadges

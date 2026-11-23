@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -18,6 +17,9 @@ import {
   useEntityExtensions,
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { deliveryOrderPageSearch } from "@/lib/router/search/inventory";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import {
   DeliveryOrderRetrieve,
@@ -62,7 +64,7 @@ export default function DeliveryOrderForm({
   const { getExtensions, isLoading: isExtensionsLoading } =
     useExtensionSchemas();
   const isEditMode = Boolean(deliveryOrderId);
-  const [qParams] = useQueryParams();
+  const [qParams] = useQueryParams(deliveryOrderPageSearch);
   const supplyOrderId = qParams.supplyOrder;
   const queryClient = useQueryClient();
 
@@ -163,8 +165,8 @@ export default function DeliveryOrderForm({
     onSuccess: (deliveryOrder: DeliveryOrderRetrieve) => {
       queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
       toast.success(t("order_created"));
-      navigate(
-        getInventoryBasePath(
+      navigate({
+        href: getInventoryBasePath(
           facilityId,
           locationId,
           internal,
@@ -172,10 +174,8 @@ export default function DeliveryOrderForm({
           false,
           `${deliveryOrder.id}${supplyOrderId ? `?supplyOrder=${supplyOrderId}` : ""}`,
         ),
-        {
-          replace: true,
-        },
-      );
+        replace: true,
+      });
     },
   });
 
@@ -186,8 +186,8 @@ export default function DeliveryOrderForm({
     onSuccess: (deliveryOrder: DeliveryOrderRetrieve) => {
       queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
       toast.success(t("order_updated"));
-      navigate(
-        getInventoryBasePath(
+      navigate({
+        href: getInventoryBasePath(
           facilityId,
           locationId,
           internal,
@@ -195,7 +195,7 @@ export default function DeliveryOrderForm({
           false,
           `${deliveryOrder.id}${supplyOrderId ? `?supplyOrder=${supplyOrderId}` : ""}`,
         ),
-      );
+      });
     },
   });
 

@@ -19,7 +19,7 @@ import {
 
 import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 import deviceApi from "@/types/device/deviceApi";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
@@ -271,7 +271,7 @@ export default function LinkDepartmentsSheet({
           <div className="space-y-6">
             <div className="space-y-4">
               <div className="space-y-4">
-                <FacilityOrganizationSelector
+                <FacilityOrganizationTreeSelect
                   facilityId={facilityId}
                   value={selectedOrgs}
                   onChange={setSelectedOrgs}

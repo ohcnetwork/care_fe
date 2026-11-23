@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import usePatientExtensionData from "@/hooks/usePatientExtensionData";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
 import {
   getPatientIdentifiers,
@@ -27,7 +28,6 @@ import {
 import { renderTokenNumber, TokenRead } from "@/types/tokens/token/token";
 import { formatDate } from "date-fns";
 import { PrinterIcon } from "lucide-react";
-import { Link } from "raviger";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 interface BaseProps {
@@ -235,12 +235,11 @@ const TokenCard = ({
                 variant="link"
                 className="underline font-semibold text-base capitalize text-gray-950"
               >
-                <Link
-                  basePath="/"
+                <HrefLink
                   href={`/facility/${appointment.facility.id}/${resourceTypeToResourcePathSlug[appointment.resource_type]}/${appointment.resource.id}/queues/${appointment.token?.queue.id}`}
                 >
                   {t("queue_board")}
-                </Link>
+                </HrefLink>
               </Button>
               <Button
                 variant="outline"

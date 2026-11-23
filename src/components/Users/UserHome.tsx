@@ -8,7 +8,6 @@ import {
   SlidersHorizontal,
   UserRound,
 } from "lucide-react";
-import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -35,6 +34,7 @@ import { getPermissions } from "@/common/Permissions";
 import query from "@/Utils/request/query";
 import { formatName, keysOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { HrefLink } from "@/lib/router/HrefLink";
 import facilityApi from "@/types/facility/facilityApi";
 import userApi from "@/types/user/userApi";
 
@@ -190,14 +190,14 @@ export default function UserHome(props: UserHomeProps) {
                     className="min-h-11 min-w-0 whitespace-normal sm:flex-none sm:px-4"
                     asChild
                   >
-                    <Link basePath="/" href={`${userUrl}/${key.toLowerCase()}`}>
+                    <HrefLink href={`${userUrl}/${key.toLowerCase()}`}>
                       <Icon
                         className="size-4"
                         strokeWidth={1.7}
                         aria-hidden="true"
                       />
                       {t(`USERMANAGEMENT_TAB__${key}`)}
-                    </Link>
+                    </HrefLink>
                   </TabsTrigger>
                 );
               })}

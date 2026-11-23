@@ -26,7 +26,6 @@ import { deepFreeze } from "@/Utils/utils";
 import { t } from "i18next";
 
 import { localDevPluginManifests } from "virtual:care-local-plugins";
-import { z } from "zod";
 
 const getPluginManifest = async (config: PlugConfig) => {
   const localManifest = localDevPluginManifests[config.slug];
@@ -38,15 +37,18 @@ const getPluginManifest = async (config: PlugConfig) => {
     } as PluginManifestWithMeta;
   }
 
-  if (!config.meta.url || !z.url().safeParse(config.meta.url).success) {
-    console.error(
-      `Plugin ${config.slug} has an invalid URL (${config.meta.url}) in meta`,
-    );
+  if (!config.meta.url) {
+    console.error(`Plugin ${config.slug} has no URL in meta`);
     return null;
   }
 
+  // Resolve against the page so relative URLs (e.g. `/plugs/<slug>/remoteEntry.js`)
+  // work from any origin. Invalid URLs throw here and are caught below.
   setFederationRemote(config.slug, {
-    url: () => Promise.resolve(config.meta.url as string),
+    url: () =>
+      Promise.resolve(
+        new URL(config.meta.url as string, window.location.href).href,
+      ),
     format: "esm",
     from: "vite",
     externalType: "promise",

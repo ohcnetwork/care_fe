@@ -65,8 +65,40 @@ test.describe("Specimen Definitions Create", () => {
       .fill(derivedFromURI);
 
     const collectionOption = faker.helpers.arrayElement(collectionOptions);
-    await page.getByRole("combobox", { name: "Collection" }).click();
+    await page
+      .getByRole("combobox", { name: "Collection", exact: true })
+      .click();
     await page.getByRole("option", { name: collectionOption }).click();
+
+    const expectedQuantity = page.getByRole("combobox", {
+      name: "Expected Quantity",
+    });
+    for (const invalidValue of [".", "1.999"]) {
+      await expectedQuantity.fill("3");
+      await expectedQuantity.fill(invalidValue);
+      await expectedQuantity.press("Escape");
+      await page.getByRole("button", { name: /save/i }).click();
+      await expect(expectedQuantity).toHaveAttribute("aria-invalid", "true");
+      await expect(expectedQuantity).toHaveAccessibleDescription(/quantity/i);
+    }
+    await expectedQuantity.fill("3.00");
+    await page
+      .getByRole("option", { name: "3.00 milliliter", exact: true })
+      .click();
+    await page
+      .getByRole("combobox", { name: "Collection Method", exact: true })
+      .click();
+    await page.getByRole("option", { name: "Aspiration - action" }).click();
+    await page
+      .getByRole("combobox", { name: "Body Site", exact: true })
+      .click();
+    await page
+      .getByPlaceholder("Select Body Site")
+      .fill("Distal phalanx of hallux");
+    await page
+      .getByRole("option", { name: /Distal phalanx of hallux/i })
+      .first()
+      .click();
 
     const preparationOption = faker.helpers.arrayElement(preparationOptions);
     await page.getByRole("button", { name: "Add" }).click();
@@ -89,7 +121,7 @@ test.describe("Specimen Definitions Create", () => {
 
     const retentionTime = faker.number.int(INT_MAX);
     await page
-      .getByRole("combobox", { name: "Enter Retention Time" })
+      .getByPlaceholder("Enter Retention Time", { exact: true })
       .fill(retentionTime.toString());
     // Pick the unit to commit the quantity and close the suggestions.
     await page
@@ -111,7 +143,7 @@ test.describe("Specimen Definitions Create", () => {
 
     const capacity = faker.number.int(INT_MAX);
     await page
-      .getByRole("combobox", { name: "Enter Capacity" })
+      .getByPlaceholder("Enter Capacity", { exact: true })
       .fill(capacity.toString());
     // Pick the unit to commit the quantity and close the suggestions.
     await page
@@ -132,8 +164,10 @@ test.describe("Specimen Definitions Create", () => {
     await page.getByRole("button", { name: /save/i }).click();
 
     // Apply status filter before searching
-    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
-    await page.getByRole("option", { name: status.toLowerCase() }).click();
+    await page.getByRole("button", { name: /^Status/ }).click();
+    await page
+      .getByRole("menuitemradio", { name: status.toLowerCase() })
+      .click();
 
     // Search for the newly created definition
     await page
@@ -158,6 +192,13 @@ test.describe("Specimen Definitions Create", () => {
     await expect(page.getByText(derivedFromURI)).toBeVisible();
     await expect(page.getByText(typeCollected)).toBeVisible();
     await expect(page.getByText(collectionOption)).toBeVisible();
+    await expect(page.getByText("3 milliliter", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Aspiration - action", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Distal phalanx of hallux", { exact: true }),
+    ).toBeVisible();
     await expect(page.getByText(preparationOption)).toBeVisible();
     await expect(
       page.getByText(new RegExp(`Is Derived${isDerived ? "Yes" : "No"}`, "i")),
@@ -207,8 +248,10 @@ test.describe("Specimen Definitions Create", () => {
     await page.getByRole("button", { name: /save/i }).click();
 
     // Apply status filter before searching
-    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
-    await page.getByRole("option", { name: status.toLowerCase() }).click();
+    await page.getByRole("button", { name: /^Status/ }).click();
+    await page
+      .getByRole("menuitemradio", { name: status.toLowerCase() })
+      .click();
 
     // Search for the newly created definition
     await page

@@ -70,6 +70,8 @@ test("location navigation distinguishes sub-locations from beds while preserving
     wardRow.getByRole("button", { name: "Delete", exact: true }),
   ).toHaveCount(0);
   await expect(
-    page.getByRole("row").filter({ hasText: rootBed.name }),
+    page
+      .locator('[data-cy="location-beds"]')
+      .getByRole("button", { name: rootBed.name, exact: true }),
   ).toBeVisible();
 });

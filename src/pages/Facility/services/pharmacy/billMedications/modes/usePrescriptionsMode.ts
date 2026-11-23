@@ -10,7 +10,6 @@ import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
 import { useQueries } from "@tanstack/react-query";
-import { navigate as ravigerNavigate } from "raviger";
 import { useMemo } from "react";
 
 interface Options {
@@ -76,7 +75,16 @@ export default function usePrescriptionsMode({
         params: { facilityId, locationId },
       });
     } else {
-      ravigerNavigate(newIds.join(","), { replace: true });
+      navigate({
+        to: "/facility/$facilityId/locations/$locationId/medication_requests/patient/$patientId/bill/prescriptions/$prescriptionIds",
+        params: {
+          facilityId,
+          locationId,
+          patientId,
+          prescriptionIds: newIds.join(","),
+        },
+        replace: true,
+      });
     }
   };
 
@@ -91,6 +99,7 @@ export default function usePrescriptionsMode({
         ? {
             patientId,
             facilityId,
+            locationId,
             encounterId: anyEncounter.id,
             excludePrescriptionIds: prescriptionIds,
           }

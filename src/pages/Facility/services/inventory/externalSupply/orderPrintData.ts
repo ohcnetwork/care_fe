@@ -2,7 +2,11 @@ import { format } from "date-fns";
 import type { TFunction } from "i18next";
 
 import type { DetailsTablePrintContent } from "@/print/detailsTable";
-import { buildDateRow, buildGeneratedFooter } from "@/print/patientDetails";
+import {
+  buildDateRow,
+  buildGeneratedFooter,
+  type PrintDetailRow,
+} from "@/print/patientDetails";
 import type { DeliveryOrderRetrieve } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import type { RequestOrderRetrieve } from "@/types/inventory/requestOrder/requestOrder";
 import type { SupplyDeliveryRead } from "@/types/inventory/supplyDelivery/supplyDelivery";
@@ -17,6 +21,7 @@ function buildOrderContent({
   tableTitle,
   header,
   rows,
+  extensionRows = [],
   t,
 }: {
   order: Order;
@@ -24,6 +29,7 @@ function buildOrderContent({
   tableTitle: string;
   header: string[];
   rows: string[][];
+  extensionRows?: PrintDetailRow[];
   t: TFunction;
 }): DetailsTablePrintContent {
   return {
@@ -39,8 +45,13 @@ function buildOrderContent({
         ...(order.supplier
           ? [{ label: t("supplier"), value: order.supplier.name }]
           : []),
+        ...extensionRows.filter((_, index) => index % 2 === 0),
       ],
-      right: [buildDateRow(t), { label: t("status"), value: t(order.status) }],
+      right: [
+        buildDateRow(t),
+        { label: t("status"), value: t(order.status) },
+        ...extensionRows.filter((_, index) => index % 2 === 1),
+      ],
     },
     title: order.name ?? null,
     note: order.note || null,
@@ -77,17 +88,20 @@ export function buildDeliveryOrderPrintContent({
   deliveryOrder,
   supplyDeliveries,
   internal,
+  extensionRows,
   t,
 }: {
   deliveryOrder: DeliveryOrderRetrieve;
   supplyDeliveries: SupplyDeliveryRead[];
   internal: boolean;
+  extensionRows: PrintDetailRow[];
   t: TFunction;
 }) {
   return buildOrderContent({
     order: deliveryOrder,
     heading: t("delivery_order"),
     tableTitle: t("supply_deliveries"),
+    extensionRows,
     header: [
       t("product"),
       t("quantity"),

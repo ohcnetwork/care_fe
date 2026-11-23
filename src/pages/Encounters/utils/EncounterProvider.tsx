@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
 import { createContext, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -13,6 +12,8 @@ import { getPermissions, Permissions } from "@/common/Permissions";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { encounterShowSearch } from "@/lib/router/search/encounter";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
 import {
@@ -94,7 +95,7 @@ export function EncounterProvider({
   const [
     { selectedEncounter: selectedEncounterId = primaryEncounterId },
     setQParams,
-  ] = useQueryParams();
+  ] = useQueryParams(encounterShowSearch);
 
   const { data: patient, isLoading: isPatientLoading } = useQuery({
     queryKey: ["patient", patientId, facilityId],

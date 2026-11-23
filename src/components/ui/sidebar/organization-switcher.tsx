@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { Check, ChevronsUpDown, LayoutDashboard } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -60,7 +60,7 @@ export function OrganizationSwitcher({
         <DropdownMenuItem asChild>
           <Link
             className="gap-2"
-            href="/"
+            to="/"
             onClick={() => isMobile && setOpenMobile(false)}
           >
             <LayoutDashboard className="size-4" />
@@ -74,7 +74,8 @@ export function OrganizationSwitcher({
           .map((org) => (
             <DropdownMenuItem key={org.id} asChild className="gap-2">
               <Link
-                href={`/organization/${org.id}`}
+                to="/organization/$id"
+                params={{ id: org.id }}
                 aria-current={
                   org.id === selectedOrganization?.id ? "true" : undefined
                 }

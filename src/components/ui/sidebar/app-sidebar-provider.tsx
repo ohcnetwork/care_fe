@@ -1,4 +1,3 @@
-import { useLocationChange, usePath } from "raviger";
 import {
   ComponentProps,
   createContext,
@@ -13,6 +12,7 @@ import {
   useState,
 } from "react";
 
+import { useLocationChange, usePathname } from "@/lib/router/location";
 import { cn } from "@/lib/utils";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -60,7 +60,7 @@ export function AppSidebarProvider({
   ...props
 }: AppSidebarProviderProps) {
   const isMobile = useIsMobile();
-  const path = usePath();
+  const path = usePathname();
   const [pinned, setPinned] = useState(defaultOpen);
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [overlayReady, setOverlayReady] = useState(!defaultOpen);
@@ -172,7 +172,7 @@ export function AppSidebarProvider({
 
   const handleSidebarProviderOpenChange = useCallback(
     (open: boolean) => {
-      // The primitive's keyboard shortcut toggles its visible open state.
+      // The primitive's rail toggles its visible open state.
       // Toggling a preview pins it instead of dismissing the hovered sidebar.
       if (open || isOverlay) pinSidebar();
       else unpinSidebar();
@@ -197,7 +197,7 @@ export function AppSidebarProvider({
   );
 
   // Hovering never changes the saved preference. This also corrects the
-  // primitive's cookie write when its keyboard shortcut pins an open preview.
+  // primitive's cookie write when its rail pins an open preview.
   useEffect(() => {
     document.cookie = `sidebar:state=${pinned}; path=/; max-age=604800`;
   }, [pinned]);

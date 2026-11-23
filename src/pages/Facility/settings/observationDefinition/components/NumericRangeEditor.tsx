@@ -11,7 +11,7 @@ import {
   NumericRange,
 } from "@/types/base/qualifiedRange/qualifiedRange";
 import { Plus, X } from "lucide-react";
-import { FieldValues, UseFormReturn } from "react-hook-form";
+import { FieldPath, FieldValues, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { InterpretationComponent } from "./InterpretationField";
 
@@ -112,7 +112,9 @@ export function NumericRangeEditor<
                   <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-1.5">
                     <FormField
                       control={form.control}
-                      name={`${fieldName}.ranges.${index}.min` as any}
+                      name={
+                        `${fieldName}.ranges.${index}.min` as FieldPath<TFieldValues>
+                      }
                       render={({ field }) => (
                         <FormItem className="min-w-0">
                           <FormControl>
@@ -136,7 +138,9 @@ export function NumericRangeEditor<
                     </span>
                     <FormField
                       control={form.control}
-                      name={`${fieldName}.ranges.${index}.max` as any}
+                      name={
+                        `${fieldName}.ranges.${index}.max` as FieldPath<TFieldValues>
+                      }
                       render={({ field }) => (
                         <FormItem className="min-w-0">
                           <FormControl>

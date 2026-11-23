@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { navigate, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -19,6 +19,8 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { formatName, isUserOnline } from "@/Utils/utils";
 import { UserReadMinimal } from "@/types/user/user";
 import { Bot } from "lucide-react";
+
+import { useRouteParams } from "@/hooks/useRouteParams";
 
 interface UserCardProps {
   user: UserReadMinimal;
@@ -130,9 +132,17 @@ export function UserCard(props: UserCardProps) {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  navigate(
-                    `${facility ? `/facility/${facility}/users/${user.username}` : `/users/${user.username}`}`,
-                  );
+                  if (facility) {
+                    navigate({
+                      to: "/facility/$facilityId/users/$username",
+                      params: { facilityId: facility, username: user.username },
+                    });
+                  } else {
+                    navigate({
+                      to: "/users/$username",
+                      params: { username: user.username },
+                    });
+                  }
                 }}
               >
                 <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
@@ -151,7 +161,7 @@ export function UserCard(props: UserCardProps) {
   );
 }
 export const UserGrid = ({ users }: { users?: UserReadMinimal[] }) => {
-  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+  const facilityId = useRouteParams("/facility/:facilityId").facilityId!;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -183,7 +193,7 @@ const UserListHeader = () => {
 };
 
 const UserListRow = ({ user }: { user: UserReadMinimal }) => {
-  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+  const facilityId = useRouteParams("/facility/:facilityId").facilityId!;
   const { t } = useTranslation();
 
   return (

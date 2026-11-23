@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { OrgSelector } from "@/components/Questionnaire/OrgSelector";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { Organization } from "@/types/organization/organization";
@@ -247,12 +247,10 @@ function FacilityOrganizationsField({
   return (
     <OrganizationsFieldShell>
       {!isLoading && (
-        <FacilityOrganizationSelector
+        <FacilityOrganizationTreeSelect
           facilityId={facilityId}
           value={currentIds}
-          currentOrganizations={
-            draft?.facilityOrganizations ?? current?.results
-          }
+          knownOrganizations={draft?.facilityOrganizations ?? current?.results}
           optional
           onChange={(value, facilityOrganizations) => {
             const ids = value ?? [];

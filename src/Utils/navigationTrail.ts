@@ -1,7 +1,8 @@
 import { type ParsedLocation, useRouter } from "@tanstack/react-router";
 import { useLayoutEffect } from "react";
 
-import { getRouter } from "@/compat/routerRef";
+import { navigate } from "@/lib/router/navigate";
+import { getRouter } from "@/lib/router/routerRef";
 
 /**
  * In-app locations of this session by history index (`__TSR_index`, kept by
@@ -34,9 +35,9 @@ export function useNavigationTrail() {
 
 /**
  * Goes back to the latest history entry whose path `isOutside` accepts, as a
- * real browser back (`history.go(-n)`). Navigates to `fallback` when this
- * session has no such entry: the page was opened directly, reloaded, or
- * reached from another site.
+ * real browser back (`history.go(-n)`). Replaces the current entry with
+ * `fallback` when this session has no such entry: the page was opened
+ * directly, reloaded, or reached from another site.
  */
 export function navigateBackFrom(
   isOutside: (pathname: string) => boolean,
@@ -53,5 +54,5 @@ export function navigateBackFrom(
       return;
     }
   }
-  void router.navigate({ to: fallback });
+  navigate({ href: fallback, replace: true });
 }

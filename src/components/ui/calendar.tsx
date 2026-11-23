@@ -82,7 +82,8 @@ function Calendar({
     }, [yearRange]),
   );
 
-  const { onPrevClick, startMonth, endMonth } = props;
+  const { onPrevClick, onNextClick, startMonth, endMonth, captionLayout } =
+    props;
 
   const columnsDisplayed = navView === "years" ? 1 : numberOfMonths;
 
@@ -94,14 +95,14 @@ function Calendar({
     "relative mx-10 flex h-(--cell-size) items-center justify-center",
     props.monthCaptionClassName,
   );
-  const _weekdaysClassName = cn("flex flex-row", props.weekdaysClassName);
+  const _weekdaysClassName = cn("flex w-full", props.weekdaysClassName);
   const _weekdayClassName = cn(
-    "w-(--cell-size) text-[0.8rem] font-normal text-muted-foreground",
+    "w-(--cell-size) min-w-0 flex-1 text-[0.8rem] font-normal text-muted-foreground",
     props.weekdayClassName,
   );
   const _monthClassName = cn("w-full", props.monthClassName);
   const _captionLabelClassName = cn(
-    "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-(--cell-size) [&>svg]:size-3.5 border border-input",
+    "pointer-events-none flex h-(--cell-size) items-center justify-center gap-1 px-2 text-sm whitespace-nowrap [&>svg]:size-3.5",
     props.captionLabelClassName,
   );
   const buttonNavClassName = buttonVariants({
@@ -119,16 +120,26 @@ function Calendar({
     "left-0",
     props.buttonPreviousClassName,
   );
-  const _navClassName = cn("flex items-start", props.navClassName);
-  const _monthGridClassName = cn("mx-auto mt-4", props.monthGridClassName);
-  const _weekClassName = cn("mt-2 flex w-max items-start", props.weekClassName);
+  const _navClassName = cn(
+    "pointer-events-none absolute inset-x-0 top-0 flex items-start [&>button]:pointer-events-auto",
+    props.navClassName,
+  );
+  const _monthGridClassName = cn(
+    "mx-auto mt-4 w-full",
+    props.monthGridClassName,
+  );
+  const _weekClassName = cn(
+    "mt-2 flex w-full items-start",
+    props.weekClassName,
+  );
+  // Raise the focused cell: later cells paint over its focus outline otherwise.
   const _dayClassName = cn(
-    "flex size-(--cell-size) flex-1 items-center justify-center p-0 text-sm",
+    "flex size-(--cell-size) min-w-0 flex-1 items-center justify-center p-0 text-sm has-focus-visible:relative has-focus-visible:z-10",
     props.dayClassName,
   );
   const _dayButtonClassName = cn(
     buttonVariants({ variant: "ghost" }),
-    "size-(--cell-size) rounded-(--cell-radius) p-0 font-normal transition-none no-underline aria-selected:opacity-100",
+    "size-(--cell-size) max-w-full rounded-(--cell-radius) p-0 font-normal transition-none no-underline aria-selected:opacity-100",
     props.dayButtonClassName,
   );
   const buttonRangeClassName =
@@ -144,15 +155,15 @@ function Calendar({
     props.rangeEndClassName,
   );
   const _rangeMiddleClassName = cn(
-    "bg-muted [&>button]:bg-transparent [&>button]:text-foreground hover:[&>button]:bg-accent",
+    "day-range-middle bg-muted [&>button]:bg-transparent [&>button]:text-foreground hover:[&>button]:bg-accent",
     props.rangeMiddleClassName,
   );
   const _selectedClassName = cn(
-    "[&>button]:bg-primary [&>button]:text-primary-foreground hover:[&>button]:bg-primary hover:[&>button]:text-primary-foreground",
+    "[&:not(.day-range-middle)>button]:bg-primary [&:not(.day-range-middle)>button]:text-primary-foreground hover:[&:not(.day-range-middle)>button]:bg-primary hover:[&:not(.day-range-middle)>button]:text-primary-foreground",
     props.selectedClassName,
   );
   const _todayClassName = cn(
-    "[&>button]:bg-muted [&>button]:rounded-md",
+    "[&:not([data-selected])>button]:bg-muted [&>button]:rounded-md",
     props.todayClassName,
   );
   const _outsideClassName = cn(
@@ -165,11 +176,73 @@ function Calendar({
   );
   const _hiddenClassName = cn("invisible flex-1", props.hiddenClassName);
 
+  const components = React.useMemo<NonNullable<DayPickerProps["components"]>>(
+    () => ({
+      Chevron: ({ orientation }) => {
+        if (orientation === "left") {
+          return <ChevronLeft className="size-4" />;
+        }
+        if (orientation === "right") {
+          return <ChevronRight className="size-4" />;
+        }
+        return <ChevronDownIcon className="size-4" />;
+      },
+      Nav: ({ className }) => (
+        <Nav
+          className={className}
+          displayYears={displayYears}
+          navView={navView}
+          setDisplayYears={setDisplayYears}
+          startMonth={startMonth}
+          endMonth={endMonth}
+          onPrevClick={onPrevClick}
+          onNextClick={onNextClick}
+        />
+      ),
+      CaptionLabel: (captionProps) => (
+        <CaptionLabel
+          showYearSwitcher={
+            showYearSwitcher && !captionLayout?.startsWith("dropdown")
+          }
+          navView={navView}
+          setNavView={setNavView}
+          displayYears={displayYears}
+          {...captionProps}
+        />
+      ),
+      MonthGrid: ({ className, children, ...gridProps }) => (
+        <MonthGrid
+          className={className}
+          displayYears={displayYears}
+          startMonth={startMonth}
+          endMonth={endMonth}
+          navView={navView}
+          setNavView={setNavView}
+          {...gridProps}
+        >
+          {children}
+        </MonthGrid>
+      ),
+    }),
+    [
+      displayYears,
+      navView,
+      setDisplayYears,
+      setNavView,
+      startMonth,
+      endMonth,
+      onPrevClick,
+      showYearSwitcher,
+      onNextClick,
+      captionLayout,
+    ],
+  );
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "bg-background group/calendar p-3 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(10)] in-data-[slot=popover-content]:bg-transparent [&_button]:no-underline",
+        "bg-background group/calendar w-fit max-w-full p-3 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(10)] in-data-[slot=popover-content]:bg-transparent [&_button]:no-underline",
         className,
       )}
       formatters={{
@@ -183,6 +256,11 @@ function Calendar({
         weekday: _weekdayClassName,
         month: _monthClassName,
         caption_label: _captionLabelClassName,
+        dropdowns: "flex h-(--cell-size) items-center justify-center gap-1",
+        dropdown_root:
+          "relative rounded-md border border-input bg-background shadow-2xs has-focus-visible:border-ring has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
+        dropdown:
+          "absolute inset-0 z-10 size-full cursor-pointer opacity-0 disabled:cursor-not-allowed",
         button_next: _buttonNextClassName,
         button_previous: _buttonPreviousClassName,
         nav: _navClassName,
@@ -199,49 +277,7 @@ function Calendar({
         disabled: _disabledClassName,
         hidden: _hiddenClassName,
       }}
-      components={{
-        Chevron: ({ orientation }) => {
-          if (orientation === "left") {
-            return <ChevronLeft className="size-4" />;
-          }
-          if (orientation === "right") {
-            return <ChevronRight className="size-4" />;
-          }
-          return <ChevronDownIcon className="size-4" />;
-        },
-        Nav: ({ className }) => (
-          <Nav
-            className={className}
-            displayYears={displayYears}
-            navView={navView}
-            setDisplayYears={setDisplayYears}
-            startMonth={startMonth}
-            endMonth={endMonth}
-            onPrevClick={onPrevClick}
-          />
-        ),
-        CaptionLabel: (props) => (
-          <CaptionLabel
-            showYearSwitcher={showYearSwitcher}
-            navView={navView}
-            setNavView={setNavView}
-            displayYears={displayYears}
-            {...props}
-          />
-        ),
-        MonthGrid: ({ className, children, ...props }) => (
-          <MonthGrid
-            children={children}
-            className={className}
-            displayYears={displayYears}
-            startMonth={startMonth}
-            endMonth={endMonth}
-            navView={navView}
-            setNavView={setNavView}
-            {...props}
-          />
-        ),
-      }}
+      components={components}
       numberOfMonths={columnsDisplayed}
       {...props}
     />

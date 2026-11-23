@@ -7,13 +7,19 @@ import {
   Plus,
   Search,
 } from "lucide-react";
-import { Link } from "raviger";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -29,6 +35,8 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
 
+import { HrefLink } from "@/lib/router/HrefLink";
+import { workspaceListSearch } from "@/lib/router/search/encounter";
 import {
   isWorkspaceStatus,
   WORKSPACE_STATUSES,
@@ -52,8 +60,8 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
   const user = useAuthUser();
   const searchId = useId();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: workspaceListSearch,
     limit: 15,
-    disableCache: true,
   });
   const listDescription = {
     instance: "workspace_instance_description",
@@ -98,36 +106,52 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
           </p>
         </div>
         <Button asChild className="h-10 shrink-0 sm:h-9">
-          <Link href={`${scope.basePath}/create`} basePath="/">
+          <HrefLink href={`${scope.basePath}/create`}>
             <Plus className="size-4" aria-hidden="true" />
             {t("create_workspace")}
-          </Link>
+          </HrefLink>
         </Button>
       </div>
 
-      <Tabs
-        value={status}
-        onValueChange={(value) => updateQuery({ status: value, page: 1 })}
-      >
-        <TabsList
-          aria-label={t("status")}
-          className="flex w-full sm:w-auto sm:self-start"
+      <div>
+        <Tabs
+          value={status}
+          onValueChange={(value) => updateQuery({ status: value, page: 1 })}
+          className="max-sm:hidden"
         >
-          {WORKSPACE_STATUSES.map((value) => {
-            const Icon = WORKSPACE_STATUS_ICONS[value];
-            return (
-              <TabsTrigger
-                key={value}
-                value={value}
-                className="flex-1 sm:flex-none sm:px-4"
-              >
-                <Icon className="size-4" aria-hidden="true" />
+          <TabsList aria-label={t("status")}>
+            {WORKSPACE_STATUSES.map((value) => {
+              const Icon = WORKSPACE_STATUS_ICONS[value];
+              return (
+                <TabsTrigger
+                  key={value}
+                  value={value}
+                  className="flex-none px-4"
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                  {t(value)}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </Tabs>
+        {/* Translated status labels do not fit as tabs on phones. */}
+        <Select
+          value={status}
+          onValueChange={(value) => updateQuery({ status: value, page: 1 })}
+        >
+          <SelectTrigger aria-label={t("status")} className="w-full sm:hidden">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {WORKSPACE_STATUSES.map((value) => (
+              <SelectItem key={value} value={value}>
                 {t(value)}
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-      </Tabs>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       <div className="w-full space-y-1.5 sm:max-w-md">
         <Label htmlFor={searchId}>{t("search")}</Label>
@@ -199,13 +223,12 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
               {workspaces.map((workspace) => (
                 <TableRow key={workspace.id}>
                   <TableCell className="max-w-xs px-4 py-3 whitespace-normal">
-                    <Link
+                    <HrefLink
                       href={`${scope.basePath}/${workspace.id}/edit`}
-                      basePath="/"
                       className="break-words font-medium text-gray-950 underline-offset-4 hover:underline focus-visible:underline"
                     >
                       {workspace.name}
-                    </Link>
+                    </HrefLink>
                     <p className="mt-1 line-clamp-3 text-sm text-gray-600 sm:hidden">
                       {workspace.description || t("no_description")}
                     </p>
@@ -217,13 +240,12 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
                   </TableCell>
                   <TableCell className="px-4 py-3 text-right">
                     <Button asChild variant="outline" size="sm">
-                      <Link
+                      <HrefLink
                         href={`${scope.basePath}/${workspace.id}/edit`}
-                        basePath="/"
                         aria-label={`${t("edit")}: ${workspace.name}`}
                       >
                         {t("edit")}
-                      </Link>
+                      </HrefLink>
                     </Button>
                   </TableCell>
                 </TableRow>

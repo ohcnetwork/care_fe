@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { ArrowUpRightSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,6 +21,7 @@ import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDi
 import { MedicationReturnSheet } from "@/pages/Facility/services/pharmacy/MedicationReturnSheet";
 
 import useFilters from "@/hooks/useFilters";
+import { dispenseOrderListSearch } from "@/lib/router/search/pharmacy";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
@@ -39,6 +41,7 @@ import {
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useAuthUser from "@/hooks/useAuthUser";
+import { navigate } from "@/lib/router/navigate";
 import {
   DISPENSE_ORDER_STATUS_STYLES,
   DispenseOrderRead,
@@ -46,7 +49,6 @@ import {
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { UserReadMinimal } from "@/types/user/user";
-import { Link, navigate } from "raviger";
 
 export default function MedicationDispenseHistory({
   facilityId,
@@ -58,8 +60,8 @@ export default function MedicationDispenseHistory({
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { qParams, Pagination, updateQuery, resultsPerPage } = useFilters({
+    schema: dispenseOrderListSearch,
     limit: 14,
-    disableCache: true,
   });
   const [selectedDispenses, setSelectedDispenses] = useState<string[]>([]);
 
@@ -204,9 +206,15 @@ export default function MedicationDispenseHistory({
                 locationId={locationId}
                 patient={selectedPatient}
                 onSuccess={(deliveryOrder) => {
-                  navigate(
-                    `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}?dispenseOrderIds=${selectedDispenses.join(",")}`,
-                  );
+                  navigate({
+                    to: "/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId",
+                    params: {
+                      facilityId,
+                      locationId,
+                      deliveryOrderId: deliveryOrder.id,
+                    },
+                    search: { dispenseOrderIds: selectedDispenses.join(",") },
+                  });
                 }}
                 trigger={
                   <Button>
@@ -229,10 +237,10 @@ export default function MedicationDispenseHistory({
           onValueChange={(value) => updateQuery({ exclude_status: value })}
           className="w-full"
         >
-          <div className="w-full overflow-x-auto pb-1">
+          <div className="w-full overflow-x-auto">
             <TabsList
               variant="line"
-              className="w-full justify-evenly border-b border-border sm:justify-start"
+              className="justify-evenly sm:justify-start"
             >
               {Object.entries(DISPENSE_STATUS_OPTIONS).map(
                 ([key, { label }]) => (
@@ -363,7 +371,14 @@ export default function MedicationDispenseHistory({
 
                     <TableCell>
                       <Button variant="outline" asChild>
-                        <Link href={`/medication_dispense/order/${item.id}`}>
+                        <Link
+                          to="/facility/$facilityId/locations/$locationId/medication_dispense/order/$dispenseOrderId"
+                          params={{
+                            facilityId,
+                            locationId,
+                            dispenseOrderId: item.id,
+                          }}
+                        >
                           <ArrowUpRightSquare
                             strokeWidth={1.5}
                             className="size-4"

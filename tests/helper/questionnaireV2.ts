@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -190,6 +190,26 @@ export async function pickValuesetFromAutocomplete(
  * the block's count (`toHaveCount(1)`) before building any negative
  * assertion on it — a zero-match locator passes `.not.` checks vacuously.
  */
+/**
+ * Clicks a question's label on the builder edit canvas. Playwright retargets a
+ * label click to its control, which is inert on the edit canvas, so click the
+ * card at the label's position instead.
+ */
+export async function clickCanvasQuestionLabel(block: Locator) {
+  const label = block.locator("label").first();
+  const [blockBox, labelBox] = await Promise.all([
+    block.boundingBox(),
+    label.boundingBox(),
+  ]);
+  if (!blockBox || !labelBox) throw new Error("Question label is not visible");
+  await block.click({
+    position: {
+      x: labelBox.x - blockBox.x + Math.min(8, labelBox.width / 2),
+      y: labelBox.y - blockBox.y + labelBox.height / 2,
+    },
+  });
+}
+
 export function questionBlock(page: Page, label: string) {
   return page
     .locator("[data-question-id]")

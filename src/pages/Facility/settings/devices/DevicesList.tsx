@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   ChevronsUpDown as CaretSortIcon,
   Box as CubeIcon,
   PlusIcon,
   SearchIcon,
 } from "lucide-react";
-import { Link } from "raviger";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -32,6 +32,7 @@ import PageTitle from "@/components/Common/PageTitle";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { deviceListSearch } from "@/lib/router/search/settings";
 
 import query from "@/Utils/request/query";
 import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
@@ -47,7 +48,9 @@ export default function DevicesList({ facilityId }: Props) {
   const pluginDevices = usePluginDevices();
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: deviceListSearch,
     limit: 12,
+    cache: true,
   });
 
   // Handle search input change
@@ -115,7 +118,11 @@ export default function DevicesList({ facilityId }: Props) {
                     className="capitalize"
                     asChild
                   >
-                    <Link href={`/devices/create?type=${pluginDevice.type}`}>
+                    <Link
+                      to="/facility/$facilityId/settings/devices/create"
+                      params={{ facilityId }}
+                      search={{ type: pluginDevice.type }}
+                    >
                       <DeviceIcon className="size-4 mr-1" />
                       {pluginDevice.type}
                     </Link>
@@ -123,7 +130,10 @@ export default function DevicesList({ facilityId }: Props) {
                 );
               })}
               <DropdownMenuItem asChild>
-                <Link href="/devices/create">
+                <Link
+                  to="/facility/$facilityId/settings/devices/create"
+                  params={{ facilityId }}
+                >
                   <CubeIcon className="size-4 mr-1" />
                   {t("other")}
                 </Link>
@@ -132,7 +142,10 @@ export default function DevicesList({ facilityId }: Props) {
           </DropdownMenu>
         ) : (
           <Button variant="white" asChild>
-            <Link href="/devices/create">
+            <Link
+              to="/facility/$facilityId/settings/devices/create"
+              params={{ facilityId }}
+            >
               <PlusIcon className="size-4" />
               {t("add_device")}
             </Link>
@@ -207,7 +220,11 @@ export default function DevicesList({ facilityId }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {devices?.results?.length ? (
               devices.results.map((device) => (
-                <DeviceCard key={device.id} device={device} />
+                <DeviceCard
+                  key={device.id}
+                  device={device}
+                  facilityId={facilityId}
+                />
               ))
             ) : (
               <Card className="col-span-full">

@@ -27,7 +27,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 import { Code } from "@/types/base/code/code";
 import careTeamApi from "@/types/careTeam/careTeamApi";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
@@ -214,8 +214,9 @@ export function CareTeamSheet({
 
         <SheetBody>
           <div className="space-y-6">
-            <FacilityOrganizationSelector
+            <FacilityOrganizationTreeSelect
               singleSelection={true}
+              value={selectedOrganization ? [selectedOrganization] : []}
               onChange={handleOrganizationChange}
               facilityId={encounter.facility.id}
             />

@@ -108,7 +108,7 @@ export default function ScheduleChargeItemDefinitionSelector({
   return (
     <Sheet open={isOpen} onOpenChange={handleSheetOpenChange}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="h-8 w-full gap-2">
+        <Button variant="outline" size="sm">
           <WalletMinimal className="size-4" />
           <span className="text-gray-950 font-medium">
             {t("manage_charges")}
