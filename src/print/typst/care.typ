@@ -71,6 +71,10 @@
 )
 #let mono-fonts = ("Geist Mono",) + fonts
 
+// Whether a block this wide is narrow, like A5 portrait (128mm between 10mm
+// margins; A4 is 190mm). Narrow blocks get smaller text.
+#let _is-narrow(width) = width < 450pt
+
 /// An image at most `max-width` wide and `max-height` tall, keeping its aspect
 /// ratio; one limited by height is centred.
 #let bounded-image(path, max-width: none, max-height: none) = layout(size => {
@@ -84,6 +88,10 @@
     img
   }
 })
+
+/// A QR code from `useQrCode`. It holds a patient UUID (29 squares a side),
+/// which scans easily at this size on any paper.
+#let qr-code(path) = image(path, width: px(80))
 
 #let labelled(label, value) = [#text(weight: "semibold", label + ":") #value]
 
@@ -213,7 +221,7 @@
   } else { header-align }
   let line = px(1) + border-color
   // Narrow pages (A5 portrait) get smaller text and padding.
-  let narrow = size.width < 450pt
+  let narrow = _is-narrow(size.width)
   let inset = if narrow { (x: px(4), y: px(6)) } else { (x: px(8), y: px(8)) }
   let font-size = if narrow { text-size.xs } else { text.size }
 
@@ -319,8 +327,9 @@
   ),
 )
 
-#let _facility-info(facility) = {
-  text(size: text-size.xxl, weight: "semibold", facility.name)
+#let _facility-info(facility, narrow) = {
+  let name-size = if narrow { text-size.xl } else { text-size.xxl }
+  text(size: name-size, weight: "semibold", facility.name)
   set text(size: text-size.xs, fill: gray(500))
   if facility.address != none { linebreak(); facility.address }
   if facility.phone != none { linebreak(); facility.phone }
@@ -347,7 +356,6 @@
   }
 
   let logo = if header.logo != none { _logo(header.logo) }
-  let info = box(_facility-info(header.facility))
   let alignment = if header.logo == none { "right" } else {
     header.logo.alignment
   }
@@ -357,21 +365,26 @@
     inset: (bottom: px(8)),
     stroke: (bottom: px(1) + border-color),
     below: px(12),
-    if alignment == "center" {
-      stack(spacing: px(8), align(center, logo), info)
-    } else if alignment == "left" {
-      grid(
-        columns: (auto, 1fr),
-        column-gutter: px(12),
-        logo, align(right, info),
-      )
-    } else {
-      grid(
-        columns: (1fr, auto),
-        column-gutter: px(12),
-        info, logo,
-      )
-    },
+    // Measured across the page: next to a wide logo, the name's own cell is
+    // narrow even on A4.
+    layout(size => {
+      let info = box(_facility-info(header.facility, _is-narrow(size.width)))
+      if alignment == "center" {
+        stack(spacing: px(8), align(center, logo), info)
+      } else if alignment == "left" {
+        grid(
+          columns: (auto, 1fr),
+          column-gutter: px(12),
+          logo, align(right, info),
+        )
+      } else {
+        grid(
+          columns: (1fr, auto),
+          column-gutter: px(12),
+          info, logo,
+        )
+      }
+    }),
   )
 }
 

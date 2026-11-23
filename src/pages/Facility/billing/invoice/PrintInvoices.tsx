@@ -76,11 +76,7 @@ function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
 
   const { facility, isFacilityLoading } = useCurrentFacility();
 
-  const qrCode = useQrCode(
-    invoices[0]?.account.patient.id ?? "",
-    QR_CODE_PATH,
-    100,
-  );
+  const qrCode = useQrCode(invoices[0]?.account.patient.id ?? "", QR_CODE_PATH);
 
   if (
     isLoading ||

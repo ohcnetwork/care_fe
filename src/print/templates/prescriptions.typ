@@ -35,22 +35,31 @@
   cells
 }
 
+// Like the HTML print's flex-wrap: side by side when both columns fit at their
+// minimum widths (14rem and 12rem), else the right one goes below.
+#let detail-columns(left, right) = layout(size => {
+  let rows(r) = detail-rows(r, label-width: px(112))
+  let side-by-side = grid(
+    columns: (3fr, 2fr),
+    column-gutter: px(16),
+    rows(left), rows(right),
+  )
+  // 14rem + gap-4 + 12rem, the HTML print's flex-basis widths and gap.
+  let min-width = px(224) + px(16) + px(192)
+  if size.width >= min-width { side-by-side } else { rows(left + right) }
+})
+
 #grid(
   columns: (1fr, auto),
   column-gutter: px(16),
   stack(
     spacing: px(12),
-    grid(
-      columns: (3fr, 2fr),
-      column-gutter: px(16),
-      detail-rows(c.details.left, label-width: px(112)),
-      detail-rows(c.details.right, label-width: px(112)),
-    ),
+    detail-columns(c.details.left, c.details.right),
     if c.details.location != none {
       detail-rows((c.details.location,), label-width: px(112))
     },
   ),
-  if c.qr_code != none { image(c.qr_code, width: px(85)) },
+  if c.qr_code != none { qr-code(c.qr_code) },
 )
 
 #v(px(8))

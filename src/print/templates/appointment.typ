@@ -45,7 +45,7 @@
         text(size: text-size.xl, weight: "bold", fill: gray(950), c.token.value),
       ))
     },
-    if c.qr_code != none { image(c.qr_code, width: px(80)) },
+    if c.qr_code != none { qr-code(c.qr_code) },
   ),
 )
 

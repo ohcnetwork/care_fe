@@ -93,7 +93,7 @@ export default function AppointmentPrint(props: Props) {
     "appointment_print",
   );
 
-  const qrCode = useQrCode(patient?.id ?? "", QR_CODE_PATH, 80);
+  const qrCode = useQrCode(patient?.id ?? "", QR_CODE_PATH);
 
   if (isLoading || !appointment || !facility || isFetching || !qrCode.ready) {
     return (

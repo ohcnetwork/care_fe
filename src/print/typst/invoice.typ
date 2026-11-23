@@ -27,7 +27,7 @@
         }
       ],
     ),
-    if invoice.qr_code != none { image(invoice.qr_code, width: px(100)) },
+    if invoice.qr_code != none { qr-code(invoice.qr_code) },
   )
 }
 

@@ -34,7 +34,7 @@ export function TypstInvoicePrint({
   statusWatermark,
 }: Props) {
   const { t } = useTranslation();
-  const qrCode = useQrCode(invoice.account.patient.id, QR_CODE_PATH, 100);
+  const qrCode = useQrCode(invoice.account.patient.id, QR_CODE_PATH);
 
   const isReady =
     qrCode.ready && !isLoadingDispenses && !isVerifiedPatientLoading;

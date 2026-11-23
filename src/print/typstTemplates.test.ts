@@ -96,12 +96,11 @@ async function compile(
   template: string,
   content: unknown,
   paper: TypstPaper = "a4",
+  layout: PrintLayout = layoutFor(paper),
 ) {
   compiler.mapShadow(
     "/data.json",
-    new TextEncoder().encode(
-      JSON.stringify({ layout: layoutFor(paper), content }),
-    ),
+    new TextEncoder().encode(JSON.stringify({ layout, content })),
   );
   try {
     const result = await compiler.runWithWorld(
@@ -132,6 +131,8 @@ interface TextBox {
   right: number;
   bottom: number;
   top: number;
+  /** Font size in points. */
+  size: number;
 }
 
 async function readPdf(pdf: Uint8Array) {
@@ -156,6 +157,7 @@ async function readPdf(pdf: Uint8Array) {
         right: x + item.width,
         bottom: y,
         top: y + item.height * 0.7,
+        size: item.height,
       });
     }
     pages.push({ width: page.view[2], boxes });
@@ -253,6 +255,43 @@ test("details-table: rejects widths that don't match the header", async () => {
     ),
     /one entry per header column/,
   );
+});
+
+test("header: the hospital name is smaller on A5, but not beside a wide logo on A4", async () => {
+  // A logo this wide leaves the name's own cell narrower than A5's page on A4.
+  compiler.mapShadow(
+    "/assets/logo",
+    new TextEncoder().encode(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="40"><rect width="200" height="40"/></svg>',
+    ),
+  );
+  const nameSize = async (paper: TypstPaper) => {
+    const layout = layoutFor(paper);
+    layout.header!.logo = {
+      path: "/assets/logo",
+      width: 200,
+      height: null,
+      alignment: "right",
+    };
+    const content = detailsTable({
+      header: ["Item"],
+      widths: [null],
+      rows: [["Paracetamol"]],
+    });
+    const pdf = await readPdf(
+      await compile("details-table", content, paper, layout),
+    );
+    const name = pdf.pages[0].boxes.find((box) =>
+      box.text.startsWith("Sample"),
+    );
+    return name && Math.round(name.size * 10) / 10;
+  };
+  try {
+    assert.equal(await nameSize("a4"), 18);
+    assert.equal(await nameSize("a5"), 15);
+  } finally {
+    compiler.unmapShadow("/assets/logo");
+  }
 });
 
 test("details-table: Indian-script text prints with real letters", async () => {
@@ -436,6 +475,82 @@ test("prescriptions: a row taller than the page continues on the next page", asy
   const missing = sentences.map((_, i) => i + 1).filter((n) => !printed.has(n));
   assert.deepEqual(missing, [], `note sentences ${missing} were cut off`);
   assert.equal(pageWith(pdf, "Medicine"), 1, "the table starts on page 1");
+});
+
+test("prescriptions: on A5 the details wrap into one column, like the HTML print", async () => {
+  // Any square SVG stands in for the QR code, which takes width from the details.
+  compiler.mapShadow(
+    "/assets/qr-code.svg",
+    new TextEncoder().encode(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="29" height="29"><rect width="29" height="29"/></svg>',
+    ),
+  );
+  const content: PrescriptionsPrintContent = {
+    ...prescriptionsContent([
+      {
+        index: "1",
+        name: "Paracetamol 500 mg oral tablet",
+        instructions: [
+          {
+            dosage: "1 tablets",
+            frequency: "1-0-1 (Twice a day)",
+            duration: "5 days",
+            text: "After food",
+          },
+        ],
+        note: null,
+      },
+    ]),
+    details: {
+      left: [
+        { label: "Patient", value: "Test Patient" },
+        { label: "Age / Sex", value: "25y, Male" },
+        { label: "Mobile Number", value: "+91 00000 00000" },
+      ],
+      right: [
+        { label: "Hospital ID", value: "1" },
+        { label: "Encounter Date", value: "28 Oct 2026, Wednesday" },
+      ],
+      location: null,
+    },
+    qr_code: "/assets/qr-code.svg",
+  };
+  const details = async (paper: TypstPaper) => {
+    const { boxes } = (
+      await readPdf(await compile("prescriptions", content, paper))
+    ).pages[0];
+    const label = (text: string) => {
+      const box = boxes.find((b) => b.text.trim() === text);
+      assert.ok(box, `no "${text}" on ${paper}`);
+      return box;
+    };
+    return {
+      patient: label("Patient"),
+      mobile: label("Mobile Number"),
+      hospitalId: label("Hospital ID"),
+      // A wrapped value is split into one text box per line.
+      dateOnOneLine: boxes.some((b) =>
+        b.text.includes("28 Oct 2026, Wednesday"),
+      ),
+    };
+  };
+  try {
+    const a5 = await details("a5");
+    assert.ok(a5.dateOnOneLine, "the encounter date wrapped on A5");
+    assert.ok(
+      Math.abs(a5.hospitalId.left - a5.patient.left) < 1 &&
+        a5.hospitalId.top < a5.mobile.bottom,
+      "on A5, Hospital ID isn't below Mobile Number in one column",
+    );
+
+    const a4 = await details("a4");
+    assert.ok(
+      a4.hospitalId.left > a4.patient.left + 100,
+      "on A4, the details lost their second column",
+    );
+  } finally {
+    compiler.unmapShadow("/assets/qr-code.svg");
+  }
 });
 
 function pageWith(pdf: Awaited<ReturnType<typeof readPdf>>, text: string) {
