@@ -212,7 +212,7 @@ async function createExternalDeliveryDraft(
     await responseData(
       await page.request.post(
         `${apiUrl}/api/v1/facility/${facilityId}/charge_item_definition/${chargeItemSlug}/set_tags/`,
-        { headers, data: { tags: [tag.id] } },
+        { headers, data: { tags: [{ tag: tag.id }] } },
       ),
     );
   }
@@ -486,6 +486,8 @@ test.describe("External delivery draft items", () => {
   test("selects and saves multiple purchase request items together", async ({
     page,
   }) => {
+    // Two delivery drafts are seeded through the API before the UI flow.
+    test.slow();
     const fixture = await createExternalDeliveryDraft(page);
     const secondFixture = await createExternalDeliveryDraft(page);
     const requestPayload = {
@@ -649,6 +651,9 @@ test.describe("External delivery draft items", () => {
   test("preserves cancelled history and replaces an item only when an edit is saved", async ({
     page,
   }, testInfo) => {
+    // A long journey through many saves and reloads; 60s is too tight for it
+    // on a busy CI backend.
+    test.slow();
     const {
       facilityId,
       apiUrl,
@@ -730,6 +735,11 @@ test.describe("External delivery draft items", () => {
         })
         .first()
         .click();
+      // The search dialog is modal; until it closes the edit form is hidden
+      // from role queries.
+      await expect(
+        page.getByPlaceholder("Search Product Knowledge"),
+      ).toBeHidden();
     };
 
     await test.step("Require an explicit pack quantity for a new item and preserve it when selecting a batch", async () => {
@@ -1025,9 +1035,35 @@ test.describe("External delivery draft items", () => {
       await savedRows
         .getByRole("button", { name: "Actions", exact: true })
         .click();
-      await page
-        .getByRole("menuitem", { name: "Continue editing", exact: true })
-        .click();
+      const [focusState] = await Promise.all([
+        editForm.evaluate(
+          (element) =>
+            new Promise<{ menuMounted: boolean; scrollLocked: boolean }>(
+              (resolve) => {
+                element.addEventListener("focusin", function onFocus(event) {
+                  if (
+                    !(event.target instanceof HTMLInputElement) ||
+                    !event.target.matches("[data-pending-item-quantity]")
+                  ) {
+                    return;
+                  }
+                  element.removeEventListener("focusin", onFocus);
+                  resolve({
+                    menuMounted: Boolean(
+                      document.querySelector(
+                        '[data-slot="dropdown-menu-content"]',
+                      ),
+                    ),
+                    scrollLocked:
+                      getComputedStyle(document.body).overflowY === "hidden",
+                  });
+                });
+              },
+            ),
+        ),
+        page.getByRole("menuitem", { name: /^continue editing$/i }).click(),
+      ]);
+      expect(focusState).toEqual({ menuMounted: false, scrollLocked: false });
       await expect(editForm.locator("tbody tr")).toHaveCount(1);
       await expect(editForm.getByRole("combobox")).toBeDisabled();
       await expect(editForm.getByRole("combobox")).toContainText(

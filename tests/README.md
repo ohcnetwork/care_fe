@@ -87,9 +87,9 @@ Playwright recommends using role-based selectors:
 
 ```typescript
 // ✅ Good - Use role-based selectors
-await page.getByRole("button", { name: /login/i }).click();
+await page.getByRole("button", { name: /^sign in$/i }).click();
 await page.getByRole("textbox", { name: /username/i }).fill("user");
-await page.getByLabel(/password/i).fill("pass");
+await page.getByLabel(/^password$/i).fill("pass");
 
 // ✅ Good - Use text selectors
 await page.getByText("Submit").click();

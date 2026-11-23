@@ -2,3 +2,4 @@ dist
 public
 build
 src/config/keyboardShortcuts.json
+src/routeTree.gen.ts

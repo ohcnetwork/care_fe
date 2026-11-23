@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   ChevronLeft,
   Edit,
@@ -8,9 +9,7 @@ import {
   History,
   MoreVertical,
   Printer,
-  Truck,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -18,7 +17,6 @@ import { toast } from "sonner";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
@@ -33,19 +31,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -55,6 +45,8 @@ import {
   NamespacedExtensionData,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { usePathname } from "@/lib/router/location";
 import { cn } from "@/lib/utils";
 import UpsertLimitCallout from "@/pages/Facility/services/inventory/externalSupply/components/UpsertLimitCallout";
 import {
@@ -62,7 +54,6 @@ import {
   AddSupplyDeliveryFormHandle,
 } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
-import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
 import { ExtensionEntityType } from "@/types/extensions/extensions";
 import {
@@ -72,7 +63,6 @@ import {
   DeliveryOrderUpdate,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
-import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
   ACTIVE_SUPPLY_DELIVERY_STATUSES,
   SupplyDeliveryCondition,
@@ -83,7 +73,7 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { ExtensionContexts } from "@/Utils/schema/types";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import { formatDateTime, formatName, goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
 
 interface Props {
@@ -91,90 +81,6 @@ interface Props {
   deliveryOrderId: string;
   locationId: string;
   internal: boolean;
-}
-
-interface AllSupplyDeliveriesProps {
-  facilityId: string;
-  deliveryOrder: DeliveryOrderRetrieve;
-  locationId: string;
-  internal: boolean;
-  isRequester: boolean;
-  selectedProductKnowledge?: ProductKnowledgeBase;
-}
-
-function AllSupplyDeliveriesComponent({
-  facilityId,
-  deliveryOrder,
-  locationId,
-  internal,
-  isRequester,
-  selectedProductKnowledge,
-}: AllSupplyDeliveriesProps) {
-  const { t } = useTranslation();
-
-  const qParams = {
-    ...(internal
-      ? {
-          supplied_inventory_item_product_knowledge:
-            selectedProductKnowledge?.id,
-        }
-      : {
-          supplied_item_product_knowledge: selectedProductKnowledge?.id,
-        }),
-    ...(internal
-      ? {
-          ...(isRequester
-            ? {
-                origin: deliveryOrder.origin?.id,
-                destination: locationId,
-              }
-            : {
-                origin: locationId,
-                destination: deliveryOrder.destination?.id,
-              }),
-        }
-      : {
-          supplier: deliveryOrder?.supplier?.id,
-          destination: isRequester ? locationId : deliveryOrder.destination?.id,
-        }),
-  };
-
-  const { data: allSupplyDeliveries, isLoading: isLoadingAllSupplyDeliveries } =
-    useQuery({
-      queryKey: ["allSupplyDeliveries", qParams],
-      queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
-        queryParams: {
-          facility: facilityId,
-          ...qParams,
-        },
-      }),
-    });
-
-  return (
-    <div className="pt-2">
-      <div className="space-y-4 max-h-[68vh] overflow-y-auto px-4 pt-4">
-        {isLoadingAllSupplyDeliveries ? (
-          <TableSkeleton count={3} />
-        ) : allSupplyDeliveries?.results &&
-          allSupplyDeliveries.results.length > 0 ? (
-          <>
-            <SupplyDeliveryTable
-              deliveries={allSupplyDeliveries.results}
-              internal={internal}
-              facilityId={facilityId}
-              linkToProduct
-            />
-          </>
-        ) : (
-          <EmptyState
-            icon={<Truck className="size-5 text-primary-600" />}
-            title={t("no_deliveries_found")}
-            description={t("no_deliveries_found_description")}
-          />
-        )}
-      </div>
-    </div>
-  );
 }
 
 function getDeliveryOrderStatusActions(
@@ -221,6 +127,8 @@ export function DeliveryOrderShow({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  // The print and edit pages are below the order page, in the same tab.
+  const pathname = usePathname();
   const { getExtensions } = useExtensionSchemas();
 
   const allExtensions = getExtensions(
@@ -243,13 +151,10 @@ export function DeliveryOrderShow({
     status: SupplyDeliveryStatus.completed,
     condition: SupplyDeliveryCondition.normal,
   });
-  const [showAllDeliveries, setShowAllDeliveries] = useState(false);
   const [showCancelledDeliveries, setShowCancelledDeliveries] = useState(false);
   const deliveryFormRef = useRef<AddSupplyDeliveryFormHandle>(null);
   const [editingDeliveryIds, setEditingDeliveryIds] = useState<string[]>([]);
   const [hasPendingItemChanges, setHasPendingItemChanges] = useState(false);
-  const [selectedProductKnowledgeDrawer, setSelectedProductKnowledgeDrawer] =
-    useState<ProductKnowledgeBase>();
   const [deliveryOrderStatusDialog, setDeliveryOrderStatusDialog] = useState<{
     open: boolean;
     status: DeliveryOrderStatus | null;
@@ -539,7 +444,7 @@ export function DeliveryOrderShow({
               variant="outline"
               className="shrink-0"
               onClick={() =>
-                navigate(
+                goBack(
                   getInventoryBasePath(
                     facilityId,
                     locationId,
@@ -576,7 +481,13 @@ export function DeliveryOrderShow({
             {supplyOrderId && (
               <Button variant="outline" asChild>
                 <Link
-                  href={`/inventory/internal/${isRequester ? "receive" : "dispatch"}/orders/${supplyOrderId}`}
+                  to="/facility/$facilityId/locations/$locationId/inventory/internal/$type/orders/$id"
+                  params={{
+                    facilityId,
+                    locationId,
+                    type: isRequester ? "receive" : "dispatch",
+                    id: supplyOrderId,
+                  }}
                 >
                   <Eye className="size-4" />{" "}
                   {isRequester
@@ -586,10 +497,10 @@ export function DeliveryOrderShow({
               </Button>
             )}
             <Button variant="outline" asChild>
-              <Link href={`${deliveryOrderId}/print`}>
+              <HrefLink href={`${pathname}/print`}>
                 <Printer className="size-4" /> {t("print")}
                 <ShortcutBadge actionId="print-delivery-order" />
-              </Link>
+              </HrefLink>
             </Button>
 
             {(!isRequester || !internal) &&
@@ -600,10 +511,10 @@ export function DeliveryOrderShow({
                 </Button>
               ) : (
                 <Button variant="outline" asChild>
-                  <Link href={`${deliveryOrderId}/edit`}>
+                  <HrefLink href={`${pathname}/edit`}>
                     <Edit /> {t("edit_order")}
                     <ShortcutBadge actionId="edit-order" />
-                  </Link>
+                  </HrefLink>
                 </Button>
               ))}
 
@@ -790,10 +701,6 @@ export function DeliveryOrderShow({
                 const value = getExtensionValue(
                   deliveryOrder.extensions as NamespacedExtensionData,
                   field,
-                  {
-                    delivery_order: deliveryOrder,
-                    supply_deliveries: supplyDeliveries,
-                  },
                 );
                 if (value === undefined || value === null) return null;
 
@@ -858,15 +765,6 @@ export function DeliveryOrderShow({
                     : t("show_cancelled_items", {
                         count: cancelledDeliveriesCount,
                       })}
-                </Button>
-              )}
-              {deliveryOrder.status === DeliveryOrderStatus.pending && (
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAllDeliveries(true)}
-                >
-                  {t("view_all_deliveries")}
-                  <ShortcutBadge actionId="all-deliveries" />
                 </Button>
               )}
 
@@ -991,15 +889,6 @@ export function DeliveryOrderShow({
                             }
                           : undefined
                       }
-                      onDeliveryClick={(delivery) => {
-                        setShowAllDeliveries(true);
-                        setSelectedProductKnowledgeDrawer(
-                          internal
-                            ? delivery.supplied_inventory_item?.product
-                                ?.product_knowledge
-                            : delivery.supplied_item?.product_knowledge,
-                        );
-                      }}
                       deliveryOrderStatus={deliveryOrder.status}
                     />
                   </div>
@@ -1039,50 +928,6 @@ export function DeliveryOrderShow({
             )}
           </CardContent>
         </Card>
-
-        <Drawer
-          open={showAllDeliveries}
-          onOpenChange={(open) => {
-            setShowAllDeliveries(open);
-            if (!open) {
-              setTimeout(() => {
-                setSelectedProductKnowledgeDrawer(undefined);
-              }, 100);
-            }
-          }}
-        >
-          <DrawerContent className="max-w-7xl mx-auto px-4 sm:px-16 pb-10 ">
-            <DrawerHeader>
-              <DrawerTitle>{t("delivery_history")}</DrawerTitle>
-              <DrawerDescription>
-                {t("delivery_history_description")}
-              </DrawerDescription>
-            </DrawerHeader>
-            <div>
-              <div className="flex items-center justify-end px-4">
-                <ProductKnowledgeSelect
-                  value={selectedProductKnowledgeDrawer}
-                  onChange={(value) => {
-                    setSelectedProductKnowledgeDrawer(value);
-                  }}
-                  placeholder={t("filter_by_product")}
-                  disableFavorites
-                  alignContent="end"
-                />
-              </div>
-              {deliveryOrder && (
-                <AllSupplyDeliveriesComponent
-                  facilityId={facilityId}
-                  deliveryOrder={deliveryOrder}
-                  locationId={locationId}
-                  internal={internal}
-                  isRequester={isRequester}
-                  selectedProductKnowledge={selectedProductKnowledgeDrawer}
-                />
-              )}
-            </div>
-          </DrawerContent>
-        </Drawer>
 
         <Dialog
           open={confirmDialog.open}

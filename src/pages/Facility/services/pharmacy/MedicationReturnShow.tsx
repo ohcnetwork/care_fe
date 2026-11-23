@@ -4,6 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { Link, useSearch } from "@tanstack/react-router";
 import {
   ChevronLeft,
   EllipsisVertical,
@@ -12,7 +13,6 @@ import {
   Printer,
   Truck,
 } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -42,6 +42,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+import { navigate } from "@/lib/router/navigate";
 import { AddMedicationReturnItemForm } from "@/pages/Facility/services/pharmacy/components/AddMedicationReturnItemForm";
 import { MedicationReturnItemsTable } from "@/pages/Facility/services/pharmacy/components/MedicationReturnItemsTable";
 import { MEDICATION_DISPENSE_CANCELLED_STATUSES } from "@/types/emr/medicationDispense/medicationDispense";
@@ -83,9 +84,9 @@ export default function MedicationReturnShow({
   });
   const [enteredInErrorDialogOpen, setEnteredInErrorDialogOpen] =
     useState(false);
-  const [{ dispenseOrderIds: dispenseOrderIdsParam }] = useQueryParams<{
-    dispenseOrderIds?: string;
-  }>();
+  const { dispenseOrderIds: dispenseOrderIdsParam } = useSearch({
+    from: "/_app/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/",
+  });
 
   const dispenseOrderIds =
     dispenseOrderIdsParam?.split(",").filter(Boolean) || [];
@@ -352,8 +353,8 @@ export default function MedicationReturnShow({
             {deliveryOrder.status === DeliveryOrderStatus.completed && (
               <Button variant="outline" asChild>
                 <Link
-                  href={`${basePath}/order/${deliveryOrderId}/print`}
-                  basePath="/"
+                  to="/facility/$facilityId/locations/$locationId/medication_return/order/$deliveryOrderId/print"
+                  params={{ facilityId, locationId, deliveryOrderId }}
                 >
                   <Printer className="size-4" /> {t("print")}
                 </Link>
@@ -423,9 +424,14 @@ export default function MedicationReturnShow({
                     <Button
                       variant="link"
                       className="p-0 h-auto text-lg font-semibold"
-                      onClick={() =>
-                        navigate(`/patient/${deliveryOrder.patient?.id}`)
-                      }
+                      onClick={() => {
+                        const patientId = deliveryOrder.patient?.id;
+                        if (!patientId) return;
+                        navigate({
+                          to: "/patient/$id/{-$tab}",
+                          params: { id: patientId },
+                        });
+                      }}
                     >
                       {deliveryOrder.patient.name}
                     </Button>
@@ -477,6 +483,8 @@ export default function MedicationReturnShow({
                       variant="link"
                       className="p-0 h-auto text-primary-600 font-semibold"
                       onClick={() => {
+                        const invoiceId = deliveryOrder.patient_invoice_id;
+                        if (!invoiceId) return;
                         // Filter out the return invoice itself from related invoices
                         const relatedInvoiceIds = [
                           ...new Set(
@@ -485,21 +493,21 @@ export default function MedicationReturnShow({
                                 item.charge_item?.paid_invoice?.id ?? [],
                             ) || [],
                           ),
-                        ].filter(
-                          (id) => id !== deliveryOrder.patient_invoice_id,
-                        );
-                        const queryParams = new URLSearchParams({
+                        ].filter((id) => id !== invoiceId);
+                        const search: Record<string, string> = {
                           sourceUrl: basePath + "/order/" + deliveryOrderId,
-                        });
+                        };
                         if (relatedInvoiceIds.length > 0) {
-                          queryParams.set(
-                            "relatedInvoices",
-                            relatedInvoiceIds.join(","),
-                          );
+                          search.relatedInvoices = relatedInvoiceIds.join(",");
                         }
-                        navigate(
-                          `/facility/${facilityId}/billing/invoices/${deliveryOrder.patient_invoice_id}?${queryParams.toString()}`,
-                        );
+                        navigate({
+                          to: "/facility/$facilityId/billing/invoices/$invoiceId",
+                          params: {
+                            facilityId,
+                            invoiceId,
+                          },
+                          search,
+                        });
                       }}
                     >
                       {t("view_invoice")}

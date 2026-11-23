@@ -6,6 +6,8 @@
     "src/PluginRegistry.ts",
     "src/Locale/update_locale.js",
     "src/lib/override/index.ts",
+    "public/loading-screen.js",
+    "public/runtime-env.js",
     "tests/globalSetup.ts",
     "tests/setup/*.setup.ts"
   ],
@@ -17,7 +19,12 @@
     "src/components/Common/Table.tsx": ["exports"],
     "src/Utils/decimal.ts": ["exports"]
   },
-  "ignore": [".opencode/**"],
-  "ignoreUnresolved": ["__federation__", "@/supportedBrowsers"],
+  "ignore": [
+    ".opencode/**",
+    "tests/fixtures/plugin/remoteEntry.js",
+    "tests/fixtures/plugin/registeredGroupRemoteEntry.js",
+    "tests/fixtures/date-range-picker/main.tsx"
+  ],
+  "ignoreUnresolved": ["__federation__"],
   "ignoreDependencies": ["workbox-core", "workbox-precaching", "pdfjs-dist"]
 }

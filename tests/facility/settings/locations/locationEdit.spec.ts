@@ -77,7 +77,10 @@ test.describe("Facility Location Edit", () => {
     });
 
     await test.step("Submit updated location", async () => {
-      await page.getByRole("button", { name: "Update" }).click();
+      await page
+        .getByRole("dialog", { name: "Edit Location", exact: true })
+        .getByRole("button", { name: "Update", exact: true })
+        .click();
     });
 
     await test.step("Verify updates in table", async () => {

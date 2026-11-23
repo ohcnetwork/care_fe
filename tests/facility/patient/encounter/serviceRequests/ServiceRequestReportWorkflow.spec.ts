@@ -4,12 +4,15 @@ import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
+import { reportTypeCombobox } from "./serviceRequest";
+
 test.use({ storageState: "tests/.auth/user.json" });
 
 interface ReportWorkflowOptions {
   hasReportCode?: boolean;
   hasExistingReport?: boolean;
   reportStatus?: "preliminary" | "final";
+  specimenScenario?: "fractional-template" | "draft-without-quantity";
 }
 
 async function mockReportWorkflow(
@@ -18,6 +21,7 @@ async function mockReportWorkflow(
     hasReportCode = false,
     hasExistingReport = false,
     reportStatus = "preliminary",
+    specimenScenario,
   }: ReportWorkflowOptions = {},
 ) {
   const facilityId = getFacilityId();
@@ -28,13 +32,33 @@ async function mockReportWorkflow(
     code: faker.string.alphanumeric(8),
     display: faker.word.words(3),
   };
+  const specimenDefinition = {
+    id: faker.string.uuid(),
+    slug: faker.string.uuid(),
+    title: faker.word.words(3),
+    type_collected: code,
+    collection: {
+      quantity: {
+        value: specimenScenario === "fractional-template" ? "0.5" : "4",
+        unit: code,
+      },
+    },
+  };
+  const draft = {
+    id: faker.string.uuid(),
+    status: "draft",
+    accession_identifier: faker.string.uuid(),
+    specimen_definition: specimenDefinition,
+    specimen_type: code,
+    collection: { quantity: null },
+  };
   const activity = {
     id: faker.string.uuid(),
     slug: faker.string.uuid(),
     title: faker.word.words(3),
     classification: "laboratory",
     diagnostic_report_codes: hasReportCode ? [code] : [],
-    specimen_requirements: [],
+    specimen_requirements: specimenScenario ? [specimenDefinition] : [],
     observation_result_requirements: [],
   };
   const encounter = {
@@ -92,7 +116,8 @@ async function mockReportWorkflow(
           activity_definition: activity,
           encounter,
           diagnostic_reports: reports,
-          specimens: [],
+          specimens:
+            specimenScenario === "draft-without-quantity" ? [draft] : [],
           locations: [],
           tags: [],
         },
@@ -117,10 +142,52 @@ async function mockReportWorkflow(
     activity,
     report,
     reportCollectionUrl,
+    createDraftUrl: `**/service_request/${serviceRequestId}/create_specimen_from_definition/`,
+    updateSpecimenUrl: `**/specimen/${draft.id}/`,
   };
 }
 
 test.describe("Service request report workflow", () => {
+  test("does not copy a fractional template quantity into the draft", async ({
+    page,
+  }) => {
+    const fixture = await mockReportWorkflow(page, {
+      specimenScenario: "fractional-template",
+    });
+    await page.route(fixture.createDraftUrl, (route) =>
+      route.fulfill({ status: 201, json: {} }),
+    );
+    await page.goto(fixture.url);
+    const created = page.waitForRequest(fixture.createDraftUrl);
+    await page.getByRole("button", { name: "Collect Specimen" }).click();
+    const { specimen } = (await created).postDataJSON();
+    expect(specimen.collection.quantity).toBeNull();
+    await expect(page.getByPlaceholder("Value", { exact: true })).toHaveValue(
+      "0.5",
+    );
+  });
+
+  test("sends null when a collector clears the optional quantity", async ({
+    page,
+  }) => {
+    const fixture = await mockReportWorkflow(page, {
+      specimenScenario: "draft-without-quantity",
+    });
+    await page.route(fixture.updateSpecimenUrl, (route) =>
+      route.fulfill({ json: {} }),
+    );
+    await page.goto(fixture.url);
+    await page.getByRole("button", { name: "Collect Specimen" }).click();
+    const value = page.getByPlaceholder("Value", { exact: true });
+    // Reopening the draft must not reapply the definition's quantity.
+    await expect(value).toHaveValue("");
+    await value.fill("2");
+    await value.fill("");
+    const updated = page.waitForRequest(fixture.updateSpecimenUrl);
+    await page.getByRole("button", { name: "Mark as collected" }).click();
+    expect((await updated).postDataJSON().collection.quantity).toBeNull();
+  });
+
   test("hides report entry for a template without observations, report codes, or existing reports", async ({
     page,
   }) => {
@@ -147,10 +214,7 @@ test.describe("Service request report workflow", () => {
     await expect(
       page.getByRole("button", { name: "Test Results Entry", exact: true }),
     ).toBeVisible();
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: "Select Diagnostic Report Type" })
-      .click();
+    await reportTypeCombobox(page).click();
     await page
       .getByRole("option", {
         name: `${fixture.report.code.display} (${fixture.report.code.code})`,
@@ -188,7 +252,7 @@ test.describe("Service request report workflow", () => {
     ).toHaveCount(0);
   });
 
-  test("shows updates within the creation minute in collapsed and expanded report headers", async ({
+  test("shows updates within the creation minute in collapsed and expanded reports", async ({
     page,
   }) => {
     const fixture = await mockReportWorkflow(page, {
@@ -196,10 +260,12 @@ test.describe("Service request report workflow", () => {
       reportStatus: "final",
     });
     await page.goto(fixture.url);
-    const expand = page.getByRole("button", {
-      name: `Expand ${fixture.report.code.display}`,
-      exact: true,
-    });
+    const expand = page
+      .locator("#service-request-section-review")
+      .getByRole("button", {
+        name: `Expand ${fixture.report.code.display}`,
+        exact: true,
+      });
     await expect(expand).toContainText("Updated:");
     await expect(expand.locator("time")).toHaveAttribute(
       "datetime",
@@ -207,18 +273,21 @@ test.describe("Service request report workflow", () => {
     );
     await expand.click();
 
-    const collapse = page.getByRole("button", {
-      name: `Collapse ${fixture.report.code.display}`,
-      exact: true,
-    });
-    await expect(collapse).toContainText("Created:");
-    await expect(collapse).toContainText("Last Updated:");
-    await expect(collapse.locator("time")).toHaveCount(2);
-    await expect(collapse.locator("time").first()).toHaveAttribute(
+    const review = page.locator("#service-request-section-review");
+    await expect(
+      review.getByRole("button", {
+        name: `Collapse ${fixture.report.code.display}`,
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(review.getByText(/^Created:/)).toBeVisible();
+    await expect(review.getByText(/^Last Updated:/)).toBeVisible();
+    await expect(review.locator("time")).toHaveCount(2);
+    await expect(review.locator("time").first()).toHaveAttribute(
       "datetime",
       fixture.report.created_date,
     );
-    await expect(collapse.locator("time").last()).toHaveAttribute(
+    await expect(review.locator("time").last()).toHaveAttribute(
       "datetime",
       fixture.report.modified_date,
     );

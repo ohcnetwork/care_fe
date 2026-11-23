@@ -1,5 +1,11 @@
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
-import * as React from "react";
+// CareUI registry source: ohcnetwork/careui (4e143863).
+/**
+ * @name scroll-area
+ * @description Augments native scroll functionality for custom, cross-browser styling.
+ * @dependencies @base-ui/react
+ * @type registry:ui
+ */
+import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area";
 
 import { cn } from "@/lib/utils";
 
@@ -7,7 +13,7 @@ function ScrollArea({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.Root>) {
+}: ScrollAreaPrimitive.Root.Props) {
   return (
     <ScrollAreaPrimitive.Root
       data-slot="scroll-area"
@@ -16,7 +22,7 @@ function ScrollArea({
     >
       <ScrollAreaPrimitive.Viewport
         data-slot="scroll-area-viewport"
-        className="focus-visible:ring-gray-950/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1 dark:focus-visible:ring-gray-300/50"
+        className="focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1"
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
@@ -30,26 +36,23 @@ function ScrollBar({
   className,
   orientation = "vertical",
   ...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>) {
+}: ScrollAreaPrimitive.Scrollbar.Props) {
   return (
-    <ScrollAreaPrimitive.ScrollAreaScrollbar
+    <ScrollAreaPrimitive.Scrollbar
       data-slot="scroll-area-scrollbar"
+      data-orientation={orientation}
       orientation={orientation}
       className={cn(
-        "flex touch-none p-px transition-colors select-none",
-        orientation === "vertical" &&
-          "h-full w-2.5 border-l border-l-transparent",
-        orientation === "horizontal" &&
-          "h-2.5 flex-col border-t border-t-transparent",
+        "flex touch-none p-px transition-colors select-none data-horizontal:h-2.5 data-horizontal:flex-col data-horizontal:border-t data-horizontal:border-t-transparent data-vertical:h-full data-vertical:w-2.5 data-vertical:border-l data-vertical:border-l-transparent",
         className,
       )}
       {...props}
     >
-      <ScrollAreaPrimitive.ScrollAreaThumb
+      <ScrollAreaPrimitive.Thumb
         data-slot="scroll-area-thumb"
-        className="bg-gray-200 relative flex-1 rounded-full dark:bg-gray-800"
+        className="bg-border relative flex-1 rounded-full"
       />
-    </ScrollAreaPrimitive.ScrollAreaScrollbar>
+    </ScrollAreaPrimitive.Scrollbar>
   );
 }
 

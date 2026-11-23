@@ -1,25 +1,19 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
 export function selectedMultiFilterBar(page: Page, label: RegExp) {
-  return page
-    .locator('[data-slot="dropdown-menu-trigger"]')
-    .filter({ hasText: label })
-    .locator("xpath=..");
+  return page.getByRole("group", { name: label });
 }
 
 export async function clearSelectedMultiFilter(page: Page, label: RegExp) {
   await page.keyboard.press("Escape");
   await selectedMultiFilterBar(page, label)
-    .locator('[data-slot="button"]')
+    .getByRole("button", { name: "Remove filter", exact: true })
     .click();
 }
 
 export async function clearAllMultiFilters(page: Page) {
   await page.keyboard.press("Escape");
-  await page
-    .locator('[data-slot="button"]')
-    .filter({ hasText: /clear all/i })
-    .click();
+  await page.getByRole("button", { name: /^clear all$/i }).click();
 }
 
 export async function openMultiFilter(
@@ -28,7 +22,18 @@ export async function openMultiFilter(
   scope: Page | Locator = page,
 ) {
   await scope.getByRole("button", { name: /^filter$/i }).click();
-  await page.getByRole("menuitem", { name: filterName }).click();
+  await page.getByRole("option", { name: filterName }).click();
+}
+
+/** Picks one option of a list filter (status, type, method) and closes it. */
+export async function applyOptionFilter(
+  page: Page,
+  filterName: RegExp,
+  optionName: RegExp,
+) {
+  await openMultiFilter(page, filterName);
+  await page.getByRole("option", { name: optionName }).click();
+  await page.keyboard.press("Escape");
 }
 
 export async function applyDateFilterPreset(
@@ -50,10 +55,11 @@ export async function applyCustomDateFilterRange(
   await openMultiFilter(page, filterName);
   await page.getByRole("menuitem", { name: /custom date range/i }).click();
 
-  const dateInputs = page.locator('input[type="date"]');
-  await dateInputs.first().fill(after);
-  await dateInputs.nth(1).fill(before);
-  await page.getByRole("button", { name: /confirm/i }).click();
+  const dateInputs = page.locator('[data-slot="date-range-picker"] input');
+  const localFormat = (date: string) => date.split("-").reverse().join("/");
+  await dateInputs.first().fill(localFormat(after));
+  await dateInputs.nth(1).fill(localFormat(before));
+  await page.getByRole("button", { name: /^apply$/i }).click();
   await page.keyboard.press("Escape");
 }
 

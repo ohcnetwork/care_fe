@@ -1,12 +1,12 @@
 declare module "markdown-it-mark" {
-  import type { PluginSimple } from "markdown-it";
+  import type { MarkdownIt } from "markdown-it";
 
-  const markdownItMark: PluginSimple;
+  const markdownItMark: (md: MarkdownIt) => void;
   export default markdownItMark;
 }
 
 declare module "markdown-it-task-lists" {
-  import type { PluginWithOptions } from "markdown-it";
+  import type { MarkdownIt } from "markdown-it";
 
   interface TaskListOptions {
     enabled?: boolean;
@@ -14,6 +14,9 @@ declare module "markdown-it-task-lists" {
     labelAfter?: boolean;
   }
 
-  const markdownItTaskLists: PluginWithOptions<TaskListOptions>;
+  const markdownItTaskLists: (
+    md: MarkdownIt,
+    options?: TaskListOptions,
+  ) => void;
   export default markdownItTaskLists;
 }

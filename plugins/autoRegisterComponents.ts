@@ -327,7 +327,7 @@ function collectComponentTargets(
   return targets;
 }
 
-export function collectUnsupportedComponentTargets(
+function collectUnsupportedComponentTargets(
   source: string,
   id: string,
 ): ComponentTarget[] {
@@ -394,7 +394,7 @@ function findTsxFiles(root: string): string[] {
 
 function collectRegisteredComponentTargets(
   srcRoot: string,
-  overrideRoot: string,
+  excludedRoots: string[],
 ): { targets: ComponentTarget[]; unsupported: ComponentTarget[] } {
   const targets: ComponentTarget[] = [];
   const unsupported: ComponentTarget[] = [];
@@ -402,7 +402,7 @@ function collectRegisteredComponentTargets(
   for (const filePath of findTsxFiles(srcRoot)) {
     const normalizedPath = normalizePath(filePath);
 
-    if (normalizedPath.startsWith(overrideRoot)) {
+    if (excludedRoots.some((root) => normalizedPath.startsWith(root))) {
       continue;
     }
 
@@ -416,7 +416,7 @@ function collectRegisteredComponentTargets(
   return { targets, unsupported };
 }
 
-export function assertUniqueComponentNames(targets: ComponentTarget[]) {
+function assertUniqueComponentNames(targets: ComponentTarget[]) {
   const componentFiles = new Map<string, Set<string>>();
 
   for (const target of targets) {
@@ -449,7 +449,7 @@ export function assertUniqueComponentNames(targets: ComponentTarget[]) {
   );
 }
 
-export function assertAllowlistFormsSupported(
+function assertAllowlistFormsSupported(
   unsupported: ComponentTarget[],
   include: ReadonlySet<string> | null | undefined,
 ) {
@@ -482,7 +482,7 @@ export function assertAllowlistFormsSupported(
   );
 }
 
-export function assertKnownComponentNames(
+function assertKnownComponentNames(
   targets: ComponentTarget[],
   include: ReadonlySet<string> | null | undefined,
   unsupported: ComponentTarget[],
@@ -509,7 +509,7 @@ export function assertKnownComponentNames(
   );
 }
 
-export function transformSource(
+function transformSource(
   source: string,
   id: string,
   include: ReadonlySet<string> | null | undefined,
@@ -638,21 +638,23 @@ export function autoRegisterComponents({
   include = null,
 }: AutoRegisterComponentsOptions = {}): Plugin {
   let srcRoot = "";
-  let overrideRoot = "";
+  // Not scanned: the override framework itself, and TanStack route files,
+  // whose `Route` export is a route object rather than a component.
+  let excludedRoots: string[] = [];
 
   return {
     name: "auto-register-components",
     enforce: "pre",
     configResolved(config) {
       srcRoot = `${normalizePath(path.resolve(config.root, "src"))}/`;
-      overrideRoot = `${normalizePath(
-        path.resolve(config.root, "src/lib/override"),
-      )}/`;
+      excludedRoots = ["src/lib/override", "src/routes"].map(
+        (dir) => `${normalizePath(path.resolve(config.root, dir))}/`,
+      );
     },
     buildStart() {
       const { targets, unsupported } = collectRegisteredComponentTargets(
         srcRoot,
-        overrideRoot,
+        excludedRoots,
       );
       assertUniqueComponentNames(targets);
       assertAllowlistFormsSupported(unsupported, include);
@@ -664,7 +666,7 @@ export function autoRegisterComponents({
       if (
         !normalizedId.endsWith(".tsx") ||
         !normalizedId.startsWith(srcRoot) ||
-        normalizedId.startsWith(overrideRoot)
+        excludedRoots.some((root) => normalizedId.startsWith(root))
       ) {
         return null;
       }

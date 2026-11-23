@@ -17,8 +17,8 @@ on:
     # here have no effect until they land on `develop`. Matched by workflow `name:`, not filename.
     workflows:
       - "CARE PR Reviewer"
+      - "CARE reply agent"
       - "Daily Playwright Test Improver"
-      - "Thank You Note Generator"
     types: [completed]
 
 # No workflow-level permissions; the single job opts into exactly what it needs.
@@ -156,9 +156,16 @@ jobs:
           #
           # `-X GET -f` puts the branch in the query string with proper encoding, which matters for
           # branch names like `renovate/all-dependencies-(patch)`.
-          HIGHEST=$(gh api -X GET "repos/$GH_REPO/actions/workflows/$WORKFLOW_ID/runs" \
-            -f branch="$HEAD_BRANCH" -f per_page=30 \
-            --jq '[.workflow_runs[].id] | max // empty' 2>/dev/null || true)
+          #
+          # Not for the CARE reply agent: each of its runs answers one human comment, and every run is
+          # dispatched or triggered on the default branch, so a newer run there is a different comment
+          # rather than a replacement. Checking would skip nearly every retry on a busy day.
+          HIGHEST=""
+          if [ "$WORKFLOW_NAME" != "CARE reply agent" ]; then
+            HIGHEST=$(gh api -X GET "repos/$GH_REPO/actions/workflows/$WORKFLOW_ID/runs" \
+              -f branch="$HEAD_BRANCH" -f per_page=30 \
+              --jq '[.workflow_runs[].id] | max // empty' 2>/dev/null || true)
+          fi
 
           if [ -n "$HIGHEST" ] && [ "$HIGHEST" -gt "$RUN_ID" ]; then
             echo "Run $HIGHEST supersedes $RUN_ID on $HEAD_BRANCH — not retrying."
