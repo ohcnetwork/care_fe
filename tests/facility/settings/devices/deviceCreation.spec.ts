@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import { selectComboboxOption } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -216,8 +217,6 @@ test.describe("Facility Devices Management", () => {
       contactType(page, index).locator("../..");
     const contactValue = (page: Page, index: number) =>
       contactRow(page, index).getByRole("textbox");
-    // Default zod messages are not localized in production builds, so email
-    // and URL errors are checked for presence rather than text.
     const contactError = (page: Page, index: number) =>
       contactRow(page, index).locator('[data-slot="form-message"]');
 
@@ -226,8 +225,10 @@ test.describe("Facility Devices Management", () => {
       index: number,
       type: string,
     ) => {
-      await contactType(page, index).click();
-      await page.getByRole("option", { name: type, exact: true }).click();
+      await selectComboboxOption(contactType(page, index), {
+        name: type,
+        exact: true,
+      });
       await expect(contactType(page, index)).toHaveText(type);
     };
 
@@ -250,7 +251,7 @@ test.describe("Facility Devices Management", () => {
       page,
     }) => {
       await addContact(page, 0, "Email", "invalid-email");
-      await expect(contactError(page, 0)).toBeVisible();
+      await expect(contactError(page, 0)).toHaveText("Invalid email address");
 
       await selectContactType(page, 0, "Phone");
       await expect(contactValue(page, 0)).toHaveValue("");
@@ -269,13 +270,13 @@ test.describe("Facility Devices Management", () => {
     test("Validate a kept value against the new contact type", async ({
       page,
     }) => {
-      await test.step("Email to URL keeps the error for a value that is not a URL", async () => {
+      await test.step("Email to URL shows the URL error", async () => {
         await addContact(page, 0, "Email", "invalid-email");
-        await expect(contactError(page, 0)).toBeVisible();
+        await expect(contactError(page, 0)).toHaveText("Invalid email address");
 
         await selectContactType(page, 0, "URL");
         await expect(contactValue(page, 0)).toHaveValue("invalid-email");
-        await expect(contactError(page, 0)).toBeVisible();
+        await expect(contactError(page, 0)).toHaveText("Invalid URL");
       });
 
       await test.step("URL to Other clears the error for a valid value", async () => {
@@ -320,12 +321,12 @@ test.describe("Facility Devices Management", () => {
     }) => {
       await addContact(page, 0, "Email", "invalid-email-1");
       await addContact(page, 1, "Email", "invalid-email-2");
-      await expect(contactError(page, 0)).toBeVisible();
-      await expect(contactError(page, 1)).toBeVisible();
+      await expect(contactError(page, 0)).toHaveText("Invalid email address");
+      await expect(contactError(page, 1)).toHaveText("Invalid email address");
 
       await selectContactType(page, 0, "Phone");
       await expect(contactError(page, 0)).toBeHidden();
-      await expect(contactError(page, 1)).toBeVisible();
+      await expect(contactError(page, 1)).toHaveText("Invalid email address");
     });
   });
 });
