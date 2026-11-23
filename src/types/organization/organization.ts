@@ -1,7 +1,7 @@
 import { t } from "i18next";
 
 import { RoleRead } from "@/types/emr/role/role";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 type org_type = "team" | "govt" | "role" | "product_supplier" | "other";
 
@@ -58,7 +58,7 @@ export interface OrganizationCreate {
 
 export interface OrganizationUserRole {
   id: string;
-  user: UserReadMinimal;
+  user: UserSpec;
   role: RoleRead;
 }
 

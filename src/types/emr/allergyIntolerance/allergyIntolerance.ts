@@ -1,5 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export const ALLERGY_CLINICAL_STATUS = [
   "active",
@@ -29,9 +29,9 @@ export interface AllergyIntolerance {
   criticality: AllergyCriticality;
   last_occurrence?: string;
   note?: string;
-  created_by: UserReadMinimal;
+  created_by: UserSpec;
   encounter: string;
-  edited_by?: UserReadMinimal;
+  edited_by?: UserSpec;
   created_date: string;
   modified_date: string;
 }

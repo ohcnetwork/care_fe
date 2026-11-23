@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { CareUIPageTitle } from "@/components/ui/typography";
 import UserAvatar from "@/components/Users/UserAvatar";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
-import { UserRead } from "@/types/user/user";
+import { UserRetrieveSpec } from "@/types/user/user";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface UserBannerProps {
-  userData: UserRead;
+  userData: UserRetrieveSpec;
   onEdit?: () => void;
 }
 

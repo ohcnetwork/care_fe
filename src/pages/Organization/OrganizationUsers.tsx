@@ -33,7 +33,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 import AddUserSheet from "./components/AddUserSheet";
 import EditUserRoleSheet from "./components/EditUserRoleSheet";
@@ -49,7 +49,13 @@ interface Props {
   routeContext?: RouteContext;
 }
 
-function UserStatusBadge({ user }: { user: UserReadMinimal }) {
+function UserStatusBadge({
+  user,
+  isServiceAccount,
+}: {
+  user: UserSpec;
+  isServiceAccount: boolean;
+}) {
   const { t } = useTranslation();
 
   if (user.deleted) {
@@ -61,7 +67,7 @@ function UserStatusBadge({ user }: { user: UserReadMinimal }) {
     );
   }
 
-  if (user.is_service_account) {
+  if (isServiceAccount) {
     return (
       <Badge variant="secondary" size="sm">
         <Bot />
@@ -364,7 +370,10 @@ export default function OrganizationUsers({
                                 </TableCell>
                               )}
                               <TableCell className="px-4 py-3">
-                                <UserStatusBadge user={user} />
+                                <UserStatusBadge
+                                  user={user}
+                                  isServiceAccount={isServiceAccount}
+                                />
                               </TableCell>
                               <TableCell className="px-4 py-3">
                                 <div className="flex items-center justify-end gap-2">

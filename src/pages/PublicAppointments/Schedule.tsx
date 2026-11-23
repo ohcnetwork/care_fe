@@ -264,9 +264,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                     <h3 className="truncate text-xl font-semibold">
                       {formatName(userData)}
                     </h3>
-                    <p className="text-sm text-gray-500 truncate">
-                      {userData.user_type}
-                    </p>
                   </div>
                 </div>
 

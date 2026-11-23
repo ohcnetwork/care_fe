@@ -67,9 +67,6 @@ export function FacilityNavUser({
                     <span className="truncate font-medium">
                       {formatName(user)}
                     </span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {user.user_type ? t(user.user_type) : user.username}
-                    </span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4 opacity-60" />
                 </>

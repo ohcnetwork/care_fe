@@ -1,7 +1,7 @@
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationRead } from "@/types/location/location";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 import RenderFacilityUserFilter from "@/components/ui/multi-filter/facilityUserFilter";
 import RenderActivityDefinitionFilter, {
@@ -97,7 +97,7 @@ export default function FilterRenderer({
         <>
           <RenderCareTeamFilter
             {...commonProps}
-            selectedUsers={selected as UserReadMinimal[]}
+            selectedUsers={selected as UserSpec[]}
           />
           <NavigationHelper isActiveFilter={true} />
         </>
@@ -107,7 +107,7 @@ export default function FilterRenderer({
         <>
           <RenderFacilityUserFilter
             {...commonProps}
-            selectedUsers={selected as UserReadMinimal[]}
+            selectedUsers={selected as UserSpec[]}
           />
           <NavigationHelper isActiveFilter={true} />
         </>

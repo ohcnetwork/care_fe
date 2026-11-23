@@ -1,6 +1,6 @@
 import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
 import { SlugConfig } from "@/types/base/slug/slugConfig";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export enum ResourceCategoryResourceType {
   product_knowledge = "product_knowledge",
@@ -45,8 +45,8 @@ export interface ResourceCategoryBase {
 export interface ResourceCategoryRead extends ResourceCategoryBase {
   created_at: string;
   updated_at: string;
-  created_by: UserReadMinimal;
-  updated_by: UserReadMinimal;
+  created_by: UserSpec;
+  updated_by: UserSpec;
 }
 
 export interface ResourceCategoryCreate {

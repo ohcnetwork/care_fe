@@ -7,13 +7,13 @@ import { toast } from "sonner";
 
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 
-import { UserBase } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 import mutate from "@/Utils/request/mutate";
 import { goBack } from "@/Utils/utils";
 
 interface ConfirmDialogProps {
-  user: UserBase;
+  user: UserSpec;
   trigger?: React.ReactNode;
   isOwnAccount?: boolean;
 }

@@ -1,4 +1,4 @@
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export interface NoteMessageRevision {
   message: string;
@@ -11,8 +11,8 @@ export interface NoteRead {
   id: string;
   message: string; // Markdown
   message_history: { history?: NoteMessageRevision[] };
-  created_by: UserReadMinimal | null;
-  updated_by: UserReadMinimal | null;
+  created_by: UserSpec | null;
+  updated_by: UserSpec | null;
   created_date: string;
   modified_date: string;
 }

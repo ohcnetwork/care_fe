@@ -14,7 +14,7 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import useAuthUser from "@/hooks/useAuthUser";
 import facilityApi from "@/types/facility/facilityApi";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 import FilterHeader from "./filterHeader";
 import { FilterConfig, FilterDateRange } from "./utils/Utils";
@@ -25,8 +25,8 @@ function CareTeamFilterDropdown({
   facilityId,
   handleBack,
 }: {
-  selectedUsers: UserReadMinimal[];
-  onUsersChange: (users: UserReadMinimal[]) => void;
+  selectedUsers: UserSpec[];
+  onUsersChange: (users: UserSpec[]) => void;
   facilityId: string;
   handleBack?: () => void;
 }) {
@@ -47,7 +47,7 @@ function CareTeamFilterDropdown({
     enabled: !!facilityId,
   });
 
-  const handleUserToggle = (user: UserReadMinimal) => {
+  const handleUserToggle = (user: UserSpec) => {
     const isSelected = selectedUsers.some((u) => u.id === user.id);
     if (isSelected) {
       // Deselect if already selected
@@ -233,10 +233,10 @@ export default function RenderCareTeamFilter({
   facilityId,
 }: {
   filter: FilterConfig;
-  selectedUsers: UserReadMinimal[];
+  selectedUsers: UserSpec[];
   onFilterChange: (
     filterKey: string,
-    values: string[] | UserReadMinimal[] | FilterDateRange,
+    values: string[] | UserSpec[] | FilterDateRange,
   ) => void;
   handleBack?: () => void;
   facilityId?: string;
@@ -269,7 +269,7 @@ export default function RenderCareTeamFilter({
 export const SelectedCareTeamBadge = ({
   selected,
 }: {
-  selected: UserReadMinimal[];
+  selected: UserSpec[];
 }) => {
   if (selected.length === 0) return null;
 

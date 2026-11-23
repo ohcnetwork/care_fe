@@ -1,5 +1,5 @@
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export interface TokenCategory {
   id: string;
@@ -18,6 +18,6 @@ export type TokenCategoryRead = TokenCategory & {
 export type TokenCategoryUpdate = Omit<TokenCategoryCreate, "resource_type">;
 
 export interface TokenCategoryRetrieveSpec extends TokenCategoryRead {
-  created_by: UserReadMinimal;
-  updated_by: UserReadMinimal;
+  created_by: UserSpec;
+  updated_by: UserSpec;
 }

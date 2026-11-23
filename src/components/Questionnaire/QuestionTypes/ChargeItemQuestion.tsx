@@ -53,7 +53,7 @@ import {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 interface ChargeItemQuestionProps {
   encounterId: string;
@@ -77,7 +77,7 @@ const CHARGE_ITEM_FIELDS = {
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
   charge_item_definition_object?: ChargeItemDefinitionRead;
-  performer_actor_object?: UserReadMinimal;
+  performer_actor_object?: UserSpec;
 }
 
 interface ChargeItemFormProps {

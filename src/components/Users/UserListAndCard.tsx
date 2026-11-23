@@ -17,14 +17,14 @@ import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { formatName, isUserOnline } from "@/Utils/utils";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserRetrieveSpec, UserSpec } from "@/types/user/user";
 import { Bot } from "lucide-react";
 
 import { useRouteParams } from "@/hooks/useRouteParams";
 
 interface UserCardProps {
-  user: UserReadMinimal;
-  roleName: string;
+  user: UserSpec;
+  roleName?: string;
   actions?: React.ReactNode;
   editRoleAction?: React.ReactNode;
   facility?: string;
@@ -36,7 +36,8 @@ export const UserStatusIndicator = ({
   addPadding = false,
   className = "",
 }: {
-  user: UserReadMinimal;
+  // is_service_account is only returned by the user retrieve API
+  user: UserSpec & Partial<Pick<UserRetrieveSpec, "is_service_account">>;
   className?: string;
   addPadding?: boolean;
 }) => {
@@ -160,18 +161,13 @@ export function UserCard(props: UserCardProps) {
     </Card>
   );
 }
-export const UserGrid = ({ users }: { users?: UserReadMinimal[] }) => {
+export const UserGrid = ({ users }: { users?: UserSpec[] }) => {
   const facilityId = useRouteParams("/facility/:facilityId").facilityId!;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
       {users?.map((user) => (
-        <UserCard
-          facility={facilityId}
-          key={user.id}
-          user={user}
-          roleName={user.user_type}
-        />
+        <UserCard facility={facilityId} key={user.id} user={user} />
       ))}
     </div>
   );
@@ -185,14 +181,13 @@ const UserListHeader = () => {
       <tr className="bg-gray-50 text-sm font-medium text-gray-500">
         <th className="px-4 py-3 text-left">{t("name")}</th>
         <th className="w-32 px-10 py-3 text-left">{t("status")}</th>
-        <th className="px-10 py-3 text-left">{t("role")}</th>
         <th className="px-4 py-3 text-left">{t("contact_number")}</th>
       </tr>
     </thead>
   );
 };
 
-const UserListRow = ({ user }: { user: UserReadMinimal }) => {
+const UserListRow = ({ user }: { user: UserSpec }) => {
   const facilityId = useRouteParams("/facility/:facilityId").facilityId!;
   const { t } = useTranslation();
 
@@ -227,9 +222,6 @@ const UserListRow = ({ user }: { user: UserReadMinimal }) => {
       <td className="flex-0 px-6 py-4">
         <UserStatusIndicator user={user} addPadding />
       </td>
-      <td id="role" className="px-10 py-4 text-sm">
-        {user.user_type}
-      </td>
       <td id="contact" className="px-4 py-4 text-sm whitespace-nowrap">
         {user.phone_number ? formatPhoneNumberIntl(user.phone_number) : "-"}
       </td>
@@ -252,7 +244,7 @@ const UserListRow = ({ user }: { user: UserReadMinimal }) => {
     </tr>
   );
 };
-export const UserList = ({ users }: { users?: UserReadMinimal[] }) => {
+export const UserList = ({ users }: { users?: UserSpec[] }) => {
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200">
       <table className="relative min-w-full divide-y divide-gray-200">
@@ -267,7 +259,7 @@ export const UserList = ({ users }: { users?: UserReadMinimal[] }) => {
   );
 };
 interface UserListAndCardViewProps {
-  users: UserReadMinimal[];
+  users: UserSpec[];
   activeTab: "card" | "list";
 }
 

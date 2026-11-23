@@ -9,14 +9,14 @@ import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
   DiagnosticReportBase,
 } from "@/types/emr/diagnosticReport/diagnosticReport";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 import { formatName } from "@/Utils/utils";
 
 interface DiagnosticReportSummaryProps {
   report: DiagnosticReportBase;
   title?: string;
   createdDate?: string;
-  requester?: UserReadMinimal | null;
+  requester?: UserSpec | null;
   className?: string;
 }
 

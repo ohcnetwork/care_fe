@@ -27,7 +27,7 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
 interface Props {
@@ -50,7 +50,7 @@ export default function LinkFacilityUserSheet({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
+  const [selectedUser, setSelectedUser] = useState<UserSpec>();
   const [selectedRole, setSelectedRole] = useState<RoleBase>();
 
   const { data: preSelectedUser } = useQuery({
@@ -104,7 +104,7 @@ export default function LinkFacilityUserSheet({
     });
   };
 
-  const handleUserChange = (user: UserReadMinimal) => {
+  const handleUserChange = (user: UserSpec) => {
     setSelectedUser(user);
     setSelectedRole(undefined);
   };
@@ -171,16 +171,6 @@ export default function LinkFacilityUserSheet({
                       </span>
                       <p className="text-sm font-medium">
                         {selectedUser.username}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-sm text-gray-500">
-                        {isServiceAccount
-                          ? t("service_account_type")
-                          : t("user_type")}
-                      </span>
-                      <p className="text-sm font-medium">
-                        {selectedUser.user_type}
                       </p>
                     </div>
                     <div>

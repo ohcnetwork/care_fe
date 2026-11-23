@@ -1,4 +1,4 @@
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export type FormSubmissionStatus = "draft" | "submitted" | "entered_in_error";
 
@@ -21,6 +21,6 @@ export interface FormSubmissionRead
   extends FormSubmissionBase, FormSubmissionUpdate {
   created_date: string;
   modified_date: string | null;
-  created_by: UserReadMinimal | null;
-  updated_by: UserReadMinimal | null;
+  created_by: UserSpec | null;
+  updated_by: UserSpec | null;
 }

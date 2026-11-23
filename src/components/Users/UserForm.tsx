@@ -54,9 +54,9 @@ import organizationApi from "@/types/organization/organizationApi";
 import {
   CEFR_LEVELS,
   USER_LANGUAGE_SYSTEM,
-  UserCreate,
-  UserReadMinimal,
-  UserUpdate,
+  UserCreateSpec,
+  UserSpec,
+  UserUpdateSpec,
 } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
@@ -64,10 +64,7 @@ export type UserProfileEditSection =
   "personal" | "contact" | "communication" | "qualification";
 
 interface Props {
-  onSubmitSuccess?: (
-    user: UserReadMinimal,
-    meta?: { roleOrgIds: string[] },
-  ) => void;
+  onSubmitSuccess?: (user: UserSpec, meta?: { roleOrgIds: string[] }) => void;
   existingUsername?: string;
   organizationId?: string;
   isServiceAccount?: boolean;
@@ -445,7 +442,7 @@ export default function UserForm({
     }
 
     if (isEditMode) {
-      const updatePayload: UserUpdate = {
+      const updatePayload: UserUpdateSpec = {
         first_name: data.first_name,
         last_name: data.last_name,
         phone_number: data.phone_number,
@@ -475,7 +472,7 @@ export default function UserForm({
         role: membership.role,
       }));
 
-      const createPayload: UserCreate = {
+      const createPayload: UserCreateSpec = {
         username: data.username!,
         password:
           data.password_setup_method === "immediate" && !isServiceAccount

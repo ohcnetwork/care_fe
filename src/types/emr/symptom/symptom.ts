@@ -1,5 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export const SYMPTOM_CLINICAL_STATUS = [
   "active",
@@ -44,8 +44,8 @@ export interface Symptom {
   onset?: Onset;
   recorded_date?: string;
   note?: string;
-  created_by: UserReadMinimal;
-  updated_by: UserReadMinimal;
+  created_by: UserSpec;
+  updated_by: UserSpec;
   category: string;
   encounter: string;
   created_date: string;
@@ -65,7 +65,7 @@ export interface SymptomRequest {
   category: string;
   created_date?: string;
   updated_date?: string;
-  created_by?: UserReadMinimal;
+  created_by?: UserSpec;
 }
 
 export const SYMPTOM_CLINICAL_STATUS_COLORS = {

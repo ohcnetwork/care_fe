@@ -15,7 +15,7 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 import { formatName } from "@/Utils/utils";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 type Column = {
   key: string;
@@ -26,7 +26,7 @@ type Column = {
 interface RowProps {
   columns: Column[];
   note?: string;
-  createdBy?: UserReadMinimal | null;
+  createdBy?: UserSpec | null;
   onViewEncounter?: () => void;
   /** Matches the tighter row gap used by panel presentations. */
   compact?: boolean;

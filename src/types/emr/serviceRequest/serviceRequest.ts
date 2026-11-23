@@ -9,7 +9,7 @@ import { ObservationRead } from "@/types/emr/observation/observation";
 import { SpecimenRead } from "@/types/emr/specimen/specimen";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { LocationRead } from "@/types/location/location";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export enum Status {
   draft = "draft",
@@ -97,7 +97,7 @@ export interface ServiceRequestApplyActivityDefinitionForm {
   activity_definition: string;
   service_request: Omit<BaseServiceRequestSpec, "id"> & {
     locations: string[];
-    requester: UserReadMinimal;
+    requester: UserSpec;
   };
 }
 
@@ -114,11 +114,11 @@ export interface ServiceRequestReadSpec extends BaseServiceRequestSpec {
   specimens: SpecimenRead[];
   observations?: ObservationRead[];
   diagnostic_reports: DiagnosticReportRead[];
-  created_by: UserReadMinimal;
-  updated_by: UserReadMinimal;
+  created_by: UserSpec;
+  updated_by: UserSpec;
   created_date: string;
   updated_at: string;
-  requester?: UserReadMinimal;
+  requester?: UserSpec;
   tags: TagConfig[];
 }
 

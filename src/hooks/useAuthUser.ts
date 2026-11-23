@@ -6,10 +6,10 @@ import {
   MfaLoginRequest,
 } from "@/types/auth/auth";
 import { TokenData } from "@/types/otp/otp";
-import { CurrentUserRead } from "@/types/user/user";
+import { CurrentUserRetrieveSpec } from "@/types/user/user";
 
 export interface AuthContextType {
-  user: CurrentUserRead | undefined;
+  user: CurrentUserRetrieveSpec | undefined;
   signIn: (creds: LoginRequest) => Promise<LoginResponse>;
   verifyMFA: (data: MfaLoginRequest) => Promise<LoginResponse>;
   isAuthenticating: boolean;

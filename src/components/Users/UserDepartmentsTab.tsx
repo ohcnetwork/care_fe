@@ -26,11 +26,11 @@ import EditFacilityUserRoleSheet from "@/pages/Facility/settings/organizations/c
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
-import { UserRead } from "@/types/user/user";
+import { UserRetrieveSpec } from "@/types/user/user";
 
 interface DepartmentRowProps {
   department: FacilityOrganizationRead;
-  userData: UserRead;
+  userData: UserRetrieveSpec;
   facilityId: string;
 }
 

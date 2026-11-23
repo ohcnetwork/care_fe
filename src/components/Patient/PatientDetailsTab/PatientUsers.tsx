@@ -32,7 +32,7 @@ import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 import { PatientProps } from ".";
 
@@ -44,7 +44,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
+  const [selectedUser, setSelectedUser] = useState<UserSpec>();
   const [selectedRole, setSelectedRole] = useState<RoleBase>();
 
   const { mutate: assignUser } = useMutation({
@@ -76,7 +76,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
     });
   };
 
-  const handleUserChange = (user: UserReadMinimal) => {
+  const handleUserChange = (user: UserSpec) => {
     setSelectedUser(user);
     setSelectedRole(undefined);
   };
@@ -132,14 +132,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                         {selectedUser.username}
                       </p>
                     </div>
-                    <div>
-                      <span className="text-sm text-gray-500">
-                        {t("user_type")}
-                      </span>
-                      <p className="text-sm font-medium">
-                        {selectedUser.user_type}
-                      </p>
-                    </div>
+
                     <div>
                       <span className="text-sm text-gray-500">
                         {t("phone_number")}
@@ -185,9 +178,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
 export const PatientUsers = ({ patientData }: PatientProps) => {
   const patientId = patientData.id;
-  const [userToRemove, setUserToRemove] = useState<UserReadMinimal | null>(
-    null,
-  );
+  const [userToRemove, setUserToRemove] = useState<UserSpec | null>(null);
 
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -275,10 +266,6 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                   {user.phone_number &&
                     formatPhoneNumberIntl(user.phone_number)}
                 </div>
-              </div>
-              <div className="text-sm ml-4">
-                <div className="text-gray-500">{t("user_type")}</div>
-                <div className="font-medium">{user.user_type}</div>
               </div>
             </div>
             <ConfirmActionDialog

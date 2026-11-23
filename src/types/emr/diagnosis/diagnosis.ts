@@ -1,5 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export const DIAGNOSIS_CLINICAL_STATUS = [
   "active",
@@ -57,8 +57,8 @@ export interface Diagnosis {
   recorded_date?: string;
   note?: string;
   category: DiagnosisCategory;
-  created_by: UserReadMinimal;
-  updated_by: UserReadMinimal;
+  created_by: UserSpec;
+  updated_by: UserSpec;
   encounter: string;
   created_date: string;
   updated_date?: string;
@@ -78,7 +78,7 @@ export interface DiagnosisRequest {
   category: DiagnosisCategory;
   encounter: string;
   dirty: boolean;
-  created_by?: UserReadMinimal;
+  created_by?: UserSpec;
   created_date?: string;
   updated_date?: string;
 }

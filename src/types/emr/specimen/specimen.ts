@@ -5,7 +5,7 @@ import {
   SpecimenDefinitionRead,
   TypeTestedSpec,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export enum SpecimenStatus {
   draft = "draft",
@@ -59,7 +59,7 @@ export interface CollectionSpec {
 }
 
 export interface CollectionReadSpec extends CollectionSpec {
-  collector_object?: UserReadMinimal | null;
+  collector_object?: UserSpec | null;
 }
 
 export interface ProcessingSpec {
@@ -70,7 +70,7 @@ export interface ProcessingSpec {
 }
 
 export interface ProcessingReadSpec extends ProcessingSpec {
-  performer_object?: UserReadMinimal | null;
+  performer_object?: UserSpec | null;
 }
 
 export interface SpecimenBase {
@@ -91,8 +91,8 @@ export interface SpecimenFromDefinitionCreate {
 }
 
 export interface SpecimenRead extends SpecimenBase {
-  created_by: UserReadMinimal;
-  updated_by: UserReadMinimal;
+  created_by: UserSpec;
+  updated_by: UserSpec;
   created_at: string;
   updated_at: string;
   type_tested: TypeTestedSpec | null;

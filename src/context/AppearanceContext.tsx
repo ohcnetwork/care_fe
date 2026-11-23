@@ -14,7 +14,7 @@ import {
 
 import { callApi } from "@/Utils/request/query";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
-import { CurrentUserRead } from "@/types/user/user";
+import { CurrentUserRetrieveSpec } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
 export type AppearanceTheme = "light" | "light-protanopia" | "light-tritanopia";
@@ -44,7 +44,7 @@ const FONT_SIZES: readonly string[] = Object.keys(FONT_SIZE_SCALE);
 const MOTION_PREFERENCES: readonly string[] = ["system", "reduce", "allow"];
 const CACHE_PREFIX = "care.appearance.v1:";
 
-type AppearanceUser = Pick<CurrentUserRead, "id" | "preferences">;
+type AppearanceUser = Pick<CurrentUserRetrieveSpec, "id" | "preferences">;
 
 interface AppearanceState {
   preferences: AppearancePreferences;

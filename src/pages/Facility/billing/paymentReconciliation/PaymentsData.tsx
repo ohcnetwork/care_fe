@@ -60,7 +60,7 @@ import {
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { LocationRead } from "@/types/location/location";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 import ChangePaymentAccountSheet from "./ChangePaymentAccountSheet";
 
@@ -83,9 +83,7 @@ export default function PaymentsData({
   hideAccountColumn?: boolean;
 }) {
   const { t } = useTranslation();
-  const [createdBy, setCreatedBy] = useState<UserReadMinimal | undefined>(
-    undefined,
-  );
+  const [createdBy, setCreatedBy] = useState<UserSpec | undefined>(undefined);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [isChangeAccountOpen, setIsChangeAccountOpen] = useState(false);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({

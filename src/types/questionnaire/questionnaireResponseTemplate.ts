@@ -1,7 +1,7 @@
 import { MedicationRequestTemplateSpec } from "@/types/emr/medicationRequest/medicationRequest";
 import { BaseServiceRequestSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 interface QuestionnaireAnswer {
   question_id: string;
@@ -52,8 +52,8 @@ export interface QuestionnaireResponseTemplateReadSpec extends QuestionnaireResp
 }
 
 export interface QuestionnaireResponseTemplateRetrieveSpec extends QuestionnaireResponseTemplateReadSpec {
-  users: UserReadMinimal[];
+  users: UserSpec[];
   facility_organizations: FacilityOrganizationRead[];
-  created_by: UserReadMinimal;
-  updated_by: UserReadMinimal;
+  created_by: UserSpec;
+  updated_by: UserSpec;
 }

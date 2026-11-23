@@ -68,7 +68,7 @@ import {
   PriceComponentType,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 import { isPositive, round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
@@ -160,9 +160,9 @@ export function EditInvoiceTable({
   useShortcutSubContext("facility:billing:invoice:show");
 
   const [performers, setPerformers] = useState<
-    Record<string, UserReadMinimal | undefined>
+    Record<string, UserSpec | undefined>
   >(() => {
-    const initial: Record<string, UserReadMinimal | undefined> = {};
+    const initial: Record<string, UserSpec | undefined> = {};
     chargeItems.forEach((item) => {
       initial[item.id] = item.performer_actor;
     });
@@ -171,7 +171,7 @@ export function EditInvoiceTable({
 
   const handlePerformerChange = (
     chargeItemId: string,
-    user: UserReadMinimal | undefined,
+    user: UserSpec | undefined,
   ) => {
     setPerformers((prev) => ({
       ...prev,
@@ -179,8 +179,8 @@ export function EditInvoiceTable({
     }));
   };
 
-  const handleApplyPerformerToAll = (user: UserReadMinimal | undefined) => {
-    const newPerformers: Record<string, UserReadMinimal | undefined> = {};
+  const handleApplyPerformerToAll = (user: UserSpec | undefined) => {
+    const newPerformers: Record<string, UserSpec | undefined> = {};
     chargeItems.forEach((item) => {
       newPerformers[item.id] = user;
     });
@@ -188,7 +188,7 @@ export function EditInvoiceTable({
   };
 
   const handleClearAllPerformers = () => {
-    const newPerformers: Record<string, UserReadMinimal | undefined> = {};
+    const newPerformers: Record<string, UserSpec | undefined> = {};
     chargeItems.forEach((item) => {
       newPerformers[item.id] = undefined;
     });

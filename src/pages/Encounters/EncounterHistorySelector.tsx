@@ -38,7 +38,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 import {
   Building2,
   Calendar,
@@ -360,7 +360,7 @@ const EncounterHistoryList = ({ onSelect, filterScope }: Props) => {
           | string
           | TagConfig[]
           | FacilityOrganizationRead
-          | UserReadMinimal
+          | UserSpec
           | { from: Date; to: Date }
           | null
           | undefined;
@@ -381,7 +381,7 @@ const EncounterHistoryList = ({ onSelect, filterScope }: Props) => {
           case "care_team": {
             // filterValue is a single UserReadMinimal (mode is "single")
             updates.selectedCareTeamMember =
-              (filterValue as UserReadMinimal) || undefined;
+              (filterValue as UserSpec) || undefined;
             break;
           }
           case "created_date":

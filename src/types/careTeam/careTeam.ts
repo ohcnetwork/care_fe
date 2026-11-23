@@ -1,5 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export interface CareTeamMember {
   user_id: string;
@@ -8,7 +8,7 @@ export interface CareTeamMember {
 
 export interface CareTeamResponse {
   role: Code;
-  member: UserReadMinimal;
+  member: UserSpec;
 }
 
 export interface CareTeamRequest {

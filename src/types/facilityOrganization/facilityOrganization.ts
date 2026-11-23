@@ -1,5 +1,5 @@
 import { RoleRead } from "@/types/emr/role/role";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export enum FacilityOrganizationType {
   ROOT = "root",
@@ -40,6 +40,6 @@ export interface FacilityOrganizationCreate extends FacilityOrganizationBase {
 
 export interface FacilityOrganizationUserRole {
   id: string;
-  user: UserReadMinimal;
+  user: UserSpec;
   role: RoleRead;
 }

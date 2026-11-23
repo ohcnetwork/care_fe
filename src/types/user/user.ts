@@ -29,33 +29,23 @@ export interface UserQualificationDegree {
   display?: string | null;
 }
 
-export interface UserBase {
-  id: string;
+export interface UserBaseSpec {
+  id?: string | null;
   first_name: string;
   last_name: string;
-  username: string;
   phone_number: string;
   prefix?: string | null;
   suffix?: string | null;
-  user_type: UserType;
-  gender: (typeof GENDER_TYPES)[number]["id"];
 }
 
-export interface UserReadMinimal extends UserBase {
+export interface UserSpec extends UserBaseSpec {
   last_login: string;
   profile_picture_url: string;
+  gender: (typeof GENDER_TYPES)[number]["id"];
+  username: string;
   mfa_enabled: boolean;
+  phone_number: string;
   deleted: boolean;
-  is_service_account: boolean;
-  communication: UserCommunication[];
-  qualification: UserQualification[];
-}
-
-export interface UserRead extends UserReadMinimal {
-  geo_organization?: Organization;
-  created_by?: UserReadMinimal;
-  email: string;
-  flags: string[];
   role_orgs?: Array<{
     id: string;
     organization: Organization;
@@ -66,15 +56,24 @@ export interface UserRead extends UserReadMinimal {
       is_system: boolean;
     };
   }>;
+  communication: UserCommunication[];
+  qualification: UserQualification[];
 }
 
-export interface CurrentUserRead extends UserRead, Permissions {
+export interface UserRetrieveSpec extends UserSpec {
+  geo_organization?: Organization;
+  created_by?: UserSpec;
+  email: string;
+  flags: string[];
+  is_service_account: boolean;
+}
+
+export interface CurrentUserRetrieveSpec extends UserRetrieveSpec, Permissions {
   alt_phone_number?: string;
   date_of_birth?: string;
   is_superuser: boolean;
   facilities: FacilityBareMinimum[];
   organizations: Organization[];
-  last_login: string;
   pf_endpoint: string | null;
   pf_p256dh: string | null;
   pf_auth: string | null;
@@ -83,19 +82,15 @@ export interface CurrentUserRead extends UserRead, Permissions {
 
 // Todo: Once backend adds a proper public user read spec, add it here and update the usages where applicable
 
-export interface UserUpdate {
-  first_name: string;
-  last_name: string;
-  phone_number: string;
-  prefix?: string | null;
-  suffix?: string | null;
+export interface UserUpdateSpec extends UserBaseSpec {
   gender: (typeof GENDER_TYPES)[number]["id"];
+  phone_number: string;
   geo_organization?: string;
   communication?: UserCommunication[];
   qualification?: UserQualification[];
 }
 
-export interface UserCreate extends UserUpdate {
+export interface UserCreateSpec extends UserUpdateSpec {
   username: string;
   password?: string;
   email: string;

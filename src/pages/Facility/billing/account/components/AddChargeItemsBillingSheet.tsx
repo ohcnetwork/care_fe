@@ -44,7 +44,7 @@ import {
   ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -60,7 +60,7 @@ interface AddChargeItemsBillingSheetProps {
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
   charge_item_definition_object: ChargeItemDefinitionRead;
-  performer_actor_object?: UserReadMinimal;
+  performer_actor_object?: UserSpec;
 }
 
 export default function AddChargeItemsBillingSheet({
@@ -124,7 +124,7 @@ export default function AddChargeItemsBillingSheet({
     );
   };
 
-  const handleUpdatePerformer = (index: number, user: UserReadMinimal) => {
+  const handleUpdatePerformer = (index: number, user: UserSpec) => {
     setSelectedItems(
       selectedItems.map((item, i) =>
         i === index

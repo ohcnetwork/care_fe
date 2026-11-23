@@ -1,6 +1,6 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import { TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 import {
   PatientCreate,
@@ -56,12 +56,12 @@ export default {
     path: "/api/v1/patient/{patientId}/add_user/",
     method: HttpMethod.POST,
     TBody: Type<{ user: string; role: string }>(),
-    TRes: Type<UserReadMinimal>(),
+    TRes: Type<UserSpec>(),
   },
   listUsers: {
     path: "/api/v1/patient/{patientId}/get_users/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<UserReadMinimal>>(),
+    TRes: Type<PaginatedResponse<UserSpec>>(),
   },
   removeUser: {
     path: "/api/v1/patient/{patientId}/delete_user/",

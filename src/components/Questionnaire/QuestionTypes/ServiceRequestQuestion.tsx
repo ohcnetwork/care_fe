@@ -55,7 +55,7 @@ import {
   QuestionnaireResponseTemplateReadSpec,
 } from "@/types/questionnaire/questionnaireResponseTemplate";
 import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
-import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
+import { CurrentUserRetrieveSpec, UserSpec } from "@/types/user/user";
 import { Decimal } from "decimal.js";
 
 import { AddToTemplateDialog } from "@/components/Questionnaire/AddToTemplateDialog";
@@ -92,7 +92,7 @@ interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
     BaseServiceRequestApplyActivityDefinitionSpec["service_request"],
     "requester"
   > & {
-    requester: UserReadMinimal;
+    requester: UserSpec;
   };
 }
 
@@ -175,8 +175,8 @@ interface ServiceRequestFormProps {
   index?: number;
   activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
-  requester?: UserReadMinimal;
-  onRequesterChange?: (user: UserReadMinimal | undefined) => void;
+  requester?: UserSpec;
+  onRequesterChange?: (user: UserSpec | undefined) => void;
 }
 
 function ServiceRequestForm({
@@ -426,7 +426,7 @@ export function ServiceRequestQuestion({
   questionnaireSlug,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
-  const currentUser = useAuthUser() as CurrentUserRead;
+  const currentUser = useAuthUser() as CurrentUserRetrieveSpec;
   const [selectedActivityDefinition, setSelectedActivityDefinition] = useState<
     string | null
   >(null);
@@ -586,14 +586,11 @@ export function ServiceRequestQuestion({
     });
   };
 
-  const handleRequesterChange = (
-    index: number,
-    user: UserReadMinimal | undefined,
-  ) => {
+  const handleRequesterChange = (index: number, user: UserSpec | undefined) => {
     handleUpdateServiceRequest(index, { requester: user || currentUser });
   };
 
-  const handleApplyRequesterToAll = (user: UserReadMinimal | undefined) => {
+  const handleApplyRequesterToAll = (user: UserSpec | undefined) => {
     const newServiceRequests = serviceRequests.map((sr) => ({
       ...sr,
       service_request: {

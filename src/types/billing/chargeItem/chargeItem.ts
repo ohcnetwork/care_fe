@@ -6,7 +6,7 @@ import {
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { InvoiceList } from "@/types/billing/invoice/invoice";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export enum ChargeItemStatus {
   // planned = "planned",
@@ -103,11 +103,11 @@ export interface ChargeItemRead extends ChargeItemBase {
   charge_item_definition: ChargeItemDefinitionBase;
   service_resource: ChargeItemServiceResource;
   service_resource_id?: string;
-  performer_actor?: UserReadMinimal;
+  performer_actor?: UserSpec;
   created_date: string;
   modified_date: string;
-  created_by: UserReadMinimal;
-  updated_by: UserReadMinimal;
+  created_by: UserSpec;
+  updated_by: UserSpec;
 }
 
 export interface ChargeItemBatchResponse {

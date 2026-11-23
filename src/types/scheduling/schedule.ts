@@ -19,7 +19,7 @@ import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareS
 import { LocationRead } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
 import { TokenRead } from "@/types/tokens/token/token";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export enum AvailabilitySlotType {
   Appointment = "appointment",
@@ -61,8 +61,8 @@ export interface ScheduleTemplate extends ScheduleEncounterDefaults {
   valid_from: string;
   valid_to: string;
   availabilities: ScheduleAvailability[];
-  created_by: UserReadMinimal;
-  updated_by: UserReadMinimal;
+  created_by: UserSpec;
+  updated_by: UserSpec;
   charge_item_definition: ChargeItemDefinitionRead;
   revisit_charge_item_definition: ChargeItemDefinitionRead;
   revisit_allowed_days: number;
@@ -230,7 +230,7 @@ type LocationResource = {
 };
 
 type UserResource = {
-  resource: UserReadMinimal;
+  resource: UserSpec;
   resource_type: SchedulableResourceType.Practitioner;
 };
 
@@ -250,7 +250,7 @@ export type AppointmentBase = {
   note: string;
   facility: FacilityBareMinimum;
   token: TokenRead | null;
-  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
+  booked_by: UserSpec | null; // This is null if the appointment was booked by the patient itself.
 } & ScheduleResource;
 
 export type Appointment = AppointmentBase & {
@@ -264,8 +264,8 @@ export type PublicAppointment = AppointmentBase & {
 export type AppointmentRead = Appointment & {
   patient: PatientRead;
   tags: TagConfig[];
-  updated_by: UserReadMinimal | null;
-  created_by: UserReadMinimal;
+  updated_by: UserSpec | null;
+  created_by: UserSpec;
   modified_date: string;
   associated_encounter?: EncounterListRead;
 };
@@ -304,11 +304,11 @@ export interface AppointmentRescheduleRequest {
   tags: TagSetRequest[];
 }
 
-export const getUserFromLocalStorage = (): UserReadMinimal => {
+export const getUserFromLocalStorage = (): UserSpec => {
   return JSON.parse(localStorage.getItem("user") ?? "{}");
 };
 
-export const storeUserInLocalStorage = (user: UserReadMinimal) => {
+export const storeUserInLocalStorage = (user: UserSpec) => {
   localStorage.setItem("user", JSON.stringify(user));
 };
 

@@ -3,7 +3,7 @@ import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import { ObservationDefinitionEmbedded } from "@/types/emr/observationDefinition/observationDefinition";
 import { QuestionType } from "@/types/questionnaire/question";
 import { SubjectType } from "@/types/questionnaire/questionnaire";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export enum ObservationStatus {
   FINAL = "final",
@@ -72,9 +72,9 @@ export interface ObservationBase {
 }
 
 export interface ObservationListRead extends ObservationBase {
-  created_by: UserReadMinimal;
-  updated_by: UserReadMinimal;
-  data_entered_by?: UserReadMinimal | null;
+  created_by: UserSpec;
+  updated_by: UserSpec;
+  data_entered_by?: UserSpec | null;
 }
 
 export interface ObservationRead extends ObservationListRead {

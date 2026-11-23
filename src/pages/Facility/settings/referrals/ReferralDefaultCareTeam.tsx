@@ -20,7 +20,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 interface Props {
   facilityId?: string;
@@ -42,7 +42,7 @@ export function ReferralDefaultCareTeam({
   description,
 }: Props) {
   const { t } = useTranslation();
-  const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
+  const [selectedUser, setSelectedUser] = useState<UserSpec>();
   const [selectedRole, setSelectedRole] = useState<Code | null>(null);
 
   function addMember() {

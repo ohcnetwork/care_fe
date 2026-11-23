@@ -14,10 +14,10 @@ import { useAuthContext } from "@/hooks/useAuthUser";
 
 import { formatName } from "@/Utils/utils";
 import { storeUserInLocalStorage } from "@/types/scheduling/schedule";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 interface Props {
-  user: UserReadMinimal;
+  user: UserSpec;
   className?: string;
   facilityId: string;
 }
@@ -52,7 +52,6 @@ export function FacilityUserCard({ user, className, facilityId }: Props) {
               <h3 className="truncate text-xl font-semibold">
                 {formatName(user)}
               </h3>
-              <p className="text-sm text-gray-500">{user.user_type}</p>
             </div>
           </div>
         </div>

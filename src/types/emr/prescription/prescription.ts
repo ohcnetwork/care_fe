@@ -1,7 +1,7 @@
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 
 export interface Prescription {
   id: string;
@@ -24,14 +24,14 @@ export interface PrescriptionCreate extends Omit<Prescription, "id"> {
 }
 
 export interface PrescriptionList extends Prescription {
-  prescribed_by: UserReadMinimal;
+  prescribed_by: UserSpec;
   encounter: EncounterRead;
   created_date: string;
   tags: TagConfig[];
 }
 
 export interface PrescriptionRead extends Prescription {
-  prescribed_by: UserReadMinimal;
+  prescribed_by: UserSpec;
   encounter: EncounterRead;
   created_date: string;
   medications: MedicationRequestRead[];

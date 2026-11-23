@@ -5,7 +5,7 @@ import {
 } from "@/types/emr/prescription/prescription";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 import { add, divide, isZero, multiply } from "@/Utils/decimal";
 import Decimal from "decimal.js";
 
@@ -411,11 +411,11 @@ export interface MedicationRequest {
   dosage_instruction: MedicationRequestDosageInstruction[];
   note?: string;
   authored_on: string;
-  created_by?: UserReadMinimal;
+  created_by?: UserSpec;
   requested_product?: string;
   requested_product_internal?: ProductKnowledgeBase;
   dispense_status?: MedicationRequestDispenseStatus;
-  requester: UserReadMinimal;
+  requester: UserSpec;
 }
 
 export type MedicationRequestTemplateSpec = Omit<
@@ -470,13 +470,13 @@ export interface MedicationRequestRead {
   note?: string;
   created_date: string;
   modified_date: string;
-  created_by: UserReadMinimal;
-  updated_by: UserReadMinimal;
+  created_by: UserSpec;
+  updated_by: UserSpec;
   authored_on: string;
   requested_product?: ProductKnowledgeBase;
   inventory_items_internal?: InventoryRead[];
   dispense_status?: MedicationRequestDispenseStatus;
-  requester?: UserReadMinimal;
+  requester?: UserSpec;
   prescription?: PrescriptionList;
 }
 
@@ -975,7 +975,7 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
  * You can extend the dictionaries & regex to cover more cases (IV, subcutaneous, brand names, etc.).
  */
 export function parseMedicationStringToRequest(
-  requester: UserReadMinimal,
+  requester: UserSpec,
   medication?: Code,
   productKnowledge?: ProductKnowledgeBase,
 ): MedicationRequest {

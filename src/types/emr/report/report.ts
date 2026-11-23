@@ -1,5 +1,5 @@
 import { TemplateBase } from "@/types/emr/template/template";
-import { UserBase, UserReadMinimal } from "@/types/user/user";
+import { UserBaseSpec, UserSpec } from "@/types/user/user";
 
 export interface ReportBase {
   id: string;
@@ -10,14 +10,14 @@ export interface ReportReadList extends ReportBase {
   template: Partial<TemplateBase>;
   report_type: string;
   associating_id: string;
-  archived_by: UserBase;
+  archived_by: UserBaseSpec;
   archived_datetime: string;
   archive_reason?: string;
   upload_completed: boolean;
   is_archived: boolean;
   created_date: string;
   extension: string;
-  uploaded_by: UserReadMinimal;
+  uploaded_by: UserSpec;
   mime_type: string;
 }
 

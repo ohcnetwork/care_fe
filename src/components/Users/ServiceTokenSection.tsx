@@ -23,12 +23,12 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import mutate from "@/Utils/request/mutate";
 import {
   GenerateServiceAccountTokenResponse,
-  UserRead,
+  UserRetrieveSpec,
 } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
 interface ServiceTokenSectionProps {
-  userData: UserRead;
+  userData: UserRetrieveSpec;
 }
 
 export default function ServiceTokenSection({

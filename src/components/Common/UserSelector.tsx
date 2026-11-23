@@ -34,15 +34,15 @@ import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { cn } from "@/lib/utils";
 import facilityApi from "@/types/facility/facilityApi";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
 interface Props {
-  selected?: UserReadMinimal;
+  selected?: UserSpec;
   selectedId?: string;
   dialogTitle?: string;
 
-  onChange: (user: UserReadMinimal) => void;
+  onChange: (user: UserSpec) => void;
   placeholder?: string;
   noOptionsMessage?: string;
   popoverClassName?: string;
@@ -59,12 +59,12 @@ interface Props {
 interface UserCommandContentProps {
   search: string;
   setSearch: (value: string) => void;
-  usersList?: UserReadMinimal[];
+  usersList?: UserSpec[];
   isFetching: boolean;
   isFetchingNextPage: boolean;
   noOptionsMessage?: string;
   selectedId?: string;
-  onChange: (user: UserReadMinimal) => void;
+  onChange: (user: UserSpec) => void;
   setOpen: (value: boolean) => void;
   ref: (node?: Element | null) => void;
   onClear?: () => void;
@@ -113,7 +113,7 @@ function UserCommandContent({
           </CommandGroup>
         )}
         <CommandGroup>
-          {usersList?.map((user: UserReadMinimal, i) => (
+          {usersList?.map((user: UserSpec, i) => (
             <CommandItem
               key={user.id}
               value={`${formatName(user)} ${user.username ?? ""}`}

@@ -43,7 +43,7 @@ import {
 } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import facilityApi from "@/types/facility/facilityApi";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserSpec } from "@/types/user/user";
 import query from "@/Utils/request/query";
 import {
   dateQueryString,
@@ -90,7 +90,7 @@ export default function InvoicesData({
   const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
     let query = { ...filterQuery };
     const createdByValue = filterQuery.created_by as
-      UserReadMinimal | UserReadMinimal[] | undefined;
+      UserSpec | UserSpec[] | undefined;
     if (createdByValue !== undefined) {
       const user = Array.isArray(createdByValue)
         ? createdByValue[0]
