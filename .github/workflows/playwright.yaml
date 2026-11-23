@@ -81,7 +81,7 @@ jobs:
 
       - name: Cache installed dependencies
         id: modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: node_modules/
           key: playwright-modules-${{ runner.os }}-${{ runner.arch }}-${{ steps.node.outputs.node-version }}-${{ hashFiles('package-lock.json', 'package.json', 'scripts/install-platform-deps.ts', '.npmrc') }}
@@ -96,7 +96,7 @@ jobs:
           NODE_ENV: production
 
       - name: Save build and node_modules to cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: |
             build/
@@ -163,7 +163,7 @@ jobs:
 
       - name: Restore database snapshot
         id: snapshot
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: care-backend/care-db.dump
           key: care-db-v1-${{ steps.revision.outputs.sha }}
@@ -183,7 +183,7 @@ jobs:
 
       - name: Save database snapshot
         if: steps.snapshot.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: care-backend/care-db.dump
           key: ${{ steps.snapshot.outputs.cache-primary-key }}
@@ -280,7 +280,7 @@ jobs:
           exit 1
 
       - name: Restore build cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: |
             build/
@@ -295,7 +295,7 @@ jobs:
           fi
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}-${{ hashFiles('playwright.config.ts') }}
@@ -431,7 +431,7 @@ jobs:
 
       - name: Restore build cache for report merge
         if: steps.skipped.outputs.skipped == 'false'
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: |
             build/
