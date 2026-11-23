@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import TagColorDot from "@/components/Tags/TagColorDot";
 import { Badge } from "@/components/ui/badge";
 import {
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuSub,
@@ -38,6 +37,12 @@ import {
   FilterMenuSearch,
   useFilterMenuSearch,
 } from "./filterMenuSearch";
+import {
+  FilterMenuItem,
+  FilterMenuLabel,
+  FilterMenuSeparator,
+  useFilterSurface,
+} from "./filterSurface";
 import {
   COLOR_PALETTE,
   FilterConfig,
@@ -133,11 +138,10 @@ function TreeViewItem({
 
   return (
     <div>
-      <DropdownMenuItem
+      <FilterMenuItem
         disabled={allChildrenSelected}
         aria-expanded={expanded}
-        closeOnClick={false}
-        onClick={() => setExpanded(!expanded)}
+        onSelect={() => setExpanded(!expanded)}
       >
         <Component />
         <TagColorDot tag={tag} fallbackColorClass={getColorForOption(0)} />
@@ -150,7 +154,7 @@ function TreeViewItem({
             className={cn("transition-transform", expanded && "rotate-90")}
           />
         )}
-      </DropdownMenuItem>
+      </FilterMenuItem>
       {expanded && (
         <div className="ps-4">
           {children?.results?.map((childTag: TagConfig) => {
@@ -196,6 +200,8 @@ function TagFilterDropdown({
     default: true,
     md: false,
   });
+  // Submenus need a menu popup; a drawer lists groups as expandable rows.
+  const inDrawer = useFilterSurface() === "drawer";
 
   // Fetch root-level tags
   const { data: rootTags, isLoading } = useQuery({
@@ -245,7 +251,7 @@ function TagFilterDropdown({
         {/* Selected Tags */}
         {filteredSelectedTags.length > 0 && (
           <>
-            <DropdownMenuLabel>{t("selected_tags")}</DropdownMenuLabel>
+            <FilterMenuLabel>{t("selected_tags")}</FilterMenuLabel>
             {filteredSelectedTags.map((tag, index) => (
               <TagFilterItem
                 key={tag.id}
@@ -256,15 +262,15 @@ function TagFilterDropdown({
                 showParent
               />
             ))}
-            <DropdownMenuSeparator />
+            <FilterMenuSeparator />
           </>
         )}
 
         {/* Groups */}
         {rootLevelGroupTags.length > 0 && !isSearching && (
           <>
-            <DropdownMenuLabel>{t("tag_groups")}</DropdownMenuLabel>
-            {isMobile
+            <FilterMenuLabel>{t("tag_groups")}</FilterMenuLabel>
+            {isMobile || inDrawer
               ? // Mobile tree view
                 rootLevelGroupTags.map((group) => (
                   <TreeViewItem
@@ -287,14 +293,14 @@ function TagFilterDropdown({
                     facilityId={facilityId}
                   />
                 ))}
-            <DropdownMenuSeparator />
+            <FilterMenuSeparator />
           </>
         )}
 
         {/* Other Tags */}
         {nonSelectedRootLevelTags.length > 0 && (
           <>
-            <DropdownMenuLabel>{t("other_tags")}</DropdownMenuLabel>
+            <FilterMenuLabel>{t("other_tags")}</FilterMenuLabel>
             {nonSelectedRootLevelTags.map((tag, index) => (
               <TagFilterItem
                 key={tag.id}

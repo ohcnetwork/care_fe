@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
 
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-
 import { FilterChoiceMark } from "./filterChoiceMark";
+import { FilterMenuItem } from "./filterSurface";
 
 export function FilterChoiceItem({
   multiple = false,
@@ -18,17 +17,16 @@ export function FilterChoiceItem({
   className?: string;
 }) {
   return (
-    <DropdownMenuItem
+    <FilterMenuItem
       role={multiple ? "menuitemcheckbox" : "menuitemradio"}
       aria-checked={checked}
-      closeOnClick={false}
       className={className}
-      onClick={() => {
+      onSelect={() => {
         if (multiple || !checked) onChoose();
       }}
     >
       <FilterChoiceMark multiple={multiple} checked={checked} />
       {children}
-    </DropdownMenuItem>
+    </FilterMenuItem>
   );
 }

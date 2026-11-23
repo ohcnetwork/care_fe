@@ -69,6 +69,11 @@ import { FilterChoiceMark } from "@/components/ui/multi-filter/filterChoiceMark"
 import FilterFooter from "@/components/ui/multi-filter/filterFooter";
 import FilterHeader from "@/components/ui/multi-filter/filterHeader";
 import {
+  FilterListHighlightContext,
+  FilterMenuItem,
+  FilterSurfaceContext,
+} from "@/components/ui/multi-filter/filterSurface";
+import {
   Popover,
   PopoverContent,
   PopoverTitle,
@@ -1601,6 +1606,49 @@ function FilterFieldEditor<T>({ render, ...props }: FilterFieldEditorProps<T>) {
   return render(props);
 }
 
+interface FilterAddButtonProps extends React.ComponentProps<typeof Button> {
+  label: string;
+  /** Beside the Filters summary, show only a plus with a tooltip. */
+  iconOnly: boolean;
+}
+
+// One element in both states, so a picker anchored to it stays mounted when the
+// first value is applied. The add menu and each picker pass their trigger props
+// through to the button.
+function FilterAddButton({
+  label,
+  iconOnly,
+  className,
+  ...props
+}: FilterAddButtonProps) {
+  return (
+    <Tooltip disabled={!iconOnly}>
+      <TooltipTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          size={iconOnly ? "icon" : "default"}
+          {...props}
+          // When the toolbar is given more room than it needs (as on mobile),
+          // the labelled button fills it and the plus stays square.
+          className={cn(
+            iconOnly ? "shrink-0" : "min-w-0 flex-1 justify-start",
+            className,
+          )}
+        >
+          {iconOnly ? (
+            <PlusIcon aria-hidden="true" />
+          ) : (
+            <ListFilterIcon aria-hidden="true" />
+          )}
+          <span className={iconOnly ? "sr-only" : undefined}>{label}</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
 // ─── Filters (main) ──────────────────────────────────────────────────────────
 interface FiltersProps<T = unknown> {
   filters: Filter<T>[];
@@ -1646,6 +1694,13 @@ export function Filters<T = unknown>({
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editingFromSummary, setEditingFromSummary] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  // Below md the compact toolbar opens one bottom drawer instead of popovers,
+  // and its views (Active filters, the field list, a picker) replace each
+  // other inside it. Closing keeps the view until the drawer has slid away.
+  const isMobile = useIsMobile();
+  const inDrawer = !!toolbarSummary && isMobile;
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerOrigin, setDrawerOrigin] = useState<"summary" | "add">("add");
   const summaryButtonRef = useRef<HTMLButtonElement>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const restoreTriggerFocus = useRef(false);
@@ -1815,7 +1870,12 @@ export function Filters<T = unknown>({
     setPrevAddFilterOpen(addFilterOpen);
     setPrevMenuSearch(menuSearchInput);
     setPrevFilteredCount(filteredFields.length);
-    if (addFilterOpen && filteredFields.length > 0) {
+    // A drawer is mostly tapped, so it highlights only while searching.
+    if (
+      addFilterOpen &&
+      filteredFields.length > 0 &&
+      (!inDrawer || menuSearchInput)
+    ) {
       setHighlightedIndex(0);
     }
   }
@@ -1832,20 +1892,34 @@ export function Filters<T = unknown>({
     setOpenSubMenu(null);
     setAddFilterOpen(true);
   };
+  const openDrawer = (origin: "summary" | "add") => {
+    setDrawerOrigin(origin);
+    if (origin === "add") openFieldMenu();
+    else {
+      setAddFilterOpen(false);
+      setEditingKey(null);
+      setSummaryOpen(true);
+    }
+    setDrawerOpen(true);
+  };
+  // In a drawer, the toolbar buttons open it instead of anchoring popups.
+  const drawerTriggerProps = (origin: "summary" | "add") =>
+    inDrawer
+      ? {
+          "aria-haspopup": "dialog" as const,
+          "aria-expanded": drawerOpen && drawerOrigin === origin,
+          onClick: () => openDrawer(origin),
+        }
+      : {};
   const addButton = (
-    <Button
+    <FilterAddButton
       ref={addButtonRef}
-      type="button"
-      variant="outline"
+      label={mergedI18n.addFilter}
+      iconOnly={applied.length > 0}
       className={cn(toolbarSummary && "shadow-2xs")}
-      aria-label={mergedI18n.addFilter}
       onClick={editing ? openFieldMenu : undefined}
-    >
-      <ListFilterIcon />
-      <span className={applied.length ? "sr-only sm:not-sr-only" : undefined}>
-        {mergedI18n.addFilter}
-      </span>
-    </Button>
+      {...drawerTriggerProps("add")}
+    />
   );
   const summaryButton = (
     <Button
@@ -1853,15 +1927,20 @@ export function Filters<T = unknown>({
       data-filter-summary-trigger=""
       type="button"
       variant="ghost"
-      className="h-auto pe-1 hover:bg-transparent focus-visible:outline-0 aria-expanded:bg-transparent [:active,[data-pressed]]:bg-transparent [:active,[data-pressed]]:inset-shadow-none dark:hover:bg-transparent"
+      className="h-auto min-w-0 flex-1 justify-start pe-1 hover:bg-transparent focus-visible:outline-0 aria-expanded:bg-transparent [:active,[data-pressed]]:bg-transparent [:active,[data-pressed]]:inset-shadow-none dark:hover:bg-transparent"
+      {...drawerTriggerProps("summary")}
     >
-      <span className="sr-only sm:not-sr-only">{t("active_filters")}</span>
+      <span className="truncate">{t("filters")}</span>
       <Badge variant="primary" counter size="sm">
         {applied.length}
       </Badge>
     </Button>
   );
   const closeEditor = () => {
+    if (inDrawer) {
+      setDrawerOpen(false);
+      return;
+    }
     restoreTriggerFocus.current = true;
     setEditingKey(null);
   };
@@ -1886,8 +1965,11 @@ export function Filters<T = unknown>({
         if (!values.length) {
           if (editingFromSummary && applied.length === 1) {
             // Clearing the last field removes the summary trigger.
-            addButtonRef.current?.focus();
-            setEditingKey(null);
+            if (inDrawer) setDrawerOpen(false);
+            else {
+              addButtonRef.current?.focus();
+              setEditingKey(null);
+            }
           }
           removeFilter(existing.id);
         } else updateFilter(existing.id, { values });
@@ -1913,6 +1995,23 @@ export function Filters<T = unknown>({
     }
   }, [editingKey, editingFromSummary]);
 
+  const pickerHeader = editing && (
+    <FilterHeader
+      label={editing.label ?? ""}
+      icon={editing.icon}
+      onBack={leaveEditor}
+      onClose={closeEditor}
+    />
+  );
+  const pickerFooter = editing && (
+    <FilterFooter
+      multiple={editing.type === "multiselect"}
+      selectedCount={editProps.values.length}
+      onClear={editing.disableClear ? undefined : () => editProps.onChange([])}
+      onDone={closeEditor}
+    />
+  );
+  // Custom pickers render inline when they find themselves in a drawer.
   const fieldEditor =
     editing &&
     (editing.customRenderer ? (
@@ -1926,39 +2025,267 @@ export function Filters<T = unknown>({
         field={editing}
         operator={existing?.operator ?? editing.defaultOperator ?? "is"}
       />
+    ) : inDrawer ? (
+      <>
+        {pickerHeader}
+        <SelectOptionsPopover
+          key={editingKey}
+          field={editing}
+          {...editProps}
+          inline
+        />
+        {pickerFooter}
+      </>
     ) : (
       <SelectOptionsPopover
         key={editingKey}
         field={editing}
         {...editProps}
-        header={
-          <FilterHeader
-            label={editing.label ?? ""}
-            icon={editing.icon}
-            onBack={leaveEditor}
-            onClose={closeEditor}
-          />
-        }
-        footer={
-          <FilterFooter
-            multiple={editing.type === "multiselect"}
-            selectedCount={editProps.values.length}
-            onClear={
-              editing.disableClear ? undefined : () => editProps.onChange([])
-            }
-            onDone={closeEditor}
-          />
-        }
+        header={pickerHeader}
+        footer={pickerFooter}
       />
     ));
 
   const clear = () => {
     addButtonRef.current?.focus();
-    setSummaryOpen(false);
-    setEditingKey(null);
+    if (inDrawer) setDrawerOpen(false);
+    else {
+      setSummaryOpen(false);
+      setEditingKey(null);
+    }
     if (onClearAll) onClearAll();
     else onChange([]);
   };
+
+  const handleFieldSearchKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (filteredFields.length > 0) {
+        setHighlightedIndex((prev) =>
+          prev < filteredFields.length - 1 ? prev + 1 : 0,
+        );
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (filteredFields.length > 0) {
+        setHighlightedIndex((prev) =>
+          prev > 0 ? prev - 1 : filteredFields.length - 1,
+        );
+      }
+    } else if (
+      (e.key === "ArrowRight" || e.key === "ArrowLeft") &&
+      highlightedIndex >= 0
+    ) {
+      const field = filteredFields[highlightedIndex];
+      const hasSubMenu = field && opensSubmenu(field);
+
+      if (e.key === "ArrowRight" && hasSubMenu) {
+        e.preventDefault();
+        setOpenSubMenu(field.key || null);
+        setActiveMenu(field.key || "root");
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        if (openSubMenu) {
+          setOpenSubMenu(null);
+          setActiveMenu("root");
+        }
+      }
+    } else if (e.key === "Enter" && highlightedIndex >= 0) {
+      e.preventDefault();
+      const field = filteredFields[highlightedIndex];
+      if (field.key) {
+        if (!opensSubmenu(field)) {
+          addFilter(field.key);
+        } else {
+          if (openSubMenu === field.key) {
+            setOpenSubMenu(null);
+            setActiveMenu("root");
+          } else {
+            setOpenSubMenu(field.key);
+            setActiveMenu(field.key);
+          }
+        }
+      }
+    } else if (e.key === "Escape") {
+      setAddFilterOpen(false);
+    }
+    e.stopPropagation();
+  };
+
+  const summaryPanel = (title: React.ReactNode) =>
+    toolbarSummary && (
+      <>
+        <div className="flex items-center gap-2 border-b border-border bg-soft-background px-4 py-2.5">
+          {title}
+          <Badge variant="primary" counter size="sm">
+            {applied.length}
+          </Badge>
+        </div>
+        <div className="p-1">
+          {applied.map((filter) => {
+            const field = fieldsMap[filter.field];
+            if (!field) return null;
+            const value = toolbarSummary(filter, field);
+            return (
+              // The row is the item surface, so its remove button
+              // shares the hover and focus state of the edit button.
+              <div
+                key={filter.id}
+                role="group"
+                aria-label={field.label}
+                className="flex items-center gap-1 rounded-md pe-1 transition hover:bg-muted-background has-[[data-slot=filter-summary-edit]:focus-visible]:bg-muted-background has-[[data-slot=filter-summary-edit]:focus-visible]:outline-2 has-[[data-slot=filter-summary-edit]:focus-visible]:-outline-offset-2 has-[[data-slot=filter-summary-edit]:focus-visible]:outline-ring"
+              >
+                <Button
+                  data-slot="filter-summary-edit"
+                  variant="ghost"
+                  className="min-w-0 flex-1 justify-start hover:bg-transparent focus-visible:outline-0 dark:hover:bg-transparent"
+                  onClick={() => {
+                    setSummaryOpen(false);
+                    setEditingFromSummary(true);
+                    setEditingKey(filter.field);
+                  }}
+                >
+                  {field.icon}
+                  <span className="text-muted-foreground">{field.label}</span>
+                  <span className="truncate" title={value}>
+                    {value}
+                  </span>
+                </Button>
+                {(field.operators?.length ?? 0) > 1 && (
+                  <FilterOperatorDropdown
+                    field={field}
+                    operator={filter.operator}
+                    values={filter.values}
+                    onChange={(operator) =>
+                      updateFilter(filter.id, { operator })
+                    }
+                  />
+                )}
+                {!field.disableClear && (
+                  <Button
+                    variant="tertiary"
+                    size="icon-xs"
+                    className="text-muted-foreground"
+                    aria-label={mergedI18n.removeFilter}
+                    onClick={() => {
+                      if (applied.length === 1) {
+                        if (inDrawer) setDrawerOpen(false);
+                        else setSummaryOpen(false);
+                        addButtonRef.current?.focus();
+                      }
+                      removeFilter(filter.id);
+                    }}
+                  >
+                    <XIcon />
+                  </Button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex items-center justify-between gap-2 border-t p-1.5">
+          <Button
+            variant="tertiary"
+            size="sm"
+            className="text-muted-foreground"
+            onClick={clear}
+          >
+            {mergedI18n.clearAll}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="shadow-2xs"
+            onClick={openFieldMenu}
+          >
+            <PlusIcon data-icon="inline-start" aria-hidden="true" />
+            {mergedI18n.addFilter}
+          </Button>
+        </div>
+      </>
+    );
+
+  const highlightedFieldId =
+    highlightedIndex >= 0 ? `${rootId}-item-${highlightedIndex}` : undefined;
+  // The drawer's field list. Its search is a searchbox, not a combobox, so the
+  // drawer doesn't focus it on open and raise the on-screen keyboard.
+  const drawerFieldList = (
+    <>
+      <FilterHeader
+        label={mergedI18n.addFilter}
+        icon={<ListFilterIcon aria-hidden="true" />}
+        onBack={
+          drawerOrigin === "summary" && applied.length > 0
+            ? () => {
+                setAddFilterOpen(false);
+                setSummaryOpen(true);
+              }
+            : undefined
+        }
+        onClose={() => setDrawerOpen(false)}
+      />
+      {showSearchInput && (
+        <div className="border-b p-3">
+          <Input
+            role="searchbox"
+            inputMode="search"
+            aria-label={mergedI18n.searchFields}
+            aria-controls={`${rootId}-listbox`}
+            aria-activedescendant={highlightedFieldId}
+            placeholder={mergedI18n.searchFields}
+            value={menuSearchInput}
+            onChange={(e) => setMenuSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              // The drawer closes itself on Escape.
+              if (e.key !== "Escape") handleFieldSearchKeyDown(e);
+            }}
+          />
+        </div>
+      )}
+      <FilterListHighlightContext.Provider
+        value={{ highlightedId: highlightedFieldId ?? null }}
+      >
+        <div
+          id={`${rootId}-listbox`}
+          role="listbox"
+          aria-label={mergedI18n.addFilter}
+          className="max-h-[50dvh] overflow-y-auto p-2"
+        >
+          {filteredFields.length === 0 ? (
+            <div className="text-muted-foreground py-2 text-center text-sm">
+              {mergedI18n.noFieldsFound}
+            </div>
+          ) : (
+            filteredFields.map((field, index) => {
+              const count =
+                filters
+                  .find((f) => f.field === field.key)
+                  ?.values.filter((v) => v !== "" && v != null).length || 0;
+              return (
+                <FilterMenuItem
+                  key={field.key}
+                  id={`${rootId}-item-${index}`}
+                  role="option"
+                  aria-selected={highlightedIndex === index}
+                  onSelect={() => field.key && addFilter(field.key)}
+                >
+                  {field.icon}
+                  <span>{field.label}</span>
+                  {count > 0 && (
+                    <span className="text-muted-foreground ml-auto text-xs tabular-nums">
+                      {count}
+                    </span>
+                  )}
+                </FilterMenuItem>
+              );
+            })
+          )}
+        </div>
+      </FilterListHighlightContext.Provider>
+    </>
+  );
 
   return (
     <FilterContext.Provider
@@ -1988,9 +2315,11 @@ export function Filters<T = unknown>({
           // open and focus states of the summary trigger.
           <div
             data-slot="filter-summary"
-            className="relative flex h-12 items-stretch rounded-md border border-stronger-border bg-background pe-2 shadow-2xs transition md:h-10 md:pe-1 dark:border-input dark:bg-input/30 has-[[data-filter-summary-trigger]:hover]:bg-muted has-[[data-filter-summary-trigger][aria-expanded=true]]:bg-muted dark:has-[[data-filter-summary-trigger]:hover]:bg-input/50 dark:has-[[data-filter-summary-trigger][aria-expanded=true]]:bg-input/50 has-[[data-filter-summary-trigger]:focus-visible]:z-10 has-[[data-filter-summary-trigger]:focus-visible]:outline-2 has-[[data-filter-summary-trigger]:focus-visible]:outline-offset-2 has-[[data-filter-summary-trigger]:focus-visible]:outline-ring"
+            className="relative flex h-12 min-w-0 flex-1 items-stretch rounded-md border border-stronger-border bg-background pe-2 shadow-2xs transition md:h-10 md:pe-1 dark:border-input dark:bg-input/30 has-[[data-filter-summary-trigger]:hover]:bg-muted has-[[data-filter-summary-trigger][aria-expanded=true]]:bg-muted dark:has-[[data-filter-summary-trigger]:hover]:bg-input/50 dark:has-[[data-filter-summary-trigger][aria-expanded=true]]:bg-input/50 has-[[data-filter-summary-trigger]:focus-visible]:z-10 has-[[data-filter-summary-trigger]:focus-visible]:outline-2 has-[[data-filter-summary-trigger]:focus-visible]:outline-offset-2 has-[[data-filter-summary-trigger]:focus-visible]:outline-ring"
           >
-            {editing && editingFromSummary ? (
+            {inDrawer ? (
+              summaryButton
+            ) : editing && editingFromSummary ? (
               fieldEditor
             ) : (
               <Popover open={summaryOpen} onOpenChange={setSummaryOpen}>
@@ -1999,96 +2328,11 @@ export function Filters<T = unknown>({
                   align={align}
                   className="w-80 max-w-(--available-width) gap-0 overflow-hidden p-0"
                 >
-                  <div className="flex items-center gap-2 border-b border-border bg-soft-background px-4 py-2.5">
+                  {summaryPanel(
                     <PopoverTitle className="text-sm font-semibold">
                       {t("active_filters")}
-                    </PopoverTitle>
-                    <Badge variant="primary" counter size="sm">
-                      {applied.length}
-                    </Badge>
-                  </div>
-                  <div className="p-1">
-                    {applied.map((filter) => {
-                      const field = fieldsMap[filter.field];
-                      if (!field) return null;
-                      const value = toolbarSummary(filter, field);
-                      return (
-                        // The row is the item surface, so its remove button
-                        // shares the hover and focus state of the edit button.
-                        <div
-                          key={filter.id}
-                          role="group"
-                          aria-label={field.label}
-                          className="flex items-center gap-1 rounded-md pe-1 transition hover:bg-muted-background has-[[data-slot=filter-summary-edit]:focus-visible]:bg-muted-background has-[[data-slot=filter-summary-edit]:focus-visible]:outline-2 has-[[data-slot=filter-summary-edit]:focus-visible]:-outline-offset-2 has-[[data-slot=filter-summary-edit]:focus-visible]:outline-ring"
-                        >
-                          <Button
-                            data-slot="filter-summary-edit"
-                            variant="ghost"
-                            className="min-w-0 flex-1 justify-start hover:bg-transparent focus-visible:outline-0 dark:hover:bg-transparent"
-                            onClick={() => {
-                              setSummaryOpen(false);
-                              setEditingFromSummary(true);
-                              setEditingKey(filter.field);
-                            }}
-                          >
-                            {field.icon}
-                            <span className="text-muted-foreground">
-                              {field.label}
-                            </span>
-                            <span className="truncate" title={value}>
-                              {value}
-                            </span>
-                          </Button>
-                          {(field.operators?.length ?? 0) > 1 && (
-                            <FilterOperatorDropdown
-                              field={field}
-                              operator={filter.operator}
-                              values={filter.values}
-                              onChange={(operator) =>
-                                updateFilter(filter.id, { operator })
-                              }
-                            />
-                          )}
-                          {!field.disableClear && (
-                            <Button
-                              variant="tertiary"
-                              size="icon-xs"
-                              className="text-muted-foreground"
-                              aria-label={mergedI18n.removeFilter}
-                              onClick={() => {
-                                if (applied.length === 1) {
-                                  setSummaryOpen(false);
-                                  addButtonRef.current?.focus();
-                                }
-                                removeFilter(filter.id);
-                              }}
-                            >
-                              <XIcon />
-                            </Button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="flex items-center justify-between gap-2 border-t p-1.5">
-                    <Button
-                      variant="tertiary"
-                      size="sm"
-                      className="text-muted-foreground"
-                      onClick={clear}
-                    >
-                      {mergedI18n.clearAll}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="shadow-2xs"
-                      onClick={openFieldMenu}
-                    >
-                      <PlusIcon data-icon="inline-start" aria-hidden="true" />
-                      {mergedI18n.addFilter}
-                    </Button>
-                  </div>
+                    </PopoverTitle>,
+                  )}
                 </PopoverContent>
               </Popover>
             )}
@@ -2098,7 +2342,9 @@ export function Filters<T = unknown>({
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className="self-center text-muted-foreground focus-visible:outline-offset-0"
+                  // On mobile the toolbar shares its row with Date, so Clear
+                  // all lives only in the Filters drawer.
+                  className="self-center text-muted-foreground focus-visible:outline-offset-0 max-md:hidden"
                   aria-label={t("clear_all_filters")}
                   onClick={clear}
                 >
@@ -2109,353 +2355,302 @@ export function Filters<T = unknown>({
             </Tooltip>
           </div>
         )}
-        {editing && !editingFromSummary
-          ? fieldEditor
-          : selectableFields.length > 0 && (
-              <DropdownMenu
-                modal={false}
-                open={addFilterOpen}
-                onOpenChange={(open) => {
-                  setAddFilterOpen(open);
-                  if (!open) {
-                    setTimeout(() => {
-                      setMenuSearchInput("");
-                      setSessionFilterIds({});
-                    }, 200);
-                  } else {
-                    setActiveMenu("root");
-                  }
-                }}
-              >
-                <DropdownMenuTrigger asChild>
-                  {(toolbarSummary ? addButton : trigger) || (
-                    <Button
-                      data-slot="filter-trigger"
-                      variant="outline"
-                      size={size}
-                      className="shadow-sm"
-                      aria-label={mergedI18n.addFilter}
-                      aria-haspopup="menu"
-                      aria-expanded={addFilterOpen}
-                    >
-                      <ListFilterIcon aria-hidden="true" />
-                      {mergedI18n.addFilter}
-                    </Button>
-                  )}
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className={cn("w-55", menuPopupClassName)}
-                  align={align}
+        {inDrawer
+          ? selectableFields.length > 0 && addButton
+          : editing && !editingFromSummary
+            ? fieldEditor
+            : selectableFields.length > 0 && (
+                <DropdownMenu
+                  modal={false}
+                  open={addFilterOpen}
+                  onOpenChange={(open) => {
+                    setAddFilterOpen(open);
+                    if (!open) {
+                      setTimeout(() => {
+                        setMenuSearchInput("");
+                        setSessionFilterIds({});
+                      }, 200);
+                    } else {
+                      setActiveMenu("root");
+                    }
+                  }}
                 >
-                  {showSearchInput && (
-                    <>
-                      <div className="relative">
-                        <Input
-                          ref={rootInputRef}
-                          role="combobox"
-                          aria-controls={`${rootId}-listbox`}
-                          aria-activedescendant={
-                            highlightedIndex >= 0
-                              ? `${rootId}-item-${highlightedIndex}`
-                              : undefined
-                          }
-                          placeholder={mergedI18n.searchFields}
-                          className={cn(
-                            "h-8 rounded-none border-0 bg-transparent! px-2 text-sm shadow-none",
-                            "focus-visible:border-border focus-visible:ring-0 focus-visible:ring-offset-0",
-                          )}
-                          value={menuSearchInput}
-                          onChange={(e) => setMenuSearchInput(e.target.value)}
-                          onClick={(e) => e.stopPropagation()}
-                          onKeyDown={(e) => {
-                            if (e.key === "ArrowDown") {
-                              e.preventDefault();
-                              if (filteredFields.length > 0) {
-                                setHighlightedIndex((prev) =>
-                                  prev < filteredFields.length - 1
-                                    ? prev + 1
-                                    : 0,
-                                );
-                              }
-                            } else if (e.key === "ArrowUp") {
-                              e.preventDefault();
-                              if (filteredFields.length > 0) {
-                                setHighlightedIndex((prev) =>
-                                  prev > 0
-                                    ? prev - 1
-                                    : filteredFields.length - 1,
-                                );
-                              }
-                            } else if (
-                              (e.key === "ArrowRight" ||
-                                e.key === "ArrowLeft") &&
+                  <DropdownMenuTrigger asChild>
+                    {(toolbarSummary ? addButton : trigger) || (
+                      <Button
+                        data-slot="filter-trigger"
+                        variant="outline"
+                        size={size}
+                        className="shadow-sm"
+                        aria-label={mergedI18n.addFilter}
+                        aria-haspopup="menu"
+                        aria-expanded={addFilterOpen}
+                      >
+                        <ListFilterIcon aria-hidden="true" />
+                        {mergedI18n.addFilter}
+                      </Button>
+                    )}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className={cn("w-55", menuPopupClassName)}
+                    align={align}
+                  >
+                    {showSearchInput && (
+                      <>
+                        <div className="relative">
+                          <Input
+                            ref={rootInputRef}
+                            role="combobox"
+                            aria-controls={`${rootId}-listbox`}
+                            aria-activedescendant={
                               highlightedIndex >= 0
-                            ) {
-                              const field = filteredFields[highlightedIndex];
-                              const hasSubMenu = field && opensSubmenu(field);
-
-                              if (e.key === "ArrowRight" && hasSubMenu) {
-                                e.preventDefault();
-                                setOpenSubMenu(field.key || null);
-                                setActiveMenu(field.key || "root");
-                              } else if (e.key === "ArrowLeft") {
-                                e.preventDefault();
-                                if (openSubMenu) {
-                                  setOpenSubMenu(null);
-                                  setActiveMenu("root");
-                                }
-                              }
-                            } else if (
-                              e.key === "Enter" &&
-                              highlightedIndex >= 0
-                            ) {
-                              e.preventDefault();
-                              const field = filteredFields[highlightedIndex];
-                              if (field.key) {
-                                if (!opensSubmenu(field)) {
-                                  addFilter(field.key);
-                                } else {
-                                  if (openSubMenu === field.key) {
-                                    setOpenSubMenu(null);
-                                    setActiveMenu("root");
-                                  } else {
-                                    setOpenSubMenu(field.key);
-                                    setActiveMenu(field.key);
-                                  }
-                                }
-                              }
-                            } else if (e.key === "Escape") {
-                              setAddFilterOpen(false);
+                                ? `${rootId}-item-${highlightedIndex}`
+                                : undefined
                             }
-                            e.stopPropagation();
-                          }}
-                        />
-                        {enableShortcut && shortcutLabel && (
-                          <Kbd className="bg-background absolute top-1/2 right-2 -translate-y-1/2 border">
-                            {shortcutLabel}
-                          </Kbd>
-                        )}
-                      </div>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
+                            placeholder={mergedI18n.searchFields}
+                            className={cn(
+                              "h-8 rounded-none border-0 bg-transparent! px-2 text-sm shadow-none",
+                              "focus-visible:border-border focus-visible:ring-0 focus-visible:ring-offset-0",
+                            )}
+                            value={menuSearchInput}
+                            onChange={(e) => setMenuSearchInput(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                            onKeyDown={handleFieldSearchKeyDown}
+                          />
+                          {enableShortcut && shortcutLabel && (
+                            <Kbd className="bg-background absolute top-1/2 right-2 -translate-y-1/2 border">
+                              {shortcutLabel}
+                            </Kbd>
+                          )}
+                        </div>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
 
-                  <div className="relative flex max-h-full">
-                    <div
-                      className="flex max-h-[min(var(--available-height),24rem)] w-full scroll-pt-2 scroll-pb-2 flex-col overscroll-contain"
-                      role="listbox"
-                      id={`${rootId}-listbox`}
-                    >
-                      <ScrollArea className="**:data-[slot=scroll-area-scrollbar]:m-0">
-                        {(() => {
-                          if (filteredFields.length === 0) {
-                            return (
-                              <div className="text-muted-foreground py-2 text-center text-sm">
-                                {mergedI18n.noFieldsFound}
-                              </div>
-                            );
-                          }
-
-                          return filteredFields.map((field, index) => {
-                            const isHighlighted = highlightedIndex === index;
-                            const itemId = `${rootId}-item-${index}`;
-
-                            if (opensSubmenu(field)) {
-                              const isMultiSelect =
-                                field.type === "multiselect";
-                              const fieldKey = field.key as string;
-                              const existingFieldFilter = filters.find(
-                                (f) => f.field === fieldKey,
-                              );
-                              const sessionFilterId =
-                                sessionFilterIds[fieldKey];
-                              const sessionFilter = sessionFilterId
-                                ? filters.find((f) => f.id === sessionFilterId)
-                                : null;
-                              const currentValues =
-                                existingFieldFilter?.values ||
-                                sessionFilter?.values ||
-                                [];
-
+                    <div className="relative flex max-h-full">
+                      <div
+                        className="flex max-h-[min(var(--available-height),24rem)] w-full scroll-pt-2 scroll-pb-2 flex-col overscroll-contain"
+                        role="listbox"
+                        id={`${rootId}-listbox`}
+                      >
+                        <ScrollArea className="**:data-[slot=scroll-area-scrollbar]:m-0">
+                          {(() => {
+                            if (filteredFields.length === 0) {
                               return (
-                                <DropdownMenuSub
-                                  key={fieldKey}
-                                  open={openSubMenu === fieldKey}
-                                  onOpenChange={(open) => {
-                                    if (open) {
-                                      setOpenSubMenu((prev) =>
-                                        prev === fieldKey ? prev : fieldKey,
-                                      );
-                                    } else {
-                                      if (openSubMenu === fieldKey) {
-                                        setOpenSubMenu(null);
-                                        setActiveMenu("root");
-                                      }
-                                    }
-                                  }}
-                                >
-                                  <DropdownMenuSubTrigger
-                                    id={itemId}
-                                    role="option"
-                                    aria-selected={isHighlighted}
-                                    data-highlighted={
-                                      isHighlighted || undefined
-                                    }
-                                    onMouseEnter={() =>
-                                      setHighlightedIndex(index)
-                                    }
-                                    className="data-[state=open]:bg-accent data-[state=open]:text-accent-foreground data-highlighted:bg-accent data-highlighted:text-accent-foreground"
-                                  >
-                                    {field.icon}
-                                    <span>{field.label}</span>
-                                    {currentValues.length > 0 && (
-                                      <span className="text-muted-foreground ml-auto text-xs tabular-nums">
-                                        {currentValues.length}
-                                      </span>
-                                    )}
-                                  </DropdownMenuSubTrigger>
-                                  <DropdownMenuSubContent className="w-50">
-                                    <FilterSubmenuContent
-                                      field={field}
-                                      currentValues={currentValues}
-                                      isMultiSelect={isMultiSelect}
-                                      i18n={mergedI18n}
-                                      isActive={activeMenu === fieldKey}
-                                      onActive={() => {
-                                        if (field.searchable !== false) {
-                                          setActiveMenu(fieldKey);
-                                        }
-                                      }}
-                                      onBack={() => {
-                                        setOpenSubMenu(null);
-                                        setActiveMenu("root");
-                                      }}
-                                      onClose={() => setAddFilterOpen(false)}
-                                      onToggle={(value, isSelected) => {
-                                        if (isMultiSelect) {
-                                          const nextValues = isSelected
-                                            ? (currentValues.filter(
-                                                (v) => v !== value,
-                                              ) as T[])
-                                            : ([
-                                                ...currentValues,
-                                                value,
-                                              ] as T[]);
+                                <div className="text-muted-foreground py-2 text-center text-sm">
+                                  {mergedI18n.noFieldsFound}
+                                </div>
+                              );
+                            }
 
-                                          // Find an existing filter to update (either from chips or this session)
-                                          const targetFilter =
-                                            existingFieldFilter ??
-                                            sessionFilter;
-                                          if (targetFilter) {
-                                            if (nextValues.length === 0) {
-                                              onChange(
-                                                filters.filter(
-                                                  (f) =>
-                                                    f.id !== targetFilter.id,
-                                                ),
+                            return filteredFields.map((field, index) => {
+                              const isHighlighted = highlightedIndex === index;
+                              const itemId = `${rootId}-item-${index}`;
+
+                              if (opensSubmenu(field)) {
+                                const isMultiSelect =
+                                  field.type === "multiselect";
+                                const fieldKey = field.key as string;
+                                const existingFieldFilter = filters.find(
+                                  (f) => f.field === fieldKey,
+                                );
+                                const sessionFilterId =
+                                  sessionFilterIds[fieldKey];
+                                const sessionFilter = sessionFilterId
+                                  ? filters.find(
+                                      (f) => f.id === sessionFilterId,
+                                    )
+                                  : null;
+                                const currentValues =
+                                  existingFieldFilter?.values ||
+                                  sessionFilter?.values ||
+                                  [];
+
+                                return (
+                                  <DropdownMenuSub
+                                    key={fieldKey}
+                                    open={openSubMenu === fieldKey}
+                                    onOpenChange={(open) => {
+                                      if (open) {
+                                        setOpenSubMenu((prev) =>
+                                          prev === fieldKey ? prev : fieldKey,
+                                        );
+                                      } else {
+                                        if (openSubMenu === fieldKey) {
+                                          setOpenSubMenu(null);
+                                          setActiveMenu("root");
+                                        }
+                                      }
+                                    }}
+                                  >
+                                    <DropdownMenuSubTrigger
+                                      id={itemId}
+                                      role="option"
+                                      aria-selected={isHighlighted}
+                                      data-highlighted={
+                                        isHighlighted || undefined
+                                      }
+                                      onMouseEnter={() =>
+                                        setHighlightedIndex(index)
+                                      }
+                                      className="data-[state=open]:bg-accent data-[state=open]:text-accent-foreground data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                                    >
+                                      {field.icon}
+                                      <span>{field.label}</span>
+                                      {currentValues.length > 0 && (
+                                        <span className="text-muted-foreground ml-auto text-xs tabular-nums">
+                                          {currentValues.length}
+                                        </span>
+                                      )}
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuSubContent className="w-50">
+                                      <FilterSubmenuContent
+                                        field={field}
+                                        currentValues={currentValues}
+                                        isMultiSelect={isMultiSelect}
+                                        i18n={mergedI18n}
+                                        isActive={activeMenu === fieldKey}
+                                        onActive={() => {
+                                          if (field.searchable !== false) {
+                                            setActiveMenu(fieldKey);
+                                          }
+                                        }}
+                                        onBack={() => {
+                                          setOpenSubMenu(null);
+                                          setActiveMenu("root");
+                                        }}
+                                        onClose={() => setAddFilterOpen(false)}
+                                        onToggle={(value, isSelected) => {
+                                          if (isMultiSelect) {
+                                            const nextValues = isSelected
+                                              ? (currentValues.filter(
+                                                  (v) => v !== value,
+                                                ) as T[])
+                                              : ([
+                                                  ...currentValues,
+                                                  value,
+                                                ] as T[]);
+
+                                            // Find an existing filter to update (either from chips or this session)
+                                            const targetFilter =
+                                              existingFieldFilter ??
+                                              sessionFilter;
+                                            if (targetFilter) {
+                                              if (nextValues.length === 0) {
+                                                onChange(
+                                                  filters.filter(
+                                                    (f) =>
+                                                      f.id !== targetFilter.id,
+                                                  ),
+                                                );
+                                                setSessionFilterIds((prev) => ({
+                                                  ...prev,
+                                                  [fieldKey]: "",
+                                                }));
+                                              } else {
+                                                onChange(
+                                                  filters.map((f) =>
+                                                    f.id === targetFilter.id
+                                                      ? {
+                                                          ...f,
+                                                          values: nextValues,
+                                                        }
+                                                      : f,
+                                                  ),
+                                                );
+                                              }
+                                            } else {
+                                              const newFilter = createFilter<T>(
+                                                fieldKey,
+                                                field.defaultOperator ||
+                                                  "is_any_of",
+                                                nextValues,
                                               );
+                                              onChange([...filters, newFilter]);
                                               setSessionFilterIds((prev) => ({
                                                 ...prev,
-                                                [fieldKey]: "",
+                                                [fieldKey]: newFilter.id,
                                               }));
+                                            }
+                                          } else {
+                                            // Single-select: update existing filter if present
+                                            if (existingFieldFilter) {
+                                              if (!isSelected) {
+                                                onChange(
+                                                  filters.map((f) =>
+                                                    f.id ===
+                                                    existingFieldFilter.id
+                                                      ? {
+                                                          ...f,
+                                                          values: [
+                                                            value,
+                                                          ] as T[],
+                                                        }
+                                                      : f,
+                                                  ),
+                                                );
+                                              }
+                                              setAddFilterOpen(false);
                                             } else {
-                                              onChange(
-                                                filters.map((f) =>
-                                                  f.id === targetFilter.id
-                                                    ? {
-                                                        ...f,
-                                                        values: nextValues,
-                                                      }
-                                                    : f,
-                                                ),
+                                              const newFilter = createFilter<T>(
+                                                fieldKey,
+                                                field.defaultOperator || "is",
+                                                [value] as T[],
                                               );
-                                            }
-                                          } else {
-                                            const newFilter = createFilter<T>(
-                                              fieldKey,
-                                              field.defaultOperator ||
-                                                "is_any_of",
-                                              nextValues,
-                                            );
-                                            onChange([...filters, newFilter]);
-                                            setSessionFilterIds((prev) => ({
-                                              ...prev,
-                                              [fieldKey]: newFilter.id,
-                                            }));
-                                          }
-                                        } else {
-                                          // Single-select: update existing filter if present
-                                          if (existingFieldFilter) {
-                                            if (!isSelected) {
-                                              onChange(
-                                                filters.map((f) =>
-                                                  f.id ===
-                                                  existingFieldFilter.id
-                                                    ? {
-                                                        ...f,
-                                                        values: [value] as T[],
-                                                      }
-                                                    : f,
-                                                ),
+                                              setLastAddedFilterId(
+                                                newFilter.id,
                                               );
+                                              onChange([...filters, newFilter]);
+                                              setAddFilterOpen(false);
                                             }
-                                            setAddFilterOpen(false);
-                                          } else {
-                                            const newFilter = createFilter<T>(
-                                              fieldKey,
-                                              field.defaultOperator || "is",
-                                              [value] as T[],
-                                            );
-                                            setLastAddedFilterId(newFilter.id);
-                                            onChange([...filters, newFilter]);
-                                            setAddFilterOpen(false);
                                           }
-                                        }
-                                      }}
-                                    />
-                                  </DropdownMenuSubContent>
-                                </DropdownMenuSub>
+                                        }}
+                                      />
+                                    </DropdownMenuSubContent>
+                                  </DropdownMenuSub>
+                                );
+                              }
+
+                              const existingFilter = filters.find(
+                                (f) => f.field === field.key,
                               );
-                            }
+                              const filterValueCount =
+                                existingFilter?.values.filter(
+                                  (v) => v !== "" && v != null,
+                                ).length || 0;
 
-                            const existingFilter = filters.find(
-                              (f) => f.field === field.key,
-                            );
-                            const filterValueCount =
-                              existingFilter?.values.filter(
-                                (v) => v !== "" && v != null,
-                              ).length || 0;
-
-                            return (
-                              <DropdownMenuItem
-                                key={field.key}
-                                id={itemId}
-                                role="option"
-                                aria-selected={isHighlighted}
-                                data-highlighted={isHighlighted || undefined}
-                                onMouseEnter={() => setHighlightedIndex(index)}
-                                onClick={() =>
-                                  field.key && addFilter(field.key)
-                                }
-                                className="data-highlighted:bg-accent data-highlighted:text-accent-foreground"
-                              >
-                                {field.icon}
-                                <span>{field.label}</span>
-                                {filterValueCount > 0 && (
-                                  <span className="text-muted-foreground ml-auto text-xs tabular-nums">
-                                    {filterValueCount}
-                                  </span>
-                                )}
-                              </DropdownMenuItem>
-                            );
-                          });
-                        })()}
-                      </ScrollArea>
+                              return (
+                                <DropdownMenuItem
+                                  key={field.key}
+                                  id={itemId}
+                                  role="option"
+                                  aria-selected={isHighlighted}
+                                  data-highlighted={isHighlighted || undefined}
+                                  onMouseEnter={() =>
+                                    setHighlightedIndex(index)
+                                  }
+                                  onClick={() =>
+                                    field.key && addFilter(field.key)
+                                  }
+                                  className="data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                                >
+                                  {field.icon}
+                                  <span>{field.label}</span>
+                                  {filterValueCount > 0 && (
+                                    <span className="text-muted-foreground ml-auto text-xs tabular-nums">
+                                      {filterValueCount}
+                                    </span>
+                                  )}
+                                </DropdownMenuItem>
+                              );
+                            });
+                          })()}
+                        </ScrollArea>
+                      </div>
                     </div>
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
 
         {!toolbarSummary &&
           filters.map((filter) => {
@@ -2494,6 +2689,51 @@ export function Filters<T = unknown>({
           </Button>
         )}
       </Container>
+      {inDrawer && (
+        <Drawer
+          open={drawerOpen}
+          onOpenChange={(open) => {
+            if (!open) setDrawerOpen(false);
+          }}
+          onOpenChangeComplete={(open) => {
+            if (open) return;
+            setSummaryOpen(false);
+            setAddFilterOpen(false);
+            setEditingKey(null);
+          }}
+        >
+          <DrawerContent
+            // The Active filters view is named by its title.
+            aria-label={
+              editing
+                ? editing.label
+                : addFilterOpen
+                  ? mergedI18n.addFilter
+                  : undefined
+            }
+            // Return to the button that opened the drawer, or to Add filter
+            // once clearing the last filter has removed the summary.
+            finalFocus={() =>
+              (drawerOrigin === "summary" &&
+              summaryButtonRef.current?.isConnected
+                ? summaryButtonRef.current
+                : addButtonRef.current) ?? true
+            }
+          >
+            <FilterSurfaceContext.Provider value="drawer">
+              {editing
+                ? fieldEditor
+                : addFilterOpen
+                  ? drawerFieldList
+                  : summaryPanel(
+                      <DrawerTitle className="text-sm font-semibold">
+                        {t("active_filters")}
+                      </DrawerTitle>,
+                    )}
+            </FilterSurfaceContext.Provider>
+          </DrawerContent>
+        </Drawer>
+      )}
     </FilterContext.Provider>
   );
 }

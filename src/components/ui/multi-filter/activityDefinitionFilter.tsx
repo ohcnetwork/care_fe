@@ -11,7 +11,6 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
@@ -38,6 +37,7 @@ import {
   FilterMenuSearch,
   useFilterMenuSearch,
 } from "./filterMenuSearch";
+import { FilterMenuItem } from "./filterSurface";
 import { FilterConfig, FilterMode, FilterValues } from "./utils/Utils";
 
 interface CategoryBreadcrumb {
@@ -299,12 +299,11 @@ function ActivityDefinitionFilterDropdown({
               {currentParent ? t("subcategories") : t("categories")}
             </div>
             {categories.map((category) => (
-              <DropdownMenuItem
+              <FilterMenuItem
                 key={category.id}
-                onSelect={(e) => {
-                  e.preventDefault();
-                  handleCategorySelect(category.slug, category.title);
-                }}
+                onSelect={() =>
+                  handleCategorySelect(category.slug, category.title)
+                }
                 className="flex items-center justify-between px-2 py-2 cursor-pointer"
               >
                 <div className="flex items-center gap-2">
@@ -312,7 +311,7 @@ function ActivityDefinitionFilterDropdown({
                   <span className="text-sm">{category.title}</span>
                 </div>
                 <ChevronRight className="size-4 text-gray-400" />
-              </DropdownMenuItem>
+              </FilterMenuItem>
             ))}
             {definitions.length > 0 && <div className="border-b my-2" />}
           </>

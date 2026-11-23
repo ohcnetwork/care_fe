@@ -17,6 +17,7 @@ import {
 } from "./dateFilter";
 import { FilterMenuSearchProvider } from "./filterMenuSearch";
 import FilterRenderer from "./filterRenderer";
+import { useFilterSurface } from "./filterSurface";
 import { FilterDateRange, FilterState } from "./utils/Utils";
 
 interface DomainFilterValueProps {
@@ -54,8 +55,29 @@ export function DomainFilterValue({
   const selected = toDomainValues(state, values);
   const { filter } = state;
   const dateDraftRef = useRef<DateFilterHandle>(null);
+  const inDrawer = useFilterSurface() === "drawer";
 
-  const menu = (
+  const picker = (
+    <FilterRenderer
+      activeFilter={filter.key}
+      dateDraftRef={dateDraftRef}
+      selectedFilters={{
+        ...selectedFilters,
+        [filter.key]: { ...state, selected },
+      }}
+      facilityId={facilityId}
+      handleBack={onBack}
+      handleClose={onClose}
+      onFilterChange={(_, next) =>
+        onChange(Array.isArray(next) ? next : [next])
+      }
+    />
+  );
+
+  // A drawer hosting the toolbar shows the picker in place of its other views.
+  const menu = inDrawer ? (
+    picker
+  ) : (
     <DropdownMenu
       open={open}
       onOpenChange={(next, details) => {
@@ -97,20 +119,7 @@ export function DomainFilterValue({
         finalFocus={finalFocus}
         aria-label={t(filter.label)}
       >
-        <FilterRenderer
-          activeFilter={filter.key}
-          dateDraftRef={dateDraftRef}
-          selectedFilters={{
-            ...selectedFilters,
-            [filter.key]: { ...state, selected },
-          }}
-          facilityId={facilityId}
-          handleBack={onBack}
-          handleClose={onClose}
-          onFilterChange={(_, next) =>
-            onChange(Array.isArray(next) ? next : [next])
-          }
-        />
+        {picker}
       </DropdownMenuContent>
     </DropdownMenu>
   );

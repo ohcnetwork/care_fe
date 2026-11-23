@@ -6,8 +6,8 @@ export function selectedMultiFilterBar(page: Page, label: RegExp) {
 
 export async function clearSelectedMultiFilter(page: Page, label: RegExp) {
   await page.keyboard.press("Escape");
-  // Compact toolbars list the selected filters in the Active filters popover.
-  const summary = page.getByRole("button", { name: /^active filters/i });
+  // Compact toolbars list the selected filters in the Filters button's popover.
+  const summary = page.getByRole("button", { name: /^filters\b/i });
   if (await summary.isVisible()) await summary.click();
   await selectedMultiFilterBar(page, label)
     .getByRole("button", { name: "Remove filter", exact: true })

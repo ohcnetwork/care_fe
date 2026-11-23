@@ -126,15 +126,15 @@ test("adds and removes an encounter tag with the pointer", async ({ page }) => {
   );
 
   await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: /active filters/i }).click();
+  await page.getByRole("button", { name: /^filters\b/i }).click();
   await page.getByRole("button", { name: /tags.*walk-in/i }).click();
   await expect(row).toBeChecked();
   await expect(checkbox.locator("svg")).toHaveCSS("width", "16px");
   await row.getByText(tag.display).click();
   await expect(page).toHaveURL((url) => !url.searchParams.get("tags"));
-  await expect(
-    page.getByRole("button", { name: /active filters/i }),
-  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^filters\b/i })).toHaveCount(
+    0,
+  );
   await expect(
     page.getByRole("button", { name: /^add filter$/i }),
   ).toBeFocused();
@@ -216,9 +216,9 @@ test("can switch fields without applying an empty picker", async ({ page }) => {
     page.getByRole("option", { name: /^department$/i }),
   ).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(
-    page.getByRole("button", { name: /active filters/i }),
-  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^filters\b/i })).toHaveCount(
+    0,
+  );
   await expect(page).toHaveURL((url) => !url.searchParams.has("tags"));
 });
 
@@ -251,7 +251,7 @@ for (const picker of [
       (url) => url.searchParams.get(picker.param) === picker.values[0],
     );
     await page.keyboard.press("Escape");
-    const active = page.getByRole("button", { name: /active filters/i });
+    const active = page.getByRole("button", { name: /^filters\b/i });
     await active.click();
     const row = page.getByRole("group", { name: picker.label, exact: true });
     await row
@@ -324,7 +324,7 @@ test("priority uses radio choices when adding and editing", async ({
   const isUrgent = (url: URL) => url.searchParams.get("priority") === "urgent";
   await expect(page).toHaveURL(isUrgent);
   await page.reload();
-  await page.getByRole("button", { name: /active filters/i }).click();
+  await page.getByRole("button", { name: /^filters\b/i }).click();
   await page.getByRole("button", { name: /priority.*urgent/i }).click();
   await expect(urgent).toBeChecked();
   await expect(
@@ -457,7 +457,7 @@ test("picker header goes back to where the picker was opened, or closes it", asy
   await expect(priorityPicker).toHaveCount(0);
   await expect(add).toBeFocused();
 
-  const active = page.getByRole("button", { name: /active filters/i });
+  const active = page.getByRole("button", { name: /^filters\b/i });
   await active.click();
   const summary = page.getByRole("dialog", { name: /^active filters$/i });
   const editPriority = summary.getByRole("button", {
@@ -573,7 +573,7 @@ for (const layout of ["desktop", "mobile"] as const) {
       await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/facility/${facility.id}/encounters/patients/all`);
     const add = page.getByRole("button", { name: /^add filter$/i });
-    const active = page.getByRole("button", { name: /active filters/i });
+    const active = page.getByRole("button", { name: /^filters\b/i });
     const clear = page.getByRole("button", { name: /^clear all filters$/i });
     const date = page.getByRole("button", { name: /^date/i });
     await expect(date).toHaveText(/today/i);
@@ -589,6 +589,12 @@ for (const layout of ["desktop", "mobile"] as const) {
     expect(start).toBeTruthy();
     expect(end).toBeTruthy();
 
+    // With nothing applied, Add keeps its label. On mobile it and Date split
+    // their row equally.
+    const labelledAdd = (await add.boundingBox())!;
+    expect(labelledAdd.width).toBeGreaterThan(labelledAdd.height);
+    if (layout === "mobile")
+      expect(labelledAdd.width).toBeCloseTo(initialDateBox.width, 0);
     await add.click();
     await expect(page.getByRole("option", { name: /^date$/i })).toHaveCount(0);
     await page.getByRole("option", { name: /^status$/i }).click();
@@ -598,11 +604,26 @@ for (const layout of ["desktop", "mobile"] as const) {
     // The value picker replaced the field menu, so one Escape closes it.
     await page.keyboard.press("Escape");
     await expect(add).toBeFocused();
-    await expect(active).toHaveAccessibleName(/active filters\s*1/i);
+    await expect(active).toHaveAccessibleName(/^filters\s*1$/i);
+    // The Filters label stays visible on every layout; Add becomes a plus
+    // with a tooltip.
+    const label = (await active
+      .getByText("Filters", { exact: true })
+      .boundingBox())!;
+    expect(label.width).toBeGreaterThan(1);
+    const plus = (await add.boundingBox())!;
+    expect(plus.width).toBeCloseTo(plus.height, 0);
+    await add.hover();
+    await expect(page.locator('[data-slot="tooltip-content"]')).toHaveText(
+      /^add filter$/i,
+    );
     const segment = page.locator('[data-slot="filter-summary"]');
-    await expect(
-      segment.getByRole("button", { name: /^clear all filters$/i }),
-    ).toBeVisible();
+    // On mobile, Clear all lives in the Filters drawer instead.
+    const segmentClear = segment.getByRole("button", {
+      name: /^clear all filters$/i,
+    });
+    if (layout === "mobile") await expect(segmentClear).toBeHidden();
+    else await expect(segmentClear).toBeVisible();
     expect((await segment.boundingBox())!.height).toBeCloseTo(
       (await add.boundingBox())!.height,
       0,
@@ -616,8 +637,11 @@ for (const layout of ["desktop", "mobile"] as const) {
       summary.getByRole("group", { name: /^status$/i }),
     ).toContainText(/planned.*completed/i);
     await expect(summary).toHaveAccessibleName(/^active filters$/i);
+    // A popover on desktop, a drawer on mobile.
     await expect(
-      summary.locator('[data-slot="popover-title"]').locator(".."),
+      summary
+        .locator('[data-slot="popover-title"], [data-slot="drawer-title"]')
+        .locator(".."),
     ).toHaveText(/^active filters\s*1$/i);
     // Measure after the zoom-in animation, which scales the boxes.
     await summary.evaluate((el) =>
@@ -637,7 +661,7 @@ for (const layout of ["desktop", "mobile"] as const) {
       .getByRole("menuitemradio", { name: departments[0].name, exact: true })
       .click();
     await page.keyboard.press("Escape");
-    await expect(active).toHaveAccessibleName(/active filters\s*2/i);
+    await expect(active).toHaveAccessibleName(/^filters\s*2$/i);
 
     const dateBox = (await date.boundingBox())!;
     const addBox = (await add.boundingBox())!;
@@ -647,7 +671,17 @@ for (const layout of ["desktop", "mobile"] as const) {
     expect(dateBox.x + dateBox.width).toBeLessThanOrEqual(
       page.viewportSize()!.width,
     );
-    await clear.click();
+    if (layout === "mobile") {
+      const group = page.getByRole("group", { name: /^filters$/i });
+      expect((await group.boundingBox())!.width).toBeCloseTo(dateBox.width, 0);
+      await active.click();
+      await page
+        .getByRole("dialog")
+        .getByRole("button", { name: /^clear all$/i })
+        .click();
+      // The drawer keeps its view while it slides away.
+      await expect(page.locator('[data-slot="drawer-popup"]')).toHaveCount(0);
+    } else await clear.click();
     await expect(active).toHaveCount(0);
     await expect(clear).toHaveCount(0);
     await expect(add).toBeVisible();
@@ -686,7 +720,11 @@ for (const layout of ["desktop", "mobile"] as const) {
 
     // Edit the saved field from the summary, rather than the add menu.
     await page.reload();
-    const active = page.getByRole("button", { name: /active filters/i });
+    // On mobile the modal drawer hides the toolbar from the accessibility tree.
+    const active = page.getByRole("button", {
+      name: /^filters\b/i,
+      includeHidden: true,
+    });
     await active.click();
     await page.getByRole("button", { name: /status.*planned/i }).click();
     await expect(active).toHaveAttribute("aria-expanded", "true");
@@ -728,3 +766,56 @@ for (const layout of ["desktop", "mobile"] as const) {
     );
   });
 }
+
+test("opens the filters in one bottom drawer on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/facility/${facility.id}/encounters/patients/all`);
+  const add = page.getByRole("button", { name: /^add filter$/i });
+  const drawers = page.locator('[data-slot="drawer-popup"]');
+
+  await add.click();
+  const fields = page.getByRole("dialog", { name: /^add filter$/i });
+  await expect(fields).toBeVisible();
+  // The search isn't focused, so the on-screen keyboard stays closed.
+  await expect(fields.getByRole("searchbox")).not.toBeFocused();
+  await fields.getByRole("option", { name: /^status$/i }).click();
+
+  // The picker replaces the field list in the same drawer.
+  const status = page.getByRole("dialog", { name: "Status" });
+  await expect(status).toBeVisible();
+  await expect(drawers).toHaveCount(1);
+  await status
+    .getByRole("menuitemcheckbox", { name: "Planned", exact: true })
+    .click();
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get("status") === "planned",
+  );
+  await status.getByRole("button", { name: "Done" }).click();
+  await expect(drawers).toHaveCount(0);
+  await expect(add).toBeFocused();
+
+  const active = page.getByRole("button", { name: /^filters\b/i });
+  await active.click();
+  const summary = page.getByRole("dialog", { name: /^active filters$/i });
+  await expect(summary).toBeVisible();
+  await summary.getByRole("button", { name: /^add filter$/i }).click();
+  await expect(fields).toBeVisible();
+  await fields.getByRole("button", { name: "Back" }).click();
+  await expect(summary).toBeVisible();
+  await summary.getByRole("button", { name: /status.*planned/i }).click();
+  await expect(status).toBeVisible();
+  await status.getByRole("button", { name: "Back" }).click();
+  await expect(summary).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(drawers).toHaveCount(0);
+  await expect(active).toBeFocused();
+
+  // Date opens its own drawer.
+  const date = page.getByRole("button", { name: /^date/i });
+  await date.click();
+  const datePicker = page.getByRole("dialog", { name: /^date$/i });
+  await datePicker.getByRole("menuitem", { name: /^yesterday$/i }).click();
+  await datePicker.getByRole("button", { name: "Done" }).click();
+  await expect(drawers).toHaveCount(0);
+  await expect(date).toHaveText(/yesterday/i);
+});

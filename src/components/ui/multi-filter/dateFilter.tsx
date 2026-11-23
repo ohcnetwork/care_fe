@@ -16,14 +16,16 @@ import {
   DateRangePicker,
   type DateRangePickerHandle,
 } from "@/components/ui/date-range-picker";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
 import FilterFooter from "./filterFooter";
 import FilterHeader from "./filterHeader";
+import { FilterMenuItem, FilterSurfaceContext } from "./filterSurface";
 import NavigationHelper from "./utils/navigation-helper";
 import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
 import {
@@ -82,14 +84,11 @@ function DateRangeOptions({
       )}
       <div className="flex flex-col gap-1 p-2">
         {options.map((option, index) => (
-          <DropdownMenuItem
+          <FilterMenuItem
             key={index}
             ref={index === focusItemIndex ? setFocusItemRef : null}
             onFocus={() => setFocusItemIndex(index)}
-            onSelect={(e) => {
-              e.preventDefault();
-              handleDateRangeSelect(option);
-            }}
+            onSelect={() => handleDateRangeSelect(option)}
             aria-current={isSameRange(option) || undefined}
             className="w-full justify-start px-3 font-medium text-sm text-gray-950"
           >
@@ -99,16 +98,13 @@ function DateRangeOptions({
             {isSameRange(option) && (
               <Check aria-hidden="true" className="ms-auto" />
             )}
-          </DropdownMenuItem>
+          </FilterMenuItem>
         ))}
-        <DropdownMenuItem
+        <FilterMenuItem
           ref={options.length === focusItemIndex ? setFocusItemRef : null}
           aria-current={isCustomDateRangeSelected || undefined}
           className="w-full justify-start px-3 font-medium text-sm text-gray-950"
-          onSelect={(e) => {
-            e.preventDefault();
-            setView("custom");
-          }}
+          onSelect={() => setView("custom")}
           onFocus={() => setFocusItemIndex(options.length)}
         >
           {t("custom_date_range")}
@@ -119,7 +115,7 @@ function DateRangeOptions({
             aria-hidden="true"
             className={cn(!isCustomDateRangeSelected && "ms-auto")}
           />
-        </DropdownMenuItem>
+        </FilterMenuItem>
       </div>
       {handleClose ? (
         <FilterFooter
@@ -251,38 +247,67 @@ export function DateFilterButton({
   filter,
   selected,
   onFilterChange,
+  className,
 }: {
   filter: FilterConfig;
   selected: FilterDateRange;
   onFilterChange: (key: string, values: FilterValues) => void;
+  className?: string;
 }) {
   const { t } = useTranslation();
   const draftRef = useRef<DateFilterHandle>(null);
+  const isMobile = useIsMobile();
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const hasDate = Boolean(selected.from || selected.to);
+  const button = (
+    <Button
+      variant="outline"
+      className={cn("ml-auto max-w-48 shrink-0 shadow-2xs", className)}
+    >
+      <CalendarDays />
+      <span className={hasDate ? "sr-only" : undefined}>{t(filter.label)}</span>
+      {hasDate && (
+        <SelectedDateBadge
+          filter={filter}
+          selected={selected}
+          interactive={false}
+        />
+      )}
+    </Button>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={drawerOpen}
+        onOpenChange={(open, details) => {
+          applyDateDraftOnClose(draftRef, open, details);
+          setDrawerOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{button}</DrawerTrigger>
+        <DrawerContent aria-label={t(filter.label)}>
+          <FilterSurfaceContext.Provider value="drawer">
+            <RenderDateFilter
+              ref={draftRef}
+              filter={filter}
+              selected={selected}
+              onFilterChange={onFilterChange}
+              handleClose={() => setDrawerOpen(false)}
+            />
+          </FilterSurfaceContext.Provider>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <DropdownMenu
       onOpenChange={(open, details) =>
         applyDateDraftOnClose(draftRef, open, details)
       }
     >
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className="ml-auto max-w-48 shrink-0 shadow-2xs"
-        >
-          <CalendarDays />
-          <span className={hasDate ? "sr-only" : undefined}>
-            {t(filter.label)}
-          </span>
-          {hasDate && (
-            <SelectedDateBadge
-              filter={filter}
-              selected={selected}
-              interactive={false}
-            />
-          )}
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>{button}</DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-0">
         <RenderDateFilter
           ref={draftRef}

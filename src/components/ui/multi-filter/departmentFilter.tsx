@@ -5,11 +5,6 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import {
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { Spinner } from "@/components/ui/spinner";
 
 import query from "@/Utils/request/query";
@@ -24,6 +19,11 @@ import {
   useFilterMenuSearch,
 } from "./filterMenuSearch";
 import { FilterOptionIndicator } from "./filterOptionIndicator";
+import {
+  FilterMenuItem,
+  FilterMenuLabel,
+  FilterMenuSeparator,
+} from "./filterSurface";
 import { COLOR_PALETTE, FilterConfig, FilterDateRange } from "./utils/Utils";
 
 const getColorForOrg = (id: string) => {
@@ -86,16 +86,15 @@ function TreeViewItem({
           <span className="truncate">{org.name}</span>
         </FilterChoiceItem>
         {hasChildren && (
-          <DropdownMenuItem
+          <FilterMenuItem
             aria-label={`${t(expanded ? "collapse" : "expand")} ${org.name}`}
             aria-expanded={expanded}
-            closeOnClick={false}
-            onClick={() => setExpanded(!expanded)}
+            onSelect={() => setExpanded(!expanded)}
           >
             <ChevronRight
               className={cn("transition-transform", expanded && "rotate-90")}
             />
-          </DropdownMenuItem>
+          </FilterMenuItem>
         )}
       </div>
       {expanded && hasChildren && (
@@ -207,16 +206,16 @@ function DepartmentFilterDropdown({
         {/* Selected Departments */}
         {filteredSelectedOrgs.length > 0 && (
           <>
-            <DropdownMenuLabel>{t("selected_departments")}</DropdownMenuLabel>
+            <FilterMenuLabel>{t("selected_departments")}</FilterMenuLabel>
             {filteredSelectedOrgs.map((org) => renderOrg(org, true))}
-            <DropdownMenuSeparator />
+            <FilterMenuSeparator />
           </>
         )}
 
         {/* Available Departments */}
         {nonSelectedOrgs.length > 0 && (
           <>
-            <DropdownMenuLabel>{t("available_departments")}</DropdownMenuLabel>
+            <FilterMenuLabel>{t("available_departments")}</FilterMenuLabel>
             {nonSelectedOrgs.map((org) => renderOrg(org, false))}
           </>
         )}

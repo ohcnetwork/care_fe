@@ -1,11 +1,5 @@
 import { useTranslation } from "react-i18next";
 
-import {
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-
 import { FilterChoiceItem } from "./filterChoiceItem";
 import FilterHeader from "./filterHeader";
 import {
@@ -14,6 +8,11 @@ import {
   useFilterMenuSearch,
 } from "./filterMenuSearch";
 import { FilterOptionIndicator } from "./filterOptionIndicator";
+import {
+  FilterMenuGroup,
+  FilterMenuLabel,
+  FilterMenuSeparator,
+} from "./filterSurface";
 import { FilterConfig, FilterOption, FilterValues } from "./utils/Utils";
 
 /** Fixed option lists (status, priority) in the same menu as the domain pickers. */
@@ -86,13 +85,13 @@ export default function RenderCommandFilter({
       </div>
       <FilterMenuList className="max-h-[30vh] overflow-y-auto p-3">
         {selectedOptions.length > 0 && (
-          <DropdownMenuGroup>
-            <DropdownMenuLabel>{t("selected")}</DropdownMenuLabel>
+          <FilterMenuGroup>
+            <FilterMenuLabel>{t("selected")}</FilterMenuLabel>
             {selectedOptions.map(renderOption)}
-          </DropdownMenuGroup>
+          </FilterMenuGroup>
         )}
         {selectedOptions.length > 0 && availableOptions.length > 0 && (
-          <DropdownMenuSeparator />
+          <FilterMenuSeparator />
         )}
         {availableOptions.map(renderOption)}
         {!selectedOptions.length && !availableOptions.length && (

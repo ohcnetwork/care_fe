@@ -3,10 +3,6 @@ import { User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/components/Common/Avatar";
-import {
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { Spinner } from "@/components/ui/spinner";
 
 import query from "@/Utils/request/query";
@@ -22,6 +18,7 @@ import {
   FilterMenuSearch,
   useFilterMenuSearch,
 } from "./filterMenuSearch";
+import { FilterMenuLabel, FilterMenuSeparator } from "./filterSurface";
 import { FilterConfig, FilterDateRange } from "./utils/Utils";
 
 function FacilityUserFilterDropdown({
@@ -104,9 +101,9 @@ function FacilityUserFilterDropdown({
         {/* Selected Users */}
         {selectedUsers.length > 0 && (
           <>
-            <DropdownMenuLabel>{t("selected")}</DropdownMenuLabel>
+            <FilterMenuLabel>{t("selected")}</FilterMenuLabel>
             {selectedUsers.map((user) => renderUser(user))}
-            <DropdownMenuSeparator />
+            <FilterMenuSeparator />
           </>
         )}
 
@@ -115,16 +112,16 @@ function FacilityUserFilterDropdown({
           !selectedUserIds.has(currentUser.id) &&
           currentUserInList && (
             <>
-              <DropdownMenuLabel>{t("quick_select")}</DropdownMenuLabel>
+              <FilterMenuLabel>{t("quick_select")}</FilterMenuLabel>
               {renderUser(currentUserInList, true)}
-              <DropdownMenuSeparator />
+              <FilterMenuSeparator />
             </>
           )}
 
         {/* Available Users */}
         {availableUsers.length > 0 && (
           <>
-            <DropdownMenuLabel>{t("available_users")}</DropdownMenuLabel>
+            <FilterMenuLabel>{t("available_users")}</FilterMenuLabel>
             {availableUsers.map((user) => renderUser(user))}
           </>
         )}

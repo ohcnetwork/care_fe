@@ -756,9 +756,12 @@ export function EncounterList({
               patientName={qParams.patient_name}
             />
           </div>
-          <div className="shrink-0">
+          {/* On mobile the filters and Date share their row equally. Both
+              halves are unpadded wrappers, so flex-basis 0 splits it evenly. */}
+          <div className="shrink-0 max-md:min-w-0 max-md:flex-1 max-md:basis-0">
             <MultiFilter
               compact
+              className="max-md:w-full"
               selectedFilters={toolbarFilters}
               onFilterChange={handleFilterChange}
               onOperationChange={handleOperationChange}
@@ -767,11 +770,14 @@ export function EncounterList({
               facilityId={facilityId}
             />
           </div>
-          <DateFilterButton
-            filter={dateState.filter}
-            selected={dateRange}
-            onFilterChange={handleFilterChange}
-          />
+          <div className="ml-auto shrink-0 max-md:min-w-0 max-md:flex-1 max-md:basis-0">
+            <DateFilterButton
+              filter={dateState.filter}
+              selected={dateRange}
+              onFilterChange={handleFilterChange}
+              className="max-md:w-full max-md:max-w-none max-md:justify-start"
+            />
+          </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">

@@ -72,7 +72,7 @@ test.describe("All Encounters encounter class filter", () => {
 
     await test.step("The filter survives a reload", async () => {
       await page.reload();
-      await page.getByRole("button", { name: /active filters/i }).click();
+      await page.getByRole("button", { name: /^filters\b/i }).click();
       await expect(
         selectedMultiFilterBar(page, /^Encounter Class$/),
       ).toContainText("Ambulatory");
@@ -85,7 +85,7 @@ test.describe("All Encounters encounter class filter", () => {
       await expect(page).toHaveURL(
         (url) => url.searchParams.get("encounter_class") === "amb",
       );
-      await page.getByRole("button", { name: /active filters/i }).click();
+      await page.getByRole("button", { name: /^filters\b/i }).click();
       await expect(
         selectedMultiFilterBar(page, /^Encounter Class$/),
       ).toContainText("Ambulatory");
