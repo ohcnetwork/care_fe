@@ -106,6 +106,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { appointmentShowSearch } from "@/lib/router/search/appointments";
 import { cn } from "@/lib/utils";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
@@ -128,9 +129,9 @@ export default function AppointmentDetail(props: Props) {
   const queryClient = useQueryClient();
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
-  const [params, setQueryParams] = useQueryParams();
+  const [params, setQueryParams] = useQueryParams(appointmentShowSearch);
   const { showSuccess } = params;
-  const [{ from_queue }] = useQueryParams();
+  const [{ from_queue }] = useQueryParams(appointmentShowSearch);
 
   useShortcutSubContext("facility:appointment");
 
@@ -344,6 +345,7 @@ export default function AppointmentDetail(props: Props) {
                     appointment={appointment}
                     token={appointment.token}
                     facility={facility}
+                    canWriteToken={canWriteToken}
                   />
                 </div>
               </>
@@ -529,7 +531,7 @@ export default function AppointmentDetail(props: Props) {
                             appointment.token_slot.availability.schedule
                           }
                           redirectQueryParams={referralEncounterParams}
-                          defaultOpen={from_queue === "true"}
+                          defaultOpen={from_queue === true}
                           defaultStatus={EncounterStatus.IN_PROGRESS}
                           trigger={
                             <QuickAction

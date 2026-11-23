@@ -32,6 +32,7 @@ export function PdfPages({ url }: { url: string }) {
     <div ref={containerRef} className="w-full">
       <Document
         file={url}
+        suspense={false}
         onLoadSuccess={({ numPages }) => setPageCount(numPages)}
         loading={<PrintLoading />}
         error={

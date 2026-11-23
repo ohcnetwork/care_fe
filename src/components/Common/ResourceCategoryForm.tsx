@@ -72,7 +72,7 @@ export function ResourceCategoryForm({
   const isEditing = !!categorySlug;
 
   const formSchema = z.object({
-    title: z.string().min(1, t("field_required")),
+    title: z.string().trim().min(1, t("field_required")),
     slug_value: slugValueSchema(),
     description: z.string().optional(),
     resource_sub_type: z

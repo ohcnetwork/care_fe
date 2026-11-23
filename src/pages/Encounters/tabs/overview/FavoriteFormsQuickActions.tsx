@@ -1,7 +1,5 @@
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
-import { useQuery } from "@tanstack/react-query";
 import { FileText } from "lucide-react";
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { HrefLink } from "@/lib/router/HrefLink";
@@ -11,8 +9,8 @@ import { appendReferralNativeContext } from "@/components/Referral/referralNativ
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import query from "@/Utils/request/query";
+
+import { useQuestionnaireFavorites } from "./useQuestionnaireFavorites";
 
 interface FavoriteFormsQuickActionsProps extends React.ComponentProps<"div"> {
   showEmpty?: boolean;
@@ -33,25 +31,12 @@ export const FavoriteFormsQuickActions = ({
   } = useEncounter();
 
   const {
-    data: favoritesResponse,
+    data: favorites = [],
     isLoading,
     isError,
     isFetching,
     refetch,
-  } = useQuery({
-    queryKey: ["questionnaire-favorites", facilityId],
-    queryFn: query(questionnaireApi.list, {
-      silent: true,
-      queryParams: {
-        favorite_list: "favorites_form",
-      },
-    }),
-  });
-
-  const favorites = useMemo(() => {
-    if (!favoritesResponse?.results) return [];
-    return favoritesResponse.results;
-  }, [favoritesResponse]);
+  } = useQuestionnaireFavorites(facilityId);
 
   if (!isLoading && !isError && !favorites.length && !showEmpty) return null;
 

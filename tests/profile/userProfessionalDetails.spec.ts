@@ -239,7 +239,7 @@ test("saves professional details, preserves credential metadata and clears remov
       .getByRole("button", { name: "Edit Personal Information", exact: true })
       .click();
     await expect(
-      dialog.getByRole("group", { name: "Personal Information", exact: true }),
+      dialog.getByRole("region", { name: "Personal details", exact: true }),
     ).toBeFocused();
     const existingDegree = dialog
       .getByRole("group", { name: "Qualification 1", exact: true })

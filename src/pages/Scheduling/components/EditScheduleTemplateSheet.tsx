@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -16,7 +17,6 @@ import WeekdayCheckbox, {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -47,6 +47,7 @@ import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScheduleEncounterDefaultsFields } from "@/pages/Scheduling/components/ScheduleEncounterDefaultsFields";
+import { ScheduleValidityField } from "@/pages/Scheduling/components/ScheduleValidityField";
 import {
   calculateSlotDuration,
   formatAvailabilityTime,
@@ -152,7 +153,7 @@ const ScheduleTemplateEditor = ({
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  // The list response omits the encounter defaults; only the detail has them.
+  // Only the detail has the saved departments and care team.
   // The key nests under the list's so saving refreshes both.
   const { data: templateDetail } = useQuery({
     queryKey: [
@@ -166,10 +167,18 @@ const ScheduleTemplateEditor = ({
   });
   const savedOrganizations = templateDetail?.organizations ?? [];
   const savedCareTeam = templateDetail?.care_team ?? [];
+  const savedEncounterType =
+    (templateDetail ?? template).encounter_type ?? null;
+  // Keep the stored option available so an unsaved change can be undone.
+  const encounterTypeOptions =
+    savedEncounterType &&
+    !careConfig.encounterClasses.includes(savedEncounterType)
+      ? [...careConfig.encounterClasses, savedEncounterType]
+      : careConfig.encounterClasses;
 
   const templateFormSchema = z
     .object({
-      name: z.string().min(1, t("field_required")),
+      name: z.string().trim().min(1, t("field_required")),
       valid_from: z.date({
         error: t("field_required"),
       }),
@@ -177,6 +186,7 @@ const ScheduleTemplateEditor = ({
         error: t("field_required"),
       }),
       is_public: z.boolean(),
+      encounter_type: z.enum(encounterTypeOptions).nullable(),
       organizations: z.array(z.string()),
       care_team: z.array(z.custom<CareTeamResponse>()),
     })
@@ -195,6 +205,7 @@ const ScheduleTemplateEditor = ({
       valid_from: new Date(template.valid_from),
       valid_to: new Date(template.valid_to),
       is_public: template.is_public,
+      encounter_type: template.encounter_type ?? null,
       organizations: [],
       care_team: [],
     },
@@ -203,14 +214,15 @@ const ScheduleTemplateEditor = ({
       valid_from: new Date(templateDetail.valid_from),
       valid_to: new Date(templateDetail.valid_to),
       is_public: templateDetail.is_public,
+      encounter_type: savedEncounterType,
       organizations: savedOrganizations.map(({ id }) => id),
       care_team: savedCareTeam,
     },
     resetOptions: { keepDirtyValues: true },
   });
-  const [organizations, careTeam] = useWatch({
+  const [encounterType, organizations, careTeam] = useWatch({
     control: form.control,
-    name: ["organizations", "care_team"],
+    name: ["encounter_type", "organizations", "care_team"],
   });
 
   const { mutate: updateTemplate, isPending: isUpdating } = useMutation({
@@ -249,11 +261,19 @@ const ScheduleTemplateEditor = ({
     const careTeamChanged =
       JSON.stringify(careTeamMembers) !==
       JSON.stringify(toCareTeamMembers(savedCareTeam));
+    // Omission preserves the server value; an explicit null clears it.
+    const encounterTypeChanged =
+      templateDetail &&
+      form.getFieldState("encounter_type").isDirty &&
+      values.encounter_type !== savedEncounterType;
     updateTemplate({
       name: values.name,
       valid_from: dateQueryString(values.valid_from),
       valid_to: dateQueryString(values.valid_to),
       is_public: values.is_public,
+      ...(encounterTypeChanged && {
+        encounter_type: values.encounter_type,
+      }),
       ...(organizationsChanged && { organizations: values.organizations }),
       ...(careTeamChanged && { care_team: careTeamMembers }),
     });
@@ -282,37 +302,7 @@ const ScheduleTemplateEditor = ({
             )}
           />
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="valid_from"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel aria-required>{t("valid_from")}</FormLabel>
-                  <DatePicker
-                    date={field.value}
-                    onChange={(date) => field.onChange(date)}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="valid_to"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel aria-required>{t("valid_to")}</FormLabel>
-                  <DatePicker
-                    date={field.value}
-                    onChange={(date) => field.onChange(date)}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <ScheduleValidityField />
 
           <FormField
             control={form.control}
@@ -352,6 +342,11 @@ const ScheduleTemplateEditor = ({
 
           <ScheduleEncounterDefaultsFields
             facilityId={facilityId}
+            encounterType={encounterType}
+            encounterTypeOptions={encounterTypeOptions}
+            onEncounterTypeChange={(value) =>
+              form.setValue("encounter_type", value, { shouldDirty: true })
+            }
             organizations={organizations}
             onOrganizationsChange={(value) =>
               form.setValue("organizations", value, { shouldDirty: true })
@@ -623,7 +618,7 @@ const NewAvailabilityCard = ({
 
   const formSchema = z
     .object({
-      name: z.string().min(1, t("field_required")),
+      name: z.string().trim().min(1, t("field_required")),
       slot_type: z.enum(["appointment", "open", "closed"]),
       start_time: z.string().min(1, t("field_required")) as z.ZodType<
         Time | undefined,

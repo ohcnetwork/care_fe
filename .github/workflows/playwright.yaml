@@ -10,9 +10,9 @@ name: Playwright Tests
 
 on:
   push:
-    branches: [main, develop, production, playwright-actions]
+    branches: [develop, "3.*"]
   pull_request:
-    branches: [develop, production]
+    branches: [develop, "3.*"]
   workflow_dispatch:
     inputs:
       backend_ref:
@@ -29,7 +29,8 @@ env:
   REACT_CARE_API_URL: http://localhost:9000
   REACT_ENABLE_QUESTIONNAIRE_DRAFT: "true"
   BACKEND_STARTUP_TIMEOUT: 120
-  TEST_SHARDS: 3
+  TEST_SHARDS: 8
+  TEST_WORKERS: 6
   # care backend ref to test against. `develop` uses the published
   # ghcr.io/ohcnetwork/care:latest image; any other branch, tag or commit is
   # built from source. Override per run with the `backend_ref` input.
@@ -45,7 +46,7 @@ jobs:
     outputs:
       tests: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.tests == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: dorny/paths-filter@v3
         id: filter
@@ -69,16 +70,25 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
+        id: node
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
+      - name: Cache installed dependencies
+        id: modules
+        uses: actions/cache@v6
+        with:
+          path: node_modules/
+          key: playwright-modules-${{ runner.os }}-${{ runner.arch }}-${{ steps.node.outputs.node-version }}-${{ hashFiles('package-lock.json', 'package.json', 'scripts/install-platform-deps.ts', '.npmrc') }}
+
       - name: Install dependencies
-        run: npm ci --prefer-offline
+        if: steps.modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit --no-fund
 
       - name: Build application
         run: npm run build
@@ -86,7 +96,7 @@ jobs:
           NODE_ENV: production
 
       - name: Save build and node_modules to cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: |
             build/
@@ -107,7 +117,7 @@ jobs:
       revision: ${{ steps.revision.outputs.sha }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Resolve backend image
         id: image
@@ -134,7 +144,7 @@ jobs:
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
 
       - name: Checkout care
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ohcnetwork/care
           path: care
@@ -153,7 +163,7 @@ jobs:
 
       - name: Restore database snapshot
         id: snapshot
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: care-backend/care-db.dump
           key: care-db-v1-${{ steps.revision.outputs.sha }}
@@ -173,7 +183,7 @@ jobs:
 
       - name: Save database snapshot
         if: steps.snapshot.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: care-backend/care-db.dump
           key: ${{ steps.snapshot.outputs.cache-primary-key }}
@@ -188,20 +198,23 @@ jobs:
   # Run E2E tests with backend integration
   test:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
-    needs: [changes, build, backend]
+    needs: [changes, backend]
     timeout-minutes: 30
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-m
+    permissions:
+      actions: read
+      contents: read
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Checkout care
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ohcnetwork/care
           path: care
@@ -238,28 +251,36 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
+          package-manager-cache: false
+
+      - name: Wait for build cache producer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          deadline=$((SECONDS + 960))
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            build_job=$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?per_page=100" \
+              --jq '.jobs[] | select(.name == "build") | [.status, (.conclusion // "")] | @tsv' \
+              || true)
+            read -r status conclusion <<< "$build_job" || true
+
+            if [ "$status" = "completed" ]; then
+              if [ "$conclusion" = "success" ]; then
+                exit 0
+              fi
+              echo "::error::Build job completed with conclusion: $conclusion"
+              exit 1
+            fi
+
+            sleep 20
+          done
+
+          echo "::error::Timed out waiting for the build job to finish"
+          exit 1
 
       - name: Restore build cache
-        id: cache-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            build/
-            node_modules/
-          key: build-${{ github.sha }}
-
-      - name: Retry cache restore after delay
-        if: steps.cache-restore.outputs.cache-hit != 'true'
-        id: cache-retry
-        run: |
-          echo "Cache miss on first attempt, waiting 30s for propagation..."
-          sleep 30
-
-      - name: Restore build cache (retry)
-        if: steps.cache-restore.outputs.cache-hit != 'true'
-        id: cache-restore-retry
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: |
             build/
@@ -274,7 +295,7 @@ jobs:
           fi
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}-${{ hashFiles('playwright.config.ts') }}
@@ -283,7 +304,7 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps --only-shell chromium
 
       - name: Wait for backend
         run: |
@@ -299,21 +320,45 @@ jobs:
             exit 1
           fi
 
-      - name: Run setup tests (serial)
-        run: npx playwright test --project=setup --workers=1
+      - name: Run setup tests (parallel where independent)
+        run: >-
+          npx playwright test
+          --project=setup-auth
+          --project=setup-facility
+          --project=setup-patient
+          --project=setup-account
+          --project=setup-data
+          --workers=4
+          --reporter=list
         env:
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
       - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
         id: test
-        run: npx playwright test --project=chromium --workers=4 --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
+        run: npx playwright test --project=chromium --workers="$TEST_WORKERS" --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
         env:
+          TEST_WORKERS: ${{ env.TEST_WORKERS }}
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
+      # The vite-modules specs need a Vite dev server, which pre-bundles
+      # dependencies as soon as it starts. Run them once, on shard 1, instead
+      # of starting that server on every shard. Separate report and output
+      # paths keep shard 1's own results.
+      - name: Run Vite module tests
+        id: vite-modules
+        if: ${{ !cancelled() && matrix.shard == 1 }}
+        run: npx playwright test --project=vite-modules --workers=2 --output=test-results-vite
+        env:
+          NODE_ENV: production
+          REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
+          PLAYWRIGHT_BLOB_OUTPUT_DIR: blob-report-vite
+          PLAYWRIGHT_BLOB_OUTPUT_NAME: report-vite-modules.zip
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results-vite.json
+
       - name: Annotate test failure
-        if: failure() && steps.test.conclusion == 'failure'
+        if: failure() && (steps.test.conclusion == 'failure' || steps.vite-modules.conclusion == 'failure')
         run: |
           echo "::error::Playwright tests failed in shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }}"
 
@@ -323,15 +368,19 @@ jobs:
         with:
           name: playwright-results-shard-${{ matrix.shard }}
           path: |
+            blob-report/
+            blob-report-vite/
             playwright-report/
             test-results/
+            test-results-vite/
             test-results.json
+            test-results-vite.json
           retention-days: 7
 
   # Aggregate results and create final report
   report:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe'"
-    needs: [changes, test]
+    needs: [changes, build, test]
     runs-on: ubuntu-latest
     steps:
       - name: Check if tests were skipped
@@ -362,12 +411,43 @@ jobs:
           <sub>Run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})</sub>
           EOF
 
+      - name: Checkout
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/checkout@v7
+
       - name: Download all test results
         if: steps.skipped.outputs.skipped == 'false'
         uses: actions/download-artifact@v4
         with:
           pattern: playwright-results-shard-*
           path: all-results
+
+      - name: Setup Node.js
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      - name: Restore build cache for report merge
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            build/
+            node_modules/
+          key: build-${{ github.sha }}
+
+      - name: Merge Playwright blob reports
+        if: steps.skipped.outputs.skipped == 'false'
+        run: |
+          mkdir -p all-blob-reports
+          find all-results -type f -name 'report-*.zip' -exec cp {} all-blob-reports/ \;
+          if find all-blob-reports -type f -name 'report-*.zip' -print -quit | grep -q .; then
+            npx playwright merge-reports --reporter=html all-blob-reports
+          else
+            echo "::warning::No Playwright blob reports were uploaded"
+          fi
 
       - name: Merge test results
         if: steps.skipped.outputs.skipped == 'false'
@@ -379,17 +459,17 @@ jobs:
           SKIPPED_TESTS=0
 
           # Parse test results from each shard
-          for dir in all-results/playwright-results-shard-*/; do
-            if [ -f "$dir/test-results.json" ]; then
-              echo "Processing results from $dir"
+          for file in all-results/playwright-results-shard-*/test-results*.json; do
+            if [ -f "$file" ]; then
+              echo "Processing results from $file"
               # Use jq to parse JSON if available, otherwise use basic parsing
               if command -v jq &> /dev/null; then
                 # Count unique tests (including nested test.describe blocks)
                 # Use recursive descent to handle nested suites
-                SHARD_TOTAL=$(jq '[.. | objects | select(has("tests")) | .tests[]] | length' "$dir/test-results.json")
-                SHARD_PASSED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "passed")] | length' "$dir/test-results.json")
-                SHARD_FAILED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "failed" or .results[-1].status == "timedOut" or .results[-1].status == "interrupted")] | length' "$dir/test-results.json")
-                SHARD_SKIPPED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "skipped")] | length' "$dir/test-results.json")
+                SHARD_TOTAL=$(jq '[.. | objects | select(has("tests")) | .tests[]] | length' "$file")
+                SHARD_PASSED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "passed")] | length' "$file")
+                SHARD_FAILED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "failed" or .results[-1].status == "timedOut" or .results[-1].status == "interrupted")] | length' "$file")
+                SHARD_SKIPPED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "skipped")] | length' "$file")
 
                 TOTAL_TESTS=$((TOTAL_TESTS + SHARD_TOTAL))
                 PASSED_TESTS=$((PASSED_TESTS + SHARD_PASSED))
@@ -417,7 +497,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-final-report
-          path: all-results/
+          path: |
+            all-results/
+            playwright-report/
           retention-days: 14
 
       - name: Generate PR comment
@@ -428,6 +510,7 @@ jobs:
 
           **Status:** ${{ steps.merge.outputs.status }}
           **Test Shards:** ${{ env.TEST_SHARDS }}
+          **Workers per Shard:** ${{ env.TEST_WORKERS }}
 
           | Metric | Count |
           |--------|-------|

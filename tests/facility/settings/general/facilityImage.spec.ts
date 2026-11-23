@@ -4,6 +4,11 @@ import { getFacilityId } from "tests/support/facilityId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Facility Image Settings", () => {
+  // All tests edit the cover of the shared facility. Run them in order in one
+  // worker: an upload in a parallel test would make the popup show that image
+  // instead of the empty upload area the last test expects.
+  test.describe.configure({ mode: "default" });
+
   let facilityId: string;
 
   test.beforeEach(async ({ page }) => {

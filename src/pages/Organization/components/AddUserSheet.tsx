@@ -1,11 +1,9 @@
+import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
-  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -40,7 +38,7 @@ export default function AddUserSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline">
-          <CareIcon icon="l-plus" className="mr-2 size-4" />
+          <Plus />
           {isServiceAccount ? t("add_service_account") : t("add_user")}
         </Button>
       </SheetTrigger>
@@ -57,16 +55,14 @@ export default function AddUserSheet({
               : t("create_user_and_add_to_org")}
           </SheetDescription>
         </SheetHeader>
-        <SheetBody>
-          <UserForm
-            onSubmitSuccess={(user, meta) => {
-              setOpen(false);
-              onUserCreated?.(user, meta);
-            }}
-            organizationId={organizationId}
-            isServiceAccount={isServiceAccount}
-          />
-        </SheetBody>
+        <UserForm
+          onSubmitSuccess={(user, meta) => {
+            setOpen(false);
+            onUserCreated?.(user, meta);
+          }}
+          organizationId={organizationId}
+          isServiceAccount={isServiceAccount}
+        />
       </SheetContent>
     </Sheet>
   );

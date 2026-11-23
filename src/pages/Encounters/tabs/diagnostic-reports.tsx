@@ -22,6 +22,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { useScopedQueryParams } from "@/hooks/useScopedQueryParams";
+import { diagnosticReportListSearch } from "@/lib/router/search/encounter";
 import { cn } from "@/lib/utils";
 import { DiagnosticReportDetailCard } from "@/pages/Encounters/DiagnosticReportDetailCard";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -191,10 +192,9 @@ export const DiagnosticReportsTab = ({
   showObservationHistory = false,
 }: DiagnosticReportsTabProps) => {
   const { t } = useTranslation();
-  const [qParams, setQueryParams] = useScopedQueryParams<{
-    reportId?: string;
-    activityDefinition?: string;
-  }>();
+  const [qParams, setQueryParams] = useScopedQueryParams(
+    diagnosticReportListSearch,
+  );
 
   const { reportId, activityDefinition } = qParams;
 

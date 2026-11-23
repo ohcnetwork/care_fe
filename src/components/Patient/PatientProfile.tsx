@@ -19,6 +19,7 @@ import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { HrefLink } from "@/lib/router/HrefLink";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { patientShowSearch } from "@/lib/router/search/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 import {
@@ -37,7 +38,7 @@ interface PatientProfileProps {
 }
 
 export const PatientProfile = (props: PatientProfileProps) => {
-  const [params] = useQueryParams<{ referralId?: string }>();
+  const [params] = useQueryParams(patientShowSearch);
   if (
     props.facilityId &&
     props.page === "appointments" &&

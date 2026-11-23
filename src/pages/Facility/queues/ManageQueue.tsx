@@ -1,4 +1,3 @@
-import { booleanFromString } from "@/common/utils";
 import { AnimatedCounter } from "@/components/Common/AnimatedCounter";
 import BackButton from "@/components/Common/BackButton";
 import Page from "@/components/Common/Page";
@@ -33,6 +32,7 @@ import {
 } from "@/components/ui/tooltip";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { queueBoardSearch } from "@/lib/router/search/queues";
 import { ManageQueueFinishedTab } from "@/pages/Facility/queues/ManageQueueFinishedTab";
 import { ManageQueueOngoingTab } from "@/pages/Facility/queues/ManageQueueOngoingTab";
 import QueueFormSheet from "@/pages/Facility/queues/QueueFormSheet";
@@ -70,9 +70,8 @@ export function ManageQueuePage({
   const { t } = useTranslation();
   const resource = useScheduleResource();
   const [editOpen, setEditOpen] = useState(false);
-  const [qParams, setQueryParams] = useQueryParams<{
-    autoRefresh?: string;
-  }>();
+
+  const [qParams, setQueryParams] = useQueryParams(queueBoardSearch);
   const { data: queue, isLoading: isQueueLoading } = useQuery({
     queryKey: ["tokenQueue", facilityId, queueId],
     queryFn: query(tokenQueueApi.get, {
@@ -105,10 +104,7 @@ export function ManageQueuePage({
     return <QueueManagementSkeleton />;
   }
 
-  const shouldAutoRefresh = booleanFromString(
-    qParams.autoRefresh ?? "",
-    careConfig.enableAutoRefresh,
-  );
+  const shouldAutoRefresh = qParams.autoRefresh ?? careConfig.enableAutoRefresh;
 
   return (
     <Page

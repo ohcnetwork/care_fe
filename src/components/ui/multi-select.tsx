@@ -27,7 +27,7 @@ import {
 import {
   fieldTriggerLayout,
   fieldTriggerSurface,
-  invalidTriggerOutline,
+  invalidTriggerRing,
   triggerFocus,
 } from "@/components/ui/field-trigger-styles";
 import { Label } from "@/components/ui/label";
@@ -107,7 +107,7 @@ export function MultiSelect({
         fieldTriggerLayout,
         fieldTriggerSurface,
         triggerFocus,
-        invalidTriggerOutline,
+        invalidTriggerRing,
         "h-auto min-h-12 w-full min-w-0 justify-between py-1 text-start font-normal md:h-auto md:min-h-10",
         className,
       )}

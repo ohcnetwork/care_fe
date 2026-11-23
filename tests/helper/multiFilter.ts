@@ -25,6 +25,17 @@ export async function openMultiFilter(
   await page.getByRole("option", { name: filterName }).click();
 }
 
+/** Picks one option of a list filter (status, type, method) and closes it. */
+export async function applyOptionFilter(
+  page: Page,
+  filterName: RegExp,
+  optionName: RegExp,
+) {
+  await openMultiFilter(page, filterName);
+  await page.getByRole("option", { name: optionName }).click();
+  await page.keyboard.press("Escape");
+}
+
 export async function applyDateFilterPreset(
   page: Page,
   filterName: RegExp,
@@ -44,10 +55,11 @@ export async function applyCustomDateFilterRange(
   await openMultiFilter(page, filterName);
   await page.getByRole("menuitem", { name: /custom date range/i }).click();
 
-  const dateInputs = page.locator('input[type="date"]');
-  await dateInputs.first().fill(after);
-  await dateInputs.nth(1).fill(before);
-  await page.getByRole("button", { name: /confirm/i }).click();
+  const dateInputs = page.locator('[data-slot="date-range-picker"] input');
+  const localFormat = (date: string) => date.split("-").reverse().join("/");
+  await dateInputs.first().fill(localFormat(after));
+  await dateInputs.nth(1).fill(localFormat(before));
+  await page.getByRole("button", { name: /^apply$/i }).click();
   await page.keyboard.press("Escape");
 }
 

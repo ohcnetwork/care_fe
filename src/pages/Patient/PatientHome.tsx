@@ -25,7 +25,6 @@ import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { UpcomingAppointmentCard } from "@/pages/Appointments/components/UpcomingAppointmentCard";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
@@ -36,23 +35,16 @@ import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
 import { goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import { useTranslation } from "react-i18next";
-
-interface QParams {
-  phone_number?: string;
-  year_of_birth: string;
-  partial_id: string;
-  flow?: "queue" | "dispense";
-  action?: "schedule" | "create_encounter";
-}
 
 export default function PatientHome() {
   useShortcutSubContext("facility:patient:home");
   const { t } = useTranslation();
-  const [{ phone_number, year_of_birth, partial_id, flow, action }] =
-    useQueryParams<QParams>();
+  const { phone_number, year_of_birth, partial_id, flow, action } = useSearch({
+    from: "/_app/facility/$facilityId/patients/home",
+  });
   const queryClient = useQueryClient();
 
   const { facility, facilityId } = useCurrentFacility();
@@ -87,8 +79,8 @@ export default function PatientHome() {
     queryFn: query(patientApi.searchRetrieve, {
       body: {
         phone_number: phone_number ?? "",
-        year_of_birth,
-        partial_id,
+        year_of_birth: year_of_birth ?? "",
+        partial_id: partial_id ?? "",
         facility: facilityId,
       },
     }),

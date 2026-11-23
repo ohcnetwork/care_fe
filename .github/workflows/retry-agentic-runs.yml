@@ -19,7 +19,6 @@ on:
       - "CARE PR Reviewer"
       - "CARE reply agent"
       - "Daily Playwright Test Improver"
-      - "Thank You Note Generator"
     types: [completed]
 
 # No workflow-level permissions; the single job opts into exactly what it needs.

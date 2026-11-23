@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -32,7 +33,6 @@ import mutate from "@/Utils/request/mutate";
 import { dateQueryString, goBack } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import { navigate } from "@/lib/router/navigate";
-import { useQueryParams } from "@/lib/router/queryParams";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import { Organization } from "@/types/organization/organization";
@@ -49,7 +49,9 @@ export default function PublicPatientRegistration(
 ) {
   const { staffId } = props;
   const { t } = useTranslation();
-  const [{ slotId, reason }] = useQueryParams();
+  const { slotId, reason } = useSearch({
+    from: "/_patient/facility/$facilityId/appointments/$staffId/patient-registration",
+  });
 
   const queryClient = useQueryClient();
 
@@ -64,10 +66,11 @@ export default function PublicPatientRegistration(
     .object({
       name: z
         .string()
+        .trim()
         .min(1, t("field_required"))
         .refine(validateName, t("min_char_length_error", { min_length: 3 })),
       gender: z.enum(GENDERS, { error: t("gender_is_required") }),
-      address: z.string().min(1, t("field_required")),
+      address: z.string().trim().min(1, t("field_required")),
       age: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
       pincode: validators().pincode,
@@ -112,7 +115,7 @@ export default function PublicPatientRegistration(
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
       mutationFn: mutate(PublicAppointmentApi.createAppointment, {
-        pathParams: { id: slotId },
+        pathParams: { id: slotId ?? "" },
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
         },

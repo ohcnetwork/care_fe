@@ -42,6 +42,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { chargeItemListSearch } from "@/lib/router/search/billing";
 
 import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
@@ -53,6 +54,7 @@ import {
   CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
   ChargeItemServiceResource,
+  ChargeItemStatus,
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
@@ -64,6 +66,11 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
@@ -74,9 +81,14 @@ import QuickAddChargeItemsSheet from "./QuickAddChargeItemsSheet";
 interface PriceComponentRowProps {
   label: string;
   components: MonetaryComponent[];
+  showSelectColumn: boolean;
 }
 
-function PriceComponentRow({ label, components }: PriceComponentRowProps) {
+function PriceComponentRow({
+  label,
+  components,
+  showSelectColumn,
+}: PriceComponentRowProps) {
   if (!components.length) return null;
 
   return (
@@ -84,7 +96,7 @@ function PriceComponentRow({ label, components }: PriceComponentRowProps) {
       {components.map((component, index) => {
         return (
           <TableRow key={`${label}-${index}`} className="text-xs text-gray-500">
-            <TableCell></TableCell>
+            {showSelectColumn && <TableCell></TableCell>}
             <TableCell></TableCell>
             <TableCell>
               {component.code && `${component.code.display} `}({label})
@@ -111,12 +123,23 @@ export interface ChargeItemsTableProps {
   accountId: string;
   patientId: string;
   canAddChargeItems?: boolean;
+  /**
+   * Whether the user may move charge items to another account. Mirrors the
+   * backend's `can_create_charge_item_in_facility` check on `change_account`.
+   */
+  canChangeAccount?: boolean;
 }
+
+/** Only billable charge items can be moved to another account. */
+const isMovable = (item: ChargeItemRead) =>
+  item.status === ChargeItemStatus.billable;
+
 function ChargeItemsTable({
   facilityId,
   accountId,
   patientId,
   canAddChargeItems = true,
+  canChangeAccount = false,
 }: ChargeItemsTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -134,8 +157,8 @@ function ChargeItemsTable({
   // Register shortcuts for this table
   useShortcutSubContext("facility:billing");
   const { qParams, updateQuery } = useFilters({
+    schema: chargeItemListSearch,
     limit: 15,
-    disableCache: true,
   });
 
   // MultiFilter configuration
@@ -247,9 +270,14 @@ function ChargeItemsTable({
     });
   };
 
+  const movableChargeItems = chargeItems?.filter(isMovable) ?? [];
+  const allMovableSelected =
+    movableChargeItems.length > 0 &&
+    movableChargeItems.every((item) => selectedItems.has(item.id));
+
   const handleSelectAll = (checked: boolean) => {
-    if (checked && chargeItems) {
-      setSelectedItems(new Set(chargeItems.map((item) => item.id)));
+    if (checked) {
+      setSelectedItems(new Set(movableChargeItems.map((item) => item.id)));
     } else {
       setSelectedItems(new Set());
     }
@@ -266,7 +294,9 @@ function ChargeItemsTable({
       return;
     }
 
-    const validIds = new Set(chargeItems.map((item) => item.id));
+    const validIds = new Set(
+      chargeItems.filter(isMovable).map((item) => item.id),
+    );
     setSelectedItems((prev) => {
       const next = new Set([...prev].filter((id) => validIds.has(id)));
       return next.size === prev.size ? prev : next;
@@ -393,7 +423,7 @@ function ChargeItemsTable({
           onSearch={(key, value) => updateQuery({ [key]: value })}
         />
       </div>
-      {selectedItems.size > 0 && chargeItems?.length && (
+      {canChangeAccount && selectedItems.size > 0 && !!chargeItems?.length && (
         <div className="mb-4 flex items-center gap-3 rounded-md border bg-primary/5 border-primary/20 p-3">
           <span className="text-sm font-medium">
             {selectedItems.size} {t("items_selected")}
@@ -427,18 +457,24 @@ function ChargeItemsTable({
           <Table className="shadow-sm w-full bg-white">
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10">
-                  <Checkbox
-                    checked={
-                      !!chargeItems?.length &&
-                      chargeItems.every((item) => selectedItems.has(item.id))
-                    }
-                    onCheckedChange={(checked: CheckedState) =>
-                      handleSelectAll(checked === true)
-                    }
-                    aria-label={t("select_all")}
-                  />
-                </TableHead>
+                {canChangeAccount && (
+                  <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10">
+                    <Checkbox
+                      checked={
+                        allMovableSelected
+                          ? true
+                          : selectedItems.size > 0
+                            ? "indeterminate"
+                            : false
+                      }
+                      disabled={!movableChargeItems.length}
+                      onCheckedChange={(checked: CheckedState) =>
+                        handleSelectAll(checked === true)
+                      }
+                      aria-label={t("select_all")}
+                    />
+                  </TableHead>
+                )}
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("created_by")}
@@ -485,15 +521,38 @@ function ChargeItemsTable({
                     key={item.id}
                     className={`border-b hover:bg-gray-50 ${selectedItems.has(item.id) ? "bg-primary/5" : ""}`}
                   >
-                    <TableCell className="border-x p-3 text-gray-950">
-                      <Checkbox
-                        checked={selectedItems.has(item.id)}
-                        onCheckedChange={(checked: CheckedState) =>
-                          handleSelectItem(item.id, checked === true)
-                        }
-                        aria-label={t("select_item")}
-                      />
-                    </TableCell>
+                    {canChangeAccount && (
+                      <TableCell className="border-x p-3 text-gray-950">
+                        {isMovable(item) ? (
+                          <Checkbox
+                            checked={selectedItems.has(item.id)}
+                            onCheckedChange={(checked: CheckedState) =>
+                              handleSelectItem(item.id, checked === true)
+                            }
+                            aria-label={t("select_item")}
+                          />
+                        ) : (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="inline-flex">
+                                <Checkbox
+                                  checked={false}
+                                  disabled
+                                  aria-label={t(
+                                    "only_billable_charge_items_can_change_account",
+                                  )}
+                                />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {t(
+                                "only_billable_charge_items_can_change_account",
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </TableCell>
+                    )}
                     <TableCell className="border-x p-3 text-gray-950">
                       <Button
                         variant="ghost"
@@ -583,10 +642,14 @@ function ChargeItemsTable({
                           setSelectedChargeItem(item);
                           setIsEditDialogOpen(true);
                         }}
-                        onChangeAccount={(item) => {
-                          setSelectedItems(new Set([item.id]));
-                          setIsChangeAccountOpen(true);
-                        }}
+                        onChangeAccount={
+                          canChangeAccount && isMovable(item)
+                            ? (item) => {
+                                setSelectedItems(new Set([item.id]));
+                                setIsChangeAccountOpen(true);
+                              }
+                            : undefined
+                        }
                       />
                     </TableCell>
                   </TableRow>
@@ -602,6 +665,7 @@ function ChargeItemsTable({
                       item,
                       MonetaryComponentType.discount,
                     )}
+                    showSelectColumn={canChangeAccount}
                   />,
                   <PriceComponentRow
                     key={`${item.id}-taxes`}
@@ -610,6 +674,7 @@ function ChargeItemsTable({
                       item,
                       MonetaryComponentType.tax,
                     )}
+                    showSelectColumn={canChangeAccount}
                   />,
                 ];
 
@@ -618,7 +683,7 @@ function ChargeItemsTable({
                     key={`${item.id}-mrp`}
                     className="text-xs text-gray-500"
                   >
-                    <TableCell></TableCell>
+                    {canChangeAccount && <TableCell></TableCell>}
                     <TableCell></TableCell>
                     <TableCell>{t("mrp")}</TableCell>
                     <TableCell></TableCell>
@@ -640,7 +705,7 @@ function ChargeItemsTable({
                     key={`${item.id}-summary`}
                     className="bg-muted/30 font-medium border-b"
                   >
-                    <TableCell></TableCell>
+                    {canChangeAccount && <TableCell></TableCell>}
                     <TableCell></TableCell>
                     <TableCell className="text-gray-950">
                       {t("total")}
@@ -665,7 +730,7 @@ function ChargeItemsTable({
                     key={`${item.id}-note`}
                     className="text-xs text-gray-500"
                   >
-                    <TableCell></TableCell>
+                    {canChangeAccount && <TableCell></TableCell>}
                     <TableCell></TableCell>
                     <TableCell>{t("note")}</TableCell>
                     <TableCell></TableCell>
@@ -683,7 +748,7 @@ function ChargeItemsTable({
 
                 const emptyRow = (
                   <TableRow key={`${item.id}-empty`} className="bg-muted">
-                    <TableCell colSpan={11}></TableCell>
+                    <TableCell colSpan={canChangeAccount ? 11 : 10}></TableCell>
                   </TableRow>
                 );
 

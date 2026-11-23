@@ -146,9 +146,9 @@ function ObservationDefinitionFormContent({
 
   const formSchema = z
     .object({
-      title: z.string().min(1, t("field_required")),
+      title: z.string().trim().min(1, t("field_required")),
       slug_value: slugValueSchema(),
-      description: z.string().min(1, t("field_required")),
+      description: z.string().trim().min(1, t("field_required")),
       status: z.enum(ObservationDefinitionStatus),
       category: z.enum(ObservationDefinitionCategory),
       permitted_data_type: z.enum(QuestionType),

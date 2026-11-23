@@ -1,5 +1,6 @@
 import i18next from "i18next";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { before, test } from "node:test";
 
 import { visibleWorkspaceColumns } from "@/components/Workspace/visibleWorkspaceColumns";
@@ -9,6 +10,7 @@ import {
   standardWorkspaceTemplate,
   WORKSPACE_STARTERS,
 } from "@/components/Workspace/workspacePresets";
+import { TAB_ICONS } from "@/components/Workspace/workspaceTabIcons";
 import {
   widgetConfigConsistencyIssues,
   workspaceWidgetIssues,
@@ -28,6 +30,7 @@ import {
   HISTORY_PAGE_KEYS,
   normalizeWorkspaceTemplate,
   SYSTEM_PAGE_KEYS,
+  workspaceStructureSchema,
 } from "./encounterWorkspace";
 import {
   getWidgetAvailability,
@@ -788,4 +791,71 @@ test("standard pages stay system pages instead of full-page sections", () => {
       .filter((page) => page.kind === "custom"),
     [],
   );
+});
+
+test("example encounter workspace and starter presets only reference supported tab icons", () => {
+  const examplePath = new URL(
+    "../../../docs/examples/encounter-workspace.json",
+    import.meta.url,
+  );
+  const exampleTemplate = JSON.parse(readFileSync(examplePath, "utf8"));
+  const parsed = createEncounterWorkspaceSchema().safeParse(exampleTemplate);
+  assert.equal(parsed.success, true);
+
+  const checkPages = (
+    pages: { kind: string; key: string; icon?: string }[],
+    source: string,
+  ) => {
+    for (const page of pages) {
+      if (page.kind === "custom" && page.icon) {
+        assert.equal(
+          Object.hasOwn(TAB_ICONS, page.icon),
+          true,
+          `${source} page "${page.key}" uses unsupported icon "${page.icon}"`,
+        );
+      }
+    }
+  };
+
+  if (parsed.success) {
+    checkPages(
+      [...parsed.data.pages, ...(parsed.data.history_pages ?? [])],
+      "docs/examples/encounter-workspace.json",
+    );
+  }
+  for (const starter of WORKSPACE_STARTERS) {
+    const template = starter.build(i18next.t, []);
+    checkPages(
+      [...template.pages, ...(template.history_pages ?? [])],
+      `starter:${starter.id}`,
+    );
+  }
+  for (const starter of HISTORY_STARTERS) {
+    checkPages(starter.build(i18next.t, []), `history_starter:${starter.id}`);
+  }
+});
+
+test("unsupported tab icons block saving while saved templates still load", () => {
+  const tab = (key: string, icon?: string) => ({
+    key,
+    kind: "custom" as const,
+    title: key,
+    icon,
+    columns: [{ span: 12, widgets: [] }],
+  });
+  const template = standardWorkspaceTemplate(i18next.t);
+  template.pages.push(
+    tab("rounds", "list-checks"),
+    tab("visit", "stethoscope"),
+    tab("plain"),
+  );
+  template.history_pages = [tab("history_info", "info")];
+
+  // Loading stays lenient; the encounter falls back to the dashboard icon.
+  assert.equal(workspaceStructureSchema.safeParse(template).success, true);
+  // Saving reports each unsupported icon, on encounter and history tabs.
+  assert.deepEqual(workspaceWidgetIssues(template, new Map(), i18next.t), [
+    "workspace_unsupported_tab_icon",
+    "workspace_unsupported_tab_icon",
+  ]);
 });
