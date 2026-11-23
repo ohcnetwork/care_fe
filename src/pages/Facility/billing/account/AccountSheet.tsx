@@ -56,7 +56,7 @@ import { ExtensionContexts } from "@/Utils/schema/types";
 
 const createBaseSchema = (t: (key: string) => string) =>
   z.object({
-    name: z.string().min(1, t("name_is_required")),
+    name: z.string().trim().min(1, t("name_is_required")),
     description: z.string().optional().nullable(),
     status: z.enum(AccountStatus),
     billing_status: z.enum(AccountBillingStatus),

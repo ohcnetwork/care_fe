@@ -56,7 +56,10 @@ import { generateSlugValue } from "@/Utils/slug";
 
 const createFormSchema = (t: TFunction) => {
   return z.object({
-    name: z.string().min(1, { message: t("name_is_required") }),
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: t("name_is_required") }),
     slug_value: slugValueSchema(),
     product_type: z.enum(ProductKnowledgeType),
     status: z.enum(ProductKnowledgeStatus),
@@ -70,14 +73,20 @@ const createFormSchema = (t: TFunction) => {
       .array(
         z.object({
           name_type: z.enum(ProductNameTypes),
-          name: z.string().min(1, { message: t("name_is_required") }),
+          name: z
+            .string()
+            .trim()
+            .min(1, { message: t("name_is_required") }),
         }),
       )
       .default([]),
     storage_guidelines: z
       .array(
         z.object({
-          note: z.string().min(1, { message: t("field_required") }),
+          note: z
+            .string()
+            .trim()
+            .min(1, { message: t("field_required") }),
           stability_duration: z
             .object({
               value: z.number().int().optional(),

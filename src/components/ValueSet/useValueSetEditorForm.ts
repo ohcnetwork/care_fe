@@ -62,13 +62,13 @@ export function useValueSetEditorForm({
     isSharedCatalogueError && !isSharedCatalogueFetching;
 
   const conceptSchema = z.object({
-    code: z.string().min(1, t("field_required")),
-    display: z.string().min(1, t("valueset_verify_before_saving")),
+    code: z.string().trim().min(1, t("field_required")),
+    display: z.string().trim().min(1, t("valueset_verify_before_saving")),
   });
   const filterSchema = z.object({
-    property: z.string().min(1, t("field_required")),
-    op: z.string().min(1, t("field_required")),
-    value: z.string().min(1, t("field_required")),
+    property: z.string().trim().min(1, t("field_required")),
+    op: z.string().trim().min(1, t("field_required")),
+    value: z.string().trim().min(1, t("field_required")),
   });
   const ruleSchema = z
     .object({

@@ -178,7 +178,7 @@ const ScheduleTemplateEditor = ({
 
   const templateFormSchema = z
     .object({
-      name: z.string().min(1, t("field_required")),
+      name: z.string().trim().min(1, t("field_required")),
       valid_from: z.date({
         error: t("field_required"),
       }),
@@ -618,7 +618,7 @@ const NewAvailabilityCard = ({
 
   const formSchema = z
     .object({
-      name: z.string().min(1, t("field_required")),
+      name: z.string().trim().min(1, t("field_required")),
       slot_type: z.enum(["appointment", "open", "closed"]),
       start_time: z.string().min(1, t("field_required")) as z.ZodType<
         Time | undefined,
