@@ -1,6 +1,15 @@
 import { faker } from "@faker-js/faker";
-import { expect, type APIRequestContext } from "@playwright/test";
-import { adminApiHeaders, apiBaseUrl } from "tests/helper/questionnaireV2";
+import {
+  expect,
+  test,
+  type APIRequestContext,
+  type Page,
+} from "@playwright/test";
+import {
+  adminApiHeaders,
+  apiBaseUrl,
+  questionBlock,
+} from "tests/helper/questionnaireV2";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -16,6 +25,7 @@ interface ReferralFixtureOptions {
   createHeaders?: Record<string, string>;
 }
 
+/** Creates an active, public referral availability with request and response forms through the API. */
 export async function createReferralAvailabilityFixture(
   request: APIRequestContext,
   options: ReferralFixtureOptions = {},
@@ -107,6 +117,7 @@ export async function createReferralAvailabilityFixture(
   };
 }
 
+/** Creates a referral availability and a pending referral to it through the API. */
 export async function createReferralFixture(
   request: APIRequestContext,
   options: ReferralFixtureOptions = {},
@@ -138,4 +149,118 @@ export async function createReferralFixture(
     referralId: referral.id,
     path: `/referrals/${referral.id}`,
   };
+}
+
+export interface ReferralRequestInput {
+  facilityId: string;
+  patientId: string;
+  /** Opens the dialog from this encounter's referrals tab (the patient's referrals tab when omitted). */
+  encounterId?: string;
+  /** The "Refer to" kind; the dialog starts on "Facilities". */
+  referTo?: "Facilities" | "Departments";
+  /** Name of the referral unit (availability) to send to. */
+  unitName: string;
+  /** Text typed into the unit search (defaults to `unitName`). */
+  unitSearch?: string;
+  title: string;
+  note?: string;
+  /** Answers to the unit's request form, by question label. */
+  answers: { question: string; answer: string }[];
+}
+
+/** Opens "New Referral", fills the destination, title, note and request form, and opens its review (does not send). */
+export async function fillReferralRequestViaUi(
+  page: Page,
+  {
+    facilityId,
+    patientId,
+    encounterId,
+    referTo,
+    unitName,
+    unitSearch,
+    title,
+    note,
+    answers,
+  }: ReferralRequestInput,
+): Promise<void> {
+  await test.step(
+    "referral.create: fill the request",
+    async () => {
+      await page.goto(
+        encounterId
+          ? `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/referrals`
+          : `/facility/${facilityId}/patient/${patientId}/referrals`,
+      );
+      await page
+        .getByRole("button", { name: "New Referral", exact: true })
+        .click();
+      const creation = page.getByRole("dialog", {
+        name: "Request form",
+        exact: true,
+      });
+      if (referTo) {
+        await creation
+          .getByRole("combobox", { name: "Refer to", exact: true })
+          .click();
+        await page.getByRole("option", { name: referTo, exact: true }).click();
+      }
+      await creation
+        .getByRole("combobox", { name: "Referral unit", exact: true })
+        .click();
+      await page
+        .getByRole("combobox", {
+          name: "Search referral units",
+          exact: true,
+        })
+        .fill(unitSearch ?? unitName);
+      await page.getByRole("option").filter({ hasText: unitName }).click();
+      await creation
+        .getByRole("textbox", { name: "Referral title", exact: true })
+        .fill(title);
+      if (note !== undefined)
+        await creation
+          .getByRole("textbox", {
+            name: "Additional note (optional)",
+            exact: true,
+          })
+          .fill(note);
+      for (const { question, answer } of answers)
+        await questionBlock(page, question).getByRole("textbox").fill(answer);
+      await creation
+        .getByRole("button", { name: "Review referral", exact: true })
+        .click();
+    },
+    { box: true },
+  );
+}
+
+/** Sends a referral through the "New Referral" dialog of a patient or encounter. */
+export async function createReferralViaUi(
+  page: Page,
+  input: ReferralRequestInput,
+): Promise<{ referralId: string }> {
+  return test.step(
+    "referral.create",
+    async () => {
+      await fillReferralRequestViaUi(page, input);
+      const creation = page.getByRole("dialog", {
+        name: "Request form",
+        exact: true,
+      });
+      const createResponse = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === "/api/v1/referral/" &&
+          response.request().method() === "POST",
+      );
+      await creation
+        .getByRole("button", { name: "Send referral", exact: true })
+        .click();
+      const saved = await createResponse;
+      expect(saved.ok(), (await saved.text()).slice(0, 2000)).toBeTruthy();
+      const referral = (await saved.json()) as { id: string };
+      await expect(creation).toBeHidden();
+      return { referralId: referral.id };
+    },
+    { box: true },
+  );
 }

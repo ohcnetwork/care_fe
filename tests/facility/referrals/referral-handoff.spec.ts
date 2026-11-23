@@ -19,7 +19,10 @@ import {
   apiBaseUrl,
   questionBlock,
 } from "tests/helper/questionnaireV2";
-import { createReferralAvailabilityFixture } from "tests/helper/referrals";
+import {
+  createReferralAvailabilityFixture,
+  fillReferralRequestViaUi,
+} from "tests/helper/referrals";
 import { getFacilityId } from "tests/support/facilityId";
 
 interface Entity {
@@ -345,6 +348,7 @@ async function completeReferralHandoff(
       },
       senderSession.headers,
     );
+
     const fixture =
       await test.step("The sender sends a referral and shares source evidence through the clinical UI", async () => {
         let creationPosts = 0;
@@ -355,50 +359,25 @@ async function completeReferralHandoff(
           )
             creationPosts++;
         });
-        await senderPage.goto(
-          `/facility/${sourceFacilityId}/patient/${patientId}/encounter/${encounterId}/referrals`,
-        );
-        await senderPage
-          .getByRole("button", { name: "New Referral", exact: true })
-          .click();
+        await fillReferralRequestViaUi(senderPage, {
+          facilityId: sourceFacilityId,
+          patientId,
+          encounterId,
+          referTo: "Departments",
+          unitName: configuration.availabilityName,
+          title: configuration.title,
+          note: referralNote,
+          answers: [
+            {
+              question: "Referral reason",
+              answer: "Specialist assessment requested",
+            },
+          ],
+        });
         const creation = senderPage.getByRole("dialog", {
           name: "Request form",
           exact: true,
         });
-        await creation
-          .getByRole("combobox", { name: "Refer to", exact: true })
-          .click();
-        await senderPage
-          .getByRole("option", { name: "Departments", exact: true })
-          .click();
-        await creation
-          .getByRole("combobox", { name: "Referral unit", exact: true })
-          .click();
-        await senderPage
-          .getByRole("combobox", {
-            name: "Search referral units",
-            exact: true,
-          })
-          .fill(configuration.availabilityName);
-        await senderPage
-          .getByRole("option")
-          .filter({ hasText: configuration.availabilityName })
-          .click();
-        await creation
-          .getByRole("textbox", { name: "Referral title", exact: true })
-          .fill(configuration.title);
-        await creation
-          .getByRole("textbox", {
-            name: "Additional note (optional)",
-            exact: true,
-          })
-          .fill(referralNote);
-        await questionBlock(senderPage, "Referral reason")
-          .getByRole("textbox")
-          .fill("Specialist assessment requested");
-        await creation
-          .getByRole("button", { name: "Review referral", exact: true })
-          .click();
         await expect(
           creation.getByRole("button", {
             name: "Send referral",
@@ -441,7 +420,7 @@ async function completeReferralHandoff(
           created_by: { id: sender.id },
         });
         expect(creationPosts).toBe(1);
-        await expect(creation).not.toBeVisible();
+        await expect(creation).toBeHidden();
         await senderPage
           .getByRole("row")
           .filter({ hasText: configuration.title })
@@ -472,7 +451,7 @@ async function completeReferralHandoff(
         await picker
           .getByRole("button", { name: "Add record", exact: true })
           .click();
-        await expect(picker).not.toBeVisible();
+        await expect(picker).toBeHidden();
         await expect(
           sourceRecords.getByText(clinicalFinding, { exact: true }),
         ).toBeVisible();
@@ -495,6 +474,7 @@ async function completeReferralHandoff(
           path: `/referrals/${referral.id}`,
         };
       });
+
     await test.step("The sender finds the referral in the encounter and the recipient in the receiving department", async () => {
       const deniedOrigin = await request.get(
         `${apiBaseUrl()}/api/v1/encounter/${encounterId}/`,
@@ -542,7 +522,7 @@ async function completeReferralHandoff(
       });
       await expect(profile).toHaveAttribute("href", `/patient/${patientId}`);
       await senderPage.keyboard.press("Escape");
-      await expect(profile).not.toBeVisible();
+      await expect(profile).toBeHidden();
       const sourceEncounter = senderPage.getByRole("region", {
         name: "Originating encounter",
         exact: true,
@@ -1057,7 +1037,7 @@ async function completeReferralHandoff(
       await visitWarning
         .getByRole("button", { name: "Retry", exact: true })
         .click();
-      await expect(visitWarning).not.toBeVisible();
+      await expect(visitWarning).toBeHidden();
       await expect(saveResponse).toBeEnabled();
       await expect(
         questionBlock(recipientPage, fixture.responseLabel).getByRole(
@@ -1090,7 +1070,7 @@ async function completeReferralHandoff(
       await picker
         .getByRole("button", { name: "Add record", exact: true })
         .click();
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       await expect(
         records.getByText(localFinding, { exact: true }),
       ).toBeVisible();
@@ -1192,7 +1172,7 @@ async function completeReferralHandoff(
           name: "Referral request",
           exact: true,
         }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       await expect(
         responses.getByText(recommendation, { exact: true }),
       ).toBeVisible();
@@ -1457,11 +1437,22 @@ for (const { walkIn, name } of [
     name: "completes a cross-facility walk-in referral through a receiving doctor encounter",
   },
 ]) {
-  test(name, async ({ browser, request, baseURL }, testInfo) => {
-    await completeReferralHandoff(
-      { browser, request, baseURL },
-      testInfo,
-      walkIn,
-    );
-  });
+  test(
+    name,
+    {
+      tag: ["@journey", "@cap:referral.handoff.complete"],
+      annotation: {
+        type: "journey",
+        description:
+          "referral.create -> referral.status.transition (receive, start) -> appointment.book or walk-in -> encounter.create -> questionnaire.fill.submit -> referral.response.submit",
+      },
+    },
+    async ({ browser, request, baseURL }, testInfo) => {
+      await completeReferralHandoff(
+        { browser, request, baseURL },
+        testInfo,
+        walkIn,
+      );
+    },
+  );
 }
