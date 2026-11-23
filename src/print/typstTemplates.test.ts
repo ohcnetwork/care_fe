@@ -310,8 +310,10 @@ test("fit-words: never breaks a Kannada joined letter", async () => {
   }
 });
 
-test("prescriptions: a long medicine name or frequency keeps every column", async () => {
-  const content: PrescriptionsPrintContent = {
+function prescriptionsContent(
+  medications: PrescriptionsPrintContent["prescriptions"][number]["medications"],
+): PrescriptionsPrintContent {
+  return {
     labels: {
       patient: "Patient",
       prescribed_by: "Prescribed by",
@@ -341,44 +343,48 @@ test("prescriptions: a long medicine name or frequency keeps every column", asyn
         date: "20 Nov 2026",
         prescribed_by: "Dr. Test",
         note: null,
-        medications: [
-          {
-            index: "1",
-            name: LONG_NAME,
-            instructions: [
-              {
-                dosage: "1 microgram",
-                frequency: LONG_FREQUENCY,
-                duration: "4 days",
-                text: "Take after food with water.",
-              },
-              {
-                dosage: "2 tablets",
-                frequency: "1-0-1 (Twice a day)",
-                duration: "3 days",
-                text: "Then reduce the dose.",
-              },
-            ],
-            note: `Note: ${LONG_WORD}`,
-          },
-          {
-            index: "2",
-            name: JOINED_NAME,
-            instructions: [
-              {
-                dosage: "1 tablets",
-                frequency: "1-1-1 (Thrice a day)",
-                duration: "5 days",
-                text: "Take after food",
-              },
-            ],
-            note: null,
-          },
-        ],
+        medications,
       },
     ],
     footer: "Computer generated",
   };
+}
+
+test("prescriptions: a long medicine name or frequency keeps every column", async () => {
+  const content = prescriptionsContent([
+    {
+      index: "1",
+      name: LONG_NAME,
+      instructions: [
+        {
+          dosage: "1 microgram",
+          frequency: LONG_FREQUENCY,
+          duration: "4 days",
+          text: "Take after food with water.",
+        },
+        {
+          dosage: "2 tablets",
+          frequency: "1-0-1 (Twice a day)",
+          duration: "3 days",
+          text: "Then reduce the dose.",
+        },
+      ],
+      note: `Note: ${LONG_WORD}`,
+    },
+    {
+      index: "2",
+      name: JOINED_NAME,
+      instructions: [
+        {
+          dosage: "1 tablets",
+          frequency: "1-1-1 (Thrice a day)",
+          duration: "5 days",
+          text: "Take after food",
+        },
+      ],
+      note: null,
+    },
+  ]);
 
   const pdf = await readPdf(await compile("prescriptions", content));
 
@@ -391,6 +397,43 @@ test("prescriptions: a long medicine name or frequency keeps every column", asyn
   for (const value of [LONG_WORD, "RESISTANT),DOMPERIDONE"]) {
     assert.ok(pdf.text.includes(value), `"${value}" lost characters`);
   }
+});
+
+test("prescriptions: a row taller than the page continues on the next page", async () => {
+  // Numbered sentences show exactly which part of the note went missing.
+  const sentences = Array.from(
+    { length: 30 },
+    (_, i) =>
+      `S${i + 1}: take with warm water after food and watch for drowsiness, rash or stomach upset.`,
+  );
+  const pdf = await readPdf(
+    await compile(
+      "prescriptions",
+      prescriptionsContent([
+        {
+          index: "1",
+          name: "Paracetamol 500 mg oral tablet",
+          instructions: [
+            {
+              dosage: "1 tablets",
+              frequency: "1-0-1 (Twice a day)",
+              duration: "5 days",
+              text: "After food",
+            },
+          ],
+          note: `Note: ${sentences.join(" ")}`,
+        },
+      ]),
+      "a5",
+    ),
+  );
+
+  const printed = new Set(
+    [...pdf.text.matchAll(/S(\d+):/g)].map((match) => Number(match[1])),
+  );
+  const missing = sentences.map((_, i) => i + 1).filter((n) => !printed.has(n));
+  assert.deepEqual(missing, [], `note sentences ${missing} were cut off`);
+  assert.equal(pageWith(pdf, "Medicine"), 1, "the table starts on page 1");
 });
 
 function pageWith(pdf: Awaited<ReturnType<typeof readPdf>>, text: string) {

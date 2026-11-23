@@ -184,7 +184,8 @@
 /// A bordered table in the style of CAREUI's `Table`. `header` repeats on
 /// every page; `header-align` defaults to centre; `empty` is shown without rows;
 /// `outer` sets the outer border's sides and corner radius. Put free text in
-/// `fr` columns: long text in an `auto` column squeezes the `fr` ones.
+/// `fr` columns: long text in an `auto` column squeezes the `fr` ones. Rows
+/// continue on the next page: a row kept whole loses what runs past the page.
 #let data-table(
   columns: (),
   align: (),
@@ -236,8 +237,6 @@
     {
     set text(weight: "medium", fill: gray(950))
     set text(size: font-size) if narrow
-    // Never split a row across pages.
-    set table.cell(breakable: false)
     fit-cells(columns, table(
       columns: sizes,
       inset: inset,
