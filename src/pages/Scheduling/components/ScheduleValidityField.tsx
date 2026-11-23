@@ -12,6 +12,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+import { getClinicTodayDate } from "@/pages/Appointments/schedulingTimeZone";
+
 interface ValidityFields {
   valid_from?: Date;
   valid_to?: Date;
@@ -50,7 +52,9 @@ export function ScheduleValidityField({
                 aria-labelledby={labelId}
                 className="w-full"
                 value={{ from: field.value, to: validTo.value }}
-                minDate={disablePast ? startOfDay(new Date()) : undefined}
+                minDate={
+                  disablePast ? startOfDay(getClinicTodayDate()) : undefined
+                }
                 allowOpenEnded={false}
                 onApply={({ from, to }) => {
                   field.onChange(from);

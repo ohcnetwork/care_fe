@@ -41,7 +41,7 @@ export function ArchivedBadge({
               {[
                 archivedBy && `${t("archived_by")} ${formatName(archivedBy)}`,
                 archivedAt &&
-                  formatDateTime(archivedAt, "DD MMM YYYY, hh:mm A"),
+                  formatDateTime(archivedAt, "dd MMM yyyy, hh:mm a"),
               ]
                 .filter(Boolean)
                 .join(" · ")}

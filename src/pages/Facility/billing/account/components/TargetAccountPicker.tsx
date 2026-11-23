@@ -93,10 +93,10 @@ export default function TargetAccountPicker({
                     <FieldTitle>{account.name}</FieldTitle>
                     {start && (
                       <FieldDescription>
-                        {formatDateTime(start, "DD MMM YYYY")}
+                        {formatDateTime(start, "dd MMM yyyy")}
                         {" – "}
                         {end
-                          ? formatDateTime(end, "DD MMM YYYY")
+                          ? formatDateTime(end, "dd MMM yyyy")
                           : t("ongoing")}
                       </FieldDescription>
                     )}

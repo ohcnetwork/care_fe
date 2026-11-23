@@ -1,7 +1,8 @@
-import { format, formatDate } from "date-fns";
+import { format } from "date-fns";
 import type { TFunction } from "i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
+import { getAppointmentsSchedulingTimeZone } from "@/pages/Appointments/schedulingTimeZone";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
 import { formatAmount } from "@/print/formatAmount";
 import type { PrintDetailRow } from "@/print/patientDetails";
@@ -22,7 +23,11 @@ import type { AppointmentRead } from "@/types/scheduling/schedule";
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import { add } from "@/Utils/decimal";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import {
+  formatDateTimeInZone,
+  formatName,
+  formatPatientAge,
+} from "@/Utils/utils";
 
 export interface AppointmentPrintContent {
   title: string;
@@ -97,7 +102,7 @@ export function buildAppointmentPrintContent({
 
   return {
     title: t("appointment_details"),
-    date: `${formatDate(appointment.token_slot.start_datetime, "dd MMM, yyyy, EEE")} | ${formatSlotTimeRange(appointment.token_slot)}`,
+    date: `${formatDateTimeInZone(appointment.token_slot.start_datetime, getAppointmentsSchedulingTimeZone(), "dd MMM, yyyy, EEE")} | ${formatSlotTimeRange(appointment.token_slot)}`,
     resource: `${t(`schedulable_resource__${appointment.resource_type}`)}: ${formatScheduleResourceName(appointment)} | ${appointment.token_slot.availability.name}`,
     patient_rows: [
       {

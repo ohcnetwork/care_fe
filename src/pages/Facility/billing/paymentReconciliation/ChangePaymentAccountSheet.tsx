@@ -125,7 +125,7 @@ export default function ChangePaymentAccountSheet({
                             {" · "}
                             {formatDateTime(
                               payment.payment_datetime,
-                              "DD MMM YYYY",
+                              "dd MMM yyyy",
                             )}
                           </span>
                         )}
