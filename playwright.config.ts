@@ -59,6 +59,15 @@ const runsPreviewProjects =
   selectedProjects.length === 0 ||
   selectedProjects.some((name) => name.toLowerCase() !== "vite-modules");
 
+/** Browsers and devices that each run the whole suite. */
+const BROWSER_PROJECTS = {
+  chromium: devices["Desktop Chrome"],
+  firefox: devices["Desktop Firefox"],
+  webkit: devices["Desktop Safari"],
+  "mobile-chrome": devices["Pixel 7"],
+  "mobile-safari": devices["iPhone 15"],
+};
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -129,9 +138,9 @@ export default defineConfig({
       testMatch: /(?:locationInventory|questionnaire)\.setup\.ts$/,
       dependencies: ["setup-auth", "setup-facility"],
     },
-    {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+    ...Object.entries(BROWSER_PROJECTS).map(([name, device]) => ({
+      name,
+      use: { ...device },
       testIgnore: VITE_MODULE_SPECS,
       dependencies: process.env.CI
         ? []
@@ -142,7 +151,7 @@ export default defineConfig({
             "setup-account",
             "setup-data",
           ],
-    },
+    })),
     // Specs that import source modules (`/src/...`) into the page. Only the
     // Vite dev server serves those; the preview build does not.
     {
@@ -156,27 +165,6 @@ export default defineConfig({
       // signed-in user nor backend fixtures.
       dependencies: [],
     },
-    // {
-    //   name: "firefox",
-    //   use: { ...devices["Desktop Firefox"] },
-    //   dependencies: ["setup"],
-    // },
-
-    // {
-    //   name: "webkit",
-    //   use: { ...devices["Desktop Safari"] },
-    //   dependencies: ["setup"],
-    // },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
 
     /* Test against branded browsers. */
     // {

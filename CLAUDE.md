@@ -95,7 +95,7 @@ npm run playwright:test:ui                              # Interactive Playwright
 
 **Running tests efficiently:**
 
-- CI runs 8 Playwright shards on `ubuntu-latest-m`, with 6 Chromium workers per shard by default (see `docs/testing.md`).
+- CI runs 8 Playwright shards on `ubuntu-latest-m` for each browser project (`chromium`, `firefox`, `webkit`, `mobile-chrome`, `mobile-safari`), with 6 workers per shard by default (see `docs/testing.md`). A run without `--project` uses all five; pass `--project=chromium` to iterate faster locally.
 - Use `--shard=N/TOTAL` to split across multiple processes
 - Run specific test directories to iterate faster: `npx playwright test tests/auth/`
 - The `setup-*` projects run first to authenticate test users and save storage state, parallelizing independent setup tasks while preserving data dependencies.

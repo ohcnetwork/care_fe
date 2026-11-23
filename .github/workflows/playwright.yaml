@@ -3,7 +3,7 @@ name: Playwright Tests
 # This workflow runs Playwright E2E tests with backend integration
 # - Triggers on push to main branches and PRs
 # - Uses path filtering to skip unnecessary runs
-# - Runs tests in parallel using shards
+# - Runs tests in parallel using shards, for each browser and device project
 # - Runs the published care backend image on a cached, migrated DB snapshot
 # - Caches Playwright browsers
 # - Provides detailed test reports as artifacts
@@ -207,7 +207,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Projects from playwright.config.ts. Each runs all shards.
+        project: [chromium, firefox, webkit, mobile-chrome, mobile-safari]
         shard: [1, 2, 3, 4, 5, 6, 7, 8]
+        # Browser engine to install next to Chromium (the setup projects use
+        # Chromium).
+        include:
+          - project: firefox
+            browser: firefox
+          - project: webkit
+            browser: webkit
+          - project: mobile-safari
+            browser: webkit
 
     steps:
       - name: Checkout
@@ -298,13 +309,13 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}-${{ hashFiles('playwright.config.ts') }}
+          key: ${{ runner.os }}-playwright-${{ matrix.browser || 'chromium' }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('playwright.config.ts') }}
           restore-keys: |
-            ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}-
-            ${{ runner.os }}-playwright-
+            ${{ runner.os }}-playwright-${{ matrix.browser || 'chromium' }}-${{ hashFiles('package-lock.json') }}-
+            ${{ runner.os }}-playwright-${{ matrix.browser || 'chromium' }}-
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps --only-shell chromium
+        run: npx playwright install --with-deps --only-shell chromium ${{ matrix.browser }}
 
       - name: Wait for backend
         run: |
@@ -334,21 +345,21 @@ jobs:
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
-      - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
+      - name: Run Playwright tests (${{ matrix.project }}, Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
         id: test
-        run: npx playwright test --project=chromium --workers="$TEST_WORKERS" --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
+        run: npx playwright test --project=${{ matrix.project }} --workers="$TEST_WORKERS" --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
         env:
           TEST_WORKERS: ${{ env.TEST_WORKERS }}
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
 
       # The vite-modules specs need a Vite dev server, which pre-bundles
-      # dependencies as soon as it starts. Run them once, on shard 1, instead
-      # of starting that server on every shard. Separate report and output
-      # paths keep shard 1's own results.
+      # dependencies as soon as it starts. Run them once, on Chromium shard 1,
+      # instead of starting that server on every shard. Separate report and
+      # output paths keep shard 1's own results.
       - name: Run Vite module tests
         id: vite-modules
-        if: ${{ !cancelled() && matrix.shard == 1 }}
+        if: ${{ !cancelled() && matrix.project == 'chromium' && matrix.shard == 1 }}
         run: npx playwright test --project=vite-modules --workers=2 --output=test-results-vite
         env:
           NODE_ENV: production
@@ -360,13 +371,13 @@ jobs:
       - name: Annotate test failure
         if: failure() && (steps.test.conclusion == 'failure' || steps.vite-modules.conclusion == 'failure')
         run: |
-          echo "::error::Playwright tests failed in shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }}"
+          echo "::error::Playwright tests failed in ${{ matrix.project }} shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }}"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-results-shard-${{ matrix.shard }}
+          name: playwright-results-${{ matrix.project }}-shard-${{ matrix.shard }}
           path: |
             blob-report/
             blob-report-vite/
@@ -419,7 +430,7 @@ jobs:
         if: steps.skipped.outputs.skipped == 'false'
         uses: actions/download-artifact@v4
         with:
-          pattern: playwright-results-shard-*
+          pattern: playwright-results-*
           path: all-results
 
       - name: Setup Node.js
@@ -459,7 +470,7 @@ jobs:
           SKIPPED_TESTS=0
 
           # Parse test results from each shard
-          for file in all-results/playwright-results-shard-*/test-results*.json; do
+          for file in all-results/playwright-results-*/test-results*.json; do
             if [ -f "$file" ]; then
               echo "Processing results from $file"
               # Use jq to parse JSON if available, otherwise use basic parsing

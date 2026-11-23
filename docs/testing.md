@@ -27,14 +27,15 @@ npm run playwright:test:ui                              # Interactive Playwright
 
 ## Running tests efficiently
 
-- CI runs 8 shards on `ubuntu-latest-m`, with 6 Chromium workers per runner by default. Each shard pays its own backend and setup cost, so the workflow uses eight larger runners rather than splitting the suite across many smaller jobs.
-- CI uses Playwright's built-in `--shard=N/8` with `fullyParallel: true` to distribute tests across 8 runners. Each shard uses 6 Chromium workers by default.
+- The suite runs in five browser projects: `chromium` (Desktop Chrome), `firefox` (Desktop Firefox), `webkit` (Desktop Safari), `mobile-chrome` (Pixel 7) and `mobile-safari` (iPhone 15). A run without `--project` uses all five, so pass `--project=chromium` (or another project) to iterate faster locally. `npm run playwright:install` installs every browser they need.
+- CI runs every project on every PR, and a failure in any project fails the workflow. Each project runs 8 shards on `ubuntu-latest-m` (40 jobs), with 6 workers per runner by default. Each shard pays its own backend and setup cost, so the workflow uses larger runners rather than splitting the suite across many smaller jobs.
+- CI uses Playwright's built-in `--shard=N/8` with `fullyParallel: true` to distribute each project's tests across 8 runners. Each shard uses 6 workers by default.
 - The setup project runs independent login and fixture setup tasks in parallel while preserving facility → patient → account dependencies.
 - Shard artifacts use Playwright's blob reporter; the report job merges them into one HTML report.
 - Use `--shard=N/TOTAL` to split a local run across shards.
 - Run specific test directories to iterate faster: `npx playwright test tests/auth/`
-- The `setup-*` projects run before Chromium to authenticate test users and save storage state.
-- The `vite-modules` project runs specs that import source modules (`/src/...`) into the page, such as `fillScribeActions.spec.ts`. Playwright starts a Vite dev server on port 4100 for it, because the preview build does not serve source modules. The dev server starts only when the run can include this project (no `--project`, or a `--project` that matches `vite-modules`), and a run of only `--project=vite-modules` skips the preview server. These specs answer their own API calls, so they need no backend or setup projects. CI runs them once, on shard 1, in their own step. Add a spec to `VITE_MODULE_SPECS` in `playwright.config.ts` to run it there
+- The `setup-*` projects run in Chromium before the browser projects to authenticate test users and save storage state.
+- The `vite-modules` project runs specs that import source modules (`/src/...`) into the page, such as `fillScribeActions.spec.ts`. Playwright starts a Vite dev server on port 4100 for it, because the preview build does not serve source modules. The dev server starts only when the run can include this project (no `--project`, or a `--project` that matches `vite-modules`), and a run of only `--project=vite-modules` skips the preview server. These specs answer their own API calls, so they need no backend or setup projects. CI runs them once, on Chromium shard 1, in their own step. Add a spec to `VITE_MODULE_SPECS` in `playwright.config.ts` to run it there
 
 ## Isolated component checks
 

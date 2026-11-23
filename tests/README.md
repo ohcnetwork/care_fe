@@ -156,7 +156,7 @@ npx playwright show-trace trace.zip
 See `playwright.config.ts` for configuration options:
 
 - **baseURL**: http://localhost:4000
-- **Browsers**: Runs tests on Chromium by default (as configured in `playwright.config.ts`)
+- **Browsers**: Runs tests in the `chromium`, `firefox`, `webkit`, `mobile-chrome` and `mobile-safari` projects (pick one with `--project`)
 - **Retries**: 2 on CI, 0 locally
 - **Trace**: Captured on first retry
 
