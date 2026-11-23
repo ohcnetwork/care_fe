@@ -43,25 +43,27 @@ const CASES: AdminFormCase[] = [
 
 test.describe("Back from admin forms", () => {
   for (const { name, listPath, formPath, openForm, backLink } of CASES) {
-    test(`back on a new ${name} returns to the list it was opened from`, async ({
-      page,
-    }) => {
-      await page.goto(listPath);
-      await openForm(page);
-      await expect(page).toHaveURL(formPath);
-      await expectHistoryIndex(page, 1);
+    test(
+      `back on a new ${name} returns to the list it was opened from`,
+      { tag: ["@atomic", "@cap:nav.back.navigate"] },
+      async ({ page }) => {
+        await page.goto(listPath);
+        await openForm(page);
+        await expect(page).toHaveURL(formPath);
+        await expectHistoryIndex(page, 1);
 
-      const back = page
-        .getByRole("main")
-        .getByRole("link", { name: backLink, exact: true });
-      await expect(back).toHaveAttribute("href", listPath);
-      await back.click();
-      await expect(page).toHaveURL(atPath(listPath));
-      await expectHistoryIndex(page, 0);
+        const back = page
+          .getByRole("main")
+          .getByRole("link", { name: backLink, exact: true });
+        await expect(back).toHaveAttribute("href", listPath);
+        await back.click();
+        await expect(page).toHaveURL(atPath(listPath));
+        await expectHistoryIndex(page, 0);
 
-      // A real back keeps the form as the forward entry.
-      await page.goForward();
-      await expect(page).toHaveURL(formPath);
-    });
+        // A real back keeps the form as the forward entry.
+        await page.goForward();
+        await expect(page).toHaveURL(formPath);
+      },
+    );
   }
 });

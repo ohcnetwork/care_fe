@@ -21,60 +21,70 @@ const searchBox = (page: Page) =>
 test.describe("Immunization policy list search params", () => {
   const listPath = "/admin/immunization-policies";
 
-  test("writes the search to the URL and the API request", async ({ page }) => {
-    const name = faker.string.alpha({ length: 8, casing: "lower" });
-    await page.goto(listPath);
-    await expect(
-      page.getByRole("heading", { name: "Immunization policies" }),
-    ).toBeVisible();
+  test(
+    "writes the search to the URL and the API request",
+    { tag: ["@atomic", "@cap:admin.immunization-policy.search"] },
+    async ({ page }) => {
+      const name = faker.string.alpha({ length: 8, casing: "lower" });
+      await page.goto(listPath);
+      await expect(
+        page.getByRole("heading", { name: "Immunization policies" }),
+      ).toBeVisible();
 
-    const request = waitForApiList(
-      page,
-      "/immunization/policy/",
-      (params) => params.get("name") === name,
-    );
-    await searchBox(page).fill(name);
-    await request;
+      const request = waitForApiList(
+        page,
+        "/immunization/policy/",
+        (params) => params.get("name") === name,
+      );
+      await searchBox(page).fill(name);
+      await request;
 
-    await expect(page).toHaveURL(queryParam("name", name));
-  });
+      await expect(page).toHaveURL(queryParam("name", name));
+    },
+  );
 
-  test("restores the search from a bookmarked URL", async ({ page }) => {
-    const name = faker.string.alpha({ length: 8, casing: "lower" });
-    const request = waitForApiList(
-      page,
-      "/immunization/policy/",
-      (params) => params.get("name") === name,
-    );
-    await page.goto(withSearch(listPath, { name }));
-    await request;
+  test(
+    "restores the search from a bookmarked URL",
+    { tag: ["@atomic", "@cap:admin.immunization-policy.search"] },
+    async ({ page }) => {
+      const name = faker.string.alpha({ length: 8, casing: "lower" });
+      const request = waitForApiList(
+        page,
+        "/immunization/policy/",
+        (params) => params.get("name") === name,
+      );
+      await page.goto(withSearch(listPath, { name }));
+      await request;
 
-    await expect(searchBox(page)).toHaveValue(name);
-  });
+      await expect(searchBox(page)).toHaveValue(name);
+    },
+  );
 
-  test("restores the search on the facility settings list", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
-    const name = faker.string.alpha({ length: 8, casing: "lower" });
-    const api = recordApiQueries(page);
-    const request = waitForApiList(
-      page,
-      "/immunization/policy/",
-      (params) =>
-        params.get("facility") === facilityId &&
-        params.get("name") === name &&
-        params.get("offset") === "0",
-    );
-    await page.goto(
-      withSearch(`/facility/${facilityId}/settings/immunization-policies`, {
-        name,
-        page: "abc",
-      }),
-    );
-    await request;
+  test(
+    "restores the search on the facility settings list",
+    { tag: ["@atomic", "@cap:admin.immunization-policy.search"] },
+    async ({ page }) => {
+      const facilityId = getFacilityId();
+      const name = faker.string.alpha({ length: 8, casing: "lower" });
+      const api = recordApiQueries(page);
+      const request = waitForApiList(
+        page,
+        "/immunization/policy/",
+        (params) =>
+          params.get("facility") === facilityId &&
+          params.get("name") === name &&
+          params.get("offset") === "0",
+      );
+      await page.goto(
+        withSearch(`/facility/${facilityId}/settings/immunization-policies`, {
+          name,
+          page: "abc",
+        }),
+      );
+      await request;
 
-    await expect(searchBox(page)).toHaveValue(name);
-    api.expectNotSent("abc");
-  });
+      await expect(searchBox(page)).toHaveValue(name);
+      api.expectNotSent("abc");
+    },
+  );
 });

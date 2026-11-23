@@ -120,28 +120,36 @@ test.describe("Back from a record that does not exist", () => {
   });
 
   for (const { name, back, path, parent } of CASES) {
-    test(`${name}: back returns to the page it was opened from`, async ({
-      page,
-    }) => {
-      await page.goto(parent(paths));
-      await navigateInApp(page, path(paths));
-      await expect(page).toHaveURL(path(paths));
-      await expectHistoryIndex(page, 1);
+    test(
+      `${name}: back returns to the page it was opened from`,
+      { tag: ["@atomic", "@cap:nav.back.navigate"] },
+      async ({ page }) => {
+        await page.goto(parent(paths));
+        await navigateInApp(page, path(paths));
+        await expect(page).toHaveURL(path(paths));
+        await expectHistoryIndex(page, 1);
 
-      await page.getByRole(back.role, { name: back.name, exact: true }).click();
-      await expect(page).toHaveURL(atPath(parent(paths)));
-      await expectHistoryIndex(page, 0);
-    });
+        await page
+          .getByRole(back.role, { name: back.name, exact: true })
+          .click();
+        await expect(page).toHaveURL(atPath(parent(paths)));
+        await expectHistoryIndex(page, 0);
+      },
+    );
 
-    test(`${name}: opened directly, back replaces it with its parent`, async ({
-      page,
-    }) => {
-      await page.goto(path(paths));
-      await expectHistoryIndex(page, 0);
+    test(
+      `${name}: opened directly, back replaces it with its parent`,
+      { tag: ["@atomic", "@cap:nav.back.navigate"] },
+      async ({ page }) => {
+        await page.goto(path(paths));
+        await expectHistoryIndex(page, 0);
 
-      await page.getByRole(back.role, { name: back.name, exact: true }).click();
-      await expect(page).toHaveURL(atPath(parent(paths)));
-      await expectHistoryIndex(page, 0);
-    });
+        await page
+          .getByRole(back.role, { name: back.name, exact: true })
+          .click();
+        await expect(page).toHaveURL(atPath(parent(paths)));
+        await expectHistoryIndex(page, 0);
+      },
+    );
   }
 });

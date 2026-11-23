@@ -50,234 +50,255 @@ test.describe("ValueSet Create", () => {
     }
   });
 
-  test("create valueset with all fields and verify it appears in preview and list", async ({
-    page,
-  }) => {
-    await page.getByRole("link", { name: "Create ValueSet" }).click();
+  test(
+    "create valueset with all fields and verify it appears in preview and list",
+    { tag: ["@atomic", "@cap:valueset.create"] },
+    async ({ page }) => {
+      await page.getByRole("link", { name: "Create ValueSet" }).click();
 
-    // Input details for the ValueSet
-    await page.getByRole("textbox", { name: "Name *" }).fill(name);
-    await page.getByRole("textbox", { name: "Slug *" }).fill(slug);
-    await page.getByRole("textbox", { name: "Description" }).fill(description);
-    await page.getByRole("combobox", { name: "Status *" }).click();
-    await page.getByRole("option", { name: status }).click();
-    await page.getByRole("button", { name: "Add Rule" }).first().click();
-    await page.getByRole("combobox", { name: "System" }).click();
-    await page.getByRole("option", { name: system }).click();
-    await page.getByRole("button", { name: "Add Concept" }).click();
-    await page.getByRole("textbox", { name: "Code" }).fill(code);
-    await page.getByLabel("Verify code").click();
-
-    await expect(
-      page
-        .getByRole("listitem")
-        .filter({ hasText: "Code verified successfully" }),
-    ).toBeVisible();
-
-    // Verify the code name is present in the display value
-    const displayValue = await page
-      .getByRole("textbox", { name: "Display name" })
-      .inputValue();
-    expect(displayValue).toContain(codeName);
-
-    await page.getByRole("button", { name: /valueset preview/i }).click();
-
-    await expect(
-      page.getByRole("dialog", {
-        name: /valueset preview/i,
-      }),
-    ).toBeVisible();
-
-    const previewDialog = page.getByRole("dialog", {
-      name: /valueset preview/i,
-    });
-
-    await expect(previewDialog.getByRole("status")).toHaveText(
-      /^Showing \d+ concepts?$/,
-    );
-    const previewConcept = previewDialog
-      .getByRole("listitem")
-      .filter({ hasText: codeName });
-    await expect(previewConcept).toBeVisible();
-    await expect(previewConcept.getByText(code, { exact: true })).toBeVisible();
-    await previewDialog.getByRole("button", { name: "Close" }).click();
-
-    const [createRequest] = await Promise.all([
-      page.waitForRequest(
-        (request) =>
-          request.method() === "POST" &&
-          new URL(request.url()).pathname === "/api/v1/valueset/",
-      ),
-      page.getByRole("button", { name: "Save ValueSet" }).click(),
-    ]);
-    expect(createRequest.postDataJSON()).toMatchObject({
-      disable_composition: false,
-    });
-
-    await expectToast(page, /valueset created successfully/i);
-
-    // Filter by status to find the created ValueSet
-    await page.getByRole("tab", { name: status }).click();
-
-    await page.getByRole("textbox", { name: "Search ValueSets" }).fill(name);
-
-    // Verify the created valueset appears in the list
-    await expect(page.getByRole("cell", { name: name })).toBeVisible();
-    await expect(page.getByRole("cell", { name: description })).toBeVisible();
-    await expect(page.getByRole("cell", { name: status })).toBeVisible();
-  });
-
-  test("verify slug auto-generation from title", async ({ page }) => {
-    await page.getByRole("link", { name: "Create ValueSet" }).click();
-    await page.getByRole("textbox", { name: "Name *" }).fill(name);
-
-    const slugField = page.getByRole("textbox", { name: "Slug *" });
-    const slugValue = await slugField.inputValue();
-    expect(slugValue).toBeTruthy();
-    expect(slugValue.length).toBeGreaterThan(0);
-
-    const expectedSlugValue = expectedSlug(name);
-
-    expect(slugValue).toContain(expectedSlugValue);
-  });
-
-  test("verify excluded rules are not present in preview", async ({ page }) => {
-    await page.getByRole("link", { name: "Create ValueSet" }).click();
-
-    // Input details for the ValueSet
-    await page.getByRole("textbox", { name: "Name *" }).fill(name);
-    await page.getByRole("textbox", { name: "Slug *" }).fill(slug);
-    const previewDialog = page.getByRole("dialog", {
-      name: /valueset preview/i,
-    });
-    const previewConcept = previewDialog
-      .getByRole("listitem")
-      .getByText(code, { exact: true });
-
-    for (const ruleType of ["Include rules", "Exclude rules"]) {
-      const ruleSection = page
-        .locator("section")
-        .filter({
-          has: page.getByRole("heading", { name: ruleType, exact: true }),
-        })
-        .last();
-      await ruleSection.getByRole("button", { name: "Add Rule" }).click();
-      await ruleSection.getByRole("combobox", { name: "System" }).click();
+      // Input details for the ValueSet
+      await page.getByRole("textbox", { name: "Name *" }).fill(name);
+      await page.getByRole("textbox", { name: "Slug *" }).fill(slug);
+      await page
+        .getByRole("textbox", { name: "Description" })
+        .fill(description);
+      await page.getByRole("combobox", { name: "Status *" }).click();
+      await page.getByRole("option", { name: status }).click();
+      await page.getByRole("button", { name: "Add Rule" }).first().click();
+      await page.getByRole("combobox", { name: "System" }).click();
       await page.getByRole("option", { name: system }).click();
-      await ruleSection.getByRole("button", { name: "Add Concept" }).click();
-      await ruleSection.getByRole("textbox", { name: "Code" }).fill(code);
-      await ruleSection.getByLabel("Verify code").click();
+      await page.getByRole("button", { name: "Add Concept" }).click();
+      await page.getByRole("textbox", { name: "Code" }).fill(code);
+      await page.getByLabel("Verify code").click();
+
       await expect(
-        ruleSection.getByRole("textbox", { name: "Display name" }),
-      ).toHaveValue(new RegExp(codeName, "i"));
+        page
+          .getByRole("listitem")
+          .filter({ hasText: "Code verified successfully" }),
+      ).toBeVisible();
+
+      // Verify the code name is present in the display value
+      const displayValue = await page
+        .getByRole("textbox", { name: "Display name" })
+        .inputValue();
+      expect(displayValue).toContain(codeName);
 
       await page.getByRole("button", { name: /valueset preview/i }).click();
-      if (ruleType === "Include rules") {
-        // Establish that this concept exists before testing its exclusion.
-        await expect(previewConcept).toBeVisible();
-      } else {
-        await expect(previewDialog.getByRole("status")).toHaveText(
-          "Showing 0 concepts",
-        );
-        await expect(previewConcept).toHaveCount(0);
-      }
-      await previewDialog.getByRole("button", { name: "Close" }).click();
-    }
-  });
 
-  test("should reject whitespace-only input in required text fields", async ({
-    page,
-  }) => {
-    const whitespace = "   ";
-    const ruleSection = (heading: string) =>
-      page
-        .locator("section")
-        .filter({
-          has: page.getByRole("heading", { name: heading, exact: true }),
-        })
-        .last();
-    const includeRules = ruleSection("Include rules");
-    const excludeRules = ruleSection("Exclude rules");
-    const filterFields = ["Property", "Operator", "Value"];
+      await expect(
+        page.getByRole("dialog", {
+          name: /valueset preview/i,
+        }),
+      ).toBeVisible();
 
-    await page.getByRole("link", { name: "Create ValueSet" }).click();
+      const previewDialog = page.getByRole("dialog", {
+        name: /valueset preview/i,
+      });
 
-    // A rule holds either concepts or filters, so use one rule for each.
-    await test.step("Add a concept with a whitespace-only code", async () => {
-      await includeRules.getByRole("button", { name: "Add Rule" }).click();
-      await includeRules.getByRole("button", { name: "Add Concept" }).click();
-      await includeRules
-        .getByRole("textbox", { name: "Code" })
-        .fill(whitespace);
-    });
-
-    await test.step("Add a filter with whitespace-only fields", async () => {
-      await excludeRules.getByRole("button", { name: "Add Rule" }).click();
-      await excludeRules.getByText("Advanced: filter by properties").click();
-      await excludeRules.getByRole("button", { name: "Add Filter" }).click();
-      for (const field of filterFields) {
-        await excludeRules
-          .getByRole("textbox", { name: field })
-          .fill(whitespace);
-      }
-    });
-
-    await page.getByRole("button", { name: "Save ValueSet" }).click();
-
-    await test.step("Verify each field shows a required error", async () => {
-      const codeError = getFieldErrorMessage(
-        includeRules.getByRole("textbox", { name: "Code" }),
+      await expect(previewDialog.getByRole("status")).toHaveText(
+        /^Showing \d+ concepts?$/,
       );
-      await expect(codeError).toBeVisible();
-      await expect(codeError).toHaveText("This field is required");
+      const previewConcept = previewDialog
+        .getByRole("listitem")
+        .filter({ hasText: codeName });
+      await expect(previewConcept).toBeVisible();
+      await expect(
+        previewConcept.getByText(code, { exact: true }),
+      ).toBeVisible();
+      await previewDialog.getByRole("button", { name: "Close" }).click();
 
-      for (const field of filterFields) {
-        const errorMessage = getFieldErrorMessage(
-          excludeRules.getByRole("textbox", { name: field }),
-        );
-        await expect(errorMessage).toBeVisible();
-        await expect(errorMessage).toHaveText("This field is required");
+      const [createRequest] = await Promise.all([
+        page.waitForRequest(
+          (request) =>
+            request.method() === "POST" &&
+            new URL(request.url()).pathname === "/api/v1/valueset/",
+        ),
+        page.getByRole("button", { name: "Save ValueSet" }).click(),
+      ]);
+      expect(createRequest.postDataJSON()).toMatchObject({
+        disable_composition: false,
+      });
+
+      await expectToast(page, /valueset created successfully/i);
+
+      // Filter by status to find the created ValueSet
+      await page.getByRole("tab", { name: status }).click();
+
+      await page.getByRole("textbox", { name: "Search ValueSets" }).fill(name);
+
+      // Verify the created valueset appears in the list
+      await expect(page.getByRole("cell", { name: name })).toBeVisible();
+      await expect(page.getByRole("cell", { name: description })).toBeVisible();
+      await expect(page.getByRole("cell", { name: status })).toBeVisible();
+    },
+  );
+
+  test(
+    "verify slug auto-generation from title",
+    { tag: ["@atomic", "@cap:valueset.create"] },
+    async ({ page }) => {
+      await page.getByRole("link", { name: "Create ValueSet" }).click();
+      await page.getByRole("textbox", { name: "Name *" }).fill(name);
+
+      const slugField = page.getByRole("textbox", { name: "Slug *" });
+      const expectedSlugValue = expectedSlug(name);
+      expect(expectedSlugValue.length).toBeGreaterThan(0);
+
+      // A web-first check that the generated slug contains the expected one
+      // (and so is non-empty).
+      await expect(slugField).toHaveValue(
+        new RegExp(expectedSlugValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+      );
+    },
+  );
+
+  test(
+    "verify excluded rules are not present in preview",
+    { tag: ["@atomic", "@cap:valueset.compose"] },
+    async ({ page }) => {
+      await page.getByRole("link", { name: "Create ValueSet" }).click();
+
+      // Input details for the ValueSet
+      await page.getByRole("textbox", { name: "Name *" }).fill(name);
+      await page.getByRole("textbox", { name: "Slug *" }).fill(slug);
+      const previewDialog = page.getByRole("dialog", {
+        name: /valueset preview/i,
+      });
+      const previewConcept = previewDialog
+        .getByRole("listitem")
+        .getByText(code, { exact: true });
+
+      for (const ruleType of ["Include rules", "Exclude rules"]) {
+        const ruleSection = page
+          .locator("section")
+          .filter({
+            has: page.getByRole("heading", { name: ruleType, exact: true }),
+          })
+          .last();
+        await ruleSection.getByRole("button", { name: "Add Rule" }).click();
+        await ruleSection.getByRole("combobox", { name: "System" }).click();
+        await page.getByRole("option", { name: system }).click();
+        await ruleSection.getByRole("button", { name: "Add Concept" }).click();
+        await ruleSection.getByRole("textbox", { name: "Code" }).fill(code);
+        await ruleSection.getByLabel("Verify code").click();
+        await expect(
+          ruleSection.getByRole("textbox", { name: "Display name" }),
+        ).toHaveValue(new RegExp(codeName, "i"));
+
+        await page.getByRole("button", { name: /valueset preview/i }).click();
+        if (ruleType === "Include rules") {
+          // Establish that this concept exists before testing its exclusion.
+          await expect(previewConcept).toBeVisible();
+        } else {
+          await expect(previewDialog.getByRole("status")).toHaveText(
+            "Showing 0 concepts",
+          );
+          await expect(previewConcept).toHaveCount(0);
+        }
+        await previewDialog.getByRole("button", { name: "Close" }).click();
       }
-    });
-  });
+    },
+  );
 
-  test("verify slug validation of 5 - 50 character", async ({ page }) => {
-    await page.getByRole("link", { name: "Create ValueSet" }).click();
+  test(
+    "should reject whitespace-only input in required text fields",
+    { tag: ["@atomic", "@cap:valueset.create"] },
+    async ({ page }) => {
+      const whitespace = "   ";
+      const ruleSection = (heading: string) =>
+        page
+          .locator("section")
+          .filter({
+            has: page.getByRole("heading", { name: heading, exact: true }),
+          })
+          .last();
+      const includeRules = ruleSection("Include rules");
+      const excludeRules = ruleSection("Exclude rules");
+      const filterFields = ["Property", "Operator", "Value"];
 
-    await page.getByRole("textbox", { name: "Name *" }).fill(name);
+      await page.getByRole("link", { name: "Create ValueSet" }).click();
 
-    const shortSlug = faker.string.alphanumeric(MIN_SLUG_LENGTH - 1);
-    await page.getByRole("textbox", { name: "Slug *" }).fill(shortSlug);
+      // A rule holds either concepts or filters, so use one rule for each.
+      await test.step("Add a concept with a whitespace-only code", async () => {
+        await includeRules.getByRole("button", { name: "Add Rule" }).click();
+        await includeRules.getByRole("button", { name: "Add Concept" }).click();
+        await includeRules
+          .getByRole("textbox", { name: "Code" })
+          .fill(whitespace);
+      });
 
-    // Try to submit
-    await page.getByRole("button", { name: /save/i }).click();
-    const errorMessage = getFieldErrorMessage(
-      page.getByRole("textbox", { name: "Slug *" }),
-    );
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText(
-      new RegExp(`at least \\d+.*at most ${MAX_SLUG_LENGTH}`, "i"),
-    );
+      await test.step("Add a filter with whitespace-only fields", async () => {
+        await excludeRules.getByRole("button", { name: "Add Rule" }).click();
+        await excludeRules.getByText("Advanced: filter by properties").click();
+        await excludeRules.getByRole("button", { name: "Add Filter" }).click();
+        for (const field of filterFields) {
+          await excludeRules
+            .getByRole("textbox", { name: field })
+            .fill(whitespace);
+        }
+      });
 
-    // Test: Slug too long (more than 50 characters)
-    const longSlug = faker.string.alphanumeric(MAX_SLUG_LENGTH + 1);
-    await page.getByRole("textbox", { name: "Slug *" }).fill(longSlug);
+      await page.getByRole("button", { name: "Save ValueSet" }).click();
 
-    // Try to submit
-    await page.getByRole("button", { name: /save/i }).click();
+      await test.step("Verify each field shows a required error", async () => {
+        const codeError = getFieldErrorMessage(
+          includeRules.getByRole("textbox", { name: "Code" }),
+        );
+        await expect(codeError).toBeVisible();
+        await expect(codeError).toHaveText("This field is required");
 
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText(
-      new RegExp(`at least \\d+.*at most ${MAX_SLUG_LENGTH}`, "i"),
-    );
+        for (const field of filterFields) {
+          const errorMessage = getFieldErrorMessage(
+            excludeRules.getByRole("textbox", { name: field }),
+          );
+          await expect(errorMessage).toBeVisible();
+          await expect(errorMessage).toHaveText("This field is required");
+        }
+      });
+    },
+  );
 
-    const validSlug = faker.string.alphanumeric(
-      faker.number.int({ min: MIN_SLUG_LENGTH, max: MAX_SLUG_LENGTH }),
-    );
-    await page.getByRole("textbox", { name: "Slug *" }).fill(validSlug);
-    await page.getByRole("button", { name: /save/i }).click();
+  test(
+    "verify slug validation of 5 - 50 character",
+    { tag: ["@atomic", "@cap:valueset.create"] },
+    async ({ page }) => {
+      await page.getByRole("link", { name: "Create ValueSet" }).click();
 
-    await expectToast(page, /valueset created successfully/i);
-    await expect(page).toHaveURL("/admin/valuesets");
-  });
+      await page.getByRole("textbox", { name: "Name *" }).fill(name);
+
+      const shortSlug = faker.string.alphanumeric(MIN_SLUG_LENGTH - 1);
+      await page.getByRole("textbox", { name: "Slug *" }).fill(shortSlug);
+
+      // Try to submit
+      await page.getByRole("button", { name: /save/i }).click();
+      const errorMessage = getFieldErrorMessage(
+        page.getByRole("textbox", { name: "Slug *" }),
+      );
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText(
+        new RegExp(`at least \\d+.*at most ${MAX_SLUG_LENGTH}`, "i"),
+      );
+
+      // Test: Slug too long (more than 50 characters)
+      const longSlug = faker.string.alphanumeric(MAX_SLUG_LENGTH + 1);
+      await page.getByRole("textbox", { name: "Slug *" }).fill(longSlug);
+
+      // Try to submit
+      await page.getByRole("button", { name: /save/i }).click();
+
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText(
+        new RegExp(`at least \\d+.*at most ${MAX_SLUG_LENGTH}`, "i"),
+      );
+
+      const validSlug = faker.string.alphanumeric(
+        faker.number.int({ min: MIN_SLUG_LENGTH, max: MAX_SLUG_LENGTH }),
+      );
+      await page.getByRole("textbox", { name: "Slug *" }).fill(validSlug);
+      await page.getByRole("button", { name: /save/i }).click();
+
+      await expectToast(page, /valueset created successfully/i);
+      await expect(page).toHaveURL("/admin/valuesets");
+    },
+  );
 });

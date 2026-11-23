@@ -32,73 +32,87 @@ test.describe("Workspace list search params", () => {
     return `/admin/workspaces${search ? `?${search}` : ""}`;
   };
 
-  test("writes the status tab to the URL and the list request", async ({
-    page,
-  }) => {
-    await page.goto(listUrl());
-    await expect(statusTab(page, "Active")).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
+  test(
+    "writes the status tab to the URL and the list request",
+    { tag: ["@atomic", "@cap:admin.workspace.filter"] },
+    async ({ page }) => {
+      await page.goto(listUrl());
+      await expect(statusTab(page, "Active")).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
 
-    const request = workspaceListRequest(
-      page,
-      (params) => params.get("status") === "draft",
-    );
-    await statusTab(page, "Draft").click();
-    await request;
+      const request = workspaceListRequest(
+        page,
+        (params) => params.get("status") === "draft",
+      );
+      await statusTab(page, "Draft").click();
+      await request;
 
-    await expect(page).toHaveURL(/[?&]status=draft(&|$)/);
-    await expect(page).toHaveURL(/[?&]page=1(&|$)/);
-    await expect(statusTab(page, "Draft")).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-  });
+      await expect(page).toHaveURL(/[?&]status=draft(&|$)/);
+      await expect(page).toHaveURL(/[?&]page=1(&|$)/);
+      await expect(statusTab(page, "Draft")).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+    },
+  );
 
-  test("restores the status from a bookmarked URL", async ({ page }) => {
-    const request = workspaceListRequest(
-      page,
-      (params) => params.get("status") === "archived",
-    );
-    await page.goto(listUrl({ status: "archived" }));
-    await request;
+  test(
+    "restores the status from a bookmarked URL",
+    { tag: ["@atomic", "@cap:admin.workspace.filter"] },
+    async ({ page }) => {
+      const request = workspaceListRequest(
+        page,
+        (params) => params.get("status") === "archived",
+      );
+      await page.goto(listUrl({ status: "archived" }));
+      await request;
 
-    await expect(statusTab(page, "Archived")).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-  });
+      await expect(statusTab(page, "Archived")).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+    },
+  );
 
-  test("ignores invalid values in a bookmarked URL", async ({ page }) => {
-    const request = workspaceListRequest(page, () => true);
-    await page.goto(listUrl({ status: "bogus", page: "abc" }));
-    const params = new URL((await request).url()).searchParams;
+  test(
+    "ignores invalid values in a bookmarked URL",
+    { tag: ["@atomic", "@cap:admin.workspace.filter"] },
+    async ({ page }) => {
+      const request = workspaceListRequest(page, () => true);
+      await page.goto(listUrl({ status: "bogus", page: "abc" }));
+      const params = new URL((await request).url()).searchParams;
 
-    expect(params.get("status")).toBe("active");
-    expect(params.get("offset")).toBe("0");
-    await expect(statusTab(page, "Active")).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-  });
+      expect(params.get("status")).toBe("active");
+      expect(params.get("offset")).toBe("0");
+      await expect(statusTab(page, "Active")).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+    },
+  );
 
-  test("restores the status of the facility list from a bookmarked URL", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
-    const request = workspaceListRequest(
-      page,
-      (params) =>
-        params.get("facility") === facilityId &&
-        params.get("status") === "draft",
-    );
-    await page.goto(`/facility/${facilityId}/settings/workspaces?status=draft`);
-    await request;
+  test(
+    "restores the status of the facility list from a bookmarked URL",
+    { tag: ["@atomic", "@cap:facility.workspace.filter"] },
+    async ({ page }) => {
+      const facilityId = getFacilityId();
+      const request = workspaceListRequest(
+        page,
+        (params) =>
+          params.get("facility") === facilityId &&
+          params.get("status") === "draft",
+      );
+      await page.goto(
+        `/facility/${facilityId}/settings/workspaces?status=draft`,
+      );
+      await request;
 
-    await expect(statusTab(page, "Draft")).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-  });
+      await expect(statusTab(page, "Draft")).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+    },
+  );
 });

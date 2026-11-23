@@ -5,29 +5,37 @@ import { getFacilityId } from "tests/support/facilityId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Authenticated User Flow", () => {
-  test("should access dashboard when logged in", async ({ page }) => {
-    // Navigate to a protected page
-    await page.goto("/");
+  test(
+    "should access dashboard when logged in",
+    { tag: ["@atomic", "@cap:nav.dashboard.view"] },
+    async ({ page }) => {
+      // Navigate to a protected page
+      await page.goto("/");
 
-    // Verify user is logged in
-    // Adjust these selectors based on your actual application
-    await expect(
-      page.getByRole("heading", {
-        name: /^Good (Morning|Afternoon|Evening), .+/,
-      }),
-    ).toBeVisible();
-  });
+      // Verify user is logged in
+      // Adjust these selectors based on your actual application
+      await expect(
+        page.getByRole("heading", {
+          name: /^Good (Morning|Afternoon|Evening), .+/,
+        }),
+      ).toBeVisible();
+    },
+  );
 
-  test("should be able to navigate to facilities", async ({ page }) => {
-    const facilityPath = `/facility/${getFacilityId()}/overview`;
-    await page.goto("/");
-    await page
-      .getByRole("tabpanel")
-      .getByRole("link", { name: /facility with patients?/i })
-      .click();
-    await expect(page).toHaveURL(facilityPath);
-    await expect(
-      page.getByRole("link", { name: "Overview", exact: true }),
-    ).toHaveAttribute("aria-current", "page");
-  });
+  test(
+    "should be able to navigate to facilities",
+    { tag: ["@atomic", "@cap:nav.facility.navigate"] },
+    async ({ page }) => {
+      const facilityPath = `/facility/${getFacilityId()}/overview`;
+      await page.goto("/");
+      await page
+        .getByRole("tabpanel")
+        .getByRole("link", { name: /facility with patients?/i })
+        .click();
+      await expect(page).toHaveURL(facilityPath);
+      await expect(
+        page.getByRole("link", { name: "Overview", exact: true }),
+      ).toHaveAttribute("aria-current", "page");
+    },
+  );
 });

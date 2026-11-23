@@ -51,97 +51,109 @@ test.describe("Shortcuts and overlays", () => {
       await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
     });
 
-    test("runs the selected page action", async ({ page }) => {
-      const palette = await openPageActionsPalette(page);
+    test(
+      "runs the selected page action",
+      { tag: ["@atomic", "@cap:nav.page-actions.run"] },
+      async ({ page }) => {
+        const palette = await openPageActionsPalette(page);
 
-      await palette.getByRole("option", { name: /^Add Allergy/ }).click();
+        await palette.getByRole("option", { name: /^Add Allergy/ }).click();
 
-      await expect(page).toHaveURL(/questionnaire\/allergy_intolerance/);
-      await expect(palette).toBeHidden();
-    });
+        await expect(page).toHaveURL(/questionnaire\/allergy_intolerance/);
+        await expect(palette).toBeHidden();
+      },
+    );
 
-    test("keeps page shortcuts from firing behind it", async ({ page }) => {
-      const palette = await openPageActionsPalette(page);
+    test(
+      "keeps page shortcuts from firing behind it",
+      { tag: ["@atomic", "@cap:nav.page-actions.run"] },
+      async ({ page }) => {
+        const palette = await openPageActionsPalette(page);
 
-      // The search box would take the key as text, so move focus off it
-      const actionList = palette.getByRole("listbox");
-      await actionList.focus();
-      await expect(actionList).toBeFocused();
-      await page.keyboard.press("a");
+        // The search box would take the key as text, so move focus off it
+        const actionList = palette.getByRole("listbox");
+        await actionList.focus();
+        await expect(actionList).toBeFocused();
+        await page.keyboard.press("a");
 
-      await page.keyboard.press("Escape");
-      await expect(palette).toBeHidden();
-      await expect(page).toHaveURL(new RegExp(`${encounterUrl}$`));
-    });
+        await page.keyboard.press("Escape");
+        await expect(palette).toBeHidden();
+        await expect(page).toHaveURL(new RegExp(`${encounterUrl}$`));
+      },
+    );
   });
 
   test.describe("Sheet with an overlay on top", () => {
-    test("Shift+Enter submits the sheet only when nothing covers it", async ({
-      page,
-    }) => {
-      const createRequests = await stubEncounterCreate(page);
-      const dialog = await openCreateEncounterSheet(page);
-      await dialog.getByRole("button", { name: /^Ambulatory/ }).click();
-      await expect(
-        dialog.getByRole("button", { name: /^Create Encounter/ }),
-      ).toBeEnabled();
+    test(
+      "Shift+Enter submits the sheet only when nothing covers it",
+      { tag: ["@atomic", "@cap:nav.shortcut.submit"] },
+      async ({ page }) => {
+        const createRequests = await stubEncounterCreate(page);
+        const dialog = await openCreateEncounterSheet(page);
+        await dialog.getByRole("button", { name: /^Ambulatory/ }).click();
+        await expect(
+          dialog.getByRole("button", { name: /^Create Encounter/ }),
+        ).toBeEnabled();
 
-      await test.step("does not submit through the open calendar", async () => {
-        const nextMonthButton = await openCalendarAndGetNextMonthButton(page);
-        await nextMonthButton.focus();
-        await page.keyboard.press("Shift+Enter");
+        await test.step("does not submit through the open calendar", async () => {
+          const nextMonthButton = await openCalendarAndGetNextMonthButton(page);
+          await nextMonthButton.focus();
+          await page.keyboard.press("Shift+Enter");
 
-        await page.keyboard.press("Escape");
-        await expect(nextMonthButton).toBeHidden();
-        expect(createRequests).toHaveLength(0);
-      });
+          await page.keyboard.press("Escape");
+          await expect(nextMonthButton).toBeHidden();
+          expect(createRequests).toHaveLength(0);
+        });
 
-      await test.step("does not submit through an open dropdown", async () => {
-        await dialog.getByRole("combobox", { name: "Status" }).click();
-        const statusOption = page.getByRole("option").first();
-        await statusOption.hover();
-        // Off the options, focus sits on the popup and the key reaches the page
-        await page.mouse.move(0, 0);
+        await test.step("does not submit through an open dropdown", async () => {
+          await dialog.getByRole("combobox", { name: "Status" }).click();
+          const statusOption = page.getByRole("option").first();
+          await statusOption.hover();
+          // Off the options, focus sits on the popup and the key reaches the page
+          await page.mouse.move(0, 0);
 
-        // Shortcuts debounce for 300ms, and the blocked press above counts
-        await page.waitForTimeout(350);
-        await page.keyboard.press("Shift+Enter");
+          // Shortcuts debounce for 300ms, and the blocked press above counts
+          await page.waitForTimeout(350);
+          await page.keyboard.press("Shift+Enter");
 
-        await page.keyboard.press("Escape");
-        await expect(statusOption).toBeHidden();
-      });
+          await page.keyboard.press("Escape");
+          await expect(statusOption).toBeHidden();
+        });
 
-      await test.step("submits once nothing covers it", async () => {
-        await page.waitForTimeout(350);
-        expect(createRequests).toHaveLength(0);
+        await test.step("submits once nothing covers it", async () => {
+          await page.waitForTimeout(350);
+          expect(createRequests).toHaveLength(0);
 
-        await page.keyboard.press("Shift+Enter");
-        await expect.poll(() => createRequests.length).toBe(1);
-      });
-    });
+          await page.keyboard.press("Shift+Enter");
+          await expect.poll(() => createRequests.length).toBe(1);
+        });
+      },
+    );
 
-    test("palette lists only the actions the sheet can run", async ({
-      page,
-    }) => {
-      const dialog = await openCreateEncounterSheet(page);
-      await expect(dialog).toBeVisible();
-      await expect(
-        page.locator('[data-shortcut-id="schedule-appointment"]'),
-      ).toBeAttached();
+    test(
+      "palette lists only the actions the sheet can run",
+      { tag: ["@atomic", "@cap:nav.page-actions.run"] },
+      async ({ page }) => {
+        const dialog = await openCreateEncounterSheet(page);
+        await expect(dialog).toBeVisible();
+        await expect(
+          page.locator('[data-shortcut-id="schedule-appointment"]'),
+        ).toBeAttached();
 
-      const palette = await openPageActionsPalette(page);
-      const cancelAction = palette.getByRole("option", {
-        name: /^Cancel Current Action/,
-      });
+        const palette = await openPageActionsPalette(page);
+        const cancelAction = palette.getByRole("option", {
+          name: /^Cancel Current Action/,
+        });
 
-      await expect(cancelAction).toBeVisible();
-      await expect(
-        palette.getByRole("option", { name: /^Schedule Appointment/ }),
-      ).toHaveCount(0);
+        await expect(cancelAction).toBeVisible();
+        await expect(
+          palette.getByRole("option", { name: /^Schedule Appointment/ }),
+        ).toHaveCount(0);
 
-      await cancelAction.click();
-      await expect(palette).toBeHidden();
-      await expect(dialog).toBeHidden();
-    });
+        await cancelAction.click();
+        await expect(palette).toBeHidden();
+        await expect(dialog).toBeHidden();
+      },
+    );
   });
 });
