@@ -1,0 +1,109 @@
+{
+  "17284": [
+    {
+      "before": "billing/nov041-before.png",
+      "after": "billing/nov041-after.png",
+      "caption": "A zero payment is submittable before; Record Payment is disabled after."
+    },
+    {
+      "before": "billing/nov044-before.png",
+      "after": "billing/nov044-after.png",
+      "caption": "Closed account status changes from the raw key to a translated label."
+    }
+  ],
+  "17285": [
+    {
+      "before": "print/nov049-before.png",
+      "after": "print/nov049-after.png",
+      "caption": "Each print row excludes types configured elsewhere while keeping its current selection."
+    }
+  ],
+  "17286": [
+    {
+      "before": "clinical/empty-sections-before.png",
+      "after": "clinical/empty-sections-after.png",
+      "caption": "Empty clinical sections are hidden while populated sections remain."
+    },
+    {
+      "before": "clinical/orders-before.png",
+      "after": "clinical/orders-after.png",
+      "caption": "Recent orders use the actual API contract and show recorded status and order links."
+    }
+  ],
+  "17287": [
+    {
+      "before": "service/nov008-before.png",
+      "after": "service/nov008-after.png",
+      "caption": "Service requests use the shared empty state and relevant filter guidance."
+    }
+  ],
+  "17288": [
+    {
+      "before": "questionnaire/active-form-picker-before.png",
+      "after": "questionnaire/active-form-picker-after.png",
+      "caption": "An active form is excluded from Add Form."
+    },
+    {
+      "before": "questionnaire/favorite-forms-before.png",
+      "after": "questionnaire/favorite-forms-after.png",
+      "caption": "Both instance and current-facility favourite forms appear."
+    }
+  ],
+  "17289": [
+    {
+      "before": "scroll/before.png",
+      "after": "scroll/after.png",
+      "caption": "Navigate from page one at420px to page two: baseline inherits420px and hides the heading; fix starts page two at0."
+    }
+  ],
+  "17290": [
+    {
+      "before": "layout/coding-before.png",
+      "after": "layout/coding-after.png",
+      "caption": "Coding actions wrap inside the card at390px."
+    },
+    {
+      "before": "layout/focus-before.png",
+      "after": "layout/focus-after.png",
+      "caption": "The form filter uses one shared focus indicator."
+    }
+  ],
+  "17291": [
+    {
+      "before": "units/short-search-before.png",
+      "after": "units/short-search-after.png",
+      "caption": "Identical zz query: misleading three-character warning becomes No Results Found."
+    }
+  ],
+  "17292": [
+    {
+      "before": "token/before-created.png",
+      "after": "token/after-created.png",
+      "caption": "An active token gains a three-dot Cancel Token menu."
+    },
+    {
+      "before": "token/before-cancelled.png",
+      "after": "token/after-cancelled.png",
+      "caption": "A cancelled token shows its terminal status separately while the appointment stays booked."
+    }
+  ],
+  "17293": [
+    {
+      "before": "layout-followup/nov006-before.png",
+      "after": "layout-followup/nov006-after.png",
+      "caption": "Same448px/13-tab workspace: a clipped17px help-text column becomes a readable full row."
+    },
+    {
+      "before": "layout-followup/nov040-before.png",
+      "after": "layout-followup/nov040-after.png",
+      "caption": "The patient-header gap increases from8px to the shared24px section spacing."
+    }
+  ],
+  "17294": [
+    {
+      "before": "referral/before.png",
+      "after": "referral/after.png",
+      "caption": "Older A service appears first by name before; newer Z service appears first by creation time after."
+    }
+  ]
+}
