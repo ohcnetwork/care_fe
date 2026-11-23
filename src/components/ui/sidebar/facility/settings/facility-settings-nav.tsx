@@ -15,6 +15,7 @@ import {
   Monitor,
   Network,
   Package,
+  Printer,
   Receipt,
   Stethoscope,
   Syringe,
@@ -35,6 +36,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
 interface SettingsPermissions {
+  canUpdateFacility: boolean;
   canListTokenCategories: boolean;
   canReadPatientIdentifierConfig: boolean;
   canListTemplate: boolean;
@@ -61,6 +63,12 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
   {
     label: "facility",
     pages: [
+      {
+        path: "settings/print-templates",
+        title: "print_templates",
+        icon: Printer,
+        permission: "canUpdateFacility",
+      },
       { path: "settings/departments", title: "departments", icon: Network },
       { path: "settings/locations", title: "locations", icon: MapPin },
       { path: "settings/devices", title: "devices", icon: Monitor },
@@ -214,10 +222,13 @@ export function FacilitySettingsNav() {
   const { t } = useTranslation();
   const { facilityId, facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
-  const permissions = getPermissions(
-    hasPermission,
-    facility?.permissions ?? [],
-  );
+  const permissions = {
+    ...getPermissions(hasPermission, facility?.permissions ?? []),
+    canUpdateFacility: getPermissions(
+      hasPermission,
+      facility?.root_org_permissions ?? [],
+    ).canUpdateFacility,
+  };
   const baseUrl = `/facility/${facilityId}`;
 
   return (
