@@ -175,6 +175,7 @@ export function LocationSelectorDialog({
       currentParentId,
       searchValue,
       currentPage,
+      myLocations,
     ],
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },

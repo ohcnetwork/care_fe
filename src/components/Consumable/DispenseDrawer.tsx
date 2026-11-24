@@ -991,6 +991,7 @@ export default function DispenseDrawer({
           }
           open={isLocationSelectorOpen}
           setOpen={setIsLocationSelectorOpen}
+          myLocations
           onLocationSelect={handleLocationChange}
         />
       </DrawerContent>
