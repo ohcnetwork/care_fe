@@ -5883,6 +5883,7 @@
   "service_request_added": "Service request added",
   "service_request_added_to_template": "Service request added to template \"{{template}}\"",
   "service_request_cancelled": "Service request cancelled",
+  "service_request_complete_pending_reports_warning": "Pending reports can't be approved or edited after the request is completed.",
   "service_request_completed": "Service request marked as completed",
   "service_request_completion_confirmation": "Are you sure you want to mark this service request as complete? This action cannot be undone.",
   "service_request_completion_note_description": "Document key findings or remarks before completing this request.",

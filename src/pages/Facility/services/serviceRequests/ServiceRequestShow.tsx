@@ -191,6 +191,8 @@ export default function ServiceRequestShow({
             facilityId={facilityId}
             serviceRequestId={serviceRequestId}
             hasFinalizedReport={hasFinalizedReport}
+            pendingReports={pendingReports}
+            totalReports={totalReports}
           />
           <div className="px-2 m-0 mb-2">
             <PatientHeader

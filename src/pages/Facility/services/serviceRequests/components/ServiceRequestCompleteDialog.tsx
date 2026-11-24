@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,6 +33,8 @@ interface ServiceRequestCompleteDialogProps {
   request: ServiceRequestReadSpec;
   facilityId: string;
   serviceRequestId: string;
+  pendingReports: number;
+  totalReports: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -40,6 +43,8 @@ export function ServiceRequestCompleteDialog({
   request,
   facilityId,
   serviceRequestId,
+  pendingReports,
+  totalReports,
   open,
   onOpenChange,
 }: ServiceRequestCompleteDialogProps) {
@@ -66,19 +71,38 @@ export function ServiceRequestCompleteDialog({
   };
 
   const content = (
-    <CompletionNoteContent
-      note={note}
-      setNote={setNote}
-      isUpdating={isPending}
-      onComplete={(note) =>
-        completeServiceRequest({
-          status: Status.completed,
-          note: note.trim() || null,
-          locations: request.locations.map((loc) => loc.id),
-        })
-      }
-      onCancel={() => handleOpenChange(false)}
-    />
+    <>
+      {pendingReports > 0 && (
+        <Alert
+          role="note"
+          className="border-yellow-200 bg-yellow-50 text-yellow-900"
+        >
+          <TriangleAlert className="text-yellow-600" />
+          <AlertTitle>
+            {t("reports_pending_final_review", {
+              count: pendingReports,
+              total: totalReports,
+            })}
+          </AlertTitle>
+          <AlertDescription className="text-yellow-800">
+            {t("service_request_complete_pending_reports_warning")}
+          </AlertDescription>
+        </Alert>
+      )}
+      <CompletionNoteContent
+        note={note}
+        setNote={setNote}
+        isUpdating={isPending}
+        onComplete={(note) =>
+          completeServiceRequest({
+            status: Status.completed,
+            note: note.trim() || null,
+            locations: request.locations.map((loc) => loc.id),
+          })
+        }
+        onCancel={() => handleOpenChange(false)}
+      />
+    </>
   );
 
   if (isMobile) {

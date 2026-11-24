@@ -59,6 +59,8 @@ export function ServiceRequestCompletion({
         request={request}
         facilityId={facilityId}
         serviceRequestId={serviceRequestId}
+        pendingReports={pendingReports}
+        totalReports={totalReports}
         open={isCompleteDialogOpen}
         onOpenChange={setIsCompleteDialogOpen}
       />
