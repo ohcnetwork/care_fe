@@ -1,5 +1,5 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
-import { UserSpec } from "@/types/user/user";
+import { PublicUserReadSpec } from "@/types/user/user";
 
 import { FacilityPublicRead } from "./facility";
 
@@ -17,11 +17,11 @@ export default {
   listSchedulableUsers: {
     path: "/api/v1/facility/{facilityId}/schedulable_users/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<UserSpec>>(),
+    TRes: Type<PaginatedResponse<PublicUserReadSpec>>(),
   },
   getSchedulableUser: {
     path: "/api/v1/facility/{facilityId}/schedulable_users/{userId}/",
     method: HttpMethod.GET,
-    TRes: Type<UserSpec>(),
+    TRes: Type<PublicUserReadSpec>(),
   },
 } as const;

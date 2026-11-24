@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 
 import { Code } from "@/types/base/code/code";
-import { UserRead } from "@/types/user/user";
+import { UserRetrieveSpec } from "@/types/user/user";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -61,7 +61,7 @@ test("saves professional details, preserves credential metadata and clears remov
     },
   });
   expect(created.status(), await created.text()).toBe(200);
-  const readUser = async (): Promise<UserRead> => {
+  const readUser = async (): Promise<UserRetrieveSpec> => {
     const response = await request.get(url, { headers });
     expect(response.ok()).toBe(true);
     return response.json();

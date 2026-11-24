@@ -2,14 +2,14 @@ import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
 import type { FacilityRead } from "@/types/facility/facility";
-import type { CurrentUserRead } from "@/types/user/user";
+import type { CurrentUserRetrieveSpec } from "@/types/user/user";
 
 // These layout tests use isolated API fixtures, not a live healthcare backend.
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe("Facility general settings layout", () => {
   let facility: FacilityRead;
-  let user: CurrentUserRead;
+  let user: CurrentUserRetrieveSpec;
 
   test.beforeEach(async ({ page }) => {
     const id = faker.string.uuid();
@@ -58,7 +58,6 @@ test.describe("Facility general settings layout", () => {
       first_name: "Layout",
       last_name: "Test",
       phone_number: "",
-      user_type: "administrator",
       gender: "male",
       last_login: "",
       profile_picture_url: "",

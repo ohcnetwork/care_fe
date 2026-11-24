@@ -19,7 +19,7 @@ import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareS
 import { LocationRead } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
 import { TokenRead } from "@/types/tokens/token/token";
-import { UserSpec } from "@/types/user/user";
+import { PublicUserReadSpec, UserSpec } from "@/types/user/user";
 
 export enum AvailabilitySlotType {
   Appointment = "appointment",
@@ -304,11 +304,11 @@ export interface AppointmentRescheduleRequest {
   tags: TagSetRequest[];
 }
 
-export const getUserFromLocalStorage = (): UserSpec => {
+export const getUserFromLocalStorage = (): PublicUserReadSpec => {
   return JSON.parse(localStorage.getItem("user") ?? "{}");
 };
 
-export const storeUserInLocalStorage = (user: UserSpec) => {
+export const storeUserInLocalStorage = (user: PublicUserReadSpec) => {
   localStorage.setItem("user", JSON.stringify(user));
 };
 

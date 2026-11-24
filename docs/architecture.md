@@ -37,7 +37,7 @@ export default {
   list: {
     path: "/api/v1/users/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<UserReadMinimal>>(),
+    TRes: Type<PaginatedResponse<UserSpec>>(),
   },
 } as const;
 ```

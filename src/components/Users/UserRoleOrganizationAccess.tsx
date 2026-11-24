@@ -24,17 +24,12 @@ import { UserProfileSection } from "@/components/Users/UserProfileSection";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
+import { UserRoleOrg } from "@/types/user/user";
 import mutate from "@/Utils/request/mutate";
 
 export interface RoleOrgFormValue {
   organization: string;
   role: string;
-}
-
-interface RoleOrgMembership {
-  id: string;
-  organization: Organization;
-  role: Pick<RoleBase, "id" | "name" | "description" | "is_system">;
 }
 
 interface RoleOrgAccessEditorProps {
@@ -162,7 +157,7 @@ export function RoleOrgAccessEditor({
 
 interface RoleOrgAccessSummaryProps {
   userId: string;
-  memberships: RoleOrgMembership[];
+  memberships: UserRoleOrg[];
 }
 
 export function RoleOrgAccessSummary({

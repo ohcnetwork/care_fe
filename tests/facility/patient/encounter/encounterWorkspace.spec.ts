@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import type { PlugConfig } from "../../../../src/types/plugConfig";
 import type { Question } from "../../../../src/types/questionnaire/question";
-import type { UserReadMinimal } from "../../../../src/types/user/user";
+import type { UserSpec } from "../../../../src/types/user/user";
 import type {
   WorkspaceRead,
   WorkspaceTemplate,
@@ -66,20 +66,20 @@ function roundsTemplate(
   };
 }
 
-function user(): UserReadMinimal {
+function user(): UserSpec {
   return {
     id: faker.string.uuid(),
     username: faker.internet.username(),
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),
     phone_number: "+919999999999",
-    user_type: "doctor",
     gender: "non_binary",
     last_login: "2026-01-01T00:00:00Z",
     profile_picture_url: "",
     mfa_enabled: false,
     deleted: false,
-    is_service_account: false,
+    communication: [],
+    qualification: [],
   };
 }
 

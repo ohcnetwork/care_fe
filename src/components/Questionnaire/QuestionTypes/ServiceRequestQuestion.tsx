@@ -83,7 +83,7 @@ export function buildServiceRequestForTemplate(
   };
 }
 
-// Extend the base type to use UserReadMinimal for requester
+// Extend the base type to use UserSpec for requester
 interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
   BaseServiceRequestApplyActivityDefinitionSpec,
   "service_request"

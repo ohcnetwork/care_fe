@@ -1,11 +1,12 @@
 import { GENDER_TYPES } from "@/common/constants";
 
 import { Permissions } from "@/types/emr/permission/permission";
+import { RoleBase } from "@/types/emr/role/role";
 import { FacilityBareMinimum } from "@/types/facility/facility";
-import { Organization } from "@/types/organization/organization";
-
-export type UserType =
-  "doctor" | "nurse" | "staff" | "volunteer" | "administrator";
+import {
+  Organization,
+  OrganizationParent,
+} from "@/types/organization/organization";
 
 export const CEFR_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 export const USER_LANGUAGE_SYSTEM = "urn:iso:std:iso:639:-3" as const;
@@ -29,8 +30,17 @@ export interface UserQualificationDegree {
   display?: string | null;
 }
 
+// Mirrors the backend's OrganizationUserExtendedReadSpec. The organization is
+// serialized with OrganizationReadSpec (no permissions/managing orgs), so the
+// lighter OrganizationParent shape is used. Keeping this shallow also matters
+// because UserSpec is embedded in many read types that end up in form values.
+export interface UserRoleOrg {
+  id: string;
+  organization: OrganizationParent;
+  role: Pick<RoleBase, "id" | "name" | "description" | "is_system">;
+}
+
 export interface UserBaseSpec {
-  id?: string | null;
   first_name: string;
   last_name: string;
   phone_number: string;
@@ -39,6 +49,7 @@ export interface UserBaseSpec {
 }
 
 export interface UserSpec extends UserBaseSpec {
+  id: string;
   last_login: string;
   profile_picture_url: string;
   gender: (typeof GENDER_TYPES)[number]["id"];
@@ -46,16 +57,7 @@ export interface UserSpec extends UserBaseSpec {
   mfa_enabled: boolean;
   phone_number: string;
   deleted: boolean;
-  role_orgs?: Array<{
-    id: string;
-    organization: Organization;
-    role: {
-      id: string;
-      name: string;
-      description: string;
-      is_system: boolean;
-    };
-  }>;
+  role_orgs?: UserRoleOrg[];
   communication: UserCommunication[];
   qualification: UserQualification[];
 }
@@ -80,7 +82,14 @@ export interface CurrentUserRetrieveSpec extends UserRetrieveSpec, Permissions {
   preferences: Record<string, unknown>;
 }
 
-// Todo: Once backend adds a proper public user read spec, add it here and update the usages where applicable
+export interface PublicUserReadSpec extends UserBaseSpec {
+  id: string;
+  last_login: string;
+  profile_picture_url: string;
+  gender: (typeof GENDER_TYPES)[number]["id"];
+  username: string;
+  role_orgs?: UserRoleOrg[];
+}
 
 export interface UserUpdateSpec extends UserBaseSpec {
   gender: (typeof GENDER_TYPES)[number]["id"];

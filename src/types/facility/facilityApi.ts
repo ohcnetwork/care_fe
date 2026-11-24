@@ -4,7 +4,7 @@ import {
   DiscountConfiguration,
   MonetaryComponentRead,
 } from "@/types/base/monetaryComponent/monetaryComponent";
-import { UserSpec } from "@/types/user/user";
+import { UserRetrieveSpec, UserSpec } from "@/types/user/user";
 
 import { FacilityCreate, FacilityListRead, FacilityRead } from "./facility";
 
@@ -75,6 +75,6 @@ export default {
   getUser: {
     path: "/api/v1/facility/{facilityId}/users/{userId}/",
     method: HttpMethod.GET,
-    TRes: Type<UserSpec>(),
+    TRes: Type<UserRetrieveSpec>(),
   },
 } as const;

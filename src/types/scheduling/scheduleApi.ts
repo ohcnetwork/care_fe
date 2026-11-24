@@ -21,7 +21,7 @@ import {
   ScheduleTemplateUpdateRequest,
 } from "@/types/scheduling/schedule";
 import { TokenGenerate, TokenRetrieve } from "@/types/tokens/token/token";
-import { UserSpec } from "@/types/user/user";
+import { PublicUserReadSpec, UserSpec } from "@/types/user/user";
 
 export default {
   /**
@@ -185,7 +185,7 @@ export default {
     getPublicScheduleableFacilityUser: {
       path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
       method: HttpMethod.GET,
-      TRes: Type<UserSpec>(),
+      TRes: Type<PublicUserReadSpec>(),
     },
     /**
      * Get appointments across facilities

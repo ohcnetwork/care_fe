@@ -379,7 +379,7 @@ const EncounterHistoryList = ({ onSelect, filterScope }: Props) => {
               (filterValue as FacilityOrganizationRead) || undefined;
             break;
           case "care_team": {
-            // filterValue is a single UserReadMinimal (mode is "single")
+            // filterValue is a single UserSpec (mode is "single")
             updates.selectedCareTeamMember =
               (filterValue as UserSpec) || undefined;
             break;

@@ -14,10 +14,10 @@ import { useAuthContext } from "@/hooks/useAuthUser";
 
 import { formatName } from "@/Utils/utils";
 import { storeUserInLocalStorage } from "@/types/scheduling/schedule";
-import { UserSpec } from "@/types/user/user";
+import { PublicUserReadSpec } from "@/types/user/user";
 
 interface Props {
-  user: UserSpec;
+  user: PublicUserReadSpec;
   className?: string;
   facilityId: string;
 }
