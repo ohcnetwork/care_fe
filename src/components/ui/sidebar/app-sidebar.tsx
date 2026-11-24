@@ -33,6 +33,7 @@ import { ResponsibilityNav } from "@/components/ui/sidebar/responsibility-switch
 import { useRouteParams } from "@/hooks/useRouteParams";
 import { useLayoutFlags } from "@/lib/router/layoutFlags";
 import { useLocationChange } from "@/lib/router/location";
+import { getRouter } from "@/lib/router/routerRef";
 import { ServiceSwitcher } from "./facility/service/service-switcher";
 
 import PinPageDialog from "@/components/Common/PinPageDialog";
@@ -116,7 +117,15 @@ export function AppSidebar({
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   React.useLayoutEffect(() => {
-    contentRef.current?.scrollTo({ top: 0 });
+    const content = contentRef.current;
+    content?.scrollTo({ top: 0 });
+    // The router restores the previous sidebar's scroll once the page has
+    // rendered, so reset again then.
+    const unsubscribe = getRouter().subscribe("onRendered", () => {
+      content?.scrollTo({ top: 0 });
+      unsubscribe();
+    });
+    return unsubscribe;
   }, [
     sidebarFor,
     facilitySettingsSidebar,
