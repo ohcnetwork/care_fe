@@ -121,6 +121,7 @@ function InvoiceShow({
       params: { facilityId, invoiceId },
       replace: true,
       search: qParams,
+      resetScroll: false,
     });
   };
   const closePaymentSheet = () => {
@@ -129,6 +130,7 @@ function InvoiceShow({
       params: { facilityId, invoiceId },
       replace: true,
       search: qParams,
+      resetScroll: false,
     });
   };
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);

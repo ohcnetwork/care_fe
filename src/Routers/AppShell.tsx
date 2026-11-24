@@ -77,6 +77,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 md:px-6 pb-4"
             }
             data-cui-page
+            data-scroll-restoration-id="app-content"
           >
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
               {children}

@@ -190,7 +190,10 @@ export default function UserHome(props: UserHomeProps) {
                     className="min-h-11 min-w-0 whitespace-normal sm:flex-none sm:px-4"
                     asChild
                   >
-                    <HrefLink href={`${userUrl}/${key.toLowerCase()}`}>
+                    <HrefLink
+                      href={`${userUrl}/${key.toLowerCase()}`}
+                      resetScroll={false}
+                    >
                       <Icon
                         className="size-4"
                         strokeWidth={1.7}
