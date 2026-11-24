@@ -400,12 +400,12 @@ test.describe("Facility settings navigation", () => {
       await expectCurrentSettingsPage(page, "Tax Codes");
       await toggle.click();
       await expect(drawer).toBeVisible();
-      const currentPage = drawer.getByRole("link", {
+      const currentPageLink = drawer.getByRole("link", {
         name: "Tax Codes",
         exact: true,
       });
-      await expect(currentPage).toHaveAttribute("aria-current", "page");
-      await currentPage.click();
+      await expect(currentPageLink).toHaveAttribute("aria-current", "page");
+      await currentPageLink.click();
       await expect(drawer).toBeHidden();
       await expect(page).toHaveURL(
         `${facilityPath}/settings/billing/tax_codes`,

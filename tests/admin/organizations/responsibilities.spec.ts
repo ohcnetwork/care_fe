@@ -5,9 +5,17 @@ import { expectAndDismissToast, expectToast } from "tests/helper/ui";
 test.use({ storageState: "tests/.auth/user.json" });
 
 async function gotoResponsibilities(page: Page) {
-  await page.goto("/admin/organizations/role", { waitUntil: "networkidle" });
+  await page.goto("/admin/organizations/role");
   await expect(
     page.getByRole("textbox", { name: /search responsibilities/i }),
+  ).toBeVisible();
+  // On wide screens the page opens the first responsibility once the list
+  // loads, moving to its detail route and remounting the directory. Wait for
+  // that selection so later searches and sheets are not reset by it.
+  await expect(
+    page
+      .locator('[data-slot="responsibility-list"]')
+      .getByRole("button", { pressed: true }),
   ).toBeVisible();
 }
 

@@ -560,9 +560,12 @@ test.describe("Location overview and forms", () => {
     await page.getByRole("button", { name: "Save Changes" }).click();
     await expectToast(page, /Nothing to submit yet/);
 
-    // A negative assertion read at toast time proves nothing — let the page
-    // go quiet first, so a late request would still be counted.
-    await page.waitForLoadState("networkidle");
+    // A negative assertion read at toast time proves nothing. Save Changes
+    // stays disabled while the submit composes or a batch is in flight, so
+    // once it is enabled again any batch request has already been counted.
+    await expect(
+      page.getByRole("button", { name: "Save Changes" }),
+    ).toBeEnabled();
     expect(batchCalls).toBe(0);
     expect(page.url()).toContain(`/questionnaire/${questionnaireId}`);
 

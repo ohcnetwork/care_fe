@@ -108,9 +108,10 @@ export async function submitAndExpectSuccess(page: Page) {
 }
 
 /**
- * After submission, waits for navigation to the encounter updates page,
- * then asserts that `expectedValues` are visible and `excludedValues` are
- * NOT visible anywhere on the page.
+ * After submission, waits for navigation to the encounter updates page and
+ * for the submitted response's answers to render, then asserts that
+ * `expectedValues` are visible and `excludedValues` are NOT visible
+ * anywhere on the page.
  */
 export async function verifySubmittedValues(
   page: Page,
@@ -118,7 +119,15 @@ export async function verifySubmittedValues(
   excludedValues: string[] = [],
 ) {
   await page.waitForURL(/\/encounter\/[^/]+\/updates/);
-  await page.waitForLoadState("networkidle");
+  // The responses widget shows a skeleton until its list query settles, and
+  // every row of a response renders together. Waiting for an answer row
+  // keeps the `excludedValues` checks from passing on a still-loading page.
+  await expect(
+    page
+      .getByRole("region", { name: "Questionnaire Responses" })
+      .locator("tr, dl > div")
+      .first(),
+  ).toBeVisible();
 
   for (const val of expectedValues) {
     const locator = page.getByText(val, { exact: true }).first();
@@ -142,8 +151,8 @@ export async function verifyLabelledValues(
   pairs: [label: string, value: string][],
 ) {
   await page.waitForURL(/\/encounter\/[^/]+\/updates/);
-  await page.waitForLoadState("networkidle");
 
+  // Each row lookup and `toHaveText` auto-wait for the responses to load.
   for (const [label, value] of pairs) {
     const row = page
       .locator("tr, dl > div")

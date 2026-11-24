@@ -422,7 +422,15 @@ test.describe("Diagnostic report review", () => {
       const catalogResponse = page.waitForResponse(catalogUrl);
       releaseCatalog();
       await catalogResponse;
-      await page.waitForLoadState("networkidle");
+      // A save that ignored the approval would be sent as soon as the page
+      // handles the catalog response; give it a bounded window to show up.
+      const lateSave = await page
+        .waitForRequest("**/api/v1/batch_requests/", { timeout: 2_000 })
+        .then(
+          () => true,
+          () => false,
+        );
+      expect(lateSave).toBe(false);
 
       await expect(
         entry.getByRole("button", { name: "Save Results" }),

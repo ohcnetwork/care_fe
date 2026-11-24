@@ -33,6 +33,19 @@ function mainLeft(page: Page) {
     .evaluate((element) => element.getBoundingClientRect().left);
 }
 
+// Shortcuts ignore a repeat within 300ms of the last handled press, measured
+// with the browser's Date.now(). Call this once the previous press has visibly
+// taken effect: it waits until the browser clock is past that window, so the
+// next press is handled instead of being dropped.
+async function waitForShortcutDebounce(page: Page) {
+  const handledBy = await page.evaluate(() => Date.now());
+  await expect
+    .poll(() => page.evaluate(() => Date.now()), {
+      message: "the 300ms shortcut debounce should elapse",
+    })
+    .toBeGreaterThan(handledBy + 300);
+}
+
 test.describe("Shared workspace navigation", () => {
   let facilityPath: string;
 
@@ -381,7 +394,7 @@ test.describe("Shared workspace navigation", () => {
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
       await expect(navigation).toBeHidden();
       // Shortcuts debounce for 300ms, so an immediate second press is ignored
-      await page.waitForTimeout(350);
+      await waitForShortcutDebounce(page);
       await page.keyboard.press("Control+b");
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "true");
       await expect(navigation).toBeInViewport({ ratio: 1 });
@@ -514,7 +527,7 @@ test.describe("Shared workspace navigation", () => {
         0,
       );
       // Shortcuts debounce for 300ms, so an immediate second press is ignored
-      await page.waitForTimeout(350);
+      await waitForShortcutDebounce(page);
       await page.keyboard.press("Meta+b");
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "true");
       await expect(navigation).toBeInViewport({ ratio: 1 });
@@ -543,8 +556,29 @@ test.describe("Shared workspace navigation", () => {
       menu.getByRole("menuitem", { name: "Profile", exact: true }),
     ).toBeVisible();
     await menu.hover();
-    // Keep the portal open beyond the preview's pointer-leave grace period.
-    await page.waitForTimeout(500);
+    // Leaving the preview closes it after a 300ms grace period unless one of
+    // its menus is open. Keep sampling while the pointer rests on the
+    // portalled menu until well past that period; any closed sample fails.
+    const restingSince = Date.now();
+    await expect
+      .poll(
+        async () => {
+          const preview = await sidebarState(page).getAttribute(
+            "data-app-sidebar-preview",
+          );
+          if (preview !== "true") {
+            throw new Error(
+              "The sidebar preview closed while its menu was open",
+            );
+          }
+          return Date.now() - restingSince;
+        },
+        {
+          message: "the preview should stay open past its close grace period",
+          intervals: [100],
+        },
+      )
+      .toBeGreaterThan(500);
     await expect(navigation).toBeInViewport({ ratio: 1 });
     await expect(sidebarState(page)).toHaveAttribute(
       "data-app-sidebar-preview",
@@ -797,12 +831,12 @@ test.describe("Shared workspace navigation", () => {
 
     await test.step("selecting the current destination dismisses the drawer too", async () => {
       await toggle.click();
-      const currentPage = drawer.getByRole("link", {
+      const currentLink = drawer.getByRole("link", {
         name: "Invoices",
         exact: true,
       });
-      await expect(currentPage).toHaveAttribute("aria-current", "page");
-      await currentPage.click();
+      await expect(currentLink).toHaveAttribute("aria-current", "page");
+      await currentLink.click();
       await expect(drawer).toBeHidden();
       await expect(page).toHaveURL(`${facilityPath}/billing/invoices`);
       await expect(toggle).toHaveAttribute("aria-expanded", "false");

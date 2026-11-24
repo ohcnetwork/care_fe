@@ -4,6 +4,7 @@ import {
   getQuestionnaireIdBySlug,
   questionBlock,
 } from "tests/helper/questionnaireV2";
+import { valueSetColumn } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -225,9 +226,7 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
       // The search is debounced, so the list keeps showing the pre-search
       // entry (the selected "milligram" row) for a beat — poll until a
       // different unit shows up rather than reading the list once.
-      const options = scope
-        .getByTestId("valueset-search-results")
-        .getByRole("option");
+      const options = valueSetColumn(scope, "search").getByRole("option");
       const readOptionTexts = async () => {
         const texts: string[] = [];
         for (let index = 0; index < (await options.count()); index++) {

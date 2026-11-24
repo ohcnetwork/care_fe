@@ -100,14 +100,21 @@ function adminOrgDetailUrlRegex(type: OrganizationType) {
 }
 
 async function gotoOrgTypeList(page: Page, type: OrganizationType) {
-  await page.goto(`/admin/organizations/${type}`, {
-    waitUntil: "networkidle",
-  });
+  await page.goto(`/admin/organizations/${type}`);
   await expect(
     type === "govt"
       ? governanceTree(page).getByRole("combobox")
       : searchInput(page, type),
   ).toBeVisible();
+  if (type === "role") {
+    // On wide screens Responsibilities opens its first entry once the list
+    // loads, which remounts the page; wait for it before interacting.
+    await expect(
+      page
+        .locator('[data-slot="responsibility-list"]')
+        .getByRole("button", { pressed: true }),
+    ).toBeVisible();
+  }
 }
 
 async function clickAndWaitForUrl(
