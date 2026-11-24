@@ -118,7 +118,7 @@ test.describe("Referral shared records", () => {
     await picker
       .getByRole("button", { name: "Add record", exact: true })
       .click();
-    await expect(picker).not.toBeVisible();
+    await expect(picker).toBeHidden();
     const responseRecords = page
       .getByRole("region", { name: "Responses", exact: true })
       .getByRole("region", { name: "Response records", exact: true });
@@ -158,7 +158,7 @@ test.describe("Referral shared records", () => {
     await picker
       .getByRole("button", { name: "Add record", exact: true })
       .click();
-    await expect(picker).not.toBeVisible();
+    await expect(picker).toBeHidden();
     await expect(responseInput).toHaveValue(draftRecommendation);
     await expect(
       editorRecords
@@ -382,7 +382,7 @@ test.describe("Referral shared records", () => {
     await page
       .getByRole("button", { name: "Hide request", exact: true })
       .click();
-    await expect(preview).not.toBeVisible();
+    await expect(preview).toBeHidden();
     await expect(
       diagnosisRecord.getByText(diagnosisNote, { exact: true }),
     ).toBeVisible();
@@ -427,7 +427,7 @@ test.describe("Referral shared records", () => {
       name: "Remove shared record?",
     });
     await confirm.getByRole("button", { name: "Remove", exact: true }).click();
-    await expect(confirm).not.toBeVisible();
+    await expect(confirm).toBeHidden();
     await expect(preview).toHaveCount(0);
     // Keep the browser session: the reference tab's all-category cache must not
     // keep a removed source attachment disabled in the scoped record picker.
@@ -446,7 +446,7 @@ test.describe("Referral shared records", () => {
       await expect(candidate).toBeEnabled();
     }
     await picker.getByRole("button", { name: "Cancel", exact: true }).click();
-    await expect(picker).not.toBeVisible();
+    await expect(picker).toBeHidden();
     await page.reload();
     await expect(preview).toHaveCount(0);
     await expect(
@@ -720,7 +720,7 @@ test.describe("Referral shared records", () => {
     await booking
       .getByRole("button", { name: "Confirm Appointment", exact: true })
       .click();
-    await expect(booking).not.toBeVisible();
+    await expect(booking).toBeHidden();
     await expect(page).toHaveURL(
       (url) =>
         url.pathname.startsWith(`${appointmentsPath}/`) &&

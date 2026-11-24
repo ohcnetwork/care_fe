@@ -64,8 +64,11 @@ export async function selectComboboxOption(
 ): Promise<void> {
   await trigger.click();
   await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  await expect(
+    trigger,
+    "combobox trigger has no aria-controls",
+  ).toHaveAttribute("aria-controls", /.+/);
   const popupId = await trigger.getAttribute("aria-controls");
-  expect(popupId, "combobox trigger has no aria-controls").toBeTruthy();
   const popup = trigger.page().locator(`[id="${popupId}"]`);
   const options =
     name === undefined

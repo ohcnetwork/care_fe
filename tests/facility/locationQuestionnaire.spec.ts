@@ -233,7 +233,7 @@ test.describe("Location overview and forms", () => {
         "false",
       );
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
-      await expect(sidebar).not.toBeVisible();
+      await expect(sidebar).toBeHidden();
       await expect(sidebar).not.toBeInViewport();
 
       await toggle.hover();
@@ -306,7 +306,7 @@ test.describe("Location overview and forms", () => {
       await expect(picker.getByPlaceholder("Search Forms")).toBeVisible();
       expect(page.url()).toBe(overviewUrl);
       await page.keyboard.press("Escape");
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       expect(page.url()).toBe(overviewUrl);
       await expect(submitForms).toBeFocused();
       await submitForms.click();
@@ -410,7 +410,7 @@ test.describe("Location overview and forms", () => {
       await expect(dialog.getByText("Notes", { exact: true })).toBeVisible();
       await expect(dialog.getByText(answer, { exact: true })).toBeVisible();
       await dialog.getByRole("button", { name: "Close", exact: true }).click();
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
       await expect(
         response.getByRole("button", { name: "View", exact: true }),
       ).toBeFocused();
@@ -429,7 +429,7 @@ test.describe("Location overview and forms", () => {
       await response.getByRole("button", { name: "View", exact: true }).click();
       await expect(dialog.getByText(answer, { exact: true })).toBeVisible();
       await dialog.getByRole("button", { name: "Close", exact: true }).click();
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
       if (desktopViewport) await page.setViewportSize(desktopViewport);
     });
 
@@ -523,6 +523,7 @@ test.describe("Location overview and forms", () => {
     page,
   }) => {
     const location = await createAndOpenLocation(page, facilityId);
+
     await test.step("forms are opened from the location workspace", async () => {
       await expect(
         page.getByRole("heading", { name: location.name, exact: true }),
@@ -548,6 +549,7 @@ test.describe("Location overview and forms", () => {
         `**/facility/${facilityId}/locations/${location.id}/questionnaire/${questionnaireId}`,
       );
     });
+
     await expect(questionBlock(page, "Notes")).toBeVisible();
 
     // Counted from before the click, so nothing can slip past unobserved.
@@ -609,7 +611,7 @@ test.describe("Location overview and forms", () => {
       .getByRole("link", { name: "Responses", exact: true })
       .click();
     await page.waitForURL(`**${locationPath}/responses`);
-    await expect(mobileNavigation).not.toBeVisible();
+    await expect(mobileNavigation).toBeHidden();
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
     await expect(
       header
@@ -623,7 +625,7 @@ test.describe("Location overview and forms", () => {
     await mobileNavigation
       .getByRole("link", { name: "Responses", exact: true })
       .click();
-    await expect(mobileNavigation).not.toBeVisible();
+    await expect(mobileNavigation).toBeHidden();
     await expect(
       page
         .locator('[data-cy="location-responses-page"]')
@@ -648,7 +650,7 @@ test.describe("Location overview and forms", () => {
       picker.getByRole("option", { name: LOCATION_QUESTIONNAIRE_TITLE }),
     ).toBeVisible();
     await page.keyboard.press("Escape");
-    await expect(picker).not.toBeVisible();
+    await expect(picker).toBeHidden();
     expect(page.url()).toBe(responsesUrl);
 
     await page
@@ -666,7 +668,7 @@ test.describe("Location overview and forms", () => {
     await expect(questionBlock(page, "Notes")).toBeVisible();
     await page.goBack();
     await page.waitForURL(`**${locationPath}/responses`);
-    await expect(picker).not.toBeVisible();
+    await expect(picker).toBeHidden();
 
     await page.goto(`${locationPath}/forms`);
     await page.waitForURL(`**${locationPath}/responses`);
@@ -783,7 +785,7 @@ test.describe("Location overview and forms", () => {
         viewer.getByText(history.errored.answer, { exact: true }),
       ).toBeVisible();
       await viewer.getByRole("button", { name: "Close", exact: true }).click();
-      await expect(viewer).not.toBeVisible();
+      await expect(viewer).toBeHidden();
       expect(new URL(page.url()).searchParams.has("response")).toBe(false);
       await expect(rows).toHaveCount(2);
     });
@@ -868,7 +870,7 @@ test.describe("Location overview and forms", () => {
       ).toBeVisible();
       expect(page.url()).toBe(filteredUrl);
       await page.keyboard.press("Escape");
-      await expect(formPicker).not.toBeVisible();
+      await expect(formPicker).toBeHidden();
       expect(page.url()).toBe(filteredUrl);
       await expect(rows).toHaveCount(1);
       await expect(rows).toContainText(history.secondForm.title);
@@ -905,7 +907,7 @@ test.describe("Location overview and forms", () => {
         await page.evaluate(() => document.documentElement.scrollWidth),
       ).toBe(390);
       await viewer.getByRole("button", { name: "Close", exact: true }).click();
-      await expect(viewer).not.toBeVisible();
+      await expect(viewer).toBeHidden();
       await expect(rows).toHaveCount(20);
       await expect(
         rows.first().getByRole("button", { name: "View", exact: true }),
@@ -929,7 +931,7 @@ test.describe("Location overview and forms", () => {
         .getByRole("option")
         .filter({ has: page.getByText(history.user.username, { exact: true }) })
         .click();
-      await expect(submitterDrawer).not.toBeVisible();
+      await expect(submitterDrawer).toBeHidden();
       expect(new URL(page.url()).searchParams.get("created_by")).toBe(
         history.user.id,
       );

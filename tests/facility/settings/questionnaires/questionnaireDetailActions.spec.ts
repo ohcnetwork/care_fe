@@ -28,7 +28,7 @@ test.describe("Questionnaire v2 detail page actions", () => {
     await test.step("The group row shows its sub-question count", async () => {
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
       await expect(page.getByText("2 Sub-questions")).toBeVisible();
-      await expect(page.getByText("General appearance")).not.toBeVisible();
+      await expect(page.getByText("General appearance")).toBeHidden();
     });
 
     await test.step("Toggling reveals the sub-question titles", async () => {
@@ -41,7 +41,7 @@ test.describe("Questionnaire v2 detail page actions", () => {
     await test.step("Toggling again collapses them", async () => {
       await toggle.click();
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
-      await expect(page.getByText("General appearance")).not.toBeVisible();
+      await expect(page.getByText("General appearance")).toBeHidden();
     });
   });
 
@@ -148,7 +148,7 @@ test.describe("Questionnaire v2 detail page actions", () => {
     await expect(page.getByPlaceholder("Enter details").first()).toBeVisible();
     await expect(
       page.getByRole("textbox", { name: "Question Title" }),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   test("status changes from the detail sidebar and persists", async ({

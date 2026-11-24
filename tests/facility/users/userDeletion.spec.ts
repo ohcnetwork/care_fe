@@ -30,7 +30,7 @@ test.describe("User Deletion Access Control", () => {
       await dialog.getByPlaceholder("Delete Account").fill("Delete Account");
       await expect(confirm).toBeEnabled();
       await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
       await expect(deleteButton).toBeVisible();
     });
   });

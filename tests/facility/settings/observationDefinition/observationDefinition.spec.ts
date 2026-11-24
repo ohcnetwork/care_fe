@@ -75,7 +75,6 @@ test.describe("Observation Definition Form with Interpretation", () => {
     gender: string = "Male",
   ) {
     await test.step("Add gender condition", async () => {
-      await page.getByTitle(`Condition ${conditionNumber}`);
       const conditionSelector = page.getByTitle(`Condition ${conditionNumber}`);
       const conditionSelectorExists = await conditionSelector.isVisible();
       if (!conditionSelectorExists) {
@@ -113,9 +112,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
     ageType: string = "years",
   ) {
     await test.step("Add age condition", async () => {
-      const conditionSelector = await page.getByTitle(
-        `Condition ${conditionNumber}`,
-      );
+      const conditionSelector = page.getByTitle(`Condition ${conditionNumber}`);
 
       // Select metric type
       await conditionSelector.getByRole("combobox").nth(0).click();
@@ -270,7 +267,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
     // Verify sheet closes
     await expect(
       page.getByRole("heading", { name: "Add/Edit Interpretation" }),
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     // Verify interpretation appears in list
     await expect(
@@ -656,7 +653,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
       // Verify sheet closes
       await expect(
         page.getByRole("heading", { name: "Add/Edit Interpretation" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
     });
 
     // Submit form
@@ -841,7 +838,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
       // Verify sheet closes
       await expect(
         page.getByRole("heading", { name: "Add/Edit Interpretation" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
 
       // Verify original values are preserved (should still show "Normal" in summary)
       await expect(

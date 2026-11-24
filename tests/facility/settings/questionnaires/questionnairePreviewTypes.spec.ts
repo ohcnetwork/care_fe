@@ -147,7 +147,7 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
         .locator('[role="gridcell"]:not([data-outside]) button')
         .first()
         .click();
-      await expect(trigger).not.toBeVisible();
+      await expect(trigger).toBeHidden();
     });
 
     await test.step("DateTime question: time input unlocks after picking a date", async () => {
@@ -299,7 +299,7 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
 
     await test.step("No dot before a note is written", async () => {
       await expect(noteButton).toBeVisible();
-      await expect(noteDot).not.toBeVisible();
+      await expect(noteDot).toBeHidden();
     });
 
     await test.step("Writing a note shows the amber dot", async () => {
@@ -307,7 +307,7 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
       const noteBox = page.getByPlaceholder("Add note");
       await noteBox.fill("needs follow-up");
       await page.keyboard.press("Escape");
-      await expect(noteBox).not.toBeVisible();
+      await expect(noteBox).toBeHidden();
       await expect(noteDot).toBeVisible();
     });
 

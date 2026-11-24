@@ -751,7 +751,7 @@ test.describe("Diagnostic report review", () => {
       .getByRole("button", { name: "Highlight", exact: true })
       .click();
     await more.press("Escape");
-    await expect(moreOptions).not.toBeVisible();
+    await expect(moreOptions).toBeHidden();
     const blockType = toolbar.getByRole("combobox", {
       name: "Select block type",
       exact: true,

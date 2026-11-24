@@ -49,7 +49,7 @@ async function createResponsibility(
   // Tests create more than one responsibility in a row; close this toast so
   // the next create does not match it as well (two toasts, same text).
   await expectAndDismissToast(page, /organization created successfully/i);
-  await expect(dialog).not.toBeVisible();
+  await expect(dialog).toBeHidden();
 }
 
 /** Searches for, then selects, a responsibility from the directory list. */
@@ -236,7 +236,7 @@ test.describe("Admin Responsibilities Page", () => {
     await dialog.getByRole("button", { name: /^update$/i }).click();
 
     await expectToast(page, /organizations updated successfully/i);
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
 
     await expect(
       page.getByRole("heading", { name: updatedName, exact: true }),
@@ -294,6 +294,6 @@ test.describe("Admin Responsibilities Page", () => {
     await expect(confirmationDialog).toBeVisible();
     await confirmationDialog.getByRole("button", { name: /remove/i }).click();
     await expectToast(page, /managed responsibility removed successfully/i);
-    await expect(manageSection.getByText(managedName)).not.toBeVisible();
+    await expect(manageSection.getByText(managedName)).toBeHidden();
   });
 });

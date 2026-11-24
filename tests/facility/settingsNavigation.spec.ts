@@ -155,7 +155,7 @@ test.describe("Facility settings navigation", () => {
       await page.mouse.move(900, 700);
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
-      await expect(sidebar).not.toBeVisible();
+      await expect(sidebar).toBeHidden();
       await expect(sidebar).not.toBeInViewport();
       const closedLeft = await main.evaluate(
         (element) => element.getBoundingClientRect().left,
@@ -192,7 +192,7 @@ test.describe("Facility settings navigation", () => {
         )
         .toBeLessThan(1);
       await page.keyboard.press("Escape");
-      await expect(sidebar).not.toBeVisible();
+      await expect(sidebar).toBeHidden();
       await page.mouse.move(900, 700);
       await toggle.hover();
       await expect(sidebar).toBeInViewport({ ratio: 1 });
@@ -343,7 +343,7 @@ test.describe("Facility settings navigation", () => {
       await expect(editor).toBeVisible();
       await expect(name).toHaveValue(unsavedName);
       await editor.getByRole("button", { name: "Close", exact: true }).click();
-      await expect(editor).not.toBeVisible();
+      await expect(editor).toBeHidden();
     } finally {
       releaseFailure();
       await page.unroute(`**${endpoint}`);
@@ -372,7 +372,7 @@ test.describe("Facility settings navigation", () => {
     const drawer = page.locator('[data-sidebar="sidebar"][data-mobile="true"]');
 
     await test.step("the drawer selects a billing page and closes", async () => {
-      await expect(drawer).not.toBeVisible();
+      await expect(drawer).toBeHidden();
       await toggle.click();
       await expect(drawer).toBeVisible();
       await expect(
@@ -384,7 +384,7 @@ test.describe("Facility settings navigation", () => {
       await drawer
         .getByRole("link", { name: "Tax Codes", exact: true })
         .click();
-      await expect(drawer).not.toBeVisible();
+      await expect(drawer).toBeHidden();
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
       await expect(page).toHaveURL(
         `${facilityPath}/settings/billing/tax_codes`,
@@ -406,7 +406,7 @@ test.describe("Facility settings navigation", () => {
       });
       await expect(currentPage).toHaveAttribute("aria-current", "page");
       await currentPage.click();
-      await expect(drawer).not.toBeVisible();
+      await expect(drawer).toBeHidden();
       await expect(page).toHaveURL(
         `${facilityPath}/settings/billing/tax_codes`,
       );
@@ -414,7 +414,7 @@ test.describe("Facility settings navigation", () => {
       await drawer
         .getByRole("link", { name: "Back to facility", exact: true })
         .click();
-      await expect(drawer).not.toBeVisible();
+      await expect(drawer).toBeHidden();
       await expect(page).toHaveURL(`${facilityPath}/overview`);
       await expect(settingsHeader(page)).toHaveCount(0);
     });

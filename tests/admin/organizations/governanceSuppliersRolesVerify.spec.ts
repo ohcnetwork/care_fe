@@ -52,7 +52,7 @@ async function createGovtOrganization(
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("textbox", { name: /name/i }).fill(orgName);
   await dialog.getByRole("button", { name: /create organization/i }).click();
-  await expect(dialog).not.toBeVisible();
+  await expect(dialog).toBeHidden();
 }
 
 async function checkGovtChildSheetValidation(page: Page) {
@@ -79,7 +79,7 @@ async function checkGovtChildSheetValidation(page: Page) {
   await submitButton.click();
   await expect(nameInput).toHaveAttribute("aria-invalid", "true");
   await dialog.getByRole("button", { name: /^close$/i }).click();
-  await expect(dialog).not.toBeVisible();
+  await expect(dialog).toBeHidden();
 }
 
 function governanceTree(page: Page) {
@@ -139,8 +139,8 @@ async function openGovtOrgDetailByName(
     await expect(card).toBeVisible();
     const link = seeDetailsLinkInCard(card);
     await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute("href", /.+/);
     const href = await link.getAttribute("href");
-    expect(href).toBeTruthy();
     const detailUrl = new URL(href!, page.url()).href;
     await link.click();
     await expect(page).toHaveURL(detailUrl);
@@ -384,7 +384,7 @@ test.describe("Organization directory compatibility", () => {
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("textbox", { name: /name/i }).fill("Updated child");
     await dialog.getByRole("button", { name: /update organization/i }).click();
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await openGovtOrgDetailByName(page, "Updated child", "govt");
     await page
       .locator('[data-slot="breadcrumb"]')
@@ -744,7 +744,7 @@ test.describe("Admin organization lists", () => {
       await dialog
         .getByRole("button", { name: /update organization/i })
         .click();
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
     });
 
     await test.step("Reload and verify the renamed child still belongs to the parent", async () => {
@@ -783,7 +783,7 @@ test.describe("Admin organization lists", () => {
       const response = await responsePromise;
       expect(response.ok()).toBeTruthy();
       expect(response.request().postDataJSON()).not.toHaveProperty("parent");
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
     });
 
     await test.step("Reload and open the responsibility from the top-level list", async () => {

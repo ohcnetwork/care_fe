@@ -127,7 +127,7 @@ export async function verifySubmittedValues(
   }
 
   for (const val of excludedValues) {
-    await expect(page.getByText(val, { exact: true })).not.toBeVisible();
+    await expect(page.getByText(val, { exact: true })).toBeHidden();
   }
 }
 

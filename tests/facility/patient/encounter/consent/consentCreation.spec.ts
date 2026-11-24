@@ -212,7 +212,7 @@ test.describe("Consent Creation", () => {
     await openNewestConsentDetails(page);
 
     // The Note heading should not be visible (it only shows when note exists)
-    await expect(page.getByRole("heading", { name: "Note" })).not.toBeVisible();
+    await expect(page.getByRole("heading", { name: "Note" })).toBeHidden();
   });
 
   test("create consent with custom Valid From and Valid Until → dates on card and detail", async ({
@@ -323,10 +323,10 @@ test.describe("Consent Editing", () => {
     // (Scoped to the sheet: the detail page behind it still shows these.)
     await expect(
       editSheet.getByText("Consent Given On", { exact: true }),
-    ).not.toBeVisible();
+    ).toBeHidden();
     await expect(
       editSheet.getByText("Consent Decision", { exact: true }),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   test("edit note → save → updated note on detail page", async ({ page }) => {
@@ -354,7 +354,7 @@ test.describe("Consent Editing", () => {
     // Sheet closes after save; verify updated note on the detail page
     await expect(page.getByRole("dialog")).toBeHidden();
     await expect(page.getByText(updatedNote)).toBeVisible();
-    await expect(page.getByText(originalNote)).not.toBeVisible();
+    await expect(page.getByText(originalNote)).toBeHidden();
   });
 
   // One test per status (mirrors the split category tests): each creates its
