@@ -1,8 +1,11 @@
 import { ScanLine, User, X } from "lucide-react";
-import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
+import { badgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { MemberCard } from "@/components/ui/member-card";
 
 interface EncounterSearchChipsProps {
   name?: string;
@@ -16,7 +19,10 @@ interface EncounterSearchChipsProps {
   onDismissNotice: () => void;
 }
 
-/** The search filters the URL applies, below the toolbar, each removable. */
+/**
+ * The search filters the URL applies, below the toolbar, each removable.
+ * Text filters are outline badges; the patient is a member card.
+ */
 export function EncounterSearchChips({
   name,
   visitId,
@@ -29,21 +35,13 @@ export function EncounterSearchChips({
 }: EncounterSearchChipsProps) {
   const { t } = useTranslation();
 
-  const chips: {
-    key: string;
-    icon?: ReactNode;
-    label: string;
-    note?: string;
-    removeLabel: string;
-    onRemove: () => void;
-  }[] = [
+  const textFilters: { key: string; label: string; removeLabel: string }[] = [
     ...(name
       ? [
           {
             key: "name",
             label: t("encounter_search_chip_name", { value: name }),
             removeLabel: t("encounter_search_remove_name_filter"),
-            onRemove: onRemoveText,
           },
         ]
       : []),
@@ -53,29 +51,12 @@ export function EncounterSearchChips({
             key: "visit",
             label: t("encounter_search_chip_visit_id", { value: visitId }),
             removeLabel: t("encounter_search_remove_visit_id_filter"),
-            onRemove: onRemoveText,
-          },
-        ]
-      : []),
-    ...(patient
-      ? [
-          {
-            key: "patient",
-            icon: patient.scanned ? <ScanLine /> : <User />,
-            label: patient.scanned
-              ? t("encounter_search_scanned_patient")
-              : (patient.name ?? t("encounter_search_patient_fallback")),
-            note: patient.scanned
-              ? t("encounter_search_scan_unverified")
-              : undefined,
-            removeLabel: t("encounter_search_remove_patient"),
-            onRemove: onRemovePatient,
           },
         ]
       : []),
   ];
 
-  if (!chips.length && !datesCleared) return null;
+  if (!textFilters.length && !patient && !datesCleared) return null;
 
   const stillApplies = name
     ? t("encounter_search_name_still_applies")
@@ -85,36 +66,62 @@ export function EncounterSearchChips({
 
   return (
     <div className="flex flex-col gap-2">
-      {chips.length > 0 && (
+      {(textFilters.length > 0 || patient) && (
         <ul
           aria-label={t("encounter_search_applied")}
           className="flex flex-wrap items-center gap-2"
         >
-          {chips.map((chip) => (
+          {textFilters.map((filter) => (
             <li
-              key={chip.key}
-              data-slot="encounter-search-chip"
-              className="inline-flex h-8 max-w-full min-w-0 items-center gap-1.5 rounded-full border bg-background ps-3 pe-0.5 text-sm shadow-2xs [&>svg]:size-3.5 [&>svg]:shrink-0 [&>svg]:text-muted-foreground"
-            >
-              {chip.icon}
-              <span className="truncate font-medium">{chip.label}</span>
-              {chip.note && (
-                <span className="truncate text-xs text-muted-foreground">
-                  {chip.note}
-                </span>
+              key={filter.key}
+              data-slot="encounter-search-applied"
+              className={cn(
+                badgeVariants({ variant: "outline", size: "lg" }),
+                "h-9 max-w-full min-w-0 gap-1.5 bg-background pe-0 shadow-2xs",
               )}
+            >
+              <span className="truncate">{filter.label}</span>
               <Button
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                className="size-7 shrink-0 rounded-full text-muted-foreground"
-                aria-label={chip.removeLabel}
-                onClick={chip.onRemove}
+                className="size-7 shrink-0 text-muted-foreground"
+                aria-label={filter.removeLabel}
+                onClick={onRemoveText}
               >
                 <X />
               </Button>
             </li>
           ))}
+          {patient && (
+            <li
+              data-slot="encounter-search-applied"
+              className="max-w-full min-w-0"
+            >
+              <MemberCard
+                size="sm"
+                icon={
+                  patient.scanned ? (
+                    <ScanLine />
+                  ) : patient.name ? undefined : (
+                    <User />
+                  )
+                }
+                name={
+                  patient.scanned
+                    ? t("encounter_search_scanned_patient")
+                    : (patient.name ?? t("encounter_search_patient_fallback"))
+                }
+                description={
+                  patient.scanned
+                    ? t("encounter_search_scan_unverified")
+                    : undefined
+                }
+                removeLabel={t("encounter_search_remove_patient")}
+                onRemove={onRemovePatient}
+              />
+            </li>
+          )}
         </ul>
       )}
       {datesCleared && (

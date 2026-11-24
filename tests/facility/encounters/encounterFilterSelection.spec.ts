@@ -901,7 +901,7 @@ test.describe("All encounters search", () => {
   const searchBox = (page: Page) =>
     page.getByRole("combobox", { name: /^search visits$/i });
   const chip = (page: Page) =>
-    page.locator('[data-slot="encounter-search-chip"]');
+    page.locator('[data-slot="encounter-search-applied"]');
   const dateNotice = (page: Page) =>
     page.getByRole("status").filter({ hasText: /date range cleared/i });
 
