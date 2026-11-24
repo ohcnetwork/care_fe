@@ -108,11 +108,13 @@ async function gotoOrgTypeList(page: Page, type: OrganizationType) {
   ).toBeVisible();
   if (type === "role") {
     // On wide screens Responsibilities opens its first entry once the list
-    // loads, which remounts the page; wait for it before interacting.
+    // loads, which remounts the page; wait for it (or the empty state) before
+    // interacting.
     await expect(
       page
         .locator('[data-slot="responsibility-list"]')
-        .getByRole("button", { pressed: true }),
+        .getByRole("button", { pressed: true })
+        .or(page.getByText(/no organizations found/i)),
     ).toBeVisible();
   }
 }

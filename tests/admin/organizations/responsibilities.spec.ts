@@ -11,11 +11,13 @@ async function gotoResponsibilities(page: Page) {
   ).toBeVisible();
   // On wide screens the page opens the first responsibility once the list
   // loads, moving to its detail route and remounting the directory. Wait for
-  // that selection so later searches and sheets are not reset by it.
+  // that selection so later searches and sheets are not reset by it, or for
+  // the empty state when there is nothing to select.
   await expect(
     page
       .locator('[data-slot="responsibility-list"]')
-      .getByRole("button", { pressed: true }),
+      .getByRole("button", { pressed: true })
+      .or(page.getByText(/no organizations found/i)),
   ).toBeVisible();
 }
 
