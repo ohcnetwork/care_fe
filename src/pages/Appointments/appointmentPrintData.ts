@@ -59,7 +59,6 @@ export interface AppointmentPrintContent {
     }[];
     total: { label: string; value: string };
   } | null;
-  /** Markdown from the rich-text editor. */
   note: PrintLabelledRichText | null;
   footer: { left: string; right: string };
 }

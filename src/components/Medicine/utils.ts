@@ -31,14 +31,11 @@ function roundDosage(value: string | number | Decimal): string {
  */
 const DISPENSABLE_UNIT_CODES = ["{tbl}", "{count}"];
 
-/**
- * Formats a dosage in Rx style. Prints pass `print: true` for no-break spaces:
- * a number split from its unit is easy to misread. It's an option, not a
- * parameter, because `joinInstructionTexts` maps this function and would pass
- * an index.
- */
+// Helper function to format dosage in Rx style
 export function formatDosage(
   instruction?: MedicationRequestDosageInstruction,
+  // An object, not a boolean: `joinInstructionTexts` maps this function and
+  // passes an index here.
   { print = false }: { print?: boolean } = {},
 ) {
   if (!instruction?.dose_and_rate) return "";

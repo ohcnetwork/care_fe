@@ -48,7 +48,6 @@
   item.text
 }))
 
-// Markdown from the rich-text editor, as blocks: see `rich-text`.
 #let labelled-rich-text(item) = block(above: px(12), width: 100%, {
   text(weight: "medium", fill: gray(700), item.label)
   rich-text(item.blocks)

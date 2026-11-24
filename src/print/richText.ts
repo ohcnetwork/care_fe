@@ -9,7 +9,6 @@ import type {
 } from "@/print/types";
 import { hasMarkdownContent, richTextMarkdown } from "@/Utils/markdown";
 
-/** The order marks are listed in, so equal formatting compares equal. */
 const MARK_ORDER: PrintTextMark[] = [
   "bold",
   "italic",
@@ -31,10 +30,6 @@ function isTaskLabel(html: string) {
   return /^<\/?label\b/.test(html);
 }
 
-/**
- * Turns an inline token's children into runs. Adjacent runs with the same
- * formatting are merged; the result says whether a task checkbox was found.
- */
 function inlineRuns(children: Token[]) {
   const runs: PrintTextRun[] = [];
   const open: Record<PrintTextMark, number> = {
@@ -127,12 +122,7 @@ interface Container {
   item?: PrintRichListItem;
 }
 
-/**
- * Parses Markdown from the rich-text editor into blocks `care.typ` can draw,
- * with the same parser the app displays it with (`richTextMarkdown`). Typst
- * never evaluates the text; HTML other than the editor's underline stays
- * literal, as on screen. Empty or formatting-only Markdown gives `[]`.
- */
+/** Same parser as the screen (`richTextMarkdown`), so notes print as shown. */
 export function richTextToPrint(
   markdown: string | null | undefined,
 ): PrintRichBlock[] {
@@ -243,13 +233,11 @@ export function richTextToPrint(
   return root.blocks;
 }
 
-/** `richTextToPrint`, or `null` when there's nothing to print. */
 export function richTextOrNull(markdown: string | null | undefined) {
   const blocks = richTextToPrint(markdown);
   return blocks.length > 0 ? blocks : null;
 }
 
-/** A labelled rich-text field, or `null` when there's nothing to print. */
 export function labelledRichText(
   label: string,
   markdown: string | null | undefined,

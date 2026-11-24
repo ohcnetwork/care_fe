@@ -144,7 +144,6 @@ interface TextBox {
   right: number;
   bottom: number;
   top: number;
-  /** Font size in points. */
   size: number;
 }
 
@@ -609,8 +608,7 @@ const doseRange = (low: string, high: string, unit: string) =>
   }) as MedicationRequestDosageInstruction;
 
 test("details-table: on A5 a dose range wraps between its doses and leaves the other columns room", async () => {
-  // In the dispense order's `auto` Dosage column. Staging's ranges look like
-  // the first.
+  // Column 1 is the dispense order's `auto` Dosage column.
   for (const [low, high, unit] of [
     ["1", "2", "tablets"],
     ["250", "500", "milligram"],
@@ -774,8 +772,7 @@ test("invoice: on A5 amounts stay whole and the Item column keeps its width", as
   assert.notEqual(pageWith(pdf, "Item"), null, "the Item column collapsed");
 });
 
-// As the rich-text editor saves it (see richText.test.ts): underlined bold
-// italic, an entity for a trailing space, a setext heading and a checklist.
+// As the rich-text editor saves it (see richText.test.ts).
 const EDITOR_MARKDOWN =
   "<u>***dfsh usdujhfjasjfd hdsj fhjsd fjdhfajs***</u>\n\n*dvsdadsfs*&#x20;\n\nddsfdsfs\n========\n\n- [x] done task";
 
@@ -939,7 +936,6 @@ test("diagnostic report: a report's title moves with its details and results", a
   );
 });
 
-/** An appointment with `charges` charge rows, for the title tests. */
 const appointmentWithCharges = (
   charges: number,
   extra: Partial<AppointmentPrintContent> = {},

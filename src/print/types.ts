@@ -53,7 +53,6 @@ export interface PrintLayout {
   };
 }
 
-/** Formatting on a run of rich text; `care.typ`'s `rich-text` draws each. */
 export type PrintTextMark =
   "bold" | "italic" | "underline" | "strike" | "highlight" | "code";
 
@@ -62,12 +61,10 @@ export type PrintTextRun =
   | { kind: "break" };
 
 export interface PrintRichListItem {
-  /** A task list item's checkbox; `null` for an ordinary item. */
   checked: boolean | null;
   blocks: PrintRichBlock[];
 }
 
-/** Markdown from the rich-text editor, parsed in TypeScript (src/print/richText.ts). */
 export type PrintRichBlock =
   | { kind: "paragraph"; runs: PrintTextRun[] }
   | { kind: "heading"; level: number; runs: PrintTextRun[] }

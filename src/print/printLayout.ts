@@ -27,7 +27,6 @@ const PAPERS: Record<NonNullable<PageConfig["size"]>, TypstPaper> = {
   Legal: "us-legal",
 };
 
-/** Translation keys for paper names, as the print dialog lists them. */
 export const PAPER_LABELS = {
   a4: "page_size_a4",
   a5: "page_size_a5",

@@ -64,8 +64,7 @@
 #let fonts = ("Figtree",)
 #let mono-fonts = ("Geist Mono",) + fonts
 
-// Whether a block this wide is narrow, like A5 portrait (128mm between 10mm
-// margins; A4 is 190mm). Narrow blocks get smaller text.
+// Between A5 portrait (128mm between 10mm margins) and A4 (190mm).
 #let _is-narrow(width) = width < 450pt
 
 /// An image at most `max-width` wide and `max-height` tall, keeping its aspect
@@ -82,8 +81,7 @@
   }
 })
 
-/// A QR code from `useQrCode`. It holds a patient UUID (29 squares a side),
-/// which scans easily at this size on any paper.
+/// A patient UUID (29 squares a side) scans easily at this size on any paper.
 #let qr-code(path) = image(path, width: px(80))
 
 #let labelled(label, value) = [#text(weight: "semibold", label + ":") #value]
@@ -128,14 +126,11 @@
   }),
 )))
 
-// Also after `@`, so an email or ABHA address breaks as `name@` / `abdm`.
 #let _break-after = regex("[^-,;/)\\]@]*[-,;/)\\]@]?")
 
 // A no-break space joins its words: it keeps a dose's number with its unit.
 #let _word-or-space = regex("[\\S\\x{A0}]+|[\\s--\\x{A0}]+")
 
-// Splits a word wider than `width` into lines: after punctuation first, then
-// between letters.
 #let _break-word(word, width) = {
   let lines = ()
   let line = ""
@@ -164,7 +159,6 @@
     words.text.matches(_word-or-space).map(m => {
       let t = m.text
       if t.trim() == "" or measure(text(t)).width <= size.width { t } else {
-        // Too wide for a line of its own: break at its no-break spaces first.
         t.split("\u{a0}").map(w => {
           if measure(text(w)).width <= size.width { w } else { _break-word(w, size.width) }
         }).join(" ")
@@ -218,7 +212,6 @@
           grid(columns: (auto, 1fr), column-gutter: 0.4em, _checkbox(item.checked), body)
         }
       }
-      // A checklist shows checkboxes in place of bullets, as on screen.
       if node.items.all(item => item.checked != none) {
         stack(spacing: px(4), ..node.items.map(item-body))
       } else if node.ordered {
@@ -246,13 +239,10 @@
   stack(spacing: px(6), ..parts)
 }
 
-/// Markdown from the rich-text editor, as blocks from src/print/richText.ts.
-/// The text is only drawn, never evaluated. `lead` (e.g. "Note:") goes before
-/// the first paragraph.
+/// `lead` (e.g. "Note:") goes before the first paragraph.
 #let rich-text(blocks, lead: none) = fit-words(_rich-blocks(blocks, lead: lead))
 
-/// Applies `fit-words` to a table's cells, except in `auto` columns, where it
-/// would split values that should fit (amounts, "6.00%").
+/// Skips `auto` columns, where `fit-words` would split amounts like "6.00%".
 #let fit-cells(columns, body) = {
   show table.cell: cell => {
     let spanned = range(cell.x, cell.x + cell.colspan)
@@ -283,15 +273,10 @@
     range(n).map(_ => center)
   } else { header-align }
   let line = px(1) + border-color
-  // Narrow pages (A5 portrait) get smaller text and padding.
   let narrow = _is-narrow(size.width)
   let inset = if narrow { (x: px(4), y: px(6)) } else { (x: px(8), y: px(8)) }
   let font-size = if narrow { text-size.xs } else { text.size }
 
-  // If the `auto` columns would leave the `fr` ones under 40% of the width,
-  // size each to its widest value instead, so only its header wraps. If that
-  // is still too wide, values wrap too, down to their longest word: amounts
-  // and dates are one word, so they keep their width.
   let sizes = columns
   if rows.len() > 0 and rows.all(r => r.len() == n) and columns.any(c => type(c) == fraction) {
     let content-of(c) = if type(c) == content and c.func() == table.cell { c.body } else { c }
@@ -380,8 +365,6 @@
     columns: (label-width, auto, 1fr),
     text(fill: gray(600), row.label),
     text(fill: gray(600), ":"),
-    // IDs, emails and ABHA addresses have no spaces: `fit-words` breaks one
-    // wider than the column after its punctuation, then between letters.
     pad(left: px(4), fit-words(text(weight: "semibold", if (
       row.value == none or row.value == ""
     ) { "-" } else { row.value }))),

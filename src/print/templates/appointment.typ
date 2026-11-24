@@ -93,7 +93,6 @@
 
 #if c.note != none {
   v(px(8))
-  // Sticky: the label moves on with the note.
   block(
     width: 100%,
     inset: (bottom: px(2)),

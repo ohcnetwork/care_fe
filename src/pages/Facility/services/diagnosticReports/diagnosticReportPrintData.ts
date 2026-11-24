@@ -45,7 +45,6 @@ export interface DiagnosticReportPrintContent {
       }[];
     } | null;
     note: { label: string; text: string } | null;
-    /** Markdown from the rich-text editor. */
     conclusion: PrintLabelledRichText | null;
     /** Paths of the attachment page images, one page each. */
     attachments: string[];

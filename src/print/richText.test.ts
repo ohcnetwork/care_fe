@@ -16,8 +16,7 @@ const paragraph = (...runs: ReturnType<typeof text>[]) => ({
 });
 
 test("richTextToPrint: the editor's formats become styled runs, not symbols", () => {
-  // As saved by the rich-text editor: underlined bold italic, a trailing space
-  // written as an entity, and a setext heading.
+  // As the rich-text editor saves it.
   const markdown =
     "<u>***dfsh usdujhfjasjfd hdsj fhjsd fjdhfajs***</u>\n\n*dvsdadsfs*&#x20;\n\nddsfdsfs\n========";
 

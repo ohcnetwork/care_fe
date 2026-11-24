@@ -35,8 +35,6 @@
   cells
 }
 
-// Like the HTML print's flex-wrap: side by side when both columns fit at their
-// minimum widths (14rem and 12rem), else the right one goes below.
 #let detail-columns(left, right) = layout(size => {
   let rows(r) = detail-rows(r, label-width: px(112))
   let side-by-side = grid(

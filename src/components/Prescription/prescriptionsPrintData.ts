@@ -41,7 +41,6 @@ export interface PrescriptionsPrintContent {
     progress: string | null;
     date: string;
     prescribed_by: string;
-    /** Markdown, as `PrescriptionView` shows it on screen. */
     note: PrintRichBlock[] | null;
     medications: {
       index: string;

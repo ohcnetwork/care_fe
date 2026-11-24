@@ -28,10 +28,7 @@ function roundFinders(svg: SVGSVGElement) {
   }
 }
 
-/**
- * Typst can't draw QR codes: render `element` and pass `files` to the preview.
- * Templates set the printed size (`qr-code` in care.typ).
- */
+/** Typst can't draw QR codes: render `element` and pass `files` to the preview. */
 export function useQrCode(value: string, path: string) {
   const ref = useRef<SVGSVGElement>(null);
   const [bytes, setBytes] = useState<Uint8Array>();
