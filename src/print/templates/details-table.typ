@@ -14,11 +14,11 @@
 #patient-details(c.details.left, c.details.right)
 
 #if c.title != none or c.note != none {
-  block(below: px(8), {
+  block(below: px(8), fit-words({
     if c.title != none { text(size: text-size.lg, weight: "semibold", fill: gray(700), c.title) }
     if c.title != none and c.note != none { parbreak() }
     if c.note != none { text(fill: gray(600), c.note) }
-  })
+  }))
 }
 
 #if c.table_title != none {

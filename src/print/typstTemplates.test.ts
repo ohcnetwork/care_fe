@@ -13,9 +13,14 @@ import { createRequire } from "node:module";
 import { join, relative } from "node:path";
 import { before, test } from "node:test";
 
+import type { QuestionnaireResponsePrintContent } from "@/components/Facility/ConsultationDetails/questionnaireResponsePrintData";
+import type { MedicationAdministrationPrintContent } from "@/components/Medicine/MedicationAdministration/medicationAdministrationPrintData";
 import type { PrescriptionsPrintContent } from "@/components/Prescription/prescriptionsPrintData";
+import type { ResourceLetterPrintContent } from "@/components/Resource/resourceLetterPrintData";
 import type { AppointmentPrintContent } from "@/pages/Appointments/appointmentPrintData";
+import type { ChargeItemsPrintContent } from "@/pages/Facility/billing/account/components/chargeItemsPrintData";
 import type { InvoicePrintContent } from "@/pages/Facility/billing/invoice/invoicePrintData";
+import type { PaymentReceiptPrintContent } from "@/pages/Facility/billing/paymentReconciliation/paymentReceiptPrintData";
 import type { DiagnosticReportPrintContent } from "@/pages/Facility/services/diagnosticReports/diagnosticReportPrintData";
 import type { DetailsTablePrintContent } from "@/print/detailsTable";
 import { richTextToPrint } from "@/print/richText";
@@ -641,36 +646,38 @@ test("details-table: a table pushed to the next page takes its title along", asy
   );
 });
 
+const INVOICE_LABELS = Object.fromEntries(
+  [
+    "patient",
+    "address",
+    "amount",
+    "bill_to",
+    "created_by",
+    "credit_notes_title",
+    "date_and_time",
+    "discount",
+    "grand_total",
+    "invoice",
+    "issue_date",
+    "item",
+    "location",
+    "net_amount",
+    "no_address_provided",
+    "no_charge_items",
+    "payment_method",
+    "payment_terms",
+    "qty",
+    "reference",
+    "total",
+    "total_credit_notes",
+    "total_received",
+    "unit_price",
+  ].map((key) => [key, key === "item" ? "Item" : key.replace(/_/g, " ")]),
+);
+
 test("invoice: on A5 amounts stay whole and the Item column keeps its width", async () => {
   const taxes = ["CGST", "SGST", "IGST"];
-  const labels = Object.fromEntries(
-    [
-      "patient",
-      "address",
-      "amount",
-      "bill_to",
-      "created_by",
-      "credit_notes_title",
-      "date_and_time",
-      "discount",
-      "grand_total",
-      "invoice",
-      "issue_date",
-      "item",
-      "location",
-      "net_amount",
-      "no_address_provided",
-      "no_charge_items",
-      "payment_method",
-      "payment_terms",
-      "qty",
-      "reference",
-      "total",
-      "total_credit_notes",
-      "total_received",
-      "unit_price",
-    ].map((key) => [key, key === "item" ? "Item" : key.replace(/_/g, " ")]),
-  );
+  const labels = INVOICE_LABELS;
   const invoice: InvoicePrintContent = {
     labels,
     number: "INV/26-27/0003",
@@ -813,4 +820,548 @@ test("appointment: the note's Markdown prints as formatting", async () => {
   };
 
   assertFormatted(await readPdf(await compile("appointment", content)));
+});
+
+/**
+ * Finds the fewest rows before `title` that push `next`, the first thing the
+ * title introduces, to page 2, and checks the title went with it. That's where
+ * a title gets left behind: it needs a line, a table a header plus a row, so
+ * some row count leaves room for the title alone at the foot of page 1.
+ */
+async function assertTitleKeptWithNext(
+  template: string,
+  contentWith: (rows: number) => unknown,
+  title: string,
+  next: string,
+) {
+  const pagesWith = async (rows: number) => {
+    const pdf = await readPdf(await compile(template, contentWith(rows)));
+    return { title: pageWith(pdf, title), next: pageWith(pdf, next) };
+  };
+  // More rows only ever push `next` later, so a binary search finds the first.
+  let low = 1;
+  let high = 120;
+  assert.ok((await pagesWith(high)).next! > 1, `"${next}" never left page 1`);
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if ((await pagesWith(middle)).next! > 1) high = middle;
+    else low = middle + 1;
+  }
+  const pages = await pagesWith(low);
+  assert.equal(
+    pages.title,
+    pages.next,
+    `with ${low} rows, "${title}" is left behind on page ${pages.title}`,
+  );
+}
+
+test("diagnostic report: a report's title moves with its details and results", async () => {
+  const results = (names: string[]) => ({
+    header: ["Test", "Result", "Reference Range"],
+    rows: names.map((name) => ({
+      component: false,
+      cells: [name, "4.5", "4.0 - 5.5"],
+      highlight: false,
+    })),
+  });
+  const report = (title: string) => ({
+    rows: [{ label: "Specimen", value: "Serum" }],
+    note: null,
+    conclusion: null,
+    attachments: [],
+    title,
+  });
+
+  await assertTitleKeptWithNext(
+    "diagnostic-report",
+    (rows): DiagnosticReportPrintContent => ({
+      heading: "Diagnostic report",
+      patient: { name: "Test Patient", identifiers: [] },
+      patient_label: "Patient",
+      patient_rows: [{ label: "Patient", value: "Test Patient" }],
+      reports: [
+        {
+          ...report("Complete Blood Count"),
+          results: results(Array.from({ length: rows }, (_, i) => `Test ${i}`)),
+        },
+        { ...report("Lipid Profile"), results: results(["Cholesterol"]) },
+      ],
+      footer: { left: "Printed by Dr. Test", right: "Generated today" },
+    }),
+    "Lipid Profile",
+    "Cholesterol",
+  );
+});
+
+/** An appointment with `charges` charge rows, for the title tests. */
+const appointmentWithCharges = (
+  charges: number,
+  extra: Partial<AppointmentPrintContent> = {},
+): AppointmentPrintContent => ({
+  title: "Appointment details",
+  date: "24 Nov 2026",
+  resource: "Dr. Test",
+  patient_rows: [{ label: "Patient", value: "Test Patient" }],
+  token: null,
+  qr_code: null,
+  tags: null,
+  charges: {
+    title: "Charges",
+    header: ["#", "Item", "Amount", "Status"],
+    rows: Array.from({ length: charges }, (_, i) => ({
+      index: String(i + 1),
+      title: `Consultation ${i}`,
+      subtitle: null,
+      amount: "₹100.00",
+      status: "Billed",
+    })),
+    total: { label: "Total", value: "₹100.00" },
+  },
+  payments: null,
+  note: null,
+  footer: { left: "Created by Dr. Test", right: "Generated today" },
+  ...extra,
+});
+
+test("appointment: the Payments title moves with the payments table", async () => {
+  await assertTitleKeptWithNext(
+    "appointment",
+    (rows) =>
+      appointmentWithCharges(rows, {
+        payments: {
+          title: "Payments",
+          header: ["#", "Invoice", "Method", "Amount"],
+          rows: [
+            {
+              index: "1",
+              invoice: "INV/1",
+              invoice_time: null,
+              method: "Cheque",
+              reference: null,
+              amount: "₹100.00",
+            },
+          ],
+          total: { label: "Total", value: "₹100.00" },
+        },
+      }),
+    "Payments",
+    "Cheque",
+  );
+});
+
+test("appointment: the note's label moves with the note", async () => {
+  await assertTitleKeptWithNext(
+    "appointment",
+    (rows) =>
+      appointmentWithCharges(rows, {
+        note: {
+          label: "Note",
+          blocks: richTextToPrint("Bring the earlier reports"),
+        },
+      }),
+    "Note",
+    "Bring the earlier reports",
+  );
+});
+
+test("invoice: the credit notes title moves with its table", async () => {
+  await assertTitleKeptWithNext(
+    "invoice",
+    (rows): InvoicePrintContent => ({
+      labels: { ...INVOICE_LABELS, credit_notes_title: "Credit notes issued" },
+      number: "INV/26-27/0003",
+      issue_date: "20 Nov, 2026 4:02 PM",
+      patient: {
+        name: "Test Patient",
+        gender_age: "Male, 25y",
+        identifiers: [],
+        address: null,
+      },
+      qr_code: null,
+      tax_columns: [],
+      items: Array.from({ length: rows }, (_, i) => ({
+        index: i + 1,
+        title: `Paracetamol 500 mg oral tablet ${i + 1}`,
+        subtitle: null,
+        unit_price: "10.00",
+        quantity: "1.00",
+        discount: { total: "0.00", parts: [] },
+        taxes: [],
+        total: "10.00",
+      })),
+      totals: { components: [], net: "₹10.00", gross: "₹10.00" },
+      payments: null,
+      credit_notes: {
+        rows: [
+          {
+            index: 1,
+            datetime: "20 Nov 2026, 04:02 PM",
+            id: "cn-1",
+            method: "Cash",
+            reference: "CREDIT-REF-1",
+            amount: "10.00",
+          },
+        ],
+        total: "₹10.00",
+      },
+      payment_terms: null,
+      created_by: "Dr. Test",
+      location: null,
+    }),
+    "Credit notes issued",
+    "CREDIT-REF-1",
+  );
+});
+
+test("drug chart: a section's title moves with its chart", async () => {
+  const content: MedicationAdministrationPrintContent = {
+    labels: {
+      patient: "Patient",
+      product: "Medication",
+      patient_name: "Patient name",
+      age_sex: "Age / Sex",
+      encounter_date: "Encounter date",
+    },
+    patient: { name: "Test Patient", identifiers: [] },
+    title: "Medication administration record",
+    info: {
+      patient_name: "Test Patient",
+      age_sex: "25y, Male",
+      encounter_date: "28 Oct 2026",
+    },
+    slot_labels: ["00", "06", "12", "18"],
+    sections: [
+      {
+        title: "Regular medications",
+        prn: false,
+        ranges: [
+          {
+            label: "28 Oct 2026 – 03 Nov 2026",
+            days: ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"].map(
+              (weekday, i) => ({ weekday, date: `${28 + i}/10` }),
+            ),
+            rows: [
+              {
+                name: "Paracetamol 500 mg",
+                summaries: ["1 tablet · Oral"],
+                orders: null,
+                counts: Array(28).fill(0),
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    footer: { left: "Printed by Dr. Test", right: "Generated today" },
+  };
+  // Later sections start on a new page, so only the first one can be left
+  // behind: grow the top margin until its chart moves to page 2.
+  const pagesWith = async (top: number) => {
+    const layout = layoutFor("a4");
+    layout.page.flipped = true;
+    layout.page.margin.top = top;
+    const pdf = await readPdf(
+      await compile("medication-administration", content, "a4", layout),
+    );
+    return {
+      title: pageWith(pdf, "REGULAR MEDICATIONS"),
+      next: pageWith(pdf, "Paracetamol 500 mg"),
+    };
+  };
+  let low = 10;
+  let high = 180;
+  assert.ok((await pagesWith(high)).next! > 1, "the chart never left page 1");
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if ((await pagesWith(middle)).next! > 1) high = middle;
+    else low = middle + 1;
+  }
+  const pages = await pagesWith(low);
+  assert.equal(
+    pages.title,
+    pages.next,
+    `with a ${low}mm top margin, the title is left behind on page ${pages.title}`,
+  );
+});
+
+test("charge items: a section's title moves with its table", async () => {
+  const section = (
+    title: string,
+    items: string[],
+  ): ChargeItemsPrintContent["sections"][number] => ({
+    title,
+    header: ["Item", "Qty", "Amount"],
+    grow: 0,
+    align: ["left", "right", "right"],
+    rows: items.map((item) => ({
+      type: "item",
+      cells: [item, "1", "₹10.00"],
+    })),
+  });
+
+  await assertTitleKeptWithNext(
+    "charge-items",
+    (rows): ChargeItemsPrintContent => ({
+      warning: null,
+      header_space: false,
+      details: { left: [], right: [] },
+      sections: [
+        section(
+          "Section One",
+          Array.from({ length: rows }, (_, i) => `Item ${i}`),
+        ),
+        section("Section Two", ["Physiotherapy"]),
+      ],
+      account_summary: null,
+      footer: { left: "Prepared by Dr. Test", right: "Generated today" },
+    }),
+    "Section Two",
+    "Physiotherapy",
+  );
+});
+
+test("prescriptions: a prescription's heading moves with its medicines", async () => {
+  const medication = (name: string, index: number) => ({
+    index: String(index + 1),
+    name,
+    instructions: [
+      {
+        dosage: "1 tablets",
+        frequency: "1-0-1 (Twice a day)",
+        duration: "5 days",
+        text: "After food",
+      },
+    ],
+    note: null,
+  });
+
+  await assertTitleKeptWithNext(
+    "prescriptions",
+    (rows) => {
+      const content = prescriptionsContent(
+        Array.from({ length: rows }, (_, i) => medication(`Medicine ${i}`, i)),
+      );
+      content.prescriptions.push({
+        ...content.prescriptions[0],
+        title: "Second prescription",
+        prescribed_by: "Dr. Second",
+        medications: [medication("Atorvastatin", 0)],
+      });
+      return content;
+    },
+    "SECOND PRESCRIPTION",
+    "Atorvastatin",
+  );
+});
+
+test("questionnaire response: a section heading moves with its questions", async () => {
+  await assertTitleKeptWithNext(
+    "questionnaire-response",
+    (rows): QuestionnaireResponsePrintContent => ({
+      heading: "Questionnaire response",
+      patient: null,
+      patient_label: "Patient",
+      details: { left: [], right: [] },
+      title: "Follow-up",
+      description: null,
+      responses: [
+        {
+          created: "Created by Dr. Test",
+          date: "24 Nov 2026",
+          blocks: [
+            ...Array.from({ length: rows }, (_, i) => ({
+              type: "question" as const,
+              text: `Question ${i}`,
+              answers: ["Yes"],
+            })),
+            { type: "heading", text: "Section B", rule: true },
+            { type: "question", text: "Next visit", answers: ["1 Dec 2026"] },
+          ],
+        },
+      ],
+    }),
+    "Section B",
+    "Next visit",
+  );
+});
+
+test("patient details: long values wrap inside their column on A4 and A5", async () => {
+  // No spaces and no break points: Typst keeps each one a single word.
+  const abha = "muhammedabdulrahmankunjumon1990@abdm";
+  const mrn = "TVMMCH2026000123456789";
+
+  for (const paper of ["a4", "a5"] as const) {
+    const pdf = await readPdf(
+      await compile(
+        "details-table",
+        {
+          ...detailsTable({
+            header: ["Item"],
+            widths: [null],
+            rows: [["Paracetamol"]],
+          }),
+          details: {
+            left: [
+              { label: "ABHA address", value: abha },
+              { label: "MRN", value: mrn },
+            ],
+            right: [{ label: "Mobile Number", value: "+91 00000 00000" }],
+          },
+        },
+        paper,
+      ),
+    );
+
+    assertReadable(pdf);
+    for (const value of [abha, mrn]) {
+      assert.ok(pdf.text.includes(value), `${paper}: "${value}" lost letters`);
+    }
+    const { boxes } = pdf.pages[0];
+    const rightColumn = boxes.find(
+      (box) => box.text.trim() === "Mobile Number",
+    );
+    assert.ok(rightColumn, `${paper}: no right column`);
+    for (const box of boxes) {
+      const text = box.text.trim();
+      if (text.length < 3 || !(abha.includes(text) || mrn.includes(text))) {
+        continue;
+      }
+      assert.ok(
+        box.right <= rightColumn.left,
+        `${paper}: "${text}" runs into the right column`,
+      );
+    }
+  }
+});
+
+test("questionnaire response: a long unbroken answer wraps on A5", async () => {
+  const code = ("REF2026112400017" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+    .repeat(2)
+    .slice(0, 68);
+  const content: QuestionnaireResponsePrintContent = {
+    heading: "Questionnaire response",
+    patient: null,
+    patient_label: "Patient",
+    details: { left: [], right: [] },
+    title: "Follow-up",
+    description: null,
+    responses: [
+      {
+        created: "Created by Dr. Test",
+        date: "24 Nov 2026",
+        blocks: [{ type: "question", text: "Reference code", answers: [code] }],
+      },
+    ],
+  };
+  const pdf = await readPdf(
+    await compile("questionnaire-response", content, "a5"),
+  );
+
+  assertReadable(pdf);
+  assert.ok(pdf.text.includes(code), "the code lost letters");
+});
+
+test("user-entered text: long unbroken values wrap on A5 in every print", async () => {
+  // One 70-character code per field, so a lost one is easy to spot.
+  const code = (tag: string) =>
+    (tag + "2026112400017ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".repeat(2)).slice(
+      0,
+      70,
+    );
+  const prints: [string, unknown, string[]][] = [
+    [
+      "details-table",
+      {
+        ...detailsTable({
+          header: ["Item"],
+          widths: [null],
+          rows: [["Paracetamol"]],
+        }),
+        title: code("TITLE"),
+        note: code("NOTE"),
+      },
+      [code("TITLE"), code("NOTE")],
+    ],
+    [
+      "invoice",
+      {
+        labels: INVOICE_LABELS,
+        number: "INV/26-27/0003",
+        issue_date: "20 Nov, 2026 4:02 PM",
+        patient: {
+          name: "Test Patient",
+          gender_age: "Male, 25y",
+          identifiers: [{ label: "ABHA address", value: code("ABHA") }],
+          address: code("ADDRESS"),
+        },
+        qr_code: null,
+        tax_columns: [],
+        items: [],
+        totals: { components: [], net: "₹0.00", gross: "₹0.00" },
+        payments: null,
+        credit_notes: null,
+        payment_terms: code("TERMS"),
+        created_by: "Dr. Test",
+        location: null,
+      } satisfies InvoicePrintContent,
+      [code("ABHA"), code("ADDRESS"), code("TERMS")],
+    ],
+    [
+      "appointment",
+      appointmentWithCharges(1, {
+        tags: { label: "Tags", value: code("TAGS") },
+      }),
+      [code("TAGS")],
+    ],
+    [
+      "payment-receipt",
+      {
+        labels: { notes: "Notes" },
+        title: "Payment receipt",
+        outcome: "Complete",
+        details: {
+          left: [{ label: "Name", value: "Test Patient" }],
+          right: [],
+        },
+        invoice: null,
+        breakdown: {
+          header: ["Type", "Kind", "Issuer", "Amount"],
+          row: ["Payment", "Deposit", "Patient", "₹10.00"],
+        },
+        totals: [{ label: "Total", value: "₹10.00", strong: true }],
+        note: code("RECEIPT"),
+        footer: { left: "Generated by Dr. Test", right: null },
+      } satisfies PaymentReceiptPrintContent,
+      [code("RECEIPT")],
+    ],
+    [
+      "resource-letter",
+      {
+        title: code("LETTER"),
+        reference: "REF-1",
+        date: "24 Nov 2026",
+        from: { label: "From", value: "Test Hospital" },
+        subject: code("SUBJECT"),
+        intro: "Please arrange the following.",
+        fields: [{ label: "Contact", value: code("CONTACT") }],
+        reason: { label: "Reason", value: code("REASON") },
+        status: { label: "Status", value: "Pending" },
+        signatures: [
+          { label: "Requested by", name: "Dr. Test", date: "24 Nov 2026" },
+        ],
+      } satisfies ResourceLetterPrintContent,
+      [code("LETTER"), code("SUBJECT"), code("CONTACT"), code("REASON")],
+    ],
+  ];
+
+  for (const [template, content, codes] of prints) {
+    const pdf = await readPdf(await compile(template, content, "a5"));
+    assertReadable(pdf);
+    for (const value of codes) {
+      assert.ok(
+        pdf.text.includes(value),
+        `${template}: "${value}" lost letters`,
+      );
+    }
+  }
 });

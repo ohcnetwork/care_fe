@@ -12,7 +12,7 @@
 #let section-table(section) = {
   let n = section.header.len()
   if section.title != none {
-    block(above: px(16), below: px(4), text(size: text-size.sm, weight: "semibold", section.title))
+    block(above: px(16), below: px(4), sticky: true, text(size: text-size.sm, weight: "semibold", section.title))
   } else { v(px(4)) }
   let columns = range(n).map(i => if i == section.grow { 1fr } else { auto })
   fit-cells(columns, table(

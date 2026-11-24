@@ -6,7 +6,7 @@
 #show: document.with(data.layout)
 #set text(size: text-size.xs)
 
-#let section-title(title) = block(below: px(2), text(weight: "semibold", fill: gray(950), title))
+#let section-title(title) = block(below: px(2), sticky: true, text(weight: "semibold", fill: gray(950), title))
 #let total-line(total) = align(right, pad(top: px(4), right: px(4), {
   text(fill: gray(950), total.label)
   h(px(8))
@@ -51,7 +51,7 @@
 
 #if c.tags != none {
   v(px(6))
-  labelled(c.tags.label, c.tags.value)
+  fit-words(labelled(c.tags.label, c.tags.value))
 }
 
 #if c.charges != none {
@@ -93,10 +93,12 @@
 
 #if c.note != none {
   v(px(8))
+  // Sticky: the label moves on with the note.
   block(
     width: 100%,
     inset: (bottom: px(2)),
     stroke: (bottom: px(1) + gray(200)),
+    sticky: true,
     text(weight: "semibold", fill: gray(700), c.note.label),
   )
   block(width: 100%, fill: soft-background, inset: px(6), radius: px(4), rich-text(c.note.blocks))

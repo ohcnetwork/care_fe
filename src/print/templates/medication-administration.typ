@@ -95,7 +95,7 @@
   for (r, week) in section.ranges.enumerate() {
     if r > 0 { pagebreak(weak: true) }
     if r == 0 {
-      block(width: 100%, below: px(8), breakable: false, fill: if section.prn { palette("pink", 700) } else { gray(800) }, inset: (x: px(8), y: px(4)), text(
+      block(width: 100%, below: px(8), breakable: false, sticky: true, fill: if section.prn { palette("pink", 700) } else { gray(800) }, inset: (x: px(8), y: px(4)), text(
         size: text-size.sm,
         weight: "bold",
         fill: white,

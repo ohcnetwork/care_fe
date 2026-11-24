@@ -136,7 +136,8 @@
   }),
 )))
 
-#let _break-after = regex("[^-,;/)\\]]*[-,;/)\\]]?")
+// Also after `@`, so an email or ABHA address breaks as `name@` / `abdm`.
+#let _break-after = regex("[^-,;/)\\]@]*[-,;/)\\]@]?")
 #let _kannada-virama = regex("\u{0CCD}\u{200D}?$")
 
 // The letters of `s`. Typst keeps joined letters together, except Kannada's
@@ -382,12 +383,11 @@
     columns: (label-width, auto, 1fr),
     text(fill: gray(600), row.label),
     text(fill: gray(600), ":"),
-    pad(left: px(4), text(weight: "semibold", if (
+    // IDs, emails and ABHA addresses have no spaces: `fit-words` breaks one
+    // wider than the column after its punctuation, then between letters.
+    pad(left: px(4), fit-words(text(weight: "semibold", if (
       row.value == none or row.value == ""
-    ) { "-" } else {
-      // A zero-width space lets long ids wrap; Typst won't break a hyphen before a digit.
-      row.value.replace("-", "-\u{200B}")
-    })),
+    ) { "-" } else { row.value }))),
   )),
 )
 

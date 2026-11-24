@@ -81,7 +81,7 @@
     v(px(24))
   }
 
-  block(below: px(6), grid(
+  block(below: px(6), sticky: true, grid(
     columns: (1fr, auto),
     align: horizon,
     {
@@ -97,13 +97,13 @@
   ))
 
   block(width: 100%, stroke: border, radius: px(6), clip: true, {
-    pad(x: px(16), y: px(12), {
+    block(sticky: true, pad(x: px(16), y: px(12), {
       text(weight: "medium", fill: gray(700), l.prescribed_by + ": ")
       text(weight: "semibold", fill: gray(950), rx.prescribed_by)
       if rx.note != none {
         text(size: text-size.xs, fill: gray(700), rich-text(rx.note, lead: l.note + ":"))
       }
-    })
+    }))
     if rx.medications.len() > 0 {
       data-table(
         columns: (auto, 3fr, 2fr, 2fr, 1.5fr, 3fr),

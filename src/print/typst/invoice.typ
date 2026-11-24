@@ -9,7 +9,7 @@
   grid(
     columns: (1fr, auto),
     column-gutter: px(16),
-    stack(
+    fit-words(stack(
       spacing: px(4),
       text(weight: "medium", fill: gray(700), l.bill_to + ":"),
       text(size: text-size.base)[
@@ -26,7 +26,7 @@
           text(fill: gray(500), l.no_address_provided)
         }
       ],
-    ),
+    )),
     if invoice.qr_code != none { qr-code(invoice.qr_code) },
   )
 }
@@ -136,7 +136,7 @@
       clip: true,
       inset: (top: px(8)),
       {
-        pad(x: px(12), bottom: px(8), text(weight: "medium", l.credit_notes_title))
+        block(sticky: true, pad(x: px(12), bottom: px(8), text(weight: "medium", l.credit_notes_title)))
         transactions-table(
           invoice.credit_notes.rows,
           (stroke: none, radius: 0pt),
@@ -156,7 +156,7 @@
       stroke: (top: px(1) + border-color),
       [
         #text(weight: "medium", fill: gray(950), l.payment_terms)
-        #block(above: px(4), invoice.payment_terms)
+        #block(above: px(4), fit-words(invoice.payment_terms))
       ],
     )
   }
