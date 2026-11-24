@@ -35,6 +35,7 @@ import {
 } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { patientIdentifierConfigListSearch } from "@/lib/router/search/admin";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -112,8 +113,8 @@ export default function PatientIdentifierConfigList({
   // reachable by superusers; facility-level configs follow facility permissions.
   const canWrite = !facilityId || canWritePatientIdentifierConfig;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: patientIdentifierConfigListSearch,
     limit: 15,
-    disableCache: true,
     defaultQueryParams: {
       status: PatientIdentifierConfigStatus.active,
     },

@@ -206,7 +206,7 @@ export function FillPageBody({
       // Order matters: finishDraft flushes the pristine state before the
       // redirect so useNavigationBlocker does not block it.
       autosave.finishDraft();
-      navigate({ href: exitTarget });
+      navigate({ href: exitTarget, replace: true });
     },
   });
 
@@ -220,7 +220,7 @@ export function FillPageBody({
     continueDraftId,
     onSaved: () => {
       autosave.finishDraft();
-      navigate({ href: exitTarget });
+      navigate({ href: exitTarget, replace: true });
     },
   });
 
@@ -244,7 +244,7 @@ export function FillPageBody({
         discarded,
       );
       queryClient.invalidateQueries({ queryKey: formSubmissionKeys.lists() });
-      navigate({ href: exitTarget });
+      navigate({ href: exitTarget, replace: true });
     },
     onError: () => toast.error(t("form_submission_discard_failed")),
   });
@@ -316,7 +316,7 @@ export function FillPageBody({
     if (serverDraft) {
       discardServerDraft.mutate(serverDraft);
     } else if (autosave.discardDraft()) {
-      navigate({ href: exitTarget });
+      navigate({ href: exitTarget, replace: true });
     }
   };
   const requestClose = () => {
@@ -332,7 +332,7 @@ export function FillPageBody({
     if (continueDraftId) {
       if (!contextRefreshFailed) serverDraftSave.saveDraft();
     } else if (autosave.minimizeDraft()) {
-      navigate({ href: exitTarget });
+      navigate({ href: exitTarget, replace: true });
     }
   };
 
@@ -494,6 +494,7 @@ export function FillPageBody({
                   <QuestionnaireSearch
                     subjectType={pickerSubjectType}
                     facilityId={facilityId}
+                    excludeIds={forms.map((form) => form.questionnaire.id)}
                     onSelect={addQuestionnaireFromPicker}
                     // The default trigger is a `role="combobox"` button,
                     // and combobox takes no name from its contents — it

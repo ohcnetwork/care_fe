@@ -70,6 +70,7 @@ import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDisp
 
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { dispenseOrderShowSearch } from "@/lib/router/search/pharmacy";
 import { AddDispenseMedicationRow } from "@/pages/Facility/services/pharmacy/components/AddDispenseMedicationRow";
 import { createAndIssueInvoice } from "@/pages/Facility/services/pharmacy/utils/createAndIssueInvoice";
 import { extractInvoicesFromDispenses } from "@/pages/Facility/services/pharmacy/utils/extractInvoicesFromDispenses";
@@ -116,10 +117,9 @@ export function DispenseOrderView({
 
   const [showCancelled, setShowCancelled] = useState(false);
 
-  const [{ autoAdvanceStatus }, setQParams] = useQueryParams<{
-    autoAdvanceStatus?: string;
-    collectPayment?: string;
-  }>();
+  const [{ autoAdvanceStatus }, setQParams] = useQueryParams(
+    dispenseOrderShowSearch,
+  );
 
   const { data: dispenseOrder, isLoading: isLoadingOrder } = useQuery({
     queryKey: ["dispenseOrder", facilityId, dispenseOrderId],
@@ -293,7 +293,7 @@ export function DispenseOrderView({
   const autoAdvanceTriggered = useRef(false);
   useEffect(() => {
     if (
-      autoAdvanceStatus === "true" &&
+      autoAdvanceStatus === true &&
       !autoAdvanceTriggered.current &&
       dispenseOrder?.status === DispenseOrderStatus.draft
     ) {

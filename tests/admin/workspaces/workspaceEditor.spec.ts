@@ -104,7 +104,7 @@ async function addSection(page: Page, column: string, label: string) {
     .getByRole("textbox", { name: "Search sections", exact: true })
     .fill(label);
   await picker.getByRole("button", { name: label, exact: true }).click();
-  await expect(picker).not.toBeVisible();
+  await expect(picker).toBeHidden();
 }
 
 // The sheet is titled with the section's widget name, so find it by the
@@ -127,7 +127,7 @@ async function closeSectionSettings(page: Page) {
   await sectionSettings(page)
     .getByRole("button", { name: "Done", exact: true })
     .click();
-  await expect(sectionSettings(page)).not.toBeVisible();
+  await expect(sectionSettings(page)).toBeHidden();
 }
 
 async function sectionAction(page: Page, name: string, action: string) {
@@ -773,7 +773,7 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await dialog
       .getByRole("button", { name: "Apply changes", exact: true })
       .click();
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await expect(
       page.getByRole("heading", { name: tabTitle, exact: true }),
     ).toBeVisible();
@@ -1081,7 +1081,7 @@ test("instance organization access searches, replaces, and clears grants while p
   await test.step("Search for another organization and replace the existing grant", async () => {
     await page.goto(`/admin/workspaces/${record.data.id}/edit`);
     await expect(generalSettings).toHaveAttribute("aria-expanded", "false");
-    await expect(access).not.toBeVisible();
+    await expect(access).toBeHidden();
     await openGeneralSettings(page);
     await expect(originalChip).toBeVisible();
     await expect(saveAccess).toBeDisabled();
@@ -1118,7 +1118,7 @@ test("instance organization access searches, replaces, and clears grants while p
     await descriptionField.fill(draftDescription);
     await generalSettings.click();
     await expect(generalSettings).toHaveAttribute("aria-expanded", "false");
-    await expect(access).not.toBeVisible();
+    await expect(access).toBeHidden();
     await openGeneralSettings(page);
     await expect(descriptionField).toBeVisible();
     await expect(descriptionField).toHaveValue(draftDescription);
@@ -1417,6 +1417,7 @@ test("department workspaces validate ownership and preserve edits after a backen
 
   const updatedName = `${name} revised`;
   const updatedTemplate = { sections: [{ key: "rounds", visible: true }] };
+
   await test.step("A rejected save keeps inputs and can be retried after API acknowledgement", async () => {
     const pathname = `/api/v1/workspace/${api.records[0].data.id}/`;
     api.rejectedWrites.add(`PUT ${pathname}`);
@@ -1597,10 +1598,9 @@ test("the combined facility list uses server pagination and retains personal cre
     await expect(
       page.getByRole("button", { name: "Delete workspace", exact: true }),
     ).toBeVisible();
+    // Back returns to the list as it was left, page included.
     await page.getByRole("link", { name: "Back", exact: true }).click();
-    await expect(page).toHaveURL(
-      (url) => url.pathname === basePath && !url.search,
-    );
+    await expect(page).toHaveURL((url) => url.pathname === basePath);
     await page.getByRole("textbox", { name: "Search", exact: true }).fill(name);
     await expect(page.getByRole("link", { name, exact: true })).toBeVisible();
   });
@@ -1703,7 +1703,7 @@ test("open workspace editor controls close when a server refresh replaces their 
       schema_version: 1,
       pages: [updatedPage, ...remainingPages],
     });
-    await expect.soft(menu).not.toBeVisible();
+    await expect.soft(menu).toBeHidden();
     await page.keyboard.press("Escape");
     await expect(
       column(1).getByRole("article", {
@@ -1745,7 +1745,7 @@ test("open workspace editor controls close when a server refresh replaces their 
         ...remainingPages,
       ],
     });
-    await expect.soft(settings).not.toBeVisible();
+    await expect.soft(settings).toBeHidden();
     await page.keyboard.press("Escape");
     await expect(
       page.getByRole("button", {
@@ -1782,7 +1782,7 @@ test("open workspace editor controls close when a server refresh replaces their 
         ...remainingPages,
       ],
     });
-    await expect.soft(picker).not.toBeVisible();
+    await expect.soft(picker).toBeHidden();
     await page.keyboard.press("Escape");
     await expect(column(2)).toHaveCount(0);
     await expect(
@@ -1802,7 +1802,7 @@ test("open workspace editor controls close when a server refresh replaces their 
     });
     await expect(confirmation).toBeVisible();
     await refreshTemplate({ schema_version: 1, pages: remainingPages });
-    await expect.soft(confirmation).not.toBeVisible();
+    await expect.soft(confirmation).toBeHidden();
     await page.keyboard.press("Escape");
     await expect(
       page.getByRole("button", { name: primaryPage.title, exact: true }),
@@ -1878,6 +1878,7 @@ test("cached workspace editors refresh untouched fields and preserve unsaved edi
 
   const draftName = `Unsaved workspace ${faker.string.alphanumeric(8)}`;
   const refreshedTemplate = { sections: [{ key: "latest", visible: false }] };
+
   await test.step("A reconnect refresh updates untouched fields while keeping pending edits", async () => {
     await nameField.fill(draftName);
     await access

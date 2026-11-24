@@ -80,7 +80,7 @@ function TagSelector({
         selected={selectedTags}
         resource={resource}
         onChange={handleChange}
-        className="h-9 w-full"
+        className="w-full"
         facilityId={facilityId}
         align="end"
       />
@@ -591,9 +591,11 @@ export function CompactConditionEditor({
                     if (typeof error.message === "string") {
                       errorMessage[key] = error.message;
                     } else if (typeof error === "object") {
-                      Object.entries(error).forEach(([k, v]: [string, any]) => {
-                        if (v && typeof v.message === "string") {
-                          errorMessage[k] = v.message;
+                      Object.entries(error).forEach(([k, v]) => {
+                        const message = (v as { message?: unknown } | null)
+                          ?.message;
+                        if (v && typeof message === "string") {
+                          errorMessage[k] = message;
                         }
                       });
                     }

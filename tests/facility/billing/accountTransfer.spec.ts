@@ -275,9 +275,10 @@ test.describe("Account Transfer Payment", () => {
     const amount = faker.number.int({ min: 1, max: 10 }).toString();
     await page.getByPlaceholder("Enter amount").fill(amount);
 
-    // Active target visible, non-active targets not visible
+    // The backend doesn't restrict the target's status, so non-active
+    // accounts are offered too
     await expect(page.getByText(targetAccount.name)).toBeVisible();
-    await expect(page.getByText(nonActiveAccounts[0].name)).not.toBeVisible();
+    await expect(page.getByText(nonActiveAccounts[0].name)).toBeVisible();
 
     await page.getByText(targetAccount.name).click();
 

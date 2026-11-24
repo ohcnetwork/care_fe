@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import type { TFunction } from "i18next";
 import { CheckIcon, PlusCircle, X } from "lucide-react";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -36,6 +36,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
@@ -53,11 +54,12 @@ import {
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import { generateSlugValue } from "@/Utils/slug";
 
-const createFormSchema = (
-  t: (key: string, options?: Record<string, unknown>) => string,
-) => {
+const createFormSchema = (t: TFunction) => {
   return z.object({
-    name: z.string().min(1, { message: t("name_is_required") }),
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: t("name_is_required") }),
     slug_value: slugValueSchema(),
     product_type: z.enum(ProductKnowledgeType),
     status: z.enum(ProductKnowledgeStatus),
@@ -71,14 +73,20 @@ const createFormSchema = (
       .array(
         z.object({
           name_type: z.enum(ProductNameTypes),
-          name: z.string().min(1, { message: t("name_is_required") }),
+          name: z
+            .string()
+            .trim()
+            .min(1, { message: t("name_is_required") }),
         }),
       )
       .default([]),
     storage_guidelines: z
       .array(
         z.object({
-          note: z.string().min(1, { message: t("field_required") }),
+          note: z
+            .string()
+            .trim()
+            .min(1, { message: t("field_required") }),
           stability_duration: z
             .object({
               value: z.number().int().optional(),
@@ -167,6 +175,7 @@ function ProductKnowledgeFormContent({
     navigate({
       to: "/facility/$facilityId/settings/product_knowledge/categories/$categorySlug",
       params: { facilityId, categorySlug },
+      replace: true,
     });
   },
 }: {
@@ -287,6 +296,7 @@ function ProductKnowledgeFormContent({
         navigate({
           to: "/facility/$facilityId/settings/product_knowledge/$slug",
           params: { facilityId, slug: productKnowledge.slug },
+          replace: true,
         });
       },
     },
@@ -1020,21 +1030,16 @@ function ProductKnowledgeFormContent({
 
             <div className="mt-6 flex justify-end space-x-4">
               <Button type="button" variant="outline" asChild>
-                {slug ? (
-                  <Link
-                    to="/facility/$facilityId/settings/product_knowledge/$slug"
-                    params={{ facilityId, slug }}
-                  >
-                    {t("cancel")}
-                  </Link>
-                ) : (
-                  <Link
-                    to="/facility/$facilityId/settings/product_knowledge/categories/$categorySlug"
-                    params={{ facilityId, categorySlug: categorySlug ?? "" }}
-                  >
-                    {t("cancel")}
-                  </Link>
-                )}
+                <HrefLink
+                  href={
+                    slug
+                      ? `/facility/${facilityId}/settings/product_knowledge/${slug}`
+                      : `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug ?? ""}`
+                  }
+                  back
+                >
+                  {t("cancel")}
+                </HrefLink>
               </Button>
               <Button
                 type="submit"

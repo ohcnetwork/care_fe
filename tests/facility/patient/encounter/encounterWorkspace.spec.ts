@@ -475,19 +475,7 @@ async function mockEncounterWorkspaceApi(
       diagnosis: "Previous asthma",
     },
   };
-  const imagingReport = {
-    id: faker.string.uuid(),
-    status: "final",
-    category: { system: "test", code: "imaging", display: "Imaging" },
-    encounter: currentEncounter,
-    observations: [],
-    conclusion: "No acute findings",
-    created_by: actor,
-    updated_by: actor,
-    requester: actor,
-    created_date: "2026-10-01T12:00:00Z",
-    modified_date: "2026-10-01T12:30:00Z",
-  };
+  // The service-request list API does not include diagnostic reports.
   const widgetOrders = options.includeWidgetData
     ? [
         {
@@ -499,19 +487,17 @@ async function mockEncounterWorkspaceApi(
             code: "36643-5",
             display: "XR Chest",
           },
-          diagnostic_reports: [imagingReport],
           created_date: "2026-10-01T09:00:00Z",
         },
         {
           title: "Creatinine",
-          status: "active",
+          status: "on_hold",
           category: "laboratory",
           code: {
             system: "http://loinc.org",
             code: "2160-0",
             display: "Creatinine",
           },
-          diagnostic_reports: [],
           created_date: "2026-10-01T10:00:00Z",
         },
         {
@@ -523,7 +509,6 @@ async function mockEncounterWorkspaceApi(
             code: "718-7",
             display: "Hemoglobin",
           },
-          diagnostic_reports: [],
           created_date: "2026-10-01T11:00:00Z",
         },
       ].map((order) => ({
@@ -1149,7 +1134,6 @@ async function mockEncounterWorkspaceApi(
     currentCareTeamMember,
     pastCareTeamMember,
     otherPrescriber,
-    imagingReport,
     widgetOrders,
     writes,
     basePath: `/facility/${facility.id}/patient/${patient.id}/encounter/${currentEncounter.id}`,
@@ -1190,6 +1174,58 @@ test("submitted boolean values stay paired with their exact question labels", as
   ]);
 });
 
+test("favorite forms combine the instance and current facility lists in shortcuts and the picker", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+  });
+  fixture.workspace.template = roundsTemplate(false, [
+    { type: "quick_actions", title: "Ward shortcuts" },
+    { type: "favorite_forms", title: "Favorite ward forms" },
+  ]);
+  const instanceForm = fixture.questionnaire;
+  const facilityForm = {
+    ...instanceForm,
+    id: faker.string.uuid(),
+    title: `Facility assessment ${faker.string.alphanumeric(6)}`,
+  };
+  await page.route("**/api/v1/questionnaire/?*", async (route) => {
+    const url = new URL(route.request().url());
+    const results = url.searchParams.has("favorite_list")
+      ? url.searchParams.get("facility") === fixture.facility.id
+        ? [facilityForm]
+        : [instanceForm]
+      : [instanceForm, facilityForm];
+    await route.fulfill({ json: { count: results.length, results } });
+  });
+
+  await page.goto(`${fixture.basePath}/rounds`);
+  const favorites = page.getByRole("region", {
+    name: "Favorite ward forms",
+    exact: true,
+  });
+  for (const form of [instanceForm, facilityForm]) {
+    await expect(
+      favorites.getByRole("link", { name: form.title }),
+    ).toHaveAttribute(
+      "href",
+      `${fixture.basePath}/questionnaire/${form.id}?return_page=rounds`,
+    );
+  }
+  await page
+    .getByRole("region", { name: "Ward shortcuts", exact: true })
+    .getByRole("button", { name: "Forms", exact: true })
+    .click();
+  for (const form of [instanceForm, facilityForm]) {
+    await expect(
+      page.getByRole("option", { name: form.title }).getByRole("button", {
+        name: "Remove from favorites",
+      }),
+    ).toBeVisible();
+  }
+});
+
 test("a cyclic added form blocks the whole submission and retains both draft forms", async ({
   page,
 }) => {
@@ -1217,7 +1253,9 @@ test("a cyclic added form blocks the whole submission and retains both draft for
   await page.route("**/api/v1/questionnaire/**", async (route) => {
     const path = new URL(route.request().url()).pathname;
     if (path === "/api/v1/questionnaire/") {
-      await route.fulfill({ json: { count: 1, results: [cyclic] } });
+      await route.fulfill({
+        json: { count: 2, results: [fixture.questionnaire, cyclic] },
+      });
     } else if (path === `/api/v1/questionnaire/${cyclic.id}/`) {
       await route.fulfill({ json: cyclic });
     } else {
@@ -1241,9 +1279,19 @@ test("a cyclic added form blocks the whole submission and retains both draft for
     .getByRole("textbox")
     .fill("Keep this clinical note");
   await page.getByRole("button", { name: "Add questionnaire" }).click();
+  await expect(page.getByRole("option", { name: cyclic.title })).toBeVisible();
+  await expect(
+    page.getByRole("option", { name: fixture.questionnaire.title }),
+  ).toHaveCount(0);
   await page.getByPlaceholder("Search Forms").fill(cyclic.title);
   await page.getByRole("option", { name: cyclic.title }).click();
   await expect(page.locator("[data-form-key]")).toHaveCount(2);
+  await page.getByRole("button", { name: "Add questionnaire" }).click();
+  await expect(
+    page.getByText("No Results Found", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("option", { name: cyclic.title })).toHaveCount(0);
+  await page.getByPlaceholder("Search Forms").press("Escape");
   await expect.poll(() => draftFormCount(page)).toBe(2);
   await page.getByRole("button", { name: "Save Changes" }).click();
   await expect(
@@ -1522,6 +1570,40 @@ test("organization history filters use each primary encounter's facility scope",
 });
 
 test.describe("Encounter workspace rendering", () => {
+  test("hides empty custom clinical sections while retaining populated sections", async ({
+    page,
+  }) => {
+    const fixture = await mockEncounterWorkspaceApi(page, { symptomCount: 0 });
+    let releaseSymptoms!: () => void;
+    const symptomsReady = new Promise<void>((resolve) => {
+      releaseSymptoms = resolve;
+    });
+    await page.route(
+      (url) =>
+        url.pathname === `/api/v1/patient/${fixture.patient.id}/symptom/`,
+      async (route) => {
+        await symptomsReady;
+        await route.fulfill({ json: { count: 0, results: [] } });
+      },
+    );
+    await page.goto(`${fixture.basePath}/rounds`);
+    await expect(
+      page.getByRole("region", { name: "Allergy review", exact: true }),
+    ).toContainText("Penicillin allergy");
+    const symptoms = page.getByRole("region", {
+      name: "Symptoms today",
+      exact: true,
+    });
+    await expect(symptoms.getByRole("status")).toBeVisible();
+    releaseSymptoms();
+    await expect(
+      page.getByRole("region", { name: "Symptoms today", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByText("No symptoms have been recorded", { exact: true }),
+    ).toHaveCount(0);
+  });
+
   test("renders configured clinical data while retaining system pages and encounter navigation", async ({
     page,
   }, testInfo) => {
@@ -1667,7 +1749,7 @@ test.describe("Encounter workspace rendering", () => {
       await sectionPicker
         .getByRole("button", { name: "Overview", exact: true })
         .click();
-      await expect(sectionPicker).not.toBeVisible();
+      await expect(sectionPicker).toBeHidden();
       await expect(page).toHaveURL(
         (url) =>
           url.pathname === `${fixture.basePath}/updates` &&
@@ -1682,7 +1764,7 @@ test.describe("Encounter workspace rendering", () => {
       await sectionPicker
         .getByRole("button", { name: "Ward rounds", exact: true })
         .click();
-      await expect(sectionPicker).not.toBeVisible();
+      await expect(sectionPicker).toBeHidden();
       await expect(page).toHaveURL(
         (url) =>
           url.pathname === `${fixture.basePath}/rounds` &&
@@ -1950,7 +2032,7 @@ test.describe("Encounter workspace rendering", () => {
       await expect(
         page.getByRole("heading", { name: "Ward rounds", exact: true }),
       ).toBeVisible();
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       expect(fixture.defaultWrites).toEqual([
         {
           workspaceId: fixture.workspace.id,
@@ -2025,7 +2107,7 @@ test.describe("Encounter workspace rendering", () => {
         .getByRole("option")
         .filter({ hasText: alternateWorkspace.name })
         .click();
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       await expect(
         page.getByRole("heading", { name: "Clinical review", exact: true }),
       ).toBeVisible();
@@ -2099,7 +2181,7 @@ test.describe("Encounter workspace rendering", () => {
         },
       ]);
       await choice.click();
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       await expect(
         page.getByRole("heading", { name: "Ward rounds", exact: true }),
       ).toBeVisible();
@@ -2145,7 +2227,7 @@ test.describe("Encounter workspace rendering", () => {
         page.getByRole("heading", { name: "Clinical review", exact: true }),
       ).toHaveCount(0);
       await choice.click();
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       await expect(
         page.getByRole("heading", { name: "Clinical review", exact: true }),
       ).toBeVisible();
@@ -2209,7 +2291,7 @@ test.describe("Encounter workspace rendering", () => {
           exact: true,
         })
         .click();
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
       await expect(
         page.getByRole("tab", { name: "Overview", exact: true }),
@@ -2611,6 +2693,7 @@ test.describe("Encounter workspace rendering", () => {
         ),
       ).toEqual([]);
     });
+
     expect(
       fixture.writes.filter(
         (request) => !request.endsWith("/account/default_account/"),
@@ -2932,6 +3015,7 @@ test.describe("Encounter workspace rendering", () => {
       ).toHaveCount(0);
       await page.keyboard.press("Escape");
     });
+
     expect(fixture.writes).toEqual([]);
   });
 
@@ -3027,9 +3111,19 @@ test.describe("Encounter workspace rendering", () => {
     await page.keyboard.press("Enter");
     await expect(page.getByRole("menu")).toBeHidden();
     await expect(priority).toBeFocused();
-    await expect(priority).toHaveCSS("outline-width", "2px");
     await expect(page).toHaveURL((url) => !url.searchParams.has("priority"));
     await expect(priority).toHaveText("Priority");
+    // Field triggers can indicate keyboard focus with an outline or a shadow ring.
+    const focusIndicator = () =>
+      priority.evaluate((element) => {
+        const { outlineStyle, outlineWidth, boxShadow } =
+          getComputedStyle(element);
+        return [outlineStyle, outlineWidth, boxShadow];
+      });
+    const focusedIndicator = await focusIndicator();
+    await page.keyboard.press("Tab");
+    await expect(priority).not.toBeFocused();
+    await expect.poll(focusIndicator).not.toEqual(focusedIndicator);
     await expect(priority).toHaveAttribute(
       "data-slot",
       "dropdown-menu-trigger",
@@ -3163,7 +3257,7 @@ test.describe("Encounter workspace rendering", () => {
         .getByRole("option")
         .filter({ hasText: consentWorkspace.name })
         .click();
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       await expect(page.getByText(consentName, { exact: true })).toBeVisible();
       await expect(page).toHaveURL(
         `${fixture.basePath}/consents?selectedEncounter=${fixture.pastEncounter.id}`,
@@ -3329,7 +3423,7 @@ test.describe("Encounter workspace rendering", () => {
       const done = drawer.getByRole("button", { name: "Done", exact: true });
       const closeDrawer = async () => {
         await done.click();
-        await expect(drawer).not.toBeVisible();
+        await expect(drawer).toBeHidden();
       };
       const save = page.getByRole("button", {
         name: "Save Changes",
@@ -3564,6 +3658,7 @@ test.describe("Encounter workspace rendering", () => {
         page.getByText(unavailableMessage, { exact: true }),
       ).toHaveCount(1);
     });
+
     await test.step("Registered plugin pages retain their declared dotted route keys", async () => {
       await page.getByRole("tab", { name: /lab\.results$/ }).click();
       await expect(page).toHaveURL((url) =>
@@ -3579,6 +3674,7 @@ test.describe("Encounter workspace rendering", () => {
         review.getByText("Read only review", { exact: true }),
       ).toBeVisible();
     });
+
     await test.step("An encounter from another patient never reaches a core or plugin widget", async () => {
       fixture.pastEncounter.patient = {
         ...fixture.patient,
@@ -3600,6 +3696,7 @@ test.describe("Encounter workspace rendering", () => {
       ).toHaveCount(0);
       expect(fixture.clinicalReads).toEqual([]);
     });
+
     expect(fixture.writes).toEqual([
       `PUT /api/v1/workspace/${fixture.workspace.id}/`,
     ]);
@@ -3976,7 +4073,7 @@ test.describe("Encounter workspace rendering", () => {
         .getByRole("option")
         .filter({ hasText: fixture.workspace.name })
         .click();
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       await expect(
         page.getByRole("alert").filter({ hasText: invalidMessage }),
       ).toBeVisible();
@@ -4001,6 +4098,7 @@ test.describe("Encounter workspace rendering", () => {
         },
       ]);
     });
+
     await test.step("Widget aliases stay unavailable while canonical widgets render", async () => {
       const aliases = ["allergy", "symptom", "diagnoses", "active_problems"];
       fixture.workspace.template = {
@@ -4344,7 +4442,7 @@ test("one workspace selection configures encounter and clinical history layouts"
   await header.click();
   await picker.getByRole("option").filter({ hasText: history.name }).click();
   // The picker closes once the choice is saved.
-  await expect(picker).not.toBeVisible();
+  await expect(picker).toBeHidden();
   await expect(header).toHaveAccessibleName(`Workspace: ${history.name}`);
   await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
   await expect
@@ -4395,7 +4493,7 @@ test("one workspace selection configures encounter and clinical history layouts"
         exact: true,
       })
       .click();
-    await expect(picker).not.toBeVisible();
+    await expect(picker).toBeHidden();
     await expect(header).toHaveAccessibleName("Workspace: Standard encounter");
     await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
     expect(fixture.defaultWrites.at(-1)).toEqual({
@@ -4502,6 +4600,7 @@ test("studio history pages can show only the forms the viewer submitted", async 
     }),
   ).toHaveCount(0);
   await page.keyboard.press("Escape");
+
   await test.step("Standard history deep links remain available alongside custom tabs", async () => {
     await page.goto(
       `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/diagnoses`,
@@ -4514,6 +4613,7 @@ test("studio history pages can show only the forms the viewer submitted", async 
     );
     await expect(forms).toHaveCount(0);
   });
+
   expect(fixture.defaultWrites).toEqual([]);
 });
 
@@ -4524,14 +4624,6 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
     includeSectionData: true,
     includeWidgetData: true,
   });
-  fixture.widgetOrders[1].diagnostic_reports = [
-    {
-      ...fixture.imagingReport,
-      id: faker.string.uuid(),
-      status: "preliminary",
-      conclusion: "",
-    },
-  ];
   const loinc = (code: string, display: string) => ({
     system: "http://loinc.org",
     code,
@@ -4695,24 +4787,23 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
     ),
   ).toBe(true);
 
-  // Outstanding orders: drafts are excluded, reports link out, open orders
-  // link to their status page.
-  await expect(orders).toContainText("1 with reports · 1 awaiting results");
+  // The list response has order statuses, not diagnostic-report outcomes.
+  await expect(orders).toContainText("Chest X-ray");
   await expect(orders.getByText("Unsent draft order")).toHaveCount(0);
   const xray = orders.getByRole("listitem").filter({ hasText: "Chest X-ray" });
   await expect(xray).toContainText("Imaging");
-  await expect(xray).toContainText("Report received");
+  await expect(xray).toContainText("Active");
   await expect(
-    xray.getByRole("link", { name: "View Report", exact: true }),
+    xray.getByRole("link", { name: "Check Status", exact: true }),
   ).toHaveAttribute(
     "href",
-    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/diagnostic_reports/${fixture.imagingReport.id}`,
+    `/facility/${fixture.facility.id}/service_requests/${fixture.widgetOrders[0].id}`,
   );
   const creatinine = orders
     .getByRole("listitem")
     .filter({ hasText: "Creatinine" });
   await expect(creatinine).toContainText("Laboratory");
-  await expect(creatinine).toContainText("No result yet");
+  await expect(creatinine).toContainText("On Hold");
   await expect(
     creatinine.getByRole("link", { name: "View Report", exact: true }),
   ).toHaveCount(0);
@@ -4855,6 +4946,5 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
   ).toBeVisible();
   await expect(vitalRow("Pulse")).not.toContainText("82");
   await expect(medication).toBeVisible();
-  await expect(orders).toContainText("No service requests found");
-  await expect(orders.getByRole("listitem")).toHaveCount(0);
+  await expect(orders).toHaveCount(0);
 });

@@ -41,6 +41,7 @@ export const encounterHistoryFiltersAtom = atomFamily((scope: string) =>
 export interface EncounterListFilters {
   status?: string;
   priority?: string;
+  encounterClass?: string;
   selectedTags: TagConfig[];
   tagsBehavior: string;
   selectedOrg?: FacilityOrganizationRead;
@@ -52,6 +53,7 @@ export interface EncounterListFilters {
 const defaultListFilters: EncounterListFilters = {
   status: undefined,
   priority: undefined,
+  encounterClass: undefined,
   selectedTags: [],
   tagsBehavior: "any",
   selectedOrg: undefined,

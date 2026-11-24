@@ -84,6 +84,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import {
   isGreaterThanOrEqual,
   isPositive,
+  isValidDecimal,
   round,
   roundWhole,
   zodDecimal,
@@ -160,7 +161,9 @@ const createBaseSchema = () =>
     payment_datetime: z.string().refine((val) => new Date(val) <= new Date(), {
       message: t("payment_date_cannot_be_in_future"),
     }),
-    amount: zodDecimal({ min: 0 }),
+    amount: zodDecimal({ min: 0 }).refine(isPositive, {
+      message: t("amount_must_be_greater_than_zero"),
+    }),
     tendered_amount: zodDecimal({ min: 0 }),
     returned_amount: zodDecimal({ min: 0 }).optional(),
     target_invoice: z.string().optional(),
@@ -184,7 +187,11 @@ const createFormSchema = (
     })
     .refine(
       (data) => {
-        if (!data.tendered_amount || !data.amount) {
+        // Zod runs this refine even when a field is partial input (e.g. ".").
+        if (
+          !isValidDecimal(data.tendered_amount) ||
+          !isValidDecimal(data.amount)
+        ) {
           return true;
         }
         return isGreaterThanOrEqual(data.tendered_amount, data.amount);
@@ -257,10 +264,13 @@ const PaymentReconciliationSheetBase = ({
   // Calculate returned amount when tender amount, amount or payment method changes
   useEffect(() => {
     if (isCashPayment) {
-      // For cash payments, calculate change to return
+      // For cash payments, calculate change to return.
+      // Partial input (e.g. ".") counts as 0 until the user types a digit.
+      const paid = isValidDecimal(amount) ? amount : "0";
+      const tendered = isValidDecimal(tenderedAmount) ? tenderedAmount : "0";
       form.setValue(
         "returned_amount",
-        round(Decimal.max(0, tenderedAmount || "0").minus(amount || "0")),
+        round(Decimal.max(0, tendered).minus(paid)),
       );
       form.setValue("reference_number", "");
     } else {
@@ -824,7 +834,9 @@ const PaymentReconciliationSheetBase = ({
 
                   <Button
                     type="submit"
-                    disabled={isPending || isExtensionsLoading}
+                    disabled={
+                      isPending || isExtensionsLoading || !(Number(amount) > 0)
+                    }
                     aria-label={
                       isCreditNote
                         ? t("record_credit_note")

@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import { getFieldErrorMessage } from "tests/helper/error";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -325,5 +326,43 @@ test.describe("Medication Request Questionnaire", () => {
     await expect(page.getByText("Dosage*This field is required")).toBeVisible();
 
     await expect(page.getByText("Frequency*eg. 1-0-1This field")).toBeVisible();
+  });
+
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    // The response template form opens only when there is a medication to save.
+    await test.step("Add a medication", async () => {
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: /Add Medication/i })
+        .click();
+      await page.getByRole("tab", { name: "Medication" }).click();
+      await page.getByPlaceholder(/Search Medications/i).fill(medicationName);
+      await page
+        .getByRole("option", { name: medicationName, exact: true })
+        .click();
+    });
+
+    await test.step("Open the save template form", async () => {
+      await page.getByRole("button", { name: /^Templates/ }).click();
+      await page.getByRole("button", { name: /^Save Current/ }).click();
+    });
+
+    const templateSheet = page.getByRole("dialog", {
+      name: "Save as Template",
+    });
+    const nameField = templateSheet.getByRole("textbox", {
+      name: "Template Name",
+    });
+    await nameField.fill("   ");
+
+    await templateSheet
+      .getByRole("button", { name: "Create Template" })
+      .click();
+
+    // Text not asserted: this schema's message is resolved at module load,
+    // before translations are ready, so it does not read "Name is required".
+    await expect(getFieldErrorMessage(nameField)).toBeVisible();
   });
 });

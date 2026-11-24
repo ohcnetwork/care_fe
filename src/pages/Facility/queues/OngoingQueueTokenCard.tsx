@@ -31,6 +31,7 @@ import mutate from "@/Utils/request/mutate";
 import { QueryParams } from "@/Utils/request/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import type { TFunction } from "i18next";
 import {
   BringToFront,
   Check,
@@ -286,7 +287,7 @@ function OngoingQueueTokenCardInner({
   setShowCancelDialog: (open: boolean) => void;
   showEnteredInErrorDialog: boolean;
   setShowEnteredInErrorDialog: (open: boolean) => void;
-  t: (key: string, options?: Record<string, unknown>) => string;
+  t: TFunction;
 }) {
   const actions = useTokenActions({
     facilityId,

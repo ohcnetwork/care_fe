@@ -1,35 +1,15 @@
 import { expect, test, type Page } from "@playwright/test";
-import { format, subDays } from "date-fns";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Assign users to a patient", () => {
-  let facilityId: string;
-
   test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
-    );
-    await page.getByText("View Encounter").first().click();
-    await navigateToPatientDetails(page);
+    const facilityId = getFacilityId();
+    const { patientId } = await createQuestionnaireEncounter(facilityId);
+    await page.goto(`/facility/${facilityId}/patient/${patientId}`);
   });
-
-  async function navigateToPatientDetails(page: Page) {
-    // Click the patient info hover card trigger to reveal the menu
-    await page
-      .locator("[data-slot='patient-info-hover-card-trigger']")
-      .last()
-      .click();
-
-    // Wait for and click the View Profile link
-    const viewProfileLink = page.getByRole("link", { name: "View Profile" });
-    await viewProfileLink.waitFor({ state: "visible" });
-    await viewProfileLink.click();
-  }
 
   async function openUsersTab(page: Page) {
     await page.getByRole("tab", { name: "Users" }).click();

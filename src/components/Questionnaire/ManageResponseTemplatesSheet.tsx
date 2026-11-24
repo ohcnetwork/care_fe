@@ -557,7 +557,7 @@ function TemplateCard({
 }
 
 const templateFormSchema = z.object({
-  name: z.string().min(1, t("name_is_required")),
+  name: z.string().trim().min(1, t("name_is_required")),
   description: z.string().optional(),
 });
 
@@ -1033,27 +1033,26 @@ export default function ManageResponseTemplatesSheet({
             )}
           />
 
-          {facilityId &&
-            (!editingTemplate || (editingTemplate && templateDetails)) && (
-              <div className="space-y-1.5">
-                <Label>{t("select_department")}</Label>
-                <FacilityOrganizationTreeSelect
-                  key={editingTemplate?.id || "new"}
-                  facilityId={facilityId}
-                  value={selectedOrganizations}
-                  onChange={setSelectedOrganizations}
-                  knownOrganizations={
-                    editingTemplate && templateDetails
-                      ? templateDetails.facility_organizations
-                      : undefined
-                  }
-                  optional
-                />
-                <FormDescription className="text-xs">
-                  {t("select_departments_to_share_template")}
-                </FormDescription>
-              </div>
-            )}
+          {facilityId && (!editingTemplate || templateDetails) && (
+            <div className="space-y-1.5">
+              <Label>{t("select_department")}</Label>
+              <FacilityOrganizationTreeSelect
+                key={editingTemplate?.id || "new"}
+                facilityId={facilityId}
+                value={selectedOrganizations}
+                onChange={setSelectedOrganizations}
+                knownOrganizations={
+                  editingTemplate && templateDetails
+                    ? templateDetails.facility_organizations
+                    : undefined
+                }
+                optional
+              />
+              <FormDescription className="text-xs">
+                {t("select_departments_to_share_template")}
+              </FormDescription>
+            </div>
+          )}
         </form>
       </Form>
     </div>

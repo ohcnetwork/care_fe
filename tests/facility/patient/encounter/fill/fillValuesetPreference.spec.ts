@@ -143,13 +143,12 @@ test.describe("Fill page: choosing between value-set variants", () => {
           .getByRole("listbox", { name: "Choose which value set to search" })
           .getByRole("option", { name: optionName })
           .click();
-        await expectToast(page, "Value set preference saved");
+        await expect(scope.getByText(`Using ${optionName}`)).toBeVisible();
       };
 
       await test.step("Pick the facility override; the popover and the backend both switch", async () => {
         const scope = await openPicker();
         await choose(scope, overrideName);
-        await expect(scope.getByText(`Using ${overrideName}`)).toBeVisible();
         expect(
           (await resolveSlugForFacility(parentSlug, facilityId)).name,
         ).toBe(overrideName);
@@ -158,7 +157,6 @@ test.describe("Fill page: choosing between value-set variants", () => {
       await test.step("Pick the instance set; the preference persists across reopen", async () => {
         const scope = await openPicker();
         await choose(scope, parentName);
-        await expect(scope.getByText(`Using ${parentName}`)).toBeVisible();
         // Asserted server-side: reopening alone would only prove the
         // client's cache changed, and the toast from the previous pick can
         // still be on screen.

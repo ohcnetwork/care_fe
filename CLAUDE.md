@@ -70,8 +70,10 @@ REACT_CARE_API_URL=http://127.0.0.1:9000
 
 ## Build/Lint/Test Commands
 
-- `npm run dev` — Start dev server at http://localhost:4000
+- `portless` — Preferred way to start the dev server
+- `npm run dev` — Start dev server directly at http://localhost:4000 (only if portless is unavailable)
 - `npm run build` — Production build (takes 2+ minutes, set timeout to 180s+)
+- `npm run typecheck` — Type check with TypeScript (`tsc --noEmit`)
 - `npm run lint` — Run ESLint (takes 85s+, set timeout to 120s+)
 - `npm run lint-fix` — ESLint with auto-fix
 - `npm run format` — Prettier formatting
@@ -87,16 +89,16 @@ npm run playwright:test                                 # Run all tests
 npm run playwright:test -- tests/auth/login.spec.ts     # Run a single test file
 npm run playwright:test -- -g "test name"               # Run tests matching a pattern
 npm run playwright:test -- --workers=4                   # Run with 4 parallel workers
-npm run playwright:test -- --shard=1/3                   # Run shard 1 of 3
+npm run playwright:test -- --shard=1/8                   # Run one equal-count shard locally
 npm run playwright:test:ui                              # Interactive Playwright UI mode
 ```
 
 **Running tests efficiently:**
 
-- Use `--workers=4` for parallel execution (CI runs setup with 1 worker, then chromium with 4 workers)
+- CI runs 8 Playwright shards on `ubuntu-latest-m`, with 6 Chromium workers per shard by default (see `docs/testing.md`).
 - Use `--shard=N/TOTAL` to split across multiple processes
 - Run specific test directories to iterate faster: `npx playwright test tests/auth/`
-- The `setup` project runs first to authenticate test users and save storage state
+- The `setup-*` projects run first to authenticate test users and save storage state, parallelizing independent setup tasks while preserving data dependencies.
 
 **Database management for re-runs:**
 

@@ -95,10 +95,9 @@ function DropdownMenuTrigger({
       ? className
       : cn(
           "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm transition-colors [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-          triggerFocus,
           appearance === "icon"
-            ? "size-9 text-muted-foreground hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground"
-            : cn(fieldTriggerLayout, fieldTriggerSurface),
+            ? "size-9 text-muted-foreground outline-0 hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 aria-expanded:bg-muted aria-expanded:text-foreground"
+            : cn(fieldTriggerLayout, fieldTriggerSurface, triggerFocus),
           className,
         );
   return (

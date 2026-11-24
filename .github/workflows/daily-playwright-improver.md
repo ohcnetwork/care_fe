@@ -54,7 +54,7 @@ safe-outputs:
     # CI runs that github-actions[bot] starts on these PRs fail with no jobs. A
     # GH_AW_CI_TRIGGER_TOKEN repo secret (PAT or App token, contents: write) fixes that: gh-aw
     # pushes an empty commit with it after opening the PR, which starts Lint and Playwright.
-  missing-tool:
+  report-missing-tool:
     create-issue: true
 # In-flight work, fetched before the agent starts so it never depends on the model choosing to
 # look. Earlier runs were told to find the tracker and made no GitHub calls at all. Only the bot's

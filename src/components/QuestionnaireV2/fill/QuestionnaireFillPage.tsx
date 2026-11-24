@@ -24,6 +24,7 @@ import { useFillPageQueries } from "./useFillPageQueries";
 
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { questionnaireFillSearch } from "@/lib/router/search/questionnaire";
 
 interface FillPageProps {
   /** What this fill is FOR — the union carries exactly the ids the
@@ -61,7 +62,7 @@ export function QuestionnaireFillPage({
       toDischarge,
       return_page: requestedReturnPage,
     },
-  ] = useQueryParams();
+  ] = useQueryParams(questionnaireFillSearch);
   const patientBound = isPatientBound(subject) ? subject : undefined;
   // Server drafts are patient/encounter records — a resource subject can
   // only have local drafts, so the query param is ignored there.
@@ -112,7 +113,7 @@ export function QuestionnaireFillPage({
 
   if (!questionnaireId) {
     return (
-      <FillShell onClose={() => navigate({ href: exitTarget })}>
+      <FillShell onClose={() => navigate({ href: exitTarget, replace: true })}>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
           <h2 className="text-lg font-semibold text-gray-900">
             {t("select_questionnaire_to_fill")}
@@ -168,7 +169,7 @@ export function QuestionnaireFillPage({
     // jump shells when data lands — and the close affordance exists even
     // while loading.
     return (
-      <FillShell onClose={() => navigate({ href: exitTarget })}>
+      <FillShell onClose={() => navigate({ href: exitTarget, replace: true })}>
         <div className="min-h-0 flex-1 overflow-hidden px-6 py-4">
           <FormSkeleton rows={10} />
         </div>
@@ -335,7 +336,10 @@ function FillErrorPage({
         <AlertTitle>{t("error")}</AlertTitle>
         <AlertDescription>{message}</AlertDescription>
       </Alert>
-      <Button variant="outline" onClick={() => navigate({ href: exitTarget })}>
+      <Button
+        variant="outline"
+        onClick={() => navigate({ href: exitTarget, replace: true })}
+      >
         <ArrowLeft className="size-4" />
         {t("back")}
       </Button>

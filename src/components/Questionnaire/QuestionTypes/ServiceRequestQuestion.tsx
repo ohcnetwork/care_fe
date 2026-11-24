@@ -48,7 +48,10 @@ import {
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import {
   ActivityDefinitionTemplateSpec,
@@ -101,7 +104,7 @@ interface ServiceRequestQuestionProps {
   facilityId: string;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
-    values: any[],
+    values: ResponseValue[],
     questionId: string,
     note?: string,
   ) => void;

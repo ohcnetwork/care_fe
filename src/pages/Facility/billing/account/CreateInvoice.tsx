@@ -807,7 +807,7 @@ export function CreateInvoicePage({
                       </FormItem>
                     )}
                   />
-                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="payment_terms"
@@ -817,6 +817,7 @@ export function CreateInvoicePage({
                           <FormControl>
                             <Textarea
                               {...field}
+                              className="resize-y"
                               disabled={createMutation.isPending}
                               placeholder={t("payment_terms_placeholder")}
                               rows={2}
@@ -835,6 +836,7 @@ export function CreateInvoicePage({
                           <FormControl>
                             <Textarea
                               {...field}
+                              className="resize-y"
                               disabled={createMutation.isPending}
                               placeholder={t("invoice_note_placeholder")}
                               rows={2}

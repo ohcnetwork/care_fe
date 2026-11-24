@@ -1,3 +1,5 @@
+import { type Ref } from "react";
+
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationRead } from "@/types/location/location";
@@ -8,7 +10,7 @@ import RenderActivityDefinitionFilter, {
   ActivityDefinitionFilterValue,
 } from "./activityDefinitionFilter";
 import RenderCareTeamFilter from "./careTeamFilter";
-import RenderDateFilter from "./dateFilter";
+import RenderDateFilter, { type DateFilterHandle } from "./dateFilter";
 import RenderDepartmentFilter from "./departmentFilter";
 import RenderLocationFilter from "./locationFilter";
 import RenderTagFilter from "./tagFilter";
@@ -21,12 +23,15 @@ export default function FilterRenderer({
   facilityId,
   onFilterChange,
   handleBack,
+  dateDraftRef,
 }: {
   activeFilter: string;
   selectedFilters: Record<string, FilterState>;
   facilityId?: string;
   onFilterChange: (filterKey: string, values: FilterValues) => void;
   handleBack?: () => void;
+  /** Lets the hosting menu apply an unapplied custom date range on close. */
+  dateDraftRef?: Ref<DateFilterHandle>;
 }) {
   const filterState = selectedFilters[activeFilter];
   const filter = filterState?.filter;
@@ -45,6 +50,7 @@ export default function FilterRenderer({
       return (
         <RenderDateFilter
           {...commonProps}
+          ref={dateDraftRef}
           selected={selected as FilterDateRange}
         />
       );

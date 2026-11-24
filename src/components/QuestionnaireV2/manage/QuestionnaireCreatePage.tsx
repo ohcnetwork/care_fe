@@ -33,6 +33,7 @@ import {
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
 import { generateSlugValue } from "@/Utils/slug";
+import { goBack } from "@/Utils/utils";
 
 import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { BasicInformationCard } from "./BasicInformationCard";
@@ -99,7 +100,8 @@ export function QuestionnaireCreatePage({
     onSuccess: (created: QuestionnaireRead) => {
       queryClient.invalidateQueries({ queryKey: questionnaireKeys.all });
       toast.success(t("questionnaire_created_successfully"));
-      navigate({ href: `${scope.basePath}/${created.id}` });
+      // Replace the form, so going back from the new questionnaire skips it.
+      navigate({ href: `${scope.basePath}/${created.id}`, replace: true });
     },
   });
 
@@ -139,10 +141,7 @@ export function QuestionnaireCreatePage({
           <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{t("permission_denied")}</AlertDescription>
         </Alert>
-        <Button
-          variant="outline"
-          onClick={() => navigate({ href: scope.basePath })}
-        >
+        <Button variant="outline" onClick={() => goBack(scope.basePath)}>
           <ArrowLeft className="size-4" />
           {t("back")}
         </Button>
@@ -155,7 +154,7 @@ export function QuestionnaireCreatePage({
       <Button
         variant="outline"
         size="xs"
-        onClick={() => navigate({ href: scope.basePath })}
+        onClick={() => goBack(scope.basePath)}
       >
         <ArrowLeft className="size-4" />
         {t("back")}
@@ -176,7 +175,7 @@ export function QuestionnaireCreatePage({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate({ href: scope.basePath })}
+                onClick={() => goBack(scope.basePath)}
               >
                 {t("cancel")}
               </Button>

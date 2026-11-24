@@ -11,6 +11,7 @@ import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { HrefLink } from "@/lib/router/HrefLink";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { referralContextSearch } from "@/lib/router/search/referral";
 import EncounterDetailsHeader from "@/pages/Encounters/EncounterDetailsHeader";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -37,10 +38,9 @@ export function ReferralPatientHeader({
   receivingEncounter,
 }: ReferralPatientHeaderProps) {
   const { t } = useTranslation();
-  const [{ sourceUrl, referralAppointmentId }] = useQueryParams<{
-    sourceUrl?: string;
-    referralAppointmentId?: string;
-  }>();
+  const [{ sourceUrl, referralAppointmentId }] = useQueryParams(
+    referralContextSearch,
+  );
   const encounterQuery = useQuery({
     queryKey: [
       "referrals",

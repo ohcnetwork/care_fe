@@ -14,6 +14,7 @@ import useFilters from "@/hooks/useFilters";
 
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
+import { externalSupplyListSearch } from "@/lib/router/search/inventory";
 import query from "@/Utils/request/query";
 
 import DeliveryOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/DeliveryOrderTable";
@@ -36,7 +37,7 @@ export function DeliveryOrderList({
 }: Props) {
   const { t } = useTranslation();
 
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams, setQueryParams] = useQueryParams(externalSupplyListSearch);
 
   const TABS_CONFIG = internal
     ? isRequester
@@ -63,10 +64,13 @@ export function DeliveryOrderList({
       ] as const);
 
   type Tab = (typeof TABS_CONFIG)[number]["value"];
-  const currentTab = (qParams.tab as Tab) || TABS_CONFIG[0].value;
+  // An unknown `tab` selects the first tab, as the request does.
+  const currentTab: Tab =
+    TABS_CONFIG.find((tab) => tab.value === qParams.tab)?.value ??
+    TABS_CONFIG[0].value;
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: externalSupplyListSearch,
     limit: 14,
-    disableCache: true,
   });
 
   const handleTabChange = (value: string) => {

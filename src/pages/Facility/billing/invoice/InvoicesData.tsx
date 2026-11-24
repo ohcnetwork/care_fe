@@ -35,6 +35,8 @@ import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilte
 
 import useFilters from "@/hooks/useFilters";
 
+import { invoiceListSearch } from "@/lib/router/search/billing";
+
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import {
@@ -65,8 +67,8 @@ export default function InvoicesData({
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: invoiceListSearch,
     limit: RESULTS_PER_PAGE_LIMIT,
-    disableCache: true,
   });
 
   const { created_date_after, created_date_before } = qParams;
@@ -74,7 +76,7 @@ export default function InvoicesData({
   const { data: createdByUser } = useQuery({
     queryKey: ["facilityUser", facilityId, qParams.created_by],
     queryFn: query(facilityApi.getUser, {
-      pathParams: { facilityId, userId: qParams.created_by },
+      pathParams: { facilityId, userId: qParams.created_by ?? "" },
     }),
     enabled: !!qParams.created_by,
   });

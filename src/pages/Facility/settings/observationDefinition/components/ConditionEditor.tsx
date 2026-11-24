@@ -26,7 +26,6 @@ import {
   getConditionValue,
   getDefaultCondition,
   Metrics,
-  TagOperationValue,
 } from "@/types/base/condition/condition";
 import { ENCOUNTER_CLASS } from "@/types/emr/encounter/encounter";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
@@ -35,10 +34,13 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, X } from "lucide-react";
-import { FieldValues, UseFormReturn } from "react-hook-form";
+import { FieldPath, FieldValues, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-function RenderConditionInput({
+type ConditionInputValue =
+  Condition["value"] | Partial<AgeOperationInRangeValue>;
+
+function RenderConditionInput<TFieldValues extends FieldValues = FieldValues>({
   condition,
   index,
   handleSetValue,
@@ -49,16 +51,9 @@ function RenderConditionInput({
 }: {
   condition: Condition;
   index: number;
-  handleSetValue: (
-    value:
-      | string
-      | ConditionOperationInRangeValue
-      | AgeOperationEqualityValue
-      | TagOperationValue,
-    index: number,
-  ) => void;
+  handleSetValue: (value: ConditionInputValue, index: number) => void;
   handleSetValueType: (value: string, index: number) => void;
-  form: UseFormReturn<any>;
+  form: UseFormReturn<TFieldValues>;
   fieldName: string;
   facilityId?: string;
 }) {
@@ -80,7 +75,7 @@ function RenderConditionInput({
         return (
           <FormField
             control={form.control}
-            name={`${fieldName}.value` as any}
+            name={`${fieldName}.value` as FieldPath<TFieldValues>}
             render={() => (
               <FormItem>
                 <FormControl>
@@ -119,7 +114,7 @@ function RenderConditionInput({
         return (
           <FormField
             control={form.control}
-            name={`${fieldName}.value.value_type` as any}
+            name={`${fieldName}.value.value_type` as FieldPath<TFieldValues>}
             render={() => (
               <FormItem className="flex-1">
                 <FormControl>
@@ -160,7 +155,7 @@ function RenderConditionInput({
           <div className="flex flex-col sm:flex-row gap-2">
             <FormField
               control={form.control}
-              name={`${fieldName}.value.value` as any}
+              name={`${fieldName}.value.value` as FieldPath<TFieldValues>}
               render={() => (
                 <FormItem>
                   <FormControl>
@@ -193,7 +188,7 @@ function RenderConditionInput({
       } else if (operation === ConditionOperation.in_range) {
         const currentRange =
           typeof value === "object" && value !== null && "min" in value
-            ? (value as any)
+            ? (value as Partial<AgeOperationInRangeValue>)
             : { min: undefined, max: undefined, value_type: "years" };
         const min = currentRange.min;
         const max = currentRange.max;
@@ -201,7 +196,7 @@ function RenderConditionInput({
           <div className="flex flex-col sm:flex-row gap-2">
             <FormField
               control={form.control}
-              name={`${fieldName}.value.min` as any}
+              name={`${fieldName}.value.min` as FieldPath<TFieldValues>}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -220,7 +215,7 @@ function RenderConditionInput({
                                 : Number(e.target.value),
                             max: currentRange.max,
                             value_type: currentRange.value_type || "years",
-                          } as any,
+                          },
                           index,
                         );
                       }}
@@ -232,7 +227,7 @@ function RenderConditionInput({
             />
             <FormField
               control={form.control}
-              name={`${fieldName}.value.max` as any}
+              name={`${fieldName}.value.max` as FieldPath<TFieldValues>}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -251,7 +246,7 @@ function RenderConditionInput({
                                 ? undefined
                                 : Number(e.target.value),
                             value_type: currentRange.value_type || "years",
-                          } as any,
+                          },
                           index,
                         );
                       }}
@@ -272,7 +267,7 @@ function RenderConditionInput({
         return (
           <FormField
             control={form.control}
-            name={`${fieldName}.value` as any}
+            name={`${fieldName}.value` as FieldPath<TFieldValues>}
             render={() => (
               <FormItem>
                 <FormControl>
@@ -308,7 +303,7 @@ function RenderConditionInput({
         return (
           <FormField
             control={form.control}
-            name={`${fieldName}.value` as any}
+            name={`${fieldName}.value` as FieldPath<TFieldValues>}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -339,7 +334,7 @@ function RenderConditionInput({
           <div className="flex flex-col sm:flex-row gap-2">
             <FormField
               control={form.control}
-              name={`${fieldName}.value.min` as any}
+              name={`${fieldName}.value.min` as FieldPath<TFieldValues>}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -369,7 +364,7 @@ function RenderConditionInput({
             />
             <FormField
               control={form.control}
-              name={`${fieldName}.value.max` as any}
+              name={`${fieldName}.value.max` as FieldPath<TFieldValues>}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -416,10 +411,10 @@ function RenderConditionInput({
           <>
             <FormField
               control={form.control}
-              name={`${fieldName}.value.value` as any}
+              name={`${fieldName}.value.value` as FieldPath<TFieldValues>}
               render={() => {
                 const errorMessage = form.getFieldState(
-                  `${fieldName}.value.value`,
+                  `${fieldName}.value.value` as FieldPath<TFieldValues>,
                   form.formState,
                 ).error?.message;
                 return (
@@ -510,14 +505,7 @@ export function ConditionEditor<
     );
   };
 
-  const handleSetValue = (
-    value:
-      | string
-      | ConditionOperationInRangeValue
-      | AgeOperationEqualityValue
-      | TagOperationValue,
-    index: number,
-  ) => {
+  const handleSetValue = (value: ConditionInputValue, index: number) => {
     let updatedCondition = conditions[index];
     updatedCondition = { ...updatedCondition, value: value } as Condition;
     setConditions(
@@ -577,7 +565,9 @@ export function ConditionEditor<
                 <div className="flex flex-col sm:flex-row gap-2 flex-1 min-w-0">
                   <FormField
                     control={form.control}
-                    name={`${fieldName}.${index}.metric` as any}
+                    name={
+                      `${fieldName}.${index}.metric` as FieldPath<TFieldValues>
+                    }
                     render={() => (
                       <FormItem className="flex-1">
                         <FormControl>
@@ -608,7 +598,9 @@ export function ConditionEditor<
                   />
                   <FormField
                     control={form.control}
-                    name={`${fieldName}.${index}.operation` as any}
+                    name={
+                      `${fieldName}.${index}.operation` as FieldPath<TFieldValues>
+                    }
                     render={() => (
                       <FormItem className="flex-1">
                         <FormControl>

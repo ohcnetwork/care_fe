@@ -13,6 +13,7 @@ import {
 import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
+import { permissionListSearch } from "@/lib/router/search/admin";
 
 import query from "@/Utils/request/query";
 import roleApi from "@/types/emr/role/roleApi";
@@ -20,8 +21,8 @@ import roleApi from "@/types/emr/role/roleApi";
 export function PermissionsIndex() {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage } = useFilters({
+    schema: permissionListSearch,
     limit: 15,
-    disableCache: true,
   });
   const { data: response } = useQuery({
     queryKey: ["roles", qParams],

@@ -1,12 +1,4 @@
-import {
-  Activity,
-  ClipboardList,
-  HeartPulse,
-  LayoutDashboard,
-  PanelsTopLeft,
-  Stethoscope,
-  type LucideIcon,
-} from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
+import { TAB_ICONS } from "@/components/Workspace/workspaceTabIcons";
 
 import EncounterNavigation, {
   EncounterTab,
@@ -27,15 +20,6 @@ import { parseEncounterWorkspace } from "./parseEncounterWorkspace";
 import { useEncounterWorkspaces } from "./useEncounterWorkspaces";
 
 import { navigate } from "@/lib/router/navigate";
-
-const customPageIcons: Record<string, LucideIcon> = {
-  stethoscope: Stethoscope,
-  "clipboard-list": ClipboardList,
-  "layout-dashboard": LayoutDashboard,
-  "panels-top-left": PanelsTopLeft,
-  activity: Activity,
-  "heart-pulse": HeartPulse,
-};
 
 interface EncounterWorkspaceContentProps {
   systemTabs: Record<string, EncounterTab>;
@@ -71,8 +55,8 @@ export function EncounterWorkspaceContent({
           label: page.title,
           visible: !page.hidden,
           icon:
-            page.icon && Object.hasOwn(customPageIcons, page.icon)
-              ? customPageIcons[page.icon]
+            page.icon && Object.hasOwn(TAB_ICONS, page.icon)
+              ? TAB_ICONS[page.icon]
               : LayoutDashboard,
           component: <EncounterWorkspacePage page={page} />,
         };
@@ -125,7 +109,11 @@ export function EncounterWorkspaceContent({
   const isLoadingSelection =
     defaults.isLoading || list.isLoading || isSelectedEncounterLoading;
 
-  const navigateToTab = (tab: string, replace = false) => {
+  const navigateToTab = (
+    tab: string,
+    replace = false,
+    resetScroll?: boolean,
+  ) => {
     const target = new URL(tab, window.location.href);
     if (tab === currentTab) {
       target.search = window.location.search;
@@ -148,6 +136,7 @@ export function EncounterWorkspaceContent({
         ),
 
         replace,
+        resetScroll,
       });
   };
 
@@ -209,7 +198,7 @@ export function EncounterWorkspaceContent({
         <EncounterNavigation
           tabs={tabs}
           currentTab={activeTab}
-          onTabChange={(tab) => navigateToTab(tab)}
+          onTabChange={(tab) => navigateToTab(tab, false, false)}
         />
       ) : (
         <Alert>

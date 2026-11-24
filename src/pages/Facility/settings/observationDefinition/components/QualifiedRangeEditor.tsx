@@ -13,7 +13,7 @@ import {
   NumericRange,
   QualifiedRange,
 } from "@/types/base/qualifiedRange/qualifiedRange";
-import { FieldValues, UseFormReturn } from "react-hook-form";
+import { FieldPath, FieldValues, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { ConditionEditor } from "./ConditionEditor";
 import { CustomValueSetEditor } from "./CustomValueSetEditor";
@@ -34,10 +34,10 @@ export function QualifiedRangeEditor<
 }: {
   form: UseFormReturn<TFieldValues>;
   editedRange: QualifiedRange;
-  setEditedRange: (
+  setEditedRange: <K extends keyof QualifiedRange>(
     range: QualifiedRange,
-    field?: keyof QualifiedRange,
-    value?: any,
+    field?: K,
+    value?: QualifiedRange[K],
   ) => void;
   onSave: () => void;
   onCancel: () => void;
@@ -77,7 +77,7 @@ export function QualifiedRangeEditor<
       <div className="flex flex-col gap-5 flex-1 overflow-y-auto py-2 px-3">
         <FormField
           control={form.control}
-          name={`${fieldName}.title` as any}
+          name={`${fieldName}.title` as FieldPath<TFieldValues>}
           render={({ field }) => (
             <FormItem>
               <FormControl>

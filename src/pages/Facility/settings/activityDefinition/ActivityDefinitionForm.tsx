@@ -66,6 +66,7 @@ import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlugValue } from "@/Utils/slug";
+import { goBack } from "@/Utils/utils";
 
 export default function ActivityDefinitionForm({
   facilityId,
@@ -130,10 +131,10 @@ function ActivityDefinitionFormContent({
   const { t } = useTranslation();
 
   const formSchema = z.object({
-    title: z.string().min(1, t("field_required")),
+    title: z.string().trim().min(1, t("field_required")),
     slug_value: slugValueSchema(),
-    description: z.string().min(1, t("field_required")),
-    usage: z.string().min(1, t("field_required")),
+    description: z.string().trim().min(1, t("field_required")),
+    usage: z.string().trim().min(1, t("field_required")),
     derived_from_uri: z.string().nullable(),
     status: z.enum(Status),
     classification: z.enum(Classification),
@@ -419,19 +420,12 @@ function ActivityDefinitionFormContent({
     }
   }
 
-  const handleCancel = () => {
-    if (categorySlug) {
-      navigate({
-        to: "/facility/$facilityId/settings/activity_definitions/categories/$categorySlug",
-        params: { facilityId, categorySlug },
-      });
-    } else {
-      navigate({
-        to: "/facility/$facilityId/settings/activity_definitions",
-        params: { facilityId },
-      });
-    }
-  };
+  const handleCancel = () =>
+    goBack(
+      categorySlug
+        ? `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`
+        : `/facility/${facilityId}/settings/activity_definitions`,
+    );
 
   return (
     <Page
