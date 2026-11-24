@@ -92,7 +92,9 @@ export function navigate(
   // `getRouter()` returns an untyped router. `options` is already checked.
   const built = router.buildLocation(options as never);
   const target = built.href;
-  if (built.pathname !== router.history.location.pathname) {
+  if (
+    built.pathname !== router.parseLocation(router.history.location).pathname
+  ) {
     arrivalScroll = {
       pathname: built.pathname,
       keep: options.resetScroll === false,

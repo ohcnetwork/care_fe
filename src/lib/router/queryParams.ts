@@ -83,9 +83,11 @@ export function useQueryParams(
       // yet. Its scroll reset must not be cancelled, unless the navigation
       // that opened it keeps the scroll (tab links). A retained hash must not
       // scroll to its target again.
+      // History keeps the path as typed (`%72`), the router decodes it.
+      const { pathname } = router.parseLocation(location);
       const keepScroll =
-        router.state.resolvedLocation?.pathname === location.pathname ||
-        keepsScrollOnArrival(location.pathname);
+        router.state.resolvedLocation?.pathname === pathname ||
+        keepsScrollOnArrival(pathname);
       navigate({
         href,
         replace,
