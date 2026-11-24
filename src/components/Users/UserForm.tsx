@@ -40,7 +40,10 @@ import {
   validateRule,
 } from "@/components/Users/UserFormValidations";
 import { UserQualificationFields } from "@/components/Users/UserQualificationFields";
-import { RoleOrgAccessEditor } from "@/components/Users/UserRoleOrganizationAccess";
+import {
+  RoleOrgAccessEditor,
+  getMissingRoleOrgField,
+} from "@/components/Users/UserRoleOrganizationAccess";
 
 import { GENDERS, GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
 
@@ -96,11 +99,20 @@ export default function UserForm({
   });
   const roleOrgListSchema = z
     .array(roleOrgSchema)
-    .refine(
-      (entries) =>
-        entries.every((entry) => !!entry.organization === !!entry.role),
-      t("role_organization_designation_required"),
-    )
+    .superRefine((entries, ctx) => {
+      const incomplete = entries.flatMap((entry, index) => {
+        const field = getMissingRoleOrgField(entry);
+        return field ? [{ index, field }] : [];
+      });
+      if (!incomplete.length) return;
+      const message = t("role_organization_designation_required");
+      // Add the list issue first: it is the message shown under the list, and
+      // react-hook-form then nests the row issues inside it.
+      ctx.addIssue({ code: "custom", message });
+      incomplete.forEach(({ index, field }) =>
+        ctx.addIssue({ code: "custom", message, path: [index, field] }),
+      );
+    })
     .transform((entries) => entries.filter((entry) => entry.organization));
 
   const userFormSchema = z
@@ -958,14 +970,19 @@ export default function UserForm({
             control={form.control}
             name="role_orgs"
             render={({ field }) => (
-              <FormItem>
+              // react-hook-form focuses this wrapper when role_orgs is the
+              // invalid field, which scrolls the list and its error into view.
+              <FormItem ref={field.ref} tabIndex={-1} className="outline-none">
                 <FormControl>
                   <RoleOrgAccessEditor
                     value={field.value || []}
-                    onChange={(value) => {
-                      form.setValue("role_orgs", value, { shouldDirty: true });
-                      form.clearErrors("role_orgs");
-                    }}
+                    rowErrors={form.formState.errors.role_orgs}
+                    onChange={(value) =>
+                      form.setValue("role_orgs", value, {
+                        shouldDirty: true,
+                        shouldValidate: form.formState.isSubmitted,
+                      })
+                    }
                     disabled={isLoadingUser || isSubmitting}
                   />
                 </FormControl>

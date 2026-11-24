@@ -40,6 +40,7 @@ interface RoleSelectProps {
   disabled?: boolean;
   className?: string;
   placeholder?: string;
+  "aria-invalid"?: boolean;
 }
 
 const PAGE_LIMIT = 10;
@@ -120,6 +121,7 @@ export function RoleSelect({
   disabled,
   className,
   placeholder,
+  "aria-invalid": ariaInvalid,
 }: RoleSelectProps) {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
@@ -183,6 +185,7 @@ export function RoleSelect({
       variant="outline"
       role="combobox"
       aria-expanded={open}
+      aria-invalid={ariaInvalid}
       className={cn("w-full justify-between", className)}
       disabled={disabled}
     >

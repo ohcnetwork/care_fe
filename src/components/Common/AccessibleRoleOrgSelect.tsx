@@ -16,6 +16,7 @@ interface AccessibleRoleOrgSelectProps {
   placeholder?: string;
   inputPlaceholder?: string;
   noOptionsMessage?: string;
+  "aria-invalid"?: boolean;
 }
 
 /**
@@ -32,6 +33,7 @@ export function AccessibleRoleOrgSelect({
   placeholder,
   inputPlaceholder,
   noOptionsMessage,
+  "aria-invalid": ariaInvalid,
 }: AccessibleRoleOrgSelectProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -87,6 +89,7 @@ export function AccessibleRoleOrgSelect({
       noOptionsMessage={noOptionsMessage || t("no_organization_found")}
       disabled={disabled}
       className={className}
+      aria-invalid={ariaInvalid}
       closeOnSelect
     />
   );
