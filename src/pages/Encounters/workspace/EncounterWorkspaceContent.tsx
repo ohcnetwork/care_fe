@@ -109,7 +109,11 @@ export function EncounterWorkspaceContent({
   const isLoadingSelection =
     defaults.isLoading || list.isLoading || isSelectedEncounterLoading;
 
-  const navigateToTab = (tab: string, replace = false) => {
+  const navigateToTab = (
+    tab: string,
+    replace = false,
+    resetScroll?: boolean,
+  ) => {
     const target = new URL(tab, window.location.href);
     if (tab === currentTab) {
       target.search = window.location.search;
@@ -132,6 +136,7 @@ export function EncounterWorkspaceContent({
         ),
 
         replace,
+        resetScroll,
       });
   };
 
@@ -193,7 +198,7 @@ export function EncounterWorkspaceContent({
         <EncounterNavigation
           tabs={tabs}
           currentTab={activeTab}
-          onTabChange={(tab) => navigateToTab(tab)}
+          onTabChange={(tab) => navigateToTab(tab, false, false)}
         />
       ) : (
         <Alert>
