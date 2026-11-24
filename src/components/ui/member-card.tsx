@@ -12,11 +12,12 @@ export interface MemberCardProps extends React.ComponentProps<"div"> {
   /** Shown as the title, and used for the avatar's initials. */
   name: string;
   imageUrl?: string;
-  /** A second line (`default`) or trailing note (`sm`): a role, a status. */
+  /** A second line (`default`) or trailing note (`sm`, `xs`): a role, a status. */
   description?: React.ReactNode;
   /** Replaces the avatar, for a member known only by a scan or an id. */
   icon?: React.ReactNode;
-  size?: "default" | "sm";
+  /** `xs` fits inside an input, as an applied value before the text. */
+  size?: "default" | "sm" | "xs";
   /** Renders a remove button after the content. */
   onRemove?: () => void;
   removeLabel?: string;
@@ -40,7 +41,8 @@ export function MemberCard({
   ...props
 }: MemberCardProps) {
   const { t } = useTranslation();
-  const small = size === "sm";
+  const small = size !== "default";
+  const xs = size === "xs";
 
   return (
     <div
@@ -48,7 +50,11 @@ export function MemberCard({
       data-size={size}
       className={cn(
         "flex max-w-full min-w-0 items-center rounded-md border bg-background text-foreground shadow-2xs",
-        small ? "h-9 gap-2 ps-1.5 pe-1 text-sm" : "gap-3 p-2 pe-1.5 text-sm",
+        xs
+          ? "h-7 gap-1.5 overflow-hidden ps-1 pe-0 text-sm shadow-none"
+          : small
+            ? "h-9 gap-2 ps-1.5 pe-1 text-sm"
+            : "gap-3 p-2 pe-1.5 text-sm",
         !onRemove && !children && "pe-3",
         className,
       )}
@@ -60,7 +66,11 @@ export function MemberCard({
           data-slot="member-card-icon"
           className={cn(
             "flex shrink-0 items-center justify-center rounded-sm bg-muted text-muted-foreground [&>svg]:shrink-0",
-            small ? "size-6 [&>svg]:size-3.5" : "size-9 [&>svg]:size-4",
+            xs
+              ? "size-5 [&>svg]:size-3"
+              : small
+                ? "size-6 [&>svg]:size-3.5"
+                : "size-9 [&>svg]:size-4",
           )}
         >
           {icon}
@@ -69,7 +79,10 @@ export function MemberCard({
         <Avatar
           name={name}
           imageUrl={imageUrl}
-          className={cn("shrink-0 rounded-sm", small ? "size-6" : "size-9")}
+          className={cn(
+            "shrink-0 rounded-sm",
+            xs ? "size-5" : small ? "size-6" : "size-9",
+          )}
         />
       )}
       <div
@@ -87,17 +100,30 @@ export function MemberCard({
         )}
       </div>
       {children}
-      {onRemove && (
-        <Button
+      {onRemove && xs ? (
+        // Inside an input it sits with badges: their close button, flush
+        // with the edge.
+        <button
           type="button"
-          variant="ghost"
-          size="icon-xs"
-          className={cn("shrink-0 text-muted-foreground", small && "size-7")}
+          className="inline-flex aspect-square shrink-0 cursor-pointer items-center justify-center self-stretch rounded-r-sm opacity-60 outline-none hover:bg-current/20 hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-indigo-500/80 focus-visible:ring-inset"
           aria-label={removeLabel ?? t("remove")}
           onClick={onRemove}
         >
-          <X />
-        </Button>
+          <X className="size-3.5" />
+        </button>
+      ) : (
+        onRemove && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className={cn("shrink-0 text-muted-foreground", small && "size-7")}
+            aria-label={removeLabel ?? t("remove")}
+            onClick={onRemove}
+          >
+            <X />
+          </Button>
+        )
       )}
     </div>
   );

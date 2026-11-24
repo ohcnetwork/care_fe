@@ -41,6 +41,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
+import { cn } from "@/lib/utils";
 
 import PatientIDScanDialog from "@/components/Scan/PatientIDScanDialog";
 
@@ -52,6 +53,7 @@ import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 
+import { AppliedSearch, EncounterSearchChips } from "./EncounterSearchChips";
 import {
   checkIdentifier,
   configOfField,
@@ -107,23 +109,30 @@ interface Lookup {
 interface EncounterSearchProps {
   /** The list's filters without its search keys, for the visit counts. */
   previewQueryParams: Record<string, string | number | undefined>;
+  /** What the URL applies, shown as removable chips before the input. */
+  applied: AppliedSearch;
   onApplyText: (field: VisitField, term: string) => void;
+  onRemoveText: () => void;
   onSelectPatient: (
     patient: SelectedPatient,
     source: "lookup" | "scan",
   ) => void;
+  onRemovePatient: () => void;
   className?: string;
 }
 
 /**
  * One input for the All Encounters list: it filters visits by name or visit
  * ID, or looks up a patient by an identifier. The input holds only the draft;
- * the list reads what the URL applies.
+ * the list reads what the URL applies, shown as chips before the input.
  */
 export function EncounterSearch({
   previewQueryParams,
+  applied,
   onApplyText,
+  onRemoveText,
   onSelectPatient,
+  onRemovePatient,
   className,
 }: EncounterSearchProps) {
   const { t } = useTranslation();
@@ -337,6 +346,17 @@ export function EncounterSearch({
     setOpen(next.trim() !== "");
   };
 
+  const hasApplied = !!(applied.name || applied.visitId || applied.patient);
+  // A removed chip's button unmounts; typing continues in the input.
+  const removeText = () => {
+    onRemoveText();
+    inputRef.current?.focus();
+  };
+  const removePatient = () => {
+    onRemovePatient();
+    inputRef.current?.focus();
+  };
+
   const describe = (row: Row) => {
     if (row.kind === "patient") return row.patient.name;
     if (row.kind === "identifier") return row.config.config.display;
@@ -437,10 +457,15 @@ export function EncounterSearch({
           setPending(null);
         }}
       >
+        {/* Grows taller when the chips and the input wrap; the addons
+            center without padding, so one line keeps the field's height. */}
         <InputGroup
           ref={anchorRef}
           data-slot="encounter-search"
-          className={className}
+          className={cn(
+            "h-auto min-h-(--input-group-height) *:data-[slot=input-group-addon]:py-0",
+            className,
+          )}
         >
           {/* Before the input, so Shift+Tab from the input reaches it. It
               shrinks before the input does. */}
@@ -516,7 +541,7 @@ export function EncounterSearch({
           </InputGroupAddon>
           {/* Full-height dividers read as part of the field's border. */}
           <Separator orientation="vertical" className="order-first bg-input" />
-          {showCountry ? (
+          {showCountry && (
             // As in the shared PhoneInput: the country, then the number.
             <CountrySelect
               value={shownCountry}
@@ -533,45 +558,100 @@ export function EncounterSearch({
                 setOpen(term !== "");
               }}
             />
-          ) : (
-            <InputGroupAddon
-              align="inline-start"
-              onClick={() => inputRef.current?.focus()}
-            >
-              <Search aria-hidden="true" />
-            </InputGroupAddon>
           )}
-          <ComboboxPrimitive.Input
-            render={<InputGroupInput ref={inputRef} className="min-w-28" />}
-            aria-label={t("encounter_search_label")}
-            aria-describedby={descriptionId}
-            placeholder={
-              field === "auto"
-                ? t("encounter_search_placeholder")
-                : t("encounter_search_placeholder_field", {
-                    field: fieldLabel,
-                  })
-            }
-            onKeyDown={(event) => {
-              scanner.track(event);
-              if (
-                event.key === "Enter" &&
-                scanner.isScannerEnter(draft, event)
-              ) {
-                const patientId = scannedPatientId(draft);
-                if (patientId) {
-                  event.preventDefault();
-                  event.preventBaseUIHandler();
-                  applyScan(patientId);
-                  return;
-                }
-              }
-              if (event.key === "Backspace" && !draft && field !== "auto") {
-                event.preventDefault();
-                setField("auto");
+          {/* The chips, then the input. When the chips don't fit beside it,
+              the input wraps to a second line inside the field. */}
+          <div
+            data-slot="encounter-search-entry"
+            className="flex min-w-0 flex-1 flex-wrap items-center gap-1 py-0.5"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) {
+                inputRef.current?.focus();
               }
             }}
-          />
+          >
+            <EncounterSearchChips
+              {...applied}
+              onRemoveText={removeText}
+              onRemovePatient={removePatient}
+            />
+            {/* The search icon leads the input, after any chips, so it marks
+                where the search continues; the two wrap together. */}
+            <div
+              className={cn(
+                "flex items-center",
+                hasApplied
+                  ? "min-w-20 flex-[1_1_--spacing(20)]"
+                  : "min-w-28 flex-1",
+              )}
+              onClick={(event) => {
+                if (event.target !== inputRef.current) {
+                  inputRef.current?.focus();
+                }
+              }}
+            >
+              {!showCountry && (
+                <Search
+                  aria-hidden="true"
+                  className={cn(
+                    "size-4 shrink-0 text-muted-foreground",
+                    hasApplied ? "ms-1" : "ms-2",
+                  )}
+                />
+              )}
+              <ComboboxPrimitive.Input
+                render={
+                  <InputGroupInput
+                    ref={inputRef}
+                    className="h-8 ps-1.5 pe-1.5"
+                  />
+                }
+                aria-label={t("encounter_search_label")}
+                aria-describedby={descriptionId}
+                placeholder={
+                  field !== "auto"
+                    ? t("encounter_search_placeholder_field", {
+                        field: fieldLabel,
+                      })
+                    : hasApplied
+                      ? t("search")
+                      : t("encounter_search_placeholder")
+                }
+                onKeyDown={(event) => {
+                  scanner.track(event);
+                  if (
+                    event.key === "Enter" &&
+                    scanner.isScannerEnter(draft, event)
+                  ) {
+                    const patientId = scannedPatientId(draft);
+                    if (patientId) {
+                      event.preventDefault();
+                      event.preventBaseUIHandler();
+                      applyScan(patientId);
+                      return;
+                    }
+                  }
+                  if (event.key === "Backspace" && !draft) {
+                    // First back to Auto, then the last chip; a held key stops
+                    // at the empty input.
+                    if (field !== "auto") {
+                      event.preventDefault();
+                      setField("auto");
+                    } else if (!event.repeat && applied.patient) {
+                      event.preventDefault();
+                      onRemovePatient();
+                    } else if (
+                      !event.repeat &&
+                      (applied.name || applied.visitId)
+                    ) {
+                      event.preventDefault();
+                      onRemoveText();
+                    }
+                  }
+                }}
+              />
+            </div>
+          </div>
           <span id={descriptionId} className="sr-only">
             {field === "auto"
               ? t("encounter_search_description_auto")

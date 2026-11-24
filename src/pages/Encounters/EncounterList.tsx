@@ -61,7 +61,7 @@ import {
   SelectedPatient,
   VisitField,
 } from "@/pages/Encounters/encounter-search/EncounterSearch";
-import { EncounterSearchChips } from "@/pages/Encounters/encounter-search/EncounterSearchChips";
+import { EncounterSearchDateNotice } from "@/pages/Encounters/encounter-search/EncounterSearchDateNotice";
 import {
   EncounterClass,
   EncounterListRead,
@@ -781,10 +781,20 @@ export function EncounterList({
           <div className="flex w-full min-w-0 items-center gap-2 @4xl/toolbar:w-auto">
             {isAllList ? (
               <EncounterSearch
-                className="w-full @4xl/toolbar:w-[32rem]"
+                // Compact; it widens only when two chips share the line.
+                className="w-full @4xl/toolbar:w-96 @4xl/toolbar:has-[[data-slot=encounter-search-applied]+[data-slot=encounter-search-applied]]:w-[32rem]"
                 previewQueryParams={listFilterParams}
+                applied={{
+                  name: qParams.name,
+                  visitId: qParams.external_identifier,
+                  patient: patient_filter
+                    ? { name: qParams.patient_name, scanned: scannedPatient }
+                    : undefined,
+                }}
                 onApplyText={applySearchText}
+                onRemoveText={removeSearchText}
                 onSelectPatient={selectPatient}
+                onRemovePatient={removePatient}
               />
             ) : (
               <>
@@ -911,23 +921,15 @@ export function EncounterList({
           </div>
         </div>
 
-        {isAllList && (
-          <EncounterSearchChips
+        {isAllList && showDateNotice && (
+          <EncounterSearchDateNotice
             name={qParams.name}
             visitId={qParams.external_identifier}
-            patient={
-              patient_filter
-                ? { name: qParams.patient_name, scanned: scannedPatient }
-                : undefined
-            }
-            onRemoveText={removeSearchText}
-            onRemovePatient={removePatient}
-            datesCleared={showDateNotice}
             onUndo={() => {
               if (dateNotice) updateQuery(dateNotice.snapshot);
               setDateNotice(null);
             }}
-            onDismissNotice={() => setDateNotice(null)}
+            onDismiss={() => setDateNotice(null)}
           />
         )}
 
