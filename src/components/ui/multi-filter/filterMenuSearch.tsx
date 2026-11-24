@@ -102,8 +102,9 @@ export function FilterMenuSearch({
   }
 
   // Focus stays in search while the arrows move the highlight, as in the
-  // menu. A searchbox, unlike a combobox, isn't focused when the drawer opens,
-  // so the on-screen keyboard only opens when the user taps the field.
+  // menu. In a popup the search takes focus as the picker appears. A
+  // searchbox, unlike a combobox, isn't focused when the drawer opens, so the
+  // on-screen keyboard only opens when the user taps the field.
   const rows = () =>
     Array.from(
       document
@@ -116,6 +117,7 @@ export function FilterMenuSearch({
       role="searchbox"
       inputMode="search"
       autoSpace={false}
+      autoFocus={surface === "popup"}
       aria-label={placeholder}
       placeholder={placeholder}
       aria-controls={listId}
@@ -163,10 +165,17 @@ export function FilterMenuList({
     <Menu.List className={cn(highlightClass, className)}>{children}</Menu.List>
   ) : (
     // A drawer has room for a longer list than the menu's 30vh.
+    // A scrollable list is keyboard-focusable in Chromium; the search owns
+    // focus, so Tab must skip it.
     <div
       id={listId}
       role="menu"
-      className={cn(highlightClass, className, "max-h-[50dvh]")}
+      tabIndex={-1}
+      className={cn(
+        highlightClass,
+        className,
+        surface === "drawer" && "max-h-[50dvh]",
+      )}
     >
       {children}
     </div>

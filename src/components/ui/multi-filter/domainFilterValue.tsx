@@ -55,7 +55,8 @@ export function DomainFilterValue({
   const selected = toDomainValues(state, values);
   const { filter } = state;
   const dateDraftRef = useRef<DateFilterHandle>(null);
-  const inDrawer = useFilterSurface() === "drawer";
+  // The compact toolbar's popover or drawer hosts the picker itself.
+  const inline = useFilterSurface() !== "menu";
 
   const picker = (
     <FilterRenderer
@@ -74,8 +75,7 @@ export function DomainFilterValue({
     />
   );
 
-  // A drawer hosting the toolbar shows the picker in place of its other views.
-  const menu = inDrawer ? (
+  const menu = inline ? (
     picker
   ) : (
     <DropdownMenu

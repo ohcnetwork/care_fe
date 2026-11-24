@@ -200,8 +200,8 @@ function TagFilterDropdown({
     default: true,
     md: false,
   });
-  // Submenus need a menu popup; a drawer lists groups as expandable rows.
-  const inDrawer = useFilterSurface() === "drawer";
+  // Submenus need a menu popup; elsewhere groups are expandable rows.
+  const inline = useFilterSurface() !== "menu";
 
   // Fetch root-level tags
   const { data: rootTags, isLoading } = useQuery({
@@ -270,7 +270,7 @@ function TagFilterDropdown({
         {rootLevelGroupTags.length > 0 && !isSearching && (
           <>
             <FilterMenuLabel>{t("tag_groups")}</FilterMenuLabel>
-            {isMobile || inDrawer
+            {isMobile || inline
               ? // Mobile tree view
                 rootLevelGroupTags.map((group) => (
                   <TreeViewItem
