@@ -914,7 +914,7 @@ export function EncounterList({
               facilityId={facilityId}
             />
           </div>
-          <div className="ml-auto shrink-0 max-md:min-w-0 max-md:flex-1 max-md:basis-0">
+          <div className="shrink-0 max-md:min-w-0 max-md:flex-1 max-md:basis-0">
             <DateFilterButton
               filter={dateState.filter}
               selected={dateRange}
