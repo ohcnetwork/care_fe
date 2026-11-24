@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { waitForListRequest } from "tests/facility/services/helpers";
 import { openMultiFilter } from "tests/helper/multiFilter";
@@ -33,6 +33,50 @@ const users = ["Ada", "Sam"].map((first_name) => ({
   username: first_name.toLowerCase(),
 }));
 
+const identifierConfig = (display: string, system: string, regex = "") => ({
+  id: faker.string.uuid(),
+  status: "active",
+  config: {
+    display,
+    system,
+    regex,
+    use: "usual",
+    description: "",
+    required: false,
+    unique: true,
+    retrieve_config: {
+      retrieve_with_dob: false,
+      retrieve_with_year_of_birth: true,
+      retrieve_with_otp: false,
+    },
+    auto_maintained: false,
+  },
+});
+const phoneConfig = identifierConfig(
+  "Phone Number",
+  "system.care.ohc.network/patient-phone-number",
+);
+const abhaConfig = identifierConfig(
+  "ABHA Number",
+  "abdm.gov.in/abha-number",
+  "\\d{14}",
+);
+const fullPatient = {
+  id: faker.string.uuid(),
+  name: "Ravi Kumar",
+  phone_number: "+919876543210",
+};
+// Partial search results carry a temporary id; only search_retrieve returns
+// the record's real one.
+const partialPatient = {
+  id: faker.string.uuid(),
+  partial_id: "a1b2c",
+  name: "Meera S",
+  gender: "female",
+  phone_number: "+919876500000",
+};
+const verifiedPatient = { id: faker.string.uuid(), name: "Meera Suresh" };
+
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test.beforeEach(async ({ page }) => {
@@ -56,8 +100,30 @@ test.beforeEach(async ({ page }) => {
     }
     if (pathname === `/api/v1/facility/${facility.id}/`)
       return route.fulfill({
-        json: { ...facility, permissions: [], features: [] },
+        json: {
+          ...facility,
+          permissions: [],
+          features: [],
+          patient_instance_identifier_configs: [phoneConfig, abhaConfig],
+          patient_facility_identifier_configs: [],
+        },
       });
+    if (pathname === "/api/v1/patient/search/") {
+      const { value } = route.request().postDataJSON();
+      return route.fulfill({
+        json:
+          value === partialPatient.phone_number
+            ? { partial: true, results: [partialPatient] }
+            : { partial: false, results: [fullPatient] },
+      });
+    }
+    if (pathname === "/api/v1/patient/search_retrieve/") {
+      const body = route.request().postDataJSON();
+      return body.year_of_birth === "1990" &&
+        body.partial_id === partialPatient.partial_id
+        ? route.fulfill({ json: verifiedPatient })
+        : route.fulfill({ status: 400, json: { detail: "No match" } });
+    }
     if (pathname === "/api/v1/plug_config/")
       return route.fulfill({ json: { configs: [] } });
     if (pathname === `/api/v1/facility/${facility.id}/organizations/`) {
@@ -535,35 +601,37 @@ test("picker footer counts multi-select values but not radio choices", async ({
 });
 
 for (const layout of ["desktop", "mobile"] as const) {
-  test(`tabs from patient search through both identifier actions on ${layout}`, async ({
+  test(`tabs from the field selector through the search actions on ${layout}`, async ({
     page,
   }) => {
     if (layout === "mobile")
       await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/facility/${facility.id}/encounters/patients/all`);
-    const search = page.getByPlaceholder(/search by patient name/i);
-    const group = page.getByRole("group", { name: /^filter by identifier$/i });
-    const scan = group.getByRole("button", { name: /scan/i });
-    const identifier = group.getByRole("combobox");
+    const search = page.getByRole("combobox", { name: /^search visits$/i });
+    const field = page.getByRole("combobox", { name: /^search field$/i });
+    const clearText = page.getByRole("button", { name: /^clear search$/i });
+    const scan = page.getByRole("button", { name: /^scan patient qr code$/i });
     await search.fill("Taylor");
-    const suggestions = page.getByRole("listbox").filter({ hasText: "Taylor" });
-    await expect(suggestions).toBeVisible();
+    await expect(page.getByRole("listbox")).toContainText("Taylor");
+    // Tab keeps its normal order and dismisses the suggestions.
+    await page.keyboard.press("Tab");
+    await expect(clearText).toBeFocused();
+    await expect(page.getByRole("listbox")).toHaveCount(0);
     await page.keyboard.press("Tab");
     await expect(scan).toBeFocused();
-    await expect(suggestions).toHaveCount(0);
-    await page.keyboard.press("Tab");
-    await expect(identifier).toBeFocused();
     await page.keyboard.press("Tab");
     await expect(
       page.getByRole("button", { name: /^add filter$/i }),
     ).toBeFocused();
     await page.keyboard.press("Shift+Tab");
-    await expect(identifier).toBeFocused();
-    await page.keyboard.press("Shift+Tab");
     await expect(scan).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(clearText).toBeFocused();
     await page.keyboard.press("Shift+Tab");
     await expect(search).toBeFocused();
     await expect(search).toHaveValue("Taylor");
+    await page.keyboard.press("Shift+Tab");
+    await expect(field).toBeFocused();
   });
 
   test(`keeps the toolbar on one line and preserves Date on ${layout}`, async ({
@@ -665,6 +733,13 @@ for (const layout of ["desktop", "mobile"] as const) {
 
     const dateBox = (await date.boundingBox())!;
     const addBox = (await add.boundingBox())!;
+    // The combined search shares the line on desktop and has its own row on
+    // mobile.
+    const searchBox = (await page
+      .locator('[data-slot="encounter-search"]')
+      .boundingBox())!;
+    if (layout === "mobile") expect(searchBox.y).toBeLessThan(addBox.y);
+    else expect(searchBox.y).toBeCloseTo(addBox.y, 0);
     expect(dateBox.y).toBeCloseTo(initialDateBox.y, 0);
     expect(dateBox.y).toBeCloseTo(addBox.y, 0);
     expect(dateBox.x).toBeGreaterThanOrEqual(addBox.x + addBox.width);
@@ -818,4 +893,405 @@ test("opens the filters in one bottom drawer on mobile", async ({ page }) => {
   await datePicker.getByRole("button", { name: "Done" }).click();
   await expect(drawers).toHaveCount(0);
   await expect(date).toHaveText(/yesterday/i);
+});
+
+test.describe("All encounters search", () => {
+  const listUrl = (query = "") =>
+    `/facility/${facility.id}/encounters/patients/all${query}`;
+  const searchBox = (page: Page) =>
+    page.getByRole("combobox", { name: /^search visits$/i });
+  const chip = (page: Page) =>
+    page.locator('[data-slot="encounter-search-chip"]');
+  const dateNotice = (page: Page) =>
+    page.getByRole("status").filter({ hasText: /date range cleared/i });
+
+  /** Splits encounter list requests into list pages and limit=1 previews. */
+  function trackEncounterRequests(page: Page) {
+    const requests = {
+      list: [] as URLSearchParams[],
+      preview: [] as URLSearchParams[],
+    };
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (url.pathname !== "/api/v1/encounter/") return;
+      const target =
+        url.searchParams.get("limit") === "1"
+          ? requests.preview
+          : requests.list;
+      target.push(url.searchParams);
+    });
+    return requests;
+  }
+
+  function trackPatientLookups(page: Page) {
+    const bodies: { config: string; value: string }[] = [];
+    page.on("request", (request) => {
+      if (new URL(request.url()).pathname === "/api/v1/patient/search/")
+        bodies.push(request.postDataJSON());
+    });
+    return bodies;
+  }
+
+  test("previews visit filters while typing and applies one only on Enter", async ({
+    page,
+  }) => {
+    await page.route(
+      (url) => url.pathname === "/api/v1/encounter/",
+      (route) => {
+        const preview =
+          new URL(route.request().url()).searchParams.get("limit") === "1";
+        return route.fulfill({
+          json: { count: preview ? 3 : 0, results: [] },
+        });
+      },
+    );
+    const requests = trackEncounterRequests(page);
+    await page.goto(listUrl());
+    await expect.poll(() => requests.list.length).toBeGreaterThan(0);
+    await expect(page).toHaveURL((url) =>
+      url.searchParams.has("created_date_after"),
+    );
+    const listRequests = requests.list.length;
+
+    await searchBox(page).pressSequentially("Taylor", { delay: 150 });
+    const nameRow = page.getByRole("option", { name: /name contains taylor/i });
+    await expect(nameRow).toContainText("3 visits");
+    await expect(
+      page.getByRole("option", { name: /visit id contains taylor/i }),
+    ).toContainText("3 visits");
+    // Previews carry the applied filters but never change the list.
+    expect(
+      requests.preview.some(
+        (params) =>
+          params.get("name") === "Taylor" && params.has("created_date_after"),
+      ),
+    ).toBe(true);
+    expect(requests.list).toHaveLength(listRequests);
+    expect(requests.list.some((params) => params.has("name"))).toBe(false);
+
+    await searchBox(page).press("Enter");
+    await expect(page).toHaveURL(
+      (url) =>
+        url.searchParams.get("name") === "Taylor" &&
+        !url.searchParams.get("external_identifier"),
+    );
+    await expect(searchBox(page)).toHaveValue("");
+    await expect(chip(page)).toHaveText(/name: taylor/i);
+    await expect
+      .poll(() =>
+        requests.list.some((params) => params.get("name") === "Taylor"),
+      )
+      .toBe(true);
+
+    await chip(page)
+      .getByRole("button", { name: "Remove name filter" })
+      .click();
+    await expect(page).toHaveURL((url) => !url.searchParams.has("name"));
+  });
+
+  test("never looks up an incomplete phone number", async ({ page }) => {
+    const lookups = trackPatientLookups(page);
+    await page.goto(listUrl());
+    await searchBox(page).pressSequentially("98765", { delay: 150 });
+    const phoneRow = page.getByRole("option", { name: /phone number 98765/i });
+    await expect(phoneRow).toHaveAttribute("aria-disabled", "true");
+    await expect(phoneRow).toContainText("Enter the full phone number");
+    // The visit group leads until a complete identifier is detected.
+    await expect(page.getByRole("option").first()).toContainText(
+      /visit id contains 98765/i,
+    );
+    await searchBox(page).press("Enter");
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("external_identifier") === "98765",
+    );
+    expect(lookups).toHaveLength(0);
+  });
+
+  test("in Auto, a full phone number offers only the phone lookup", async ({
+    page,
+  }) => {
+    // Like a facility with many configs: some without a format rule, and the
+    // phone config listed last.
+    const hospitalId = identifierConfig("Hospital ID", "example.org/hospital");
+    const tmhId = identifierConfig("TMH ID", "example.org/tmh");
+    await page.route(`**/api/v1/facility/${facility.id}/`, (route) =>
+      route.fulfill({
+        json: {
+          ...facility,
+          permissions: [],
+          features: [],
+          patient_instance_identifier_configs: [tmhId, abhaConfig],
+          patient_facility_identifier_configs: [hospitalId, phoneConfig],
+        },
+      }),
+    );
+    await page.goto(listUrl());
+
+    await searchBox(page).pressSequentially("+919846404232", { delay: 20 });
+    const patientRows = page
+      .getByRole("group", { name: /look up a patient/i })
+      .getByRole("option");
+    await expect(patientRows).toHaveCount(1);
+    await expect(patientRows).toContainText(/phone number \+91 98464 04232/i);
+    await expect(page.getByRole("option").first()).toContainText(
+      /phone number/i,
+    );
+
+    // Without a format match, a partly typed phone number leads with its
+    // hint; then configs without a rule, usable ones before disabled ones.
+    await searchBox(page).fill("");
+    await searchBox(page).pressSequentially("98464", { delay: 20 });
+    await expect(patientRows.first()).toContainText(/phone number 98464/i);
+    await expect(patientRows.first()).toHaveAttribute("aria-disabled", "true");
+    await expect(patientRows.nth(1)).toContainText(/tmh id 98464/i);
+    await expect(patientRows.last()).toHaveAttribute("aria-disabled", "true");
+  });
+
+  test("shows the phone country in Auto once a number is typed", async ({
+    page,
+  }) => {
+    await page.goto(listUrl());
+    // The open dropdown hides the rest of the page from the a11y tree.
+    const country = (name: string) =>
+      page.locator(`[data-slot="encounter-search"] [aria-label="${name}"]`);
+    const india = country("Phone country: India (+91)");
+    await searchBox(page).pressSequentially("Ravi", { delay: 50 });
+    await expect(india).toBeHidden();
+
+    await searchBox(page).fill("");
+    await searchBox(page).pressSequentially("98765", { delay: 50 });
+    await expect(india).toBeVisible();
+    await expect(page.getByText(/^auto$/i)).toBeVisible();
+
+    // A number with its own code shows that code's country.
+    await searchBox(page).fill("");
+    await searchBox(page).pressSequentially("+4", { delay: 50 });
+    await expect(india).toBeVisible();
+    await searchBox(page).pressSequentially("4 7400 123456", { delay: 50 });
+    await expect(country("Phone country: United Kingdom (+44)")).toBeVisible();
+    await expect(page.getByRole("option").first()).toContainText(
+      /phone number \+44 7400 123456/i,
+    );
+  });
+
+  test("looks up a phone number in the picked country", async ({ page }) => {
+    const lookups = trackPatientLookups(page);
+    await page.goto(listUrl());
+    await searchBox(page).pressSequentially("phone:", { delay: 50 });
+    await page
+      .getByRole("button", { name: "Phone country: India (+91)" })
+      .click();
+    await page.getByPlaceholder("Search country...").fill("United Kingdom");
+    await page.getByRole("option", { name: /united kingdom \+44/i }).click();
+    await expect(
+      page.getByRole("button", { name: "Phone country: United Kingdom (+44)" }),
+    ).toBeVisible();
+    await expect(searchBox(page)).toBeFocused();
+
+    await searchBox(page).pressSequentially("07400 123456", { delay: 50 });
+    await expect(page.getByRole("option")).toContainText(
+      /phone number \+44 7400 123456/i,
+    );
+    await searchBox(page).press("Enter");
+    await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
+    expect(lookups).toEqual([
+      { config: phoneConfig.id, value: "+447400123456", page_size: 20 },
+    ]);
+  });
+
+  test("looks up a complete phone on Enter, and Undo restores the dates", async ({
+    page,
+  }) => {
+    const lookups = trackPatientLookups(page);
+    await page.goto(listUrl("?name=Kumar"));
+    await expect(page).toHaveURL((url) =>
+      url.searchParams.has("created_date_after"),
+    );
+    const before = new URL(page.url()).searchParams;
+
+    await searchBox(page).pressSequentially("9876543210", { delay: 150 });
+    // Detection puts the lookup first; typing alone never searches. Auto
+    // reads the number in the default country and shows its code.
+    await expect(page.getByRole("option").first()).toContainText(
+      /phone number \+91 98765 43210/i,
+    );
+    expect(lookups).toHaveLength(0);
+    await searchBox(page).press("Enter");
+    await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
+    expect(lookups).toEqual([
+      { config: phoneConfig.id, value: "+919876543210", page_size: 20 },
+    ]);
+    await page.getByRole("option", { name: fullPatient.name }).click();
+
+    await expect(page).toHaveURL(
+      (url) =>
+        url.searchParams.get("patient_filter") === fullPatient.id &&
+        url.searchParams.get("patient_name") === fullPatient.name &&
+        !url.searchParams.has("created_date_after") &&
+        !url.searchParams.has("created_date_before"),
+    );
+    await expect(dateNotice(page)).toContainText(
+      "The name filter still applies.",
+    );
+    await expect(
+      chip(page).filter({ hasText: fullPatient.name }),
+    ).toBeVisible();
+
+    await dateNotice(page).getByRole("button", { name: "Undo" }).click();
+    await expect(page).toHaveURL(
+      (url) =>
+        !url.searchParams.has("patient_filter") &&
+        url.searchParams.get("created_date_after") ===
+          before.get("created_date_after") &&
+        url.searchParams.get("created_date_before") ===
+          before.get("created_date_before"),
+    );
+    await expect(dateNotice(page)).toHaveCount(0);
+
+    // Removing the patient is not Undo: the default dates resume.
+    await searchBox(page).pressSequentially("9876543210", { delay: 150 });
+    await searchBox(page).press("Enter");
+    await page.getByRole("option", { name: fullPatient.name }).click();
+    await expect(dateNotice(page)).toBeVisible();
+    await chip(page)
+      .filter({ hasText: fullPatient.name })
+      .getByRole("button", { name: "Remove patient" })
+      .click();
+    await expect(page).toHaveURL(
+      (url) =>
+        !url.searchParams.has("patient_filter") &&
+        url.searchParams.has("created_date_after"),
+    );
+    await expect(dateNotice(page)).toHaveCount(0);
+  });
+
+  test("verifies a partial record and filters by its full record's id", async ({
+    page,
+  }) => {
+    const retrievals: Record<string, string>[] = [];
+    page.on("request", (request) => {
+      if (
+        new URL(request.url()).pathname === "/api/v1/patient/search_retrieve/"
+      )
+        retrievals.push(request.postDataJSON());
+    });
+    await page.goto(listUrl());
+    await searchBox(page).pressSequentially("9876500000", { delay: 150 });
+    await searchBox(page).press("Enter");
+    await page.getByRole("option", { name: /meera s/i }).click();
+
+    const year = page.getByRole("textbox", { name: /year of birth/i });
+    await year.fill("1985");
+    await page.getByRole("button", { name: "Verify" }).click();
+    await expect(page.getByRole("alert")).toHaveText(
+      /year of birth doesn't match/i,
+    );
+    await expect(page).toHaveURL(
+      (url) => !url.searchParams.has("patient_filter"),
+    );
+
+    await year.fill("1990");
+    await page.getByRole("button", { name: "Verify" }).click();
+    await expect(page).toHaveURL(
+      (url) =>
+        url.searchParams.get("patient_filter") === verifiedPatient.id &&
+        url.searchParams.get("patient_name") === verifiedPatient.name,
+    );
+    expect(page.url()).not.toContain(partialPatient.id);
+    expect(retrievals.at(-1)).toMatchObject({
+      partial_id: partialPatient.partial_id,
+      year_of_birth: "1990",
+    });
+  });
+
+  test("keeps a bookmarked patient_filter without patient_name", async ({
+    page,
+  }) => {
+    const requests = trackEncounterRequests(page);
+    await page.goto(
+      listUrl(`?patient_filter=${fullPatient.id}&status=planned`),
+    );
+    await expect(chip(page)).toHaveText(/^patient$/i);
+    await expect
+      .poll(() =>
+        requests.list.some(
+          (params) =>
+            params.get("patient_filter") === fullPatient.id &&
+            !params.has("created_date_after"),
+        ),
+      )
+      .toBe(true);
+    // The empty state offers one way out per filter, without extra queries.
+    const empty = page.getByText(
+      "No visits match this date range and these filters",
+    );
+    await expect(empty).toBeVisible();
+    for (const name of ["Remove Status filter", "Remove patient"])
+      await expect(
+        page.locator('[data-slot="card"]').getByRole("button", { name }),
+      ).toBeVisible();
+  });
+
+  test("a scanner's Enter applies the patient; a typed Enter filters visits", async ({
+    page,
+  }) => {
+    const scanned = faker.string.uuid();
+    await page.goto(listUrl());
+    await searchBox(page).click();
+    // A handheld scanner types the whole code at once, then Enter.
+    await page.keyboard.type(scanned);
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(
+      (url) =>
+        url.searchParams.get("patient_filter") === scanned &&
+        !url.searchParams.has("name") &&
+        !url.searchParams.has("external_identifier"),
+    );
+    await expect(chip(page)).toContainText("Scanned patient");
+    await expect(chip(page)).toContainText(
+      "Identity not verified by this scan",
+    );
+
+    await chip(page).getByRole("button", { name: "Remove patient" }).click();
+    await searchBox(page).pressSequentially(scanned, { delay: 150 });
+    await searchBox(page).press("Enter");
+    await expect(page).toHaveURL(
+      (url) =>
+        url.searchParams.get("name") === scanned &&
+        !url.searchParams.has("patient_filter"),
+    );
+  });
+
+  test("reaches the field selector from the keyboard and reads prefixes", async ({
+    page,
+  }) => {
+    await page.goto(listUrl());
+    const field = page.getByRole("combobox", { name: /^search field$/i });
+    await searchBox(page).focus();
+    await page.keyboard.press("Shift+Tab");
+    await expect(field).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(page.getByRole("option", { name: "Visit ID" })).toBeVisible();
+    await page.keyboard.press("v");
+    await page.keyboard.press("Enter");
+    await expect(field).toHaveText(/visit id/i);
+    await expect(searchBox(page)).toBeFocused();
+    await expect(searchBox(page)).toHaveAccessibleDescription(
+      /searching visit id/i,
+    );
+
+    // Backspace in an empty input returns to Auto; prefixes pick a field.
+    await page.keyboard.press("Backspace");
+    await expect(field).toHaveText(/auto/i);
+    await searchBox(page).pressSequentially("phone:", { delay: 50 });
+    await expect(field).toHaveText(/phone number/i);
+    // The phone field shows its country, preselected as in PhoneInput.
+    await expect(
+      page.getByRole("button", { name: "Phone country: India (+91)" }),
+    ).toBeVisible();
+    await expect(searchBox(page)).toHaveValue("");
+    await searchBox(page).pressSequentially("12345", { delay: 50 });
+    // With a field chosen, only its row shows.
+    await expect(page.getByRole("option")).toHaveCount(1);
+  });
 });

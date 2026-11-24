@@ -56,6 +56,16 @@ import { encounterListSearch } from "@/lib/router/search/encounter";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import {
+  EmptyStateAction,
+  EncounterListEmptyState,
+} from "@/pages/Encounters/encounter-search/EncounterListEmptyState";
+import {
+  EncounterSearch,
+  SelectedPatient,
+  VisitField,
+} from "@/pages/Encounters/encounter-search/EncounterSearch";
+import { EncounterSearchChips } from "@/pages/Encounters/encounter-search/EncounterSearchChips";
+import {
   EncounterClass,
   EncounterListRead,
   EncounterRead,
@@ -199,6 +209,12 @@ export function EncounterList({
   // filters by, saves and restores an encounter class. A stray
   // ?encounter_class= on a class-specific list is ignored.
   const filtersByEncounterClass = !encounterClass;
+  // Only the All list has the combined search; class lists keep theirs.
+  const isAllList = !encounterClass;
+  const [dateNotice, setDateNotice] = useState<{
+    patientId: string;
+    snapshot: Record<string, string | undefined>;
+  } | null>(null);
 
   const getDefaultDateRange = () => {
     const today = new Date();
@@ -379,29 +395,39 @@ export function EncounterList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
+  // The list's filters without its search text; the All search previews its
+  // visit counts with the same ones.
+  const listFilterParams = {
+    ...buildQueryParams(
+      facilityId,
+      status,
+      priority,
+      created_date_after,
+      created_date_before,
+      organization,
+      care_team_user,
+    ),
+    encounter_class: filtersByEncounterClass
+      ? qParams.encounter_class
+      : encounterClass,
+    tags: qParams.tags,
+    tags_behavior: qParams.tags_behavior,
+    patient_filter: patient_filter,
+  };
+  // The All list reads only what the URL applies, never the unsubmitted draft.
+  const listSearch = isAllList
+    ? { name: qParams.name, external_identifier: qParams.external_identifier }
+    : searchQueryParams;
+
   const { data: queryEncounters, isFetching } = useQuery({
     queryKey: ["encounters", facilityId, qParams, encounterClass],
     queryFn: query.debounced(encounterApi.list, {
       queryParams: {
-        ...buildQueryParams(
-          facilityId,
-          status,
-          priority,
-          created_date_after,
-          created_date_before,
-          organization,
-          care_team_user,
-        ),
-        encounter_class: filtersByEncounterClass
-          ? qParams.encounter_class
-          : encounterClass,
-        external_identifier: searchQueryParams.external_identifier,
+        ...listFilterParams,
+        external_identifier: listSearch.external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
-        tags: qParams.tags,
-        tags_behavior: qParams.tags_behavior,
-        patient_filter: patient_filter,
-        name: searchQueryParams.name,
+        name: listSearch.name,
       },
     }),
     enabled: !propEncounters && !encounter_id,
@@ -631,7 +657,112 @@ export function EncounterList({
     updateQuery,
   ]);
 
+  const applySearchText = (field: VisitField, term: string) =>
+    updateQuery(
+      field === "name"
+        ? { name: term, external_identifier: "" }
+        : { name: "", external_identifier: term },
+    );
+  const removeSearchText = () =>
+    updateQuery({ name: "", external_identifier: "" });
+
+  // Selecting a patient clears the dates, as before. Undo restores the
+  // previous patient and dates; the history is replaced, so Back can't.
+  const selectPatient = (patient: SelectedPatient) => {
+    const datesCleared = !!(created_date_after || created_date_before);
+    updateQuery({
+      patient_filter: patient.id,
+      patient_name: patient.name,
+      created_date_after: undefined,
+      created_date_before: undefined,
+    });
+    setDateNotice(
+      datesCleared
+        ? {
+            patientId: patient.id,
+            snapshot: {
+              patient_filter,
+              patient_name: qParams.patient_name,
+              created_date_after,
+              created_date_before,
+            },
+          }
+        : null,
+    );
+  };
+  // Removing the patient isn't Undo: the default dates resume.
+  const removePatient = () => {
+    updateQuery({ patient_filter: undefined, patient_name: undefined });
+    setDateNotice(null);
+  };
+  const showDateNotice =
+    !!dateNotice &&
+    dateNotice.patientId === patient_filter &&
+    !created_date_after &&
+    !created_date_before;
+  const scannedPatient =
+    qParams.patient_name === t("scanned_patient") ||
+    qParams.patient_name === t("encounter_search_scanned_patient");
+
   const { created_date: dateState, ...toolbarFilters } = selectedFilters;
+  // One button per applied filter, from the URL alone. The date range can
+  // only be lifted for a patient; otherwise the default dates return.
+  const emptyStateActions: EmptyStateAction[] = [
+    ...(patient_filter && (created_date_after || created_date_before)
+      ? [
+          {
+            key: "dates",
+            label: t("encounter_list_empty_any_date"),
+            onClick: () =>
+              updateQuery({
+                created_date_after: undefined,
+                created_date_before: undefined,
+              }),
+          },
+        ]
+      : []),
+    ...Object.entries(toolbarFilters).flatMap(([key, state]) =>
+      Array.isArray(state.selected) && state.selected.length
+        ? [
+            {
+              key,
+              label: t("encounter_list_empty_remove_filter", {
+                filter: t(state.filter.label),
+              }),
+              onClick: () => handleClearFilter(key),
+            },
+          ]
+        : [],
+    ),
+    ...(qParams.name
+      ? [
+          {
+            key: "name",
+            label: t("encounter_search_remove_name_filter"),
+            onClick: removeSearchText,
+          },
+        ]
+      : []),
+    ...(qParams.external_identifier
+      ? [
+          {
+            key: "visit",
+            label: t("encounter_search_remove_visit_id_filter"),
+            onClick: removeSearchText,
+          },
+        ]
+      : []),
+    ...(patient_filter
+      ? [
+          {
+            key: "patient",
+            label: t("encounter_search_remove_patient"),
+            onClick: removePatient,
+          },
+        ]
+      : []),
+  ];
+
   const dateRange =
     Array.isArray(dateState.selected) ||
     ((patient_filter || encounterClass === "imp") &&
@@ -661,100 +792,113 @@ export function EncounterList({
       <div className="@container/toolbar space-y-4 mt-4 flex flex-col">
         <div className="flex w-full min-w-0 flex-wrap items-center gap-2 @4xl/toolbar:flex-nowrap">
           <div className="flex w-full min-w-0 items-center gap-2 @4xl/toolbar:w-auto">
-            <div className="relative min-w-24 flex-1 @4xl/toolbar:w-60 @4xl/toolbar:flex-none">
-              <Popover
-                open={searchOptionsOpen && showSearchOptions}
-                onOpenChange={setSearchOptionsOpen}
-              >
-                <PopoverAnchor asChild>
-                  <InputGroup>
-                    <InputGroupInput
-                      ref={searchInputRef}
-                      value={searchText}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        setSearchText(value);
-                        setSearchOptionsOpen(value.trim() !== "");
-                        setActiveSearchOptionIndex(0);
-                      }}
-                      onFocus={() => {
-                        if (showSearchOptions) {
-                          setSearchOptionsOpen(true);
-                        }
-                      }}
-                      onKeyDown={handleSearchInputKeyDown}
-                      placeholder={selectedSearchType.placeholder}
-                    />
-                    <InputGroupAddon>
-                      <Search aria-hidden="true" />
-                    </InputGroupAddon>
-                  </InputGroup>
-                </PopoverAnchor>
-                <PopoverContent
-                  className="w-(--anchor-width) p-0"
-                  align="start"
-                  onOpenAutoFocus={(event) => {
-                    event.preventDefault();
-                    searchInputRef.current?.focus();
-                  }}
-                  onCloseAutoFocus={(event) => {
-                    event.preventDefault();
-                  }}
-                >
-                  <Command>
-                    <CommandList>
-                      <CommandGroup>
-                        {searchWithOptions.map((option, index) => (
-                          <CommandItem
-                            key={option.key}
-                            value={option.key}
-                            onSelect={() => handleSearchWithChange(option.key)}
-                            className={`flex items-center gap-2 ${
-                              activeSearchOptionIndex === index
-                                ? "bg-accent"
-                                : ""
-                            }`}
-                            onMouseEnter={() =>
-                              setActiveSearchOptionIndex(index)
+            {isAllList ? (
+              <EncounterSearch
+                className="w-full @4xl/toolbar:w-[32rem]"
+                previewQueryParams={listFilterParams}
+                onApplyText={applySearchText}
+                onSelectPatient={selectPatient}
+              />
+            ) : (
+              <>
+                <div className="relative min-w-24 flex-1 @4xl/toolbar:w-60 @4xl/toolbar:flex-none">
+                  <Popover
+                    open={searchOptionsOpen && showSearchOptions}
+                    onOpenChange={setSearchOptionsOpen}
+                  >
+                    <PopoverAnchor asChild>
+                      <InputGroup>
+                        <InputGroupInput
+                          ref={searchInputRef}
+                          value={searchText}
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            setSearchText(value);
+                            setSearchOptionsOpen(value.trim() !== "");
+                            setActiveSearchOptionIndex(0);
+                          }}
+                          onFocus={() => {
+                            if (showSearchOptions) {
+                              setSearchOptionsOpen(true);
                             }
-                          >
-                            <div>
-                              {searchText}{" "}
-                              <span className="text-muted-foreground">
-                                {option.label}
-                              </span>
-                            </div>
-                            <Check
-                              className={`ml-auto size-4 ${
-                                option.key === searchWith
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              }`}
-                            />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-            <PatientIdentifierFilter
-              onSelect={(patientId, patientName) =>
-                updateQuery({
-                  patient_filter: patientId,
-                  patient_name: patientName,
-                  created_date_after: undefined,
-                  created_date_before: undefined,
-                })
-              }
-              placeholder={t("filter_by_identifier")}
-              size="default"
-              className="w-auto min-w-0 flex-1 @4xl/toolbar:flex-none [&>[data-variant]]:shadow-2xs"
-              scanLabelClassName="hidden @lg/toolbar:block"
-              patientId={qParams.patient_filter}
-              patientName={qParams.patient_name}
-            />
+                          }}
+                          onKeyDown={handleSearchInputKeyDown}
+                          placeholder={selectedSearchType.placeholder}
+                        />
+                        <InputGroupAddon>
+                          <Search aria-hidden="true" />
+                        </InputGroupAddon>
+                      </InputGroup>
+                    </PopoverAnchor>
+                    <PopoverContent
+                      className="w-(--anchor-width) p-0"
+                      align="start"
+                      onOpenAutoFocus={(event) => {
+                        event.preventDefault();
+                        searchInputRef.current?.focus();
+                      }}
+                      onCloseAutoFocus={(event) => {
+                        event.preventDefault();
+                      }}
+                    >
+                      <Command>
+                        <CommandList>
+                          <CommandGroup>
+                            {searchWithOptions.map((option, index) => (
+                              <CommandItem
+                                key={option.key}
+                                value={option.key}
+                                onSelect={() =>
+                                  handleSearchWithChange(option.key)
+                                }
+                                className={`flex items-center gap-2 ${
+                                  activeSearchOptionIndex === index
+                                    ? "bg-accent"
+                                    : ""
+                                }`}
+                                onMouseEnter={() =>
+                                  setActiveSearchOptionIndex(index)
+                                }
+                              >
+                                <div>
+                                  {searchText}{" "}
+                                  <span className="text-muted-foreground">
+                                    {option.label}
+                                  </span>
+                                </div>
+                                <Check
+                                  className={`ml-auto size-4 ${
+                                    option.key === searchWith
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  }`}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <PatientIdentifierFilter
+                  onSelect={(patientId, patientName) =>
+                    updateQuery({
+                      patient_filter: patientId,
+                      patient_name: patientName,
+                      created_date_after: undefined,
+                      created_date_before: undefined,
+                    })
+                  }
+                  placeholder={t("filter_by_identifier")}
+                  size="default"
+                  className="w-auto min-w-0 flex-1 @4xl/toolbar:flex-none [&>[data-variant]]:shadow-2xs"
+                  scanLabelClassName="hidden @lg/toolbar:block"
+                  patientId={qParams.patient_filter}
+                  patientName={qParams.patient_name}
+                />
+              </>
+            )}
           </div>
           {/* On mobile the filters and Date share their row equally. Both
               halves are unpadded wrappers, so flex-basis 0 splits it evenly. */}
@@ -780,12 +924,36 @@ export function EncounterList({
           </div>
         </div>
 
+        {isAllList && (
+          <EncounterSearchChips
+            name={qParams.name}
+            visitId={qParams.external_identifier}
+            patient={
+              patient_filter
+                ? { name: qParams.patient_name, scanned: scannedPatient }
+                : undefined
+            }
+            onRemoveText={removeSearchText}
+            onRemovePatient={removePatient}
+            datesCleared={showDateNotice}
+            onUndo={() => {
+              if (dateNotice) updateQuery(dateNotice.snapshot);
+              setDateNotice(null);
+            }}
+            onDismissNotice={() => setDateNotice(null)}
+          />
+        )}
+
         <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
           {isFetching ? (
             <CardGridSkeleton count={6} />
           ) : encounters.length === 0 ? (
             <div className="col-span-full">
-              <EmptyState />
+              {isAllList ? (
+                <EncounterListEmptyState actions={emptyStateActions} />
+              ) : (
+                <EmptyState />
+              )}
             </div>
           ) : (
             <>
