@@ -33,6 +33,7 @@ export interface HrefNavigateOptions {
   replace?: boolean;
   state?: HistoryState;
   resetScroll?: boolean;
+  hashScrollIntoView?: boolean | ScrollIntoViewOptions;
   ignoreBlocker?: boolean;
 }
 

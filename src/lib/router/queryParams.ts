@@ -69,7 +69,8 @@ export function useQueryParams(
 
   const setQueryParams = useCallback<SetQueryParams>(
     (query, { overwrite = true, replace = false } = {}) => {
-      const location = getRouter().history.location;
+      const router = getRouter();
+      const location = router.history.location;
       const next = overwrite
         ? query
         : { ...parseQuery(location.search), ...query };
@@ -78,7 +79,17 @@ export function useQueryParams(
       if (serialized) href += "?" + serialized;
       if (!overwrite) href += location.hash;
       // Filters and selection update this page, so keep its scroll position.
-      navigate({ href, replace, resetScroll: false });
+      // A page that writes default filters while it mounts is not on screen
+      // yet. Its scroll reset must not be cancelled. A retained hash must not
+      // scroll to its target again.
+      const onScreen =
+        router.state.resolvedLocation?.pathname === location.pathname;
+      navigate({
+        href,
+        replace,
+        resetScroll: onScreen ? false : undefined,
+        hashScrollIntoView: false,
+      });
     },
     [],
   );
