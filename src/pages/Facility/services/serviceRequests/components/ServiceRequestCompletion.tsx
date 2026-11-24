@@ -127,6 +127,7 @@ export function ServiceRequestCompletion({
         request={request}
         facilityId={facilityId}
         serviceRequestId={serviceRequestId}
+        pendingReports={pendingReports}
         open={isCompleteDialogOpen}
         onOpenChange={setIsCompleteDialogOpen}
       />

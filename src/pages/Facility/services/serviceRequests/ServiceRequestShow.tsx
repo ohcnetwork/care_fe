@@ -262,6 +262,7 @@ export default function ServiceRequestShow({
                 facilityId={facilityId}
                 serviceRequestId={serviceRequestId}
                 hasFinalizedReport={hasFinalizedReport}
+                pendingReports={pendingReports}
                 locationId={locationId}
                 disableEdit={disableEdit}
               />

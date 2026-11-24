@@ -23,6 +23,7 @@ interface ServiceRequestHeaderProps {
   facilityId: string;
   serviceRequestId: string;
   hasFinalizedReport: boolean;
+  pendingReports: number;
   locationId?: string;
   disableEdit: boolean;
 }
@@ -33,6 +34,7 @@ export function ServiceRequestHeader({
   facilityId,
   serviceRequestId,
   hasFinalizedReport,
+  pendingReports,
   locationId,
   disableEdit,
 }: ServiceRequestHeaderProps) {
@@ -99,6 +101,7 @@ export function ServiceRequestHeader({
           facilityId={facilityId}
           serviceRequestId={serviceRequestId}
           hasFinalizedReport={hasFinalizedReport}
+          pendingReports={pendingReports}
         />
       </div>
 

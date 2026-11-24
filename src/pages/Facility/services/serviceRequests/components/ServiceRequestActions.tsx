@@ -27,6 +27,7 @@ interface ServiceRequestActionsProps {
   facilityId: string;
   serviceRequestId: string;
   hasFinalizedReport: boolean;
+  pendingReports: number;
 }
 
 export function ServiceRequestActions({
@@ -34,6 +35,7 @@ export function ServiceRequestActions({
   facilityId,
   serviceRequestId,
   hasFinalizedReport,
+  pendingReports,
 }: ServiceRequestActionsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -133,6 +135,7 @@ export function ServiceRequestActions({
           request={request}
           facilityId={facilityId}
           serviceRequestId={serviceRequestId}
+          pendingReports={pendingReports}
           open={isCompleteDialogOpen}
           onOpenChange={setIsCompleteDialogOpen}
         />

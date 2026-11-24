@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,6 +34,7 @@ interface ServiceRequestCompleteDialogProps {
   request: ServiceRequestReadSpec;
   facilityId: string;
   serviceRequestId: string;
+  pendingReports: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -41,6 +43,7 @@ export function ServiceRequestCompleteDialog({
   request,
   facilityId,
   serviceRequestId,
+  pendingReports,
   open,
   onOpenChange,
 }: ServiceRequestCompleteDialogProps) {
@@ -72,19 +75,32 @@ export function ServiceRequestCompleteDialog({
   }
 
   const content = (
-    <CompletionNoteContent
-      note={note}
-      onNoteChange={setNote}
-      isUpdating={isPending}
-      onComplete={() =>
-        completeServiceRequest({
-          status: Status.completed,
-          note: note.trim() || null,
-          locations: request.locations.map((loc) => loc.id),
-        })
-      }
-      onCancel={() => handleOpenChange(false)}
-    />
+    <>
+      {pendingReports > 0 && (
+        <Alert variant="warning" role="note">
+          <TriangleAlert />
+          <AlertTitle>
+            {t("pending_final_review_reports", { count: pendingReports })}
+          </AlertTitle>
+          <AlertDescription>
+            {t("service_request_complete_pending_reports_warning")}
+          </AlertDescription>
+        </Alert>
+      )}
+      <CompletionNoteContent
+        note={note}
+        onNoteChange={setNote}
+        isUpdating={isPending}
+        onComplete={() =>
+          completeServiceRequest({
+            status: Status.completed,
+            note: note.trim() || null,
+            locations: request.locations.map((loc) => loc.id),
+          })
+        }
+        onCancel={() => handleOpenChange(false)}
+      />
+    </>
   );
 
   if (isMobile) {
