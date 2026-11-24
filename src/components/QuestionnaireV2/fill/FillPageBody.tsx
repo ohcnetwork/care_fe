@@ -1,7 +1,6 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
-import { navigate, useNavigationPrompt } from "raviger";
 import {
   type CSSProperties,
   useCallback,
@@ -22,6 +21,7 @@ import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { formatKeyboardShortcut } from "@/Utils/keyboardShortcutUtils";
 import mutate from "@/Utils/request/mutate";
+import { navigate } from "@/lib/router/navigate";
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 import type { PatientRead } from "@/types/emr/patient/patient";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -51,6 +51,7 @@ import { useSubmitFillSession } from "./submit/useSubmitFillSession";
 import { useFillActions } from "./useFillActions";
 import { useFillSessionForms } from "./useFillSessionForms";
 
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { FillSessionNotices } from "./FillSessionNotices";
 import { FillSessionTabs } from "./FillSessionTabs";
 
@@ -203,9 +204,9 @@ export function FillPageBody({
     blockedFormLabels,
     onSuccess: () => {
       // Order matters: finishDraft flushes the pristine state before the
-      // redirect so useNavigationPrompt doesn't block it.
+      // redirect so useNavigationBlocker does not block it.
       autosave.finishDraft();
-      navigate(exitTarget);
+      navigate({ href: exitTarget, replace: true });
     },
   });
 
@@ -219,7 +220,7 @@ export function FillPageBody({
     continueDraftId,
     onSaved: () => {
       autosave.finishDraft();
-      navigate(exitTarget);
+      navigate({ href: exitTarget, replace: true });
     },
   });
 
@@ -243,7 +244,7 @@ export function FillPageBody({
         discarded,
       );
       queryClient.invalidateQueries({ queryKey: formSubmissionKeys.lists() });
-      navigate(exitTarget);
+      navigate({ href: exitTarget, replace: true });
     },
     onError: () => toast.error(t("form_submission_discard_failed")),
   });
@@ -315,7 +316,7 @@ export function FillPageBody({
     if (serverDraft) {
       discardServerDraft.mutate(serverDraft);
     } else if (autosave.discardDraft()) {
-      navigate(exitTarget);
+      navigate({ href: exitTarget, replace: true });
     }
   };
   const requestClose = () => {
@@ -331,11 +332,11 @@ export function FillPageBody({
     if (continueDraftId) {
       if (!contextRefreshFailed) serverDraftSave.saveDraft();
     } else if (autosave.minimizeDraft()) {
-      navigate(exitTarget);
+      navigate({ href: exitTarget, replace: true });
     }
   };
 
-  useNavigationPrompt(
+  useNavigationBlocker(
     autosave.dirty && !import.meta.env.DEV,
     t("unsaved_changes"),
   );
@@ -493,6 +494,7 @@ export function FillPageBody({
                   <QuestionnaireSearch
                     subjectType={pickerSubjectType}
                     facilityId={facilityId}
+                    excludeIds={forms.map((form) => form.questionnaire.id)}
                     onSelect={addQuestionnaireFromPicker}
                     // The default trigger is a `role="combobox"` button,
                     // and combobox takes no name from its contents — it

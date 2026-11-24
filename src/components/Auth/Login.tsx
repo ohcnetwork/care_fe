@@ -1,5 +1,4 @@
 import careConfig from "@careConfig";
-import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,6 +11,9 @@ import { StaffLoginForm } from "@/components/Auth/StaffLoginForm";
 
 import { LocalStorageKeys } from "@/common/constants";
 
+import { useQueryParams } from "@/lib/router/queryParams";
+import { loginPageSearch } from "@/lib/router/search/auth";
+
 type LoginMode = "staff" | "patient";
 
 interface LoginProps {
@@ -20,7 +22,7 @@ interface LoginProps {
 
 const Login = ({ forgot = false }: LoginProps) => {
   const { t } = useTranslation();
-  const [{ mode }, setQueryParams] = useQueryParams<{ mode?: string }>();
+  const [{ mode }, setQueryParams] = useQueryParams(loginPageSearch);
   const [forgotPassword, setForgotPassword] = useState(forgot);
   // Shared so a username typed on the sign-in form carries into password reset.
   const [username, setUsername] = useState("");

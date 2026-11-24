@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
 
 import { callApi } from "@/Utils/request/query";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { referralContextSearch } from "@/lib/router/search/referral";
 import { ReferralResource } from "@/types/emr/referral/referralResource";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
@@ -12,7 +13,7 @@ export function useReferralResourceLink(
   patientId: string,
 ) {
   const facilityId = attachment.metadata?.facility_id;
-  const [{ sourceUrl }] = useQueryParams<{ sourceUrl?: string }>();
+  const [{ sourceUrl }] = useQueryParams(referralContextSearch);
   return useQuery({
     queryKey: [
       "referrals",

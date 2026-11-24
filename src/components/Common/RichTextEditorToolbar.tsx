@@ -61,6 +61,8 @@ import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
+import { isAppleDevice } from "@/Utils/utils";
+
 export function RichTextEditorToolbar() {
   const { t } = useTranslation();
   const [
@@ -82,7 +84,6 @@ export function RichTextEditorToolbar() {
   const applyListType = usePublisher(applyListType$);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
-  const isApple = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
 
   // Subscribe while More is closed, too: typing changes the history state.
   useEffect(() => {
@@ -184,10 +185,10 @@ export function RichTextEditorToolbar() {
   };
 
   const undoLabel = t("rich_text_editor.toolbar.undo", {
-    shortcut: isApple ? "⌘Z" : "Ctrl+Z",
+    shortcut: isAppleDevice ? "⌘Z" : "Ctrl+Z",
   });
   const redoLabel = t("rich_text_editor.toolbar.redo", {
-    shortcut: isApple ? "⌘Y" : "Ctrl+Y",
+    shortcut: isAppleDevice ? "⌘Y" : "Ctrl+Y",
   });
 
   return (

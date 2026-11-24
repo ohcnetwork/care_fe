@@ -121,7 +121,7 @@ export function FillShell({
   }, [minimizeOnEscape]);
 
   return (
-    // Cancel AppRouter's page-wrapper p-2 while the mobile shell stays in flow.
+    // Cancel the page-wrapper padding of AppShell while the mobile shell stays in flow.
     <div
       ref={shellRef}
       className={cn(

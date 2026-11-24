@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { valueSetEditorSearch } from "@/lib/router/search/admin";
 import {
   ValueSetBase,
   ValueSetCreate,
@@ -67,7 +69,7 @@ export function ValueSetEditor({
   const { canWrite, isLoading: isPermissionLoading } =
     useCanWriteValueSet(scope);
   // `?parent=` is how the list's Customize action seeds a new facility set.
-  const [{ parent: initialParentId }] = useQueryParams<{ parent?: string }>();
+  const [{ parent: initialParentId }] = useQueryParams(valueSetEditorSearch);
 
   // Fetch existing valueset if we're editing
   const { data: existingValueset, isLoading } = useQuery({
@@ -98,11 +100,12 @@ export function ValueSetEditor({
       }
       // Set department access on the edit page so readers can use the new
       // facility value set.
-      navigate(
-        scope.authContext === "facility"
-          ? `${scope.basePath}/${data.id}/edit`
-          : scope.basePath,
-      );
+      navigate({
+        href:
+          scope.authContext === "facility"
+            ? `${scope.basePath}/${data.id}/edit`
+            : scope.basePath,
+      });
     },
   });
 
@@ -119,7 +122,7 @@ export function ValueSetEditor({
         onSuccess(data);
         return;
       }
-      navigate(scope.basePath);
+      navigate({ href: scope.basePath });
     },
   });
 

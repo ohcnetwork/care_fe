@@ -342,7 +342,10 @@ export function MedicationStatementQuestion({
                 {
                   key: "",
                   label: t("medicine"),
-                  render: (med) => displayMedicationName(med),
+                  render: (med) =>
+                    "dosage_instruction" in med
+                      ? displayMedicationName(med)
+                      : med.medication?.display || "",
                 },
                 {
                   key: "dosage_instruction",

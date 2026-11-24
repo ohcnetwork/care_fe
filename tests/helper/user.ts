@@ -59,8 +59,7 @@ export async function createDisposableUserViaUi(
   await page.locator('input[name="c_password"]').fill(password);
   await page.getByRole("textbox", { name: "Email" }).fill(email);
   await page.getByRole("textbox", { name: "Phone Number" }).fill(phoneNumber);
-  await page.getByRole("combobox", { name: "Gender" }).click();
-  await page.getByRole("option", { name: gender, exact: true }).click();
+  await page.getByRole("radio", { name: gender, exact: true }).check();
 
   await page
     .getByRole("combobox")

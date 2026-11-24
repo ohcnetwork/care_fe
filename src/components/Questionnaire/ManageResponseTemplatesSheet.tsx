@@ -48,6 +48,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -82,7 +83,7 @@ import { questionnaireResponseTemplateApi } from "@/types/questionnaire/question
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 
 import { t } from "i18next";
 import { buildMedicationForTemplate } from "./QuestionTypes/MedicationRequestQuestion";
@@ -556,7 +557,7 @@ function TemplateCard({
 }
 
 const templateFormSchema = z.object({
-  name: z.string().min(1, t("name_is_required")),
+  name: z.string().trim().min(1, t("name_is_required")),
   description: z.string().optional(),
 });
 
@@ -1032,26 +1033,26 @@ export default function ManageResponseTemplatesSheet({
             )}
           />
 
-          {facilityId &&
-            (!editingTemplate || (editingTemplate && templateDetails)) && (
-              <div className="space-y-1.5">
-                <FacilityOrganizationSelector
-                  key={editingTemplate?.id || "new"}
-                  facilityId={facilityId}
-                  value={selectedOrganizations}
-                  onChange={setSelectedOrganizations}
-                  currentOrganizations={
-                    editingTemplate && templateDetails
-                      ? templateDetails.facility_organizations
-                      : undefined
-                  }
-                  optional
-                />
-                <FormDescription className="text-xs">
-                  {t("select_departments_to_share_template")}
-                </FormDescription>
-              </div>
-            )}
+          {facilityId && (!editingTemplate || templateDetails) && (
+            <div className="space-y-1.5">
+              <Label>{t("select_department")}</Label>
+              <FacilityOrganizationTreeSelect
+                key={editingTemplate?.id || "new"}
+                facilityId={facilityId}
+                value={selectedOrganizations}
+                onChange={setSelectedOrganizations}
+                knownOrganizations={
+                  editingTemplate && templateDetails
+                    ? templateDetails.facility_organizations
+                    : undefined
+                }
+                optional
+              />
+              <FormDescription className="text-xs">
+                {t("select_departments_to_share_template")}
+              </FormDescription>
+            </div>
+          )}
         </form>
       </Form>
     </div>

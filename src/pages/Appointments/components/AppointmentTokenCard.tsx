@@ -1,7 +1,15 @@
 import { QRCodeSVG } from "qrcode.react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -13,7 +21,9 @@ import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import usePatientExtensionData from "@/hooks/usePatientExtensionData";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
+import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
 import {
   getPatientIdentifiers,
   PatientRead,
@@ -24,16 +34,21 @@ import {
   AppointmentRead,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
-import { renderTokenNumber, TokenRead } from "@/types/tokens/token/token";
+import {
+  renderTokenNumber,
+  TOKEN_STATUS_COLORS,
+  TokenActiveStatuses,
+  TokenRead,
+} from "@/types/tokens/token/token";
 import { formatDate } from "date-fns";
-import { PrinterIcon } from "lucide-react";
-import { Link } from "raviger";
+import { MoreVertical, OctagonX, PrinterIcon } from "lucide-react";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 interface BaseProps {
   id?: string;
   facility?: FacilityRead;
   inPrintMode?: boolean;
+  canWriteToken?: boolean;
 }
 
 type Props =
@@ -46,10 +61,17 @@ const TokenCard = ({
   facility,
   appointment,
   inPrintMode = false,
+  canWriteToken = false,
 }: Props) => {
   const { t } = useTranslation();
   const isLargeScreen = useBreakpoints({ lg: true, default: false });
+  const [cancelOpen, setCancelOpen] = useState(false);
   useShortcutSubContext();
+  const canCancelToken =
+    token &&
+    canWriteToken &&
+    !inPrintMode &&
+    TokenActiveStatuses.includes(token.status);
 
   // Get patient from token or appointment (one is always defined per Props type)
   const patient = token?.patient ?? appointment?.patient;
@@ -71,19 +93,64 @@ const TokenCard = ({
       id={id}
       className="p-2 border border-gray-200 relative transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none bg-gray-100"
     >
-      <div className="flex flex-col px-1">
-        {token && <p className="font-semibold">{renderTokenNumber(token)}</p>}
-        {appointment && (
-          <p className="font-semibold">
-            {t("appointment")} {t(appointment.status)}
-          </p>
-        )}
-        {appointment && (
-          <p className="text-gray-700">
-            {formatScheduleResourceName(appointment)}
-          </p>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-col px-1">
+          {token && (
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="font-semibold">{renderTokenNumber(token)}</p>
+              {!TokenActiveStatuses.includes(token.status) && (
+                <Badge
+                  role="status"
+                  aria-label={t("token_status")}
+                  variant={TOKEN_STATUS_COLORS[token.status]}
+                >
+                  {t(token.status.toLowerCase())}
+                </Badge>
+              )}
+            </div>
+          )}
+          {appointment && (
+            <p className="font-semibold">
+              {t("appointment")} {t(appointment.status)}
+            </p>
+          )}
+          {appointment && (
+            <p className="text-gray-700">
+              {formatScheduleResourceName(appointment)}
+            </p>
+          )}
+        </div>
+        {canCancelToken && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t("token_actions")}
+                className="shrink-0 print:hidden"
+              >
+                <MoreVertical className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={() => setCancelOpen(true)}
+              >
+                <OctagonX className="size-4" />
+                {t("cancel_token")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
+      {canCancelToken && (
+        <CancelTokenDialog
+          open={cancelOpen}
+          onOpenChange={setCancelOpen}
+          token={token}
+        />
+      )}
       <div className="flex flex-col gap-2 bg-white rounded-md p-4 shadow-md mt-2 ">
         <div className="flex flex-row justify-between">
           <div className=" flex flex-col items-start justify-between">
@@ -235,12 +302,11 @@ const TokenCard = ({
                 variant="link"
                 className="underline font-semibold text-base capitalize text-gray-950"
               >
-                <Link
-                  basePath="/"
+                <HrefLink
                   href={`/facility/${appointment.facility.id}/${resourceTypeToResourcePathSlug[appointment.resource_type]}/${appointment.resource.id}/queues/${appointment.token?.queue.id}`}
                 >
                   {t("queue_board")}
-                </Link>
+                </HrefLink>
               </Button>
               <Button
                 variant="outline"

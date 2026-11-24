@@ -1,6 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import { format, subDays } from "date-fns";
+import {
+  departmentCards,
+  departmentTrigger,
+} from "tests/helper/departmentSelect";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -30,54 +34,26 @@ test.describe("Manage care team for an encounter", () => {
     facilityId = getFacilityId();
     selectedUsername = faker.helpers.arrayElement(TEST_USERNAMES);
     selectedRole = faker.helpers.arrayElement(TEST_ROLES);
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+    // Each test gets its own encounter: on a shared one, a parallel test
+    // adds or removes members while this test counts on them.
+    const { patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId);
     await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
     );
-    await page.getByText("View Encounter").first().click();
   });
 
   test.describe("Adding members", () => {
-    test.afterEach(async ({ page }) => {
-      await test.step("Cleanup: Remove added member", async () => {
-        try {
-          const dialog = page.getByRole("dialog", { name: "Manage Care Team" });
-
-          const isDialogVisible = await dialog.isVisible().catch(() => false);
-          if (!isDialogVisible) {
-            return;
-          }
-
-          const removableMembers = dialog
-            .locator("button")
-            .filter({ has: page.locator("svg.lucide-x") });
-          const removableCount = await removableMembers.count();
-
-          if (removableCount === 0) {
-            return;
-          }
-
-          const removeButton = removableMembers.last();
-          await removeButton.click();
-          await page.getByRole("button", { name: "Remove" }).click();
-          await expectToast(page, /removed successfully/i);
-        } catch {
-          // Member might already be removed or not added
-        }
-      });
-    });
-
     test("Add a care team member with role", async ({ page }) => {
       await test.step("Open care team sheet", async () => {
         await openCareTeamDialog(page);
       });
 
       await test.step("Verify department selector", async () => {
+        await expect(departmentTrigger(page)).toBeVisible();
         await expect(
-          page.getByRole("combobox").filter({ hasText: "Select Department" }),
+          departmentCards(page).filter({ hasText: "Administration" }),
         ).toBeVisible();
-        await expect(page.getByText("Administration")).toBeVisible();
       });
 
       await test.step("Select member", async () => {
@@ -99,7 +75,9 @@ test.describe("Manage care team for an encounter", () => {
           .filter({ hasText: "Select Role" })
           .click();
         await page.getByPlaceholder("Select Role").fill(selectedRole);
-        await page.getByRole("option", { name: selectedRole }).click();
+        await page
+          .getByRole("option", { name: selectedRole, exact: true })
+          .click();
       });
 
       await test.step("Add member", async () => {
@@ -134,7 +112,9 @@ test.describe("Manage care team for an encounter", () => {
           .filter({ hasText: "Select Role" })
           .click();
         await page.getByPlaceholder("Select Role").fill(selectedRole);
-        await page.getByRole("option", { name: selectedRole }).click();
+        await page
+          .getByRole("option", { name: selectedRole, exact: true })
+          .click();
 
         await page.getByRole("button", { name: "Add" }).click();
         await expectToast(page, /member added successfully/i);
@@ -156,7 +136,9 @@ test.describe("Manage care team for an encounter", () => {
           .filter({ hasText: "Select Role" })
           .click();
         await page.getByPlaceholder("Select Role").fill(selectedRole);
-        await page.getByRole("option", { name: selectedRole }).click();
+        await page
+          .getByRole("option", { name: selectedRole, exact: true })
+          .click();
 
         await page.getByRole("button", { name: "Add" }).click();
         await expectToast(page, /already added|already exists|duplicate/i);
@@ -169,7 +151,9 @@ test.describe("Manage care team for an encounter", () => {
   }) => {
     await test.step("Open care team sheet", async () => {
       await openCareTeamDialog(page);
-      await expect(page.getByText("Administration")).toBeVisible();
+      await expect(
+        departmentCards(page).filter({ hasText: "Administration" }),
+      ).toBeVisible();
     });
 
     await test.step("Select member and role without adding", async () => {
@@ -189,7 +173,9 @@ test.describe("Manage care team for an encounter", () => {
         .filter({ hasText: "Select Role" })
         .click();
       await page.getByPlaceholder("Select Role").fill(selectedRole);
-      await page.getByRole("option", { name: selectedRole }).click();
+      await page
+        .getByRole("option", { name: selectedRole, exact: true })
+        .click();
     });
 
     await test.step("Close sheet without clicking Add", async () => {
@@ -243,7 +229,9 @@ test.describe("Manage care team for an encounter", () => {
         .filter({ hasText: "Select Role" })
         .click();
       await page.getByPlaceholder("Select Role").fill(selectedRole);
-      await page.getByRole("option", { name: selectedRole }).click();
+      await page
+        .getByRole("option", { name: selectedRole, exact: true })
+        .click();
     });
 
     await test.step("Verify Add button is now enabled", async () => {

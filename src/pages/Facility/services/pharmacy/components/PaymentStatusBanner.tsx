@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import Decimal from "decimal.js";
 import {
   BadgeCheckIcon,
@@ -17,7 +18,6 @@ import {
   SendIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { Link, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -60,6 +60,8 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { DottedDivider } from "@/components/ui/dotted-divider";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { dispenseOrderShowSearch } from "@/lib/router/search/pharmacy";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -175,9 +177,9 @@ export function PaymentStatusBanner({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [{ collectPayment }, setQParams] = useQueryParams<{
-    collectPayment?: string;
-  }>();
+  const [{ collectPayment }, setQParams] = useQueryParams(
+    dispenseOrderShowSearch,
+  );
 
   const [paymentSheetOpen, setPaymentSheetOpen] = useState(false);
   const [markBalancedDialogOpen, setMarkBalancedDialogOpen] = useState(false);
@@ -380,8 +382,8 @@ export function PaymentStatusBanner({
             <div className="flex items-center gap-2">
               <Button variant="outline" asChild>
                 <Link
-                  basePath="/"
-                  href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
+                  to="/facility/$facilityId/billing/invoices/$invoiceId"
+                  params={{ facilityId, invoiceId: invoice.id }}
                 >
                   <ReceiptIcon className="size-4" />
                   {t("view_invoice")}
@@ -409,8 +411,8 @@ export function PaymentStatusBanner({
                     {invoice.account.id && (
                       <DropdownMenuItem asChild>
                         <Link
-                          basePath="/"
-                          href={`/facility/${facilityId}/billing/account/${invoice.account.id}`}
+                          to="/facility/$facilityId/billing/account/$accountId"
+                          params={{ facilityId, accountId: invoice.account.id }}
                         >
                           <BanknoteIcon className="size-4" />
                           {t("go_to_account")}
@@ -479,8 +481,8 @@ export function PaymentStatusBanner({
             <p>
               {t("invoice_includes_non_medication_items")}{" "}
               <Link
-                basePath="/"
-                href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
+                to="/facility/$facilityId/billing/invoices/$invoiceId"
+                params={{ facilityId, invoiceId: invoice.id }}
                 className="inline-flex items-center gap-0.5 font-medium underline"
               >
                 {t("view_invoice")}
@@ -588,8 +590,8 @@ export function PaymentStatusBanner({
               <>
                 <Button variant="outline" asChild>
                   <Link
-                    href={`/facility/${facilityId}/billing/invoice/${invoice.id}/print`}
-                    basePath="/"
+                    to="/facility/$facilityId/billing/invoice/$invoiceId/print"
+                    params={{ facilityId, invoiceId: invoice.id }}
                   >
                     <PrinterIcon className="size-4" />
                     {t("print_invoice")}
@@ -616,8 +618,8 @@ export function PaymentStatusBanner({
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
                       <Link
-                        basePath="/"
-                        href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
+                        to="/facility/$facilityId/billing/invoices/$invoiceId"
+                        params={{ facilityId, invoiceId: invoice.id }}
                       >
                         <ReceiptIcon className="size-4" />
                         {t("view_invoice")}
@@ -626,8 +628,8 @@ export function PaymentStatusBanner({
                     {accountId && (
                       <DropdownMenuItem asChild>
                         <Link
-                          basePath="/"
-                          href={`/facility/${facilityId}/billing/account/${accountId}`}
+                          to="/facility/$facilityId/billing/account/$accountId"
+                          params={{ facilityId, accountId }}
                         >
                           <BanknoteIcon className="size-4" />
                           {t("go_to_account")}
@@ -649,8 +651,8 @@ export function PaymentStatusBanner({
               <>
                 <Button variant="outline" asChild>
                   <Link
-                    href={`/facility/${facilityId}/billing/invoice/${invoice.id}/print`}
-                    basePath="/"
+                    to="/facility/$facilityId/billing/invoice/$invoiceId/print"
+                    params={{ facilityId, invoiceId: invoice.id }}
                   >
                     <PrinterIcon className="size-4" />
                     {t("invoice")}
@@ -684,24 +686,25 @@ export function PaymentStatusBanner({
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
                           <Link
-                            basePath="/"
-                            href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
+                            to="/facility/$facilityId/billing/invoices/$invoiceId"
+                            params={{ facilityId, invoiceId: invoice.id }}
                           >
                             <LinkIcon className="size-4" />
                             {t("view_invoice")}
                           </Link>
                         </DropdownMenuItem>
-                        {accountId && (
-                          <DropdownMenuItem asChild>
-                            <Link
-                              basePath="/"
-                              href={`/facility/${facilityId}/billing/account/${accountId}`}
-                            >
-                              <BanknoteIcon className="size-4" />
-                              {t("go_to_account")}
-                            </Link>
-                          </DropdownMenuItem>
-                        )}
+                        <DropdownMenuItem asChild>
+                          <Link
+                            to="/facility/$facilityId/billing/account/$accountId"
+                            params={{
+                              facilityId,
+                              accountId: invoice.account.id,
+                            }}
+                          >
+                            <BanknoteIcon className="size-4" />
+                            {t("go_to_account")}
+                          </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => promptCancel()}
                           variant="destructive"

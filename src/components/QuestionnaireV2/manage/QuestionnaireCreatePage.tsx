@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check } from "lucide-react";
-import { navigate, useNavigationPrompt } from "raviger";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -20,6 +19,7 @@ import { QuestionsEmptyState } from "@/components/QuestionnaireV2/shared/Questio
 import { SegmentedRadioGroup } from "@/components/QuestionnaireV2/shared/SegmentedRadioGroup";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
+import { navigate } from "@/lib/router/navigate";
 import {
   QUESTIONNAIRE_STATUSES,
   QuestionnaireRead,
@@ -33,7 +33,9 @@ import {
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
 import { generateSlugValue } from "@/Utils/slug";
+import { goBack } from "@/Utils/utils";
 
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { BasicInformationCard } from "./BasicInformationCard";
 import {
   DetailFormValues,
@@ -98,13 +100,14 @@ export function QuestionnaireCreatePage({
     onSuccess: (created: QuestionnaireRead) => {
       queryClient.invalidateQueries({ queryKey: questionnaireKeys.all });
       toast.success(t("questionnaire_created_successfully"));
-      navigate(`${scope.basePath}/${created.id}`);
+      // Replace the form, so going back from the new questionnaire skips it.
+      navigate({ href: `${scope.basePath}/${created.id}`, replace: true });
     },
   });
 
   // The sibling builder page guards unsaved edits the same way; `!isPending`
   // keeps the post-create navigate() in onSuccess from tripping the prompt.
-  useNavigationPrompt(
+  useNavigationBlocker(
     form.formState.isDirty && !isPending,
     t("unsaved_changes_warning"),
   );
@@ -138,7 +141,7 @@ export function QuestionnaireCreatePage({
           <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{t("permission_denied")}</AlertDescription>
         </Alert>
-        <Button variant="outline" onClick={() => navigate(scope.basePath)}>
+        <Button variant="outline" onClick={() => goBack(scope.basePath)}>
           <ArrowLeft className="size-4" />
           {t("back")}
         </Button>
@@ -151,7 +154,7 @@ export function QuestionnaireCreatePage({
       <Button
         variant="outline"
         size="xs"
-        onClick={() => navigate(scope.basePath)}
+        onClick={() => goBack(scope.basePath)}
       >
         <ArrowLeft className="size-4" />
         {t("back")}
@@ -172,7 +175,7 @@ export function QuestionnaireCreatePage({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate(scope.basePath)}
+                onClick={() => goBack(scope.basePath)}
               >
                 {t("cancel")}
               </Button>

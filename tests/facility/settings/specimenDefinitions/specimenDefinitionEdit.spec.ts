@@ -58,8 +58,10 @@ test.describe("Specimen Definitions Edit", () => {
     await page.getByRole("button", { name: /save/i }).click();
 
     // Apply status filter before searching
-    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
-    await page.getByRole("option", { name: status.toLowerCase() }).click();
+    await page.getByRole("button", { name: /^Status/ }).click();
+    await page
+      .getByRole("menuitemradio", { name: status.toLowerCase() })
+      .click();
 
     // Search for the newly created definition
     await page
@@ -88,7 +90,9 @@ test.describe("Specimen Definitions Edit", () => {
       .fill(derivedFromURI);
 
     const collectionOption = faker.helpers.arrayElement(collectionOptions);
-    await page.getByRole("combobox", { name: "Collection" }).click();
+    await page
+      .getByRole("combobox", { name: "Collection", exact: true })
+      .click();
     await page.getByRole("option", { name: collectionOption }).click();
 
     const preparationOption = faker.helpers.arrayElement(preparationOptions);
@@ -112,7 +116,7 @@ test.describe("Specimen Definitions Edit", () => {
 
     const retentionTime = faker.number.int(INT_MAX);
     await page
-      .getByRole("combobox", { name: "Enter Retention Time" })
+      .getByPlaceholder("Enter Retention Time", { exact: true })
       .fill(retentionTime.toString());
     // Pick the unit to commit the quantity and close the suggestions.
     await page
@@ -134,7 +138,7 @@ test.describe("Specimen Definitions Edit", () => {
 
     const capacity = faker.number.int(INT_MAX);
     await page
-      .getByRole("combobox", { name: "Enter Capacity" })
+      .getByPlaceholder("Enter Capacity", { exact: true })
       .fill(capacity.toString());
     // Pick the unit to commit the quantity and close the suggestions.
     await page
@@ -195,6 +199,35 @@ test.describe("Specimen Definitions Edit", () => {
       ),
     ).toBeVisible();
     await expect(page.getByText(capOption)).toBeVisible();
-    await expect(page.getByText(minimumVolume.toString())).toBeVisible();
+    await expect(
+      page.getByText(minimumVolume.toString(), { exact: true }),
+    ).toBeVisible();
+
+    await page.getByRole("link", { name: "Edit", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Remove Collection", exact: true })
+      .click();
+    await page.getByRole("textbox", { name: "Derived From URI" }).clear();
+    const saved = page.waitForResponse(
+      (res) =>
+        res.url().includes("/specimen_definition/") &&
+        res.request().method() === "PUT",
+    );
+    await page.getByRole("button", { name: /save/i }).click();
+    const response = await saved;
+    expect(response.ok()).toBeTruthy();
+    expect(response.request().postDataJSON().collection).toEqual({});
+    expect(response.request().postDataJSON().derived_from_uri).toBe("");
+    await expect(
+      page.getByRole("heading", { name: `${definitionTitle}-edited` }),
+    ).toBeVisible();
+    await page.reload();
+    await expect(
+      page.getByRole("heading", { name: `${definitionTitle}-edited` }),
+    ).toBeVisible();
+    await expect(page.getByText(collectionOption, { exact: true })).toHaveCount(
+      0,
+    );
+    await expect(page.getByText(derivedFromURI)).toHaveCount(0);
   });
 });

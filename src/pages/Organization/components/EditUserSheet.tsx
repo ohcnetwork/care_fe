@@ -2,7 +2,6 @@ import { useTranslation } from "react-i18next";
 
 import {
   Sheet,
-  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -43,16 +42,14 @@ export default function EditUserSheet({
           <SheetTitle>{t("edit_user")}</SheetTitle>
           <SheetDescription>{t("edit_user_description")}</SheetDescription>
         </SheetHeader>
-        <SheetBody>
-          <UserForm
-            onSubmitSuccess={(user, meta) => {
-              setOpen(false);
-              onUserUpdated?.(user, meta);
-            }}
-            existingUsername={existingUsername}
-            initialSection={initialSection}
-          />
-        </SheetBody>
+        <UserForm
+          onSubmitSuccess={(user, meta) => {
+            setOpen(false);
+            onUserUpdated?.(user, meta);
+          }}
+          existingUsername={existingUsername}
+          initialSection={initialSection}
+        />
       </SheetContent>
     </Sheet>
   );

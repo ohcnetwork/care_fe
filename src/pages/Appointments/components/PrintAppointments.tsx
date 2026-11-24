@@ -1,34 +1,19 @@
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useQueryParams } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import PrintLoading from "@/CAREUI/misc/PrintLoading";
+import TypstPrintPreview from "@/CAREUI/misc/TypstPrintPreview";
 
 import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
-import Loading from "@/components/Common/Loading";
-import PrintFooter from "@/components/Common/PrintFooter";
-
-import query from "@/Utils/request/query";
-import {
-  dateQueryString,
-  formatDateTime,
-  formatPatientAge,
-} from "@/Utils/utils";
-import {
-  getPatientIdentifiers,
-  PatientRead,
-} from "@/types/emr/patient/patient";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { appointmentListSearch } from "@/lib/router/search/appointments";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import type { DetailsTablePrintContent } from "@/print/detailsTable";
+import { buildGeneratedFooter } from "@/print/patientDetails";
+import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
@@ -38,7 +23,12 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { renderTokenNumber } from "@/types/tokens/token/token";
-import { useEffect, useState } from "react";
+import query from "@/Utils/request/query";
+import {
+  dateQueryString,
+  formatDateTime,
+  formatPatientAge,
+} from "@/Utils/utils";
 
 type PrintAppointmentsProps = {
   facilityId: string;
@@ -53,10 +43,7 @@ export function PrintAppointments({
 }: PrintAppointmentsProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
-  const [qParams] = useQueryParams();
-  const [selectedPatient, setSelectedPatient] = useState<PatientRead | null>(
-    null,
-  );
+  const [qParams] = useQueryParams(appointmentListSearch);
 
   const practitioners = qParams.practitioners
     ? qParams.practitioners.split(",")
@@ -91,7 +78,7 @@ export function PrintAppointments({
     }),
   });
 
-  const { data: patientDetails } = useQuery({
+  const { data: selectedPatient } = useQuery({
     queryKey: ["patient-details", qParams.patient],
     queryFn: query(patientApi.get, {
       pathParams: { id: qParams.patient! },
@@ -99,14 +86,8 @@ export function PrintAppointments({
     enabled: !!qParams.patient,
   });
 
-  useEffect(() => {
-    if (patientDetails) {
-      setSelectedPatient(patientDetails);
-    }
-  }, [patientDetails]);
-
   if (isLoading) {
-    return <Loading />;
+    return <PrintLoading />;
   }
 
   const appointments = sortByTokenNo
@@ -117,158 +98,107 @@ export function PrintAppointments({
         return a.token.number - b.token.number;
       })
     : (appointmentsData?.results ?? []);
-  const totalCount = appointmentsData?.count ?? 0;
+
+  const showPractitioner = practitioners.length > 1;
+
+  const content: DetailsTablePrintContent = {
+    heading: t("appointments"),
+    patient: null,
+    patient_label: "",
+    details: {
+      left: [
+        ...(qParams.date_from && qParams.date_to
+          ? [
+              {
+                label: t("date_range"),
+                value: `${format(new Date(qParams.date_from), "dd MMM yyyy")} - ${format(new Date(qParams.date_to), "dd MMM yyyy")}`,
+              },
+            ]
+          : []),
+        ...(qParams.patient
+          ? [{ label: t("patient"), value: selectedPatient?.name ?? null }]
+          : []),
+        ...(practitioners.length === 1 && appointments[0]
+          ? [
+              {
+                label: t("practitioner", { count: 1 }),
+                value: formatScheduleResourceName(appointments[0]),
+              },
+            ]
+          : []),
+      ],
+      right: [
+        {
+          label: t("generated_on"),
+          value: format(new Date(), "dd MMM, yyyy h:mm a"),
+        },
+        {
+          label: t("total_appointments"),
+          value: String(appointmentsData?.count ?? 0),
+        },
+      ],
+    },
+    title: null,
+    note: null,
+    table_title: null,
+    table: {
+      header: [
+        t("patient"),
+        ...(showPractitioner ? [t("practitioner", { count: 1 })] : []),
+        t("appointment_time"),
+        t("token_no"),
+        t("status"),
+      ],
+      rows: appointments.map((appointment) => [
+        [
+          appointment.patient.name,
+          [
+            `${formatPatientAge(appointment.patient, true)}, ${t(`GENDER__${appointment.patient.gender}`)}`,
+            ...getPatientIdentifiers(appointment.patient, {
+              use: PatientIdentifierUse.official,
+            }).map(
+              (identifier) =>
+                `(${identifier.config.config.display}: ${identifier.value})`,
+            ),
+          ].join(" "),
+        ].join("\n"),
+        ...(showPractitioner ? [formatScheduleResourceName(appointment)] : []),
+        [
+          formatDateTime(
+            appointment.token_slot.start_datetime,
+            "ddd, DD MMM YYYY",
+          ),
+          formatDateTime(appointment.token_slot.start_datetime, "hh:mm a"),
+        ].join("\n"),
+        appointment.token ? renderTokenNumber(appointment.token) : "--",
+        t(appointment.status),
+      ]),
+    },
+    footer: buildGeneratedFooter(t),
+  };
 
   return (
-    <div>
-      <div className="max-w-4xl mx-auto no-print mb-4 flex flex-wrap justify-start items-center gap-4 p-4 bg-gray-50 border rounded-md border-gray-200">
-        <div className="gap-2 flex items-center">
-          <Switch
-            id="sort-by-token"
-            checked={sortByTokenNo}
-            onCheckedChange={setSortByTokenNo}
-          />
-          <label htmlFor="sort-by-token" className="cursor-pointer text-sm">
-            {t("sort_by_token_no")}
-          </label>
-        </div>
-      </div>
-      <PrintPreview
-        title={t("appointments")}
-        facility={facility}
-        templateSlug={PrintTemplateType.appointments}
-      >
-        <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold pb-2 border-b border-gray-200">
-          {t("appointments")}
-        </h2>
-
-        <div>
-          {/* Filter Summary */}
-          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6">
-            <div className="space-y-1 text-sm">
-              {qParams.date_from && qParams.date_to && (
-                <p className="text-gray-600">
-                  {t("date_range")}:{" "}
-                  {format(new Date(qParams.date_from), "dd MMM yyyy")} -{" "}
-                  {format(new Date(qParams.date_to), "dd MMM yyyy")}
-                </p>
-              )}
-              {qParams.patient && (
-                <p className="text-gray-600">
-                  {t("patient")}: {selectedPatient?.name}
-                </p>
-              )}
-              {practitioners.length === 1 && (
-                <p className="text-gray-600">
-                  {t("practitioner", { count: 1 })}:{" "}
-                  {formatScheduleResourceName(appointments[0])}
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-500">{t("generated_on")}</span>
-                <span>{format(new Date(), "dd MMM, yyyy h:mm a")}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">
-                  {t("total_appointments")}:
-                </span>
-                <span>{totalCount}</span>
-              </div>
-            </div>
+    <TypstPrintPreview
+      template="details-table"
+      title={t("appointments")}
+      content={content}
+      facility={facility}
+      templateSlug={PrintTemplateType.appointments}
+      toolbar={
+        <div className="flex flex-wrap items-center justify-start gap-4 rounded-md border border-gray-200 bg-gray-50 p-4">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="sort-by-token"
+              checked={sortByTokenNo}
+              onCheckedChange={setSortByTokenNo}
+            />
+            <label htmlFor="sort-by-token" className="cursor-pointer text-sm">
+              {t("sort_by_token_no")}
+            </label>
           </div>
-
-          <div className="mt-6 border-t border-gray-200 pt-6">
-            {/* Appointments Table */}
-            <div className="overflow-x-auto">
-              <Table className="w-full">
-                <TableHeader>
-                  <TableRow className="divide-x">
-                    <TableHead className="p-2 font-medium text-gray-500">
-                      {t("patient")}
-                    </TableHead>
-                    {practitioners.length > 1 && (
-                      <TableHead className="p-2 font-medium text-gray-500">
-                        {t("practitioner", { count: 1 })}
-                      </TableHead>
-                    )}
-                    <TableHead className="p-2 font-medium text-gray-500">
-                      {t("appointment_time")}
-                    </TableHead>
-                    <TableHead className="p-2 font-medium text-gray-500">
-                      {t("token_no")}
-                    </TableHead>
-                    <TableHead className="p-2 font-medium text-gray-500">
-                      {t("status")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {appointments.map((appointment) => (
-                    <TableRow
-                      key={appointment.id}
-                      className="border-b divide-x"
-                    >
-                      <TableCell className="p-2 align-top break-words whitespace-normal">
-                        <div>
-                          <p className="font-medium">
-                            {appointment.patient.name}
-                          </p>
-                          <p className="text-sm text-gray-600 flex items-center gap-1">
-                            {formatPatientAge(appointment.patient, true)},{" "}
-                            {t(`GENDER__${appointment.patient.gender}`)}
-                            {getPatientIdentifiers(appointment.patient, {
-                              use: PatientIdentifierUse.official,
-                            }).map((identifier) => (
-                              <p
-                                key={identifier.config.id}
-                                className="text-xs text-gray-600"
-                              >
-                                ({identifier.config.config.display}:{" "}
-                                {identifier.value}){" "}
-                              </p>
-                            ))}
-                          </p>
-                        </div>
-                      </TableCell>
-                      {practitioners.length > 1 && (
-                        <TableCell className="p-2 align-top break-words whitespace-normal">
-                          {formatScheduleResourceName(appointment)}
-                        </TableCell>
-                      )}
-                      <TableCell className="p-2 align-top flex flex-col gap-1">
-                        {formatDateTime(
-                          appointment.token_slot.start_datetime,
-                          "ddd, DD MMM YYYY",
-                        )}
-                        <span>
-                          {formatDateTime(
-                            appointment.token_slot.start_datetime,
-                            "hh:mm a",
-                          )}
-                        </span>
-                      </TableCell>
-                      <TableCell className="p-2 align-top">
-                        {appointment.token
-                          ? renderTokenNumber(appointment.token)
-                          : "--"}
-                      </TableCell>
-                      <TableCell className="p-2 align-top">
-                        {t(appointment.status)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <PrintFooter className="mt-12 pt-4 border-t" />
         </div>
-      </PrintPreview>
-    </div>
+      }
+    />
   );
 }
 

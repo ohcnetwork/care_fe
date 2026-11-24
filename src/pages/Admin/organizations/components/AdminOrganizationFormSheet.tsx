@@ -55,6 +55,7 @@ export default function AdminOrganizationFormSheet({
 
   const isEditMode = !!org;
   const isRoleOrganizationPage = organizationType === OrgType.ROLE;
+  const isTeamOrganizationPage = organizationType === OrgType.TEAM;
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
@@ -128,17 +129,39 @@ export default function AdminOrganizationFormSheet({
       name: values.name.trim(),
       description: values.description?.trim() || undefined,
       org_type: values.org_type,
-      parent_id: parentOrgId,
-    };
+    } satisfies OrganizationUpdate;
 
     if (isEditMode) {
       updateOrganization(data);
     } else {
-      createOrganization(data);
+      createOrganization({
+        ...data,
+        parent: parentOrgId,
+      } satisfies OrganizationCreate);
     }
   };
 
   const isPending = isCreating || isUpdating;
+  const title = isRoleOrganizationPage
+    ? isEditMode
+      ? t("edit_role_organization")
+      : t("create_role_organization")
+    : isTeamOrganizationPage
+      ? isEditMode
+        ? t("edit_department_team")
+        : t("create_department_team")
+      : isEditMode
+        ? t("edit")
+        : t("add_organization");
+  const description = isRoleOrganizationPage
+    ? isEditMode
+      ? t("edit_role_organization_description")
+      : t("create_role_organization_description")
+    : isTeamOrganizationPage
+      ? isEditMode
+        ? t("edit_department_team_description")
+        : t("create_department_team_description")
+      : undefined;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -158,24 +181,8 @@ export default function AdminOrganizationFormSheet({
       </SheetTrigger>
       <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
-          <SheetTitle>
-            {isRoleOrganizationPage
-              ? isEditMode
-                ? t("edit_role_organization")
-                : t("create_role_organization")
-              : isEditMode
-                ? t("edit_department_team")
-                : t("create_department_team")}
-          </SheetTitle>
-          <SheetDescription>
-            {isRoleOrganizationPage
-              ? isEditMode
-                ? t("edit_role_organization_description")
-                : t("create_role_organization_description")
-              : isEditMode
-                ? t("edit_department_team_description")
-                : t("create_department_team_description")}
-          </SheetDescription>
+          <SheetTitle>{title}</SheetTitle>
+          {description && <SheetDescription>{description}</SheetDescription>}
         </SheetHeader>
         <Form {...form}>
           <form
@@ -210,7 +217,9 @@ export default function AdminOrganizationFormSheet({
                           placeholder={
                             isRoleOrganizationPage
                               ? t("enter_role_organization_name")
-                              : t("enter_department_team_name")
+                              : isTeamOrganizationPage
+                                ? t("enter_department_team_name")
+                                : undefined
                           }
                         />
                       </FormControl>
@@ -231,7 +240,9 @@ export default function AdminOrganizationFormSheet({
                           placeholder={
                             isRoleOrganizationPage
                               ? t("enter_role_organization_description")
-                              : t("enter_department_team_description")
+                              : isTeamOrganizationPage
+                                ? t("enter_department_team_description")
+                                : undefined
                           }
                         />
                       </FormControl>

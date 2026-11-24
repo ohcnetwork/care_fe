@@ -1,9 +1,9 @@
 import { CheckIcon, NotebookPen } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
@@ -44,7 +44,7 @@ export const SummaryPanelActionsTab = ({
       ? [
           {
             label: t("manage_consents"),
-            onClick: () => navigate("consents"),
+            onClick: () => navigate({ href: "consents" }),
             hideOnMobile: false,
           },
         ]

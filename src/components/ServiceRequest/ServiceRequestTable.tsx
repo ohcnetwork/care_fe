@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +17,7 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { TagBadges } from "@/components/Tags/TagBadges";
 
 import { LocationNode } from "@/components/Location/LocationTree";
+import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
 import {
   SERVICE_REQUEST_PRIORITY_COLORS,
@@ -46,10 +46,17 @@ export default function ServiceRequestTable({
   const queryClient = useQueryClient();
 
   const handleViewDetails = (request: ServiceRequestReadSpec) => {
-    const baseUrl = locationId
-      ? `/facility/${facilityId}/locations/${locationId}/service_requests`
-      : `/facility/${facilityId}/service_requests`;
-    navigate(`${baseUrl}/${request.id}`);
+    if (locationId) {
+      navigate({
+        to: "/facility/$facilityId/locations/$locationId/service_requests/$serviceRequestId",
+        params: { facilityId, locationId, serviceRequestId: request.id },
+      });
+    } else {
+      navigate({
+        to: "/facility/$facilityId/service_requests/$serviceRequestId",
+        params: { facilityId, serviceRequestId: request.id },
+      });
+    }
   };
 
   return (

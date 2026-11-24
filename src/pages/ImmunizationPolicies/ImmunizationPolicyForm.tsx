@@ -2,7 +2,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { Link, navigate, useNavigationPrompt } from "raviger";
 import { useMemo } from "react";
 import { flushSync } from "react-dom";
 import { useForm, useWatch } from "react-hook-form";
@@ -28,12 +27,15 @@ import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import {
   ImmunizationPolicyRead,
   ImmunizationPolicyScope,
 } from "@/types/emr/immunizationPolicy/immunizationPolicy";
 import immunizationPolicyApi from "@/types/emr/immunizationPolicy/immunizationPolicyApi";
 
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { PolicyTemplateEditor } from "./PolicyTemplateEditor";
 import {
   newPolicyTemplate,
@@ -95,10 +97,10 @@ export default function ImmunizationPolicyForm({
           </Alert>
           <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <Link href={scope.basePath} basePath="/">
+              <HrefLink href={scope.basePath} back>
                 <ArrowLeft className="size-4" />
                 {t("back")}
-              </Link>
+              </HrefLink>
             </Button>
             {isError && (
               <Button variant="outline" onClick={() => refetch()}>
@@ -162,7 +164,7 @@ function ImmunizationPolicyEditor({
   const issues =
     validation && !validation.success ? validation.error.issues : [];
   const isDirty = form.formState.isDirty;
-  useNavigationPrompt(isDirty, t("unsaved_changes_warning"));
+  useNavigationBlocker(isDirty, t("unsaved_changes_warning"));
 
   const handleSaved = () => {
     queryClient.invalidateQueries({ queryKey: ["immunization-policies"] });
@@ -174,7 +176,7 @@ function ImmunizationPolicyEditor({
       ),
     );
     flushSync(() => form.reset(form.getValues()));
-    navigate(scope.basePath);
+    navigate({ href: scope.basePath, replace: true });
   };
 
   const create = useMutation({
@@ -207,14 +209,14 @@ function ImmunizationPolicyEditor({
           })}
         >
           <header className="space-y-4 border-b border-gray-200 pb-5">
-            <Link
+            <HrefLink
               href={scope.basePath}
-              basePath="/"
+              back
               className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
             >
               <ArrowLeft className="size-3.5" aria-hidden="true" />
               {t("immunization_policies")}
-            </Link>
+            </HrefLink>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 space-y-2">
                 <div className="flex flex-wrap items-center gap-2.5">

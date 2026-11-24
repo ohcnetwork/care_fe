@@ -1,21 +1,29 @@
 import { useQuery } from "@tanstack/react-query";
-import { PlusIcon } from "lucide-react";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
+import { ClipboardListIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { FilterTabs } from "@/components/ui/filter-tabs";
-import { Input } from "@/components/ui/input";
+import {
+  Frame,
+  FrameFooter,
+  FrameHeader,
+  FramePanel,
+} from "@/components/ui/frame";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
 import useFilters from "@/hooks/useFilters";
+import { encounterServiceRequestListSearch } from "@/lib/router/search/encounter";
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -37,11 +45,9 @@ export const EncounterServiceRequestTab = () => {
     Pagination: Pagination,
     resultsPerPage,
   } = useFilters({
+    schema: encounterServiceRequestListSearch,
     limit: 20,
-    disableCache: true,
   });
-
-  const maxVisibleTabs = useBreakpoints({ default: 2, md: 3 });
 
   const { data, isLoading } = useQuery({
     queryKey: ["serviceRequests", facilityId, { ...qParams, encounterId }],
@@ -59,111 +65,122 @@ export const EncounterServiceRequestTab = () => {
     enabled: !!facilityId,
   });
 
-  const handleClearPriority = () => {
-    updateQuery({ priority: undefined });
-  };
-
   const handleClearStatus = () => {
     updateQuery({ status: undefined });
   };
 
+  const handleClearPriority = () => {
+    updateQuery({ priority: undefined });
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="hidden md:block">
-          <FilterTabs
-            value={qParams.status || ""}
-            onValueChange={(value) => updateQuery({ status: value })}
-            options={Object.values(Status)}
-            variant="background"
-            showAllOption={true}
-            allOptionLabel="all"
-            showMoreDropdown={true}
-            maxVisibleTabs={maxVisibleTabs}
-            defaultVisibleOptions={[
-              Status.active,
-              Status.completed,
-              Status.draft,
-            ]}
-            className="w-auto overflow-x-auto"
-          />
-        </div>
+    <div className="@container min-w-0 space-y-4">
+      <div className="hidden @min-[30rem]:block">
+        <FilterTabs
+          value={qParams.status || ""}
+          onValueChange={(value) => updateQuery({ status: value })}
+          options={Object.values(Status)}
+          variant="underline"
+          showMoreDropdown
+          maxVisibleTabs={3}
+          defaultVisibleOptions={[
+            Status.active,
+            Status.completed,
+            Status.draft,
+          ]}
+        />
+      </div>
 
-        <div className="w-full md:hidden">
-          <FilterSelect
-            value={qParams.status || ""}
-            onValueChange={(value) => updateQuery({ status: value })}
-            options={Object.values(Status)}
-            label={t("status")}
-            onClear={handleClearStatus}
-          />
-        </div>
-
-        <div className="w-full md:w-auto">
-          <FilterSelect
-            value={qParams.priority || ""}
-            onValueChange={(value) => updateQuery({ priority: value })}
-            options={Object.values(Priority)}
-            label={t("priority")}
-            onClear={handleClearPriority}
-          />
-        </div>
-
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center md:ml-auto md:w-auto">
-          <div className="relative w-full md:w-[300px]">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <CareIcon icon="l-search" className="size-5" />
-            </span>
-            <Input
+      <Frame stacked>
+        <FrameHeader className="gap-3 @min-[30rem]:flex-row @min-[30rem]:flex-wrap @min-[30rem]:items-center">
+          <InputGroup className="min-w-0 bg-background @min-[30rem]:w-auto @min-[30rem]:max-w-sm @min-[30rem]:flex-[1_1_12rem]">
+            <InputGroupInput
+              aria-label={t("search_service_requests")}
               placeholder={t("search_service_requests")}
               value={qParams.search || ""}
               onChange={(e) =>
                 updateQuery({ search: e.target.value || undefined })
               }
-              className="w-full md:w-[300px] pl-10 border border-gray-400 rounded-md"
+            />
+            <InputGroupAddon>
+              <SearchIcon aria-hidden="true" />
+            </InputGroupAddon>
+          </InputGroup>
+
+          <div className="@min-[30rem]:hidden">
+            <FilterSelect
+              value={qParams.status || ""}
+              onValueChange={(value) => updateQuery({ status: value })}
+              options={Object.values(Status)}
+              label={t("status")}
+              onClear={handleClearStatus}
+            />
+          </div>
+
+          <div className="@min-[30rem]:shrink-0">
+            <FilterSelect
+              value={qParams.priority || ""}
+              onValueChange={(value) => updateQuery({ priority: value })}
+              options={Object.values(Priority)}
+              label={t("priority")}
+              onClear={handleClearPriority}
+              className="w-full"
             />
           </div>
 
           {encounter && facilityId && canWriteClinicalData && (
-            <Button variant="primary" asChild className="w-full sm:w-auto">
+            <Button
+              variant="secondary"
+              asChild
+              className="w-full @min-[30rem]:ms-auto @min-[30rem]:w-auto @min-[30rem]:shrink-0"
+            >
               <Link
-                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`}
-                className="flex items-center"
+                to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/questionnaire/$questionnaireId"
+                params={{
+                  facilityId,
+                  patientId,
+                  encounterId,
+                  questionnaireId: "service_request",
+                }}
               >
-                <PlusIcon className="size-5 mr-1" />
+                <PlusIcon data-icon="inline-start" aria-hidden="true" />
                 {t("create_service_request")}
               </Link>
             </Button>
           )}
-        </div>
-      </div>
+        </FrameHeader>
 
-      {isLoading ? (
-        <TableSkeleton count={6} />
-      ) : (
-        <div className="space-y-6">
-          <Card className="overflow-hidden">
-            <CardContent className="p-0">
-              {data?.results?.length ? (
-                <ServiceRequestTable
-                  requests={data.results}
-                  facilityId={facilityId || ""}
-                  showPatientInfo={false}
-                  readOnly={!canWriteClinicalData}
-                />
-              ) : (
-                <div className="p-6 text-center text-gray-500">
-                  {t("no_service_requests_found")}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        <FramePanel className="min-w-0 overflow-hidden p-0 **:data-[slot=table-container]:rounded-none **:data-[slot=table-container]:border-0">
+          {isLoading ? (
+            <div className="p-3">
+              <TableSkeleton count={6} />
+            </div>
+          ) : data?.results?.length ? (
+            <ServiceRequestTable
+              requests={data.results}
+              facilityId={facilityId || ""}
+              showPatientInfo={false}
+              readOnly={!canWriteClinicalData}
+            />
+          ) : (
+            <EmptyState
+              icon={<ClipboardListIcon aria-hidden="true" />}
+              title={t("no_service_requests_found")}
+              description={
+                qParams.search || qParams.status || qParams.priority
+                  ? t("adjust_service_request_filters")
+                  : undefined
+              }
+            />
+          )}
+        </FramePanel>
 
-          <div className="flex justify-center">
-            <Pagination totalCount={data?.count || 0} />
-          </div>
-        </div>
-      )}
+        {data && data.count > resultsPerPage && (
+          <FrameFooter>
+            <Pagination totalCount={data.count} noMargin />
+          </FrameFooter>
+        )}
+      </Frame>
     </div>
   );
 };

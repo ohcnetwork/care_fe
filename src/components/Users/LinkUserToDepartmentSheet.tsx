@@ -21,7 +21,7 @@ import {
 import { RoleSelect } from "@/components/Common/RoleSelect";
 
 import mutate from "@/Utils/request/mutate";
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
@@ -113,7 +113,8 @@ export default function LinkUserToDepartmentSheet({
         <SheetBody>
           <div className="space-y-6">
             <div className="space-y-2">
-              <FacilityOrganizationSelector
+              <Label>{t("select_department")}</Label>
+              <FacilityOrganizationTreeSelect
                 facilityId={facilityId}
                 value={selectedOrganizations}
                 onChange={setSelectedOrganizations}

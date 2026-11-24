@@ -1,14 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, X } from "lucide-react";
-import { navigate } from "raviger";
 import React, { useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -42,7 +41,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
 import { CodeSchema } from "@/types/base/code/code";
 import {
   getConditionDiscriminatorValue,
@@ -66,8 +64,9 @@ import observationDefinitionApi from "@/types/emr/observationDefinition/observat
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
+import { navigate } from "@/lib/router/navigate";
 import { generateSlugValue } from "@/Utils/slug";
-import { valuesOf } from "@/Utils/utils";
+import { goBack, valuesOf } from "@/Utils/utils";
 import { ObservationInterpretation } from "./components/ObservationInterpretation";
 
 export default function ObservationDefinitionForm({
@@ -129,9 +128,13 @@ function ObservationDefinitionFormContent({
   observationSlug,
   existingData,
   onSuccess = () =>
-    navigate(`/facility/${facilityId}/settings/observation_definitions`),
+    navigate({
+      to: "/facility/$facilityId/settings/observation_definitions",
+      params: { facilityId },
+      replace: true,
+    }),
   onCancel = () =>
-    navigate(`/facility/${facilityId}/settings/observation_definitions`),
+    goBack(`/facility/${facilityId}/settings/observation_definitions`),
 }: {
   facilityId: string;
   observationSlug?: string;
@@ -143,9 +146,9 @@ function ObservationDefinitionFormContent({
 
   const formSchema = z
     .object({
-      title: z.string().min(1, t("field_required")),
+      title: z.string().trim().min(1, t("field_required")),
       slug_value: slugValueSchema(),
-      description: z.string().min(1, t("field_required")),
+      description: z.string().trim().min(1, t("field_required")),
       status: z.enum(ObservationDefinitionStatus),
       category: z.enum(ObservationDefinitionCategory),
       permitted_data_type: z.enum(QuestionType),
@@ -312,9 +315,11 @@ function ObservationDefinitionFormContent({
       onSuccess: (observationDefinition: ObservationDefinitionRead) => {
         queryClient.invalidateQueries({ queryKey: ["observationDefinitions"] });
         toast.success(t("observation_definition_updated"));
-        navigate(
-          `/facility/${facilityId}/settings/observation_definitions/${observationDefinition.slug}`,
-        );
+        navigate({
+          to: "/facility/$facilityId/settings/observation_definitions/$observationSlug",
+          params: { facilityId, observationSlug: observationDefinition.slug },
+          replace: true,
+        });
       },
     });
 
@@ -408,7 +413,7 @@ function ObservationDefinitionFormContent({
                 onClick={() => {
                   handleClearObservationInterpretation(clearRootLevel);
                 }}
-                className={cn(buttonVariants({ variant: "destructive" }))}
+                variant="destructive"
               >
                 {t("remove")}
               </AlertDialogAction>

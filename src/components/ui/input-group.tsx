@@ -119,34 +119,42 @@ function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
   );
 }
 
+// FormControl passes data-slot="form-control", which would hide the control from
+// InputGroup's focus ring. Explicit slots (e.g. CommandInput's) are kept.
+function groupControlSlot(slot?: string) {
+  return slot && slot !== "form-control" ? slot : "input-group-control";
+}
+
 function InputGroupInput({
   className,
+  "data-slot": slot,
   ...props
-}: React.ComponentProps<"input">) {
+}: React.ComponentProps<"input"> & { "data-slot"?: string }) {
   return (
     <Input
-      data-slot="input-group-control"
       className={cn(
         "flex-1 rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent",
         className,
       )}
       {...props}
+      data-slot={groupControlSlot(slot)}
     />
   );
 }
 
 function InputGroupTextarea({
   className,
+  "data-slot": slot,
   ...props
-}: React.ComponentProps<"textarea">) {
+}: React.ComponentProps<"textarea"> & { "data-slot"?: string }) {
   return (
     <Textarea
-      data-slot="input-group-control"
       className={cn(
         "flex-1 resize-none rounded-none border-0 bg-transparent py-2 shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent",
         className,
       )}
       {...props}
+      data-slot={groupControlSlot(slot)}
     />
   );
 }

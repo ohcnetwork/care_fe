@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -26,6 +25,7 @@ import {
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
 import BackButton from "@/components/Common/BackButton";
+import { navigate } from "@/lib/router/navigate";
 import TagConfigTable from "./components/TagConfigTable";
 
 interface TagConfigViewProps {
@@ -83,6 +83,8 @@ export default function TagConfigView({
         priority: childData.priority,
         status: TagStatus.ARCHIVED,
         resource: childData.resource,
+        facility_organization: childData.facility_organization?.id ?? null,
+        organization: childData.organization?.id ?? null,
         parent:
           childData.parent &&
           typeof childData.parent === "object" &&
@@ -113,9 +115,12 @@ export default function TagConfigView({
 
   const handleViewChild = (configId: string) => {
     if (facilityId) {
-      navigate(`/facility/${facilityId}/settings/tag_config/${configId}`);
+      navigate({
+        to: "/facility/$facilityId/settings/tag_config/$tagId",
+        params: { facilityId, tagId: configId },
+      });
     } else {
-      navigate(`/admin/tag_config/${configId}`);
+      navigate({ to: "/admin/tag_config/$id", params: { id: configId } });
     }
   };
 

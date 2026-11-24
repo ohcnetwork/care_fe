@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -36,8 +36,13 @@ function EncounterNode({
         <span className="size-2 rounded-full bg-gray-400 mr-2" />
         <span className={!end ? "font-semibold" : "text-gray-700 font-medium"}>
           <Link
-            href={`/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
-            basePath={`/facility/${encounter.facility.id}`}
+            to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
+            params={{
+              facilityId: encounter.facility.id,
+              patientId: encounter.patient.id,
+              encounterId: encounter.id,
+              tab: "updates",
+            }}
             className="flex gap-1"
           >
             {encounter.patient.name}

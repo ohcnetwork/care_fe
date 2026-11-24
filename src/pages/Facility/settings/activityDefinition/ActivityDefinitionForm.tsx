@@ -2,7 +2,6 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2Icon } from "lucide-react";
-import { navigate } from "raviger";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -40,6 +39,7 @@ import { HealthcareServiceSelector } from "@/pages/Facility/services/HealthcareS
 import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
+import { navigate } from "@/lib/router/navigate";
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
 import SpecimenDefinitionForm from "@/pages/Facility/settings/specimen-definitions/SpecimenDefinitionForm";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
@@ -66,6 +66,7 @@ import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlugValue } from "@/Utils/slug";
+import { goBack } from "@/Utils/utils";
 
 export default function ActivityDefinitionForm({
   facilityId,
@@ -130,10 +131,10 @@ function ActivityDefinitionFormContent({
   const { t } = useTranslation();
 
   const formSchema = z.object({
-    title: z.string().min(1, t("field_required")),
+    title: z.string().trim().min(1, t("field_required")),
     slug_value: slugValueSchema(),
-    description: z.string().min(1, t("field_required")),
-    usage: z.string().min(1, t("field_required")),
+    description: z.string().trim().min(1, t("field_required")),
+    usage: z.string().trim().min(1, t("field_required")),
     derived_from_uri: z.string().nullable(),
     status: z.enum(Status),
     classification: z.enum(Classification),
@@ -355,7 +356,9 @@ function ActivityDefinitionFormContent({
           queryKey: ["activityDefinition", activityDefinitionSlug],
         });
         toast.success(t("activity_definition_created_successfully"));
-        navigate(`/facility/${facilityId}/settings/activity_definitions`, {
+        navigate({
+          to: "/facility/$facilityId/settings/activity_definitions",
+          params: { facilityId },
           replace: true,
         });
       },
@@ -377,12 +380,14 @@ function ActivityDefinitionFormContent({
           ],
         });
         toast.success(t("activity_definition_updated_successfully"));
-        navigate(
-          `/facility/${facilityId}/settings/activity_definitions/${activityDefinition.slug}`,
-          {
-            replace: true,
+        navigate({
+          to: "/facility/$facilityId/settings/activity_definitions/$activityDefinitionSlug",
+          params: {
+            facilityId,
+            activityDefinitionSlug: activityDefinition.slug,
           },
-        );
+          replace: true,
+        });
       },
     });
 
@@ -415,15 +420,12 @@ function ActivityDefinitionFormContent({
     }
   }
 
-  const handleCancel = () => {
-    if (categorySlug) {
-      navigate(
-        `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
-      );
-    } else {
-      navigate(`/facility/${facilityId}/settings/activity_definitions`);
-    }
-  };
+  const handleCancel = () =>
+    goBack(
+      categorySlug
+        ? `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`
+        : `/facility/${facilityId}/settings/activity_definitions`,
+    );
 
   return (
     <Page

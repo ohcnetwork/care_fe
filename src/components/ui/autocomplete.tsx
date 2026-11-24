@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Combobox,
@@ -22,6 +21,12 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  fieldTriggerLayout,
+  fieldTriggerSurface,
+  invalidTriggerRing,
+  triggerFocus,
+} from "@/components/ui/field-trigger-styles";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -42,7 +47,7 @@ interface AutocompleteProps {
   onOpenChange?: (open: boolean) => void;
   placeholder?: string;
   inputPlaceholder?: string;
-  noOptionsMessage?: string;
+  noOptionsMessage?: React.ReactNode;
   disabled?: boolean;
   align?: "start" | "center" | "end";
   className?: string;
@@ -69,7 +74,7 @@ export default function Autocomplete({
   inputPlaceholder,
   noOptionsMessage,
   disabled,
-  align = "center",
+  align = "start",
   className,
   popoverClassName,
   popoverContentClassName,
@@ -83,6 +88,7 @@ export default function Autocomplete({
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
+  const controlRef = React.useRef<HTMLDivElement>(null);
   const isMobile = useBreakpoints({ default: true, sm: false });
   const selectedOption = options.find((option) => option.value === value);
   const displayText = selectedOption?.label || (freeInput ? value : "");
@@ -95,17 +101,20 @@ export default function Autocomplete({
   };
 
   const triggerButton = (
-    <Button
+    <button
       {...props}
       ref={ref}
       type="button"
-      variant="outline"
       role="combobox"
       aria-expanded={open}
       disabled={disabled}
       title={displayText || undefined}
       data-shortcut-id={shortcutId}
       className={cn(
+        fieldTriggerLayout,
+        fieldTriggerSurface,
+        triggerFocus,
+        invalidTriggerRing,
         "min-w-0 flex-1 justify-between font-normal",
         className,
         popoverClassName,
@@ -125,14 +134,19 @@ export default function Autocomplete({
           <ChevronDown className="size-4 text-muted-foreground" />
         )}
       </span>
-    </Button>
+    </button>
   );
 
   const clearButton = clearVisible && (
-    <Button
-      variant="outline"
-      size="icon"
+    <button
+      type="button"
+      data-slot="autocomplete-clear"
       aria-label={t("clear")}
+      className={cn(
+        fieldTriggerSurface,
+        triggerFocus,
+        "inline-flex size-12 shrink-0 items-center justify-center md:size-10",
+      )}
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -141,8 +155,8 @@ export default function Autocomplete({
         handleOpenChange(false);
       }}
     >
-      <X />
-    </Button>
+      <X aria-hidden="true" className="size-4" />
+    </button>
   );
 
   const content = (
@@ -234,14 +248,19 @@ export default function Autocomplete({
         </Drawer>
       ) : (
         <>
-          <ButtonGroup className="w-full min-w-0">
+          <ButtonGroup ref={controlRef} className="w-full min-w-0">
             <ComboboxTrigger render={triggerButton} showChevron={false} />
             {clearButton}
           </ButtonGroup>
+          {/* Anchored to the whole control (trigger + clear) and start-aligned; narrow
+              triggers get the standard popover width so options don't wrap.
+              `data-chips={false}`: a custom anchor here is not a chips input. */}
           <ComboboxContent
+            anchor={controlRef}
+            data-chips={false}
             align={align}
             className={cn(
-              "flex w-(--anchor-width) min-h-40 flex-col",
+              "flex w-(--anchor-width) min-w-[max(var(--anchor-width),--spacing(72))] min-h-40 flex-col",
               popoverContentClassName,
             )}
           >

@@ -159,6 +159,34 @@ test.describe("User Profile Avatar Modification", () => {
     });
   });
 
+  test("Show a real image source in the cropper and cropped preview", async ({
+    page,
+  }) => {
+    let dialog: Locator;
+
+    await test.step("Upload an image and verify the cropper uses a real source", async () => {
+      dialog = await openAvatarDialog(page);
+      await page
+        .locator("input[type='file']")
+        .first()
+        .setInputFiles(validImagePath);
+      await expect(page.getByRole("button", { name: "Crop" })).toBeEnabled({
+        timeout: 10000,
+      });
+      await expect(dialog.locator(".reactEasyCrop_Image")).toHaveAttribute(
+        "src",
+        /^(blob:|data:)/,
+      );
+    });
+
+    await test.step("Crop and verify the cropped preview", async () => {
+      await page.getByRole("button", { name: "Crop" }).click();
+      const croppedPreview = dialog.getByAltText("Cropped preview");
+      await expect(croppedPreview).toBeVisible({ timeout: 10000 });
+      await expect(croppedPreview).toHaveAttribute("src", /^(blob:|data:)/);
+    });
+  });
+
   test("Reject avatar upload with invalid file type", async ({ page }) => {
     await test.step("Open avatar editor dialog", async () => {
       await openAvatarDialog(page);

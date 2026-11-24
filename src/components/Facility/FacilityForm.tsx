@@ -25,6 +25,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 
 import LocationPicker from "@/components/Common/GeoLocationPicker";
+import { RichTextEditor } from "@/components/Common/RichTextEditor";
 import GovtOrganizationPicker from "@/components/Organization/GovtOrganizationPicker";
 
 import mutate from "@/Utils/request/mutate";
@@ -274,9 +275,12 @@ export default function FacilityForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("description")}</FormLabel>
-                <FormControl>
-                  <Textarea {...field} placeholder={t("markdown_supported")} />
-                </FormControl>
+                <RichTextEditor
+                  label={t("description")}
+                  placeholder={t("markdown_supported")}
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
                 <FormMessage />
               </FormItem>
             )}

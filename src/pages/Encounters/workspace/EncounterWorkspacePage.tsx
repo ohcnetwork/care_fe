@@ -103,7 +103,6 @@ export function WorkspacePage({
                   title={widget.title}
                   config={widget.config}
                   context={context}
-                  showEmpty
                 />
               </ErrorBoundary>
             )

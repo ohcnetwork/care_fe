@@ -20,7 +20,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { Button } from "@/components/ui/button";
 import { DottedDivider } from "@/components/ui/dotted-divider";
 import { extractInvoicesFromDispenses } from "@/pages/Facility/services/pharmacy/utils/extractInvoicesFromDispenses";
-import { Link } from "raviger";
+import { Link } from "@tanstack/react-router";
 
 interface Props {
   facilityId: string;
@@ -104,8 +104,8 @@ export default function DispenseOrderCompleted({
                 asChild
               >
                 <Link
-                  href={`/facility/${facilityId}/billing/invoices/${invoiceIds.join(",")}/print`}
-                  basePath="/"
+                  to="/facility/$facilityId/billing/invoices/$invoiceIds/print"
+                  params={{ facilityId, invoiceIds: invoiceIds.join(",") }}
                 >
                   <PrinterIcon className="size-4" />
                   {t("print_invoices")}
@@ -118,7 +118,10 @@ export default function DispenseOrderCompleted({
                 type="button"
                 asChild
               >
-                <Link href="/medication_requests">
+                <Link
+                  to="/facility/$facilityId/locations/$locationId/medication_requests"
+                  params={{ facilityId, locationId }}
+                >
                   {t("prescription_queue")}
                 </Link>
               </Button>
@@ -129,7 +132,12 @@ export default function DispenseOrderCompleted({
                 type="button"
                 asChild
               >
-                <Link href="/medication_dispense">{t("go_to_dispenses")}</Link>
+                <Link
+                  to="/facility/$facilityId/locations/$locationId/medication_dispense"
+                  params={{ facilityId, locationId }}
+                >
+                  {t("go_to_dispenses")}
+                </Link>
               </Button>
               <Button
                 variant="link"
@@ -138,7 +146,12 @@ export default function DispenseOrderCompleted({
                 type="button"
                 asChild
               >
-                <Link href="/medication_return">{t("medicine_returns")}</Link>
+                <Link
+                  to="/facility/$facilityId/locations/$locationId/medication_return"
+                  params={{ facilityId, locationId }}
+                >
+                  {t("medicine_returns")}
+                </Link>
               </Button>
             </div>
           </div>

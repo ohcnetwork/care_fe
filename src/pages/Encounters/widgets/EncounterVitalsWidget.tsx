@@ -274,6 +274,7 @@ function VitalsPanel({
         title={title}
         readOnly
         presentation="panel"
+        className="overflow-hidden"
         actionButton={actions}
       >
         {children}
@@ -406,7 +407,7 @@ function VitalsMatrix({
             tabIndex={0}
             className="min-w-0 max-w-full overflow-x-auto focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <table className="min-w-max border-separate border-spacing-0 text-sm">
+            <table className="w-full min-w-max border-separate border-spacing-0 text-sm">
               <caption className="sr-only">{title}</caption>
               <thead>
                 <tr>
@@ -489,6 +490,7 @@ function VitalsMatrix({
                       <VitalMatrixCell
                         key={column.key}
                         cell={row.cells.get(column.key)}
+                        rowUnit={row.unit}
                         latest={index === 0}
                       />
                     ))}
@@ -523,9 +525,11 @@ const FLAG_ICONS = {
 
 function VitalMatrixCell({
   cell,
+  rowUnit,
   latest,
 }: {
   cell?: VitalCell;
+  rowUnit?: string;
   latest: boolean;
 }) {
   const { t } = useTranslation();
@@ -538,7 +542,7 @@ function VitalMatrixCell({
         )}
         aria-label={t("workspace_vitals_no_reading")}
       >
-        {t("workspace_vitals_no_reading")}
+        -
       </td>
     );
   }
@@ -566,7 +570,7 @@ function VitalMatrixCell({
     >
       <span className="inline-flex items-center justify-end gap-1">
         {cell.text}
-        {cell.unit && (
+        {cell.unit && cell.unit !== rowUnit && (
           <span className="whitespace-pre text-xs text-placeholder-foreground">
             {" "}
             {cell.unit}

@@ -212,8 +212,8 @@ export function QuestionInspector({
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
-          <div className="max-w-full overflow-x-auto px-4 pb-1">
-            <TabsList variant="line">
+          <div className="max-w-full overflow-x-auto">
+            <TabsList variant="line" className="px-4">
               <TabsTrigger value="question">{t("question")}</TabsTrigger>
               <TabsTrigger value="logic">
                 {t("logic")}

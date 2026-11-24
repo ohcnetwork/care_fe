@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Building2, ChevronRight } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -17,14 +17,16 @@ import {
 } from "@/components/ui/table";
 
 import SearchInput from "@/components/Common/SearchInput";
+import { SectionHeader } from "@/components/Common/SectionHeader";
 
 import useFilters from "@/hooks/useFilters";
+import { organizationViewSearch } from "@/lib/router/search/organization";
 
 import query from "@/Utils/request/query";
+import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
-import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout, {
   type RouteContext,
 } from "./components/OrganizationLayout";
@@ -43,8 +45,8 @@ export default function OrganizationView({
   const { t } = useTranslation();
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: organizationViewSearch,
     limit: 15,
-    disableCache: true,
   });
 
   const { data: children, isFetching } = useQuery({
@@ -60,9 +62,7 @@ export default function OrganizationView({
   });
 
   // Hack for the sidebar to work
-  const baseUrl = navOrganizationId
-    ? `/organization/${navOrganizationId}`
-    : `/organization/${id}`;
+  const childNavOrganizationId = navOrganizationId || id;
 
   return (
     <OrganizationLayout
@@ -73,14 +73,14 @@ export default function OrganizationView({
       {() => {
         return (
           <div className="space-y-4">
-            <EntityBadge
+            <SectionHeader
               title={t("organizations")}
               description={t("organization_children_description")}
               count={children?.count}
               isFetching={isFetching}
             />
             <Frame>
-              <FrameHeader>
+              <FrameHeader className="p-1 md:p-2">
                 <SearchInput
                   options={[
                     {
@@ -123,7 +123,7 @@ export default function OrganizationView({
                         </TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody className="bg-white">
+                    <TableBody className="bg-background">
                       {isFetching
                         ? Array.from({ length: 5 }, (_, index) => (
                             <TableRow key={index} aria-hidden="true">
@@ -145,7 +145,13 @@ export default function OrganizationView({
                             <TableRow
                               key={orgChild.id}
                               onClick={() =>
-                                navigate(`${baseUrl}/children/${orgChild.id}`)
+                                navigate({
+                                  to: "/organization/$navOrganizationId/children/$id",
+                                  params: {
+                                    navOrganizationId: childNavOrganizationId,
+                                    id: orgChild.id,
+                                  },
+                                })
                               }
                               className="cursor-pointer hover:bg-muted/50"
                             >
@@ -182,9 +188,13 @@ export default function OrganizationView({
                                 className="px-4 text-right"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <Button variant="ghost" asChild>
+                                <Button variant="tertiary" asChild>
                                   <Link
-                                    href={`${baseUrl}/children/${orgChild.id}`}
+                                    to="/organization/$navOrganizationId/children/$id"
+                                    params={{
+                                      navOrganizationId: childNavOrganizationId,
+                                      id: orgChild.id,
+                                    }}
                                     aria-label={`${t("open")} ${orgChild.name}`}
                                   >
                                     {t("open")}

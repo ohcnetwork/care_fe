@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
@@ -10,6 +9,7 @@ import { Button } from "@/components/ui/button";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import {
   WorkspaceAuthContext,
   WorkspaceScope,
@@ -52,10 +52,10 @@ export function WorkspaceEditor({ scope, id }: WorkspaceEditorProps) {
           </Alert>
           <div className="flex gap-2">
             <Button asChild variant="outline">
-              <Link href={scope.basePath} basePath="/">
+              <HrefLink href={scope.basePath} back>
                 <ArrowLeft className="size-4" />
                 {t("back")}
-              </Link>
+              </HrefLink>
             </Button>
             <Button variant="outline" onClick={() => refetch()}>
               {t("try_again")}

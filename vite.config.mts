@@ -10,6 +10,7 @@ import {
 
 import federation from "@originjs/vite-plugin-federation";
 import tailwindcss from "@tailwindcss/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
@@ -20,6 +21,7 @@ import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
+import { typstCompilerWasm } from "./plugins/typstCompilerWasm";
 import validateEnv from "./scripts/validate-env";
 
 const LOCAL_PLUGIN_MODULE_ID = "virtual:care-local-plugins";
@@ -436,6 +438,17 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         ),
       }),
       tailwindcss(),
+      // Generates src/routeTree.gen.ts from src/routes/**. Must run before
+      // react().
+      tanstackRouter({
+        target: "react",
+        autoCodeSplitting: false,
+        routesDirectory: "./src/routes",
+        generatedRouteTree: "./src/routeTree.gen.ts",
+        routeFileIgnorePrefix: "-",
+        quoteStyle: "double",
+        semicolons: true,
+      }),
       federation({
         name: "core",
         remotes: {
@@ -446,7 +459,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "react-dom",
           "react-i18next",
           "@tanstack/react-query",
-          "raviger",
+          // One router instance: plugins read the host router's context.
+          "@tanstack/react-router",
           "sonner",
           "decimal.js",
         ],
@@ -455,6 +469,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       treeShakeCareIcons({
         iconWhitelist: ["default"],
       }),
+      typstCompilerWasm(),
       VitePWA({
         strategies: "injectManifest",
         srcDir: "src",
@@ -466,6 +481,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         },
         injectManifest: {
           maximumFileSizeToCacheInBytes: 8000000,
+          // Replaced per deployment, so it must always come from the network.
+          globIgnores: ["**/node_modules/**/*", "runtime-env.js"],
         },
         manifest: {
           name: "Care",
@@ -516,14 +533,22 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         "react-i18next",
         "i18next",
         "@tanstack/react-query",
-        "raviger",
+        "@tanstack/react-router",
         "sonner",
         "decimal.js",
       ],
     },
-    // optimizeDeps: {
-    //   include: getPluginDependencies(),
-    // },
+    optimizeDeps: {
+      // `virtual:pwa-register` imports workbox-window. The dependency scanner
+      // cannot follow virtual modules, so without this the dev server finds it
+      // on first load, re-optimizes and reloads the page.
+      include: ["workbox-window"],
+    },
+    worker: {
+      // The print worker (src/print) loads the Typst compiler with a dynamic
+      // import, which needs ES module workers.
+      format: "es",
+    },
     build: {
       target: "es2022",
       outDir: "build",

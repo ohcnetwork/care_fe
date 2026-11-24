@@ -1,5 +1,4 @@
 import { X } from "lucide-react";
-import { navigate } from "raviger";
 import { ReactNode, SubmitEventHandler } from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -29,6 +28,7 @@ import {
   DeliveryOrderStatus,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { goBack } from "@/Utils/utils";
 
 import { DeliveryOrderRoutingField } from "./DeliveryOrderRoutingField";
 
@@ -179,7 +179,7 @@ export function DeliveryOrderFormContent({
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(returnPath)}
+              onClick={() => goBack(returnPath)}
             >
               {t("cancel")}
               <ShortcutBadge actionId="cancel-action" />

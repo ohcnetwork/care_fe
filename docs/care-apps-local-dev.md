@@ -1,7 +1,7 @@
 ## Plugin Discovery & Setup
 
 - Build-time plugins configured via REACT_ENABLED_APPS env var
-- format: org/repo or org/repo@host/path/to/remoteEntry.js
+- format: org/repo, org/repo@host/path/to/remoteEntry.js, or org/repo@/path/to/remoteEntry.js (relative, same origin)
 
 ## Build-time vs. Runtime
 
@@ -11,9 +11,9 @@
 
 ## Vite Federation Architecture
 
-- Main app (vite.config.mts): federation with name "core", dummy remote, shared: react/react-dom/i18next/react-query/raviger/sonner/decimal.js
+- Main app (vite.config.mts): federation with name "core", dummy remote, shared: react/react-dom/i18next/react-query/react-router/sonner/decimal.js
 - Per-app (apps/care_hello_fe/vite.config.ts): exposes ./manifest pointing to src/manifest.tsx, builds remoteEntry.js to dist/assets/
-- RemoteEntry URL resolving: GitHub Pages if no @ suffix, otherwise http:// for localhost, https:// elsewhere
+- RemoteEntry URL resolving: GitHub Pages if no @ suffix, kept relative if it starts with /, otherwise http:// for localhost, https:// elsewhere. PluginEngine resolves all URLs against the current page at load time.
 - Runtime: PluginEngine.tsx uses setFederationRemote() to register each plugin slug dynamically, then getFederationRemote() to load manifest
 
 ## Local Dev Workflow
@@ -34,7 +34,7 @@
 
 - Goal: Auto-discover apps/ plugins in dev-only mode for direct HMR without separate builds/previews
 - Approach: Detect mode === 'dev', scan apps/ directory for `src/manifest.*` files, manage two pluginMap paths
-- Shared deps already configured: federation shares react, react-dom, react-i18next, @tanstack/react-query, raviger, sonner, decimal.js
+- Shared deps already configured: federation shares react, react-dom, react-i18next, @tanstack/react-query, @tanstack/react-router, sonner, decimal.js
 - Tailwind content: Already includes ./apps/\*_/_ so CSS should work
 - Risk: Re-export cycles if apps/ import from src/ (already happens - care_hello_fe imports Page component)
 - Federation globals: **federation** methods already in globals.d.ts and usable in dev mode

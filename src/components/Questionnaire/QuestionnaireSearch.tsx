@@ -1,6 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronsUpDown as CaretSortIcon, Plus } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -31,9 +29,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import query from "@/Utils/request/query";
 import { conditionalAttribute } from "@/Utils/utils";
+import { navigate } from "@/lib/router/navigate";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -43,20 +43,20 @@ interface QuestionnaireSearchProps {
   onSelect?: (questionnaire: QuestionnaireRead) => void;
   subjectType?: string;
   facilityId?: string;
+  excludeIds?: readonly string[];
 
   disabled?: boolean;
   size?: React.ComponentProps<typeof Button>["size"];
 }
 
-const QUESTIONNAIRES_PER_PAGE = 30;
-
 export function QuestionnaireSearch({
   placeholder,
   trigger,
   size = "default",
-  onSelect = (selected) => navigate(`questionnaire/${selected.id}`),
+  onSelect = (selected) => navigate({ href: `questionnaire/${selected.id}` }),
   subjectType,
   facilityId,
+  excludeIds = [],
 
   disabled,
 }: QuestionnaireSearchProps) {
@@ -74,31 +74,27 @@ export function QuestionnaireSearch({
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useInfiniteQuery({
+  } = useInfiniteList({
     queryKey: ["questionnaires", "picker", search, subjectType, facilityId],
-    queryFn: ({ pageParam, signal }) =>
-      query.debounced(questionnaireApi.list, {
-        queryParams: {
-          title: search,
-          ...conditionalAttribute(!!subjectType, {
-            subject_type: subjectType,
-          }),
-          ...conditionalAttribute(!!facilityId, {
-            facility_or_instance: facilityId,
-          }),
-          status: "active",
-          limit: QUESTIONNAIRES_PER_PAGE,
-          offset: pageParam,
-        },
-      })({ signal }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, pages) => {
-      const offset = pages.length * QUESTIONNAIRES_PER_PAGE;
-      return offset < lastPage.count ? offset : undefined;
-    },
+    ...query.infinite(questionnaireApi.list, {
+      queryParams: {
+        title: search,
+        ...conditionalAttribute(!!subjectType, {
+          subject_type: subjectType,
+        }),
+        ...conditionalAttribute(!!facilityId, {
+          facility_or_instance: facilityId,
+        }),
+        status: "active",
+      },
+      pageSize: 30,
+      debounceInterval: 500,
+    }),
     enabled: isOpen && !disabled,
   });
-  const questionnaires = data?.pages.flatMap((page) => page.results) ?? [];
+  const questionnaires = (data?.results ?? []).filter(
+    (questionnaire) => !excludeIds.includes(questionnaire.id),
+  );
 
   const handleOpenChange = (open: boolean) => {
     if (open && disabled) return;

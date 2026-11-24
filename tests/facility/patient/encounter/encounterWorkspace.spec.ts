@@ -475,19 +475,7 @@ async function mockEncounterWorkspaceApi(
       diagnosis: "Previous asthma",
     },
   };
-  const imagingReport = {
-    id: faker.string.uuid(),
-    status: "final",
-    category: { system: "test", code: "imaging", display: "Imaging" },
-    encounter: currentEncounter,
-    observations: [],
-    conclusion: "No acute findings",
-    created_by: actor,
-    updated_by: actor,
-    requester: actor,
-    created_date: "2026-10-01T12:00:00Z",
-    modified_date: "2026-10-01T12:30:00Z",
-  };
+  // The service-request list API does not include diagnostic reports.
   const widgetOrders = options.includeWidgetData
     ? [
         {
@@ -499,19 +487,17 @@ async function mockEncounterWorkspaceApi(
             code: "36643-5",
             display: "XR Chest",
           },
-          diagnostic_reports: [imagingReport],
           created_date: "2026-10-01T09:00:00Z",
         },
         {
           title: "Creatinine",
-          status: "active",
+          status: "on_hold",
           category: "laboratory",
           code: {
             system: "http://loinc.org",
             code: "2160-0",
             display: "Creatinine",
           },
-          diagnostic_reports: [],
           created_date: "2026-10-01T10:00:00Z",
         },
         {
@@ -523,7 +509,6 @@ async function mockEncounterWorkspaceApi(
             code: "718-7",
             display: "Hemoglobin",
           },
-          diagnostic_reports: [],
           created_date: "2026-10-01T11:00:00Z",
         },
       ].map((order) => ({
@@ -1149,7 +1134,6 @@ async function mockEncounterWorkspaceApi(
     currentCareTeamMember,
     pastCareTeamMember,
     otherPrescriber,
-    imagingReport,
     widgetOrders,
     writes,
     basePath: `/facility/${facility.id}/patient/${patient.id}/encounter/${currentEncounter.id}`,
@@ -1190,6 +1174,58 @@ test("submitted boolean values stay paired with their exact question labels", as
   ]);
 });
 
+test("favorite forms combine the instance and current facility lists in shortcuts and the picker", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+  });
+  fixture.workspace.template = roundsTemplate(false, [
+    { type: "quick_actions", title: "Ward shortcuts" },
+    { type: "favorite_forms", title: "Favorite ward forms" },
+  ]);
+  const instanceForm = fixture.questionnaire;
+  const facilityForm = {
+    ...instanceForm,
+    id: faker.string.uuid(),
+    title: `Facility assessment ${faker.string.alphanumeric(6)}`,
+  };
+  await page.route("**/api/v1/questionnaire/?*", async (route) => {
+    const url = new URL(route.request().url());
+    const results = url.searchParams.has("favorite_list")
+      ? url.searchParams.get("facility") === fixture.facility.id
+        ? [facilityForm]
+        : [instanceForm]
+      : [instanceForm, facilityForm];
+    await route.fulfill({ json: { count: results.length, results } });
+  });
+
+  await page.goto(`${fixture.basePath}/rounds`);
+  const favorites = page.getByRole("region", {
+    name: "Favorite ward forms",
+    exact: true,
+  });
+  for (const form of [instanceForm, facilityForm]) {
+    await expect(
+      favorites.getByRole("link", { name: form.title }),
+    ).toHaveAttribute(
+      "href",
+      `${fixture.basePath}/questionnaire/${form.id}?return_page=rounds`,
+    );
+  }
+  await page
+    .getByRole("region", { name: "Ward shortcuts", exact: true })
+    .getByRole("button", { name: "Forms", exact: true })
+    .click();
+  for (const form of [instanceForm, facilityForm]) {
+    await expect(
+      page.getByRole("option", { name: form.title }).getByRole("button", {
+        name: "Remove from favorites",
+      }),
+    ).toBeVisible();
+  }
+});
+
 test("a cyclic added form blocks the whole submission and retains both draft forms", async ({
   page,
 }) => {
@@ -1217,7 +1253,9 @@ test("a cyclic added form blocks the whole submission and retains both draft for
   await page.route("**/api/v1/questionnaire/**", async (route) => {
     const path = new URL(route.request().url()).pathname;
     if (path === "/api/v1/questionnaire/") {
-      await route.fulfill({ json: { count: 1, results: [cyclic] } });
+      await route.fulfill({
+        json: { count: 2, results: [fixture.questionnaire, cyclic] },
+      });
     } else if (path === `/api/v1/questionnaire/${cyclic.id}/`) {
       await route.fulfill({ json: cyclic });
     } else {
@@ -1241,9 +1279,19 @@ test("a cyclic added form blocks the whole submission and retains both draft for
     .getByRole("textbox")
     .fill("Keep this clinical note");
   await page.getByRole("button", { name: "Add questionnaire" }).click();
+  await expect(page.getByRole("option", { name: cyclic.title })).toBeVisible();
+  await expect(
+    page.getByRole("option", { name: fixture.questionnaire.title }),
+  ).toHaveCount(0);
   await page.getByPlaceholder("Search Forms").fill(cyclic.title);
   await page.getByRole("option", { name: cyclic.title }).click();
   await expect(page.locator("[data-form-key]")).toHaveCount(2);
+  await page.getByRole("button", { name: "Add questionnaire" }).click();
+  await expect(
+    page.getByText("No Results Found", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("option", { name: cyclic.title })).toHaveCount(0);
+  await page.getByPlaceholder("Search Forms").press("Escape");
   await expect.poll(() => draftFormCount(page)).toBe(2);
   await page.getByRole("button", { name: "Save Changes" }).click();
   await expect(
@@ -1371,7 +1419,10 @@ test("formatting-only optional appointment notes do not require a slot", async (
       .filter({ hasText: "Validation failed" }),
   ).toBeVisible();
   expect(posts).toHaveLength(0);
-  await editor.fill("");
+  // fill("") selects via a DOM range that Lexical may not have synced before
+  // Delete on a busy main thread; its own select-all updates it synchronously.
+  await editor.press("ControlOrMeta+a");
+  await editor.press("Delete");
   await editor.pressSequentially("# ");
   await expect(editor).toHaveText("");
   await page.getByRole("button", { name: "Save Changes" }).click();
@@ -1519,6 +1570,40 @@ test("organization history filters use each primary encounter's facility scope",
 });
 
 test.describe("Encounter workspace rendering", () => {
+  test("hides empty custom clinical sections while retaining populated sections", async ({
+    page,
+  }) => {
+    const fixture = await mockEncounterWorkspaceApi(page, { symptomCount: 0 });
+    let releaseSymptoms!: () => void;
+    const symptomsReady = new Promise<void>((resolve) => {
+      releaseSymptoms = resolve;
+    });
+    await page.route(
+      (url) =>
+        url.pathname === `/api/v1/patient/${fixture.patient.id}/symptom/`,
+      async (route) => {
+        await symptomsReady;
+        await route.fulfill({ json: { count: 0, results: [] } });
+      },
+    );
+    await page.goto(`${fixture.basePath}/rounds`);
+    await expect(
+      page.getByRole("region", { name: "Allergy review", exact: true }),
+    ).toContainText("Penicillin allergy");
+    const symptoms = page.getByRole("region", {
+      name: "Symptoms today",
+      exact: true,
+    });
+    await expect(symptoms.getByRole("status")).toBeVisible();
+    releaseSymptoms();
+    await expect(
+      page.getByRole("region", { name: "Symptoms today", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByText("No symptoms have been recorded", { exact: true }),
+    ).toHaveCount(0);
+  });
+
   test("renders configured clinical data while retaining system pages and encounter navigation", async ({
     page,
   }, testInfo) => {
@@ -1861,6 +1946,10 @@ test.describe("Encounter workspace rendering", () => {
   test("selects workspace defaults from the header for the current encounter class across facilities", async ({
     page,
   }) => {
+    // Fifteen full page loads check what applies on entry. Each cold load of
+    // the route-split build fetches hundreds of chunks, which overruns 60s on
+    // a busy CI runner.
+    test.slow();
     const fixture = await mockEncounterWorkspaceApi(page);
     fixture.defaults.splice(0);
     fixture.currentEncounter.encounter_class = "imp";
@@ -2926,6 +3015,162 @@ test.describe("Encounter workspace rendering", () => {
       await page.keyboard.press("Escape");
     });
     expect(fixture.writes).toEqual([]);
+  });
+
+  test("lays out the Service Requests toolbar and switches status controls at narrow widths", async ({
+    page,
+  }) => {
+    const fixture = await mockEncounterWorkspaceApi(page, {
+      includeConfigData: true,
+      includeSectionData: true,
+    });
+    fixture.workspace.template = {
+      schema_version: 1,
+      pages: [{ kind: "system", key: "service_requests" }],
+    };
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${fixture.basePath}/service_requests?status=on_hold`);
+
+    const frame = page.locator('[data-slot="frame"]').filter({
+      has: page.getByRole("textbox", { name: "Search requests..." }),
+    });
+    const header = frame.locator('[data-slot="frame-panel-header"]');
+    const search = header.getByRole("textbox", {
+      name: "Search requests...",
+    });
+    const create = header.getByRole("link", { name: "Create Service Request" });
+    const statusTabs = page
+      .locator('[data-slot="tabs-list"][data-variant="line"]')
+      .filter({ has: page.getByRole("tab", { name: "Active", exact: true }) });
+
+    await expect(statusTabs).toBeVisible();
+    await expect(
+      statusTabs.getByRole("tab", { name: /on hold/i }),
+    ).toHaveAttribute("aria-selected", "true");
+    await statusTabs.getByRole("tab", { name: "All", exact: true }).click();
+    await expect(page).toHaveURL((url) => !url.searchParams.has("status"));
+    await expect(frame.getByRole("table")).toBeVisible();
+    const priority = header.getByRole("button", { name: /^Priority/ });
+    await priority.click();
+    await expect(
+      page.getByRole("menuitemradio", { name: "All", exact: true }),
+    ).toBeChecked();
+    await page
+      .getByRole("menuitemradio", { name: "Urgent", exact: true })
+      .click();
+    await expect(page).toHaveURL(
+      (url) =>
+        url.searchParams.get("priority") === "urgent" &&
+        url.searchParams.get("page") === "1",
+    );
+    await expect(priority).toContainText("Urgent");
+    await expect
+      .poll(() =>
+        fixture.sectionReads.some(
+          (url) =>
+            url.pathname.endsWith("/service_request/") &&
+            url.searchParams.get("priority") === "urgent",
+        ),
+      )
+      .toBe(true);
+    await expect(create).toBeVisible();
+    await expect(search).toBeVisible();
+    await expect
+      .poll(async () => {
+        const [headerBox, createBox, searchBox] = await Promise.all([
+          header.boundingBox(),
+          create.boundingBox(),
+          search.boundingBox(),
+        ]);
+        if (!headerBox || !createBox || !searchBox) return false;
+        const rightInset =
+          headerBox.x + headerBox.width - createBox.x - createBox.width;
+        return (
+          rightInset >= 0 &&
+          rightInset <= 24 &&
+          Math.abs(createBox.y - searchBox.y) < 8
+        );
+      })
+      .toBe(true);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(statusTabs).toBeHidden();
+    await expect(
+      header.getByRole("button", { name: "Status", exact: true }),
+    ).toBeVisible();
+    await expect(create).toBeVisible();
+    await priority.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("menuitemradio", { name: "Urgent", exact: true }),
+    ).toBeChecked();
+    await page.getByRole("menuitemradio", { name: "All", exact: true }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("menu")).toBeHidden();
+    await expect(priority).toBeFocused();
+    await expect(page).toHaveURL((url) => !url.searchParams.has("priority"));
+    await expect(priority).toHaveText("Priority");
+    // Field triggers can indicate keyboard focus with an outline or a shadow ring.
+    const focusIndicator = () =>
+      priority.evaluate((element) => {
+        const { outlineStyle, outlineWidth, boxShadow } =
+          getComputedStyle(element);
+        return [outlineStyle, outlineWidth, boxShadow];
+      });
+    const focusedIndicator = await focusIndicator();
+    await page.keyboard.press("Tab");
+    await expect(priority).not.toBeFocused();
+    await expect.poll(focusIndicator).not.toEqual(focusedIndicator);
+    await expect(priority).toHaveAttribute(
+      "data-slot",
+      "dropdown-menu-trigger",
+    );
+    await expect(priority).not.toHaveAttribute("data-variant");
+
+    for (const dark of [false, true]) {
+      await page.evaluate((enabled) => {
+        document.documentElement.classList.toggle("dark", enabled);
+      }, dark);
+      for (const pressed of [false, true]) {
+        await priority.evaluate((element, enabled) => {
+          element.toggleAttribute("data-pressed", enabled);
+        }, pressed);
+        const triggerShadows = await priority.evaluate((element) => {
+          const reference = document.createElement("input");
+          reference.className = "shadow-2xs";
+          reference.setAttribute("aria-hidden", "true");
+          document.body.append(reference);
+          const referenceStyle = getComputedStyle(reference);
+          const triggerStyle = getComputedStyle(element);
+          const result = {
+            shadow: triggerStyle.getPropertyValue("--tw-shadow"),
+            insetShadow: triggerStyle
+              .getPropertyValue("--tw-inset-shadow")
+              .replace(/^inset\s+/, ""),
+            textShadow: triggerStyle.textShadow,
+            referenceShadow: referenceStyle.getPropertyValue("--tw-shadow"),
+            referenceInsetShadow:
+              referenceStyle.getPropertyValue("--tw-inset-shadow"),
+          };
+          reference.remove();
+          return result;
+        });
+        expect(triggerShadows.shadow).toBe(triggerShadows.referenceShadow);
+        expect(triggerShadows.insetShadow).toBe(
+          triggerShadows.referenceInsetShadow,
+        );
+        expect(triggerShadows.textShadow).toBe("none");
+      }
+      await priority.evaluate((element) => {
+        element.removeAttribute("data-pressed");
+      });
+      await expect(create).toHaveCSS("text-shadow", "none");
+      const createShadow = await create.evaluate((element) =>
+        getComputedStyle(element).getPropertyValue("--tw-shadow"),
+      );
+      expect(createShadow).not.toBe("0 0 #0000");
+    }
   });
 
   test("keeps system-page filters local when changing tabs or workspaces", async ({
@@ -4371,14 +4616,6 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
     includeSectionData: true,
     includeWidgetData: true,
   });
-  fixture.widgetOrders[1].diagnostic_reports = [
-    {
-      ...fixture.imagingReport,
-      id: faker.string.uuid(),
-      status: "preliminary",
-      conclusion: "",
-    },
-  ];
   const loinc = (code: string, display: string) => ({
     system: "http://loinc.org",
     code,
@@ -4476,7 +4713,8 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
       has: page.getByRole("button", { name, exact: true }),
     });
   const pulse = vitalRow("Pulse");
-  await expect(pulse.getByRole("cell").first()).toHaveText("82 /min");
+  await expect(pulse.getByRole("cell").first()).toHaveText("82");
+  await expect(pulse.getByRole("cell").first()).toHaveAccessibleName("82 /min");
   await expect(
     pulse.getByRole("cell", { name: "76 /min", exact: true }),
   ).toBeVisible();
@@ -4519,7 +4757,9 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
   await expect(observationHistory).toHaveCount(0);
   await expect(vitalRow("Oxygen saturation")).toContainText("97");
   const temperature = vitalRow("Body temperature");
-  await expect(temperature).toContainText("No reading");
+  await expect(
+    temperature.getByRole("cell", { name: "No reading", exact: true }).first(),
+  ).toHaveText("-");
   await expect(temperature).not.toContainText(/\d/);
   await expect(vitals).toContainText(`by ${actorName}`);
   await expect(
@@ -4539,24 +4779,23 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
     ),
   ).toBe(true);
 
-  // Outstanding orders: drafts are excluded, reports link out, open orders
-  // link to their status page.
-  await expect(orders).toContainText("1 with reports · 1 awaiting results");
+  // The list response has order statuses, not diagnostic-report outcomes.
+  await expect(orders).toContainText("Chest X-ray");
   await expect(orders.getByText("Unsent draft order")).toHaveCount(0);
   const xray = orders.getByRole("listitem").filter({ hasText: "Chest X-ray" });
   await expect(xray).toContainText("Imaging");
-  await expect(xray).toContainText("Report received");
+  await expect(xray).toContainText("Active");
   await expect(
-    xray.getByRole("link", { name: "View Report", exact: true }),
+    xray.getByRole("link", { name: "Check Status", exact: true }),
   ).toHaveAttribute(
     "href",
-    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/diagnostic_reports/${fixture.imagingReport.id}`,
+    `/facility/${fixture.facility.id}/service_requests/${fixture.widgetOrders[0].id}`,
   );
   const creatinine = orders
     .getByRole("listitem")
     .filter({ hasText: "Creatinine" });
   await expect(creatinine).toContainText("Laboratory");
-  await expect(creatinine).toContainText("No result yet");
+  await expect(creatinine).toContainText("On Hold");
   await expect(
     creatinine.getByRole("link", { name: "View Report", exact: true }),
   ).toHaveCount(0);
@@ -4699,6 +4938,5 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
   ).toBeVisible();
   await expect(vitalRow("Pulse")).not.toContainText("82");
   await expect(medication).toBeVisible();
-  await expect(orders).toContainText("No service requests found");
-  await expect(orders.getByRole("listitem")).toHaveCount(0);
+  await expect(orders).toHaveCount(0);
 });
