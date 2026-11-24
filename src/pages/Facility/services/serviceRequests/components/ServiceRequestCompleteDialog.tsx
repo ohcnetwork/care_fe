@@ -34,7 +34,6 @@ interface ServiceRequestCompleteDialogProps {
   facilityId: string;
   serviceRequestId: string;
   pendingReports: number;
-  totalReports: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -44,7 +43,6 @@ export function ServiceRequestCompleteDialog({
   facilityId,
   serviceRequestId,
   pendingReports,
-  totalReports,
   open,
   onOpenChange,
 }: ServiceRequestCompleteDialogProps) {
@@ -79,10 +77,7 @@ export function ServiceRequestCompleteDialog({
         >
           <TriangleAlert className="text-yellow-600" />
           <AlertTitle>
-            {t("reports_pending_final_review", {
-              count: pendingReports,
-              total: totalReports,
-            })}
+            {t("pending_final_review_reports", { count: pendingReports })}
           </AlertTitle>
           <AlertDescription className="text-yellow-800">
             {t("service_request_complete_pending_reports_warning")}

@@ -67,9 +67,7 @@ test("marks a service request with a pending report as completed from the action
       .click();
     const dialog = page.getByRole("dialog", { name: "Add Completion Note" });
     const warning = dialog.getByRole("note");
-    await expect(warning).toContainText(
-      "1 of 1 reports is pending final review",
-    );
+    await expect(warning).toContainText("1 report is pending final review");
     await expect(warning).toContainText(
       "Pending reports can't be approved or edited after the request is completed.",
     );

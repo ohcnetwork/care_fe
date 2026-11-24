@@ -4471,6 +4471,8 @@
   "pending_deliveries": "Pending Deliveries",
   "pending_delivery_items_one": "{{count}} item ready to save",
   "pending_delivery_items_other": "{{count}} items ready to save",
+  "pending_final_review_reports_one": "{{count}} report is pending final review",
+  "pending_final_review_reports_other": "{{count}} reports are pending final review",
   "pending_from_patient": "Pending from Patient",
   "pending_pos": "Pending POs",
   "pending_specimen_collection": "Pending Specimen Collection",
