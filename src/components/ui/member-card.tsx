@@ -51,10 +51,12 @@ export function MemberCard({
       className={cn(
         "flex max-w-full min-w-0 items-center rounded-md border bg-background text-foreground shadow-2xs",
         xs
-          ? "h-7 gap-1.5 overflow-hidden ps-1 pe-0 text-sm shadow-none"
+          ? "h-7 gap-1.5 ps-1 pe-0.5 text-sm shadow-none"
           : small
             ? "h-9 gap-2 ps-1.5 pe-1 text-sm"
             : "gap-3 p-2 pe-1.5 text-sm",
+        // Small cards end in the badge's close button, flush with the edge.
+        small && onRemove && "overflow-hidden pe-0",
         !onRemove && !children && "pe-3",
         className,
       )}
@@ -100,9 +102,9 @@ export function MemberCard({
         )}
       </div>
       {children}
-      {onRemove && xs ? (
-        // Inside an input it sits with badges: their close button, flush
-        // with the edge.
+      {onRemove && small ? (
+        // Small cards sit with badges: their close button, flush with the
+        // edge.
         <button
           type="button"
           className="inline-flex aspect-square shrink-0 cursor-pointer items-center justify-center self-stretch rounded-r-sm opacity-60 outline-none hover:bg-current/20 hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-indigo-500/80 focus-visible:ring-inset"
@@ -117,7 +119,7 @@ export function MemberCard({
             type="button"
             variant="ghost"
             size="icon-xs"
-            className={cn("shrink-0 text-muted-foreground", small && "size-7")}
+            className="shrink-0 text-muted-foreground"
             aria-label={removeLabel ?? t("remove")}
             onClick={onRemove}
           >

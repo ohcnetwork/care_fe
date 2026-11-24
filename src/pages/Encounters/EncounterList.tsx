@@ -45,6 +45,7 @@ import {
   PopoverAnchor,
   PopoverContent,
 } from "@/components/ui/popover";
+import { useIsMobile } from "@/hooks/use-mobile";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import Page from "@/components/Common/Page";
@@ -61,6 +62,7 @@ import {
   SelectedPatient,
   VisitField,
 } from "@/pages/Encounters/encounter-search/EncounterSearch";
+import { EncounterSearchChips } from "@/pages/Encounters/encounter-search/EncounterSearchChips";
 import { EncounterSearchDateNotice } from "@/pages/Encounters/encounter-search/EncounterSearchDateNotice";
 import {
   EncounterClass,
@@ -174,6 +176,7 @@ export function EncounterList({
   });
   const { t } = useTranslation();
   const user = useAuthUser();
+  const isMobile = useIsMobile();
   const filterScope = `${user.id}:${facilityId}`;
   const storageKey = encounterFilterStorageKey("list", filterScope);
   const [, setSavedFilters] = useAtom(encounterListFiltersAtom(filterScope));
@@ -704,6 +707,14 @@ export function EncounterList({
   const scannedPatient =
     qParams.patient_name === t("scanned_patient") ||
     qParams.patient_name === t("encounter_search_scanned_patient");
+  // Inside the search on desktop; on mobile, a row below the toolbar.
+  const appliedSearch = {
+    name: qParams.name,
+    visitId: qParams.external_identifier,
+    patient: patient_filter
+      ? { name: qParams.patient_name, scanned: scannedPatient }
+      : undefined,
+  };
 
   const { created_date: dateState, ...toolbarFilters } = selectedFilters;
   // What the empty state names, from the URL alone: toolbar fields, then
@@ -784,13 +795,7 @@ export function EncounterList({
                 // Compact; it widens only when two chips share the line.
                 className="w-full @4xl/toolbar:w-96 @4xl/toolbar:has-[[data-slot=encounter-search-applied]+[data-slot=encounter-search-applied]]:w-[32rem]"
                 previewQueryParams={listFilterParams}
-                applied={{
-                  name: qParams.name,
-                  visitId: qParams.external_identifier,
-                  patient: patient_filter
-                    ? { name: qParams.patient_name, scanned: scannedPatient }
-                    : undefined,
-                }}
+                applied={isMobile ? {} : appliedSearch}
                 onApplyText={applySearchText}
                 onRemoveText={removeSearchText}
                 onSelectPatient={selectPatient}
@@ -920,6 +925,15 @@ export function EncounterList({
             />
           </div>
         </div>
+
+        {isAllList && isMobile && (
+          <EncounterSearchChips
+            layout="row"
+            {...appliedSearch}
+            onRemoveText={removeSearchText}
+            onRemovePatient={removePatient}
+          />
+        )}
 
         {isAllList && showDateNotice && (
           <EncounterSearchDateNotice
