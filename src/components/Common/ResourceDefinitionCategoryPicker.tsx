@@ -815,8 +815,10 @@ export function ResourceDefinitionCategoryPicker<T>({
       disabled={disabled}
       data-shortcut-id={shortcutId}
     >
-      <div className="flex items-center flex-1 w-0 min-w-0 gap-2">
-        {getDisplayValue()}
+      <div className="grid flex-1 min-w-0 grid-cols-[minmax(0,1fr)] items-center">
+        <div className="flex items-center min-w-0 contain-inline-size [contain-intrinsic-inline-size:16rem]">
+          {getDisplayValue()}
+        </div>
       </div>
       {shortcutId && <ShortcutBadge actionId={shortcutId} />}
       {!clearVisible && (
@@ -838,7 +840,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   );
 
   return (
-    <div className="space-y-2">
+    <div className="self-stretch space-y-2">
       {isMobile ? (
         <Drawer
           open={open}
