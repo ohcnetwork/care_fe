@@ -731,6 +731,7 @@ function AccountShow({
           navigate({
             to: "/facility/$facilityId/billing/account/$accountId/$tab",
             params: { facilityId, accountId, tab: value },
+            resetScroll: false,
           })
         }
         setPageTitle={false}
