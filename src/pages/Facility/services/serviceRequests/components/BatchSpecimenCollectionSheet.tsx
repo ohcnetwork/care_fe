@@ -153,11 +153,28 @@ function BatchSpecimenCollectionForm({
   };
 
   const isReady = !isError && !isLoading && pending.length > 0;
+  const specimenTotal = pending.length + collectedCount;
 
   return (
     <>
       <SheetHeader>
-        <SheetTitle>{t("collect_specimen")}</SheetTitle>
+        <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1">
+          <SheetTitle>{t("collect_specimen")}</SheetTitle>
+          {!isError && !isLoading && specimenTotal > 0 && (
+            <span className="flex items-center gap-1 text-sm text-soft-foreground">
+              {!pending.length && (
+                <CircleCheck
+                  aria-hidden="true"
+                  className="size-4 text-green-600"
+                />
+              )}
+              {t("specimens_collected_progress", {
+                collected: collectedCount,
+                total: specimenTotal,
+              })}
+            </span>
+          )}
+        </div>
         <SheetDescription>
           {requests[0]?.encounter.patient.name}
         </SheetDescription>
