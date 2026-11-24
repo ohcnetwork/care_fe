@@ -1693,9 +1693,9 @@ export function Filters<T = unknown>({
   const { t } = useTranslation();
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editingFromSummary, setEditingFromSummary] = useState(false);
-  // True while a picker opened from Add filter applies the first field. The
-  // summary then waits until the picker closes, so the toolbar and the picker
-  // anchored to Add filter stay where they are.
+  // True when Add filter opened with no field applied. The summary then waits
+  // until its popover closes, so the toolbar and the popover anchored to Add
+  // filter stay where they are while the first field is applied.
   const [summaryDeferred, setSummaryDeferred] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   // Below md the compact toolbar opens one bottom drawer instead of popovers,
@@ -1815,9 +1815,6 @@ export function Filters<T = unknown>({
           setAddFilterOpen(false);
           setMenuSearchInput("");
           setEditingFromSummary(false);
-          setSummaryDeferred(
-            !inDrawer && !filters.some((filter) => filter.values.length > 0),
-          );
           setEditingKey(fieldKey);
           return;
         }
@@ -1845,14 +1842,7 @@ export function Filters<T = unknown>({
         setMenuSearchInput("");
       }
     },
-    [
-      fieldsMap,
-      filters,
-      inDrawer,
-      onChange,
-      setMenuSearchInput,
-      toolbarSummary,
-    ],
+    [fieldsMap, filters, onChange, setMenuSearchInput, toolbarSummary],
   );
 
   const selectableFields = useMemo(() => getSelectableFields(fields), [fields]);
@@ -1896,12 +1886,13 @@ export function Filters<T = unknown>({
 
   const Container = toolbarSummary ? ButtonGroup : "div";
   const applied = filters.filter((filter) => filter.values.length > 0);
+  const addPopoverOpen = addFilterOpen || (!!editingKey && !editingFromSummary);
   const summaryVisible =
-    applied.length > 0 &&
-    !(summaryDeferred && !!editingKey && !editingFromSummary);
+    applied.length > 0 && !(summaryDeferred && !inDrawer && addPopoverOpen);
   const editing = editingKey ? fieldsMap[editingKey] : undefined;
   const existing = filters.find((filter) => filter.field === editingKey);
   const openFieldMenu = () => {
+    if (!addPopoverOpen) setSummaryDeferred(applied.length === 0);
     setSummaryOpen(false);
     setEditingKey(null);
     setMenuSearchInput("");
@@ -1934,7 +1925,6 @@ export function Filters<T = unknown>({
       label={mergedI18n.addFilter}
       iconOnly={summaryVisible}
       className={cn(toolbarSummary && "shadow-2xs")}
-      onClick={editing ? openFieldMenu : undefined}
       {...drawerTriggerProps("add")}
     />
   );
@@ -1997,7 +1987,6 @@ export function Filters<T = unknown>({
         ]);
       }
     },
-    trigger: editingFromSummary ? summaryButton : addButton,
   };
 
   // The trigger remounts when its editor closes. Don't steal focus if the user
@@ -2028,7 +2017,8 @@ export function Filters<T = unknown>({
       onDone={closeEditor}
     />
   );
-  // Custom pickers render inline when they find themselves in a drawer.
+  // The toolbar's popover or drawer hosts the picker, so it renders inline:
+  // custom pickers read the surface, the option list takes `inline`.
   const fieldEditor =
     editing &&
     (editing.customRenderer ? (
@@ -2036,13 +2026,12 @@ export function Filters<T = unknown>({
         key={editingKey}
         render={editing.customRenderer}
         {...editProps}
-        finalFocus={false}
         onBack={leaveEditor}
         onClose={closeEditor}
         field={editing}
         operator={existing?.operator ?? editing.defaultOperator ?? "is"}
       />
-    ) : inDrawer ? (
+    ) : (
       <>
         {pickerHeader}
         <SelectOptionsPopover
@@ -2053,14 +2042,6 @@ export function Filters<T = unknown>({
         />
         {pickerFooter}
       </>
-    ) : (
-      <SelectOptionsPopover
-        key={editingKey}
-        field={editing}
-        {...editProps}
-        header={pickerHeader}
-        footer={pickerFooter}
-      />
     ));
 
   const clear = () => {
@@ -2134,7 +2115,10 @@ export function Filters<T = unknown>({
   const summaryPanel = (title: React.ReactNode) =>
     toolbarSummary && (
       <>
-        <div className="flex items-center gap-2 border-b border-border bg-soft-background px-4 py-2.5">
+        <div
+          data-slot="filter-summary-heading"
+          className="flex items-center gap-2 border-b border-border bg-soft-background px-4 py-2.5"
+        >
           {title}
           <Badge variant="primary" counter size="sm">
             {applied.length}
@@ -2226,36 +2210,46 @@ export function Filters<T = unknown>({
 
   const highlightedFieldId =
     highlightedIndex >= 0 ? `${rootId}-item-${highlightedIndex}` : undefined;
-  // The drawer's field list. Its search is a searchbox, not a combobox, so the
-  // drawer doesn't focus it on open and raise the on-screen keyboard.
-  const drawerFieldList = (
+  // The compact toolbar's field list. In the drawer its search is a
+  // searchbox, not a combobox, so the drawer doesn't focus it on open and
+  // raise the on-screen keyboard. In the popup it is focused, as the menu's
+  // was.
+  const fieldList = (surface: "popup" | "drawer") => (
     <>
-      <FilterHeader
-        label={mergedI18n.addFilter}
-        icon={<ListFilterIcon aria-hidden="true" />}
-        onBack={
-          drawerOrigin === "summary" && applied.length > 0
-            ? () => {
-                setAddFilterOpen(false);
-                setSummaryOpen(true);
-              }
-            : undefined
-        }
-        onClose={() => setDrawerOpen(false)}
-      />
+      {surface === "drawer" && (
+        <FilterHeader
+          label={mergedI18n.addFilter}
+          icon={<ListFilterIcon aria-hidden="true" />}
+          onBack={
+            drawerOrigin === "summary" && applied.length > 0
+              ? () => {
+                  setAddFilterOpen(false);
+                  setSummaryOpen(true);
+                }
+              : undefined
+          }
+          onClose={() => setDrawerOpen(false)}
+        />
+      )}
       {showSearchInput && (
-        <div className="border-b p-3">
+        <div className={surface === "drawer" ? "border-b p-3" : "border-b"}>
           <Input
-            role="searchbox"
+            ref={surface === "popup" ? rootInputRef : undefined}
+            role={surface === "drawer" ? "searchbox" : "combobox"}
             inputMode="search"
+            autoFocus={surface === "popup"}
             aria-label={mergedI18n.searchFields}
             aria-controls={`${rootId}-listbox`}
             aria-activedescendant={highlightedFieldId}
             placeholder={mergedI18n.searchFields}
+            className={cn(
+              surface === "popup" &&
+                "h-8 rounded-none border-0 bg-transparent! px-2 text-sm shadow-none focus-visible:border-border focus-visible:ring-0 focus-visible:ring-offset-0",
+            )}
             value={menuSearchInput}
             onChange={(e) => setMenuSearchInput(e.target.value)}
             onKeyDown={(e) => {
-              // The drawer closes itself on Escape.
+              // The drawer and the popover close themselves on Escape.
               if (e.key !== "Escape") handleFieldSearchKeyDown(e);
             }}
           />
@@ -2267,8 +2261,13 @@ export function Filters<T = unknown>({
         <div
           id={`${rootId}-listbox`}
           role="listbox"
+          tabIndex={-1}
           aria-label={mergedI18n.addFilter}
-          className="max-h-[50dvh] overflow-y-auto p-2"
+          className={
+            surface === "drawer"
+              ? "max-h-[50dvh] overflow-y-auto p-2"
+              : "max-h-[min(var(--available-height),24rem)] overflow-y-auto p-1"
+          }
         >
           {filteredFields.length === 0 ? (
             <div className="text-muted-foreground py-2 text-center text-sm">
@@ -2336,20 +2335,37 @@ export function Filters<T = unknown>({
           >
             {inDrawer ? (
               summaryButton
-            ) : editing && editingFromSummary ? (
-              fieldEditor
             ) : (
-              <Popover open={summaryOpen} onOpenChange={setSummaryOpen}>
+              // One popover holds the Active filters list and the picker it
+              // opens, so editing swaps the content without a close and open.
+              <Popover
+                open={summaryOpen || (!!editing && editingFromSummary)}
+                onOpenChange={(open) => {
+                  if (open) {
+                    setSummaryOpen(true);
+                    return;
+                  }
+                  if (editing && editingFromSummary) closeEditor();
+                  else setSummaryOpen(false);
+                }}
+              >
                 <PopoverTrigger asChild>{summaryButton}</PopoverTrigger>
                 <PopoverContent
                   align={align}
+                  aria-label={
+                    editing && editingFromSummary ? editing.label : undefined
+                  }
                   className="w-80 max-w-(--available-width) gap-0 overflow-hidden p-0"
                 >
-                  {summaryPanel(
-                    <PopoverTitle className="text-sm font-semibold">
-                      {t("active_filters")}
-                    </PopoverTitle>,
-                  )}
+                  <FilterSurfaceContext.Provider value="popup">
+                    {editing && editingFromSummary
+                      ? fieldEditor
+                      : summaryPanel(
+                          <PopoverTitle className="text-sm font-semibold">
+                            {t("active_filters")}
+                          </PopoverTitle>,
+                        )}
+                  </FilterSurfaceContext.Provider>
                 </PopoverContent>
               </Popover>
             )}
@@ -2374,8 +2390,53 @@ export function Filters<T = unknown>({
         )}
         {inDrawer
           ? selectableFields.length > 0 && addButton
-          : editing && !editingFromSummary
-            ? fieldEditor
+          : toolbarSummary
+            ? selectableFields.length > 0 && (
+                // Likewise, the field list and the picker chosen from it share
+                // one popover anchored to Add filter.
+                <Popover
+                  open={addFilterOpen || (!!editing && !editingFromSummary)}
+                  onOpenChange={(open, details) => {
+                    if (open) {
+                      openFieldMenu();
+                      return;
+                    }
+                    if (editing && !editingFromSummary) {
+                      // Pressing Add filter over a picker returns to the
+                      // field list; anything else closes.
+                      if (details.reason === "trigger-press") openFieldMenu();
+                      else closeEditor();
+                      return;
+                    }
+                    setAddFilterOpen(false);
+                    setTimeout(() => {
+                      setMenuSearchInput("");
+                      setSessionFilterIds({});
+                    }, 200);
+                  }}
+                >
+                  <PopoverTrigger asChild>{addButton}</PopoverTrigger>
+                  <PopoverContent
+                    align={align}
+                    aria-label={
+                      editing && !editingFromSummary
+                        ? editing.label
+                        : mergedI18n.addFilter
+                    }
+                    className={cn(
+                      "max-w-(--available-width) gap-0 overflow-hidden p-0 transition-[width] duration-150",
+                      editing && !editingFromSummary ? "w-80" : "w-55",
+                      menuPopupClassName,
+                    )}
+                  >
+                    <FilterSurfaceContext.Provider value="popup">
+                      {editing && !editingFromSummary
+                        ? fieldEditor
+                        : fieldList("popup")}
+                    </FilterSurfaceContext.Provider>
+                  </PopoverContent>
+                </Popover>
+              )
             : selectableFields.length > 0 && (
                 <DropdownMenu
                   modal={false}
@@ -2741,7 +2802,7 @@ export function Filters<T = unknown>({
               {editing
                 ? fieldEditor
                 : addFilterOpen
-                  ? drawerFieldList
+                  ? fieldList("drawer")
                   : summaryPanel(
                       <DrawerTitle className="text-sm font-semibold">
                         {t("active_filters")}

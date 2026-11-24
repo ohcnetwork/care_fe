@@ -145,8 +145,8 @@ test("navigates tags from the open search field without focusing a row", async (
 }) => {
   await page.goto(`/facility/${facility.id}/encounters/patients/all`);
   await page.getByRole("button", { name: /^add filter$/i }).press("Enter");
-  const filterMenu = page.getByRole("menu");
-  await expect(filterMenu.getByRole("combobox")).toBeFocused();
+  const fields = page.getByRole("dialog", { name: /^add filter$/i });
+  await expect(fields.getByRole("combobox")).toBeFocused();
   await page.keyboard.type("Tags");
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
@@ -165,10 +165,11 @@ test("navigates tags from the open search field without focusing a row", async (
   await expect(leaf).not.toHaveCSS("background-color", idleBackground);
   await page.keyboard.press("ArrowUp");
   await expect(groupRow).toHaveAttribute("data-highlighted", "");
-  await page.keyboard.press("ArrowRight");
+  // Enter expands the group in place; focus stays in the search.
+  await page.keyboard.press("Enter");
   const childRow = page.getByRole("menuitemcheckbox", { name: child.display });
-  await expect(childRow).toBeFocused();
-  await page.keyboard.press("ArrowLeft");
+  await expect(childRow).toBeVisible();
+  await expect(groupRow).toHaveAttribute("aria-expanded", "true");
   await expect(search).toBeFocused();
   await page.keyboard.type("unmatched");
   await expect(page.getByText(/no tags/i)).toBeVisible();
@@ -179,7 +180,8 @@ test("navigates tags from the open search field without focusing a row", async (
   await page.keyboard.press("ControlOrMeta+a");
   await page.keyboard.type("Review required");
   await expect(search).toHaveValue("Review required");
-  await expect(childRow).toHaveAttribute("data-highlighted", "");
+  await expect(childRow).toBeVisible();
+  // Enter picks the first match.
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(
     (url) => url.searchParams.get("tags") === child.id,
@@ -422,6 +424,52 @@ test("status and priority open in place like the other pickers", async ({
   await expect(
     page.getByRole("menuitemradio", { name: "Urgent", exact: true }),
   ).toBeChecked();
+});
+
+test("edits and adds filters inside one open popover", async ({ page }) => {
+  await page.goto(`/facility/${facility.id}/encounters/patients/all`);
+  const add = page.getByRole("button", { name: /^add filter$/i });
+  const active = page.getByRole("button", { name: /^filters\b/i });
+  const fields = page.getByRole("dialog", { name: /^add filter$/i });
+  const picker = page.getByRole("dialog", { name: "Status" });
+  const summary = page.getByRole("dialog", { name: /^active filters$/i });
+  // A marker set on the element survives only if it is never remounted.
+  const mark = (dialog: Locator, value: string) =>
+    dialog.evaluate((el, v) => {
+      (el as HTMLElement).dataset.probe = v;
+    }, value);
+
+  await add.click();
+  await mark(fields, "add");
+  await page.getByRole("option", { name: /^status$/i }).click();
+  await expect(picker).toHaveAttribute("data-probe", "add");
+  await picker
+    .getByRole("menuitemcheckbox", { name: "Planned", exact: true })
+    .click();
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get("status") === "planned",
+  );
+  // Add filter over its picker returns to the field list, in place.
+  await add.click();
+  await expect(fields).toHaveAttribute("data-probe", "add");
+  await expect(page.getByRole("option", { name: /^priority$/i })).toBeVisible();
+  await expect(active).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(fields).toHaveCount(0);
+  await expect(active).toHaveAccessibleName(/^filters\s*1$/i);
+
+  await active.click();
+  await mark(summary, "summary");
+  const editStatus = summary.getByRole("button", { name: /status.*planned/i });
+  await editStatus.click();
+  await expect(picker).toHaveAttribute("data-probe", "summary");
+  await expect(picker.getByRole("searchbox")).toBeFocused();
+  await picker.getByRole("button", { name: "Back" }).click();
+  await expect(summary).toHaveAttribute("data-probe", "summary");
+  await editStatus.click();
+  await picker.getByRole("button", { name: "Done" }).click();
+  await expect(picker).toHaveCount(0);
+  await expect(active).toBeFocused();
 });
 
 test("keeps the picker in place while the first filter is applied", async ({
@@ -675,9 +723,7 @@ for (const layout of ["desktop", "mobile"] as const) {
     await expect(summary).toHaveAccessibleName(/^active filters$/i);
     // A popover on desktop, a drawer on mobile.
     await expect(
-      summary
-        .locator('[data-slot="popover-title"], [data-slot="drawer-title"]')
-        .locator(".."),
+      summary.locator('[data-slot="filter-summary-heading"]'),
     ).toHaveText(/^active filters\s*1$/i);
     // Measure after the zoom-in animation, which scales the boxes.
     await summary.evaluate((el) =>
@@ -788,9 +834,8 @@ for (const layout of ["desktop", "mobile"] as const) {
       await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/facility/${facility.id}/encounters/patients/all`);
     await openMultiFilter(page, /^tags$/i);
-    const trigger = page.getByRole("menuitem", { name: /Follow-up/ });
-    if (layout === "mobile") await trigger.click();
-    else await trigger.press("ArrowRight");
+    // Groups expand in place on every layout.
+    await page.getByRole("menuitem", { name: /Follow-up/ }).click();
     const row = page.getByRole("menuitemcheckbox", {
       name: child.display,
       exact: true,
