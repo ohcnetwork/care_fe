@@ -61,15 +61,7 @@
   xxl: px(24),
 )
 
-// Typst can't use the computer's fonts, so a character Figtree lacks falls
-// back to the next font that has it (Hindi and Marathi share Devanagari).
-#let fonts = (
-  "Figtree",
-  "Noto Sans Malayalam",
-  "Noto Sans Devanagari",
-  "Noto Sans Tamil",
-  "Noto Sans Kannada",
-)
+#let fonts = ("Figtree",)
 #let mono-fonts = ("Geist Mono",) + fonts
 
 // Whether a block this wide is narrow, like A5 portrait (128mm between 10mm
@@ -138,21 +130,6 @@
 
 // Also after `@`, so an email or ABHA address breaks as `name@` / `abdm`.
 #let _break-after = regex("[^-,;/)\\]@]*[-,;/)\\]@]?")
-#let _kannada-virama = regex("\u{0CCD}\u{200D}?$")
-
-// The letters of `s`. Typst keeps joined letters together, except Kannada's
-// (ಸ್ + ವಾ), so join those.
-#let _letters(s) = {
-  let units = ()
-  for c in s.clusters() {
-    if units.len() > 0 and units.last().ends-with(_kannada-virama) {
-      units.last() += c
-    } else {
-      units.push(c)
-    }
-  }
-  units
-}
 
 // A no-break space joins its words: it keeps a dose's number with its unit.
 #let _word-or-space = regex("[\\S\\x{A0}]+|[\\s--\\x{A0}]+")
@@ -163,7 +140,7 @@
   let lines = ()
   let line = ""
   for piece in word.matches(_break-after).map(m => m.text).filter(p => p != "") {
-    let units = if measure(text(piece)).width > width { _letters(piece) } else { (piece,) }
+    let units = if measure(text(piece)).width > width { piece.clusters() } else { (piece,) }
     for unit in units {
       if line != "" and measure(text(line + unit)).width > width {
         lines.push(line)
@@ -197,7 +174,7 @@
   body
 })
 
-// A task list's checkbox, drawn: Figtree and Noto have no ☐ or ☑.
+// A task list's checkbox, drawn: Figtree has no ☐ or ☑.
 #let _checkbox(checked) = box(
   width: 0.75em,
   height: 0.75em,

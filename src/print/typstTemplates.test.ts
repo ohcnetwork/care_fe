@@ -307,61 +307,6 @@ test("header: the hospital name is smaller on A5, but not beside a wide logo on 
   }
 });
 
-test("details-table: Indian-script text prints with real letters", async () => {
-  const names = {
-    NotoSansMalayalam: "രാഹുൽ കൃഷ്ണൻ",
-    NotoSansDevanagari: "राहुल कुमार",
-    NotoSansTamil: "ராகுல் கிருஷ்ணன்",
-    NotoSansKannada: "ರಾಹುಲ್ ಕೃಷ್ಣ",
-  };
-  const bytes = await compile("details-table", {
-    ...detailsTable({
-      header: ["ഇനം", "ബാച്ച്", "അളവ്"],
-      widths: [2, 1, null],
-      rows: Object.values(names).map((name) => [name, "B12", "1.00"]),
-    }),
-    heading: "മരുന്ന് തിരികെ നൽകൽ",
-  });
-
-  // A missing letter prints as an empty box but keeps its character in the
-  // text, so check the fonts the PDF was drawn with instead.
-  const pdfSource = Buffer.from(bytes).toString("latin1");
-  for (const font of Object.keys(names)) {
-    assert.match(pdfSource, new RegExp(`/BaseFont /[A-Z]{6}\\+${font}-`));
-  }
-  assert.match(pdfSource, /\+NotoSansMalayalam-Bold/, "semibold heading");
-  assertReadable(await readPdf(bytes));
-});
-
-test("fit-words: never breaks a Kannada joined letter", async () => {
-  // Typst's clusters split ಸ್ವಾ into ಸ್ + ವಾ; a break there would print a
-  // half letter. Some of these widths break right at such a spot.
-  compiler.addSource(
-    "/templates/test-kannada.typ",
-    `#import "../typst/care.typ": *
-#set page(width: 400pt, height: auto, margin: 10pt)
-#set text(font: fonts, size: 10pt)
-#for w in range(20, 90, step: 2) {
-  block(width: w * 1pt, fit-words("ಲಕ್ಷ್ಮೀನಾರಾಯಣಕೃಷ್ಣಸ್ವಾಮಿಪ್ರಸಾದ"))
-}`,
-  );
-  const { pages } = await readPdf(await compile("test-kannada", null));
-
-  const lines = new Map<number, TextBox[]>();
-  for (const box of pages.flatMap((page) => page.boxes)) {
-    const y = Math.round(box.bottom);
-    lines.set(y, [...(lines.get(y) ?? []), box]);
-  }
-  for (const boxes of lines.values()) {
-    const line = boxes
-      .sort((a, b) => a.left - b.left)
-      .map((box) => box.text)
-      .join("")
-      .trim();
-    assert.ok(!line.endsWith("್"), `"${line}" ends in half a letter`);
-  }
-});
-
 function prescriptionsContent(
   medications: PrescriptionsPrintContent["prescriptions"][number]["medications"],
 ): PrescriptionsPrintContent {
