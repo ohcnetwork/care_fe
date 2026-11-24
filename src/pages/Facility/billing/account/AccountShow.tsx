@@ -156,7 +156,7 @@ function AccountShow({
     canWritePaymentReconciliation,
   } = getPermissions(hasPermission, facility?.permissions || []);
 
-  useShortcutSubContext("facility:account:show");
+  useShortcutSubContext("facility:account:show&facility:billing");
 
   const { data: account, isLoading } = useQuery({
     queryKey: ["account", accountId],
