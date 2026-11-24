@@ -4843,7 +4843,6 @@
   "selected_location": "Selected Location",
   "selected_payments": "Selected payments",
   "selected_practitioner": "Selected practitioner",
-  "selected_slot_not_found": "Selected Slot Not Found",
   "selected_tags": "Selected Tags",
   "selected_token_slot_display": "on <strong>{{date}}</strong> between <strong>{{startTime}}</strong> & <strong>{{endTime}}</strong>",
   "send": "Send",

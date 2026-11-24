@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSearch } from "@tanstack/react-router";
+import { useRouter, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -57,6 +57,19 @@ export default function PublicPatientRegistration(
 
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
+
+  // Back and Cancel return to the patient select page. Without history to go
+  // back to (the page was reloaded or opened directly), the fallback keeps the
+  // chosen slot and reason, which the patient select page needs.
+  const router = useRouter();
+  const goBackToPatientSelect = () =>
+    goBack(
+      router.buildLocation({
+        to: "/facility/$facilityId/appointments/$staffId/patient-select",
+        params: { facilityId: props.facilityId, staffId },
+        search: { slotId, reason },
+      }).href,
+    );
 
   const [selectedGeoOrg, setSelectedGeoOrg] = useState<Organization | null>(
     null,
@@ -184,11 +197,7 @@ export default function PublicPatientRegistration(
           variant="outline"
           className="border border-secondary-400"
           type="button"
-          onClick={() =>
-            goBack(
-              `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
-            )
-          }
+          onClick={() => goBackToPatientSelect()}
         >
           <span className="text-sm underline">{t("back")}</span>
         </Button>
@@ -407,11 +416,7 @@ export default function PublicPatientRegistration(
                 variant="white"
                 className="sm:w-1/5"
                 type="button"
-                onClick={() =>
-                  goBack(
-                    `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
-                  )
-                }
+                onClick={() => goBackToPatientSelect()}
               >
                 <span className="bg-linear-to-b from-white/15 to-transparent" />
                 {t("cancel")}

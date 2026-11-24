@@ -132,10 +132,14 @@ export default function PatientSelect({
         params: { facilityId, staffId, page: "send" },
       });
     } else if (!slotId) {
-      toast.error(t("selected_slot_not_found"));
+      // No slot chosen yet: send the patient to pick one. Replace this entry
+      // so that Back skips the slot-less page instead of landing on it and
+      // redirecting forward again. No toast: there is no error to report, the
+      // slot page shows its own empty state when a day has no slots.
       navigate({
         to: "/facility/$facilityId/appointments/$staffId/book-appointment",
         params: { facilityId, staffId },
+        replace: true,
       });
     }
   }, [facilityId, staffId, tokenData, slotId, t]);
