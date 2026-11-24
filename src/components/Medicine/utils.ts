@@ -2,6 +2,7 @@ import Decimal from "decimal.js";
 
 import {
   computeTotalDoseQuantity,
+  DosageQuantity,
   formatTimingBounds,
   getFrequencyDisplayLabel,
   getTimingBounds,
@@ -30,15 +31,25 @@ function roundDosage(value: string | number | Decimal): string {
  */
 const DISPENSABLE_UNIT_CODES = ["{tbl}", "{count}"];
 
-// Helper function to format dosage in Rx style
-export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
+/**
+ * Formats a dosage in Rx style. Prints pass `print: true` for no-break spaces:
+ * a number split from its unit is easy to misread. It's an option, not a
+ * parameter, because `joinInstructionTexts` maps this function and would pass
+ * an index.
+ */
+export function formatDosage(
+  instruction?: MedicationRequestDosageInstruction,
+  { print = false }: { print?: boolean } = {},
+) {
   if (!instruction?.dose_and_rate) return "";
 
+  const dose = ({ value, unit }: DosageQuantity) =>
+    `${roundDosage(value)}${print ? "\u00a0" : " "}${unit.display}`;
   const { dose_range, dose_quantity } = instruction.dose_and_rate;
   if (dose_range) {
-    return `${roundDosage(dose_range.low.value)} ${dose_range.low.unit.display} -> ${roundDosage(dose_range.high.value)} ${dose_range.high.unit.display}`;
+    return `${dose(dose_range.low)} → ${dose(dose_range.high)}`;
   } else if (dose_quantity) {
-    return `${roundDosage(dose_quantity.value)} ${dose_quantity.unit.display}`;
+    return dose(dose_quantity);
   }
   return "";
 }

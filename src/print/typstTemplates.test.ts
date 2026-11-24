@@ -15,6 +15,10 @@ import { before, test } from "node:test";
 
 import type { QuestionnaireResponsePrintContent } from "@/components/Facility/ConsultationDetails/questionnaireResponsePrintData";
 import type { MedicationAdministrationPrintContent } from "@/components/Medicine/MedicationAdministration/medicationAdministrationPrintData";
+import {
+  formatDosage,
+  joinInstructionTexts,
+} from "@/components/Medicine/utils";
 import type { PrescriptionsPrintContent } from "@/components/Prescription/prescriptionsPrintData";
 import type { ResourceLetterPrintContent } from "@/components/Resource/resourceLetterPrintData";
 import type { AppointmentPrintContent } from "@/pages/Appointments/appointmentPrintData";
@@ -25,6 +29,7 @@ import type { DiagnosticReportPrintContent } from "@/pages/Facility/services/dia
 import type { DetailsTablePrintContent } from "@/print/detailsTable";
 import { richTextToPrint } from "@/print/richText";
 import type { PrintLayout, TypstPaper } from "@/print/types";
+import type { MedicationRequestDosageInstruction } from "@/types/emr/medicationRequest/medicationRequest";
 
 const PRINT_DIR = join(process.cwd(), "src/print");
 const MM = 72 / 25.4;
@@ -644,6 +649,102 @@ test("details-table: a table pushed to the next page takes its title along", asy
     pageWith(pdf, "Medication Dispenses"),
     pageWith(pdf, "Medicine"),
   );
+});
+
+const quantity = (value: string, unit: string) => ({
+  value,
+  unit: { code: unit, display: unit, system: "http://unitsofmeasure.org" },
+});
+
+const doseRange = (low: string, high: string, unit: string) =>
+  ({
+    dose_and_rate: {
+      dose_range: { low: quantity(low, unit), high: quantity(high, unit) },
+    },
+  }) as MedicationRequestDosageInstruction;
+
+test("details-table: on A5 a dose range wraps between its doses and leaves the other columns room", async () => {
+  // In the dispense order's `auto` Dosage column. Staging's ranges look like
+  // the first.
+  for (const [low, high, unit] of [
+    ["1", "2", "tablets"],
+    ["250", "500", "milligram"],
+  ]) {
+    const dosage = formatDosage(doseRange(low, high, unit), { print: true });
+    const content = dispenseOrder(null);
+    content.table.rows = content.table.rows.map((row) =>
+      row.map((cell, i) => (i === 1 ? dosage : cell)),
+    );
+    const pdf = await readPdf(await compile("details-table", content, "a5"));
+
+    assertReadable(pdf);
+    // Squeezed `fr` columns split even short words.
+    for (const word of ["Medicine", "DICLOFENAC"]) {
+      assert.ok(pageWith(pdf, word), `${dosage}: "${word}" is split`);
+    }
+    const lines = pdf.pages.flatMap((page) =>
+      page.boxes.map((box) => box.text.replace(/\s/g, " ")),
+    );
+    for (const dose of [`${low} ${unit}`, `${high} ${unit}`]) {
+      assert.ok(
+        lines.some((line) => line.includes(dose)),
+        `${dosage}: "${dose}" is split over two lines`,
+      );
+    }
+  }
+});
+
+test("formatDosage: prints keep each number with its unit, screens don't", () => {
+  const range = doseRange("1", "2", "tablets");
+  const single = {
+    dose_and_rate: { dose_quantity: quantity("250", "milligram") },
+  } as MedicationRequestDosageInstruction;
+
+  assert.equal(formatDosage(range), "1 tablets → 2 tablets");
+  assert.equal(formatDosage(single), "250 milligram");
+  assert.equal(
+    formatDosage(range, { print: true }),
+    "1\u00a0tablets → 2\u00a0tablets",
+  );
+  assert.equal(formatDosage(single, { print: true }), "250\u00a0milligram");
+  // `joinInstructionTexts` maps it, so its second argument is an index.
+  assert.equal(
+    joinInstructionTexts([range], formatDosage),
+    "1 tablets → 2 tablets",
+  );
+});
+
+test("prescriptions: a dose too wide for its cell breaks after the number instead of running over", async () => {
+  // "100 international" is wider than the A5 Dosage column.
+  const dosage = formatDosage(
+    {
+      dose_and_rate: { dose_quantity: quantity("100", "international unit") },
+    } as MedicationRequestDosageInstruction,
+    { print: true },
+  );
+  const pdf = await readPdf(
+    await compile(
+      "prescriptions",
+      prescriptionsContent([
+        {
+          index: "1",
+          name: "Insulin glargine 100 units/mL injection",
+          instructions: [
+            {
+              dosage,
+              frequency: "1-0-1 (Twice a day)",
+              duration: "5 days",
+              text: "After food",
+            },
+          ],
+          note: null,
+        },
+      ]),
+      "a5",
+    ),
+  );
+
+  assertReadable(pdf);
 });
 
 const INVOICE_LABELS = Object.fromEntries(

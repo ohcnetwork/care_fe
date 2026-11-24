@@ -154,7 +154,8 @@
   units
 }
 
-#let _word-or-space = regex("\\S+|\\s+")
+// A no-break space joins its words: it keeps a dose's number with its unit.
+#let _word-or-space = regex("[\\S\\x{A0}]+|[\\s--\\x{A0}]+")
 
 // Splits a word wider than `width` into lines: after punctuation first, then
 // between letters.
@@ -185,7 +186,12 @@
   show regex("\\S+(?:\\s+\\S+){0,99}"): words => context {
     words.text.matches(_word-or-space).map(m => {
       let t = m.text
-      if t.trim() == "" or measure(text(t)).width <= size.width { t } else { _break-word(t, size.width) }
+      if t.trim() == "" or measure(text(t)).width <= size.width { t } else {
+        // Too wide for a line of its own: break at its no-break spaces first.
+        t.split("\u{a0}").map(w => {
+          if measure(text(w)).width <= size.width { w } else { _break-word(w, size.width) }
+        }).join(" ")
+      }
     }).join()
   }
   body
@@ -283,8 +289,9 @@
 /// A bordered table in the style of CAREUI's `Table`. `header` repeats on
 /// every page; `header-align` defaults to centre; `empty` is shown without rows;
 /// `outer` sets the outer border's sides and corner radius. Put free text in
-/// `fr` columns: long text in an `auto` column squeezes the `fr` ones. Rows
-/// continue on the next page: a row kept whole loses what runs past the page.
+/// `fr` columns: if the `auto` ones would take over 60% of the width, their
+/// headers wrap, then their values, down to the longest word. Rows continue on
+/// the next page: a row kept whole loses what runs past the page.
 #let data-table(
   columns: (),
   align: (),
@@ -305,7 +312,9 @@
   let font-size = if narrow { text-size.xs } else { text.size }
 
   // If the `auto` columns would leave the `fr` ones under 40% of the width,
-  // size each to its widest value instead, so only its header wraps.
+  // size each to its widest value instead, so only its header wraps. If that
+  // is still too wide, values wrap too, down to their longest word: amounts
+  // and dates are one word, so they keep their width.
   let sizes = columns
   if rows.len() > 0 and rows.all(r => r.len() == n) and columns.any(c => type(c) == fraction) {
     let content-of(c) = if type(c) == content and c.func() == table.cell { c.body } else { c }
@@ -317,8 +326,19 @@
     let natural = range(n).map(i => if fit.at(i) == none { 0pt } else {
       calc.max(fit.at(i), width(header.at(i)) + 2 * inset.x)
     })
-    if size.width - natural.sum() < 0.4 * size.width {
-      sizes = range(n).map(i => if fit.at(i) == none { columns.at(i) } else { fit.at(i) })
+    let budget = 0.6 * size.width
+    if natural.sum() > budget {
+      let least = range(n).map(i => if fit.at(i) == none { none } else {
+        calc.max(longest-word(header.at(i)), ..rows.map(r => longest-word(r.at(i)))) + 2 * inset.x
+      })
+      let cols = range(n).filter(i => fit.at(i) != none)
+      let over = cols.map(i => fit.at(i)).sum() - budget
+      let slack = cols.map(i => fit.at(i) - least.at(i)).sum()
+      // Every column gives up the same share of what it can spare.
+      let cut = if over <= 0pt or slack == 0pt { 0 } else { calc.min(1, over / slack) }
+      sizes = range(n).map(i => if fit.at(i) == none { columns.at(i) } else {
+        fit.at(i) - cut * (fit.at(i) - least.at(i))
+      })
     }
   }
 

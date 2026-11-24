@@ -66,7 +66,7 @@ export function buildDispenseOrderPrintContent({
           dispense.item.product.product_knowledge.name,
           joinInstructionTexts(
             instructions,
-            formatDosage,
+            (di) => formatDosage(di, { print: true }),
             INSTRUCTION_SEPARATOR,
           ),
           joinInstructionTexts(

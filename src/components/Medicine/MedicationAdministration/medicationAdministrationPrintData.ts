@@ -101,7 +101,7 @@ export function buildMedicationAdministrationPrintContent({
           summaries: instructions
             .map((di) =>
               [
-                formatDosage(di),
+                formatDosage(di, { print: true }),
                 di.route?.display,
                 prn ? t("as_needed") : formatFrequency(di),
               ]

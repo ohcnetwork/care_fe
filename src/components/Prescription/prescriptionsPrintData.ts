@@ -151,7 +151,7 @@ export function buildPrescriptionsPrintContent({
             index: String(medIndex + 1),
             name: displayMedicationName(medication),
             instructions: instructions.map((di) => ({
-              dosage: formatDosage(di) || "",
+              dosage: formatDosage(di, { print: true }) || "",
               frequency: formatFrequency(di) || "",
               duration: formatDuration(di) || "",
               text: [
