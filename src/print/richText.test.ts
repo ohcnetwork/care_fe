@@ -2,34 +2,31 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { richTextToPrint } from "@/print/richText";
-import type { PrintTextMark } from "@/print/types";
+import type {
+  PrintRichBlock,
+  PrintTextMark,
+  PrintTextRun,
+} from "@/print/types";
 
-const text = (value: string, marks: PrintTextMark[] = [], link = null) => ({
-  kind: "text" as const,
-  text: value,
-  marks,
-  link,
-});
-const paragraph = (...runs: ReturnType<typeof text>[]) => ({
-  kind: "paragraph" as const,
+const text = (
+  value: string,
+  marks: PrintTextMark[] = [],
+  link: string | null = null,
+): PrintTextRun => ({ kind: "text", text: value, marks, link });
+const paragraph = (...runs: PrintTextRun[]): PrintRichBlock => ({
+  kind: "paragraph",
   runs,
 });
 
 test("richTextToPrint: the editor's formats become styled runs, not symbols", () => {
   // As the rich-text editor saves it.
   const markdown =
-    "<u>***dfsh usdujhfjasjfd hdsj fhjsd fjdhfajs***</u>\n\n*dvsdadsfs*&#x20;\n\nddsfdsfs\n========";
+    "<u>***Drink more water***</u>\n\n*rest well*&#x20;\n\nAdvice\n========";
 
   assert.deepEqual(richTextToPrint(markdown), [
-    paragraph(
-      text("dfsh usdujhfjasjfd hdsj fhjsd fjdhfajs", [
-        "bold",
-        "italic",
-        "underline",
-      ]),
-    ),
-    paragraph(text("dvsdadsfs", ["italic"])),
-    { kind: "heading", level: 1, runs: [text("ddsfdsfs")] },
+    paragraph(text("Drink more water", ["bold", "italic", "underline"])),
+    paragraph(text("rest well", ["italic"])),
+    { kind: "heading", level: 1, runs: [text("Advice")] },
   ]);
 });
 
@@ -87,23 +84,15 @@ test("richTextToPrint: highlight, strikethrough, links, quotes, rules and line b
       "==marked== ~~gone~~ [CARE](https://care.ohc.network)\nnext line\n\n> quoted\n\n---",
     ),
     [
-      {
-        kind: "paragraph",
-        runs: [
-          text("marked", ["highlight"]),
-          text(" "),
-          text("gone", ["strike"]),
-          text(" "),
-          {
-            kind: "text",
-            text: "CARE",
-            marks: [],
-            link: "https://care.ohc.network",
-          },
-          { kind: "break" },
-          text("next line"),
-        ],
-      },
+      paragraph(
+        text("marked", ["highlight"]),
+        text(" "),
+        text("gone", ["strike"]),
+        text(" "),
+        text("CARE", [], "https://care.ohc.network"),
+        { kind: "break" },
+        text("next line"),
+      ),
       { kind: "quote", blocks: [paragraph(text("quoted"))] },
       { kind: "rule" },
     ],

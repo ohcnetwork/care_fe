@@ -27,7 +27,7 @@ import type { InvoicePrintContent } from "@/pages/Facility/billing/invoice/invoi
 import type { PaymentReceiptPrintContent } from "@/pages/Facility/billing/paymentReconciliation/paymentReceiptPrintData";
 import type { DiagnosticReportPrintContent } from "@/pages/Facility/services/diagnosticReports/diagnosticReportPrintData";
 import type { DetailsTablePrintContent } from "@/print/detailsTable";
-import { richTextToPrint } from "@/print/richText";
+import { labelledRichText, richTextToPrint } from "@/print/richText";
 import type { PrintLayout, TypstPaper } from "@/print/types";
 import type { MedicationRequestDosageInstruction } from "@/types/emr/medicationRequest/medicationRequest";
 
@@ -80,6 +80,11 @@ function filesUnder(dir: string): string[] {
   );
 }
 
+const svg = (width: number, height: number) =>
+  new TextEncoder().encode(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="${width}" height="${height}"/></svg>`,
+  );
+
 let compiler: TypstCompiler;
 
 before(async () => {
@@ -103,6 +108,8 @@ before(async () => {
       readFileSync(path, "utf8"),
     );
   }
+  compiler.mapShadow("/assets/logo", svg(200, 40));
+  compiler.mapShadow("/assets/qr-code.svg", svg(29, 29));
 });
 
 async function compile(
@@ -132,7 +139,8 @@ async function compile(
         `Couldn't compile ${template}: ${JSON.stringify(result.diagnostics)}`,
       );
     }
-    return result.result;
+    const bytes = result.result;
+    return { bytes, ...(await readPdf(bytes)) };
   } finally {
     compiler.unmapShadow("/data.json");
   }
@@ -202,7 +210,11 @@ function assertReadable({ pages, text }: Awaited<ReturnType<typeof readPdf>>) {
 }
 
 function detailsTable(
-  table: DetailsTablePrintContent["table"],
+  table: DetailsTablePrintContent["table"] = {
+    header: ["Item"],
+    widths: [null],
+    rows: [["Paracetamol"]],
+  },
 ): DetailsTablePrintContent {
   return {
     heading: "Medication return",
@@ -218,33 +230,24 @@ function detailsTable(
 }
 
 test("details-table: long names and lot numbers stay in their columns", async () => {
-  const pdf = await readPdf(
-    await compile(
-      "details-table",
-      detailsTable({
-        header: [
-          "Item",
-          "Batch",
-          "Quantity",
-          "Expiry Date",
-          "Condition",
-          "Return Date",
-        ],
-        widths: [3, 1.5, null, null, null, null],
-        rows: [
-          [JOINED_NAME, LONG_LOT, "1.00", "27/06/2030", "Normal", "20/11/2026"],
-          [LONG_NAME, "2", "15.00", "09/09/2027", "Damaged", "20/11/2026"],
-          [
-            "Paracetamol 500 mg oral tablet",
-            "B12",
-            "10.00",
-            "-",
-            "Normal",
-            "-",
-          ],
-        ],
-      }),
-    ),
+  const pdf = await compile(
+    "details-table",
+    detailsTable({
+      header: [
+        "Item",
+        "Batch",
+        "Quantity",
+        "Expiry Date",
+        "Condition",
+        "Return Date",
+      ],
+      widths: [3, 1.5, null, null, null, null],
+      rows: [
+        [JOINED_NAME, LONG_LOT, "1.00", "27/06/2030", "Normal", "20/11/2026"],
+        [LONG_NAME, "2", "15.00", "09/09/2027", "Damaged", "20/11/2026"],
+        ["Paracetamol 500 mg oral tablet", "B12", "10.00", "-", "Normal", "-"],
+      ],
+    }),
   );
 
   assertReadable(pdf);
@@ -270,44 +273,48 @@ test("details-table: rejects widths that don't match the header", async () => {
 });
 
 test("header: the hospital name is smaller on A5, but not beside a wide logo on A4", async () => {
-  // A logo this wide leaves the name's own cell narrower than A5's page on A4.
-  compiler.mapShadow(
-    "/assets/logo",
-    new TextEncoder().encode(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="40"><rect width="200" height="40"/></svg>',
-    ),
-  );
   const nameSize = async (paper: TypstPaper) => {
     const layout = layoutFor(paper);
+    // A logo this wide leaves the name's own cell narrower than A5's page on A4.
     layout.header!.logo = {
       path: "/assets/logo",
       width: 200,
       height: null,
       alignment: "right",
     };
-    const content = detailsTable({
-      header: ["Item"],
-      widths: [null],
-      rows: [["Paracetamol"]],
-    });
-    const pdf = await readPdf(
-      await compile("details-table", content, paper, layout),
-    );
+    const pdf = await compile("details-table", detailsTable(), paper, layout);
     const name = pdf.pages[0].boxes.find((box) =>
       box.text.startsWith("Sample"),
     );
     return name && Math.round(name.size * 10) / 10;
   };
-  try {
-    assert.equal(await nameSize("a4"), 18);
-    assert.equal(await nameSize("a5"), 15);
-  } finally {
-    compiler.unmapShadow("/assets/logo");
-  }
+  assert.equal(await nameSize("a4"), 18);
+  assert.equal(await nameSize("a5"), 15);
+});
+
+const medication = ({
+  index = "1",
+  name = "Paracetamol 500 mg oral tablet",
+  dosage = "1 tablets",
+  note = null as string | null,
+} = {}) => ({
+  index,
+  name,
+  instructions: [
+    {
+      dosage,
+      frequency: "1-0-1 (Twice a day)",
+      duration: "5 days",
+      text: "After food",
+    },
+  ],
+  note,
 });
 
 function prescriptionsContent(
-  medications: PrescriptionsPrintContent["prescriptions"][number]["medications"],
+  medications: PrescriptionsPrintContent["prescriptions"][number]["medications"] = [
+    medication(),
+  ],
 ): PrescriptionsPrintContent {
   return {
     labels: {
@@ -382,7 +389,7 @@ test("prescriptions: a long medicine name or frequency keeps every column", asyn
     },
   ]);
 
-  const pdf = await readPdf(await compile("prescriptions", content));
+  const pdf = await compile("prescriptions", content);
 
   assertReadable(pdf);
   const words = pdf.pages.flatMap((page) => page.boxes.map((box) => box.text));
@@ -404,26 +411,12 @@ test("prescriptions: a row taller than the page continues on the next page", asy
     (_, i) =>
       `S${i + 1}: take with warm water after food and watch for drowsiness, rash or stomach upset.`,
   );
-  const pdf = await readPdf(
-    await compile(
-      "prescriptions",
-      prescriptionsContent([
-        {
-          index: "1",
-          name: "Paracetamol 500 mg oral tablet",
-          instructions: [
-            {
-              dosage: "1 tablets",
-              frequency: "1-0-1 (Twice a day)",
-              duration: "5 days",
-              text: "After food",
-            },
-          ],
-          note: `Note: ${sentences.join(" ")}`,
-        },
-      ]),
-      "a5",
-    ),
+  const pdf = await compile(
+    "prescriptions",
+    prescriptionsContent([
+      medication({ note: `Note: ${sentences.join(" ")}` }),
+    ]),
+    "a5",
   );
 
   const printed = new Set(
@@ -435,29 +428,8 @@ test("prescriptions: a row taller than the page continues on the next page", asy
 });
 
 test("prescriptions: on A5 the details wrap into one column, like the HTML print", async () => {
-  // Any square SVG stands in for the QR code, which takes width from the details.
-  compiler.mapShadow(
-    "/assets/qr-code.svg",
-    new TextEncoder().encode(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="29" height="29"><rect width="29" height="29"/></svg>',
-    ),
-  );
   const content: PrescriptionsPrintContent = {
-    ...prescriptionsContent([
-      {
-        index: "1",
-        name: "Paracetamol 500 mg oral tablet",
-        instructions: [
-          {
-            dosage: "1 tablets",
-            frequency: "1-0-1 (Twice a day)",
-            duration: "5 days",
-            text: "After food",
-          },
-        ],
-        note: null,
-      },
-    ]),
+    ...prescriptionsContent(),
     details: {
       left: [
         { label: "Patient", value: "Test Patient" },
@@ -470,12 +442,11 @@ test("prescriptions: on A5 the details wrap into one column, like the HTML print
       ],
       location: null,
     },
+    // Any square SVG stands in for the QR code, which takes width from the details.
     qr_code: "/assets/qr-code.svg",
   };
   const details = async (paper: TypstPaper) => {
-    const { boxes } = (
-      await readPdf(await compile("prescriptions", content, paper))
-    ).pages[0];
+    const { boxes } = (await compile("prescriptions", content, paper)).pages[0];
     const label = (text: string) => {
       const box = boxes.find((b) => b.text.trim() === text);
       assert.ok(box, `no "${text}" on ${paper}`);
@@ -491,23 +462,19 @@ test("prescriptions: on A5 the details wrap into one column, like the HTML print
       ),
     };
   };
-  try {
-    const a5 = await details("a5");
-    assert.ok(a5.dateOnOneLine, "the encounter date wrapped on A5");
-    assert.ok(
-      Math.abs(a5.hospitalId.left - a5.patient.left) < 1 &&
-        a5.hospitalId.top < a5.mobile.bottom,
-      "on A5, Hospital ID isn't below Mobile Number in one column",
-    );
+  const a5 = await details("a5");
+  assert.ok(a5.dateOnOneLine, "the encounter date wrapped on A5");
+  assert.ok(
+    Math.abs(a5.hospitalId.left - a5.patient.left) < 1 &&
+      a5.hospitalId.top < a5.mobile.bottom,
+    "on A5, Hospital ID isn't below Mobile Number in one column",
+  );
 
-    const a4 = await details("a4");
-    assert.ok(
-      a4.hospitalId.left > a4.patient.left + 100,
-      "on A4, the details lost their second column",
-    );
-  } finally {
-    compiler.unmapShadow("/assets/qr-code.svg");
-  }
+  const a4 = await details("a4");
+  assert.ok(
+    a4.hospitalId.left > a4.patient.left + 100,
+    "on A4, the details lost their second column",
+  );
 });
 
 function pageWith(pdf: Awaited<ReturnType<typeof readPdf>>, text: string) {
@@ -572,9 +539,7 @@ const dispenseOrder = (note: string | null): DetailsTablePrintContent => ({
 });
 
 test("details-table: on A5 the table starts on the first page", async () => {
-  const pdf = await readPdf(
-    await compile("details-table", dispenseOrder(null), "a5"),
-  );
+  const pdf = await compile("details-table", dispenseOrder(null), "a5");
 
   assertReadable(pdf);
   assert.equal(pageWith(pdf, "Medicine"), 1);
@@ -582,16 +547,16 @@ test("details-table: on A5 the table starts on the first page", async () => {
 });
 
 test("details-table: a table pushed to the next page takes its title along", async () => {
-  const note = Array(26)
-    .fill("A long note that pushes the table down the page.")
-    .join(" ");
-  const pdf = await readPdf(
-    await compile("details-table", dispenseOrder(note), "a5"),
-  );
-
-  assert.equal(
-    pageWith(pdf, "Medication Dispenses"),
-    pageWith(pdf, "Medicine"),
+  await assertTitleKeptWithNext(
+    "details-table",
+    (rows) =>
+      dispenseOrder(
+        Array(rows)
+          .fill("A long note that pushes the table down the page.")
+          .join(" "),
+      ),
+    "Medication Dispenses",
+    "Medicine",
   );
 });
 
@@ -618,7 +583,7 @@ test("details-table: on A5 a dose range wraps between its doses and leaves the o
     content.table.rows = content.table.rows.map((row) =>
       row.map((cell, i) => (i === 1 ? dosage : cell)),
     );
-    const pdf = await readPdf(await compile("details-table", content, "a5"));
+    const pdf = await compile("details-table", content, "a5");
 
     assertReadable(pdf);
     // Squeezed `fr` columns split even short words.
@@ -665,26 +630,12 @@ test("prescriptions: a dose too wide for its cell breaks after the number instea
     } as MedicationRequestDosageInstruction,
     { print: true },
   );
-  const pdf = await readPdf(
-    await compile(
-      "prescriptions",
-      prescriptionsContent([
-        {
-          index: "1",
-          name: "Insulin glargine 100 units/mL injection",
-          instructions: [
-            {
-              dosage,
-              frequency: "1-0-1 (Twice a day)",
-              duration: "5 days",
-              text: "After food",
-            },
-          ],
-          note: null,
-        },
-      ]),
-      "a5",
-    ),
+  const pdf = await compile(
+    "prescriptions",
+    prescriptionsContent([
+      medication({ name: "Insulin glargine 100 units/mL injection", dosage }),
+    ]),
+    "a5",
   );
 
   assertReadable(pdf);
@@ -719,21 +670,33 @@ const INVOICE_LABELS = Object.fromEntries(
   ].map((key) => [key, key === "item" ? "Item" : key.replace(/_/g, " ")]),
 );
 
+const invoiceContent = (
+  extra: Partial<InvoicePrintContent> = {},
+): InvoicePrintContent => ({
+  labels: INVOICE_LABELS,
+  number: "INV/26-27/0003",
+  issue_date: "20 Nov, 2026 4:02 PM",
+  patient: {
+    name: "Test Patient",
+    gender_age: "Male, 25y",
+    identifiers: [],
+    address: null,
+  },
+  qr_code: null,
+  tax_columns: [],
+  items: [],
+  totals: { components: [], net: "₹0.00", gross: "₹0.00" },
+  payments: null,
+  credit_notes: null,
+  payment_terms: null,
+  created_by: "Dr. Test",
+  location: null,
+  ...extra,
+});
+
 test("invoice: on A5 amounts stay whole and the Item column keeps its width", async () => {
-  const taxes = ["CGST", "SGST", "IGST"];
-  const labels = INVOICE_LABELS;
-  const invoice: InvoicePrintContent = {
-    labels,
-    number: "INV/26-27/0003",
-    issue_date: "20 Nov, 2026 4:02 PM",
-    patient: {
-      name: "Test Patient",
-      gender_age: "Male, 25y",
-      identifiers: [],
-      address: null,
-    },
-    qr_code: null,
-    tax_columns: taxes,
+  const invoice = invoiceContent({
+    tax_columns: ["CGST", "SGST", "IGST"],
     items: [
       {
         index: 1,
@@ -751,14 +714,9 @@ test("invoice: on A5 amounts stay whole and the Item column keeps its width", as
       },
     ],
     totals: { components: [], net: "₹1,25,035.91", gross: "₹1,25,035.91" },
-    payments: null,
-    credit_notes: null,
-    payment_terms: null,
-    created_by: "Dr. Test",
-    location: null,
-  };
+  });
 
-  const pdf = await readPdf(await compile("invoice", invoice, "a5"));
+  const pdf = await compile("invoice", invoice, "a5");
 
   assertReadable(pdf);
   for (const amount of ["1,25,000.00", "1,25,035.91", "18.00%"]) {
@@ -774,13 +732,13 @@ test("invoice: on A5 amounts stay whole and the Item column keeps its width", as
 
 // As the rich-text editor saves it (see richText.test.ts).
 const EDITOR_MARKDOWN =
-  "<u>***dfsh usdujhfjasjfd hdsj fhjsd fjdhfajs***</u>\n\n*dvsdadsfs*&#x20;\n\nddsfdsfs\n========\n\n- [x] done task";
+  "<u>***Drink more water***</u>\n\n*rest well*&#x20;\n\nAdvice\n========\n\n- [x] done task";
 
 function assertFormatted({ text }: Awaited<ReturnType<typeof readPdf>>) {
   for (const words of [
-    "dfsh usdujhfjasjfd hdsj fhjsd fjdhfajs",
-    "dvsdadsfs",
-    "ddsfdsfs",
+    "Drink more water",
+    "rest well",
+    "Advice",
     "done task",
   ]) {
     assert.ok(text.includes(words), `"${words}" is missing`);
@@ -790,150 +748,27 @@ function assertFormatted({ text }: Awaited<ReturnType<typeof readPdf>>) {
   }
 }
 
-test("diagnostic report: the conclusion's Markdown prints as formatting", async () => {
-  const content: DiagnosticReportPrintContent = {
-    heading: "Diagnostic report",
-    patient: { name: "Test Patient", identifiers: [] },
-    patient_label: "Patient",
-    patient_rows: [{ label: "Patient", value: "Test Patient" }],
-    reports: [
-      {
-        title: "Sugar test",
-        rows: [],
-        results: null,
-        note: null,
-        conclusion: {
-          label: "Conclusion",
-          blocks: richTextToPrint(EDITOR_MARKDOWN),
-        },
-        attachments: [],
-      },
-    ],
-    footer: { left: "Printed by Dr. Test", right: "Generated today" },
-  };
-  const bytes = await compile("diagnostic-report", content);
+type Report = DiagnosticReportPrintContent["reports"][number];
 
-  assertFormatted(await readPdf(bytes));
-  // Typst doesn't slant upright letters: italics need Figtree's italic faces.
-  const pdfSource = Buffer.from(bytes).toString("latin1");
-  assert.match(pdfSource, /\/BaseFont \/[A-Z]{6}\+Figtree-Italic\b/, "italic");
-  assert.match(
-    pdfSource,
-    /\/BaseFont \/[A-Z]{6}\+Figtree-SemiBoldItalic\b/,
-    "bold italic",
-  );
+const report = (title: string, extra: Partial<Report> = {}): Report => ({
+  title,
+  rows: [{ label: "Specimen", value: "Serum" }],
+  results: null,
+  note: null,
+  conclusion: null,
+  attachments: [],
+  ...extra,
 });
 
-test("prescriptions: the prescription note's Markdown prints as formatting", async () => {
-  const content = prescriptionsContent([
-    {
-      index: "1",
-      name: "Paracetamol 500 mg oral tablet",
-      instructions: [
-        {
-          dosage: "1 tablets",
-          frequency: "1-0-1 (Twice a day)",
-          duration: "5 days",
-          text: "After food",
-        },
-      ],
-      note: null,
-    },
-  ]);
-  content.prescriptions[0].note = richTextToPrint(EDITOR_MARKDOWN);
-  const pdf = await readPdf(await compile("prescriptions", content));
-
-  assertFormatted(pdf);
-  assert.ok(pdf.text.includes("Note:"), "the note's label is missing");
-});
-
-test("appointment: the note's Markdown prints as formatting", async () => {
-  const content: AppointmentPrintContent = {
-    title: "Appointment details",
-    date: "24 Nov 2026",
-    resource: "Dr. Test",
-    patient_rows: [{ label: "Patient", value: "Test Patient" }],
-    token: null,
-    qr_code: null,
-    tags: null,
-    charges: null,
-    payments: null,
-    note: { label: "Note", blocks: richTextToPrint(EDITOR_MARKDOWN) },
-    footer: { left: "Created by Dr. Test", right: "Generated today" },
-  };
-
-  assertFormatted(await readPdf(await compile("appointment", content)));
-});
-
-/**
- * Finds the fewest rows before `title` that push `next`, the first thing the
- * title introduces, to page 2, and checks the title went with it. That's where
- * a title gets left behind: it needs a line, a table a header plus a row, so
- * some row count leaves room for the title alone at the foot of page 1.
- */
-async function assertTitleKeptWithNext(
-  template: string,
-  contentWith: (rows: number) => unknown,
-  title: string,
-  next: string,
-) {
-  const pagesWith = async (rows: number) => {
-    const pdf = await readPdf(await compile(template, contentWith(rows)));
-    return { title: pageWith(pdf, title), next: pageWith(pdf, next) };
-  };
-  // More rows only ever push `next` later, so a binary search finds the first.
-  let low = 1;
-  let high = 120;
-  assert.ok((await pagesWith(high)).next! > 1, `"${next}" never left page 1`);
-  while (low < high) {
-    const middle = Math.floor((low + high) / 2);
-    if ((await pagesWith(middle)).next! > 1) high = middle;
-    else low = middle + 1;
-  }
-  const pages = await pagesWith(low);
-  assert.equal(
-    pages.title,
-    pages.next,
-    `with ${low} rows, "${title}" is left behind on page ${pages.title}`,
-  );
-}
-
-test("diagnostic report: a report's title moves with its details and results", async () => {
-  const results = (names: string[]) => ({
-    header: ["Test", "Result", "Reference Range"],
-    rows: names.map((name) => ({
-      component: false,
-      cells: [name, "4.5", "4.0 - 5.5"],
-      highlight: false,
-    })),
-  });
-  const report = (title: string) => ({
-    rows: [{ label: "Specimen", value: "Serum" }],
-    note: null,
-    conclusion: null,
-    attachments: [],
-    title,
-  });
-
-  await assertTitleKeptWithNext(
-    "diagnostic-report",
-    (rows): DiagnosticReportPrintContent => ({
-      heading: "Diagnostic report",
-      patient: { name: "Test Patient", identifiers: [] },
-      patient_label: "Patient",
-      patient_rows: [{ label: "Patient", value: "Test Patient" }],
-      reports: [
-        {
-          ...report("Complete Blood Count"),
-          results: results(Array.from({ length: rows }, (_, i) => `Test ${i}`)),
-        },
-        { ...report("Lipid Profile"), results: results(["Cholesterol"]) },
-      ],
-      footer: { left: "Printed by Dr. Test", right: "Generated today" },
-    }),
-    "Lipid Profile",
-    "Cholesterol",
-  );
+const diagnosticReport = (
+  ...reports: Report[]
+): DiagnosticReportPrintContent => ({
+  heading: "Diagnostic report",
+  patient: { name: "Test Patient", identifiers: [] },
+  patient_label: "Patient",
+  patient_rows: [{ label: "Patient", value: "Test Patient" }],
+  reports,
+  footer: { left: "Printed by Dr. Test", right: "Generated today" },
 });
 
 const appointmentWithCharges = (
@@ -963,6 +798,100 @@ const appointmentWithCharges = (
   note: null,
   footer: { left: "Created by Dr. Test", right: "Generated today" },
   ...extra,
+});
+
+test("diagnostic report: the conclusion's Markdown prints as formatting", async () => {
+  const pdf = await compile(
+    "diagnostic-report",
+    diagnosticReport(
+      report("Sugar test", {
+        conclusion: labelledRichText("Conclusion", EDITOR_MARKDOWN),
+      }),
+    ),
+  );
+
+  assertFormatted(pdf);
+  // Typst doesn't slant upright letters: italics need Figtree's italic faces.
+  const pdfSource = Buffer.from(pdf.bytes).toString("latin1");
+  assert.match(pdfSource, /\/BaseFont \/[A-Z]{6}\+Figtree-Italic\b/, "italic");
+  assert.match(
+    pdfSource,
+    /\/BaseFont \/[A-Z]{6}\+Figtree-SemiBoldItalic\b/,
+    "bold italic",
+  );
+});
+
+test("prescriptions: the prescription note's Markdown prints as formatting", async () => {
+  const content = prescriptionsContent();
+  content.prescriptions[0].note = richTextToPrint(EDITOR_MARKDOWN);
+  const pdf = await compile("prescriptions", content);
+
+  assertFormatted(pdf);
+  assert.ok(pdf.text.includes("Note:"), "the note's label is missing");
+});
+
+test("appointment: the note's Markdown prints as formatting", async () => {
+  const content = appointmentWithCharges(1, {
+    note: labelledRichText("Note", EDITOR_MARKDOWN),
+  });
+
+  assertFormatted(await compile("appointment", content));
+});
+
+/**
+ * Finds the fewest rows before `title` that push `next`, the first thing the
+ * title introduces, to page 2, and checks the title went with it. That's where
+ * a title gets left behind: it needs a line, a table a header plus a row, so
+ * some row count leaves room for the title alone at the foot of page 1.
+ */
+async function assertTitleKeptWithNext(
+  template: string,
+  contentWith: (rows: number) => unknown,
+  title: string,
+  next: string,
+) {
+  const pagesWith = async (rows: number) => {
+    const pdf = await compile(template, contentWith(rows));
+    return { title: pageWith(pdf, title), next: pageWith(pdf, next) };
+  };
+  // More rows only ever push `next` later, so a binary search finds the first.
+  let low = 1;
+  let high = 120;
+  assert.ok((await pagesWith(high)).next! > 1, `"${next}" never left page 1`);
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if ((await pagesWith(middle)).next! > 1) high = middle;
+    else low = middle + 1;
+  }
+  const pages = await pagesWith(low);
+  assert.equal(
+    pages.title,
+    pages.next,
+    `with ${low} rows, "${title}" is left behind on page ${pages.title}`,
+  );
+}
+
+test("diagnostic report: a report's title moves with its details and results", async () => {
+  const results = (names: string[]) => ({
+    header: ["Test", "Result", "Reference Range"],
+    rows: names.map((name) => ({
+      component: false,
+      cells: [name, "4.5", "4.0 - 5.5"],
+      highlight: false,
+    })),
+  });
+  await assertTitleKeptWithNext(
+    "diagnostic-report",
+    (rows) =>
+      diagnosticReport(
+        report("Complete Blood Count", {
+          results: results(Array.from({ length: rows }, (_, i) => `Test ${i}`)),
+        }),
+        report("Lipid Profile", { results: results(["Cholesterol"]) }),
+      ),
+    "Lipid Profile",
+    "Cholesterol",
+  );
 });
 
 test("appointment: the Payments title moves with the payments table", async () => {
@@ -996,10 +925,7 @@ test("appointment: the note's label moves with the note", async () => {
     "appointment",
     (rows) =>
       appointmentWithCharges(rows, {
-        note: {
-          label: "Note",
-          blocks: richTextToPrint("Bring the earlier reports"),
-        },
+        note: labelledRichText("Note", "Bring the earlier reports"),
       }),
     "Note",
     "Bring the earlier reports",
@@ -1009,47 +935,37 @@ test("appointment: the note's label moves with the note", async () => {
 test("invoice: the credit notes title moves with its table", async () => {
   await assertTitleKeptWithNext(
     "invoice",
-    (rows): InvoicePrintContent => ({
-      labels: { ...INVOICE_LABELS, credit_notes_title: "Credit notes issued" },
-      number: "INV/26-27/0003",
-      issue_date: "20 Nov, 2026 4:02 PM",
-      patient: {
-        name: "Test Patient",
-        gender_age: "Male, 25y",
-        identifiers: [],
-        address: null,
-      },
-      qr_code: null,
-      tax_columns: [],
-      items: Array.from({ length: rows }, (_, i) => ({
-        index: i + 1,
-        title: `Paracetamol 500 mg oral tablet ${i + 1}`,
-        subtitle: null,
-        unit_price: "10.00",
-        quantity: "1.00",
-        discount: { total: "0.00", parts: [] },
-        taxes: [],
-        total: "10.00",
-      })),
-      totals: { components: [], net: "₹10.00", gross: "₹10.00" },
-      payments: null,
-      credit_notes: {
-        rows: [
-          {
-            index: 1,
-            datetime: "20 Nov 2026, 04:02 PM",
-            id: "cn-1",
-            method: "Cash",
-            reference: "CREDIT-REF-1",
-            amount: "10.00",
-          },
-        ],
-        total: "₹10.00",
-      },
-      payment_terms: null,
-      created_by: "Dr. Test",
-      location: null,
-    }),
+    (rows) =>
+      invoiceContent({
+        labels: {
+          ...INVOICE_LABELS,
+          credit_notes_title: "Credit notes issued",
+        },
+        items: Array.from({ length: rows }, (_, i) => ({
+          index: i + 1,
+          title: `Paracetamol 500 mg oral tablet ${i + 1}`,
+          subtitle: null,
+          unit_price: "10.00",
+          quantity: "1.00",
+          discount: { total: "0.00", parts: [] },
+          taxes: [],
+          total: "10.00",
+        })),
+        totals: { components: [], net: "₹10.00", gross: "₹10.00" },
+        credit_notes: {
+          rows: [
+            {
+              index: 1,
+              datetime: "20 Nov 2026, 04:02 PM",
+              id: "cn-1",
+              method: "Cash",
+              reference: "CREDIT-REF-1",
+              amount: "10.00",
+            },
+          ],
+          total: "₹10.00",
+        },
+      }),
     "Credit notes issued",
     "CREDIT-REF-1",
   );
@@ -1102,8 +1018,11 @@ test("drug chart: a section's title moves with its chart", async () => {
     const layout = layoutFor("a4");
     layout.page.flipped = true;
     layout.page.margin.top = top;
-    const pdf = await readPdf(
-      await compile("medication-administration", content, "a4", layout),
+    const pdf = await compile(
+      "medication-administration",
+      content,
+      "a4",
+      layout,
     );
     return {
       title: pageWith(pdf, "REGULAR MEDICATIONS"),
@@ -1163,31 +1082,19 @@ test("charge items: a section's title moves with its table", async () => {
 });
 
 test("prescriptions: a prescription's heading moves with its medicines", async () => {
-  const medication = (name: string, index: number) => ({
-    index: String(index + 1),
-    name,
-    instructions: [
-      {
-        dosage: "1 tablets",
-        frequency: "1-0-1 (Twice a day)",
-        duration: "5 days",
-        text: "After food",
-      },
-    ],
-    note: null,
-  });
-
   await assertTitleKeptWithNext(
     "prescriptions",
     (rows) => {
       const content = prescriptionsContent(
-        Array.from({ length: rows }, (_, i) => medication(`Medicine ${i}`, i)),
+        Array.from({ length: rows }, (_, i) =>
+          medication({ index: String(i + 1), name: `Medicine ${i}` }),
+        ),
       );
       content.prescriptions.push({
         ...content.prescriptions[0],
         title: "Second prescription",
         prescribed_by: "Dr. Second",
-        medications: [medication("Atorvastatin", 0)],
+        medications: [medication({ name: "Atorvastatin" })],
       });
       return content;
     },
@@ -1196,32 +1103,31 @@ test("prescriptions: a prescription's heading moves with its medicines", async (
   );
 });
 
+const questionnaireResponse = (
+  blocks: QuestionnaireResponsePrintContent["responses"][number]["blocks"],
+): QuestionnaireResponsePrintContent => ({
+  heading: "Questionnaire response",
+  patient: null,
+  patient_label: "Patient",
+  details: { left: [], right: [] },
+  title: "Follow-up",
+  description: null,
+  responses: [{ created: "Created by Dr. Test", date: "24 Nov 2026", blocks }],
+});
+
 test("questionnaire response: a section heading moves with its questions", async () => {
   await assertTitleKeptWithNext(
     "questionnaire-response",
-    (rows): QuestionnaireResponsePrintContent => ({
-      heading: "Questionnaire response",
-      patient: null,
-      patient_label: "Patient",
-      details: { left: [], right: [] },
-      title: "Follow-up",
-      description: null,
-      responses: [
-        {
-          created: "Created by Dr. Test",
-          date: "24 Nov 2026",
-          blocks: [
-            ...Array.from({ length: rows }, (_, i) => ({
-              type: "question" as const,
-              text: `Question ${i}`,
-              answers: ["Yes"],
-            })),
-            { type: "heading", text: "Section B", rule: true },
-            { type: "question", text: "Next visit", answers: ["1 Dec 2026"] },
-          ],
-        },
-      ],
-    }),
+    (rows) =>
+      questionnaireResponse([
+        ...Array.from({ length: rows }, (_, i) => ({
+          type: "question" as const,
+          text: `Question ${i}`,
+          answers: ["Yes"],
+        })),
+        { type: "heading", text: "Section B", rule: true },
+        { type: "question", text: "Next visit", answers: ["1 Dec 2026"] },
+      ]),
     "Section B",
     "Next visit",
   );
@@ -1233,25 +1139,19 @@ test("patient details: long values wrap inside their column on A4 and A5", async
   const mrn = "TVMMCH2026000123456789";
 
   for (const paper of ["a4", "a5"] as const) {
-    const pdf = await readPdf(
-      await compile(
-        "details-table",
-        {
-          ...detailsTable({
-            header: ["Item"],
-            widths: [null],
-            rows: [["Paracetamol"]],
-          }),
-          details: {
-            left: [
-              { label: "ABHA address", value: abha },
-              { label: "MRN", value: mrn },
-            ],
-            right: [{ label: "Mobile Number", value: "+91 00000 00000" }],
-          },
+    const pdf = await compile(
+      "details-table",
+      {
+        ...detailsTable(),
+        details: {
+          left: [
+            { label: "ABHA address", value: abha },
+            { label: "MRN", value: mrn },
+          ],
+          right: [{ label: "Mobile Number", value: "+91 00000 00000" }],
         },
-        paper,
-      ),
+      },
+      paper,
     );
 
     assertReadable(pdf);
@@ -1276,33 +1176,6 @@ test("patient details: long values wrap inside their column on A4 and A5", async
   }
 });
 
-test("questionnaire response: a long unbroken answer wraps on A5", async () => {
-  const code = ("REF2026112400017" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-    .repeat(2)
-    .slice(0, 68);
-  const content: QuestionnaireResponsePrintContent = {
-    heading: "Questionnaire response",
-    patient: null,
-    patient_label: "Patient",
-    details: { left: [], right: [] },
-    title: "Follow-up",
-    description: null,
-    responses: [
-      {
-        created: "Created by Dr. Test",
-        date: "24 Nov 2026",
-        blocks: [{ type: "question", text: "Reference code", answers: [code] }],
-      },
-    ],
-  };
-  const pdf = await readPdf(
-    await compile("questionnaire-response", content, "a5"),
-  );
-
-  assertReadable(pdf);
-  assert.ok(pdf.text.includes(code), "the code lost letters");
-});
-
 test("user-entered text: long unbroken values wrap on A5 in every print", async () => {
   // One 70-character code per field, so a lost one is easy to spot.
   const code = (tag: string) =>
@@ -1313,39 +1186,20 @@ test("user-entered text: long unbroken values wrap on A5 in every print", async 
   const prints: [string, unknown, string[]][] = [
     [
       "details-table",
-      {
-        ...detailsTable({
-          header: ["Item"],
-          widths: [null],
-          rows: [["Paracetamol"]],
-        }),
-        title: code("TITLE"),
-        note: code("NOTE"),
-      },
+      { ...detailsTable(), title: code("TITLE"), note: code("NOTE") },
       [code("TITLE"), code("NOTE")],
     ],
     [
       "invoice",
-      {
-        labels: INVOICE_LABELS,
-        number: "INV/26-27/0003",
-        issue_date: "20 Nov, 2026 4:02 PM",
+      invoiceContent({
         patient: {
           name: "Test Patient",
           gender_age: "Male, 25y",
           identifiers: [{ label: "ABHA address", value: code("ABHA") }],
           address: code("ADDRESS"),
         },
-        qr_code: null,
-        tax_columns: [],
-        items: [],
-        totals: { components: [], net: "₹0.00", gross: "₹0.00" },
-        payments: null,
-        credit_notes: null,
         payment_terms: code("TERMS"),
-        created_by: "Dr. Test",
-        location: null,
-      } satisfies InvoicePrintContent,
+      }),
       [code("ABHA"), code("ADDRESS"), code("TERMS")],
     ],
     [
@@ -1394,10 +1248,17 @@ test("user-entered text: long unbroken values wrap on A5 in every print", async 
       } satisfies ResourceLetterPrintContent,
       [code("LETTER"), code("SUBJECT"), code("CONTACT"), code("REASON")],
     ],
+    [
+      "questionnaire-response",
+      questionnaireResponse([
+        { type: "question", text: "Reference code", answers: [code("ANSWER")] },
+      ]),
+      [code("ANSWER")],
+    ],
   ];
 
   for (const [template, content, codes] of prints) {
-    const pdf = await readPdf(await compile(template, content, "a5"));
+    const pdf = await compile(template, content, "a5");
     assertReadable(pdf);
     for (const value of codes) {
       assert.ok(
