@@ -55,10 +55,7 @@ import useFilters from "@/hooks/useFilters";
 import { encounterListSearch } from "@/lib/router/search/encounter";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
-import {
-  EmptyStateAction,
-  EncounterListEmptyState,
-} from "@/pages/Encounters/encounter-search/EncounterListEmptyState";
+import { EncounterListEmptyState } from "@/pages/Encounters/encounter-search/EncounterListEmptyState";
 import {
   EncounterSearch,
   SelectedPatient,
@@ -500,6 +497,9 @@ export function EncounterList({
     dateFilter("created_date", t("date"), longDateRangeOptions, true),
   ];
 
+  // Query params to apply with the next filter update, so clearing the
+  // filters and the search together is one navigation.
+  const queuedQuery = useRef<Record<string, string | undefined>>({});
   const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
     // Save to sessionStorage atom
     setSavedFilters((prev) => {
@@ -593,7 +593,8 @@ export function EncounterList({
           break;
       }
     }
-    updateQuery(filterQuery);
+    updateQuery({ ...filterQuery, ...queuedQuery.current });
+    queuedQuery.current = {};
   };
 
   const {
@@ -705,63 +706,49 @@ export function EncounterList({
     qParams.patient_name === t("encounter_search_scanned_patient");
 
   const { created_date: dateState, ...toolbarFilters } = selectedFilters;
-  // One button per applied filter, from the URL alone. The date range can
-  // only be lifted for a patient; otherwise the default dates return.
-  const emptyStateActions: EmptyStateAction[] = [
-    ...(patient_filter && (created_date_after || created_date_before)
-      ? [
-          {
-            key: "dates",
-            label: t("encounter_list_empty_any_date"),
-            onClick: () =>
-              updateQuery({
-                created_date_after: undefined,
-                created_date_before: undefined,
-              }),
-          },
-        ]
-      : []),
-    ...Object.entries(toolbarFilters).flatMap(([key, state]) =>
-      Array.isArray(state.selected) && state.selected.length
-        ? [
-            {
-              key,
-              label: t("encounter_list_empty_remove_filter", {
-                filter: t(state.filter.label),
-              }),
-              onClick: () => handleClearFilter(key),
-            },
-          ]
-        : [],
-    ),
-    ...(qParams.name
-      ? [
-          {
-            key: "name",
-            label: t("encounter_search_remove_name_filter"),
-            onClick: removeSearchText,
-          },
-        ]
-      : []),
+  // What the empty state names, from the URL alone: toolbar fields, then
+  // the search text and the patient.
+  const appliedFilterKeys = Object.entries(toolbarFilters)
+    .filter(
+      ([, state]) => Array.isArray(state.selected) && state.selected.length,
+    )
+    .map(([key]) => key);
+  const appliedNames = [
+    ...appliedFilterKeys.map((key) => t(toolbarFilters[key].filter.label)),
+    ...(qParams.name ? [t("encounter_search_field_name")] : []),
     ...(qParams.external_identifier
-      ? [
-          {
-            key: "visit",
-            label: t("encounter_search_remove_visit_id_filter"),
-            onClick: removeSearchText,
-          },
-        ]
+      ? [t("encounter_search_field_visit_id")]
       : []),
     ...(patient_filter
       ? [
-          {
-            key: "patient",
-            label: t("encounter_search_remove_patient"),
-            onClick: removePatient,
-          },
+          scannedPatient || !qParams.patient_name
+            ? t("encounter_search_patient_fallback")
+            : qParams.patient_name,
         ]
       : []),
   ];
+  // Clears the toolbar fields, the search text and the patient in one
+  // navigation. Without a patient the default dates return.
+  const clearEmptyStateFilters = () => {
+    queuedQuery.current = {
+      name: "",
+      external_identifier: "",
+      patient_filter: undefined,
+      patient_name: undefined,
+    };
+    if (appliedFilterKeys.length) handleClearFilters(appliedFilterKeys);
+    else onFilterUpdate({});
+    setDateNotice(null);
+  };
+  // The date range can only be lifted for a patient.
+  const showAnyDate =
+    patient_filter && (created_date_after || created_date_before)
+      ? () =>
+          updateQuery({
+            created_date_after: undefined,
+            created_date_before: undefined,
+          })
+      : undefined;
 
   const dateRange =
     Array.isArray(dateState.selected) ||
@@ -950,7 +937,11 @@ export function EncounterList({
           ) : encounters.length === 0 ? (
             <div className="col-span-full">
               {isAllList ? (
-                <EncounterListEmptyState actions={emptyStateActions} />
+                <EncounterListEmptyState
+                  applied={appliedNames}
+                  onClearFilters={clearEmptyStateFilters}
+                  onShowAnyDate={showAnyDate}
+                />
               ) : (
                 <EmptyState />
               )}

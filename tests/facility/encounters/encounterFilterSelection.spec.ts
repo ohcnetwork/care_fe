@@ -1302,15 +1302,26 @@ test.describe("All encounters search", () => {
         ),
       )
       .toBe(true);
-    // The empty state offers one way out per filter, without extra queries.
-    const empty = page.getByText(
-      "No visits match this date range and these filters",
+    // The empty state names what is applied and clears it in one step,
+    // without extra queries.
+    const empty = page.locator('[data-slot="card"]', {
+      hasText: "No visits match this date range and these filters",
+    });
+    await expect(empty).toContainText("Filtered by Status, Patient");
+    await expect(
+      empty.getByRole("button", { name: "Show any date" }),
+    ).toHaveCount(0);
+    await empty.getByRole("button", { name: "Clear filters" }).click();
+    await expect(page).toHaveURL(
+      (url) =>
+        !url.searchParams.has("status") &&
+        !url.searchParams.has("patient_filter") &&
+        !!url.searchParams.get("created_date_after"),
     );
-    await expect(empty).toBeVisible();
-    for (const name of ["Remove Status filter", "Remove patient"])
-      await expect(
-        page.locator('[data-slot="card"]').getByRole("button", { name }),
-      ).toBeVisible();
+    await expect(chip(page)).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^filters\b/i })).toHaveCount(
+      0,
+    );
   });
 
   test("a scanner's Enter applies the patient; a typed Enter filters visits", async ({
