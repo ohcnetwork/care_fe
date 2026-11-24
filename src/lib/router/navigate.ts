@@ -37,6 +37,16 @@ export interface HrefNavigateOptions {
   ignoreBlocker?: boolean;
 }
 
+let arrivalScroll: { pathname: string; keep: boolean } | undefined;
+
+/**
+ * Whether the latest navigation to `pathname` asked to keep the scroll
+ * position (`resetScroll: false`, as tab links do).
+ */
+export function keepsScrollOnArrival(pathname: string) {
+  return arrivalScroll?.pathname === pathname && arrivalScroll.keep;
+}
+
 /**
  * `navigate` for code that runs outside a component, such as an event handler
  * or a mutation callback.
@@ -80,7 +90,14 @@ export function navigate(
   }
   const router = getRouter();
   // `getRouter()` returns an untyped router. `options` is already checked.
-  const target = router.buildLocation(options as never).href;
+  const built = router.buildLocation(options as never);
+  const target = built.href;
+  if (built.pathname !== router.history.location.pathname) {
+    arrivalScroll = {
+      pathname: built.pathname,
+      keep: options.resetScroll === false,
+    };
+  }
   const rendered = router.state.resolvedLocation ?? router.state.location;
   if (target === router.latestLocation.href && target !== rendered.href) {
     return;

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 import { useCurrentLocation } from "@/lib/router/location";
-import { navigate } from "@/lib/router/navigate";
+import { keepsScrollOnArrival, navigate } from "@/lib/router/navigate";
 import { getRouter } from "@/lib/router/routerRef";
 import {
   readSearch,
@@ -80,14 +80,16 @@ export function useQueryParams(
       if (!overwrite) href += location.hash;
       // Filters and selection update this page, so keep its scroll position.
       // A page that writes default filters while it mounts is not on screen
-      // yet. Its scroll reset must not be cancelled. A retained hash must not
+      // yet. Its scroll reset must not be cancelled, unless the navigation
+      // that opened it keeps the scroll (tab links). A retained hash must not
       // scroll to its target again.
-      const onScreen =
-        router.state.resolvedLocation?.pathname === location.pathname;
+      const keepScroll =
+        router.state.resolvedLocation?.pathname === location.pathname ||
+        keepsScrollOnArrival(location.pathname);
       navigate({
         href,
         replace,
-        resetScroll: onScreen ? false : undefined,
+        resetScroll: keepScroll ? false : undefined,
         hashScrollIntoView: false,
       });
     },
