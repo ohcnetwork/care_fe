@@ -1693,6 +1693,10 @@ export function Filters<T = unknown>({
   const { t } = useTranslation();
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editingFromSummary, setEditingFromSummary] = useState(false);
+  // True while a picker opened from Add filter applies the first field. The
+  // summary then waits until the picker closes, so the toolbar and the picker
+  // anchored to Add filter stay where they are.
+  const [summaryDeferred, setSummaryDeferred] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   // Below md the compact toolbar opens one bottom drawer instead of popovers,
   // and its views (Active filters, the field list, a picker) replace each
@@ -1811,6 +1815,9 @@ export function Filters<T = unknown>({
           setAddFilterOpen(false);
           setMenuSearchInput("");
           setEditingFromSummary(false);
+          setSummaryDeferred(
+            !inDrawer && !filters.some((filter) => filter.values.length > 0),
+          );
           setEditingKey(fieldKey);
           return;
         }
@@ -1838,7 +1845,14 @@ export function Filters<T = unknown>({
         setMenuSearchInput("");
       }
     },
-    [fieldsMap, filters, onChange, setMenuSearchInput, toolbarSummary],
+    [
+      fieldsMap,
+      filters,
+      inDrawer,
+      onChange,
+      setMenuSearchInput,
+      toolbarSummary,
+    ],
   );
 
   const selectableFields = useMemo(() => getSelectableFields(fields), [fields]);
@@ -1882,6 +1896,9 @@ export function Filters<T = unknown>({
 
   const Container = toolbarSummary ? ButtonGroup : "div";
   const applied = filters.filter((filter) => filter.values.length > 0);
+  const summaryVisible =
+    applied.length > 0 &&
+    !(summaryDeferred && !!editingKey && !editingFromSummary);
   const editing = editingKey ? fieldsMap[editingKey] : undefined;
   const existing = filters.find((filter) => filter.field === editingKey);
   const openFieldMenu = () => {
@@ -1915,7 +1932,7 @@ export function Filters<T = unknown>({
     <FilterAddButton
       ref={addButtonRef}
       label={mergedI18n.addFilter}
-      iconOnly={applied.length > 0}
+      iconOnly={summaryVisible}
       className={cn(toolbarSummary && "shadow-2xs")}
       onClick={editing ? openFieldMenu : undefined}
       {...drawerTriggerProps("add")}
@@ -2310,7 +2327,7 @@ export function Filters<T = unknown>({
           className,
         )}
       >
-        {toolbarSummary && applied.length > 0 && (
+        {toolbarSummary && summaryVisible && (
           // One outline segment holds both actions, so it owns the hover,
           // open and focus states of the summary trigger.
           <div

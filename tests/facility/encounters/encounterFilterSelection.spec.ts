@@ -424,6 +424,42 @@ test("status and priority open in place like the other pickers", async ({
   ).toBeChecked();
 });
 
+test("keeps the picker in place while the first filter is applied", async ({
+  page,
+}) => {
+  await page.goto(`/facility/${facility.id}/encounters/patients/all`);
+  const add = page.getByRole("button", { name: /^add filter$/i });
+  const active = page.getByRole("button", { name: /^filters\b/i });
+  await openMultiFilter(page, /^status$/i);
+  const picker = page.getByRole("dialog", { name: "Status" });
+  // Measure after the zoom-in animation, which scales the box.
+  await picker.evaluate((el) =>
+    Promise.all(el.getAnimations().map((animation) => animation.finished)),
+  );
+  const pickerBefore = (await picker.boundingBox())!;
+  const addBefore = (await add.boundingBox())!;
+  await picker
+    .getByRole("menuitemcheckbox", { name: "Planned", exact: true })
+    .click();
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get("status") === "planned",
+  );
+  // The toolbar waits for the picker to close before it shows Filters, so
+  // neither Add filter nor the picker anchored to it moves.
+  await expect(active).toHaveCount(0);
+  const addAfter = (await add.boundingBox())!;
+  expect(addAfter.x).toBeCloseTo(addBefore.x, 0);
+  expect(addAfter.width).toBeCloseTo(addBefore.width, 0);
+  const pickerAfter = (await picker.boundingBox())!;
+  expect(pickerAfter.x).toBeCloseTo(pickerBefore.x, 0);
+  expect(pickerAfter.y).toBeCloseTo(pickerBefore.y, 0);
+  await picker.getByRole("button", { name: "Done" }).click();
+  await expect(picker).toHaveCount(0);
+  await expect(active).toHaveAccessibleName(/^filters\s*1$/i);
+  await expect(add).toBeFocused();
+  expect((await add.boundingBox())!.width).toBeLessThan(addBefore.width);
+});
+
 test("picker header goes back to where the picker was opened, or closes it", async ({
   page,
 }) => {
