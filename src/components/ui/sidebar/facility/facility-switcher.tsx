@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { Check, ChevronsUpDown, LayoutDashboard, Search } from "lucide-react";
-import { Link } from "raviger";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -71,7 +71,7 @@ export function FacilitySwitcher({
         <DropdownMenuItem asChild>
           <Link
             className="gap-2"
-            href="/"
+            to="/"
             onClick={() => isMobile && setOpenMobile(false)}
           >
             <LayoutDashboard className="size-4" />
@@ -111,7 +111,8 @@ export function FacilitySwitcher({
           filteredFacilities.map((facility) => (
             <DropdownMenuItem key={facility.id} asChild className="gap-2">
               <Link
-                href={`/facility/${facility.id}/overview`}
+                to="/facility/$facilityId/overview"
+                params={{ facilityId: facility.id }}
                 aria-current={
                   facility.id === selectedFacility?.id ? "true" : undefined
                 }

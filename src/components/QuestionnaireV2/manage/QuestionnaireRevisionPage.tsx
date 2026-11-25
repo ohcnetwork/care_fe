@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -18,7 +17,7 @@ import {
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
-import { relativeTime } from "@/Utils/utils";
+import { goBack, relativeTime } from "@/Utils/utils";
 
 /**
  * Full-page read-only viewer for a single past revision, mounted at
@@ -72,7 +71,7 @@ export function QuestionnaireRevisionPage({
           <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{t("no_data_found")}</AlertDescription>
         </Alert>
-        <Button variant="outline" onClick={() => navigate(versionsPath)}>
+        <Button variant="outline" onClick={() => goBack(versionsPath)}>
           <ArrowLeft className="mr-2 size-4" />
           {t("back")}
         </Button>
@@ -98,7 +97,7 @@ export function QuestionnaireRevisionPage({
           type="button"
           variant="outline"
           size="xs"
-          onClick={() => navigate(versionsPath)}
+          onClick={() => goBack(versionsPath)}
         >
           <ArrowLeft className="size-4" />
           {t("back")}

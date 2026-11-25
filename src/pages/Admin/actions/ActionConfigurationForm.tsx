@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Trash2 } from "lucide-react";
-import { Link, navigate } from "raviger";
 import { useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { useForm, useWatch } from "react-hook-form";
@@ -31,6 +30,8 @@ import { useActionRegistry } from "@/components/QuestionnaireV2/builder/actions/
 import { findActionIssues } from "@/components/QuestionnaireV2/builder/actionValidation";
 import { reachableContextPaths } from "@/components/QuestionnaireV2/builder/actionVariables";
 
+import { HrefLink } from "@/lib/router/HrefLink";
+import { navigate } from "@/lib/router/navigate";
 import {
   ACTION_CONFIGURATION_CONTEXT_TYPES,
   ActionConfigurationRead,
@@ -45,6 +46,7 @@ import {
 } from "@/types/questionnaire/actions";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 
 import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { ActionConfigurationFields } from "./ActionConfigurationFields";
@@ -52,7 +54,6 @@ import {
   ActionConfigurationFormValues,
   actionConfigurationFormSchema,
 } from "./actionConfigurationFormSchema";
-import { ADMIN_ACTIONS_PATH } from "./ActionConfigurationList";
 import { actionContextHint } from "./labels";
 import { actionConfigurationKeys } from "./queryKeys";
 
@@ -98,10 +99,7 @@ export function ActionConfigurationForm({ id }: ActionConfigurationFormProps) {
             <AlertTitle>{t("error")}</AlertTitle>
             <AlertDescription>{t("no_data_found")}</AlertDescription>
           </Alert>
-          <Button
-            variant="outline"
-            onClick={() => navigate(ADMIN_ACTIONS_PATH)}
-          >
+          <Button variant="outline" onClick={() => goBack("/admin/actions")}>
             <ArrowLeft className="size-4" />
             {t("back")}
           </Button>
@@ -120,10 +118,10 @@ export function ActionConfigurationForm({ id }: ActionConfigurationFormProps) {
               </AlertDescription>
             </Alert>
             <Button asChild variant="outline">
-              <Link href={ADMIN_ACTIONS_PATH}>
+              <HrefLink href="/admin/actions" back>
                 <ArrowLeft className="size-4" />
                 {t("back")}
-              </Link>
+              </HrefLink>
             </Button>
           </div>
         </Page>
@@ -227,7 +225,7 @@ function ActionConfigurationEditor({
       setActionsDirty(false);
       form.reset(form.getValues());
     });
-    navigate(ADMIN_ACTIONS_PATH);
+    navigate({ to: "/admin/actions" });
   };
 
   const { mutate: create, isPending: isCreating } = useMutation({
@@ -309,14 +307,13 @@ function ActionConfigurationEditor({
           noValidate
         >
           <div className="flex flex-wrap items-center gap-3">
-            {/* raviger's Link (not a bare anchor): the click goes through
-                navigate(), so a dirty form gets the app's unsaved-changes
-                prompt and a clean one a client-side transition. */}
+            {/* A left click goes back; a dirty form still gets the app's
+                unsaved-changes prompt. */}
             <Button asChild variant="outline" size="xs">
-              <Link href={ADMIN_ACTIONS_PATH}>
+              <HrefLink href="/admin/actions" back>
                 <ArrowLeft className="size-4" />
                 {t("back")}
-              </Link>
+              </HrefLink>
             </Button>
             <h1 className="min-w-0 flex-1 truncate text-xl font-bold text-gray-900">
               {title}

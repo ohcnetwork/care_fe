@@ -40,7 +40,10 @@ export default function ServiceHistoryForm({
   const isEditMode = !!serviceRecord;
 
   const formSchema = z.object({
-    note: z.string().min(1, { message: t("field_required") }),
+    note: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
     serviced_on: z.date({ error: t("field_required") }).max(dayjs().toDate(), {
       message: t("service_date_min_date"),
     }),

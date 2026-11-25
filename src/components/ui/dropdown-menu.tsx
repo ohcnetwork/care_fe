@@ -9,6 +9,11 @@ import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import * as React from "react";
 
 import {
+  fieldTriggerLayout,
+  fieldTriggerSurface,
+  triggerFocus,
+} from "@/components/ui/field-trigger-styles";
+import {
   MenuLabelContext,
   isMenuSelectionCanceled,
   menuFinalFocus,
@@ -44,7 +49,6 @@ function resolveAsChild(
     return {
       render: React.createElement(child.type as React.ElementType, {
         ...restProps,
-        // Let the trigger override child styles (e.g. tone down a Button's shadow).
         className: cn(childClassName, className),
       }),
       children: extractedChildren,
@@ -71,6 +75,7 @@ function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
 }
 
 function DropdownMenuTrigger({
+  appearance = "unstyled",
   asChild,
   nativeButton,
   render,
@@ -78,17 +83,29 @@ function DropdownMenuTrigger({
   className,
   ...props
 }: Omit<MenuPrimitive.Trigger.Props, "render" | "className"> & {
+  appearance?: "unstyled" | "field" | "icon";
   asChild?: boolean;
   render?: RenderProp;
   className?: string;
 }) {
-  const resolved = resolveAsChild(asChild, children, render, className);
+  const usesChild = asChild && React.isValidElement(children);
+  const resolved = resolveAsChild(usesChild, children, render, className);
+  const triggerClassName =
+    resolved.render || appearance === "unstyled"
+      ? className
+      : cn(
+          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm transition-colors [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+          appearance === "icon"
+            ? "size-9 text-muted-foreground outline-0 hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 aria-expanded:bg-muted aria-expanded:text-foreground"
+            : cn(fieldTriggerLayout, fieldTriggerSurface, triggerFocus),
+          className,
+        );
   return (
     <MenuPrimitive.Trigger
       data-slot="dropdown-menu-trigger"
       nativeButton={nativeButton ?? menuTriggerNativeButton(resolved.render)}
       render={resolved.render}
-      className={asChild ? undefined : className}
+      className={usesChild ? undefined : triggerClassName}
       {...props}
     >
       {resolved.children}

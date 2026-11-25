@@ -19,6 +19,7 @@ import SpecimenIDScanDialog from "@/components/Scan/SpecimenIDScanDialog";
 import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable";
 
 import useFilters from "@/hooks/useFilters";
+import { serviceRequestListSearch } from "@/lib/router/search/services";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
@@ -163,8 +164,8 @@ export default function ServiceRequestList({
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: serviceRequestListSearch,
     limit: 14,
-    disableCache: true,
     defaultQueryParams: {
       status: "active",
     },
@@ -187,7 +188,7 @@ export default function ServiceRequestList({
     queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
       pathParams: {
         facilityId,
-        activityDefinitionSlug: qParams.activity_definition,
+        activityDefinitionSlug: qParams.activity_definition ?? "",
       },
     }),
     enabled: !!qParams.activity_definition && !selectedActivityDefinition,
@@ -362,7 +363,7 @@ export default function ServiceRequestList({
               </Button>
             </div>
           </div>
-          <div className="w-full mb-4 overflow-x-auto">
+          <div className="w-full mb-4">
             <FilterTabs
               value={qParams.status || Status.active}
               onValueChange={(value) => updateQuery({ status: value })}
@@ -416,8 +417,6 @@ export default function ServiceRequestList({
               <TableSkeleton count={5} />
             </div>
           </>
-        ) : serviceRequests.length === 0 && !isLoading ? (
-          <EmptyState />
         ) : serviceRequests.length === 0 ? (
           <EmptyState />
         ) : (

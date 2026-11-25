@@ -41,6 +41,42 @@ export const get = (name) => {
       );
     };
 
+    // Long plugin content exercises the real app shell's scroll container.
+    const ScrollPage = ({ page }) =>
+      React.createElement(
+        "section",
+        { style: { minHeight: "2400px" } },
+        React.createElement("h1", null, `Scroll page ${page}`),
+        React.createElement(
+          "nav",
+          {
+            style: {
+              position: "fixed",
+              top: "90px",
+              right: "24px",
+              zIndex: 50,
+              background: "white",
+            },
+          },
+          React.createElement(
+            Router.Link,
+            { to: `/test-plugin/scroll/${page === "one" ? "two" : "one"}` },
+            "Other scroll page",
+          ),
+          " ",
+          React.createElement(
+            Router.Link,
+            { to: `/test-plugin/scroll/${page}`, hash: "scroll-target" },
+            "Jump to section",
+          ),
+        ),
+        React.createElement(
+          "h2",
+          { id: "scroll-target", style: { marginTop: "1000px" } },
+          "Scroll destination",
+        ),
+      );
+
     return {
       __esModule: true,
       default: {
@@ -53,6 +89,8 @@ export const get = (name) => {
               `Test plugin item ${itemId}`,
             ),
           "/test-plugin/router": () => React.createElement(RouterPage),
+          "/test-plugin/scroll/:page": ({ page }) =>
+            React.createElement(ScrollPage, { page }),
           // Under the settings layout: takes the settings workspace.
           "/facility/:facilityId/settings/test-plugin": ({ facilityId }) =>
             React.createElement(

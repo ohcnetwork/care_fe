@@ -12,6 +12,7 @@ import {
   useIsScopedQueryParams,
   useScopedQueryParams,
 } from "@/hooks/useScopedQueryParams";
+import { responseListSearch } from "@/lib/router/search/encounter";
 import { cn } from "@/lib/utils";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -108,7 +109,7 @@ function LeftPanel({
             <Button
               variant="outline"
               role="combobox"
-              className="w-full border border-primary-600 justify-between h-auto min-h-[2.5rem] py-2"
+              className="w-full border shadow-xs border-primary-600 justify-between h-auto min-h-[2.5rem] py-2"
             >
               <div className="flex justify-start items-center gap-2 text-primary-800 flex-1">
                 <span className="text-left whitespace-normal break-words">
@@ -181,12 +182,7 @@ export const EncounterResponsesTab = ({
   const { t } = useTranslation();
   const scoped = useIsScopedQueryParams();
   const id = useId();
-  const [qParams, setQueryParams] = useScopedQueryParams<{
-    questionnaireSlug?: string;
-    questionnaireTitle?: string;
-    responseId?: string;
-    role?: string;
-  }>();
+  const [qParams, setQueryParams] = useScopedQueryParams(responseListSearch);
 
   const { questionnaireSlug, questionnaireTitle, responseId, role } = qParams;
 

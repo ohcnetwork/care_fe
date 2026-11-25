@@ -1,5 +1,4 @@
 import { BadgeCheck, ChevronsUpDown, LogOut, RefreshCw } from "lucide-react";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -29,6 +28,7 @@ import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { formatName } from "@/Utils/utils";
+import { navigate } from "@/lib/router/navigate";
 
 export function FacilityNavUser({
   selectedFacilityId,
@@ -114,7 +114,7 @@ export function FacilityNavUser({
                   const profileUrl = selectedFacilityId
                     ? `/facility/${selectedFacilityId}/users/${user.username}`
                     : `/users/${user.username}`;
-                  navigate(profileUrl);
+                  navigate({ href: profileUrl });
                 }}
               >
                 <BadgeCheck />
@@ -124,9 +124,9 @@ export function FacilityNavUser({
                 <DropdownMenuItem
                   key={item.name}
                   onClick={() => {
-                    navigate(
-                      `/facility/${selectedFacilityId}/users/${user.username}/${item.url}`,
-                    );
+                    navigate({
+                      href: `/facility/${selectedFacilityId}/users/${user.username}/${item.url}`,
+                    });
                   }}
                 >
                   {item.icon}

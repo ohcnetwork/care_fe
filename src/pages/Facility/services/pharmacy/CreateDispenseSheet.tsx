@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { navigate } from "raviger";
 import { cloneElement, isValidElement, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -19,6 +18,7 @@ import {
 
 import { PatientIdentifierSelector } from "@/components/Patient/PatientIdentifierSelector";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { navigate } from "@/lib/router/navigate";
 import {
   PartialPatientModel,
   PatientListRead,
@@ -57,14 +57,16 @@ export function CreateDispenseSheet({
   // Direct navigation handler when patient is preselected
   const handleDirectDispense = () => {
     if (!preselectedPatient) return;
-    navigate(
-      `/facility/${facilityId}/patients/home?${new URLSearchParams({
+    navigate({
+      to: "/facility/$facilityId/patients/home",
+      params: { facilityId },
+      search: {
         phone_number: preselectedPatient.phone_number,
         year_of_birth: preselectedPatient.year_of_birth?.toString() || "",
         partial_id: preselectedPatient.id.slice(0, 5),
         flow: "dispense",
-      }).toString()}`,
-    );
+      },
+    });
   };
 
   const resetState = () => {
@@ -87,8 +89,10 @@ export function CreateDispenseSheet({
   const handleRegisterNewPatient = useCallback(() => {
     setIsOpen(false);
     resetState();
-    navigate(`/facility/${facilityId}/patient/create`, {
-      query: { flow: "dispense" },
+    navigate({
+      to: "/facility/$facilityId/patient/create",
+      params: { facilityId },
+      search: { flow: "dispense" },
     });
   }, [facilityId]);
 
@@ -99,8 +103,10 @@ export function CreateDispenseSheet({
     }
     setIsOpen(false);
     resetState();
-    navigate(
-      `/facility/${facilityId}/patients/home?${new URLSearchParams({
+    navigate({
+      to: "/facility/$facilityId/patients/home",
+      params: { facilityId },
+      search: {
         phone_number: selectedPatient.phone_number,
         year_of_birth:
           ("year_of_birth" in selectedPatient &&
@@ -108,8 +114,8 @@ export function CreateDispenseSheet({
           "",
         partial_id: selectedPatient.id.slice(0, 5),
         flow: "dispense",
-      }).toString()}`,
-    );
+      },
+    });
   };
 
   // When patientId is provided, render a simple button that navigates directly

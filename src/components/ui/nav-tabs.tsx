@@ -97,8 +97,8 @@ export const NavTabs = <TabKey extends string>({
       value={currentTab ?? allTabKeys[0]}
       onValueChange={(tab) => onTabChange(tab as TabKey)}
     >
-      <div className="min-w-0 max-w-full overflow-x-auto pb-1">
-        <TabsList variant="line" className="w-full justify-start">
+      <div className="min-w-0 max-w-full overflow-x-auto">
+        <TabsList variant="line">
           {visibleTabs.map((option, index) => (
             <TabsTrigger
               key={option}

@@ -9,6 +9,12 @@ import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 
 import {
+  fieldTriggerLayout,
+  fieldTriggerSurface,
+  invalidTriggerRing,
+  triggerFocus,
+} from "@/components/ui/field-trigger-styles";
+import {
   OverlayEventsContext,
   resolveAsChild,
   useOverlayContent,
@@ -66,20 +72,37 @@ function PopoverAnchor({
 }
 
 function PopoverTrigger({
+  appearance = "unstyled",
   asChild,
   render,
   children,
+  className,
   ...props
 }: Omit<PopoverPrimitive.Trigger.Props, "render"> & {
+  appearance?: "unstyled" | "field";
   asChild?: boolean;
   render?: RenderProp;
 }) {
   const resolved = resolveAsChild(asChild, children, render);
+  const isField = appearance === "field" && !resolved.render;
   return (
     <PopoverPrimitive.Trigger
       data-slot="popover-trigger"
       render={resolved.render}
       nativeButton={resolved.nativeButton}
+      className={
+        isField
+          ? (state) =>
+              cn(
+                fieldTriggerLayout,
+                fieldTriggerSurface,
+                triggerFocus,
+                invalidTriggerRing,
+                "justify-between transition-colors",
+                typeof className === "function" ? className(state) : className,
+              )
+          : className
+      }
       {...props}
     >
       {resolved.children}

@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { ArrowLeft, History, SquarePen } from "lucide-react";
-import { Link } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,6 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/pages/Encounters/EncounterProperties";
 
@@ -181,7 +181,7 @@ export default function EncounterDetailsHeader({
               className="ml-auto h-8 shrink-0 rounded-lg border-gray-300 bg-white px-3 text-gray-950 shadow-none hover:bg-gray-50"
               asChild
             >
-              <Link
+              <HrefLink
                 href={editUrl}
                 aria-label={t("edit_encounter")}
                 data-shortcut-id="update-encounter"
@@ -192,7 +192,7 @@ export default function EncounterDetailsHeader({
                   strokeWidth={1.75}
                 />
                 {t("edit")}
-              </Link>
+              </HrefLink>
             </Button>
           )}
           {actions && <div className="ml-auto shrink-0">{actions}</div>}

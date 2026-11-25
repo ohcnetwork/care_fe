@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
 import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -12,6 +11,12 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import {
+  receiveDeliveryListSearch,
+  receiveOrderListSearch,
+} from "@/lib/router/search/inventory";
 import query from "@/Utils/request/query";
 import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
 
@@ -43,6 +48,9 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
   const { t } = useTranslation();
   const currentTab = tab === "deliveries" ? "deliveries" : "orders";
   const { location } = useCurrentLocation();
+  // To Receive stays open at locations that don't use inventory, so transfers
+  // already sent there can be received, but they can't raise stock requests
+  const canRaiseRequest = (location?.inventory_usage ?? "none") !== "none";
   return (
     <Page
       title={t("to_receive")}
@@ -71,13 +79,13 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
               )}
             </p>
           </div>
-          {currentTab === "orders" && (
+          {currentTab === "orders" && canRaiseRequest && (
             <div className="flex items-center gap-2">
               <Button
                 variant="primary"
                 onClick={() =>
-                  navigate(
-                    getInventoryBasePath(
+                  navigate({
+                    href: getInventoryBasePath(
                       facilityId,
                       locationId,
                       internal,
@@ -85,7 +93,7 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
                       true,
                       "new",
                     ),
-                  )
+                  })
                 }
               >
                 <CareIcon icon="l-plus" />
@@ -122,15 +130,15 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
           }}
           currentTab={currentTab}
           onTabChange={(value) =>
-            navigate(
-              getInventoryBasePath(
+            navigate({
+              href: getInventoryBasePath(
                 facilityId,
                 locationId,
                 internal,
                 value === "orders",
                 true,
               ),
-            )
+            })
           }
         />
       </div>
@@ -155,10 +163,10 @@ function OutgoingOrdersTab({
   ];
   const defaultStatus = EFFECTIVE_STATUSES[0].value;
 
-  const [qParams] = useQueryParams();
+  const [qParams] = useQueryParams(receiveOrderListSearch);
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: receiveOrderListSearch,
     limit: 14,
-    disableCache: true,
     defaultQueryParams: { status: defaultStatus },
   });
   const currentStatus = qParams.status || defaultStatus;
@@ -295,10 +303,10 @@ function IncomingDeliveriesTab({
   ];
   const defaultStatus = EFFECTIVE_STATUSES[0].value;
 
-  const [qParams] = useQueryParams();
+  const [qParams] = useQueryParams(receiveDeliveryListSearch);
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
+    schema: receiveDeliveryListSearch,
     limit: 14,
-    disableCache: true,
     defaultQueryParams: { status: defaultStatus },
   });
   const currentStatus = qParams.status || defaultStatus;

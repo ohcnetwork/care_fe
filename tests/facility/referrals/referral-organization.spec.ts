@@ -10,6 +10,67 @@ import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+test("shows newly created referral availability first in organization settings", async ({
+  page,
+  request,
+}) => {
+  const suffix = faker.string.alphanumeric(12);
+  const organizationResponse = await request.post(
+    `${apiBaseUrl()}/api/v1/organization/`,
+    {
+      headers: adminApiHeaders(),
+      data: {
+        name: `Availability ordering ${suffix}`,
+        description: "Referral availability ordering test",
+        org_type: "govt",
+        metadata: {},
+      },
+    },
+  );
+  expect(organizationResponse.ok(), await organizationResponse.text()).toBe(
+    true,
+  );
+  const organization = (await organizationResponse.json()) as { id: string };
+  const names = [`A earlier service ${suffix}`, `Z newest service ${suffix}`];
+  const availabilityIds: string[] = [];
+  for (const name of names) {
+    const response = await request.post(
+      `${apiBaseUrl()}/api/v1/referral_availability/`,
+      {
+        headers: adminApiHeaders(),
+        data: {
+          name,
+          description: "Created-order regression",
+          status: "draft",
+          is_public: false,
+          referral_type: "consultation",
+          entity_type: "external_organization",
+          external_organization: organization.id,
+          care_team: [],
+          questionnaires: [],
+        },
+      },
+    );
+    expect(response.ok(), await response.text()).toBe(true);
+    availabilityIds.push(((await response.json()) as { id: string }).id);
+  }
+  // Editing an older destination must not move it above a newly created one.
+  const updated = await request.patch(
+    `${apiBaseUrl()}/api/v1/referral_availability/${availabilityIds[0]}/`,
+    {
+      headers: adminApiHeaders(),
+      data: { description: "Older service edited most recently" },
+    },
+  );
+  expect(updated.ok(), await updated.text()).toBe(true);
+
+  await page.goto(`/organization/${organization.id}/settings/referrals`);
+  const cards = page.getByRole("listitem").filter({
+    has: page.getByRole("heading", { name: new RegExp(suffix) }),
+  });
+  await expect(cards.getByRole("heading")).toHaveText([names[1], names[0]]);
+});
+
 test("configures an organization destination and receives its referral in the organization inbox", async ({
   page,
   request,
@@ -103,7 +164,7 @@ test("configures an organization destination and receives its referral in the or
       internal_organization: null,
     });
     availabilityId = availability.id;
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await page.reload();
     await expect(
       page.getByRole("listitem").filter({

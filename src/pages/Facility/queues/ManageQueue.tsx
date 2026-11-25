@@ -1,4 +1,3 @@
-import { booleanFromString } from "@/common/utils";
 import { AnimatedCounter } from "@/components/Common/AnimatedCounter";
 import BackButton from "@/components/Common/BackButton";
 import Page from "@/components/Common/Page";
@@ -31,6 +30,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { navigate } from "@/lib/router/navigate";
+import { useQueryParams } from "@/lib/router/queryParams";
+import { queueBoardSearch } from "@/lib/router/search/queues";
 import { ManageQueueFinishedTab } from "@/pages/Facility/queues/ManageQueueFinishedTab";
 import { ManageQueueOngoingTab } from "@/pages/Facility/queues/ManageQueueOngoingTab";
 import QueueFormSheet from "@/pages/Facility/queues/QueueFormSheet";
@@ -46,9 +48,8 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { ChevronLeft, Edit3, InfoIcon, SettingsIcon } from "lucide-react";
-import { useNavigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
-import { getTokenQueueStatusCount } from "./utils";
+import { getQueueBoardPath, getTokenQueueStatusCount } from "./utils";
 
 interface ManageQueuePageProps {
   facilityId: string;
@@ -66,11 +67,8 @@ export function ManageQueuePage({
   tab,
 }: ManageQueuePageProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const resource = useScheduleResource();
-  const [qParams, setQueryParams] = useQueryParams<{
-    autoRefresh?: string;
-  }>();
+  const [qParams, setQueryParams] = useQueryParams(queueBoardSearch);
   const { data: queue, isLoading: isQueueLoading } = useQuery({
     queryKey: ["tokenQueue", facilityId, queueId],
     queryFn: query(tokenQueueApi.get, {
@@ -103,10 +101,7 @@ export function ManageQueuePage({
     return <QueueManagementSkeleton />;
   }
 
-  const shouldAutoRefresh = booleanFromString(
-    qParams.autoRefresh ?? "",
-    careConfig.enableAutoRefresh,
-  );
+  const shouldAutoRefresh = qParams.autoRefresh ?? careConfig.enableAutoRefresh;
 
   return (
     <Page
@@ -273,10 +268,17 @@ export function ManageQueuePage({
           }}
           currentTab={tab}
           onTabChange={(tab) => {
-            navigate(tab, {
-              query: {
-                autoRefresh: shouldAutoRefresh.toString(),
-              },
+            const searchParams = new URLSearchParams({
+              autoRefresh: shouldAutoRefresh.toString(),
+            });
+            navigate({
+              href: `${getQueueBoardPath({
+                facilityId,
+                resourceType,
+                resourceId,
+                queueId,
+                tab,
+              })}?${searchParams.toString()}`,
             });
           }}
           setPageTitle={false}

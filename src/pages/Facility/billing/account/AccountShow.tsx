@@ -1,9 +1,15 @@
-import { DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { HrefLink } from "@/lib/router/HrefLink";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { Hash, Info, MoreVertical } from "lucide-react";
-import { Link as RavigerLink } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -15,12 +21,6 @@ import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -129,6 +129,7 @@ function AccountShow({
       to: "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType",
       params: { facilityId, accountId, tab, paymentType: type },
       replace: true,
+      resetScroll: false,
     });
   };
   const closePaymentSheet = () => {
@@ -136,6 +137,7 @@ function AccountShow({
       to: "/facility/$facilityId/billing/account/$accountId/$tab",
       params: { facilityId, accountId, tab },
       replace: true,
+      resetScroll: false,
     });
   };
   const [transferPaymentOpen, setTransferPaymentOpen] = useState(false);
@@ -148,12 +150,13 @@ function AccountShow({
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
-  const { canUpdateAccount } = getPermissions(
-    hasPermission,
-    facility?.permissions || [],
-  );
+  const {
+    canUpdateAccount,
+    canCreateChargeItem,
+    canWritePaymentReconciliation,
+  } = getPermissions(hasPermission, facility?.permissions || []);
 
-  useShortcutSubContext("facility:account:show");
+  useShortcutSubContext("facility:account:show&facility:billing");
 
   const { data: account, isLoading } = useQuery({
     queryKey: ["account", accountId],
@@ -287,20 +290,16 @@ function AccountShow({
           <h2 className="text-2xl font-bold">{t("account_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("account_may_not_exist")}</p>
           <Button asChild className="mt-4">
-            <Link
-              to="/facility/$facilityId/billing/account"
-              params={{ facilityId }}
-            >
+            <HrefLink href={`/facility/${facilityId}/billing/account`} back>
               {t("back_to_accounts")}
-            </Link>
+            </HrefLink>
           </Button>
         </div>
       </div>
     );
   }
 
-  const isAccountBillableAndActive =
-    !!account && isAccountActiveAndBillable(account);
+  const isAccountBillableAndActive = isAccountActiveAndBillable(account);
 
   const roundedBalance = roundWhole(account.total_balance);
   const roundedBilledGross = roundWhole(account.total_gross);
@@ -326,6 +325,7 @@ function AccountShow({
           accountId={accountId}
           patientId={account.patient.id}
           canAddChargeItems={isAccountBillableAndActive}
+          canChangeAccount={canCreateChargeItem}
         />
       ),
       shortcutId: "switch-to-charge-items-tab",
@@ -338,6 +338,7 @@ function AccountShow({
           accountId={accountId}
           patientId={account.patient.id}
           hideAccountColumn
+          canChangeAccount={canWritePaymentReconciliation}
         />
       ),
       shortcutId: "switch-to-payments-tab",
@@ -545,11 +546,16 @@ function AccountShow({
           </div>
           <div className="flex items-center gap-2">
             <Button variant="link" asChild className="text-gray-950 underline">
-              <RavigerLink
-                href={`/facility/${facilityId}/patient/${account.patient.id}/accounts`}
+              <Link
+                to="/facility/$facilityId/patient/$patientId/{-$tab}"
+                params={{
+                  facilityId,
+                  patientId: account.patient.id,
+                  tab: "accounts",
+                }}
               >
                 {t("past_accounts")}
-              </RavigerLink>
+              </Link>
             </Button>
             {canUpdateAccount && (
               <Button
@@ -727,6 +733,7 @@ function AccountShow({
           navigate({
             to: "/facility/$facilityId/billing/account/$accountId/$tab",
             params: { facilityId, accountId, tab: value },
+            resetScroll: false,
           })
         }
         setPageTitle={false}

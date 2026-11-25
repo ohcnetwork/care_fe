@@ -4,8 +4,8 @@ import { expect, test } from "@playwright/test";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
+// Display names: the UCUM value set search matches displays, not codes.
 const UNITS = [
-  "meq/g",
   "gram percent",
   "beats / minute",
   "per liter",
@@ -391,8 +391,8 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       await page.getByRole("combobox", { name: "Unit" }).nth(1).click();
-      await page.waitForLoadState("networkidle");
-      await page.getByRole("option").first().click();
+      await page.getByPlaceholder("Search for units").fill(unit);
+      await page.getByRole("option", { name: unit }).first().click();
     });
 
     // Verify component interpretation section is disabled
@@ -482,8 +482,8 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       await page.getByRole("combobox", { name: "Unit" }).nth(1).click();
-      await page.waitForLoadState("networkidle");
-      await page.getByRole("option").first().click();
+      await page.getByPlaceholder("Search for units").fill(unit);
+      await page.getByRole("option", { name: unit }).first().click();
 
       // Add component-level interpretation
       await page

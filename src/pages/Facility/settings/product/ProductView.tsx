@@ -20,6 +20,7 @@ import Page from "@/components/Common/Page";
 import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import BackButton from "@/components/Common/BackButton";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { navigate } from "@/lib/router/navigate";
@@ -66,12 +67,7 @@ export default function ProductView({ facilityId, productId }: Props) {
           <Button
             variant="outline"
             className="mt-4"
-            onClick={() =>
-              navigate({
-                to: "/facility/$facilityId/settings/product",
-                params: { facilityId },
-              })
-            }
+            onClick={() => goBack(`/facility/${facilityId}/settings/product`)}
           >
             <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
             {t("back_to_list")}

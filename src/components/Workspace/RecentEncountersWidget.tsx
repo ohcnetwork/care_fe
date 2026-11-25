@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { MapPin, Users } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { HrefLink } from "@/lib/router/HrefLink";
 import { cn } from "@/lib/utils";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -105,12 +105,12 @@ export function RecentEncountersWidget({
         presentation="panel"
         className="min-w-0 overflow-hidden"
         actionButton={
-          <Link
+          <HrefLink
             href={`${patientPath}/encounters`}
             className="text-xs font-medium text-primary-700 underline-offset-2 hover:underline"
           >
             {t("workspace_encounters_see_all")}
-          </Link>
+          </HrefLink>
         }
       >
         {isLoading ? (
@@ -216,12 +216,12 @@ export function RecentEncountersWidget({
                       {t(`encounter_status__${encounter.status}`)}
                     </Badge>
                     {!isCurrent && (
-                      <Link
+                      <HrefLink
                         href={href}
                         className="text-xs font-medium text-primary-700 underline-offset-2 hover:underline"
                       >
                         {t("workspace_encounters_see_encounter")}
-                      </Link>
+                      </HrefLink>
                     )}
                   </div>
                 </li>

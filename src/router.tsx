@@ -3,8 +3,8 @@ import { createRouter } from "@tanstack/react-router";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
-import { setRouter } from "@/compat/routerRef";
 import { type RouterAuth, routerAuth } from "@/lib/router/auth";
+import { setRouter } from "@/lib/router/routerRef";
 import { parseSearch, stringifySearch } from "@/lib/router/searchParams";
 import "@/lib/router/staticData";
 import { routeTree } from "@/routeTree.gen";
@@ -21,6 +21,9 @@ export const router = createRouter({
   defaultPreload: "intent",
   defaultPreloadStaleTime: 0,
   scrollRestoration: true,
+  // Staff pages scroll inside the persistent shell, rather than the window.
+  // Reset it for new entries while the router restores cached Back/Forward.
+  scrollToTopSelectors: ['[data-scroll-restoration-id="app-content"]'],
   parseSearch,
   stringifySearch,
   // Some params hold comma-separated ids (`$prescriptionIds`, `$invoiceIds`).

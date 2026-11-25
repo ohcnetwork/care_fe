@@ -185,7 +185,11 @@ export const FacilityHome = ({
     />
   );
   const facilityActions = canUpdateFacility ? (
-    <FacilityHomeActions facility={facilityData} isSettings={isSettings} />
+    <FacilityHomeActions
+      facility={facilityData}
+      isSettings={isSettings}
+      canDelete={user.is_superuser}
+    />
   ) : null;
 
   if (isSettings) {
@@ -197,7 +201,6 @@ export const FacilityHome = ({
           facility={facilityData}
           actions={facilityActions}
           settingsActions={renderSettingsActions?.(isError)}
-          canDelete={user.is_superuser}
           canUpdateFacility={canUpdateFacility}
           onEditCoverImage={() => setEditCoverImage(true)}
         />
@@ -212,7 +215,6 @@ export const FacilityHome = ({
         facility={facilityData}
         actions={facilityActions}
         canUpdateFacility={canUpdateFacility}
-        canDelete={user.is_superuser}
         onEditCoverImage={() => setEditCoverImage(true)}
       />
     </div>

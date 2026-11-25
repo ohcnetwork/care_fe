@@ -24,12 +24,18 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  fieldTriggerLayout,
+  fieldTriggerSurface,
+  invalidTriggerRing,
+  triggerFocus,
+} from "@/components/ui/field-trigger-styles";
 import { Label } from "@/components/ui/label";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
 
-type ButtonProps = Omit<
-  React.ComponentProps<typeof Button>,
+type TriggerProps = Omit<
+  React.ComponentProps<"button">,
   keyof MultiSelectProps
 >;
 interface MultiSelectProps {
@@ -52,63 +58,88 @@ export function MultiSelect({
   selectionSummary,
   translationBasekey,
   ...props
-}: ButtonProps & MultiSelectProps) {
+}: TriggerProps & MultiSelectProps) {
   const { t } = useTranslation();
   const [selectedValues, setSelectedValues] = React.useState<string[]>(value);
   const [open, setOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
   const selectAllId = React.useId();
 
-  React.useEffect(() => {
+  // Re-sync the draft only when the contents of `value` change
+  const valueKey = JSON.stringify([...value].sort());
+  const [syncedValueKey, setSyncedValueKey] = React.useState(valueKey);
+  if (syncedValueKey !== valueKey) {
+    setSyncedValueKey(valueKey);
     setSelectedValues(value);
-  }, [value]);
+  }
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
       setSelectedValues(value);
     } else if (open) {
-      // Existing callers commit the draft when the panel closes, including Cancel.
       onValueChange(selectedValues);
     }
     setOpen(nextOpen);
   };
 
+  const optionByValue = new Map(
+    options.map((option) => [option.value, option]),
+  );
+  const committed = new Set(value);
+  const draft = new Set(selectedValues);
   const groups = [
-    {
-      value: "selected",
-      items: options
-        .filter((option) => value.includes(option.value))
-        .map((option) => option.value),
-    },
+    { value: "selected", items: value },
     {
       value: "available",
-      items: options
-        .filter((option) => !value.includes(option.value))
-        .map((option) => option.value),
+      items: [...optionByValue.keys()].filter((item) => !committed.has(item)),
     },
   ].filter((group) => group.items.length > 0);
   const allSelected =
-    options.length > 0 &&
-    options.every((option) => selectedValues.includes(option.value));
+    options.length > 0 && options.every((option) => draft.has(option.value));
 
   const trigger = (
-    <Button
-      variant="outline"
+    <button
+      type="button"
       ref={ref}
       role="combobox"
       aria-expanded={open}
-      className={cn("w-full min-w-0 justify-between font-normal", className)}
+      className={cn(
+        fieldTriggerLayout,
+        fieldTriggerSurface,
+        triggerFocus,
+        invalidTriggerRing,
+        "h-auto min-h-12 w-full min-w-0 justify-between py-1 text-start font-normal md:h-auto md:min-h-10",
+        className,
+      )}
       {...props}
     >
       {value.length === 0 ? (
         <span className="truncate text-muted-foreground">{placeholder}</span>
-      ) : (
-        <Badge variant="neutral" className="max-w-full truncate">
-          {selectionSummary || t("options_selected", { count: value.length })}
+      ) : selectionSummary ? (
+        <Badge
+          variant="neutral"
+          className="min-w-0 shrink whitespace-normal wrap-anywhere"
+        >
+          {selectionSummary}
         </Badge>
+      ) : (
+        <span className="flex min-w-0 flex-wrap gap-1">
+          {value.map((item) => (
+            <Badge
+              key={item}
+              variant="neutral"
+              className="max-w-full whitespace-normal wrap-anywhere"
+            >
+              {optionByValue.get(item)?.label ?? item}
+            </Badge>
+          ))}
+        </span>
       )}
-      <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
-    </Button>
+      <ChevronDown
+        aria-hidden="true"
+        className="size-4 shrink-0 text-muted-foreground"
+      />
+    </button>
   );
 
   const content = (
@@ -137,7 +168,9 @@ export function MultiSelect({
           checked={allSelected}
           onCheckedChange={() =>
             setSelectedValues(
-              allSelected ? [] : options.map((option) => option.value),
+              allSelected
+                ? []
+                : [...new Set([...draft, ...optionByValue.keys()])],
             )
           }
         />
@@ -152,9 +185,7 @@ export function MultiSelect({
             )}
             <ComboboxCollection>
               {(optionValue: string) => {
-                const option = options.find(
-                  (option) => option.value === optionValue,
-                );
+                const option = optionByValue.get(optionValue);
                 return (
                   <ComboboxItem
                     key={optionValue}
@@ -173,9 +204,6 @@ export function MultiSelect({
         )}
       </ComboboxList>
       <div className="flex shrink-0 justify-end gap-2 border-t border-border p-2">
-        <Button variant="ghost" onClick={() => handleOpenChange(false)}>
-          {t("cancel")}
-        </Button>
         <Button onClick={() => handleOpenChange(false)}>{t("done")}</Button>
       </div>
     </>
@@ -188,8 +216,7 @@ export function MultiSelect({
       value={selectedValues}
       onValueChange={setSelectedValues}
       itemToStringLabel={(optionValue) =>
-        options.find((option) => option.value === optionValue)?.label ??
-        optionValue
+        optionByValue.get(optionValue)?.label ?? optionValue
       }
       open={open}
       inline={isMobile}

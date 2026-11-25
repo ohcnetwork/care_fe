@@ -33,7 +33,7 @@ General Guidelines
 
 - Care uses TanStack Query for data fetching from the API along with query and mutate utilities for the queryFn and mutationFn. (Docs @ /Utils/request/README.md)
 - APIs are defined in the api.tsx file.
-- Use raviger for routing.
+- Use TanStack Router for routing (file routes in `src/routes/`; see docs/architecture.md).
 - Add and reuse proper translations for the components in the en.json file.
 
 # Testing Guidelines

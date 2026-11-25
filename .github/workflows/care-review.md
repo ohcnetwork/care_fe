@@ -31,6 +31,11 @@ on:
   # An untrusted contributor can therefore influence what the review *says*, but not run their code
   # here and not write to the repository.
   roles: all
+# gh-aw rejects `pull_request_target` with `roles: all` in strict mode. Outside strict mode this flag
+# allows it, which keeps community fork PRs reviewed.
+strict: false
+features:
+  dangerously-allow-roles-read-and-pull-request-target: true
 # Upstream only — forks lack the Copilot credentials and would fail loudly on every fork PR.
 # Draft PRs are excluded HERE rather than in the prompt: a prompt-level skip still spins up the
 # engine and reads the whole agent file before deciding to do nothing. That is a billed noop on
@@ -145,7 +150,7 @@ safe-outputs:
   # people to ignore that issue. The run log already records why we skipped.
   noop:
     report-as-issue: false
-  missing-tool:
+  report-missing-tool:
     create-issue: true
 ---
 

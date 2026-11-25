@@ -1,5 +1,4 @@
 import { CalendarDays } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { getPermissions } from "@/common/Permissions";
@@ -11,6 +10,8 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
 import BookAppointmentSheet from "./BookAppointment/BookAppointmentSheet";
 import { BookingsList } from "./BookAppointment/BookingsList";
+
+import { HrefLink } from "@/lib/router/HrefLink";
 
 // The appointment APIs authorize facility scheduling independently of chart
 // access. A referral supplies only the patient's identity, never PatientRead
@@ -33,12 +34,13 @@ export function ReferralPatientAppointments({
     <Page title={t("appointments")}>
       <div className="space-y-5">
         {context.returnUrl && (
-          <Link
+          <HrefLink
             href={context.returnUrl}
+            back={context.returnToReferral}
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             {t("referral_return_to_referral")}
-          </Link>
+          </HrefLink>
         )}
         {loading ? (
           <p role="status">{t("loading")}</p>
