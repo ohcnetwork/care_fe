@@ -76,6 +76,7 @@ import {
   isAccountBillingClosed,
 } from "@/pages/Facility/billing/account/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 import { ReportType } from "@/types/emr/report/report";
 import AccountSheet from "./AccountSheet";
 import TransferPaymentSheet from "./TransferPaymentSheet";
@@ -366,19 +367,29 @@ function AccountShow({
     },
   };
 
+  const hasPatientIdentifiersOrTags =
+    getPatientIdentifiers(account.patient).length > 0 ||
+    account.patient.instance_tags.length > 0 ||
+    !!account.patient.facility_tags?.length;
+
   return (
     <div className="space-y-3">
       <BackButton size="xs">
         <CareIcon icon="l-arrow-left" className="size-4" />
         {t("back")}
       </BackButton>
-      <Card className="rounded-none shadow-none border-none flex flex-col md:flex-row md:justify-between bg-transparent gap-4">
+      <Card className="rounded-none shadow-none border-none flex flex-col md:flex-row md:flex-wrap md:justify-between bg-transparent gap-4">
         <PatientHeader
           patient={account.patient}
           facilityId={facilityId}
-          className="flex-1 p-0 bg-transparent shadow-none"
+          className={cn(
+            "min-w-0 p-0 bg-transparent shadow-none md:grow",
+            // Ask for enough room to lay out identifiers and tags in a row;
+            // when the row cannot give it, the actions wrap below instead.
+            hasPatientIdentifiersOrTags ? "md:basis-[44rem]" : "md:basis-64",
+          )}
         />
-        <div className="flex gap-2">
+        <div className="flex gap-2 md:ml-auto">
           {isAccountBillableAndActive && (
             <div className="hidden lg:flex gap-2">
               <Button
