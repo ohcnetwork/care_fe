@@ -196,9 +196,8 @@ export function QuestionnaireStudioPage({
       return;
     }
 
-    // The server can still reject a question the rules above don't cover.
-    // Its error names a zero-based path ("questions.5" is question 6), so
-    // open the question it means and say which one in the author's numbering.
+    // The server's error path counts from zero ("questions.5" is question
+    // 6), so open the question it means and name it as the outline does.
     const submitted = state.questions;
     const handleServerError = (error: Error) => {
       const target = findServerErrorQuestion(error, submitted);

@@ -63,25 +63,12 @@ const SAVE_CHECKS: SaveCheck[] = [
     messageKey: "quantity_needs_valueset",
   },
   {
-    // Same backend rule as quantity above: a choice question with neither
-    // custom options nor a value set is rejected, and the raw 400 only names
-    // a zero-based position ("questions.5" is the sixth question).
+    // Same backend rule as quantity above, for choice questions.
     predicate: (question) =>
       question.type === "choice" &&
       !question.answer_value_set &&
       (question.answer_option?.length ?? 0) === 0,
     messageKey: "choice_needs_options",
-  },
-  {
-    // The backend also rejects a custom option left blank.
-    predicate: (question) =>
-      question.type === "choice" &&
-      !question.answer_value_set &&
-      (question.answer_option?.some(
-        (option) => !String(option.value ?? "").trim(),
-      ) ??
-        false),
-    messageKey: "choice_option_values_required",
   },
   {
     // Core resource editors use structured questions; plugins use groups.
