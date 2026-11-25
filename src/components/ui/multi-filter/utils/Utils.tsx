@@ -146,6 +146,26 @@ export type FilterConfig =
   | CareTeamFilterConfig
   | FacilityUserFilterConfig;
 
+/**
+ * Whether a filter's picker takes one value. Picking it applies the value and
+ * closes the picker, as a select does, so the picker has no Done button.
+ * Multi-select pickers stay open until Done. Tags and locations always take
+ * several values; the date picker has its own apply flow.
+ */
+export function isSingleSelectFilter(filter: FilterConfig): boolean {
+  switch (filter.type) {
+    case "command":
+    case "activity_definition":
+      return filter.mode !== "multi";
+    case "department":
+    case "care_team":
+    case "facility_user":
+      return true;
+    default:
+      return false;
+  }
+}
+
 export interface OperationConfig {
   selectedOperation: Operation | null;
   availableOperations: Operation[];

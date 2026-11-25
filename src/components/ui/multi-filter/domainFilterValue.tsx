@@ -15,10 +15,15 @@ import {
   SelectedDateBadge,
   applyDateDraftOnClose,
 } from "./dateFilter";
+import { CloseOnRepickContext } from "./filterChoiceItem";
 import { FilterMenuSearchProvider } from "./filterMenuSearch";
 import FilterRenderer from "./filterRenderer";
 import { useFilterSurface } from "./filterSurface";
-import { FilterDateRange, FilterState } from "./utils/Utils";
+import {
+  FilterDateRange,
+  FilterState,
+  isSingleSelectFilter,
+} from "./utils/Utils";
 
 interface DomainFilterValueProps {
   state: FilterState;
@@ -58,21 +63,33 @@ export function DomainFilterValue({
   // The compact toolbar's popover or drawer hosts the picker itself.
   const inline = useFilterSurface() !== "menu";
 
+  // A single-select picker applies its pick and closes, as Done does in the
+  // toolbar and as the built-in option lists do; picking the current choice
+  // again closes it too. Clearing keeps it open.
+  const closeOnPick = isSingleSelectFilter(filter);
+  const closePicker = onClose ?? (() => onOpenChange?.(false));
+
   const picker = (
-    <FilterRenderer
-      activeFilter={filter.key}
-      dateDraftRef={dateDraftRef}
-      selectedFilters={{
-        ...selectedFilters,
-        [filter.key]: { ...state, selected },
-      }}
-      facilityId={facilityId}
-      handleBack={onBack}
-      handleClose={onClose}
-      onFilterChange={(_, next) =>
-        onChange(Array.isArray(next) ? next : [next])
-      }
-    />
+    <CloseOnRepickContext.Provider
+      value={closeOnPick ? closePicker : undefined}
+    >
+      <FilterRenderer
+        activeFilter={filter.key}
+        dateDraftRef={dateDraftRef}
+        selectedFilters={{
+          ...selectedFilters,
+          [filter.key]: { ...state, selected },
+        }}
+        facilityId={facilityId}
+        handleBack={onBack}
+        handleClose={onClose}
+        onFilterChange={(_, next) => {
+          const nextValues = Array.isArray(next) ? next : [next];
+          onChange(nextValues);
+          if (closeOnPick && nextValues.length > 0) closePicker();
+        }}
+      />
+    </CloseOnRepickContext.Provider>
   );
 
   const menu = inline ? (

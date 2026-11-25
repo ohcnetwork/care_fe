@@ -2,7 +2,11 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
-/** Action row shared by filter pickers: selection summary, Clear and Done. */
+/**
+ * Action row shared by filter pickers: selection summary, Clear and Done.
+ * A picker that closes when a value is picked omits `onDone`, so it has no
+ * Done; its header's close button closes it unchanged.
+ */
 function FilterFooter({
   multiple,
   selectedCount,
@@ -13,11 +17,12 @@ function FilterFooter({
   selectedCount: number;
   /** Omit for fields that can't be cleared. */
   onClear?: () => void;
-  onDone: () => void;
+  /** Omit for pickers that close when a value is picked. */
+  onDone?: () => void;
 }) {
   const { t } = useTranslation();
   // Keep Done at the trailing edge, but first in the multi-select tab order.
-  const doneButton = (
+  const doneButton = onDone && (
     <Button
       type="button"
       variant="primary"
