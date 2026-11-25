@@ -1,16 +1,18 @@
 import { Link } from "@tanstack/react-router";
+import { ChevronRight, MapPin, Stethoscope } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { EncounterActions } from "@/components/Encounter/EncounterActions";
+import {
+  EncounterStatusBadge,
+  EncounterTimeBlock,
+  PatientMeta,
+  patientHomeSearch,
+  viewEncounterParams,
+} from "@/components/Encounter/EncounterCardParts";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
 import {
   Tooltip,
   TooltipContent,
@@ -19,198 +21,181 @@ import {
 
 import { cn } from "@/lib/utils";
 
-import { PatientAge } from "@/components/Patient/PatientAge";
+import { Avatar } from "@/components/Common/Avatar";
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
-  ENCOUNTER_STATUS_COLORS,
   EncounterListRead,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import { LocationTypeIcons } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
-import { formatDateTime, formatName } from "@/Utils/utils";
-import { Clock, Stethoscope } from "lucide-react";
+import { formatName } from "@/Utils/utils";
 
 export interface EncounterInfoCardProps {
   encounter: EncounterListRead | EncounterRead;
   facilityId: string;
+  /** Drops the border and shadow so the card sits flush, as in a sheet. */
   hideBorder?: boolean;
 }
 
-export default function EncounterInfoCard(props: EncounterInfoCardProps) {
+const VISIBLE_TAGS = 2;
+
+/**
+ * One encounter in the encounters list: who, status, when, what kind, where
+ * and with whom, from the list response alone. The gear, the age and the
+ * tags reuse their existing components.
+ */
+export default function EncounterInfoCard({
+  encounter,
+  facilityId,
+  hideBorder = false,
+}: EncounterInfoCardProps) {
   const { t } = useTranslation();
-
-  const { encounter, facilityId, hideBorder = false } = props;
-
-  // Get encounter tags and handle overflow
-  const encounterTags = encounter.tags || [];
-  const visibleTags = encounterTags.slice(0, 2); // Show first 2 tags
-  const remainingCount = encounterTags.length - 2;
+  const { patient } = encounter;
+  const tags = encounter.tags ?? [];
+  const practitioner = encounter.care_team?.[0]?.member;
+  const location = encounter.current_location;
+  const LocationIcon = location ? LocationTypeIcons[location.form] : MapPin;
 
   return (
-    <Card
+    <article
       data-cy="encounter-card"
       data-status={encounter.status}
-      key={props.encounter.id}
       className={cn(
-        "md:flex md:flex-col h-full overflow-hidden",
-        hideBorder && "border-none shadow-none",
+        "flex h-full flex-col rounded-xl bg-background text-sm text-foreground",
+        !hideBorder &&
+          "border border-border shadow-xs transition-[border-color,box-shadow] duration-150 hover:border-strong-border hover:shadow-md hover:shadow-black/5 dark:hover:shadow-white/5",
       )}
     >
-      <CardHeader className="bg-gray-100 px-4 pt-2 pb-1">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex flex-1 min-w-0 flex-wrap items-center gap-x-2 gap-y-1 justify-between">
-            <div className="min-w-0 flex-1 basis-full sm:basis-auto">
-              <h3 className="text-lg font-semibold text-gray-950 break-words">
-                {encounter.patient.name}
-              </h3>
-              <p className="text-sm text-gray-700">
-                <PatientAge patient={encounter.patient} />,{" "}
-                {t(`GENDER__${encounter.patient.gender}`)}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2 shrink-0">
-              {encounter.patient.deceased_datetime && (
-                <Badge variant="destructive">{t("deceased")}</Badge>
-              )}
-              <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
-                {t(`encounter_status__${encounter.status}`)}
-              </Badge>
-            </div>
+      <div className="flex flex-1 flex-col gap-2.5 p-3.5">
+        {/* Header: avatar, name and meta; status and the gear. */}
+        <div className="flex items-start gap-2.5">
+          <Avatar
+            name={patient.name}
+            className="size-8 shrink-0 rounded-lg text-[11px]"
+          />
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate text-[15.5px] leading-5 font-semibold tracking-tight">
+              {patient.name}
+            </h3>
+            <PatientMeta patient={patient} />
           </div>
-          <EncounterActions encounter={encounter} />
-        </div>
-      </CardHeader>
-      <CardContent className="px-4 py-2 pt-2 bg-white space-y-2">
-        <div className="flex gap-1 items-center text-gray-600">
-          <Clock className="size-3 text-gray-500 shrink-0" />
-          <span className="text-xs text-gray-700">
-            {encounter.period.start &&
-              formatDateTime(encounter.period.start, "DD/MM/YYYY, hh:mm A")}
-            {encounter.period.end &&
-              ` - ${formatDateTime(encounter.period.end, "DD/MM/YYYY, hh:mm A")}`}
-          </span>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {patient.deceased_datetime && (
+              <Badge variant="destructive" size="md">
+                {t("deceased")}
+              </Badge>
+            )}
+            <EncounterStatusBadge status={encounter.status} />
+            <EncounterActions encounter={encounter} />
+          </div>
         </div>
 
-        {/* Doctor and Location Row */}
-        {(encounter.care_team?.[0] || encounter.current_location) && (
-          <div className="flex flex-col md:flex-row justify-start md:items-center gap-2 md:gap-3 text-gray-600">
-            {/* Primary Doctor */}
-            {encounter.care_team?.[0] && (
-              <div className="flex items-center gap-1 min-w-0">
-                <Stethoscope className="size-3 text-gray-500 shrink-0" />
-                <span className="text-xs font-medium text-gray-700 truncate">
-                  {formatName(encounter.care_team[0].member)}
-                </span>
+        <EncounterTimeBlock encounter={encounter} />
+
+        {/* Class, priority and tags. */}
+        <div className="flex flex-wrap items-center gap-1">
+          <Badge
+            variant={ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]}
+            size="md"
+          >
+            {t(`encounter_class__${encounter.encounter_class}`)}
+          </Badge>
+          <Badge
+            variant={ENCOUNTER_PRIORITY_COLORS[encounter.priority]}
+            size="md"
+          >
+            {t(`encounter_priority__${encounter.priority}`)}
+          </Badge>
+          {tags.slice(0, VISIBLE_TAGS).map((tag) => (
+            <TagBadge
+              key={tag.id}
+              tag={tag}
+              hierarchyDisplay
+              variant="outline"
+              className="text-xs"
+            />
+          ))}
+          {tags.length > VISIBLE_TAGS && (
+            <Badge variant="neutral" size="md">
+              +{tags.length - VISIBLE_TAGS} {t("more")}
+            </Badge>
+          )}
+        </div>
+
+        {/* Where and with whom; hidden when neither is known. */}
+        {(location || practitioner) && (
+          <dl className="grid grid-cols-2 gap-2 border-t border-dashed pt-2.5 text-xs text-muted-foreground">
+            {location && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div
+                    className="flex min-w-0 items-center gap-1.5"
+                    title={getLocationPath(location)}
+                  >
+                    <dt className="sr-only">{t("location")}</dt>
+                    <LocationIcon
+                      aria-hidden="true"
+                      className="size-[13px] shrink-0"
+                    />
+                    <dd className="truncate">{location.name}</dd>
+                  </div>
+                </TooltipTrigger>
+                {location.parent && (
+                  <TooltipContent side="bottom">
+                    {getLocationPath(location)}
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            )}
+            {practitioner && (
+              <div
+                className="flex min-w-0 items-center gap-1.5"
+                title={formatName(practitioner)}
+              >
+                <dt className="sr-only">{t("practitioner")}</dt>
+                <Stethoscope
+                  aria-hidden="true"
+                  className="size-[13px] shrink-0"
+                />
+                <dd className="truncate">{formatName(practitioner)}</dd>
               </div>
             )}
-
-            {/* Current Location */}
-            {encounter.current_location && (
-              <>
-                {encounter.care_team?.[0] && (
-                  <span className="text-gray-300 hidden md:inline">|</span>
-                )}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center gap-1 min-w-0 cursor-default">
-                      {(() => {
-                        const LocationIcon =
-                          LocationTypeIcons[encounter.current_location.form];
-                        return (
-                          <LocationIcon className="size-3 text-gray-500 shrink-0" />
-                        );
-                      })()}
-                      <span className="text-xs font-medium text-gray-700 truncate">
-                        {encounter.current_location.name}
-                      </span>
-                    </div>
-                  </TooltipTrigger>
-                  {encounter.current_location.parent && (
-                    <TooltipContent side="bottom">
-                      <span className="text-xs">
-                        {getLocationPath(encounter.current_location)}
-                      </span>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              </>
-            )}
-          </div>
+          </dl>
         )}
+      </div>
 
-        {/* Encounter Class and Priority Tags */}
-        <div className="flex flex-wrap gap-1">
-          {encounter.encounter_class && (
-            <Badge
-              variant={ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]}
-              className="text-xs"
+      <footer className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-b-xl border-t bg-soft-background px-3.5 py-2">
+        {encounter.external_identifier && (
+          <span
+            className="min-w-0 truncate font-mono text-xs text-muted-foreground"
+            title={t("encounter_id")}
+          >
+            {encounter.external_identifier}
+          </span>
+        )}
+        <div className="ml-auto flex shrink-0 items-center gap-1">
+          <Button variant="ghost" size="sm" asChild>
+            <Link
+              to="/facility/$facilityId/patients/home"
+              params={{ facilityId }}
+              search={patientHomeSearch(patient)}
             >
-              {t(`encounter_class__${encounter.encounter_class}`)}
-            </Badge>
-          )}
-          {encounter.priority && (
-            <Badge
-              variant={ENCOUNTER_PRIORITY_COLORS[encounter.priority]}
-              className="text-xs"
+              {t("patient_home")}
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link
+              to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
+              params={viewEncounterParams(encounter, facilityId)}
             >
-              {t(`encounter_priority__${encounter.priority}`)}
-            </Badge>
-          )}
+              {t("view_encounter")}
+              <ChevronRight data-icon="inline-end" aria-hidden="true" />
+            </Link>
+          </Button>
         </div>
-
-        {/* Tags Section */}
-        {encounterTags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {visibleTags.map((tag) => (
-              <TagBadge
-                key={tag.id}
-                tag={tag}
-                hierarchyDisplay
-                variant="outline"
-                className="bg-gray-100 text-gray-700 border-gray-200 px-2 py-1 text-xs"
-              />
-            ))}
-            {remainingCount > 0 && (
-              <Badge className="bg-gray-100 text-gray-700 border-gray-200 px-2 py-1 text-xs">
-                +{remainingCount}
-                {t("more")}
-              </Badge>
-            )}
-          </div>
-        )}
-      </CardContent>
-
-      <CardFooter className="flex flex-wrap justify-end items-center px-2 py-2 gap-x-1 gap-y-2 mt-auto">
-        <Button variant="link" aria-label={t("patient_home")} asChild>
-          <Link
-            to="/facility/$facilityId/patients/home"
-            params={{ facilityId }}
-            search={{
-              phone_number: encounter.patient.phone_number,
-              year_of_birth: encounter.patient.year_of_birth?.toString() || "",
-              partial_id: encounter.patient.id.slice(0, 5),
-            }}
-            className="text-gray-700 underline hover:text-gray-900 text-sm font-medium"
-          >
-            {t("patient_home")}
-          </Link>
-        </Button>
-        <Button variant="outline" aria-label={t("view_encounter")} asChild>
-          <Link
-            to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
-            params={{
-              facilityId,
-              patientId: encounter.patient.id,
-              encounterId: encounter.id,
-              tab: "updates",
-            }}
-          >
-            {t("view_encounter")}
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
+      </footer>
+    </article>
   );
 }

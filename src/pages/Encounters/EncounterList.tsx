@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { Check, Search } from "lucide-react";
+import { Check, LayoutGrid, List as ListIcon, Search } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,6 +20,14 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  Frame,
+  FrameDescription,
+  FrameFooter,
+  FrameHeader,
+  FramePanel,
+  FrameTitle,
+} from "@/components/ui/frame";
 import {
   InputGroup,
   InputGroupAddon,
@@ -45,12 +54,14 @@ import {
   PopoverAnchor,
   PopoverContent,
 } from "@/components/ui/popover";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import Page from "@/components/Common/Page";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
+import { EncounterTable } from "@/components/Encounter/EncounterTable";
 
 import useFilters from "@/hooks/useFilters";
 import { encounterListSearch } from "@/lib/router/search/encounter";
@@ -143,6 +154,82 @@ const buildQueryParams = (
   return params;
 };
 
+type EncounterListView = "cards" | "list";
+
+// The chosen view is a display preference: it lives in localStorage, not in
+// the URL or the query key, so switching never refetches.
+const VIEW_STORAGE_KEY = "care_encounter_list_view";
+
+function readStoredView(): EncounterListView {
+  try {
+    return localStorage.getItem(VIEW_STORAGE_KEY) === "list" ? "list" : "cards";
+  } catch {
+    return "cards";
+  }
+}
+
+function storeView(view: EncounterListView) {
+  try {
+    localStorage.setItem(VIEW_STORAGE_KEY, view);
+  } catch {
+    // Private mode or a full store: the choice just isn't remembered.
+  }
+}
+
+function EncounterViewToggle({
+  view,
+  onChange,
+}: {
+  view: EncounterListView;
+  onChange: (view: EncounterListView) => void;
+}) {
+  const { t } = useTranslation();
+  const options: {
+    value: EncounterListView;
+    label: string;
+    icon: typeof LayoutGrid;
+  }[] = [
+    { value: "cards", label: t("encounter_view_cards"), icon: LayoutGrid },
+    { value: "list", label: t("encounter_view_list"), icon: ListIcon },
+  ];
+  return (
+    <ToggleGroup
+      aria-label={t("view")}
+      value={[view]}
+      onValueChange={(next) => {
+        const picked = next[0] as EncounterListView | undefined;
+        if (picked && picked !== view) onChange(picked);
+      }}
+      size="sm"
+      spacing={1}
+      className="rounded-lg bg-muted p-0.5"
+    >
+      {options.map(({ value, label, icon: Icon }) => (
+        <ToggleGroupItem
+          key={value}
+          value={value}
+          aria-label={label}
+          className="relative h-7 gap-1.5 px-2.5 text-xs hover:bg-transparent data-pressed:bg-transparent"
+        >
+          {view === value && (
+            // The highlight slides between the options.
+            <motion.span
+              layoutId="encounter-view-toggle"
+              aria-hidden="true"
+              className="absolute inset-0 rounded-md bg-background shadow-xs"
+              transition={{ type: "spring", stiffness: 500, damping: 40 }}
+            />
+          )}
+          <span className="relative z-10 flex items-center gap-1.5">
+            <Icon aria-hidden="true" className="size-3.5" />
+            {label}
+          </span>
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
+  );
+}
+
 function EmptyState() {
   const { t } = useTranslation();
   return (
@@ -215,6 +302,11 @@ export function EncounterList({
     patientId: string;
     snapshot: Record<string, string | undefined>;
   } | null>(null);
+  const [view, setView] = useState<EncounterListView>(readStoredView);
+  const changeView = (next: EncounterListView) => {
+    setView(next);
+    storeView(next);
+  };
 
   const getDefaultDateRange = () => {
     const today = new Date();
@@ -761,6 +853,34 @@ export function EncounterList({
           })
       : undefined;
 
+  // The frame footer and header read the page's own data only.
+  const totalCount = propEncounters
+    ? propEncounters.length
+    : queryEncounters?.count;
+  const hasMorePages =
+    !propEncounters &&
+    !!queryEncounters &&
+    queryEncounters.count > resultsPerPage;
+  const rangeFrom = ((qParams.page || 1) - 1) * resultsPerPage + 1;
+  const showingRange =
+    !isFetching && totalCount && encounters.length
+      ? t("encounters_showing_range", {
+          from: propEncounters ? 1 : rangeFrom,
+          to: propEncounters
+            ? encounters.length
+            : rangeFrom + encounters.length - 1,
+          total: totalCount,
+        })
+      : undefined;
+  // "N in progress" is exact only when this page holds every result.
+  const inProgressCount = encounters.filter(
+    (encounter) => encounter.status === EncounterStatus.IN_PROGRESS,
+  ).length;
+  const liveSummary =
+    !isFetching && inProgressCount > 0 && !hasMorePages
+      ? t("encounters_in_progress_count", { count: inProgressCount })
+      : undefined;
+
   const dateRange =
     Array.isArray(dateState.selected) ||
     ((patient_filter || encounterClass === "imp") &&
@@ -947,41 +1067,76 @@ export function EncounterList({
           />
         )}
 
-        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-          {isFetching ? (
-            <CardGridSkeleton count={6} />
-          ) : encounters.length === 0 ? (
-            <div className="col-span-full">
-              {isAllList ? (
-                <EncounterListEmptyState
-                  applied={appliedNames}
-                  onClearFilters={clearEmptyStateFilters}
-                  onShowAnyDate={showAnyDate}
-                />
-              ) : (
-                <EmptyState />
+        <Frame>
+          <FrameHeader className="flex-row items-center justify-between gap-2">
+            <div className="min-w-0">
+              <FrameTitle>{t("encounters")}</FrameTitle>
+              {liveSummary && (
+                <FrameDescription className="text-xs">
+                  {liveSummary}
+                </FrameDescription>
               )}
             </div>
-          ) : (
-            <>
-              {encounters.map(
-                (encounter: EncounterListRead | EncounterRead) => (
-                  <EncounterInfoCard
-                    key={encounter.id}
-                    encounter={encounter}
-                    facilityId={facilityId}
+            <EncounterViewToggle view={view} onChange={changeView} />
+          </FrameHeader>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={view}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              {!isFetching && encounters.length === 0 ? (
+                isAllList ? (
+                  <EncounterListEmptyState
+                    applied={appliedNames}
+                    onClearFilters={clearEmptyStateFilters}
+                    onShowAnyDate={showAnyDate}
                   />
-                ),
+                ) : (
+                  <EmptyState />
+                )
+              ) : view === "list" ? (
+                // One panel holds the table; its own container border is
+                // dropped so only the frame and the panel draw borders.
+                <FramePanel className="overflow-hidden p-0 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
+                  <EncounterTable
+                    encounters={encounters}
+                    facilityId={facilityId}
+                    loading={isFetching}
+                  />
+                </FramePanel>
+              ) : (
+                <div className="grid gap-2 [grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr))]">
+                  {isFetching ? (
+                    <CardGridSkeleton count={6} />
+                  ) : (
+                    encounters.map(
+                      (encounter: EncounterListRead | EncounterRead) => (
+                        <EncounterInfoCard
+                          key={encounter.id}
+                          encounter={encounter}
+                          facilityId={facilityId}
+                        />
+                      ),
+                    )
+                  )}
+                </div>
               )}
-              {queryEncounters?.count &&
-                queryEncounters.count > resultsPerPage && (
-                  <div className="col-span-full">
-                    <Pagination totalCount={queryEncounters.count} />
-                  </div>
-                )}
-            </>
+            </motion.div>
+          </AnimatePresence>
+          {(showingRange || hasMorePages) && (
+            <FrameFooter className="flex-row flex-wrap items-center justify-between gap-2">
+              <span className="text-xs text-muted-foreground">
+                {showingRange}
+              </span>
+              {hasMorePages && queryEncounters && (
+                <Pagination totalCount={queryEncounters.count} noMargin />
+              )}
+            </FrameFooter>
           )}
-        </div>
+        </Frame>
       </div>
     </Page>
   );
