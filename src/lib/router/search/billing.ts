@@ -63,9 +63,8 @@ export const accountListSearch = z.object({
   billing_status: searchEnum(AccountBillingStatus),
   /** One of `careConfig.encounterClasses`. */
   encounter_class: searchString(),
-  /** A date and time (`dateTimeQueryString`). */
-  created_date_after: searchString(),
-  created_date_before: searchString(),
+  created_date_after: searchDate(),
+  created_date_before: searchDate(),
   /** Comma-separated tag ids. */
   tags: searchString(),
   tags_behavior: searchString(),
