@@ -81,6 +81,14 @@ const careConfig = {
   defaultDischargeDisposition: env.REACT_DEFAULT_DISCHARGE_DISPOSITION as
     EncounterDischargeDisposition | undefined,
 
+  /**
+   * Flag to make hospital identifier mandatory in the encounter question
+   */
+  encounterHospitalIdentifierRequired: booleanFromString(
+    env.REACT_ENCOUNTER_HOSPITAL_IDENTIFIER_REQUIRED,
+    false,
+  ),
+
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
     "https://www.openstreetmap.org/?mlat={lat}&mlon={long}&zoom=15",
