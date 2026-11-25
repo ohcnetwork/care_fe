@@ -118,11 +118,11 @@ function DateRangeOptions({
         </FilterMenuItem>
       </div>
       {handleClose ? (
+        // No Done: picking a preset, or applying a custom range, closes.
         <FilterFooter
           multiple={false}
           selectedCount={hasSelection ? 1 : 0}
           onClear={onClear}
-          onDone={handleClose}
         />
       ) : (
         <NavigationHelper isActiveFilter={true} />
@@ -201,10 +201,9 @@ export default function RenderDateFilter({
           value={selected}
           minDate={meta?.minDate}
           maxDate={meta?.maxDate}
-          onApply={(range) => {
-            onFilterChange(filter.key, range);
-            setView("options");
-          }}
+          // Applying closes the picker; the calendar stays on screen while
+          // it fades out rather than switching back to the presets.
+          onApply={(range) => onFilterChange(filter.key, range)}
         />
       ) : (
         <DateRangeOptions
@@ -243,6 +242,20 @@ export const getDateOperations = (selected: FilterDateRange) => {
   return [];
 };
 
+/**
+ * Wraps a date picker's change handler so a picked range (a preset, or an
+ * applied custom range) closes the picker; clearing keeps it open.
+ */
+function closeOnDatePick(
+  onFilterChange: (key: string, values: FilterValues) => void,
+  close: () => void,
+) {
+  return (key: string, values: FilterValues) => {
+    onFilterChange(key, values);
+    if (!Array.isArray(values)) close();
+  };
+}
+
 export function DateFilterButton({
   filter,
   selected,
@@ -257,7 +270,9 @@ export function DateFilterButton({
   const { t } = useTranslation();
   const draftRef = useRef<DateFilterHandle>(null);
   const isMobile = useIsMobile();
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  // One open state for the menu and the drawer, so a pick can close either.
+  const [open, setOpen] = useState(false);
+  const pick = closeOnDatePick(onFilterChange, () => setOpen(false));
   const hasDate = Boolean(selected.from || selected.to);
   const button = (
     <Button
@@ -279,10 +294,10 @@ export function DateFilterButton({
   if (isMobile) {
     return (
       <Drawer
-        open={drawerOpen}
-        onOpenChange={(open, details) => {
-          applyDateDraftOnClose(draftRef, open, details);
-          setDrawerOpen(open);
+        open={open}
+        onOpenChange={(next, details) => {
+          applyDateDraftOnClose(draftRef, next, details);
+          setOpen(next);
         }}
       >
         <DrawerTrigger asChild>{button}</DrawerTrigger>
@@ -292,8 +307,8 @@ export function DateFilterButton({
               ref={draftRef}
               filter={filter}
               selected={selected}
-              onFilterChange={onFilterChange}
-              handleClose={() => setDrawerOpen(false)}
+              onFilterChange={pick}
+              handleClose={() => setOpen(false)}
             />
           </FilterSurfaceContext.Provider>
         </DrawerContent>
@@ -303,9 +318,11 @@ export function DateFilterButton({
 
   return (
     <DropdownMenu
-      onOpenChange={(open, details) =>
-        applyDateDraftOnClose(draftRef, open, details)
-      }
+      open={open}
+      onOpenChange={(next, details) => {
+        applyDateDraftOnClose(draftRef, next, details);
+        setOpen(next);
+      }}
     >
       <DropdownMenuTrigger asChild>{button}</DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-0">
@@ -313,7 +330,7 @@ export function DateFilterButton({
           ref={draftRef}
           filter={filter}
           selected={selected}
-          onFilterChange={onFilterChange}
+          onFilterChange={pick}
         />
       </DropdownMenuContent>
     </DropdownMenu>
@@ -333,6 +350,7 @@ export const SelectedDateBadge = ({
 }) => {
   const { t } = useTranslation();
   const draftRef = useRef<DateFilterHandle>(null);
+  const [open, setOpen] = useState(false);
   const hasValidFrom = !!selected.from && isValid(selected.from);
   const hasValidTo = !!selected.to && isValid(selected.to);
   if (!hasValidFrom && !hasValidTo) return <></>;
@@ -371,9 +389,11 @@ export const SelectedDateBadge = ({
 
   return (
     <DropdownMenu
-      onOpenChange={(open, details) =>
-        applyDateDraftOnClose(draftRef, open, details)
-      }
+      open={open}
+      onOpenChange={(next, details) => {
+        applyDateDraftOnClose(draftRef, next, details);
+        setOpen(next);
+      }}
     >
       <DropdownMenuTrigger asChild>
         <Button
@@ -391,7 +411,7 @@ export const SelectedDateBadge = ({
           ref={draftRef}
           filter={filter}
           selected={selected}
-          onFilterChange={onFilterChange}
+          onFilterChange={closeOnDatePick(onFilterChange, () => setOpen(false))}
           defaultView="custom"
         />
       </DropdownMenuContent>

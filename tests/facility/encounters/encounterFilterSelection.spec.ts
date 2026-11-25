@@ -1044,8 +1044,9 @@ test("opens the filters in one bottom drawer on mobile", async ({ page }) => {
   const date = page.getByRole("button", { name: /^date/i });
   await date.click();
   const datePicker = page.getByRole("dialog", { name: /^date$/i });
+  // Picking a preset closes it; there is no Done.
+  await expect(datePicker.getByRole("button", { name: "Done" })).toHaveCount(0);
   await datePicker.getByRole("menuitem", { name: /^yesterday$/i }).click();
-  await datePicker.getByRole("button", { name: "Done" }).click();
   await expect(drawers).toHaveCount(0);
   await expect(date).toHaveText(/yesterday/i);
 });
@@ -1463,4 +1464,43 @@ test.describe("All encounters search", () => {
     // With a field chosen, only its row shows.
     await expect(page.getByRole("option")).toHaveCount(1);
   });
+});
+
+test("the Date menu closes on a preset or an applied custom range", async ({
+  page,
+}) => {
+  await page.goto(`/facility/${facility.id}/encounters/patients/all`);
+  const date = page.getByRole("button", { name: /^date/i });
+  const menu = page.locator('[data-slot="dropdown-menu-content"]');
+  const yesterday = page.getByRole("menuitem", { name: /^yesterday$/i });
+
+  await date.click();
+  await yesterday.click();
+  await expect(menu).toHaveCount(0);
+  await expect(date).toHaveText(/yesterday/i);
+  await expect(date).toBeFocused();
+
+  // The current preset again closes without a change.
+  const before = page.url();
+  await date.click();
+  await yesterday.click();
+  await expect(menu).toHaveCount(0);
+  expect(page.url()).toBe(before);
+
+  // Opening the custom range is not a pick: the calendar stays open, and
+  // Apply closes it without switching back to the presets on the way out.
+  await date.click();
+  await page.getByRole("menuitem", { name: /custom date range/i }).click();
+  const inputs = page.locator('[data-slot="date-range-picker"] input');
+  await expect(inputs.first()).toBeVisible();
+  await inputs.first().fill("01/01/2026");
+  await inputs.nth(1).fill("10/01/2026");
+  await page.getByRole("button", { name: /^apply$/i }).click();
+  await expect(yesterday).toHaveCount(0);
+  await expect(menu).toHaveCount(0);
+  await expect(page).toHaveURL(
+    ({ searchParams }) =>
+      searchParams.get("created_date_after") === "2026-01-01" &&
+      searchParams.get("created_date_before") === "2026-01-10",
+  );
 });
