@@ -154,6 +154,7 @@ function HealthcareServiceFormContent({
             name: "",
             styling_metadata: { careIcon: undefined },
             extra_details: "",
+            internal_type: undefined,
             locations: [],
             managing_organization: null,
           },
@@ -294,7 +295,7 @@ function HealthcareServiceFormContent({
                       <FormControl>
                         <Select
                           onValueChange={field.onChange}
-                          value={field.value}
+                          value={field.value ?? ""}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue
@@ -454,11 +455,7 @@ function HealthcareServiceFormContent({
                       <FormControl>
                         <IconPicker
                           value={field.value || ""}
-                          onChange={(value) => {
-                            form.setValue("styling_metadata", {
-                              careIcon: value,
-                            });
-                          }}
+                          onChange={field.onChange}
                         />
                       </FormControl>
                       <FormMessage />
