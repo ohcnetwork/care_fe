@@ -3887,7 +3887,6 @@
   "questionnaire_response_logs": "Questionnaire Response Logs",
   "questionnaire_response_marked_as_entered_in_error": "Questionnaire response marked as entered in error",
   "questionnaire_responses": "Questionnaire Responses",
-  "questionnaire_server_error_question": "Check question {{position}} ({{title}}) — the error above is about this question",
   "questionnaire_submission_failed": "Failed to submit questionnaire",
   "questionnaire_submit_missing_forms": "{{forms}} could not be included in this save. Reload the page and try again.",
   "questionnaire_submit_requires_encounter": "\"{{title}}\" can only be submitted from an encounter. Open it from the patient's encounter and try again.",

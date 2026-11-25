@@ -58,6 +58,7 @@ export function handleHttpError(error: Error) {
       return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     Notifications.BadRequest({ errs });
     return;
   }
@@ -94,7 +95,7 @@ function contentTooLarge(error: HTTPError) {
 
 type PydanticError = {
   type: string;
-  loc?: string[];
+  loc?: (string | number)[];
   msg: string | Record<string, string>;
   input?: unknown;
   url?: string;
@@ -145,7 +146,7 @@ function isPydanticError(errors: unknown): errors is PydanticError[] {
 function handlePydanticErrors(errors: PydanticError[]) {
   errors.map(({ type, loc, msg }) => {
     const message = typeof msg === "string" ? msg : Object.values(msg)[0];
-    if (!loc) {
+    if (!loc?.length) {
       toast.error(message);
       return;
     }
@@ -153,7 +154,8 @@ function handlePydanticErrors(errors: PydanticError[]) {
       .replace("_", " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
     toast.error(message, {
-      description: `${type}: '${loc.join(".")}'`,
+      // List positions arrive zero-based; show them as people count.
+      description: `${type}: '${loc.map((part) => (typeof part === "number" ? part + 1 : part)).join(".")}'`,
       duration: 8000,
     });
   });

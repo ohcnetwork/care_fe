@@ -35,7 +35,6 @@ import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import { ActionsPanel } from "./ActionsPanel";
 import { FormSettingsPanel } from "./FormSettingsPanel";
 import { QuestionInspector } from "./QuestionInspector";
-import { findServerErrorQuestion } from "./serverErrorQuestion";
 import { StudioCanvas } from "./StudioCanvas";
 import { StudioMobileQuestionNav } from "./StudioMobileQuestionNav";
 import { StudioOutline } from "./StudioOutline";
@@ -196,32 +195,12 @@ export function QuestionnaireStudioPage({
       return;
     }
 
-    // The server's error path counts from zero ("questions.5" is question
-    // 6), so open the question it means and name it as the outline does.
-    const submitted = state.questions;
-    const handleServerError = (error: Error) => {
-      const target = findServerErrorQuestion(error, submitted);
-      if (!target) return;
+    form.handleSubmit(saveDraft, () => {
+      // Metadata invalid (e.g. slug out of bounds) — surface the fields.
       setView("edit");
-      revealQuestion(target.question.id);
-      toast.error(
-        t("questionnaire_server_error_question", {
-          position: target.position,
-          title: target.question.text,
-        }),
-        { duration: 8000 },
-      );
-    };
-
-    form.handleSubmit(
-      (meta) => saveDraft(meta, handleServerError),
-      () => {
-        // Metadata invalid (e.g. slug out of bounds) — surface the fields.
-        setView("edit");
-        setInspectorTarget("form");
-        toast.error(t("form_settings_invalid"));
-      },
-    )();
+      setInspectorTarget("form");
+      toast.error(t("form_settings_invalid"));
+    })();
   };
 
   // isPermissionLoading folds in so write affordances (Save Changes, Import)
