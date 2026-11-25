@@ -1,6 +1,5 @@
-import { Clock } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useSyncExternalStore } from "react";
+import { ReactNode, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -173,34 +172,45 @@ function LiveDot() {
   );
 }
 
-/** The card's time block: a label line, then the value and its context. */
-export function EncounterTimeBlock({ encounter }: { encounter: Encounter }) {
+/**
+ * The card's time block: a label line, then the value and its context.
+ * `action` sits at its right end, such as the encounter's gear menu.
+ */
+export function EncounterTimeBlock({
+  encounter,
+  action,
+}: {
+  encounter: Encounter;
+  action?: ReactNode;
+}) {
   const time = useEncounterTime(encounter);
   return (
     <div
       data-slot="encounter-time"
-      className="flex flex-col gap-0.5 rounded-lg bg-soft-background px-2.5 py-2"
+      className="flex items-center gap-2 rounded-lg bg-soft-background px-2.5 py-2"
     >
-      <div className="flex items-center gap-1.5 text-[11.5px] leading-4 font-medium text-muted-foreground">
-        <Clock aria-hidden="true" className="size-3 shrink-0" />
-        <span className="truncate">{time.label}</span>
-      </div>
-      <div className="flex min-w-0 items-baseline gap-1.5">
-        {time.live && <LiveDot />}
-        <span
-          className={cn(
-            "shrink-0 text-[13.5px] leading-5 font-medium tabular-nums",
-            time.struck && "text-muted-foreground line-through",
-          )}
-        >
-          {time.value}
-        </span>
-        {time.context && (
-          <span className="truncate text-xs text-muted-foreground">
-            {time.context}
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <div className="flex items-center gap-1.5 text-[11.5px] leading-4 font-medium text-muted-foreground">
+          <span className="truncate">{time.label}</span>
+        </div>
+        <div className="flex min-w-0 items-baseline gap-1.5">
+          {time.live && <LiveDot />}
+          <span
+            className={cn(
+              "shrink-0 text-[13.5px] leading-5 font-medium tabular-nums",
+              time.struck && "text-muted-foreground line-through",
+            )}
+          >
+            {time.value}
           </span>
-        )}
+          {time.context && (
+            <span className="truncate text-xs text-muted-foreground">
+              {time.context}
+            </span>
+          )}
+        </div>
       </div>
+      {action}
     </div>
   );
 }

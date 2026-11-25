@@ -79,14 +79,11 @@ export function EncounterTable({
           <TableHead className={`${headCell} w-[10%]`}>
             {t("priority")}
           </TableHead>
-          <TableHead className={`${headCell} w-[11%]`}>
+          <TableHead className={`${headCell} w-[15%]`}>
             {t("location")}
           </TableHead>
-          <TableHead className={`${headCell} w-[10%]`}>
+          <TableHead className={`${headCell} w-[14%]`}>
             {t("practitioner")}
-          </TableHead>
-          <TableHead className={`${headCell} w-[8%]`}>
-            {t("encounter_id")}
           </TableHead>
           <TableHead className={`${headCell} w-28 text-right`}>
             {t("actions")}
@@ -126,9 +123,6 @@ export function EncounterTable({
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-3.5 w-24" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-3.5 w-16" />
                 </TableCell>
                 <TableCell>
                   <div className="flex justify-end gap-1">
@@ -257,14 +251,6 @@ function EncounterTableRow({
           title={practitioner ? formatName(practitioner) : undefined}
         >
           {practitioner ? formatName(practitioner) : "—"}
-        </span>
-      </TableCell>
-      <TableCell>
-        <span
-          className="block truncate font-mono text-xs text-muted-foreground"
-          title={encounter.external_identifier ?? undefined}
-        >
-          {encounter.external_identifier ?? "—"}
         </span>
       </TableCell>
       <TableCell>

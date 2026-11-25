@@ -69,7 +69,7 @@ export default function EncounterInfoCard({
       )}
     >
       <div className="flex flex-1 flex-col gap-2.5 p-3.5">
-        {/* Header: avatar, name and meta; status and the gear. */}
+        {/* Header: avatar, name and meta; status. */}
         <div className="flex items-start gap-2.5">
           <Avatar
             name={patient.name}
@@ -88,11 +88,15 @@ export default function EncounterInfoCard({
               </Badge>
             )}
             <EncounterStatusBadge status={encounter.status} />
-            <EncounterActions encounter={encounter} />
           </div>
         </div>
 
-        <EncounterTimeBlock encounter={encounter} />
+        {/* The gear (Restart, for a completed encounter only) sits beside
+            the time that says it was completed. */}
+        <EncounterTimeBlock
+          encounter={encounter}
+          action={<EncounterActions encounter={encounter} />}
+        />
 
         {/* Class, priority and tags. */}
         <div className="flex flex-wrap items-center gap-1">
@@ -124,77 +128,76 @@ export default function EncounterInfoCard({
           )}
         </div>
 
-        {/* Where and with whom; hidden when neither is known. */}
-        {(location || practitioner) && (
-          <dl className="grid grid-cols-2 gap-2 border-t border-dashed pt-2.5 text-xs text-muted-foreground">
-            {location && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div
-                    className="flex min-w-0 items-center gap-1.5"
-                    title={getLocationPath(location)}
-                  >
-                    <dt className="sr-only">{t("location")}</dt>
-                    <LocationIcon
-                      aria-hidden="true"
-                      className="size-[13px] shrink-0"
-                    />
-                    <dd className="truncate">{location.name}</dd>
-                  </div>
-                </TooltipTrigger>
-                {location.parent && (
-                  <TooltipContent side="bottom">
-                    {getLocationPath(location)}
-                  </TooltipContent>
-                )}
-              </Tooltip>
+        {/* Where and with whom. Both slots always show, so an encounter
+            without a location or a practitioner reads as unassigned. */}
+        <dl className="mt-auto grid grid-cols-2 gap-2 border-t border-dashed pt-2.5 text-xs text-muted-foreground">
+          {location ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  className="flex min-w-0 items-center gap-1.5"
+                  title={getLocationPath(location)}
+                >
+                  <dt className="sr-only">{t("location")}</dt>
+                  <LocationIcon
+                    aria-hidden="true"
+                    className="size-3.25 shrink-0"
+                  />
+                  <dd className="truncate text-foreground">{location.name}</dd>
+                </div>
+              </TooltipTrigger>
+              {location.parent && (
+                <TooltipContent side="bottom">
+                  {getLocationPath(location)}
+                </TooltipContent>
+              )}
+            </Tooltip>
+          ) : (
+            <div className="flex min-w-0 items-center gap-1.5">
+              <dt className="sr-only">{t("location")}</dt>
+              <MapPin aria-hidden="true" className="size-3.25 shrink-0" />
+              <dd className="truncate">{t("encounter_card_no_location")}</dd>
+            </div>
+          )}
+          <div
+            className="flex min-w-0 items-center gap-1.5"
+            title={practitioner ? formatName(practitioner) : undefined}
+          >
+            <dt className="sr-only">{t("practitioner")}</dt>
+            <Stethoscope aria-hidden="true" className="size-3.25 shrink-0" />
+            {practitioner ? (
+              <dd className="truncate text-foreground">
+                {formatName(practitioner)}
+              </dd>
+            ) : (
+              <dd className="truncate">
+                {t("encounter_card_no_practitioner")}
+              </dd>
             )}
-            {practitioner && (
-              <div
-                className="flex min-w-0 items-center gap-1.5"
-                title={formatName(practitioner)}
-              >
-                <dt className="sr-only">{t("practitioner")}</dt>
-                <Stethoscope
-                  aria-hidden="true"
-                  className="size-[13px] shrink-0"
-                />
-                <dd className="truncate">{formatName(practitioner)}</dd>
-              </div>
-            )}
-          </dl>
-        )}
+          </div>
+        </dl>
       </div>
 
-      <footer className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-b-xl border-t bg-soft-background px-3.5 py-2">
-        {encounter.external_identifier && (
-          <span
-            className="min-w-0 truncate font-mono text-xs text-muted-foreground"
-            title={t("encounter_id")}
+      <footer className="flex items-center justify-between gap-2 rounded-b-xl border-t bg-soft-background px-3.5 py-2">
+        <Button variant="tertiary" asChild>
+          <Link
+            to="/facility/$facilityId/patients/home"
+            params={{ facilityId }}
+            className="underline"
+            search={patientHomeSearch(patient)}
           >
-            {encounter.external_identifier}
-          </span>
-        )}
-        <div className="ml-auto flex shrink-0 items-center gap-1">
-          <Button variant="ghost" size="sm" asChild>
-            <Link
-              to="/facility/$facilityId/patients/home"
-              params={{ facilityId }}
-              search={patientHomeSearch(patient)}
-            >
-              {t("patient_home")}
-            </Link>
-          </Button>
-          <Button variant="outline" size="sm" asChild>
-            <Link
-              to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
-              params={viewEncounterParams(encounter, facilityId)}
-            >
-              {t("view_encounter")}
-              <ChevronRight data-icon="inline-end" aria-hidden="true" />
-            </Link>
-          </Button>
-        </div>
+            {t("patient_home")}
+          </Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link
+            to="/facility/$facilityId/patient/$patientId/encounter/$encounterId/$tab"
+            params={viewEncounterParams(encounter, facilityId)}
+          >
+            {t("view_encounter")}
+            <ChevronRight data-icon="inline-end" aria-hidden="true" />
+          </Link>
+        </Button>
       </footer>
     </article>
   );

@@ -22,11 +22,9 @@ import {
 } from "@/components/ui/command";
 import {
   Frame,
-  FrameDescription,
   FrameFooter,
   FrameHeader,
   FramePanel,
-  FrameTitle,
 } from "@/components/ui/frame";
 import {
   InputGroup,
@@ -54,7 +52,7 @@ import {
   PopoverAnchor,
   PopoverContent,
 } from "@/components/ui/popover";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -176,12 +174,14 @@ function storeView(view: EncounterListView) {
   }
 }
 
-function EncounterViewToggle({
+function EncounterViewTabs({
   view,
   onChange,
+  className,
 }: {
   view: EncounterListView;
   onChange: (view: EncounterListView) => void;
+  className?: string;
 }) {
   const { t } = useTranslation();
   const options: {
@@ -193,40 +193,20 @@ function EncounterViewToggle({
     { value: "list", label: t("encounter_view_list"), icon: ListIcon },
   ];
   return (
-    <ToggleGroup
-      aria-label={t("view")}
-      value={[view]}
-      onValueChange={(next) => {
-        const picked = next[0] as EncounterListView | undefined;
-        if (picked && picked !== view) onChange(picked);
-      }}
-      size="sm"
-      spacing={1}
-      className="rounded-lg bg-muted p-0.5"
+    <Tabs
+      value={view}
+      onValueChange={(next) => onChange(next as EncounterListView)}
+      className={className}
     >
-      {options.map(({ value, label, icon: Icon }) => (
-        <ToggleGroupItem
-          key={value}
-          value={value}
-          aria-label={label}
-          className="relative h-7 gap-1.5 px-2.5 text-xs hover:bg-transparent data-pressed:bg-transparent"
-        >
-          {view === value && (
-            // The highlight slides between the options.
-            <motion.span
-              layoutId="encounter-view-toggle"
-              aria-hidden="true"
-              className="absolute inset-0 rounded-md bg-background shadow-xs"
-              transition={{ type: "spring", stiffness: 500, damping: 40 }}
-            />
-          )}
-          <span className="relative z-10 flex items-center gap-1.5">
-            <Icon aria-hidden="true" className="size-3.5" />
+      <TabsList aria-label={t("view")}>
+        {options.map(({ value, label, icon: Icon }) => (
+          <TabsTrigger key={value} value={value}>
+            <Icon aria-hidden="true" />
             {label}
-          </span>
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   );
 }
 
@@ -302,11 +282,14 @@ export function EncounterList({
     patientId: string;
     snapshot: Record<string, string | undefined>;
   } | null>(null);
-  const [view, setView] = useState<EncounterListView>(readStoredView);
+  const [preferredView, setPreferredView] =
+    useState<EncounterListView>(readStoredView);
   const changeView = (next: EncounterListView) => {
-    setView(next);
+    setPreferredView(next);
     storeView(next);
   };
+  // Mobile shows only cards; the saved choice returns on a wider screen.
+  const view: EncounterListView = isMobile ? "cards" : preferredView;
 
   const getDefaultDateRange = () => {
     const today = new Date();
@@ -872,15 +855,6 @@ export function EncounterList({
           total: totalCount,
         })
       : undefined;
-  // "N in progress" is exact only when this page holds every result.
-  const inProgressCount = encounters.filter(
-    (encounter) => encounter.status === EncounterStatus.IN_PROGRESS,
-  ).length;
-  const liveSummary =
-    !isFetching && inProgressCount > 0 && !hasMorePages
-      ? t("encounters_in_progress_count", { count: inProgressCount })
-      : undefined;
-
   const dateRange =
     Array.isArray(dateState.selected) ||
     ((patient_filter || encounterClass === "imp") &&
@@ -907,237 +881,236 @@ export function EncounterList({
         </Badge>
       }
     >
-      <div className="@container/toolbar space-y-4 mt-4 flex flex-col">
-        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 @4xl/toolbar:flex-nowrap">
-          <div className="flex w-full min-w-0 items-center gap-2 @4xl/toolbar:w-auto">
-            {isAllList ? (
-              <EncounterSearch
-                // Compact; it widens only when two chips share the line.
-                className="w-full @4xl/toolbar:w-96 @4xl/toolbar:has-[[data-slot=encounter-search-applied]+[data-slot=encounter-search-applied]]:w-[32rem]"
-                previewQueryParams={listFilterParams}
-                applied={isMobile ? {} : appliedSearch}
-                onApplyText={applySearchText}
-                onRemoveText={removeSearchText}
-                onSelectPatient={selectPatient}
-                onRemovePatient={removePatient}
-              />
-            ) : (
-              <>
-                <div className="relative min-w-24 flex-1 @4xl/toolbar:w-60 @4xl/toolbar:flex-none">
-                  <Popover
-                    open={searchOptionsOpen && showSearchOptions}
-                    onOpenChange={setSearchOptionsOpen}
-                  >
-                    <PopoverAnchor asChild>
-                      <InputGroup>
-                        <InputGroupInput
-                          ref={searchInputRef}
-                          value={searchText}
-                          onChange={(event) => {
-                            const value = event.target.value;
-                            setSearchText(value);
-                            setSearchOptionsOpen(value.trim() !== "");
-                            setActiveSearchOptionIndex(0);
-                          }}
-                          onFocus={() => {
-                            if (showSearchOptions) {
-                              setSearchOptionsOpen(true);
-                            }
-                          }}
-                          onKeyDown={handleSearchInputKeyDown}
-                          placeholder={selectedSearchType.placeholder}
-                        />
-                        <InputGroupAddon>
-                          <Search aria-hidden="true" />
-                        </InputGroupAddon>
-                      </InputGroup>
-                    </PopoverAnchor>
-                    <PopoverContent
-                      className="w-(--anchor-width) p-0"
-                      align="start"
-                      onOpenAutoFocus={(event) => {
-                        event.preventDefault();
-                        searchInputRef.current?.focus();
-                      }}
-                      onCloseAutoFocus={(event) => {
-                        event.preventDefault();
-                      }}
-                    >
-                      <Command>
-                        <CommandList>
-                          <CommandGroup>
-                            {searchWithOptions.map((option, index) => (
-                              <CommandItem
-                                key={option.key}
-                                value={option.key}
-                                onSelect={() =>
-                                  handleSearchWithChange(option.key)
-                                }
-                                className={`flex items-center gap-2 ${
-                                  activeSearchOptionIndex === index
-                                    ? "bg-accent"
-                                    : ""
-                                }`}
-                                onMouseEnter={() =>
-                                  setActiveSearchOptionIndex(index)
-                                }
-                              >
-                                <div>
-                                  {searchText}{" "}
-                                  <span className="text-muted-foreground">
-                                    {option.label}
-                                  </span>
-                                </div>
-                                <Check
-                                  className={`ml-auto size-4 ${
-                                    option.key === searchWith
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  }`}
-                                />
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <PatientIdentifierFilter
-                  onSelect={(patientId, patientName) =>
-                    updateQuery({
-                      patient_filter: patientId,
-                      patient_name: patientName,
-                      created_date_after: undefined,
-                      created_date_before: undefined,
-                    })
-                  }
-                  placeholder={t("filter_by_identifier")}
-                  size="default"
-                  className="w-auto min-w-0 flex-1 @4xl/toolbar:flex-none [&>[data-variant]]:shadow-2xs"
-                  scanLabelClassName="hidden @lg/toolbar:block"
-                  patientId={qParams.patient_filter}
-                  patientName={qParams.patient_name}
+      <Frame className="mt-4">
+        {/* The toolbar: search and filters on the left, the view tabs on
+            the right; applied-search chips and the date notice below. */}
+        <FrameHeader className="@container/toolbar gap-2">
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-2 @4xl/toolbar:flex-nowrap">
+            <div className="flex w-full min-w-0 items-center gap-2 @4xl/toolbar:w-auto">
+              {isAllList ? (
+                <EncounterSearch
+                  // Compact; it widens only when two chips share the line.
+                  className="w-full @4xl/toolbar:w-96 @4xl/toolbar:has-[[data-slot=encounter-search-applied]+[data-slot=encounter-search-applied]]:w-[32rem]"
+                  previewQueryParams={listFilterParams}
+                  applied={isMobile ? {} : appliedSearch}
+                  onApplyText={applySearchText}
+                  onRemoveText={removeSearchText}
+                  onSelectPatient={selectPatient}
+                  onRemovePatient={removePatient}
                 />
-              </>
-            )}
-          </div>
-          {/* On mobile the filters and Date share their row equally. Both
-              halves are unpadded wrappers, so flex-basis 0 splits it evenly. */}
-          <div className="shrink-0 max-md:min-w-0 max-md:flex-1 max-md:basis-0">
-            <MultiFilter
-              compact
-              className="max-md:w-full"
-              selectedFilters={toolbarFilters}
-              onFilterChange={handleFilterChange}
-              onOperationChange={handleOperationChange}
-              onClearAll={() => handleClearFilters(Object.keys(toolbarFilters))}
-              onClearFilter={handleClearFilter}
-              facilityId={facilityId}
-            />
-          </div>
-          <div className="shrink-0 max-md:min-w-0 max-md:flex-1 max-md:basis-0">
-            <DateFilterButton
-              filter={dateState.filter}
-              selected={dateRange}
-              onFilterChange={handleFilterChange}
-              className="max-md:w-full max-md:max-w-none max-md:justify-start"
-            />
-          </div>
-        </div>
-
-        {isAllList && isMobile && (
-          <EncounterSearchChips
-            layout="row"
-            {...appliedSearch}
-            onRemoveText={removeSearchText}
-            onRemovePatient={removePatient}
-          />
-        )}
-
-        {isAllList && showDateNotice && (
-          <EncounterSearchDateNotice
-            name={qParams.name}
-            visitId={qParams.external_identifier}
-            onUndo={() => {
-              if (dateNotice) updateQuery(dateNotice.snapshot);
-              setDateNotice(null);
-            }}
-            onDismiss={() => setDateNotice(null)}
-          />
-        )}
-
-        <Frame>
-          <FrameHeader className="flex-row items-center justify-between gap-2">
-            <div className="min-w-0">
-              <FrameTitle>{t("encounters")}</FrameTitle>
-              {liveSummary && (
-                <FrameDescription className="text-xs">
-                  {liveSummary}
-                </FrameDescription>
+              ) : (
+                <>
+                  <div className="relative min-w-24 flex-1 @4xl/toolbar:w-60 @4xl/toolbar:flex-none">
+                    <Popover
+                      open={searchOptionsOpen && showSearchOptions}
+                      onOpenChange={setSearchOptionsOpen}
+                    >
+                      <PopoverAnchor asChild>
+                        <InputGroup>
+                          <InputGroupInput
+                            ref={searchInputRef}
+                            value={searchText}
+                            onChange={(event) => {
+                              const value = event.target.value;
+                              setSearchText(value);
+                              setSearchOptionsOpen(value.trim() !== "");
+                              setActiveSearchOptionIndex(0);
+                            }}
+                            onFocus={() => {
+                              if (showSearchOptions) {
+                                setSearchOptionsOpen(true);
+                              }
+                            }}
+                            onKeyDown={handleSearchInputKeyDown}
+                            placeholder={selectedSearchType.placeholder}
+                          />
+                          <InputGroupAddon>
+                            <Search aria-hidden="true" />
+                          </InputGroupAddon>
+                        </InputGroup>
+                      </PopoverAnchor>
+                      <PopoverContent
+                        className="w-(--anchor-width) p-0"
+                        align="start"
+                        onOpenAutoFocus={(event) => {
+                          event.preventDefault();
+                          searchInputRef.current?.focus();
+                        }}
+                        onCloseAutoFocus={(event) => {
+                          event.preventDefault();
+                        }}
+                      >
+                        <Command>
+                          <CommandList>
+                            <CommandGroup>
+                              {searchWithOptions.map((option, index) => (
+                                <CommandItem
+                                  key={option.key}
+                                  value={option.key}
+                                  onSelect={() =>
+                                    handleSearchWithChange(option.key)
+                                  }
+                                  className={`flex items-center gap-2 ${
+                                    activeSearchOptionIndex === index
+                                      ? "bg-accent"
+                                      : ""
+                                  }`}
+                                  onMouseEnter={() =>
+                                    setActiveSearchOptionIndex(index)
+                                  }
+                                >
+                                  <div>
+                                    {searchText}{" "}
+                                    <span className="text-muted-foreground">
+                                      {option.label}
+                                    </span>
+                                  </div>
+                                  <Check
+                                    className={`ml-auto size-4 ${
+                                      option.key === searchWith
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    }`}
+                                  />
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <PatientIdentifierFilter
+                    onSelect={(patientId, patientName) =>
+                      updateQuery({
+                        patient_filter: patientId,
+                        patient_name: patientName,
+                        created_date_after: undefined,
+                        created_date_before: undefined,
+                      })
+                    }
+                    placeholder={t("filter_by_identifier")}
+                    size="default"
+                    className="w-auto min-w-0 flex-1 @4xl/toolbar:flex-none [&>[data-variant]]:shadow-2xs"
+                    scanLabelClassName="hidden @lg/toolbar:block"
+                    patientId={qParams.patient_filter}
+                    patientName={qParams.patient_name}
+                  />
+                </>
               )}
             </div>
-            <EncounterViewToggle view={view} onChange={changeView} />
-          </FrameHeader>
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={view}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              {!isFetching && encounters.length === 0 ? (
-                isAllList ? (
-                  <EncounterListEmptyState
-                    applied={appliedNames}
-                    onClearFilters={clearEmptyStateFilters}
-                    onShowAnyDate={showAnyDate}
-                  />
-                ) : (
-                  <EmptyState />
-                )
-              ) : view === "list" ? (
-                // One panel holds the table; its own container border is
-                // dropped so only the frame and the panel draw borders.
-                <FramePanel className="overflow-hidden p-0 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
-                  <EncounterTable
-                    encounters={encounters}
-                    facilityId={facilityId}
-                    loading={isFetching}
-                  />
-                </FramePanel>
-              ) : (
-                <div className="grid gap-2 [grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr))]">
-                  {isFetching ? (
-                    <CardGridSkeleton count={6} />
-                  ) : (
-                    encounters.map(
-                      (encounter: EncounterListRead | EncounterRead) => (
-                        <EncounterInfoCard
-                          key={encounter.id}
-                          encounter={encounter}
-                          facilityId={facilityId}
-                        />
-                      ),
-                    )
-                  )}
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
-          {(showingRange || hasMorePages) && (
-            <FrameFooter className="flex-row flex-wrap items-center justify-between gap-2">
-              <span className="text-xs text-muted-foreground">
-                {showingRange}
-              </span>
-              {hasMorePages && queryEncounters && (
-                <Pagination totalCount={queryEncounters.count} noMargin />
-              )}
-            </FrameFooter>
+            {/* On mobile the filters and Date share their row equally. Both
+              halves are unpadded wrappers, so flex-basis 0 splits it evenly. */}
+            <div className="shrink-0 max-md:min-w-0 max-md:flex-1 max-md:basis-0">
+              <MultiFilter
+                compact
+                className="max-md:w-full"
+                selectedFilters={toolbarFilters}
+                onFilterChange={handleFilterChange}
+                onOperationChange={handleOperationChange}
+                onClearAll={() =>
+                  handleClearFilters(Object.keys(toolbarFilters))
+                }
+                onClearFilter={handleClearFilter}
+                facilityId={facilityId}
+              />
+            </div>
+            <div className="shrink-0 max-md:min-w-0 max-md:flex-1 max-md:basis-0">
+              <DateFilterButton
+                filter={dateState.filter}
+                selected={dateRange}
+                onFilterChange={handleFilterChange}
+                className="max-md:w-full max-md:max-w-none max-md:justify-start"
+              />
+            </div>
+            {!isMobile && (
+              <EncounterViewTabs
+                view={view}
+                onChange={changeView}
+                className="ml-auto shrink-0"
+              />
+            )}
+          </div>
+
+          {isAllList && isMobile && (
+            <EncounterSearchChips
+              layout="row"
+              {...appliedSearch}
+              onRemoveText={removeSearchText}
+              onRemovePatient={removePatient}
+            />
           )}
-        </Frame>
-      </div>
+
+          {isAllList && showDateNotice && (
+            <EncounterSearchDateNotice
+              name={qParams.name}
+              visitId={qParams.external_identifier}
+              onUndo={() => {
+                if (dateNotice) updateQuery(dateNotice.snapshot);
+                setDateNotice(null);
+              }}
+              onDismiss={() => setDateNotice(null)}
+            />
+          )}
+        </FrameHeader>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={view}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            {!isFetching && encounters.length === 0 ? (
+              isAllList ? (
+                <EncounterListEmptyState
+                  applied={appliedNames}
+                  onClearFilters={clearEmptyStateFilters}
+                  onShowAnyDate={showAnyDate}
+                />
+              ) : (
+                <EmptyState />
+              )
+            ) : view === "list" ? (
+              // One panel holds the table; its own container border is
+              // dropped so only the frame and the panel draw borders.
+              <FramePanel className="overflow-hidden p-0 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
+                <EncounterTable
+                  encounters={encounters}
+                  facilityId={facilityId}
+                  loading={isFetching}
+                />
+              </FramePanel>
+            ) : (
+              <div className="grid gap-2 [grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr))]">
+                {isFetching ? (
+                  <CardGridSkeleton count={6} />
+                ) : (
+                  encounters.map(
+                    (encounter: EncounterListRead | EncounterRead) => (
+                      <EncounterInfoCard
+                        key={encounter.id}
+                        encounter={encounter}
+                        facilityId={facilityId}
+                      />
+                    ),
+                  )
+                )}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+        {(showingRange || hasMorePages) && (
+          <FrameFooter className="flex-row flex-wrap items-center justify-between gap-2">
+            <span className="text-xs text-muted-foreground">
+              {showingRange}
+            </span>
+            {hasMorePages && queryEncounters && (
+              <Pagination totalCount={queryEncounters.count} noMargin />
+            )}
+          </FrameFooter>
+        )}
+      </Frame>
     </Page>
   );
 }
