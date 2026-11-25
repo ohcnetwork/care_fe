@@ -454,21 +454,23 @@ function ChargeItemsTable({
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
                 {canChangeAccount && (
-                  <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10">
-                    <Checkbox
-                      checked={
-                        allMovableSelected
-                          ? true
-                          : selectedItems.size > 0
-                            ? "indeterminate"
-                            : false
-                      }
-                      disabled={!movableChargeItems.length}
-                      onCheckedChange={(checked: CheckedState) =>
-                        handleSelectAll(checked === true)
-                      }
-                      aria-label={t("select_all")}
-                    />
+                  <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10 [&:has([role=checkbox])]:pr-3">
+                    <div className="flex items-center justify-center">
+                      <Checkbox
+                        checked={
+                          allMovableSelected
+                            ? true
+                            : selectedItems.size > 0
+                              ? "indeterminate"
+                              : false
+                        }
+                        disabled={!movableChargeItems.length}
+                        onCheckedChange={(checked: CheckedState) =>
+                          handleSelectAll(checked === true)
+                        }
+                        aria-label={t("select_all")}
+                      />
+                    </div>
                   </TableHead>
                 )}
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>
@@ -518,35 +520,37 @@ function ChargeItemsTable({
                     className={`border-b hover:bg-gray-50 ${selectedItems.has(item.id) ? "bg-primary/5" : ""}`}
                   >
                     {canChangeAccount && (
-                      <TableCell className="border-x p-3 text-gray-950">
-                        {isMovable(item) ? (
-                          <Checkbox
-                            checked={selectedItems.has(item.id)}
-                            onCheckedChange={(checked: CheckedState) =>
-                              handleSelectItem(item.id, checked === true)
-                            }
-                            aria-label={t("select_item")}
-                          />
-                        ) : (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="inline-flex">
-                                <Checkbox
-                                  checked={false}
-                                  disabled
-                                  aria-label={t(
-                                    "only_billable_charge_items_can_change_account",
-                                  )}
-                                />
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {t(
-                                "only_billable_charge_items_can_change_account",
-                              )}
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
+                      <TableCell className="border-x p-3 text-gray-950 [&:has([role=checkbox])]:pr-3">
+                        <div className="flex items-center justify-center">
+                          {isMovable(item) ? (
+                            <Checkbox
+                              checked={selectedItems.has(item.id)}
+                              onCheckedChange={(checked: CheckedState) =>
+                                handleSelectItem(item.id, checked === true)
+                              }
+                              aria-label={t("select_item")}
+                            />
+                          ) : (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="inline-flex">
+                                  <Checkbox
+                                    checked={false}
+                                    disabled
+                                    aria-label={t(
+                                      "only_billable_charge_items_can_change_account",
+                                    )}
+                                  />
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {t(
+                                  "only_billable_charge_items_can_change_account",
+                                )}
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
                       </TableCell>
                     )}
                     <TableCell className="border-x p-3 text-gray-950">
