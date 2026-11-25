@@ -7,6 +7,7 @@ interface FieldErrorProps {
   questionId: string;
   errors?: QuestionValidationError[];
   index?: number;
+  id?: string;
 }
 
 export function FieldError({
@@ -14,6 +15,7 @@ export function FieldError({
   questionId,
   errors,
   index,
+  id,
 }: FieldErrorProps) {
   const { t } = useTranslation();
   const error = errors?.find(
@@ -26,7 +28,7 @@ export function FieldError({
   if (!error) return null;
 
   return (
-    <div className="text-sm text-red-500 mt-1">
+    <div id={id} className="text-sm text-red-500 mt-1">
       {error.error || error.msg || t("field_required")}
     </div>
   );

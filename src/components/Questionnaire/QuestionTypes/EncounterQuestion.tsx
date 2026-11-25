@@ -273,6 +273,11 @@ export function EncounterQuestion({
     },
   );
 
+  const hasExternalIdentifierError = hasError(
+    HOSPITAL_IDENTIFIER_FIELDS.EXTERNAL_IDENTIFIER.key,
+  );
+  const externalIdentifierErrorId = `${questionnaireResponse.question_id}-external-identifier-error`;
+
   return (
     <div className="space-y-6">
       <QuestionLabel question={question} />
@@ -344,12 +349,15 @@ export function EncounterQuestion({
             }
             disabled={disabled}
             placeholder={t("ip_op_obs_emr_number")}
-            className={cn(
-              hasError(HOSPITAL_IDENTIFIER_FIELDS.EXTERNAL_IDENTIFIER.key) &&
-                "border-red-500",
-            )}
+            aria-required={careConfig.encounterHospitalIdentifierRequired}
+            aria-invalid={hasExternalIdentifierError}
+            aria-describedby={
+              hasExternalIdentifierError ? externalIdentifierErrorId : undefined
+            }
+            className={cn(hasExternalIdentifierError && "border-red-500")}
           />
           <FieldError
+            id={externalIdentifierErrorId}
             fieldKey={HOSPITAL_IDENTIFIER_FIELDS.EXTERNAL_IDENTIFIER.key}
             questionId={questionnaireResponse.question_id}
             errors={errors}
