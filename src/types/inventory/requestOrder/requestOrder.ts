@@ -77,9 +77,6 @@ export interface RequestOrderCreate extends RequestOrder {
 
 export interface RequestOrderUpdate extends RequestOrder {
   id: string;
-  supplier?: string;
-  origin?: string;
-  destination: string;
 }
 
 export interface RequestOrderRetrieve extends RequestOrder {
