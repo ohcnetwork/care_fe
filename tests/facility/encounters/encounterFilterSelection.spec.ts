@@ -1413,9 +1413,12 @@ test.describe("All encounters search", () => {
         !url.searchParams.has("name") &&
         !url.searchParams.has("external_identifier"),
     );
+    // The chip says "Unverified" in short; its tooltip has the full note.
     await expect(chip(page)).toContainText("Scanned patient");
-    await expect(chip(page)).toContainText(
-      "Identity not verified by this scan",
+    await expect(chip(page)).toContainText("Unverified");
+    await expect(chip(page)).toHaveAttribute(
+      "title",
+      "Scanned patient. Identity not verified by this scan",
     );
 
     await chip(page).getByRole("button", { name: "Remove patient" }).click();
