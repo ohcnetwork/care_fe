@@ -63,7 +63,6 @@ const SAVE_CHECKS: SaveCheck[] = [
     messageKey: "quantity_needs_valueset",
   },
   {
-    // Same backend rule as quantity above, for choice questions.
     predicate: (question) =>
       question.type === "choice" &&
       !question.answer_value_set &&

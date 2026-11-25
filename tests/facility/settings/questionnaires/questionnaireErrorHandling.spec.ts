@@ -148,7 +148,6 @@ test.describe("Questionnaire v2 validation errors name the right question", () =
     await page.getByRole("option", { name: "Choice" }).click();
 
     await page.getByRole("button", { name: "Save Changes" }).click();
-    // Blocked client-side (the backend would reject it with a 400).
     await expectToast(
       page,
       "Choice questions need answer options — add options or pick a value set",
@@ -171,7 +170,6 @@ test.describe("Questionnaire v2 validation errors name the right question", () =
         return route.fulfill({
           status: 400,
           contentType: "application/json",
-          // The backend's path counts from zero: index 0 is question 1.
           body: JSON.stringify({
             errors: [
               {

@@ -154,7 +154,6 @@ function handlePydanticErrors(errors: PydanticError[]) {
       .replace("_", " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
     toast.error(message, {
-      // List positions arrive zero-based; show them as people count.
       description: `${type}: '${loc.map((part) => (typeof part === "number" ? part + 1 : part)).join(".")}'`,
       duration: 8000,
     });
