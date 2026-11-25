@@ -21,7 +21,6 @@ import {
 
 import { cn } from "@/lib/utils";
 
-import { Avatar } from "@/components/Common/Avatar";
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
@@ -68,17 +67,11 @@ export default function EncounterInfoCard({
           "border border-border shadow-xs transition-[border-color,box-shadow] duration-150 hover:border-strong-border hover:shadow-md hover:shadow-black/5 dark:hover:shadow-white/5",
       )}
     >
-      <div className="flex flex-1 flex-col gap-2.5 p-3.5">
-        {/* Header: avatar, name and meta; status. */}
-        <div className="flex items-start gap-2.5">
-          <Avatar
-            name={patient.name}
-            className="size-8 shrink-0 rounded-lg text-[11px]"
-          />
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        {/* Header: name and meta; status. */}
+        <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-[15.5px] leading-5 font-semibold tracking-tight">
-              {patient.name}
-            </h3>
+            <h3 className="truncate text-base font-semibold">{patient.name}</h3>
             <PatientMeta patient={patient} />
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
@@ -130,7 +123,7 @@ export default function EncounterInfoCard({
 
         {/* Where and with whom. Both slots always show, so an encounter
             without a location or a practitioner reads as unassigned. */}
-        <dl className="mt-auto grid grid-cols-2 gap-2 border-t border-dashed pt-2.5 text-xs text-muted-foreground">
+        <dl className="mt-auto grid grid-cols-2 gap-2 border-t border-dashed pt-3 text-xs text-muted-foreground">
           {location ? (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -141,7 +134,7 @@ export default function EncounterInfoCard({
                   <dt className="sr-only">{t("location")}</dt>
                   <LocationIcon
                     aria-hidden="true"
-                    className="size-3.25 shrink-0"
+                    className="size-3.5 shrink-0"
                   />
                   <dd className="truncate text-foreground">{location.name}</dd>
                 </div>
@@ -155,7 +148,7 @@ export default function EncounterInfoCard({
           ) : (
             <div className="flex min-w-0 items-center gap-1.5">
               <dt className="sr-only">{t("location")}</dt>
-              <MapPin aria-hidden="true" className="size-3.25 shrink-0" />
+              <MapPin aria-hidden="true" className="size-3.5 shrink-0" />
               <dd className="truncate">{t("encounter_card_no_location")}</dd>
             </div>
           )}
@@ -164,7 +157,7 @@ export default function EncounterInfoCard({
             title={practitioner ? formatName(practitioner) : undefined}
           >
             <dt className="sr-only">{t("practitioner")}</dt>
-            <Stethoscope aria-hidden="true" className="size-3.25 shrink-0" />
+            <Stethoscope aria-hidden="true" className="size-3.5 shrink-0" />
             {practitioner ? (
               <dd className="truncate text-foreground">
                 {formatName(practitioner)}
@@ -178,7 +171,7 @@ export default function EncounterInfoCard({
         </dl>
       </div>
 
-      <footer className="flex items-center justify-between gap-2 rounded-b-xl border-t bg-soft-background px-3.5 py-2">
+      <footer className="flex items-center justify-between gap-2 rounded-b-xl border-t bg-soft-background px-4 py-2">
         <Button variant="tertiary" asChild>
           <Link
             to="/facility/$facilityId/patients/home"

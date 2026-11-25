@@ -31,7 +31,6 @@ import {
 
 import { cn } from "@/lib/utils";
 
-import { Avatar } from "@/components/Common/Avatar";
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
@@ -47,15 +46,15 @@ type Encounter = EncounterListRead | EncounterRead;
 /**
  * The narrowest the table gets, in its compact layout. Narrower than this,
  * the encounters list shows cards instead. Keep in sync with the table's
- * `min-w-[600px]`.
+ * `min-w-150`.
  */
 export const ENCOUNTER_TABLE_MIN_WIDTH = 600;
 
 // The layout follows the table's own width, not the viewport's: the sidebar
-// changes how much room the table gets. From 60rem (960px) the table shows
+// changes how much room the table gets. From 56rem (896px, @4xl) the table shows
 // eight columns; below it, related columns merge into two-line cells.
-const WIDE = "hidden @min-[60rem]:table-cell";
-const COMPACT = "@min-[60rem]:hidden";
+const WIDE = "hidden @4xl:table-cell";
+const COMPACT = "@4xl:hidden";
 
 // Secondary details in a row: the location, the practitioner, and the dash
 // shown when either is missing.
@@ -90,44 +89,44 @@ export function EncounterTable({
     <div className="@container">
       {/* Fixed layout: the columns share the width and truncate, so the
           table only scrolls below its minimum width. */}
-      <Table className="min-w-[600px] table-fixed">
+      <Table className="min-w-150 table-fixed">
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className={cn(headCell, "w-[28%] @min-[60rem]:w-[20%]")}>
+            <TableHead className={cn(headCell, "w-1/4 @4xl:w-1/5")}>
               {t("patient")}
             </TableHead>
-            <TableHead className={cn(headCell, WIDE, "w-[11%]")}>
+            <TableHead className={cn(headCell, WIDE, "w-1/10")}>
               {t("status")}
             </TableHead>
-            <TableHead className={cn(headCell, WIDE, "w-[15%]")}>
+            <TableHead className={cn(headCell, WIDE, "w-3/20")}>
               {t("encounter_table_when")}
             </TableHead>
             <TableHead
-              className={cn(headCell, COMPACT, "w-[22%] truncate")}
+              className={cn(headCell, COMPACT, "w-1/5 truncate")}
               title={t("encounter_table_status_time")}
             >
               {t("encounter_table_status_time")}
             </TableHead>
-            <TableHead className={cn(headCell, WIDE, "w-[10%]")}>
+            <TableHead className={cn(headCell, WIDE, "w-1/10")}>
               {t("class")}
             </TableHead>
-            <TableHead className={cn(headCell, WIDE, "w-[10%]")}>
+            <TableHead className={cn(headCell, WIDE, "w-1/10")}>
               {t("priority")}
             </TableHead>
             <TableHead
-              className={cn(headCell, COMPACT, "w-[18%] truncate")}
+              className={cn(headCell, COMPACT, "w-1/5 truncate")}
               title={t("encounter_table_class_priority")}
             >
               {t("encounter_table_class_priority")}
             </TableHead>
-            <TableHead className={cn(headCell, WIDE, "w-[15%]")}>
+            <TableHead className={cn(headCell, WIDE, "w-3/20")}>
               {t("location")}
             </TableHead>
-            <TableHead className={cn(headCell, WIDE, "w-[14%]")}>
+            <TableHead className={cn(headCell, WIDE, "w-3/20")}>
               {t("practitioner")}
             </TableHead>
             <TableHead
-              className={cn(headCell, COMPACT, "w-[24%] truncate")}
+              className={cn(headCell, COMPACT, "w-1/4 truncate")}
               title={t("encounter_table_location_practitioner")}
             >
               {t("encounter_table_location_practitioner")}
@@ -160,12 +159,9 @@ function SkeletonRow() {
   return (
     <TableRow aria-hidden="true" className="[&>td]:py-2">
       <TableCell>
-        <div className="flex items-center gap-2.5">
-          <Skeleton className="size-8 shrink-0 rounded-lg" />
-          <div className="space-y-1.5">
-            <Skeleton className="h-3.5 w-32" />
-            <Skeleton className="h-3 w-20" />
-          </div>
+        <div className="space-y-1.5">
+          <Skeleton className="h-3.5 w-32" />
+          <Skeleton className="h-3 w-20" />
         </div>
       </TableCell>
       <TableCell className={WIDE}>
@@ -238,29 +234,23 @@ function EncounterTableRow({
       className="relative transition-colors hover:bg-muted/50 [&>td]:py-2"
     >
       <TableCell>
-        <div className="flex items-center gap-2.5">
-          <Avatar
-            name={patient.name}
-            className="size-8 shrink-0 rounded-lg text-[11px]"
-          />
-          <div className="min-w-0">
-            {/* The name opens Patient Home; it sits above the row's
-                encounter link, and only as wide as the name. */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  to="/facility/$facilityId/patients/home"
-                  params={{ facilityId }}
-                  search={patientHomeSearch(patient)}
-                  className="relative z-10 inline-block max-w-full truncate align-top font-semibold underline decoration-muted-foreground/50 underline-offset-2 hover:decoration-foreground"
-                >
-                  {patient.name}
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>{t("patient_home")}</TooltipContent>
-            </Tooltip>
-            <PatientMeta patient={patient} />
-          </div>
+        <div className="min-w-0">
+          {/* The name opens Patient Home; it sits above the row's
+              encounter link, and only as wide as the name. */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                to="/facility/$facilityId/patients/home"
+                params={{ facilityId }}
+                search={patientHomeSearch(patient)}
+                className="relative z-10 inline-block max-w-full truncate align-top font-semibold underline decoration-muted-foreground/50 underline-offset-2 hover:decoration-foreground"
+              >
+                {patient.name}
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>{t("patient_home")}</TooltipContent>
+          </Tooltip>
+          <PatientMeta patient={patient} />
         </div>
       </TableCell>
 

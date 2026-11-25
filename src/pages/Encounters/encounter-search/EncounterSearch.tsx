@@ -580,9 +580,7 @@ export function EncounterSearch({
             <div
               className={cn(
                 "flex items-center",
-                hasApplied
-                  ? "min-w-20 flex-[1_1_--spacing(20)]"
-                  : "min-w-28 flex-1",
+                hasApplied ? "min-w-20 grow basis-20" : "min-w-28 flex-1",
               )}
               onClick={(event) => {
                 if (event.target !== inputRef.current) {
@@ -686,7 +684,7 @@ export function EncounterSearch({
         <ComboboxContent
           anchor={anchorRef}
           data-chips={false}
-          className="flex w-(--anchor-width) min-w-[min(var(--anchor-width),--spacing(80))] flex-col"
+          className="flex w-(--anchor-width) min-w-(--anchor-width) flex-col"
         >
           {lookup && (
             <div className="flex items-center gap-1 border-b p-1">

@@ -86,7 +86,7 @@ export function EncounterSearchChips({
         row
           ? "flex-wrap gap-2"
           : [
-              "max-w-max min-w-0 grow-[100] gap-1 ps-1.5 @max-lg/toolbar:flex-wrap",
+              "max-w-max min-w-0 grow-100 gap-1 ps-1.5 @max-lg/toolbar:flex-wrap",
               count > 1 ? "basis-56" : "basis-32",
             ],
       )}

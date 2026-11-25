@@ -902,7 +902,7 @@ export function EncounterList({
               {isAllList ? (
                 <EncounterSearch
                   // Compact; it widens only when two chips share the line.
-                  className="w-full @4xl/toolbar:w-96 @4xl/toolbar:has-[[data-slot=encounter-search-applied]+[data-slot=encounter-search-applied]]:w-[32rem]"
+                  className="w-full @4xl/toolbar:w-96 @4xl/toolbar:has-[[data-slot=encounter-search-applied]+[data-slot=encounter-search-applied]]:w-128"
                   previewQueryParams={listFilterParams}
                   applied={isMobile ? {} : appliedSearch}
                   onApplyText={applySearchText}
@@ -1072,6 +1072,9 @@ export function EncounterList({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
+            // The card grid counts columns from the frame's width, which the
+            // sidebar changes, not the viewport's.
+            className="@container"
           >
             {!isFetching && encounters.length === 0 ? (
               isAllList ? (
@@ -1094,7 +1097,7 @@ export function EncounterList({
                 />
               </FramePanel>
             ) : (
-              <div className="grid gap-2 [grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr))]">
+              <div className="grid gap-2 @2xl:grid-cols-2 @5xl:grid-cols-3 @7xl:grid-cols-4">
                 {isFetching ? (
                   <CardGridSkeleton count={6} />
                 ) : (

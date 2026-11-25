@@ -187,17 +187,17 @@ export function EncounterTimeBlock({
   return (
     <div
       data-slot="encounter-time"
-      className="flex items-center gap-2 rounded-lg bg-soft-background px-2.5 py-2"
+      className="flex items-center gap-2 rounded-lg bg-soft-background px-3 py-2"
     >
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <div className="flex items-center gap-1.5 text-[11.5px] leading-4 font-medium text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
           <span className="truncate">{time.label}</span>
         </div>
         <div className="flex min-w-0 items-baseline gap-1.5">
           {time.live && <LiveDot />}
           <span
             className={cn(
-              "shrink-0 text-[13.5px] leading-5 font-medium tabular-nums",
+              "shrink-0 text-sm font-medium tabular-nums",
               time.struck && "text-muted-foreground line-through",
             )}
           >
