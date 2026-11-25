@@ -163,7 +163,7 @@ export function useEncounterTime(encounter: Encounter): EncounterTimeInfo {
 }
 
 /** A small pulsing dot for a running encounter. */
-function LiveDot() {
+export function LiveDot() {
   return (
     <span aria-hidden="true" className="relative inline-flex size-1.5 shrink-0">
       <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary/60 motion-reduce:hidden" />

@@ -55,11 +55,15 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useAuthUser from "@/hooks/useAuthUser";
+import { useIsNarrowerThan } from "@/hooks/useIsNarrowerThan";
 
 import Page from "@/components/Common/Page";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
-import { EncounterTable } from "@/components/Encounter/EncounterTable";
+import {
+  ENCOUNTER_TABLE_MIN_WIDTH,
+  EncounterTable,
+} from "@/components/Encounter/EncounterTable";
 
 import useFilters from "@/hooks/useFilters";
 import { encounterListSearch } from "@/lib/router/search/encounter";
@@ -288,8 +292,16 @@ export function EncounterList({
     setPreferredView(next);
     storeView(next);
   };
-  // Mobile shows only cards; the saved choice returns on a wider screen.
-  const view: EncounterListView = isMobile ? "cards" : preferredView;
+  // The frame's width, not the viewport's, decides whether the table fits:
+  // the sidebar changes the room it gets. The panel adds a 1px border on
+  // each side of the table.
+  const [frameRef, frameTooNarrowForTable] = useIsNarrowerThan<HTMLDivElement>(
+    ENCOUNTER_TABLE_MIN_WIDTH + 2,
+  );
+  // Mobile, and a frame too narrow for the table, show only cards, without
+  // the view tabs; the saved choice returns when there is room again.
+  const cardsOnly = isMobile || frameTooNarrowForTable;
+  const view: EncounterListView = cardsOnly ? "cards" : preferredView;
 
   const getDefaultDateRange = () => {
     const today = new Date();
@@ -881,7 +893,7 @@ export function EncounterList({
         </Badge>
       }
     >
-      <Frame className="mt-4">
+      <Frame ref={frameRef} className="mt-4">
         {/* The toolbar: search and filters on the left, the view tabs on
             the right; applied-search chips and the date notice below. */}
         <FrameHeader className="@container/toolbar gap-2">
@@ -1023,7 +1035,7 @@ export function EncounterList({
                 className="max-md:w-full max-md:max-w-none max-md:justify-start"
               />
             </div>
-            {!isMobile && (
+            {!cardsOnly && (
               <EncounterViewTabs
                 view={view}
                 onChange={changeView}
