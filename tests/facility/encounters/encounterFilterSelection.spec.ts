@@ -252,13 +252,15 @@ for (const picker of [
     await expect(page).toHaveURL(
       (url) => url.searchParams.get(picker.param) === picker.values[0],
     );
-    await page.keyboard.press("Escape");
+    // Picking a radio applies it and closes the picker.
+    await expect(first).toBeHidden();
     const active = page.getByRole("button", { name: /^filters\b/i });
-    await active.click();
     const row = page.getByRole("group", { name: picker.label, exact: true });
-    await row
-      .getByRole("button", { name: new RegExp(picker.label, "i") })
-      .click();
+    const edit = row.getByRole("button", {
+      name: new RegExp(picker.label, "i"),
+    });
+    await active.click();
+    await edit.click();
     const next = page.getByRole("menuitemradio", {
       name: picker.names[1],
       exact: true,
@@ -267,8 +269,11 @@ for (const picker of [
     await expect(page).toHaveURL(
       (url) => url.searchParams.get(picker.param) === picker.values[1],
     );
+    await expect(next).toBeHidden();
+    // Reopened, only the new choice is checked.
+    await active.click();
+    await edit.click();
     await expect(next).toBeChecked();
-    await next.click();
     await expect(
       page.getByRole("menuitemradio", { checked: true }),
     ).toHaveCount(1);
@@ -293,12 +298,11 @@ test("browses child departments without selecting their parent", async ({
   await expect(child).not.toBeChecked();
   await expect(page).toHaveURL((url) => !url.searchParams.has("organization"));
   await child.click();
+  // Only the child is applied, and picking it closes the picker.
   await expect(page).toHaveURL(
     (url) => url.searchParams.get("organization") === ward.id,
   );
-  await expect(page.getByRole("menuitemradio", { checked: true })).toHaveCount(
-    1,
-  );
+  await expect(child).toBeHidden();
 });
 
 test("priority uses radio choices when adding and editing", async ({
@@ -325,15 +329,22 @@ test("priority uses radio choices when adding and editing", async ({
   await Promise.all([waitForPriority("urgent"), urgent.click()]);
   const isUrgent = (url: URL) => url.searchParams.get("priority") === "urgent";
   await expect(page).toHaveURL(isUrgent);
+  // Picking a radio applies it and closes the picker.
+  await expect(urgent).toBeHidden();
   await page.reload();
-  await page.getByRole("button", { name: /^filters\b/i }).click();
+  const active = page.getByRole("button", { name: /^filters\b/i });
+  await active.click();
   await page.getByRole("button", { name: /priority.*urgent/i }).click();
   await expect(urgent).toBeChecked();
   await expect(
     urgent.locator('[data-slot="radio-group-item"]'),
   ).toHaveAttribute("data-checked", "");
+  // Picking the current choice again keeps it, and closes.
   await urgent.click();
+  await expect(urgent).toBeHidden();
   await expect(page).toHaveURL(isUrgent);
+  await active.click();
+  await page.getByRole("button", { name: /priority.*urgent/i }).click();
   const selected = page.getByRole("group", { name: /^selected$/i });
   await expect(selected.getByRole("menuitemradio")).toHaveText("Urgent");
   const routine = page.getByRole("menuitemradio", {
@@ -341,8 +352,12 @@ test("priority uses radio choices when adding and editing", async ({
     exact: true,
   });
   await Promise.all([waitForPriority("routine"), routine.click()]);
+  await expect(routine).toBeHidden();
+  await active.click();
+  await page.getByRole("button", { name: /priority.*routine/i }).click();
   await expect(selected.getByRole("menuitemradio")).toHaveText("Routine");
   await expect(urgent).not.toBeChecked();
+  // Clear removes the choice but keeps the picker open for another.
   const clear = page.getByRole("button", { name: "Clear", exact: true });
   await Promise.all([waitForPriority(null), clear.click()]);
   await expect(page).toHaveURL(
@@ -350,6 +365,8 @@ test("priority uses radio choices when adding and editing", async ({
       searchParams.get("encounter_class") === "amb" &&
       !searchParams.has("priority"),
   );
+  await expect(routine).toBeVisible();
+  await expect(routine).not.toBeChecked();
 });
 
 test("groups selected statuses first and filters both sections without duplicates", async ({
@@ -421,9 +438,11 @@ test("status and priority open in place like the other pickers", async ({
   await expect(page).toHaveURL(
     (url) => url.searchParams.get("priority") === "urgent",
   );
+  // Enter picks the radio, which closes the picker and returns focus.
   await expect(
-    page.getByRole("menuitemradio", { name: "Urgent", exact: true }),
-  ).toBeChecked();
+    page.getByRole("searchbox", { name: /search priority/i }),
+  ).toBeHidden();
+  await expect(add).toBeFocused();
 });
 
 test("edits and adds filters inside one open popover", async ({ page }) => {
@@ -508,6 +527,48 @@ test("keeps the picker in place while the first filter is applied", async ({
   expect((await add.boundingBox())!.width).toBeLessThan(addBefore.width);
 });
 
+for (const origin of ["Add filter", "Active filters"] as const) {
+  test(`a picker opened from ${origin} fades out without showing ${origin}`, async ({
+    page,
+  }) => {
+    await page.goto(`/facility/${facility.id}/encounters/patients/all`);
+    const popup = page.locator('[data-slot="popover-content"]');
+    const picker = page.getByRole("dialog", { name: "Priority" });
+    await openMultiFilter(page, /^priority$/i);
+    let choice = "Urgent";
+    if (origin === "Active filters") {
+      await picker.getByRole("menuitemradio", { name: "Urgent" }).click();
+      await expect(popup).toHaveCount(0);
+      await page.getByRole("button", { name: /^filters\b/i }).click();
+      await page.getByRole("button", { name: /priority.*urgent/i }).click();
+      choice = "Routine";
+    }
+    await expect(picker).toBeVisible();
+    // Record each view the popover shows, by its name, until it has gone.
+    await page.evaluate(() => {
+      const views = new Set<string>();
+      const record = () => {
+        const content = document.querySelector('[data-slot="popover-content"]');
+        if (content)
+          views.add(content.getAttribute("aria-label") ?? "Active filters");
+      };
+      record();
+      new MutationObserver(record).observe(document.body, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+      });
+      (window as unknown as { popoverViews: Set<string> }).popoverViews = views;
+    });
+    await picker.getByRole("menuitemradio", { name: choice }).click();
+    await expect(popup).toHaveCount(0);
+    const views = await page.evaluate(() => [
+      ...(window as unknown as { popoverViews: Set<string> }).popoverViews,
+    ]);
+    expect(views).toEqual(["Priority"]);
+  });
+}
+
 test("picker header goes back to where the picker was opened, or closes it", async ({
   page,
 }) => {
@@ -533,11 +594,17 @@ test("picker header goes back to where the picker was opened, or closes it", asy
   await expect(statusField).toBeVisible();
 
   await priorityField.click();
-  await page
+  const priorityPicker = page.getByRole("dialog", { name: "Priority" });
+  // Close shuts the picker without picking.
+  await priorityPicker.getByRole("button", { name: "Close" }).click();
+  await expect(priorityPicker).toHaveCount(0);
+  await expect(add).toBeFocused();
+  await expect(page).toHaveURL((url) => !url.searchParams.has("priority"));
+  // Picking a radio closes it too.
+  await openMultiFilter(page, /^priority$/i);
+  await priorityPicker
     .getByRole("menuitemradio", { name: "Urgent", exact: true })
     .click();
-  const priorityPicker = page.getByRole("dialog", { name: "Priority" });
-  await priorityPicker.getByRole("button", { name: "Close" }).click();
   await expect(priorityPicker).toHaveCount(0);
   await expect(add).toBeFocused();
 
@@ -559,11 +626,11 @@ test("picker header goes back to where the picker was opened, or closes it", asy
   expect(pickerBox.y).toBeCloseTo(summaryBox.y, 0);
   await back.click();
   await editPriority.press("Enter");
-  await priorityPicker.getByRole("button", { name: "Done" }).click();
+  await priorityPicker.getByRole("button", { name: "Close" }).click();
   await expect(active).toBeFocused();
 });
 
-test("picker footer counts multi-select values but not radio choices", async ({
+test("picker footer counts multi-select values; radio pickers close on pick", async ({
   page,
 }) => {
   await page.goto(`/facility/${facility.id}/encounters/patients/all`);
@@ -609,13 +676,20 @@ test("picker footer counts multi-select values but not radio choices", async ({
   await openMultiFilter(page, /^priority$/i);
   const priorityPicker = page.getByRole("dialog", { name: "Priority" });
   const radioFooter = priorityPicker.locator('[data-slot="filter-footer"]');
-  const urgent = priorityPicker.getByRole("menuitemradio", { name: "Urgent" });
-  await urgent.click();
-  await expect(urgent).toBeChecked();
+  // A radio picker has no count and no Done: picking closes it.
   await expect(
     radioFooter.getByText("Pick one", { exact: true }),
   ).toBeVisible();
-  await expect(radioFooter).not.toContainText("1 selected");
+  await expect(radioFooter.getByRole("status")).toHaveCount(0);
+  await expect(radioFooter.getByRole("button", { name: "Done" })).toHaveCount(
+    0,
+  );
+  await priorityPicker.getByRole("menuitemradio", { name: "Urgent" }).click();
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get("priority") === "urgent",
+  );
+  await expect(priorityPicker).toHaveCount(0);
+  await expect(add).toBeFocused();
 });
 
 for (const layout of ["desktop", "mobile"] as const) {

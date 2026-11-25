@@ -1,7 +1,16 @@
-import type { ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 
 import { FilterChoiceMark } from "./filterChoiceMark";
 import { FilterMenuItem } from "./filterSurface";
+
+/**
+ * Closes a single-select picker when its current choice is picked again, as
+ * a select does. Pickers that close on a pick provide it; without it, picking
+ * the current choice again does nothing.
+ */
+export const CloseOnRepickContext = createContext<(() => void) | undefined>(
+  undefined,
+);
 
 export function FilterChoiceItem({
   multiple = false,
@@ -16,6 +25,7 @@ export function FilterChoiceItem({
   children: ReactNode;
   className?: string;
 }) {
+  const closeOnRepick = useContext(CloseOnRepickContext);
   return (
     <FilterMenuItem
       role={multiple ? "menuitemcheckbox" : "menuitemradio"}
@@ -23,6 +33,7 @@ export function FilterChoiceItem({
       className={className}
       onSelect={() => {
         if (multiple || !checked) onChoose();
+        else closeOnRepick?.();
       }}
     >
       <FilterChoiceMark multiple={multiple} checked={checked} />

@@ -1691,7 +1691,16 @@ export function Filters<T = unknown>({
   toolbarSummary,
 }: FiltersProps<T>) {
   const { t } = useTranslation();
-  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editingKey, setEditingKeyState] = useState<string | null>(null);
+  // Closing a picker inside a popover keeps it there until the popover has
+  // faded out, as the drawer keeps its view while it slides away. Clearing it
+  // at once would show the Active filters list or the field list, at their
+  // width, on the way out. Opening any view cancels a pending close.
+  const [editorClosing, setEditorClosing] = useState(false);
+  const setEditingKey = useCallback((key: string | null) => {
+    setEditorClosing(false);
+    setEditingKeyState(key);
+  }, []);
   const [editingFromSummary, setEditingFromSummary] = useState(false);
   // True when Add filter opened with no field applied. The summary then waits
   // until its popover closes, so the toolbar and the popover anchored to Add
@@ -1842,7 +1851,14 @@ export function Filters<T = unknown>({
         setMenuSearchInput("");
       }
     },
-    [fieldsMap, filters, onChange, setMenuSearchInput, toolbarSummary],
+    [
+      fieldsMap,
+      filters,
+      onChange,
+      setEditingKey,
+      setMenuSearchInput,
+      toolbarSummary,
+    ],
   );
 
   const selectableFields = useMemo(() => getSelectableFields(fields), [fields]);
@@ -1886,6 +1902,10 @@ export function Filters<T = unknown>({
 
   const Container = toolbarSummary ? ButtonGroup : "div";
   const applied = filters.filter((filter) => filter.values.length > 0);
+  // A picker shows while it is being edited, not while it fades out.
+  const editorOpen = !!editingKey && !editorClosing;
+  // Includes the fade-out, so the deferred summary waits until the popover
+  // anchored to Add filter has gone.
   const addPopoverOpen = addFilterOpen || (!!editingKey && !editingFromSummary);
   const summaryVisible =
     applied.length > 0 && !(summaryDeferred && !inDrawer && addPopoverOpen);
@@ -1949,7 +1969,11 @@ export function Filters<T = unknown>({
       return;
     }
     restoreTriggerFocus.current = true;
-    setEditingKey(null);
+    // The popover closes now and clears the picker once it has faded out.
+    setEditorClosing(true);
+  };
+  const finishClosingEditor = (open: boolean) => {
+    if (!open && editorClosing) setEditingKey(null);
   };
   // Back returns to the Active filters list when the editor was opened from
   // it and filters remain; otherwise to the field list.
@@ -2009,12 +2033,13 @@ export function Filters<T = unknown>({
       onClose={closeEditor}
     />
   );
+  // A single-select option list closes on a pick, so only multi-select has Done.
   const pickerFooter = editing && (
     <FilterFooter
       multiple={editing.type === "multiselect"}
       selectedCount={editProps.values.length}
       onClear={editing.disableClear ? undefined : () => editProps.onChange([])}
-      onDone={closeEditor}
+      onDone={editing.type === "multiselect" ? closeEditor : undefined}
     />
   );
   // The toolbar's popover or drawer hosts the picker, so it renders inline:
@@ -2339,15 +2364,19 @@ export function Filters<T = unknown>({
               // One popover holds the Active filters list and the picker it
               // opens, so editing swaps the content without a close and open.
               <Popover
-                open={summaryOpen || (!!editing && editingFromSummary)}
+                open={summaryOpen || (editorOpen && editingFromSummary)}
                 onOpenChange={(open) => {
                   if (open) {
+                    // Reopened while its picker fades out: show the list.
+                    if (editorClosing && editingFromSummary)
+                      setEditingKey(null);
                     setSummaryOpen(true);
                     return;
                   }
                   if (editing && editingFromSummary) closeEditor();
                   else setSummaryOpen(false);
                 }}
+                onOpenChangeComplete={finishClosingEditor}
               >
                 <PopoverTrigger asChild>{summaryButton}</PopoverTrigger>
                 <PopoverContent
@@ -2395,7 +2424,8 @@ export function Filters<T = unknown>({
                 // Likewise, the field list and the picker chosen from it share
                 // one popover anchored to Add filter.
                 <Popover
-                  open={addFilterOpen || (!!editing && !editingFromSummary)}
+                  open={addFilterOpen || (editorOpen && !editingFromSummary)}
+                  onOpenChangeComplete={finishClosingEditor}
                   onOpenChange={(open, details) => {
                     if (open) {
                       openFieldMenu();
@@ -2423,8 +2453,10 @@ export function Filters<T = unknown>({
                         ? editing.label
                         : mergedI18n.addFilter
                     }
+                    // The width switches with the view, without a transition:
+                    // animating it reflows the content on every frame.
                     className={cn(
-                      "max-w-(--available-width) gap-0 overflow-hidden p-0 transition-[width] duration-150",
+                      "max-w-(--available-width) gap-0 overflow-hidden p-0",
                       editing && !editingFromSummary ? "w-80" : "w-55",
                       menuPopupClassName,
                     )}

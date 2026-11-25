@@ -16,7 +16,12 @@ import FilterFooter from "./filterFooter";
 import RenderLocationFilter from "./locationFilter";
 import RenderTagFilter from "./tagFilter";
 import NavigationHelper from "./utils/navigation-helper";
-import { FilterDateRange, FilterState, FilterValues } from "./utils/Utils";
+import {
+  FilterDateRange,
+  FilterState,
+  FilterValues,
+  isSingleSelectFilter,
+} from "./utils/Utils";
 
 export default function FilterRenderer({
   activeFilter,
@@ -48,10 +53,11 @@ export default function FilterRenderer({
     handleClose,
     onFilterChange,
   };
-  // Pickers opened from "Add filter" (which can close) get Clear/Done; inline
-  // value pickers keep the keyboard hints.
+  // Pickers opened from "Add filter" (which can close) get Clear, and Done
+  // when they take several values: a single-select picker closes on a pick.
+  // Inline value pickers keep the keyboard hints.
+  const multiple = !isSingleSelectFilter(filter);
   const footer = (
-    multiple: boolean,
     hints: ReactNode = (
       <NavigationHelper isActiveFilter enterToSelect canGoBack={!!handleBack} />
     ),
@@ -63,7 +69,7 @@ export default function FilterRenderer({
         onClear={
           filter.disableClear ? undefined : () => onFilterChange(filter.key, [])
         }
-        onDone={handleClose}
+        onDone={multiple ? handleClose : undefined}
       />
     ) : (
       hints
@@ -77,7 +83,7 @@ export default function FilterRenderer({
             {...commonProps}
             selected={selected as string[]}
           />
-          {footer(filter.mode === "multi")}
+          {footer()}
         </>
       );
     case "date":
@@ -95,7 +101,7 @@ export default function FilterRenderer({
             {...commonProps}
             selectedTags={selected as TagConfig[]}
           />
-          {footer(true)}
+          {footer()}
         </>
       );
     case "department":
@@ -105,7 +111,7 @@ export default function FilterRenderer({
             {...commonProps}
             selectedOrgs={selected as FacilityOrganizationRead[]}
           />
-          {footer(false)}
+          {footer()}
         </>
       );
     case "location":
@@ -119,7 +125,7 @@ export default function FilterRenderer({
             handleClose={handleClose}
             facilityId={facilityId}
           />
-          {footer(true, <NavigationHelper isActiveFilter />)}
+          {footer(<NavigationHelper isActiveFilter />)}
         </>
       );
     case "activity_definition":
@@ -130,7 +136,7 @@ export default function FilterRenderer({
             facilityId={facilityId || ""}
             selectedDefinitions={selected as ActivityDefinitionFilterValue[]}
           />
-          {footer(filter.mode === "multi")}
+          {footer()}
         </>
       );
     case "care_team":
@@ -141,7 +147,7 @@ export default function FilterRenderer({
             {...commonProps}
             selectedUsers={selected as UserReadMinimal[]}
           />
-          {footer(false)}
+          {footer()}
         </>
       );
     default:
