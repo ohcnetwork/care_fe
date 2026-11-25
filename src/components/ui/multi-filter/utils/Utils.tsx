@@ -150,7 +150,8 @@ export type FilterConfig =
  * Whether a filter's picker takes one value. Picking it applies the value and
  * closes the picker, as a select does, so the picker has no Done button.
  * Multi-select pickers stay open until Done. Tags and locations always take
- * several values; the date picker has its own apply flow.
+ * several values. A date takes one range: a preset, or a custom range once
+ * it is applied (opening the calendar is not a pick).
  */
 export function isSingleSelectFilter(filter: FilterConfig): boolean {
   switch (filter.type) {
@@ -160,6 +161,7 @@ export function isSingleSelectFilter(filter: FilterConfig): boolean {
     case "department":
     case "care_team":
     case "facility_user":
+    case "date":
       return true;
     default:
       return false;
