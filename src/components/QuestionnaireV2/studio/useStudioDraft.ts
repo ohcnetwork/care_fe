@@ -158,7 +158,10 @@ export function useStudioDraft({
     if (!metaEditedDuringFlight) form.reset(metadataValues(updated));
   });
 
-  const saveDraft = (meta: DetailFormValues) => {
+  const saveDraft = (
+    meta: DetailFormValues,
+    onError?: (error: Error) => void,
+  ) => {
     if (!questionnaire) return;
     // Capture exactly what this PUT includes; the response may arrive after
     // the author has continued editing any of these three draft parts.
@@ -175,6 +178,8 @@ export function useStudioDraft({
         status: meta.status,
       }),
       organizationDraft ? { scope, ...organizationDraft } : undefined,
+      undefined,
+      onError,
     );
   };
 

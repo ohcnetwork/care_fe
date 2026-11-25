@@ -100,6 +100,11 @@ export function useUpdateQuestionnaire(
       body: QuestionnaireUpdate,
       organizations?: OrganizationUpdate,
       onCallSaved?: (updated: QuestionnaireRead) => void,
-    ) => update.mutate({ body, organizations, onCallSaved }),
+      onCallError?: (error: Error) => void,
+    ) =>
+      update.mutate(
+        { body, organizations, onCallSaved },
+        { onError: onCallError },
+      ),
   };
 }

@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
+import {
+  addTopLevelQuestion,
+  createQuestionnaireAndOpenBuilder,
+} from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -126,6 +129,83 @@ test.describe("Questionnaire v2 save race with concurrent edits", () => {
       await putResponse;
       await page.reload();
       await expect(titleInput).toHaveValue(midFlightTitle);
+    });
+  });
+});
+
+test.describe("Questionnaire v2 validation errors name the right question", () => {
+  test("a choice question without options is blocked before it reaches the server", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+
+    await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title: `QV2 Choice Guard ${Date.now()}`,
+    });
+    await addTopLevelQuestion(page, faker.lorem.words(3));
+    await page.getByRole("combobox").first().click();
+    await page.getByRole("option", { name: "Choice" }).click();
+
+    await page.getByRole("button", { name: "Save Changes" }).click();
+    // Blocked client-side (the backend would reject it with a 400).
+    await expectToast(
+      page,
+      "Choice questions need answer options — add options or pick a value set",
+    );
+  });
+
+  test("a server validation error opens the question it points at", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    const firstTitle = `First ${faker.string.alphanumeric(6)}`;
+    const secondTitle = `Second ${faker.string.alphanumeric(6)}`;
+
+    await test.step("Author two questions, leaving the second one selected", async () => {
+      await createQuestionnaireAndOpenBuilder(page, {
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+        title: `QV2 Save 400 ${Date.now()}`,
+      });
+      await addTopLevelQuestion(page, firstTitle);
+      await addTopLevelQuestion(page, secondTitle);
+      await expect(
+        page.getByRole("textbox", { name: "Question Title" }),
+      ).toHaveValue(secondTitle);
+    });
+
+    await test.step("Reject the save with an error on the first question", async () => {
+      await page.route("**/api/v1/questionnaire/*/", (route) => {
+        if (route.request().method() === "PUT") {
+          return route.fulfill({
+            status: 400,
+            contentType: "application/json",
+            // The backend's path counts from zero: index 0 is question 1.
+            body: JSON.stringify({
+              errors: [
+                {
+                  type: "value_error",
+                  loc: ["questions", 0],
+                  msg: "Value error, rejected by the server",
+                },
+              ],
+            }),
+          });
+        }
+        return route.fallback();
+      });
+      await page.getByRole("button", { name: "Save Changes" }).click();
+    });
+
+    await test.step("The first question is opened and named by its number", async () => {
+      await expectToast(page, "Value error, rejected by the server");
+      await expectToast(
+        page,
+        `Check question 1 (${firstTitle}) — the error above is about this question`,
+      );
+      await expect(
+        page.getByRole("textbox", { name: "Question Title" }),
+      ).toHaveValue(firstTitle);
     });
   });
 });
