@@ -10,6 +10,12 @@ function taxRateOption(rate: string) {
   return new RegExp(`^${rate}(?:\\.0+)?%$`);
 }
 
+const formatCurrency = (val: string | number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+  }).format(Number(val));
+
 test.describe("Charge Item Definition Creation", () => {
   let facilityId: string;
   let title: string;
@@ -68,6 +74,78 @@ test.describe("Charge Item Definition Creation", () => {
     await expect(
       page.getByText(/charge item definition.*created successfully/i),
     ).toHaveCount(0);
+  });
+
+  test("keeps the form usable while a partial base price is typed", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: /add definition/i }).click();
+    const basePriceInput = page.getByRole("textbox", { name: /base price/i });
+    const summaryBasePrice = page
+      .locator("div")
+      .filter({ has: page.getByRole("heading", { name: /price summary/i }) })
+      .last()
+      .locator("div")
+      .filter({ hasText: /^Base Price/ })
+      .last();
+
+    // Type one key at a time. Partial input ("-", ".", "-.") is not a number
+    // yet, so the summary shows "-" and the page must not crash.
+    const sequences: { keys: string; summaries: (number | null)[] }[] = [
+      { keys: "-12.5", summaries: [null, -1, -12, -12, -12.5] },
+      { keys: "-.5", summaries: [null, null, -0.5] },
+      { keys: ".5", summaries: [null, 0.5] },
+    ];
+    for (const { keys, summaries } of sequences) {
+      await basePriceInput.clear();
+      for (const [index, key] of [...keys].entries()) {
+        await basePriceInput.pressSequentially(key);
+        await expect(basePriceInput).toHaveValue(keys.slice(0, index + 1));
+        const amount = summaries[index];
+        await expect(summaryBasePrice).toHaveText(
+          `Base Price${amount === null ? "-" : formatCurrency(amount)}`,
+        );
+      }
+    }
+
+    // Submit with partial input: show the validation error, do not crash.
+    await basePriceInput.clear();
+    await basePriceInput.pressSequentially("-");
+    await page.getByRole("button", { name: /create/i }).click();
+    await expect(page.getByText(/base price.*required/i)).toBeVisible();
+    await expect(basePriceInput).toHaveValue("-");
+  });
+
+  test("create charge item definition with a negative base price", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: /add definition/i }).click();
+    await page.getByRole("textbox", { name: /title/i }).fill(title);
+    await page.getByRole("textbox", { name: /slug/i }).fill(slug);
+    await page
+      .getByRole("textbox", { name: /base price/i })
+      .pressSequentially("-25.5");
+
+    await page.getByRole("button", { name: /create/i }).click();
+
+    await expect(
+      page.getByText(/charge item definition.*created successfully/i),
+    ).toBeVisible();
+
+    await expect(async () => {
+      await page.getByRole("textbox", { name: /search/i }).clear();
+      await page.getByRole("textbox", { name: /search/i }).fill(title);
+      await expect(page.getByRole("table").getByText(title)).toBeVisible();
+    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
+
+    await page.getByRole("link", { name: "View" }).click();
+    await page.waitForURL("**/charge_item_definitions/**");
+    await expect(page.getByRole("heading", { name: title })).toBeVisible();
+
+    await page.getByRole("button", { name: "Edit" }).first().click();
+    await expect(
+      page.getByRole("textbox", { name: /base price/i }),
+    ).toHaveValue("-25.50");
   });
 
   test("create charge item definition with required fields only", async ({
@@ -201,11 +279,6 @@ test.describe("Charge Item Definition Creation", () => {
     await expect(page.getByText(description)).toBeVisible();
     await expect(page.getByText(purpose).last()).toBeVisible();
     await expect(page.getByText(url)).toBeVisible();
-    const formatCurrency = (val: string) =>
-      new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR",
-      }).format(Number(val));
     await expect(page.getByText(formatCurrency(mrp))).toBeVisible();
     await expect(page.getByText(formatCurrency(purchasePrice))).toBeVisible();
     await expect(page.getByText("9.00%")).toBeVisible();

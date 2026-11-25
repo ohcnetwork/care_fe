@@ -24,9 +24,26 @@ export async function callApi<Route extends ApiRoute<unknown, unknown>>(
 
   const isFormData = options?.body instanceof FormData;
 
+  // Only attach the CARE access token to requests for the CARE API origin.
+  const isCareApiOrigin = (() => {
+    try {
+      const base = window.location.origin;
+      return (
+        new URL(url, base).origin ===
+        new URL(careConfig.apiUrl || base, base).origin
+      );
+    } catch {
+      return false;
+    }
+  })();
+
   const fetchOptions: RequestInit = {
     method,
-    headers: makeHeaders(noAuth ?? false, options?.headers, isFormData),
+    headers: makeHeaders(
+      (noAuth ?? false) || !isCareApiOrigin,
+      options?.headers,
+      isFormData,
+    ),
     signal: options?.signal,
   };
 
