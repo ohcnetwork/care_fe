@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
+import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 
 import query from "@/Utils/request/query";
 import { cn } from "@/lib/utils";
@@ -85,6 +86,13 @@ const ENCOUNTER_FIELDS: FieldDefinitions = {
   },
 } as const;
 
+const HOSPITAL_IDENTIFIER_FIELDS: FieldDefinitions = {
+  EXTERNAL_IDENTIFIER: {
+    key: "external_identifier",
+    required: true,
+  },
+} as const;
+
 export function validateEncounterQuestion(
   value: EncounterEdit | undefined,
   questionId: string,
@@ -98,6 +106,16 @@ export function validateEncounterQuestion(
     !value?.hospitalization?.discharge_disposition
   ) {
     errors.push(...validateFields(value, questionId, ENCOUNTER_FIELDS));
+  }
+
+  if (value && careConfig.encounterHospitalIdentifierRequired) {
+    errors.push(
+      ...validateFields(
+        { ...value, external_identifier: value.external_identifier?.trim() },
+        questionId,
+        HOSPITAL_IDENTIFIER_FIELDS,
+      ),
+    );
   }
 
   return errors;
@@ -313,7 +331,12 @@ export function EncounterQuestion({
         </div>
 
         <div className="space-y-2">
-          <Label>{t("hospital_identifier")}</Label>
+          <Label>
+            {t("hospital_identifier")}
+            {careConfig.encounterHospitalIdentifierRequired && (
+              <span className="text-red-500">*</span>
+            )}
+          </Label>
           <Input
             value={encounter.external_identifier || ""}
             onChange={(e) =>
@@ -321,6 +344,15 @@ export function EncounterQuestion({
             }
             disabled={disabled}
             placeholder={t("ip_op_obs_emr_number")}
+            className={cn(
+              hasError(HOSPITAL_IDENTIFIER_FIELDS.EXTERNAL_IDENTIFIER.key) &&
+                "border-red-500",
+            )}
+          />
+          <FieldError
+            fieldKey={HOSPITAL_IDENTIFIER_FIELDS.EXTERNAL_IDENTIFIER.key}
+            questionId={questionnaireResponse.question_id}
+            errors={errors}
           />
         </div>
       </div>
