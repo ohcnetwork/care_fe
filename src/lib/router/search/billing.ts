@@ -81,8 +81,8 @@ export const chargeItemListSearch = z.object({
   /** Comma-separated `ChargeItemServiceResource` values. */
   service_resource: searchString(),
   created_by: searchString(),
-  created_date_after: searchString(),
-  created_date_before: searchString(),
+  created_date_after: searchDate(),
+  created_date_before: searchDate(),
   ordering: searchString(),
   title: searchString(),
 });

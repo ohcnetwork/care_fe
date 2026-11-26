@@ -46,16 +46,38 @@ const patient = (birth: string | undefined, end: string) =>
     deceased_datetime: end,
   }) as PatientRead;
 
-test("date-only inputs remain local calendar dates", () => {
-  const date = parseDate("2024-02-29");
-  assert.equal(date.getFullYear(), 2024);
-  assert.equal(date.getMonth(), 1);
-  assert.equal(date.getDate(), 29);
-  assert.equal(date.getHours(), 0);
-  assert.equal(dateQueryString(date), "2024-02-29");
-  assert.equal(parseLocalDate("2024-02-29")?.getTime(), date.getTime());
-  assert.equal(parseLocalDate(), undefined);
-});
+const TIME_ZONES = ["UTC", "America/Los_Angeles", "Asia/Kolkata"];
+
+// Pins the process time zone so these tests check the same thing on every
+// machine. Under UTC alone, local midnight and UTC midnight are one instant.
+const withTimeZone = (timeZone: string, run: () => void) => {
+  const originalTimezone = process.env.TZ;
+  process.env.TZ = timeZone;
+  try {
+    run();
+  } finally {
+    if (originalTimezone === undefined) {
+      delete process.env.TZ;
+    } else {
+      process.env.TZ = originalTimezone;
+    }
+  }
+};
+
+for (const timeZone of TIME_ZONES) {
+  test(`date-only inputs remain local calendar dates in ${timeZone}`, () => {
+    withTimeZone(timeZone, () => {
+      const date = parseDate("2024-02-29");
+      assert.equal(date.getFullYear(), 2024);
+      assert.equal(date.getMonth(), 1);
+      assert.equal(date.getDate(), 29);
+      assert.equal(date.getHours(), 0);
+      assert.equal(dateQueryString(date), "2024-02-29");
+      assert.equal(parseLocalDate("2024-02-29")?.getTime(), date.getTime());
+      assert.equal(parseLocalDate(), undefined);
+    });
+  });
+}
 
 test("offset timestamps retain their instant and Date inputs are cloned", () => {
   const date = parseDate("2024-03-01T00:30:00+05:30");
@@ -65,33 +87,43 @@ test("offset timestamps retain their instant and Date inputs are cloned", () => 
   assert.equal(parseDate(date.toString()).getTime(), date.getTime());
 });
 
-test("formatters preserve midnight, time, literal and meridiem formatting", () => {
-  assert.equal(formatDateTime("2024-02-29"), "29/02/2024");
-  assert.equal(formatDateTime("2024-02-29T13:05:00"), "01:05 PM; 29/02/2024");
-  assert.equal(
-    formatDateTime(
-      "2024-02-29",
-      undefined,
-      "MMM dd, yyyy",
-      "MMM dd, yyyy, hh:mm a",
-    ),
-    "Feb 29, 2024",
-  );
-  assert.equal(
-    formatDateTime(
-      "2024-02-29T13:05:00",
-      undefined,
-      "MMM dd, yyyy",
-      "MMM dd, yyyy, hh:mm a",
-    ),
-    "Feb 29, 2024, 01:05 PM",
-  );
-  assert.equal(
-    formatDateTime("2024-02-29T13:05:00", "MMMM d, yyyy 'at' h:mm a"),
-    "February 29, 2024 at 1:05 PM",
-  );
-  assert.equal(formatDateTime("2024-02-29T13:05:00", "hh:mm aaa"), "01:05 pm");
-});
+for (const timeZone of TIME_ZONES) {
+  test(`formatters preserve midnight, time, literal and meridiem formatting in ${timeZone}`, () => {
+    withTimeZone(timeZone, () => {
+      assert.equal(formatDateTime("2024-02-29"), "29/02/2024");
+      assert.equal(
+        formatDateTime("2024-02-29T13:05:00"),
+        "01:05 PM; 29/02/2024",
+      );
+      assert.equal(
+        formatDateTime(
+          "2024-02-29",
+          undefined,
+          "MMM dd, yyyy",
+          "MMM dd, yyyy, hh:mm a",
+        ),
+        "Feb 29, 2024",
+      );
+      assert.equal(
+        formatDateTime(
+          "2024-02-29T13:05:00",
+          undefined,
+          "MMM dd, yyyy",
+          "MMM dd, yyyy, hh:mm a",
+        ),
+        "Feb 29, 2024, 01:05 PM",
+      );
+      assert.equal(
+        formatDateTime("2024-02-29T13:05:00", "MMMM d, yyyy 'at' h:mm a"),
+        "February 29, 2024 at 1:05 PM",
+      );
+      assert.equal(
+        formatDateTime("2024-02-29T13:05:00", "hh:mm aaa"),
+        "01:05 pm",
+      );
+    });
+  });
+}
 
 test("invalid or absent query values do not throw or produce filter dates", () => {
   for (const value of [
@@ -113,36 +145,44 @@ test("invalid or absent query values do not throw or produce filter dates", () =
   assert.equal(relativeTime(null), "Invalid Date");
 });
 
-test("a date-only filter string stays on that local calendar day", () => {
-  assert.equal(
-    dateTimeQueryString("2026-09-29"),
-    new Date(2026, 8, 29).toISOString(),
-  );
-  assert.equal(
-    dateTimeQueryString("2026-09-29", true),
-    new Date(2026, 8, 30).toISOString(),
-  );
-});
+for (const timeZone of TIME_ZONES) {
+  test(`a date-only filter string stays on that local calendar day in ${timeZone}`, () => {
+    withTimeZone(timeZone, () => {
+      assert.equal(
+        dateTimeQueryString("2026-09-29"),
+        new Date(2026, 8, 29).toISOString(),
+      );
+      assert.equal(
+        dateTimeQueryString("2026-09-29", true),
+        new Date(2026, 8, 30).toISOString(),
+      );
+    });
+  });
+}
 
-test("date filters use next local midnight, including both DST transitions", () => {
-  for (const [year, month, day] of [
-    [2024, 2, 10],
-    [2024, 10, 3],
-    [2024, 11, 31],
-  ]) {
-    const date = new Date(year, month, day, 14, 30);
-    const original = date.getTime();
-    assert.equal(
-      dateTimeQueryString(date),
-      new Date(year, month, day).toISOString(),
-    );
-    assert.equal(
-      dateTimeQueryString(date, true),
-      new Date(year, month, day + 1).toISOString(),
-    );
-    assert.equal(date.getTime(), original);
-  }
-});
+for (const timeZone of TIME_ZONES) {
+  test(`date filters use next local midnight, including both DST transitions in ${timeZone}`, () => {
+    withTimeZone(timeZone, () => {
+      for (const [year, month, day] of [
+        [2024, 2, 10],
+        [2024, 10, 3],
+        [2024, 11, 31],
+      ]) {
+        const date = new Date(year, month, day, 14, 30);
+        const original = date.getTime();
+        assert.equal(
+          dateTimeQueryString(date),
+          new Date(year, month, day).toISOString(),
+        );
+        assert.equal(
+          dateTimeQueryString(date, true),
+          new Date(year, month, day + 1).toISOString(),
+        );
+        assert.equal(date.getTime(), original);
+      }
+    });
+  });
+}
 
 test("date-field validation rejects incomplete, overflowing and non-leap dates", () => {
   assert.equal(isValidDate("2024", "02", "29"), true);
@@ -192,56 +232,64 @@ test("online status keeps a strict five-minute cutoff", (context) => {
   assert.equal(isUserOnline({ last_login: "invalid" }), false);
 });
 
-test("patient age retains neonatal, pediatric, adult and deceased boundaries", () => {
-  for (const [birth, end, expected] of [
-    ["2024-01-01", "2024-01-29", "28 days"],
-    ["2024-01-01", "2024-01-30", "4 weeks 1 days"],
-    ["2023-01-01", "2024-01-02", "12 months 1 days"],
-    ["2022-01-01", "2024-01-01", "2 years"],
-    ["2022-01-01", "2024-02-01", "2 years 1 months"],
-    ["2006-01-01", "2024-01-01", "18 years"],
-    ["2024-02-29", "2025-02-28", "12 months"],
-    ["2023-01-30", "2024-02-28", "12 months 29 days"],
-    ["2024-03-09", "2024-03-11", "2 days"],
-  ]) {
-    assert.equal(
-      formatPatientAge(patient(birth, end)),
-      expected,
-      `${birth} to ${end}`,
-    );
-  }
-  assert.equal(
-    formatPatientAge(patient("2022-01-01", "2024-02-01"), true),
-    "2Y 1M",
-  );
-  assert.equal(
-    formatPatientAge(patient(undefined, "2024-02-01")),
-    "2000 (24Y)",
-  );
-});
+for (const timeZone of TIME_ZONES) {
+  test(`patient age retains neonatal, pediatric, adult and deceased boundaries in ${timeZone}`, () => {
+    withTimeZone(timeZone, () => {
+      for (const [birth, end, expected] of [
+        ["2024-01-01", "2024-01-29", "28 days"],
+        ["2024-01-01", "2024-01-30", "4 weeks 1 days"],
+        ["2023-01-01", "2024-01-02", "12 months 1 days"],
+        ["2022-01-01", "2024-01-01", "2 years"],
+        ["2022-01-01", "2024-02-01", "2 years 1 months"],
+        ["2006-01-01", "2024-01-01", "18 years"],
+        ["2024-02-29", "2025-02-28", "12 months"],
+        ["2023-01-30", "2024-02-28", "12 months 29 days"],
+        ["2024-03-09", "2024-03-11", "2 days"],
+      ]) {
+        assert.equal(
+          formatPatientAge(patient(birth, end)),
+          expected,
+          `${birth} to ${end}`,
+        );
+      }
+      assert.equal(
+        formatPatientAge(patient("2022-01-01", "2024-02-01"), true),
+        "2Y 1M",
+      );
+      assert.equal(
+        formatPatientAge(patient(undefined, "2024-02-01")),
+        "2000 (24Y)",
+      );
+    });
+  });
+}
 
-test("age breakdown clamps leap-day and month-end anniversaries", () => {
-  assert.equal(
-    formatPatientAgeBreakdown(patient("2024-02-29", "2025-02-28")),
-    "1 years",
-  );
-  assert.equal(
-    formatPatientAgeBreakdown(patient("2024-01-30", "2024-02-28")),
-    "29 days",
-  );
-  assert.equal(
-    formatPatientAgeBreakdown(patient("2024-01-31", "2024-02-29")),
-    "1 months",
-  );
-  assert.equal(
-    formatPatientAgeBreakdown(patient("2022-01-01", "2024-02-03")),
-    "2 years, 1 months, 2 days",
-  );
-  assert.equal(
-    formatPatientAgeBreakdown(patient(undefined, "2024-02-03")),
-    null,
-  );
-});
+for (const timeZone of TIME_ZONES) {
+  test(`age breakdown clamps leap-day and month-end anniversaries in ${timeZone}`, () => {
+    withTimeZone(timeZone, () => {
+      assert.equal(
+        formatPatientAgeBreakdown(patient("2024-02-29", "2025-02-28")),
+        "1 years",
+      );
+      assert.equal(
+        formatPatientAgeBreakdown(patient("2024-01-30", "2024-02-28")),
+        "29 days",
+      );
+      assert.equal(
+        formatPatientAgeBreakdown(patient("2024-01-31", "2024-02-29")),
+        "1 months",
+      );
+      assert.equal(
+        formatPatientAgeBreakdown(patient("2022-01-01", "2024-02-03")),
+        "2 years, 1 months, 2 days",
+      );
+      assert.equal(
+        formatPatientAgeBreakdown(patient(undefined, "2024-02-03")),
+        null,
+      );
+    });
+  });
+}
 
 test("facility-local helpers use the scheduling timezone, not the browser zone", () => {
   const slotInstant = "2026-09-30T04:30:00.000Z";
@@ -260,8 +308,13 @@ test("facility-local helpers use the scheduling timezone, not the browser zone",
 });
 
 test("formatDateTimeInZone ignores viewer DST when formatting clinic zone (US spring forward)", () => {
-  // 02:30 on 8 Mar 2026 in Asia/Kolkata. Fails under America/New_York if wall
-  // clock is rebuilt with new Date(y,m,d,h,…) before format.
-  const instant = "2026-03-07T21:00:00.000Z";
-  assert.equal(formatDateTimeInZone(instant, "Asia/Kolkata", "HH:mm"), "02:30");
+  withTimeZone("America/New_York", () => {
+    // 02:30 on 8 Mar 2026 in Asia/Kolkata. Fails under America/New_York if wall
+    // clock is rebuilt with new Date(y,m,d,h,…) before format.
+    const instant = "2026-03-07T21:00:00.000Z";
+    assert.equal(
+      formatDateTimeInZone(instant, "Asia/Kolkata", "HH:mm"),
+      "02:30",
+    );
+  });
 });
