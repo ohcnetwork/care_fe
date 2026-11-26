@@ -881,6 +881,7 @@
   "child_tag_archived_successfully": "Child tag archived successfully",
   "child_tags": "Child tags",
   "children": "Children",
+  "choice_needs_options": "Choice questions need answer options — add options or pick a value set",
   "choose_file": "Upload From Device",
   "choose_other_search_type": "Choose other search types",
   "choose_resource": "Choose practitioner/location/healthcare service to see availability.",
