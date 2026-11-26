@@ -158,7 +158,7 @@ test.describe("Fill page shell", () => {
         await back.click();
         await expect(workspaceHeader).toBeVisible();
         if (pinned) await expect(sidebar).toBeVisible();
-        else await expect(sidebar).not.toBeVisible();
+        else await expect(sidebar).toBeHidden();
       }
     });
   });

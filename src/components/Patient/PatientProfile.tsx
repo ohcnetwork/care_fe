@@ -134,6 +134,7 @@ const PatientProfileContent = (props: PatientProfileProps) => {
                       ? "border-b-4 border-green-800 text-green-800 md:border-b-2"
                       : "rounded-t-lg text-gray-600 hover:bg-gray-100"
                   }`}
+                  resetScroll={false}
                   role="tab"
                   aria-selected={page === tab.route}
                   aria-controls={`${tab.route}-panel`}

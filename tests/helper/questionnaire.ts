@@ -1,11 +1,7 @@
 import { type Page, expect } from "@playwright/test";
-import { setTimeout as delay } from "node:timers/promises";
+import { createTestEncounter } from "tests/helper/encounter";
 import { createTestPatient } from "tests/helper/patient";
-import {
-  adminApiHeaders,
-  apiBaseUrl,
-  questionBlock,
-} from "tests/helper/questionnaireV2";
+import { questionBlock } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 
 /**
@@ -35,41 +31,14 @@ export async function createQuestionnaireEncounter(
     organizations?: string[];
   } = {},
 ): Promise<{ patientId: string; encounterId: string }> {
-  const headers = adminApiHeaders();
   const patientId = await createTestPatient("Questionnaire Test");
-  const encounterBody = JSON.stringify({
-    patient: patientId,
-    facility: facilityId,
+  const encounterId = await createTestEncounter(facilityId, patientId, {
     status,
-    encounter_class: encounterClass,
+    encounterClass,
     period: { start: start.toISOString() },
-    priority: "routine",
     organizations,
   });
-  for (let attempt = 0; ; attempt++) {
-    const response = await fetch(`${apiBaseUrl()}/api/v1/encounter/`, {
-      method: "POST",
-      headers,
-      body: encounterBody,
-    });
-    if (response.ok) {
-      const encounterId = ((await response.json()) as { id: string }).id;
-      return { patientId, encounterId };
-    }
-    const error = await response.text();
-    // The backend serializes encounter creation per facility with a lock
-    // (the rejected create is rolled back), so retry only that rejection.
-    if (
-      attempt >= 4 ||
-      response.status !== 400 ||
-      !error.includes("Encounter creation failed, try again after a while")
-    ) {
-      throw new Error(
-        `Failed to create questionnaire encounter: ${response.status} — ${error}`,
-      );
-    }
-    await delay(250 * (attempt + 1));
-  }
+  return { patientId, encounterId };
 }
 
 /**
@@ -139,9 +108,10 @@ export async function submitAndExpectSuccess(page: Page) {
 }
 
 /**
- * After submission, waits for navigation to the encounter updates page,
- * then asserts that `expectedValues` are visible and `excludedValues` are
- * NOT visible anywhere on the page.
+ * After submission, waits for navigation to the encounter updates page and
+ * for the submitted response's answers to render, then asserts that
+ * `expectedValues` are visible and `excludedValues` are NOT visible
+ * anywhere on the page.
  */
 export async function verifySubmittedValues(
   page: Page,
@@ -149,7 +119,15 @@ export async function verifySubmittedValues(
   excludedValues: string[] = [],
 ) {
   await page.waitForURL(/\/encounter\/[^/]+\/updates/);
-  await page.waitForLoadState("networkidle");
+  // The responses widget shows a skeleton until its list query settles, and
+  // every row of a response renders together. Waiting for an answer row
+  // keeps the `excludedValues` checks from passing on a still-loading page.
+  await expect(
+    page
+      .getByRole("region", { name: "Questionnaire Responses" })
+      .locator("tr, dl > div")
+      .first(),
+  ).toBeVisible();
 
   for (const val of expectedValues) {
     const locator = page.getByText(val, { exact: true }).first();
@@ -158,7 +136,7 @@ export async function verifySubmittedValues(
   }
 
   for (const val of excludedValues) {
-    await expect(page.getByText(val, { exact: true })).not.toBeVisible();
+    await expect(page.getByText(val, { exact: true })).toBeHidden();
   }
 }
 
@@ -173,8 +151,8 @@ export async function verifyLabelledValues(
   pairs: [label: string, value: string][],
 ) {
   await page.waitForURL(/\/encounter\/[^/]+\/updates/);
-  await page.waitForLoadState("networkidle");
 
+  // Each row lookup and `toHaveText` auto-wait for the responses to load.
   for (const [label, value] of pairs) {
     const row = page
       .locator("tr, dl > div")

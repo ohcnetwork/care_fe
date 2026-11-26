@@ -124,7 +124,7 @@ test.describe("Facility forms and responses", () => {
       await expect(picker.getByPlaceholder("Search Forms")).toBeVisible();
       await expect(page).toHaveURL(`${facilityPath}/general`);
       await page.keyboard.press("Escape");
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       await expect(submit).toBeFocused();
       await submit.click();
       const search = picker.getByPlaceholder("Search Forms");
@@ -222,7 +222,7 @@ test.describe("Facility forms and responses", () => {
       await page.reload();
       await expect(viewer.getByText(answer, { exact: true })).toBeVisible();
       await viewer.getByRole("button", { name: "Close", exact: true }).click();
-      await expect(viewer).not.toBeVisible();
+      await expect(viewer).toBeHidden();
       await expect(page).toHaveURL(`${facilityPath}/responses`);
     });
 
@@ -416,7 +416,7 @@ test.describe("Facility forms and responses", () => {
         .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
         .toBe(390);
       await viewer.getByRole("button", { name: "Close", exact: true }).click();
-      await expect(viewer).not.toBeVisible();
+      await expect(viewer).toBeHidden();
       expect(page.url()).toBe(filteredUrl);
       await page.addLocatorHandler(updateNotice, dismissUpdateNotice);
       await page
@@ -434,7 +434,7 @@ test.describe("Facility forms and responses", () => {
       ).toBeVisible();
       expect(page.url()).toBe(filteredUrl);
       await page.keyboard.press("Escape");
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       expect(page.url()).toBe(filteredUrl);
       await expect(rows).toHaveAttribute("data-response-id", completed.id);
     });

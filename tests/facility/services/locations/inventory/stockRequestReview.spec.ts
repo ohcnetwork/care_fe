@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Request } from "@playwright/test";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -63,14 +63,14 @@ test("an internal stock request shows requested quantities without retired API f
     },
   });
   expect(added.ok(), await added.text()).toBe(true);
-  const failedReads: number[] = [];
-  page.on("response", (response) => {
+  // Delivery reads the page starts; their responses are checked below.
+  const deliveryReads: Request[] = [];
+  page.on("request", (request) => {
     if (
-      response.request().method() === "GET" &&
-      response.url().includes("/api/v1/supply_delivery/") &&
-      response.status() >= 400
+      request.method() === "GET" &&
+      request.url().includes("/api/v1/supply_delivery/")
     )
-      failedReads.push(response.status());
+      deliveryReads.push(request);
   });
   await page.goto(
     `/facility/${facilityId}/locations/${destination.id}/inventory/internal/receive/orders/${order.id}`,
@@ -85,7 +85,13 @@ test("an internal stock request shows requested quantities without retired API f
   await expect(
     page.getByRole("combobox").filter({ hasText: "Add Item" }),
   ).toBeVisible();
-  await page.waitForLoadState("networkidle");
+  // Any delivery read starts with the page's other reads, which have rendered
+  // by now; wait for each to finish before checking for failures.
+  const failedReads = (
+    await Promise.all(deliveryReads.map((request) => request.response()))
+  ).flatMap((response) =>
+    response && response.status() >= 400 ? [response.status()] : [],
+  );
   expect(
     failedReads,
     "Stock requests must not request retired delivery history",

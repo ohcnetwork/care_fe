@@ -141,7 +141,7 @@ test.describe("Questionnaire v2 choice answer options", () => {
       // dropdown (legacy ChoiceQuestion's selectType threshold).
       await expect(
         page.getByRole("radio", { name: optionValues[0] }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       // The a11y association is load-bearing: the trigger must be reachable
       // by the question's accessible name (label + selected value).
       const trigger = page.getByRole("combobox", { name: questionTitle });

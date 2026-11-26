@@ -172,17 +172,17 @@ test.describe("TanStack Router navigation", () => {
     await mockTestPlugin(page);
 
     await page.goto("/test-plugin/router");
-    const routerPage = page.locator('[data-cy="test-plugin-router"]');
-    await expect(routerPage).toHaveText("/test-plugin/router");
+    const routerButton = page.locator('[data-cy="test-plugin-router"]');
+    await expect(routerButton).toHaveText("/test-plugin/router");
 
-    await routerPage.click();
+    await routerButton.click();
     await expect(page).toHaveURL(/\/test-plugin\/items\/7$/);
     await expect(page.locator('[data-cy="test-plugin-page"]')).toHaveText(
       "Test plugin item 7",
     );
 
     await page.goBack();
-    await expect(routerPage).toHaveText("/test-plugin/router");
+    await expect(routerButton).toHaveText("/test-plugin/router");
   });
 
   test("typed links keep commas in comma-separated id params", async ({

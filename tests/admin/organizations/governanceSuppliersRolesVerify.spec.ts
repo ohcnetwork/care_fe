@@ -52,7 +52,7 @@ async function createGovtOrganization(
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("textbox", { name: /name/i }).fill(orgName);
   await dialog.getByRole("button", { name: /create organization/i }).click();
-  await expect(dialog).not.toBeVisible();
+  await expect(dialog).toBeHidden();
 }
 
 async function checkGovtChildSheetValidation(page: Page) {
@@ -79,7 +79,7 @@ async function checkGovtChildSheetValidation(page: Page) {
   await submitButton.click();
   await expect(nameInput).toHaveAttribute("aria-invalid", "true");
   await dialog.getByRole("button", { name: /^close$/i }).click();
-  await expect(dialog).not.toBeVisible();
+  await expect(dialog).toBeHidden();
 }
 
 function governanceTree(page: Page) {
@@ -100,14 +100,23 @@ function adminOrgDetailUrlRegex(type: OrganizationType) {
 }
 
 async function gotoOrgTypeList(page: Page, type: OrganizationType) {
-  await page.goto(`/admin/organizations/${type}`, {
-    waitUntil: "networkidle",
-  });
+  await page.goto(`/admin/organizations/${type}`);
   await expect(
     type === "govt"
       ? governanceTree(page).getByRole("combobox")
       : searchInput(page, type),
   ).toBeVisible();
+  if (type === "role") {
+    // On wide screens Responsibilities opens its first entry once the list
+    // loads, which remounts the page; wait for it (or the empty state) before
+    // interacting.
+    await expect(
+      page
+        .locator('[data-slot="responsibility-list"]')
+        .getByRole("button", { pressed: true })
+        .or(page.getByText(/no organizations found/i)),
+    ).toBeVisible();
+  }
 }
 
 async function clickAndWaitForUrl(
@@ -139,8 +148,8 @@ async function openGovtOrgDetailByName(
     await expect(card).toBeVisible();
     const link = seeDetailsLinkInCard(card);
     await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute("href", /.+/);
     const href = await link.getAttribute("href");
-    expect(href).toBeTruthy();
     const detailUrl = new URL(href!, page.url()).href;
     await link.click();
     await expect(page).toHaveURL(detailUrl);
@@ -196,7 +205,9 @@ test.describe("Organization directory compatibility", () => {
     await page.goto(
       `/admin/organizations/product_supplier/${faker.string.uuid()}`,
     );
-    await expect(page).toHaveURL(/\/admin\/organizations\/product_supplier\/?$/);
+    await expect(page).toHaveURL(
+      /\/admin\/organizations\/product_supplier\/?$/,
+    );
     await expect(
       page.getByRole("heading", { name: /^suppliers$/i }),
     ).toBeVisible();
@@ -313,14 +324,16 @@ test.describe("Organization directory compatibility", () => {
       permissions: [],
       has_children: false,
     };
-    let child: {
-      id: string;
-      name: string;
-      org_type: string;
-      parent: typeof root;
-      permissions: string[];
-      has_children: boolean;
-    } | undefined;
+    let child:
+      | {
+          id: string;
+          name: string;
+          org_type: string;
+          parent: typeof root;
+          permissions: string[];
+          has_children: boolean;
+        }
+      | undefined;
 
     await page.route("**/api/v1/organization/**", async (route) => {
       const request = route.request();
@@ -343,7 +356,10 @@ test.describe("Organization directory compatibility", () => {
         await route.fulfill({ json: child });
       } else if (url.pathname === `/api/v1/organization/${root.id}/`) {
         await route.fulfill({ json: root });
-      } else if (child && url.pathname === `/api/v1/organization/${child.id}/`) {
+      } else if (
+        child &&
+        url.pathname === `/api/v1/organization/${child.id}/`
+      ) {
         await route.fulfill({ json: child });
       } else if (url.pathname === "/api/v1/organization/") {
         const candidates =
@@ -377,7 +393,7 @@ test.describe("Organization directory compatibility", () => {
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("textbox", { name: /name/i }).fill("Updated child");
     await dialog.getByRole("button", { name: /update organization/i }).click();
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await openGovtOrgDetailByName(page, "Updated child", "govt");
     await page
       .locator('[data-slot="breadcrumb"]')
@@ -737,7 +753,7 @@ test.describe("Admin organization lists", () => {
       await dialog
         .getByRole("button", { name: /update organization/i })
         .click();
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
     });
 
     await test.step("Reload and verify the renamed child still belongs to the parent", async () => {
@@ -776,7 +792,7 @@ test.describe("Admin organization lists", () => {
       const response = await responsePromise;
       expect(response.ok()).toBeTruthy();
       expect(response.request().postDataJSON()).not.toHaveProperty("parent");
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
     });
 
     await test.step("Reload and open the responsibility from the top-level list", async () => {

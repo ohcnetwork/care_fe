@@ -113,8 +113,9 @@ async function selectCode(
     })
     .first()
     .click();
+  // routeTerminology serves no starred or recent codes, so the picker's only
+  // options are its search results.
   await page
-    .getByTestId("valueset-search-results")
     .getByRole("option")
     .filter({ hasText: kind === "vaccine" ? vaccine.display : disease.display })
     .click();

@@ -4,6 +4,7 @@ import tsParser from "@typescript-eslint/parser";
 import i18nextPlugin from "eslint-plugin-i18next";
 import i18nextNoUndefinedTranslationKeysPlugin from "eslint-plugin-i18next-no-undefined-translation-keys";
 import noRelativeImportPaths from "eslint-plugin-no-relative-import-paths";
+import playwright from "eslint-plugin-playwright";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
@@ -66,6 +67,8 @@ const config = [
       ".opencode/**",
       ".codex/**",
       ".cursor/**",
+      // Test fixtures (e.g. Vite-served harnesses) are not in any tsconfig.
+      "tests/fixtures/**",
     ],
   },
   eslint.configs.recommended,
@@ -276,11 +279,65 @@ const config = [
   // Playwright-specific rules
   {
     files: ["tests/**/*.ts", "playwright.config.ts"],
+    plugins: { playwright },
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         project: "./tests/tsconfig.json",
       },
+    },
+    rules: {
+      // Explicit allow-list of eslint-plugin-playwright rules; `flat/recommended`
+      // is not spread. `no-nth-methods` stays off: `.first()/.last()/.nth()`
+      // are idiomatic Playwright.
+      //
+      // No existing violations: errors, so they gate new code.
+      "playwright/max-nested-describe": "error",
+      "playwright/missing-playwright-await": "error",
+      "playwright/no-duplicate-hooks": "error",
+      "playwright/no-duplicate-slow": "error",
+      "playwright/no-element-handle": "error",
+      "playwright/no-eval": "error",
+      "playwright/no-focused-test": "error",
+      "playwright/no-nested-step": "error",
+      "playwright/no-page-pause": "error",
+      "playwright/no-standalone-expect": "error",
+      "playwright/no-unnecessary-assertions": "error",
+      "playwright/no-unsafe-references": "error",
+      "playwright/no-wait-for-navigation": "error",
+      "playwright/no-wait-for-selector": "error",
+      "playwright/prefer-hooks-on-top": "error",
+      "playwright/valid-describe-callback": "error",
+      "playwright/valid-expect": "error",
+      "playwright/valid-expect-in-promise": "error",
+      "playwright/valid-test-tags": "error",
+      "playwright/valid-title": "error",
+      // Rules the tests were migrated to; errors too, so CI and the
+      // pre-commit hook reject new violations.
+      "playwright/consistent-spacing-between-blocks": "error",
+      "playwright/no-force-option": "error",
+      "playwright/no-networkidle": "error",
+      "playwright/no-unused-locators": "error",
+      "playwright/no-useless-await": "error",
+      "playwright/no-useless-not": "error",
+      "playwright/no-wait-for-timeout": "error",
+      "playwright/prefer-hooks-in-order": "error",
+      "playwright/prefer-locator": "error",
+      "playwright/prefer-to-have-count": "error",
+      "playwright/prefer-to-have-length": "error",
+      "playwright/prefer-web-first-assertions": "error",
+      "playwright/no-restricted-locators": [
+        "error",
+        [
+          {
+            type: "getByTestId",
+            message:
+              "Avoid test IDs — use role/label/text locators (getByRole, getByLabel, getByText).",
+          },
+        ],
+      ],
+      // `any` is only a warning in src/; the tests have none, so keep it out.
+      "@typescript-eslint/no-explicit-any": "error",
     },
   },
 

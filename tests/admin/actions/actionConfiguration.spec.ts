@@ -178,7 +178,7 @@ test.describe("Admin action configurations", () => {
       await page.waitForURL(/\/admin\/actions$/);
       await expect(
         page.getByRole("row", { name: new RegExp(`${name} v2`) }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       expect((await fetchConfiguration(configurationId)).status).toBe(404);
     });
   });
