@@ -486,7 +486,7 @@ test("re-picking a range in another month keeps that month in view", async ({
   await expect(apply(page)).toBeFocused();
 });
 
-test("the real multi-filter passes bounds through and closes the menu after Apply", async ({
+test("the date filter panel passes bounds through and its host closes after Apply", async ({
   page,
 }) => {
   await open(page, "menu&integration&max");
@@ -509,6 +509,29 @@ test("the real multi-filter passes bounds through and closes the menu after Appl
   await page.getByRole("menuitem", { name: /custom date range/i }).click();
   await expect(from(page)).toHaveValue("03/11/2026");
   await expect(to(page)).toHaveValue("16/11/2026");
+});
+
+test("the real DateFilterButton closes after a preset and after Apply", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/__date-range-test/index.html?host");
+  const trigger = page.getByRole("button", { name: "Created date" });
+  const menu = page.locator('[data-slot="dropdown-menu-content"]');
+  await trigger.click();
+  await page.getByRole("menuitem", { name: "Today", exact: true }).click();
+  await expect(menu).toBeHidden();
+  await expect(applied(page)).toContainText('"from":"2026-11-20"');
+  await expect(applied(page)).toContainText('"count":1');
+  await page.getByRole("button", { name: /created date/i }).click();
+  await page.getByRole("menuitem", { name: /custom date range/i }).click();
+  await from(page).fill("03/11/2026");
+  await to(page).fill("16/11/2026");
+  await apply(page).click();
+  await expect(menu).toBeHidden();
+  await expect(applied(page)).toContainText('"from":"2026-11-03"');
+  await expect(applied(page)).toContainText('"to":"2026-11-16"');
+  await expect(applied(page)).toContainText('"count":2');
 });
 
 test("hover preview preserves day nodes and editing From clears an earlier To", async ({

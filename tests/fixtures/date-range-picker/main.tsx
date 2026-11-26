@@ -14,7 +14,10 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import RenderDateFilter from "@/components/ui/multi-filter/dateFilter";
+import RenderDateFilter, {
+  DateFilterButton,
+} from "@/components/ui/multi-filter/dateFilter";
+import type { FilterConfig } from "@/components/ui/multi-filter/utils/Utils";
 
 import "@/style/index.css";
 import en from "../../../public/locale/en.json";
@@ -40,15 +43,38 @@ function Fixture() {
   };
   const minDate = params.has("min") ? new Date(2026, 9, 10) : undefined;
   const maxDate = params.has("max") ? startOfDay(new Date()) : undefined;
+  const filter: FilterConfig = {
+    key: "created_date",
+    label: "Created date",
+    type: "date",
+    options: [],
+    meta: { minDate, maxDate },
+  };
+  // "host" mounts the real DateFilterButton (as on the encounter list), so
+  // closing after a pick is its own behaviour, not this fixture's.
+  if (params.has("host")) {
+    return (
+      <main className="p-2">
+        <DateFilterButton
+          filter={filter}
+          selected={range}
+          onFilterChange={(_key, next) => {
+            if (!Array.isArray(next)) handleApply(next);
+          }}
+        />
+        <output aria-label="Applied range">
+          {JSON.stringify({
+            from: range.from && format(range.from, "yyyy-MM-dd"),
+            to: range.to && format(range.to, "yyyy-MM-dd"),
+            count,
+          })}
+        </output>
+      </main>
+    );
+  }
   const panel = params.has("integration") ? (
     <RenderDateFilter
-      filter={{
-        key: "created_date",
-        label: "Created date",
-        type: "date",
-        options: [],
-        meta: { minDate, maxDate },
-      }}
+      filter={filter}
       selected={range}
       onFilterChange={(_key, next) => {
         if (Array.isArray(next)) throw new Error("Expected a date range");
