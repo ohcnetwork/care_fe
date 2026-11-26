@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -65,6 +66,7 @@ import { goBack } from "@/Utils/utils";
 const createRequestOrderFormSchema = (
   t: (key: string) => string,
   internal: boolean,
+  isEditMode: boolean,
 ) =>
   z.object({
     name: z.string().trim().min(1, t("name_is_required")),
@@ -73,12 +75,14 @@ const createRequestOrderFormSchema = (
     category: z.enum(RequestOrderCategory),
     priority: z.enum(RequestOrderPriority),
     reason: z.enum(RequestOrderReason),
-    supplier: internal
-      ? z.string().optional()
-      : z.string().min(1, t("supplier_required")),
-    origin: internal
-      ? z.string().min(1, t("origin_required"))
-      : z.string().optional(),
+    supplier:
+      internal || isEditMode
+        ? z.string().optional()
+        : z.string().min(1, t("supplier_required")),
+    origin:
+      internal && !isEditMode
+        ? z.string().min(1, t("origin_required"))
+        : z.string().optional(),
     destination: z.string().min(1, t("destination_required")),
     tags: z.array(z.string()),
   });
@@ -134,6 +138,7 @@ export default function RequestOrderForm({
         name: supplierSearchQuery || undefined,
       },
     }),
+    enabled: !internal && !isEditMode,
   });
 
   const {
@@ -151,15 +156,13 @@ export default function RequestOrderForm({
       },
     }),
     select: (data: PaginatedResponse<LocationRead>) => {
-      // Only inventory locations other than the current one; keep an existing
-      // order's origin so it still shows when editing
+      // Only inventory locations other than the current one
       return data.results.filter(
         (location) =>
-          location.id !== locationId &&
-          (location.inventory_usage !== "none" ||
-            location.id === existingData?.origin?.id),
+          location.id !== locationId && location.inventory_usage !== "none",
       );
     },
+    enabled: internal && !isEditMode,
   });
 
   const vendorOptions =
@@ -175,7 +178,9 @@ export default function RequestOrderForm({
     })) || [];
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(createRequestOrderFormSchema(t, internal)),
+    resolver: zodResolver(
+      createRequestOrderFormSchema(t, internal, isEditMode),
+    ),
     defaultValues: {
       name: "",
       note: "",
@@ -250,8 +255,13 @@ export default function RequestOrderForm({
   function onSubmit(data: FormValues) {
     if (isEditMode && requestOrderId) {
       updateRequestOrder({
-        ...data,
         id: requestOrderId,
+        name: data.name,
+        note: data.note,
+        intent: data.intent,
+        category: data.category,
+        priority: data.priority,
+        reason: data.reason,
         status: existingData?.status || RequestOrderStatus.draft,
       });
     } else {
@@ -333,40 +343,61 @@ export default function RequestOrderForm({
                           <FormLabel>
                             {internal ? t("deliver_from") : t("vendor")}
                           </FormLabel>
-                          <FormControl>
-                            <Autocomplete
-                              options={
-                                internal ? deliveryFromOptions : vendorOptions
-                              }
-                              value={field.value || ""}
-                              onChange={field.onChange}
-                              isLoading={
-                                internal
-                                  ? isLoadingDeliveryFromLocations
-                                  : false
-                              }
-                              onSearch={
-                                internal
-                                  ? setSearchDeliveryFrom
-                                  : setSupplierSearchQuery
-                              }
-                              placeholder={
-                                internal
-                                  ? t("select_location")
-                                  : t("select_vendor")
-                              }
-                              inputPlaceholder={
-                                internal
-                                  ? t("search_location")
-                                  : t("search_vendor")
-                              }
-                              noOptionsMessage={
-                                internal
-                                  ? t("no_location_found")
-                                  : t("no_vendor_found")
-                              }
-                            />
-                          </FormControl>
+                          {isEditMode ? (
+                            <>
+                              <FormControl>
+                                <Input
+                                  className="h-9 cursor-default bg-gray-100 text-gray-600"
+                                  value={
+                                    (internal
+                                      ? existingData?.origin?.name
+                                      : existingData?.supplier?.name) ?? ""
+                                  }
+                                  readOnly
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                {internal
+                                  ? t("deliver_from_cannot_be_changed")
+                                  : t("vendor_cannot_be_changed")}
+                              </FormDescription>
+                            </>
+                          ) : (
+                            <FormControl>
+                              <Autocomplete
+                                options={
+                                  internal ? deliveryFromOptions : vendorOptions
+                                }
+                                value={field.value || ""}
+                                onChange={field.onChange}
+                                isLoading={
+                                  internal
+                                    ? isLoadingDeliveryFromLocations
+                                    : false
+                                }
+                                onSearch={
+                                  internal
+                                    ? setSearchDeliveryFrom
+                                    : setSupplierSearchQuery
+                                }
+                                placeholder={
+                                  internal
+                                    ? t("select_location")
+                                    : t("select_vendor")
+                                }
+                                inputPlaceholder={
+                                  internal
+                                    ? t("search_location")
+                                    : t("search_vendor")
+                                }
+                                noOptionsMessage={
+                                  internal
+                                    ? t("no_location_found")
+                                    : t("no_vendor_found")
+                                }
+                              />
+                            </FormControl>
+                          )}
                           <FormMessage />
                         </FormItem>
                       )}
@@ -379,7 +410,7 @@ export default function RequestOrderForm({
                           <FormLabel>{t("intent")}</FormLabel>
                           <Select
                             onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            value={field.value}
                           >
                             <FormControl>
                               <SelectTrigger

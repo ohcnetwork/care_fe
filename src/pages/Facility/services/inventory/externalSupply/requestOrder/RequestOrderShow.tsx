@@ -119,10 +119,13 @@ export function RequestOrderShow({
     if (!requestOrder) return;
 
     updateOrder({
-      ...requestOrder,
-      supplier: requestOrder.supplier?.id || "",
-      origin: requestOrder.origin?.id || undefined,
-      destination: requestOrder.destination.id,
+      id: requestOrder.id,
+      name: requestOrder.name,
+      note: requestOrder.note,
+      intent: requestOrder.intent,
+      category: requestOrder.category,
+      priority: requestOrder.priority,
+      reason: requestOrder.reason,
       status,
     });
   }
