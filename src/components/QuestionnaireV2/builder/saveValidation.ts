@@ -63,6 +63,14 @@ const SAVE_CHECKS: SaveCheck[] = [
     messageKey: "quantity_needs_valueset",
   },
   {
+    // A template with no name or no content would render as an empty entry.
+    predicate: (question) =>
+      question.templates?.some(
+        (template) => !template.name.trim() || !template.content.trim(),
+      ) ?? false,
+    messageKey: "template_name_and_content_required",
+  },
+  {
     // Core resource editors use structured questions; plugins use groups.
     predicate: (question) =>
       question.type === "structured" &&
