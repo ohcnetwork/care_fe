@@ -95,8 +95,17 @@ test.describe("Procedure Questionnaire", () => {
     const procedureName = faker.helpers.arrayElement(RECORD_PROCEDURES);
     const note = `Procedure note ${faker.string.alphanumeric(10)}`;
 
+    // Let the encounter's saved procedures seed the form before a new row is
+    // appended after them.
+    const savedProcedures = page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        url.pathname === `/api/v1/patient/${patientId}/procedure/` &&
+        url.searchParams.get("encounter") === encounterId
+      );
+    });
     await page.goto(questionnaireUrl);
-    await page.waitForLoadState("networkidle");
+    await savedProcedures;
 
     await page
       .getByRole("combobox")
@@ -161,8 +170,8 @@ test.describe("Procedure Questionnaire", () => {
     );
 
     await page.goto(questionnaireUrl);
-    await page.waitForLoadState("networkidle");
 
+    // The seeded row only renders once the saved procedures have loaded.
     const procedureRow = page.getByRole("row", { name: procedureName }).first();
     await procedureRow.getByRole("button", { name: "Actions" }).click();
     await page.getByRole("menuitem", { name: "Remove Procedure" }).click();

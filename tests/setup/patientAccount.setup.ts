@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 import { getFacilityId } from "tests/support/facilityId";
@@ -19,15 +19,16 @@ test("navigate to an patient - create and save account id", async ({
   );
 
   try {
-    await page.waitForLoadState("networkidle");
+    // Check if an account already exists. Wait for the account list query to
+    // settle first: it renders either a "Go to account" row button or the
+    // empty state, so the isVisible() check below never sees the skeleton.
+    const goToAccountButton = page
+      .getByRole("button", { name: "Go to account" })
+      .first();
+    const noAccountsMessage = page.getByText("No accounts found");
+    await expect(goToAccountButton.or(noAccountsMessage)).toBeVisible();
 
-    // Check if an account already exists
-    const goToAccountButton = page.getByRole("button", {
-      name: "Go to account",
-    });
-    const accountExists = await goToAccountButton
-      .isVisible()
-      .catch(() => false);
+    const accountExists = await goToAccountButton.isVisible();
 
     if (accountExists) {
       await goToAccountButton.click();

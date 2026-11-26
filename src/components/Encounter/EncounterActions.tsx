@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { navigate } from "@/lib/router/navigate";
+import { cn } from "@/lib/utils";
 import {
   EncounterListRead,
   EncounterRead,
@@ -22,9 +23,17 @@ import mutate from "@/Utils/request/mutate";
 
 export interface EncounterActionsProps {
   encounter: EncounterRead | EncounterListRead;
+  /**
+   * The gear button's size: "compact" (32px, the default) for cards and
+   * headers, or "default", the standard icon button.
+   */
+  triggerSize?: "compact" | "default";
 }
 
-export function EncounterActions({ encounter }: EncounterActionsProps) {
+export function EncounterActions({
+  encounter,
+  triggerSize = "compact",
+}: EncounterActionsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -68,7 +77,10 @@ export function EncounterActions({ encounter }: EncounterActionsProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 text-gray-500 hover:text-gray-700"
+          className={cn(
+            triggerSize === "compact" && "size-8",
+            "text-gray-500 hover:text-gray-700",
+          )}
           disabled={isRestarting}
         >
           <Settings className="size-4" />

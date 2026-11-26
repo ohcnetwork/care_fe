@@ -188,6 +188,7 @@ test.afterEach(async ({ page }, testInfo) => {
 for (const timezoneId of ["America/Los_Angeles", "Asia/Kolkata"]) {
   test.describe(timezoneId, () => {
     test.use({ timezoneId });
+
     test("Scribe date, datetime and time answers render in their own input formats", async ({
       page,
     }) => {
@@ -211,6 +212,7 @@ for (const timezoneId of ["America/Los_Angeles", "Asia/Kolkata"]) {
           page.locator('[data-question-id="time"] input'),
         ).toHaveValue("09:12:30");
       });
+
       await test.step("Reject mixed formats without replacing the displayed answers", async () => {
         expect((await setAnswer(page, "date", ["2026-09-08T14:35"])).ok).toBe(
           false,
@@ -232,6 +234,7 @@ for (const timezoneId of ["America/Los_Angeles", "Asia/Kolkata"]) {
           page.locator('[data-question-id="time"] input'),
         ).toHaveValue("09:12:30");
       });
+
       await test.step("Display an explicit datetime offset in the clinician's timezone", async () => {
         expect(
           await setAnswer(page, "dateTime", ["2026-09-08T14:35:00+05:30"]),

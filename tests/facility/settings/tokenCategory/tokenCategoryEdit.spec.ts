@@ -50,7 +50,7 @@ test.describe("Token Category Edit - Permission Tests", () => {
         .fill(tokenCategoryName);
       await sheet.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
       await sheet.getByRole("button", { name: "Create" }).click();
-      await expect(sheet).not.toBeVisible();
+      await expect(sheet).toBeHidden();
 
       await page
         .getByRole("searchbox", { name: "Search Token Categories" })
@@ -94,7 +94,7 @@ test.describe("Token Category Edit - Permission Tests", () => {
         .getByRole("textbox", { name: "Shorthand" })
         .fill(updatedShorthand);
       await sheet.getByRole("button", { name: "Save Changes" }).click();
-      await expect(sheet).not.toBeVisible();
+      await expect(sheet).toBeHidden();
 
       // The edited category stays in its original section
       await page
@@ -140,7 +140,7 @@ test.describe("Token Category Edit - Permission Tests", () => {
         defaultFrame.getByText("Default", { exact: true }),
       ).toBeVisible();
       await sheet.getByRole("button", { name: "Close" }).click();
-      await expect(sheet).not.toBeVisible();
+      await expect(sheet).toBeHidden();
 
       // The new default is badged and listed first in its section
       await expect(item().getByText("Default", { exact: true })).toBeVisible();

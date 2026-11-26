@@ -76,7 +76,7 @@ test("saves professional details, preserves credential metadata and clears remov
       dialog.getByRole("button", { name: "Update User", exact: true }).click(),
     ]);
     expect(response.ok()).toBe(true);
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
   };
   try {
     await page.goto(`/users/${username}`);
@@ -105,7 +105,7 @@ test("saves professional details, preserves credential metadata and clears remov
       page.getByRole("option", { name: "Malayalam", exact: true }),
     ).toBeVisible();
     await page.getByPlaceholder("Search languages").press("Escape");
-    await expect(page.getByPlaceholder("Search languages")).not.toBeVisible();
+    await expect(page.getByPlaceholder("Search languages")).toBeHidden();
     await expect(dialog).toBeVisible();
     await language.getByRole("combobox", { name: /^Language/ }).click();
     await expect(page.getByPlaceholder("Search languages")).toHaveValue("");
@@ -128,19 +128,19 @@ test("saves professional details, preserves credential metadata and clears remov
     await language.getByRole("combobox", { name: /^Language/ }).click();
     await page.getByPlaceholder("Search languages").fill("Malayalam");
     await page.getByRole("option", { name: "Malayalam", exact: true }).click();
-    await expect(page.getByPlaceholder("Search languages")).not.toBeVisible();
+    await expect(page.getByPlaceholder("Search languages")).toBeHidden();
     await language.getByRole("combobox", { name: /^Language/ }).click();
     await expect(page.getByPlaceholder("Search languages")).toHaveValue("");
     await expect(
       page.getByRole("option", { name: "Afar", exact: true }),
     ).toBeVisible();
     await page.getByPlaceholder("Search languages").press("Escape");
-    await expect(page.getByPlaceholder("Search languages")).not.toBeVisible();
+    await expect(page.getByPlaceholder("Search languages")).toBeHidden();
     await expect(
       dialog.getByText("Each language can only be added once.", {
         exact: true,
       }),
-    ).not.toBeVisible();
+    ).toBeHidden();
     await language
       .getByRole("combobox", { name: "Proficiency", exact: true })
       .click();
@@ -270,7 +270,7 @@ test("saves professional details, preserves credential metadata and clears remov
 
     // Reopening must refresh the cached editor before an unrelated edit is saved.
     await page.keyboard.press("Escape");
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     const refreshedPhone = `+919${faker.string.numeric(9)}`;
     const historicalCommunication = [
       ...persisted.communication,
@@ -297,7 +297,7 @@ test("saves professional details, preserves credential metadata and clears remov
     await dialog
       .getByRole("button", { name: "Update User", exact: true })
       .click();
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     const afterNameEdit = await readUser();
     expect(afterNameEdit).toMatchObject({
       first_name: "Updated Profile",

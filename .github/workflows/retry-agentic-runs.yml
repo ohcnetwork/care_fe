@@ -45,7 +45,7 @@ jobs:
           github.event.workflow_run.run_attempt < 3 }}
     runs-on: ubuntu-latest
     permissions:
-      # Read the failed run's logs, and re-run its failed jobs. Nothing else — this job never
+      # Read the failed run's logs, and re-run it. Nothing else — this job never
       # touches repository contents, and deliberately holds no `contents` or `pull-requests` scope.
       actions: write
     timeout-minutes: 45
@@ -80,6 +80,9 @@ jobs:
           #   - quota / invocation caps and daily credit ceilings are exhausted budgets, not
           #     momentary congestion, and reset on a schedule this job cannot wait out;
           #   - auth and model-not-supported errors are configuration, and need a human.
+          # Copilot's monthly AI-credit quota slips through: the harness logs a bare 429 with
+          # `isCAPIQuotaExceededError=false`, which matches TRANSIENT below. The CARE PR Reviewer's
+          # pre-check cancels those re-runs; the other workflows retry up to the attempt cap.
           #
           # Match only the harness's `is<Thing>=true` flags and explicit `: true` env values. The
           # bare output *names* are useless as markers: gh-aw prints `Set output
@@ -130,7 +133,7 @@ jobs:
           echo "Waiting ${DELAY}s before re-running $WORKFLOW_NAME #$RUN_ID."
           sleep "$DELAY"
 
-      - name: Re-run failed jobs unless a newer run has superseded this one
+      - name: Re-run unless a newer run has superseded this one
         if: steps.classify.outputs.retry == 'true'
         run: |
           set -euo pipefail
@@ -179,7 +182,14 @@ jobs:
 
           # --failed re-runs only the jobs that failed, reusing the original event payload, so the
           # reviewer sees the same PR and head SHA it was originally triggered for.
-          gh run rerun "$RUN_ID" --failed
+          # Not for the CARE PR Reviewer: its pre_activation checks (PR closed? no new code? quota
+          # used up?) must run again, and --failed would reuse their old result. Its no-new-code
+          # check also keeps a review that already posted from posting twice.
+          if [ "$WORKFLOW_NAME" = "CARE PR Reviewer" ]; then
+            gh run rerun "$RUN_ID"
+          else
+            gh run rerun "$RUN_ID" --failed
+          fi
           echo "Re-ran $WORKFLOW_NAME #$RUN_ID (was attempt $RUN_ATTEMPT)."
           {
             echo "### Retried \`$WORKFLOW_NAME\`"
