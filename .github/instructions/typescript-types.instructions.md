@@ -39,7 +39,7 @@ export interface PatientRead {
   instance_tags: TagConfig[];
   geo_organization: Organization;
   instance_identifiers: PatientIdentifier[];
-  created_by: UserReadMinimal | null;
+  created_by: UserSpec | null;
   year_of_birth: number;
   // Always include medical-specific fields
 }
@@ -48,7 +48,7 @@ export interface PatientRead {
 ## Import Path Conventions for Types
 - Cross-domain imports: `import { TagConfig } from "@/types/emr/tagConfig/tagConfig"`
 - Organization imports: `import { Organization } from "@/types/organization/organization"`
-- User imports: `import { UserReadMinimal } from "@/types/user/user"`
+- User imports: `import { UserSpec } from "@/types/user/user"`
 - Patient identifiers: `import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig"`
 - EMR patient types: `import { PatientRead, PatientCreate } from "@/types/emr/patient/patient"`
 - Facility types: `import { FacilityRead, FacilityCreate } from "@/types/facility/facility"`
@@ -105,13 +105,11 @@ export interface PatientAdmissionForm {
 ## Role-Based Access Types
 ```typescript
 // User permissions for healthcare roles
-export interface CurrentUserRead extends UserRead, Permissions {
-  user_type: UserType;
+export interface CurrentUserRetrieveSpec extends UserRetrieveSpec, Permissions {
+  is_superuser: boolean;
   facilities: FacilityBareMinimum[];
-  home_facility: FacilityBareMinimum;
+  organizations: Organization[];
 }
-
-export type UserType = 'doctor' | 'nurse' | 'staff' | 'volunteer' | 'administrator';
 ```
 
 ## Medical Measurement Types
@@ -123,7 +121,7 @@ export interface VitalSigns {
   heartRate: { value: number; unit: 'bpm' };
   oxygenSaturation: { value: number; unit: 'percentage' };
   recordedAt: string; // ISO 8601
-  recordedBy: UserReadMinimal;
+  recordedBy: UserSpec;
 }
 ```
 

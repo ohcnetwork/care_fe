@@ -218,7 +218,6 @@ test.describe("Bed board", () => {
             username: "bed-board",
             first_name: "Bed",
             last_name: "Board",
-            user_type: "nurse",
             is_superuser: true,
             permissions: [],
             flags: [],

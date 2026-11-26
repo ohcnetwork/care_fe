@@ -25,7 +25,7 @@ applyTo: "src/common/**/*.{ts,tsx}"
 ### Medical Permission Checking
 ```typescript
 // Role-based permission example
-export const canAccessPatientData = (user: UserRead, patientId: string) => {
+export const canAccessPatientData = (user: UserRetrieveSpec, patientId: string) => {
   return (
     hasPermission(user, "view_patient") ||
     isAssignedToPatient(user, patientId) ||

@@ -115,7 +115,6 @@ test.describe("Location settings layout", () => {
             username: "location-settings",
             first_name: "Location",
             last_name: "Settings",
-            user_type: "administrator",
             is_superuser: true,
             permissions: [],
             flags: [],
