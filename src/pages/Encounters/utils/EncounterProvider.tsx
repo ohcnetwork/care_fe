@@ -26,6 +26,7 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 
 type EncounterContextType = {
   facilityId?: string;
@@ -38,6 +39,7 @@ type EncounterContextType = {
   selectedEncounter: EncounterRead | undefined;
   isPatientLoading: boolean;
   isPrimaryEncounterLoading: boolean;
+  primaryEncounterError: HTTPError | null;
   isSelectedEncounterLoading: boolean;
   setSelectedEncounter: (encounterId: string | null) => void;
   primaryEncounterPermissions: Permissions;
@@ -106,16 +108,19 @@ export function EncounterProvider({
     }),
   });
 
-  const { data: primaryEncounter, isLoading: isPrimaryEncounterLoading } =
-    useQuery({
-      queryKey: ["encounter", primaryEncounterId],
-      queryFn: query(encounterApi.get, {
-        pathParams: { id: primaryEncounterId },
-        queryParams: facilityId
-          ? { facility: facilityId }
-          : { patient: patientId },
-      }),
-    });
+  const {
+    data: primaryEncounter,
+    isLoading: isPrimaryEncounterLoading,
+    error: primaryEncounterError,
+  } = useQuery({
+    queryKey: ["encounter", primaryEncounterId],
+    queryFn: query(encounterApi.get, {
+      pathParams: { id: primaryEncounterId },
+      queryParams: facilityId
+        ? { facility: facilityId }
+        : { patient: patientId },
+    }),
+  });
 
   const { data: selectedEncounter, isLoading: isSelectedEncounterLoading } =
     useQuery({
@@ -234,6 +239,7 @@ export function EncounterProvider({
         selectedEncounter,
         isPatientLoading,
         isPrimaryEncounterLoading,
+        primaryEncounterError,
         isSelectedEncounterLoading,
         setSelectedEncounter,
         primaryEncounterPermissions,
