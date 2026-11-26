@@ -113,7 +113,7 @@ function buildChargeSection(
           invoiceStatus === InvoiceStatus.balanced
         ),
         cells: [
-          formatDateTime(item.created_date, "DD/MM/YY"),
+          formatDateTime(item.created_date, "dd/MM/yy"),
           item.paid_invoice?.number ?? "",
           item.title,
           ...(showStatus ? [t(item.status)] : []),
@@ -205,7 +205,7 @@ function buildPaymentSection(
         cells: [
           [
             payment.payment_datetime
-              ? formatDateTime(payment.payment_datetime, "DD-MM-YY")
+              ? formatDateTime(payment.payment_datetime, "dd-MM-yy")
               : "",
             payment.id,
           ].join("\n"),
@@ -394,7 +394,7 @@ export function buildChargeItemsPrintContent({
       ],
       right: [
         { label: t("bill_id"), value: account?.id ?? null },
-        { label: t("date"), value: formatDateTime(new Date(), "DD-MM-YYYY") },
+        { label: t("date"), value: formatDateTime(new Date(), "dd-MM-yyyy") },
         ...getPatientIdentifiers(patient, {
           use: PatientIdentifierUse.official,
         }).map((identifier) => ({

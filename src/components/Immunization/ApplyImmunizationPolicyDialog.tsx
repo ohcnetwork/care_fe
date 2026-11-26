@@ -271,7 +271,7 @@ function ApplyPolicyForm({
                   <span className="text-xs text-gray-500">
                     {item.due_date
                       ? t("immunization_due_on", {
-                          date: formatDateTime(item.due_date, "DD MMM YYYY"),
+                          date: formatDateTime(item.due_date, "dd MMM yyyy"),
                         })
                       : t("immunization_no_due_date")}
                   </span>

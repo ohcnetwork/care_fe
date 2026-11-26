@@ -124,7 +124,7 @@ export default function DispenseOrderListSelector({
                       {selectedDispenseOrder.name ||
                         formatDateTime(
                           selectedDispenseOrder.created_date,
-                          "DD/MM/YYYY hh:mm A",
+                          "dd/MM/yyyy hh:mm a",
                         )}
                     </span>
                     <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
@@ -207,7 +207,7 @@ function DispenseOrderList({
                     {dispenseOrder.name ||
                       formatDateTime(
                         dispenseOrder.created_date,
-                        "DD/MM/YYYY hh:mm A",
+                        "dd/MM/yyyy hh:mm a",
                       )}
                   </span>
                   <span className="text-sm font-medium text-gray-700 whitespace-nowrap">

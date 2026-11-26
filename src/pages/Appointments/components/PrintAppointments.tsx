@@ -10,6 +10,10 @@ import { Switch } from "@/components/ui/switch";
 
 import { useQueryParams } from "@/lib/router/queryParams";
 import { appointmentListSearch } from "@/lib/router/search/appointments";
+import {
+  formatSchedulingDateTime,
+  getAppointmentsSchedulingTimeZone,
+} from "@/pages/Appointments/schedulingTimeZone";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import type { DetailsTablePrintContent } from "@/print/detailsTable";
 import { buildGeneratedFooter } from "@/print/patientDetails";
@@ -25,8 +29,9 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import query from "@/Utils/request/query";
 import {
-  dateQueryString,
+  facilityLocalDateQueryString,
   formatDateTime,
+  formatDateTimeInZone,
   formatPatientAge,
 } from "@/Utils/utils";
 
@@ -44,6 +49,7 @@ export function PrintAppointments({
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
   const [qParams] = useQueryParams(appointmentListSearch);
+  const schedulingTimeZone = getAppointmentsSchedulingTimeZone();
 
   const practitioners = qParams.practitioners
     ? qParams.practitioners.split(",")
@@ -69,7 +75,9 @@ export function PrintAppointments({
         slot: qParams.slot,
         user: qParams.practitioners ?? undefined,
         date_after: qParams.date_from,
-        date_before: qParams.date_to ?? dateQueryString(new Date()),
+        date_before:
+          qParams.date_to ??
+          facilityLocalDateQueryString(new Date(), schedulingTimeZone),
         tags: qParams.tags,
         resource_type: resourceType,
         resource_ids: qParams.practitioners ?? resourceId,
@@ -111,7 +119,7 @@ export function PrintAppointments({
           ? [
               {
                 label: t("date_range"),
-                value: `${format(new Date(qParams.date_from), "dd MMM yyyy")} - ${format(new Date(qParams.date_to), "dd MMM yyyy")}`,
+                value: `${formatDateTime(qParams.date_from, "dd MMM yyyy")} - ${formatDateTime(qParams.date_to, "dd MMM yyyy")}`,
               },
             ]
           : []),
@@ -164,11 +172,16 @@ export function PrintAppointments({
         ].join("\n"),
         ...(showPractitioner ? [formatScheduleResourceName(appointment)] : []),
         [
-          formatDateTime(
+          formatDateTimeInZone(
             appointment.token_slot.start_datetime,
-            "ddd, DD MMM YYYY",
+            schedulingTimeZone,
+            "EEE, dd MMM yyyy",
           ),
-          formatDateTime(appointment.token_slot.start_datetime, "hh:mm a"),
+          formatSchedulingDateTime(
+            appointment.token_slot.start_datetime,
+            "hh:mm aaa",
+            schedulingTimeZone,
+          ),
         ].join("\n"),
         appointment.token ? renderTokenNumber(appointment.token) : "--",
         t(appointment.status),

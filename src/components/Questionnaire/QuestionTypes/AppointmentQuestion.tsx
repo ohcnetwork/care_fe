@@ -1,4 +1,3 @@
-import { format } from "date-fns";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -23,6 +22,13 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentFormSection } from "@/pages/Appointments/BookAppointment/AppointmentFormSection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
+import { SchedulingTimeZoneCallout } from "@/pages/Appointments/components/SchedulingTimeZoneCallout";
+import {
+  formatSchedulingDateTime,
+  getAppointmentsSchedulingTimeZone,
+  getClinicDateFromInstant,
+  getClinicTodayDate,
+} from "@/pages/Appointments/schedulingTimeZone";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -42,6 +48,7 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import { hasMarkdownContent } from "@/Utils/markdown";
+import { formatDateTimeInZone } from "@/Utils/utils";
 
 interface AppointmentQuestionProps {
   question: Question;
@@ -170,7 +177,9 @@ export function AppointmentQuestion({
   const [open, setOpen] = useState(false);
   const { hasError } = useFieldError(question.id, errors);
   const [selectedDate, setSelectedDate] = useState(() =>
-    committedSlot ? new Date(committedSlot.start_datetime) : new Date(),
+    committedSlot
+      ? getClinicDateFromInstant(committedSlot.start_datetime)
+      : getClinicTodayDate(),
   );
   const [selectedSlotId, setSelectedSlotId] = useState<string | undefined>(
     value.slot_id,
@@ -259,7 +268,9 @@ export function AppointmentQuestion({
                 setSelectedSlotId(value.slot_id);
                 setSelectedSlot(committedSlot);
                 if (committedSlot) {
-                  setSelectedDate(new Date(committedSlot.start_datetime));
+                  setSelectedDate(
+                    getClinicDateFromInstant(committedSlot.start_datetime),
+                  );
                 }
               }
               setOpen(nextOpen);
@@ -276,15 +287,20 @@ export function AppointmentQuestion({
                     <Trans
                       i18nKey="selected_token_slot_display"
                       values={{
-                        date: format(
+                        date: formatDateTimeInZone(
                           committedSlot.start_datetime,
+                          getAppointmentsSchedulingTimeZone(),
                           "dd MMM, yyyy",
                         ),
-                        startTime: format(
+                        startTime: formatDateTimeInZone(
                           committedSlot.start_datetime,
+                          getAppointmentsSchedulingTimeZone(),
                           "h:mm a",
                         ),
-                        endTime: format(committedSlot.end_datetime, "h:mm a"),
+                        endTime: formatSchedulingDateTime(
+                          committedSlot.end_datetime,
+                          "h:mm a",
+                        ),
                       }}
                       components={{
                         strong: <span className="font-semibold" />,
@@ -312,6 +328,7 @@ export function AppointmentQuestion({
               </SheetHeader>
               <SheetBody>
                 <div className="space-y-4">
+                  <SchedulingTimeZoneCallout />
                   <AppointmentDateSelection
                     facilityId={facilityId}
                     resourceId={selectedResource.resource?.id || undefined}

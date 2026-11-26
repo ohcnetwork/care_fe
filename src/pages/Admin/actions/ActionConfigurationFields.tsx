@@ -176,7 +176,7 @@ export function ActionConfigurationFields({
                 dateTime={existing.created_date}
                 className="block text-xs text-gray-500"
               >
-                {formatDateTime(existing.created_date, "DD/MM/YYYY hh:mm A")}
+                {formatDateTime(existing.created_date, "dd/MM/yyyy hh:mm a")}
               </time>
             </dd>
           </div>
@@ -190,7 +190,7 @@ export function ActionConfigurationFields({
                 dateTime={existing.modified_date}
                 className="block text-xs text-gray-500"
               >
-                {formatDateTime(existing.modified_date, "DD/MM/YYYY hh:mm A")}
+                {formatDateTime(existing.modified_date, "dd/MM/yyyy hh:mm a")}
               </time>
             </dd>
           </div>

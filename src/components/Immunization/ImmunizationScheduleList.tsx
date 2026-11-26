@@ -209,7 +209,7 @@ function ScheduleItem({
                 <div key={field} className="flex gap-1">
                   <dt>{t(label)}:</dt>
                   <dd className="font-medium text-gray-700">
-                    {formatDateTime(recommendation[field]!, "DD MMM YYYY")}
+                    {formatDateTime(recommendation[field]!, "dd MMM yyyy")}
                   </dd>
                 </div>
               ))}

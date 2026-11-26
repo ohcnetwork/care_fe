@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { isBefore, parseISO, startOfDay } from "date-fns";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -35,7 +35,15 @@ import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { useQueryParams } from "@/lib/router/queryParams";
 import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
+import {
+  getAppointmentsSchedulingTimeZone,
+  getClinicTodayDate,
+} from "@/pages/Appointments/schedulingTimeZone";
 import { ScheduleValidityField } from "@/pages/Scheduling/components/ScheduleValidityField";
+import {
+  isScheduleStartTimeInFutureInZone,
+  isScheduleTimeBefore,
+} from "@/pages/Scheduling/dateValidation";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -64,18 +72,19 @@ export default function CreateScheduleExceptionSheet({
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
   const [qParams, _setQParams] = useQueryParams(scheduleHomeSearch);
   const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
+  const clinicToday = getClinicTodayDate();
 
   const formSchema = z
     .object({
       reason: z.string().trim().min(1, t("field_required")),
       valid_from: z
         .date({ error: t("field_required") })
-        .min(dayjs().startOf("day").toDate(), {
+        .min(startOfDay(clinicToday), {
           message: t("schedule_exception_creation_for_past_validation_error"),
         }),
       valid_to: z
         .date({ error: t("field_required") })
-        .min(dayjs().startOf("day").toDate(), {
+        .min(startOfDay(clinicToday), {
           message: t("schedule_exception_creation_for_past_validation_error"),
         }),
       start_time: z
@@ -92,9 +101,7 @@ export default function CreateScheduleExceptionSheet({
     .refine(
       (data) => {
         if (data.unavailable_all_day) return true;
-        const startTime = dayjs(data.start_time, "HH:mm");
-        const endTime = dayjs(data.end_time, "HH:mm");
-        return startTime.isBefore(endTime);
+        return isScheduleTimeBefore(data.start_time, data.end_time);
       },
       {
         message: t("start_time_must_be_before_end_time"),
@@ -104,12 +111,12 @@ export default function CreateScheduleExceptionSheet({
     .refine(
       (data) => {
         if (data.unavailable_all_day) return true;
-        const startTime = dayjs(data.start_time, "HH:mm");
-        const now = dayjs();
-        if (dayjs(data.valid_from).isSame(now, "day")) {
-          return now.isBefore(startTime);
-        }
-        return true;
+        return isScheduleStartTimeInFutureInZone(
+          data.valid_from,
+          data.start_time,
+          getAppointmentsSchedulingTimeZone(),
+          new Date(),
+        );
       },
       {
         message: t("start_time_must_be_in_the_future"),
@@ -117,7 +124,8 @@ export default function CreateScheduleExceptionSheet({
       },
     )
     .refine(
-      (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
+      (data) =>
+        !isBefore(startOfDay(data.valid_to), startOfDay(data.valid_from)),
       {
         path: ["valid_to"],
         message: t("valid_till_equal_or_after_valid_from"),
@@ -136,17 +144,17 @@ export default function CreateScheduleExceptionSheet({
   });
 
   // The URL holds local calendar dates (YYYY-MM-DD). `new Date()` would read
-  // them as UTC midnight, the previous day west of UTC; dayjs reads them as
+  // them as UTC midnight, the previous day west of UTC; parseISO reads them as
   // local midnight.
   useEffect(() => {
     if (qParams.valid_from) {
-      form.setValue("valid_from", dayjs(qParams.valid_from).toDate());
+      form.setValue("valid_from", parseISO(qParams.valid_from));
     }
   }, [qParams.valid_from, form]);
 
   useEffect(() => {
     if (qParams.valid_to) {
-      form.setValue("valid_to", dayjs(qParams.valid_to).toDate());
+      form.setValue("valid_to", parseISO(qParams.valid_to));
     }
   }, [qParams.valid_to, form]);
 

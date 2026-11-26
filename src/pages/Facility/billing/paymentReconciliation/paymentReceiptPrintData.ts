@@ -54,7 +54,7 @@ export function buildPaymentReceiptPrintContent({
       right: [
         {
           label: t("date"),
-          value: formatDateTime(payment.created_date, "DD-MM-YYYY"),
+          value: formatDateTime(payment.created_date, "dd-MM-yyyy"),
         },
         { label: t("payment_id"), value: payment.id },
         ...getPatientIdentifiers(patient, {

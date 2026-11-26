@@ -1,3 +1,10 @@
+import {
+  differenceInMilliseconds,
+  isSameYear,
+  isToday,
+  isTomorrow,
+  isYesterday,
+} from "date-fns";
 import { AnimatePresence, motion } from "motion/react";
 import { ReactNode, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,7 +20,7 @@ import {
   EncounterRead,
   EncounterStatus,
 } from "@/types/emr/encounter/encounter";
-import dayjs from "@/Utils/dayjs";
+import { formatDateTime, parseDate, relativeTime } from "@/Utils/date";
 
 type Encounter = EncounterListRead | EncounterRead;
 
@@ -71,15 +78,14 @@ export function formatEncounterDuration(ms: number) {
   return `${mins}m`;
 }
 
-function formatWhen(date: dayjs.Dayjs, t: (key: string) => string) {
-  const now = dayjs();
-  const time = date.format("h:mm A");
-  if (date.isSame(now, "day")) return `${t("today")}, ${time}`;
-  if (date.isSame(now.add(1, "day"), "day")) return `${t("tomorrow")}, ${time}`;
-  if (date.isSame(now.subtract(1, "day"), "day"))
-    return `${t("yesterday")}, ${time}`;
-  return date.format(
-    date.isSame(now, "year") ? "ddd D MMM, h:mm A" : "D MMM YYYY, h:mm A",
+function formatWhen(date: Date, t: (key: string) => string) {
+  const time = formatDateTime(date, "h:mm a");
+  if (isToday(date)) return `${t("today")}, ${time}`;
+  if (isTomorrow(date)) return `${t("tomorrow")}, ${time}`;
+  if (isYesterday(date)) return `${t("yesterday")}, ${time}`;
+  return formatDateTime(
+    date,
+    isSameYear(date, new Date()) ? "EEE d MMM, h:mm a" : "d MMM yyyy, h:mm a",
   );
 }
 
@@ -101,13 +107,14 @@ export function useEncounterTime(encounter: Encounter): EncounterTimeInfo {
   const { t } = useTranslation();
   useMinuteTick();
   const { status, period } = encounter;
-  const start = period.start ? dayjs(period.start) : null;
-  const end = period.end ? dayjs(period.end) : null;
-  const now = dayjs();
+  const start = period.start ? parseDate(period.start) : null;
+  const end = period.end ? parseDate(period.end) : null;
 
   if (ENDED_STATUSES.includes(status)) {
     const lasted =
-      start && end ? formatEncounterDuration(end.diff(start)) : undefined;
+      start && end
+        ? formatEncounterDuration(differenceInMilliseconds(end, start))
+        : undefined;
     const at = end ?? start;
     return {
       label: lasted
@@ -115,7 +122,7 @@ export function useEncounterTime(encounter: Encounter): EncounterTimeInfo {
         : t("encounter_time_completed"),
       value: at ? formatWhen(at, t) : t("not_started"),
       context: end
-        ? t("encounter_time_ended", { time: end.fromNow() })
+        ? t("encounter_time_ended", { time: relativeTime(end) })
         : undefined,
       struck: false,
       live: false,
@@ -133,7 +140,7 @@ export function useEncounterTime(encounter: Encounter): EncounterTimeInfo {
     return {
       label: t("encounter_time_scheduled_for"),
       value: start ? formatWhen(start, t) : t("not_started"),
-      context: start ? start.fromNow() : undefined,
+      context: start ? relativeTime(start) : undefined,
       struck: false,
       live: false,
     };
@@ -145,7 +152,7 @@ export function useEncounterTime(encounter: Encounter): EncounterTimeInfo {
     return {
       label: t("encounter_time_running_for"),
       value: start
-        ? formatEncounterDuration(now.diff(start))
+        ? formatEncounterDuration(differenceInMilliseconds(new Date(), start))
         : t("not_started"),
       context: start
         ? t("encounter_time_since", { time: formatWhen(start, t) })
@@ -284,7 +291,7 @@ export function PatientMeta({
 }) {
   const { t } = useTranslation();
   const birthYear = patient.date_of_birth
-    ? dayjs(patient.date_of_birth).year()
+    ? parseDate(patient.date_of_birth).getFullYear()
     : null;
   return (
     <p

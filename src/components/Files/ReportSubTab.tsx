@@ -291,7 +291,7 @@ export function ReportSubTab({
                                   t(report.report_type),
                                   formatDateTime(
                                     report.created_date,
-                                    "DD MMM YYYY",
+                                    "dd MMM yyyy",
                                   ),
                                 ].join(" · ")}
                               </span>
@@ -306,11 +306,11 @@ export function ReportSubTab({
                         <TooltipComponent
                           content={formatDateTime(
                             report.created_date,
-                            "DD MMM YYYY, hh:mm A",
+                            "dd MMM yyyy, hh:mm a",
                           )}
                         >
                           <span>
-                            {formatDateTime(report.created_date, "DD MMM YYYY")}
+                            {formatDateTime(report.created_date, "dd MMM yyyy")}
                           </span>
                         </TooltipComponent>
                       </TableCell>

@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
 import { Edit3Icon, Lock } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -14,8 +13,10 @@ import ScheduleChargeItemDefinitionSelector from "@/pages/Scheduling/components/
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatDateTime } from "@/Utils/utils";
 import { useQueryParams } from "@/lib/router/queryParams";
 import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
+import { clinicCalendarDate } from "@/pages/Appointments/schedulingTimeZone";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
 import { getPermissions } from "@/common/Permissions";
@@ -238,11 +239,14 @@ const ScheduleTemplateItem = ({
           <Trans
             i18nKey="schedule_valid_from_till_range"
             values={{
-              from_date: format(
-                parseISO(template.valid_from),
+              from_date: formatDateTime(
+                clinicCalendarDate(template.valid_from),
                 "EEE, dd MMM yyyy",
               ),
-              to_date: format(parseISO(template.valid_to), "EEE, dd MMM yyyy"),
+              to_date: formatDateTime(
+                clinicCalendarDate(template.valid_to),
+                "EEE, dd MMM yyyy",
+              ),
             }}
             components={{ strong: <strong className="font-semibold" /> }}
           />

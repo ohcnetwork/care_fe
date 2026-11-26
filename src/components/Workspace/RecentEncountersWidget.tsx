@@ -159,7 +159,7 @@ export function RecentEncountersWidget({
                       >
                         {formatDateTime(
                           encounter.period.start ?? encounter.created_date,
-                          "DD MMM YYYY",
+                          "dd MMM yyyy",
                         )}
                       </time>
                       <span

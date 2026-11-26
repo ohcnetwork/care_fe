@@ -25,15 +25,19 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import {
+  getAppointmentsSchedulingTimeZone,
+  getClinicTodayYmd,
+} from "@/pages/Appointments/schedulingTimeZone";
+import {
   encounterRequiresDischarge,
   useEncounterProgressController,
 } from "@/pages/Encounters/utils/useEncounterProgressController";
 import patientApi from "@/types/emr/patient/patientApi";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { renderTokenNumber } from "@/types/tokens/token/token";
+import { facilityLocalDateQueryString } from "@/Utils/date";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   CalendarCheck,
@@ -61,7 +65,10 @@ import { toast } from "sonner";
 const getQueueLink = (appointment: AppointmentRead): string => {
   const facilityId = appointment.facility.id;
   const resourceId = appointment.resource.id;
-  const date = dateQueryString(new Date(appointment.token_slot.start_datetime));
+  const date = facilityLocalDateQueryString(
+    appointment.token_slot.start_datetime,
+    getAppointmentsSchedulingTimeZone(),
+  );
   const dateParams = `date_from=${date}&date_to=${date}`;
 
   switch (appointment.resource_type) {
@@ -89,7 +96,7 @@ const PatientScanButton = ({
 
   const { mutate: checkPatientAppointments, isPending } = useMutation({
     mutationFn: async (patientId: string) => {
-      const today = dateQueryString(new Date());
+      const today = getClinicTodayYmd();
       const controller = new AbortController();
 
       const [appointments, patient] = await Promise.all([

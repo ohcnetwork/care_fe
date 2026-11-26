@@ -522,7 +522,7 @@ export function CreateInvoicePage({
                                   {" · "}
                                   {formatDateTime(
                                     item.created_date,
-                                    "hh:mm a - DD MMM, YYYY",
+                                    "hh:mm aaa - dd MMM, yyyy",
                                   )}
                                 </div>
                               </TableCell>

@@ -75,7 +75,7 @@ export default function PrescriptionView({
         <div className="hidden lg:block">
           <h3 className="font-semibold text-lg">
             {prescription && prescriptionId
-              ? formatDateTime(prescription.created_date, "DD/MM/YYYY hh:mm A")
+              ? formatDateTime(prescription.created_date, "dd/MM/yyyy hh:mm a")
               : t("all_prescriptions")}
           </h3>
           <p className="text-sm text-gray-500">

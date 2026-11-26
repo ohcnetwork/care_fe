@@ -134,7 +134,7 @@ export function buildPrescriptionsPrintContent({
           : null,
       date: formatDateTime(
         prescription.created_date,
-        "DD MMM YYYY, ddd, hh:mm A",
+        "dd MMM yyyy, EEE, hh:mm a",
       ),
       prescribed_by: formatName(prescription.prescribed_by),
       note: prescription.note || null,
@@ -165,6 +165,6 @@ export function buildPrescriptionsPrintContent({
         },
       ),
     })),
-    footer: `${t("computer_generated_prescription")} | ${formatDateTime(new Date(), "MMMM D, YYYY [at] h:mm A")}`,
+    footer: `${t("computer_generated_prescription")} | ${formatDateTime(new Date(), "MMMM d, yyyy 'at' h:mm a")}`,
   };
 }

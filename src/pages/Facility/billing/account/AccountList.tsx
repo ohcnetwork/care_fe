@@ -54,7 +54,11 @@ import accountApi from "@/types/billing/account/accountApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
-import { dateTimeQueryString } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  parseLocalDate,
+} from "@/Utils/utils";
 
 import { navigate } from "@/lib/router/navigate";
 import { isPositive, roundWhole } from "@/Utils/decimal";
@@ -130,10 +134,10 @@ export function AccountList({
               ...query,
               created_date: undefined,
               created_date_after: dateRange?.from
-                ? dateTimeQueryString(dateRange?.from as Date)
+                ? dateQueryString(dateRange.from as Date)
                 : undefined,
               created_date_before: dateRange?.to
-                ? dateTimeQueryString(dateRange?.to as Date, true)
+                ? dateQueryString(dateRange.to as Date)
                 : undefined,
             };
           }
@@ -155,8 +159,8 @@ export function AccountList({
     created_date:
       created_date_after || created_date_before
         ? {
-            from: created_date_after ? new Date(created_date_after) : undefined,
-            to: created_date_before ? new Date(created_date_before) : undefined,
+            from: parseLocalDate(created_date_after),
+            to: parseLocalDate(created_date_before),
           }
         : undefined,
     billing_status: qParams.billing_status
@@ -179,8 +183,12 @@ export function AccountList({
         status: qParams.status,
         billing_status: qParams.billing_status,
         encounter_class: qParams.encounter_class,
-        created_date_after: qParams.created_date_after,
-        created_date_before: qParams.created_date_before,
+        created_date_after: created_date_after
+          ? dateTimeQueryString(created_date_after)
+          : undefined,
+        created_date_before: created_date_before
+          ? dateTimeQueryString(created_date_before, true)
+          : undefined,
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
       },

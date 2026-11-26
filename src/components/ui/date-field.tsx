@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import dayjs from "@/Utils/dayjs";
+import { isValidDate } from "@/Utils/date";
 import { cn } from "@/lib/utils";
 
 interface DateFieldProps {
@@ -13,11 +13,6 @@ interface DateFieldProps {
   disabled?: boolean;
   hideLabels?: boolean;
 }
-
-const isValidDate = (year: string, month: string, day: string): boolean => {
-  const parsedDate = dayjs(`${year}-${month}-${day}`, "YYYY-MM-DD", true);
-  return parsedDate.isValid();
-};
 
 export default function DateField({
   date,

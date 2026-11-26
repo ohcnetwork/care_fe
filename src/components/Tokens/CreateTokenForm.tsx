@@ -28,7 +28,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { dateQueryString } from "@/Utils/utils";
+import { getClinicTodayYmd } from "@/pages/Appointments/schedulingTimeZone";
 
 import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
@@ -161,7 +161,7 @@ export default function CreateTokenForm({
       note: data.note,
       resource_type: selectedResource.resource_type,
       resource_id: data.resourceId,
-      date: dateQueryString(new Date()),
+      date: getClinicTodayYmd(),
     };
 
     createToken(tokenRequest);

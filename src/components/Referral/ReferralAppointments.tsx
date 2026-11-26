@@ -20,13 +20,13 @@ import { HrefLink } from "@/lib/router/HrefLink";
 import { navigate } from "@/lib/router/navigate";
 import { useQueryParams } from "@/lib/router/queryParams";
 import { referralContextSearch } from "@/lib/router/search/referral";
+import { formatSchedulingDateTime } from "@/pages/Appointments/schedulingTimeZone";
 import { EncounterStatus } from "@/types/emr/encounter/encounter";
 import { ReferralRetrieve } from "@/types/emr/referral/referral";
 import { ReferralResource } from "@/types/emr/referral/referralResource";
 import referralResourceApi from "@/types/emr/referral/referralResourceApi";
 import { CancelledAppointmentStatuses } from "@/types/scheduling/schedule";
 import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
 
 import { appendReferralNativeContext } from "./referralNativeNavigation";
 import { getReferralResponseUrl } from "./referralNavigation";
@@ -85,7 +85,10 @@ function AppointmentSummary({
           <div className="flex flex-wrap items-center gap-2 font-medium">
             <CalendarDays className="size-4 text-primary" />
             {appointment
-              ? formatDateTime(appointment.token_slot.start_datetime)
+              ? formatSchedulingDateTime(
+                  appointment.token_slot.start_datetime,
+                  "hh:mm a; dd/MM/yyyy",
+                )
               : t("appointment")}
             {appointment && (
               <Badge

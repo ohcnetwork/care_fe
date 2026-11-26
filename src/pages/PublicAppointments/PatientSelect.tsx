@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
-import dayjs from "dayjs";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,7 +16,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { goBack } from "@/Utils/utils";
+import { formatDateTime, goBack } from "@/Utils/utils";
 import { navigate } from "@/lib/router/navigate";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
@@ -188,10 +187,10 @@ export default function PatientSelect({
 
   const getPatienDobOrAge = (patient: PublicPatientRead) => {
     if (patient.date_of_birth) {
-      return dayjs(patient.date_of_birth).format("DD MMM YYYY");
+      return formatDateTime(patient.date_of_birth, "dd MMM yyyy");
     }
     const yearOfBirth = patient.year_of_birth;
-    const age = dayjs().year() - yearOfBirth!;
+    const age = new Date().getFullYear() - yearOfBirth!;
     return `${age} years`;
   };
 

@@ -54,7 +54,11 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import locationApi from "@/types/location/locationApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
-import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  parseLocalDate,
+} from "@/Utils/utils";
 
 function EmptyState() {
   const { t } = useTranslation();
@@ -290,12 +294,8 @@ export default function ServiceRequestList({
     created_date:
       qParams.created_date_after || qParams.created_date_before
         ? {
-            from: qParams.created_date_after
-              ? new Date(qParams.created_date_after)
-              : undefined,
-            to: qParams.created_date_before
-              ? new Date(qParams.created_date_before)
-              : undefined,
+            from: parseLocalDate(qParams.created_date_after),
+            to: parseLocalDate(qParams.created_date_before),
           }
         : undefined,
   });
@@ -324,10 +324,10 @@ export default function ServiceRequestList({
         encounter_class: qParams.encounter_class,
         activity_definition: qParams.activity_definition,
         created_date_after: qParams.created_date_after
-          ? dateTimeQueryString(new Date(qParams.created_date_after))
+          ? dateTimeQueryString(qParams.created_date_after)
           : undefined,
         created_date_before: qParams.created_date_before
-          ? dateTimeQueryString(new Date(qParams.created_date_before), true)
+          ? dateTimeQueryString(qParams.created_date_before, true)
           : undefined,
       },
     }),

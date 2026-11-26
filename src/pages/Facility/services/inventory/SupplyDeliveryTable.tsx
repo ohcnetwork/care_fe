@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { formatDate, parseISO } from "date-fns";
 import { Edit, EllipsisVertical } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -34,6 +33,7 @@ import {
   NamespacedExtensionData,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
+
 import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -51,7 +51,7 @@ import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { ExtensionContexts, SupplyDeliveryAnchor } from "@/Utils/schema/types";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatDateTime } from "@/Utils/utils";
 
 /** Extension anchors (x-ui.placement.after) this table renders, in column order */
 const EXTENSION_ANCHORS = [
@@ -425,7 +425,7 @@ export function SupplyDeliveryTable({
               </TableCell>
               {extensionValuesAfter(delivery, "batch")}
               <TableCell>
-                {expiry ? formatDate(parseISO(expiry), "dd/MM/yyyy") : "-"}
+                {expiry ? formatDateTime(expiry, "dd/MM/yyyy") : "-"}
               </TableCell>
               {extensionValuesAfter(delivery, "expiry")}
               <TableCell>
@@ -448,7 +448,7 @@ export function SupplyDeliveryTable({
               {extensionValuesAfter(delivery, "quantity")}
               <TableCell>
                 {delivery.created_date &&
-                  formatDate(new Date(delivery.created_date), "dd/MM/yyyy")}
+                  formatDateTime(delivery.created_date, "dd/MM/yyyy")}
               </TableCell>
               {extensionValuesAfter(delivery, "date")}
               <TableCell>

@@ -95,7 +95,7 @@ export function BedPatientDetails({
             <li className="flex items-center gap-1.5">
               <CalendarClock className="size-3.5 shrink-0" aria-hidden="true" />
               <span className="sr-only">{t("admitted")}</span>
-              {formatDateTime(admittedAt, "DD/MM/YYYY, hh:mm A")}
+              {formatDateTime(admittedAt, "dd/MM/yyyy, hh:mm a")}
             </li>
           )}
         </ul>

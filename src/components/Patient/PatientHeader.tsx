@@ -1,5 +1,7 @@
 import { Trans, useTranslation } from "react-i18next";
 
+import { formatDateTime } from "@/Utils/utils";
+
 import { BLOOD_GROUP_CHOICES } from "@/common/constants";
 import { Avatar } from "@/components/Common/Avatar";
 import { PatientAge } from "@/components/Patient/PatientAge";
@@ -22,7 +24,6 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import dayjs from "dayjs";
 
 interface PatientHeaderProps {
   patient:
@@ -239,8 +240,8 @@ export const PatientDeceasedInfo = ({
         <Trans
           i18nKey="passed_away_on"
           values={{
-            date: dayjs(patient.deceased_datetime).format("MMMM DD, YYYY"),
-            time: dayjs(patient.deceased_datetime).format("hh:mm A"),
+            date: formatDateTime(patient.deceased_datetime, "MMMM dd, yyyy"),
+            time: formatDateTime(patient.deceased_datetime, "hh:mm a"),
           }}
         ></Trans>
       </div>

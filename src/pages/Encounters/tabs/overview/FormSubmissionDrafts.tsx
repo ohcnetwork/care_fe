@@ -225,7 +225,7 @@ export function FormSubmissionDrafts({
                 aria-label={`${t("saved_on")} ${savedAt}`}
                 className="hidden shrink-0 whitespace-nowrap text-xs text-gray-500 @xl/draft-forms:block"
               >
-                {formatDateTime(row.savedAt, "DD MMM, hh:mm A")}
+                {formatDateTime(row.savedAt, "dd MMM, hh:mm a")}
               </time>
               <Button
                 type="button"

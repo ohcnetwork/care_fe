@@ -18,7 +18,11 @@ import {
   receiveOrderListSearch,
 } from "@/lib/router/search/inventory";
 import query from "@/Utils/request/query";
-import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  parseLocalDate,
+} from "@/Utils/utils";
 
 import {
   dateFilter,
@@ -213,8 +217,8 @@ function OutgoingOrdersTab({
     date:
       qParams.date_after || qParams.date_before
         ? {
-            from: qParams.date_after ? new Date(qParams.date_after) : undefined,
-            to: qParams.date_before ? new Date(qParams.date_before) : undefined,
+            from: parseLocalDate(qParams.date_after),
+            to: parseLocalDate(qParams.date_before),
           }
         : undefined,
   });
@@ -231,10 +235,10 @@ function OutgoingOrdersTab({
         origin_isnull: !internal,
         priority: qParams.priority,
         date_after: qParams.date_after
-          ? dateTimeQueryString(new Date(qParams.date_after))
+          ? dateTimeQueryString(qParams.date_after)
           : undefined,
         date_before: qParams.date_before
-          ? dateTimeQueryString(new Date(qParams.date_before), true)
+          ? dateTimeQueryString(qParams.date_before, true)
           : undefined,
       },
     }),
@@ -350,12 +354,8 @@ function IncomingDeliveriesTab({
     date:
       qParams.created_date_after || qParams.created_date_before
         ? {
-            from: qParams.created_date_after
-              ? new Date(qParams.created_date_after)
-              : undefined,
-            to: qParams.created_date_before
-              ? new Date(qParams.created_date_before)
-              : undefined,
+            from: parseLocalDate(qParams.created_date_after),
+            to: parseLocalDate(qParams.created_date_before),
           }
         : undefined,
   });
@@ -372,10 +372,10 @@ function IncomingDeliveriesTab({
         origin_isnull: !internal,
         priority: qParams.priority,
         created_date_after: qParams.created_date_after
-          ? dateTimeQueryString(new Date(qParams.created_date_after))
+          ? dateTimeQueryString(qParams.created_date_after)
           : undefined,
         created_date_before: qParams.created_date_before
-          ? dateTimeQueryString(new Date(qParams.created_date_before), true)
+          ? dateTimeQueryString(qParams.created_date_before, true)
           : undefined,
       },
     }),

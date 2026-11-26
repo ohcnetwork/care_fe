@@ -393,7 +393,7 @@ export const FilesPage = ({
                                   t(`file_type__${fileType.toLowerCase()}`),
                                   formatDateTime(
                                     file.created_date,
-                                    "DD MMM YYYY",
+                                    "dd MMM yyyy",
                                   ),
                                 ].join(" · ")}
                               </span>
@@ -411,11 +411,11 @@ export const FilesPage = ({
                         <TooltipComponent
                           content={formatDateTime(
                             file.created_date,
-                            "DD MMM YYYY, hh:mm A",
+                            "dd MMM yyyy, hh:mm a",
                           )}
                         >
                           <span>
-                            {formatDateTime(file.created_date, "DD MMM YYYY")}
+                            {formatDateTime(file.created_date, "dd MMM yyyy")}
                           </span>
                         </TooltipComponent>
                       </TableCell>
