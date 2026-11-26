@@ -54,7 +54,11 @@ import {
   getSlotsPerSession,
   getTokenDuration,
 } from "@/pages/Scheduling/utils";
-import { CareTeamResponse, toCareTeamMembers } from "@/types/careTeam/careTeam";
+import {
+  CareTeamDraftMember,
+  isCareTeamComplete,
+  toCareTeamMembers,
+} from "@/types/careTeam/careTeam";
 import {
   AvailabilityDateTime,
   SchedulableResourceType,
@@ -188,7 +192,9 @@ const ScheduleTemplateEditor = ({
       is_public: z.boolean(),
       encounter_type: z.enum(encounterTypeOptions).nullable(),
       organizations: z.array(z.string()),
-      care_team: z.array(z.custom<CareTeamResponse>()),
+      care_team: z
+        .array(z.custom<CareTeamDraftMember>())
+        .refine((rows) => isCareTeamComplete(rows)),
     })
     .refine(
       (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
@@ -252,6 +258,8 @@ const ScheduleTemplateEditor = ({
   const isProcessing = isUpdating || isDeleting;
 
   function onSubmit(values: z.infer<typeof templateFormSchema>) {
+    // The schema already rejects incomplete rows; this narrows the type.
+    if (!isCareTeamComplete(values.care_team)) return;
     const careTeamMembers = toCareTeamMembers(values.care_team);
     // Saved defaults may name departments or staff no longer at the facility,
     // which the API rejects. Send them only when edited so other changes save.
@@ -356,6 +364,7 @@ const ScheduleTemplateEditor = ({
             onCareTeamChange={(value) =>
               form.setValue("care_team", value, { shouldDirty: true })
             }
+            showCareTeamErrors={form.formState.isSubmitted}
             // Until the saved defaults load, an edit here would replace them.
             disabled={isProcessing || !templateDetail}
           />

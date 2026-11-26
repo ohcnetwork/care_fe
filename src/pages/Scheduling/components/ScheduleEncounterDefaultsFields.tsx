@@ -13,7 +13,7 @@ import {
 
 import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 import { ReferralDefaultCareTeam } from "@/pages/Facility/settings/referrals/ReferralDefaultCareTeam";
-import { CareTeamResponse } from "@/types/careTeam/careTeam";
+import { CareTeamDraftMember } from "@/types/careTeam/careTeam";
 import { EncounterClass } from "@/types/emr/encounter/encounter";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
@@ -29,8 +29,9 @@ interface Props {
   onOrganizationsChange: (organizations: string[]) => void;
   /** Records for the saved organization IDs, so the selector can label them. */
   currentOrganizations?: FacilityOrganizationRead[];
-  careTeam: CareTeamResponse[];
-  onCareTeamChange: (careTeam: CareTeamResponse[]) => void;
+  careTeam: CareTeamDraftMember[];
+  onCareTeamChange: (careTeam: CareTeamDraftMember[]) => void;
+  showCareTeamErrors?: boolean;
   disabled?: boolean;
 }
 
@@ -44,6 +45,7 @@ export function ScheduleEncounterDefaultsFields({
   currentOrganizations,
   careTeam,
   onCareTeamChange,
+  showCareTeamErrors,
   disabled,
 }: Props) {
   const { t } = useTranslation();
@@ -70,6 +72,7 @@ export function ScheduleEncounterDefaultsFields({
         facilityId={facilityId}
         value={careTeam}
         onChange={onCareTeamChange}
+        showErrors={showCareTeamErrors}
         disabled={disabled}
         title={t("care_team")}
         description={t("schedule_default_care_team_help")}
