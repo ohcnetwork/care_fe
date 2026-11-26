@@ -55,6 +55,16 @@ export default function PublicPatientRegistration(
 
   const queryClient = useQueryClient();
 
+  const goBackToPatientSelect = () => {
+    const search = new URLSearchParams();
+    if (slotId) search.set("slotId", slotId);
+    if (reason) search.set("reason", reason);
+    const query = search.toString();
+    goBack(
+      `/facility/${props.facilityId}/appointments/${staffId}/patient-select${query ? `?${query}` : ""}`,
+    );
+  };
+
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
 
@@ -184,11 +194,7 @@ export default function PublicPatientRegistration(
           variant="outline"
           className="border border-secondary-400"
           type="button"
-          onClick={() =>
-            goBack(
-              `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
-            )
-          }
+          onClick={goBackToPatientSelect}
         >
           <span className="text-sm underline">{t("back")}</span>
         </Button>
@@ -407,11 +413,7 @@ export default function PublicPatientRegistration(
                 variant="white"
                 className="sm:w-1/5"
                 type="button"
-                onClick={() =>
-                  goBack(
-                    `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
-                  )
-                }
+                onClick={goBackToPatientSelect}
               >
                 <span className="bg-linear-to-b from-white/15 to-transparent" />
                 {t("cancel")}
