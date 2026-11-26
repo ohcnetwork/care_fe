@@ -33,6 +33,7 @@ function Fixture() {
       : {},
   );
   const [count, setCount] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
   const handleApply = (next: DateRangeValue) => {
     setRange(next);
     setCount((previous) => previous + 1);
@@ -52,6 +53,9 @@ function Fixture() {
       onFilterChange={(_key, next) => {
         if (Array.isArray(next)) throw new Error("Expected a date range");
         handleApply(next);
+        // Like the real hosts (DateFilterButton, SelectedDateBadge and
+        // DomainFilterValue), a picked range closes the menu.
+        setMenuOpen(false);
       }}
     />
   ) : (
@@ -68,7 +72,7 @@ function Fixture() {
   return (
     <main className="p-2">
       {params.has("menu") ? (
-        <DropdownMenu>
+        <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenuTrigger asChild>
             <Button>Open date filter</Button>
           </DropdownMenuTrigger>

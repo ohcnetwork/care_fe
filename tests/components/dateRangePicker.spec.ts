@@ -381,6 +381,9 @@ test("the applied preset is marked with a check and footer hints use Kbd", async
   await expect(custom).toHaveCSS("border-top-width", "0px");
   await expect(menu.locator('kbd[data-slot="kbd"]')).toHaveCount(4);
   await page.getByRole("menuitem", { name: "Today", exact: true }).click();
+  // Like the real hosts, picking a preset closes the menu; reopen to see marks.
+  await expect(menu).toBeHidden();
+  await page.getByRole("button", { name: "Open date filter" }).click();
   const today = page.getByRole("menuitem", { name: "Today", exact: true });
   await expect(today).toHaveAttribute("aria-current", "true");
   await expect(custom).not.toHaveAttribute("aria-current");
@@ -483,7 +486,7 @@ test("re-picking a range in another month keeps that month in view", async ({
   await expect(apply(page)).toBeFocused();
 });
 
-test("the real multi-filter passes bounds through and returns to presets after Apply", async ({
+test("the real multi-filter passes bounds through and closes the menu after Apply", async ({
   page,
 }) => {
   await open(page, "menu&integration&max");
@@ -497,9 +500,14 @@ test("the real multi-filter passes bounds through and returns to presets after A
   await expect(page.getByText("14 days", { exact: true })).toBeVisible();
   await apply(page).click();
   await expect(
-    page.getByRole("menuitem", { name: /custom date range/i }),
-  ).toBeVisible();
+    page.locator('[data-slot="dropdown-menu-content"]'),
+  ).toBeHidden();
+  await expect(page.getByTestId("applied")).toContainText(
+    '"from":"2026-11-03"',
+  );
+  await expect(page.getByTestId("applied")).toContainText('"to":"2026-11-16"');
   await expect(page.getByTestId("applied")).toContainText('"count":1');
+  await page.getByRole("button", { name: "Open date filter" }).click();
   await page.getByRole("menuitem", { name: /custom date range/i }).click();
   await expect(from(page)).toHaveValue("03/11/2026");
   await expect(to(page)).toHaveValue("16/11/2026");

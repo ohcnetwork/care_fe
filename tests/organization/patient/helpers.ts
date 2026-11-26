@@ -1,11 +1,20 @@
 import { expect, type Page } from "@playwright/test";
 
 /**
- * Get the patient name from an encounter info card.
+ * Get the patient name from the first encounter card on All Encounters.
+ * The list defaults to today's visits, so widen the dates first: fixture
+ * encounters may be older, and the empty state has a heading of its own.
  */
 export async function getPatientNameFromCard(page: Page): Promise<string> {
-  const target = page.locator("[data-slot='card']").first();
-  const name = await target.locator("h3").innerText();
+  await page.waitForURL(/created_date_after=/);
+  const url = new URL(page.url());
+  url.searchParams.set("created_date_after", "2000-01-01");
+  await page.goto(url.toString());
+  const name = await page
+    .getByRole("article")
+    .first()
+    .getByRole("heading", { level: 3 })
+    .innerText();
   return name.trim();
 }
 

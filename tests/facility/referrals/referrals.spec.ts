@@ -20,8 +20,9 @@ async function selectDepartment(page: Page, name: string) {
   await page
     .getByPlaceholder("Search departments...", { exact: true })
     .fill(name);
-  await page.getByRole("menuitem", { name, exact: true }).click();
-  await page.keyboard.press("Escape");
+  // Department is single-select: picking a row applies it and closes the picker.
+  await page.getByRole("menuitemradio", { name, exact: true }).click();
+  await expect(page.getByRole("menu")).toBeHidden();
   await expect(selectedMultiFilterBar(page, /Department/)).toContainText(name);
 }
 
@@ -271,7 +272,7 @@ test.describe("Referrals", () => {
             name: "Search referral units",
             exact: true,
           }),
-        ).not.toBeVisible();
+        ).toBeHidden();
       }
       if (originalViewport) await page.setViewportSize(originalViewport);
     };
@@ -468,7 +469,7 @@ test.describe("Referrals", () => {
         facility: facilityId,
         internal_organization: departmentId,
       });
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
       await page
         .getByRole("textbox", {
           name: "Search referral availability",
@@ -496,10 +497,8 @@ test.describe("Referrals", () => {
         .getByRole("button", { name: "Remove filter", exact: true })
         .click();
       expect((await facilityScopeResponse).ok()).toBeTruthy();
-      await expect(row).not.toBeVisible();
-      await expect(
-        selectedMultiFilterBar(page, /Department/),
-      ).not.toBeVisible();
+      await expect(row).toBeHidden();
+      await expect(selectedMultiFilterBar(page, /Department/)).toBeHidden();
     });
 
     await test.step("Reload the saved configuration and activate it", async () => {
@@ -531,7 +530,7 @@ test.describe("Referrals", () => {
       await dialog
         .getByRole("button", { name: "Save Changes", exact: true })
         .click();
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
       const row = page.getByRole("listitem").filter({
         has: page.getByRole("heading", {
           name: availabilityName,
@@ -597,7 +596,7 @@ test.describe("Referrals", () => {
         name: "Referrals",
         exact: true,
       });
-      await expect(widget).not.toBeVisible();
+      await expect(widget).toBeHidden();
       const quickActions = page.getByRole("region", {
         name: "Quick Actions",
         exact: true,
@@ -639,7 +638,7 @@ test.describe("Referrals", () => {
       });
       await expect(profile).toHaveAttribute("href", `/patient/${patientId}`);
       await page.keyboard.press("Escape");
-      await expect(profile).not.toBeVisible();
+      await expect(profile).toBeHidden();
       const encounterDetails = patientDetails.getByLabel("Encounter", {
         exact: true,
       });
@@ -822,7 +821,7 @@ test.describe("Referrals", () => {
         title: referralTitle,
       });
       expect(await createResponse.json()).toMatchObject({ assignees: [] });
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
       await expect(page).toHaveURL(`${encounterUrl}/updates`);
       await expect(widget).toBeVisible();
       await expect(
@@ -999,7 +998,7 @@ test.describe("Referrals", () => {
       });
       await page.goto(laterPageUrl.pathname + laterPageUrl.search);
       expect((await laterPageResponse).ok()).toBeTruthy();
-      await expect(row).not.toBeVisible();
+      await expect(row).toBeHidden();
       const firstPageResponse = page.waitForResponse((response) => {
         const url = new URL(response.url());
         return (
@@ -1013,7 +1012,7 @@ test.describe("Referrals", () => {
       expect((await firstPageResponse).ok()).toBeTruthy();
       await expect(list.getByRole("status")).toHaveCount(0);
       await expect(list.getByRole("alert")).toHaveCount(0);
-      await expect(row).not.toBeVisible();
+      await expect(row).toBeHidden();
       await selectReferralFilter(page, /^Status\b/, "Pending");
       await expect(row).toHaveCount(1);
 
@@ -1030,7 +1029,7 @@ test.describe("Referrals", () => {
       expect((await assignedResponse).ok()).toBeTruthy();
       await expect(list.getByRole("status")).toHaveCount(0);
       await expect(list.getByRole("alert")).toHaveCount(0);
-      await expect(row).not.toBeVisible();
+      await expect(row).toBeHidden();
       await selectedMultiFilterBar(page, /^Assigned to me$/)
         .getByRole("button", { name: "Remove filter", exact: true })
         .click();
@@ -1055,7 +1054,7 @@ test.describe("Referrals", () => {
       ).toContainText("Yes");
       await expect(list.getByRole("status")).toHaveCount(0);
       await expect(list.getByRole("alert")).toHaveCount(0);
-      await expect(row).not.toBeVisible();
+      await expect(row).toBeHidden();
 
       const facilityScopeResponse = page.waitForResponse((response) => {
         const url = new URL(response.url());
@@ -1077,18 +1076,16 @@ test.describe("Referrals", () => {
           !url.searchParams.get("referralStatus") &&
           !url.searchParams.get("referralAssignedToMe"),
       );
-      await expect(
-        selectedMultiFilterBar(page, /Department/),
-      ).not.toBeVisible();
-      await expect(selectedMultiFilterBar(page, /^Status$/)).not.toBeVisible();
+      await expect(selectedMultiFilterBar(page, /Department/)).toBeHidden();
+      await expect(selectedMultiFilterBar(page, /^Status$/)).toBeHidden();
       await expect(
         selectedMultiFilterBar(page, /^Assigned to me$/),
-      ).not.toBeVisible();
+      ).toBeHidden();
       await expect(list.getByRole("status")).toHaveCount(0);
       await expect(list.getByRole("alert")).toHaveCount(0);
       // Facility scope contains referrals addressed to the facility itself;
       // this referral belongs to its selected receiving department.
-      await expect(row).not.toBeVisible();
+      await expect(row).toBeHidden();
     });
 
     await test.step("Deactivate the destination without hiding its existing referral", async () => {
@@ -1111,7 +1108,7 @@ test.describe("Referrals", () => {
       await editDialog
         .getByRole("button", { name: "Save Changes", exact: true })
         .click();
-      await expect(editDialog).not.toBeVisible();
+      await expect(editDialog).toBeHidden();
       await expect(
         page.getByRole("listitem").filter({
           has: page.getByRole("heading", {
@@ -1205,8 +1202,8 @@ test.describe("Referrals", () => {
         })
         .click();
       expect((await deletedAvailability).status()).toBe(204);
-      await expect(dialog).not.toBeVisible();
-      await expect(row).not.toBeVisible();
+      await expect(dialog).toBeHidden();
+      await expect(row).toBeHidden();
 
       await page.reload();
       await selectDepartment(page, departmentName);
@@ -1222,7 +1219,7 @@ test.describe("Referrals", () => {
       const response = await configurationResponse;
       expect(response.ok()).toBeTruthy();
       expect((await response.json()).count).toBe(0);
-      await expect(row).not.toBeVisible();
+      await expect(row).toBeHidden();
 
       await page.goto(referralPath);
       await expect(
