@@ -70,57 +70,58 @@ export function clinicCalendarDate(
 /**
  * Presets relative to clinic "today" (as local-midnight Date labels) so the
  * pill matches URL clinic days via isSameDay — not browser new Date().
+ *
+ * Each preset reads the clinic day when it is used, because the filter keeps
+ * its first presets for as long as the page is open. Pass `at` to fix the day.
  */
 export function getClinicShortDateRangeOptions(
   timeZone: string = getAppointmentsSchedulingTimeZone(),
-  at: Date = new Date(),
+  at?: Date,
 ): DateRangeOption[] {
-  const clinicToday = parseLocalDate(
-    facilityLocalDateQueryString(at, timeZone),
-  )!;
+  const clinicToday = () => getClinicTodayDate(timeZone, at ?? new Date());
 
   return [
     {
       label: "last_week",
-      getDateRange: () => ({
-        from: subDays(clinicToday, 7),
-        to: clinicToday,
-      }),
+      getDateRange: () => {
+        const today = clinicToday();
+        return { from: subDays(today, 7), to: today };
+      },
     },
     {
       label: "yesterday",
-      getDateRange: () => ({
-        from: subDays(clinicToday, 1),
-        to: subDays(clinicToday, 1),
-      }),
+      getDateRange: () => {
+        const yesterday = subDays(clinicToday(), 1);
+        return { from: yesterday, to: yesterday };
+      },
     },
     {
       label: "today",
-      getDateRange: () => ({
-        from: clinicToday,
-        to: clinicToday,
-      }),
+      getDateRange: () => {
+        const today = clinicToday();
+        return { from: today, to: today };
+      },
     },
     {
       label: "tomorrow",
-      getDateRange: () => ({
-        from: addDays(clinicToday, 1),
-        to: addDays(clinicToday, 1),
-      }),
+      getDateRange: () => {
+        const tomorrow = addDays(clinicToday(), 1);
+        return { from: tomorrow, to: tomorrow };
+      },
     },
     {
       label: "next_week",
-      getDateRange: () => ({
-        from: clinicToday,
-        to: addDays(clinicToday, 7),
-      }),
+      getDateRange: () => {
+        const today = clinicToday();
+        return { from: today, to: addDays(today, 7) };
+      },
     },
     {
       label: "next_month",
-      getDateRange: () => ({
-        from: clinicToday,
-        to: addDays(clinicToday, 30),
-      }),
+      getDateRange: () => {
+        const today = clinicToday();
+        return { from: today, to: addDays(today, 30) };
+      },
     },
   ];
 }

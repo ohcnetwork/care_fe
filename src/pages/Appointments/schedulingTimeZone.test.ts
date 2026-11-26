@@ -207,6 +207,30 @@ test("clinic presets use India today while Wellington is already tomorrow", () =
   );
 });
 
+test("clinic presets follow the clinic day past midnight on an open page", (t) => {
+  // 11:50 PM on Nov 26 in India
+  t.mock.timers.enable({
+    apis: ["Date"],
+    now: new Date("2026-11-26T18:20:00.000Z"),
+  });
+  const options = getClinicShortDateRangeOptions("Asia/Kolkata");
+  const day = (label: string) =>
+    format(
+      options.find((option) => option.label === label)!.getDateRange().from!,
+      "yyyy-MM-dd",
+    );
+
+  assert.equal(day("today"), "2026-11-26");
+  assert.equal(day("yesterday"), "2026-11-25");
+
+  // 12:10 AM on Nov 27 in India, with the same options
+  t.mock.timers.setTime(new Date("2026-11-26T18:40:00.000Z").getTime());
+
+  assert.equal(day("today"), "2026-11-27");
+  assert.equal(day("yesterday"), "2026-11-26");
+  assert.equal(day("tomorrow"), "2026-11-28");
+});
+
 test("date-only schedule bounds stay on that calendar day", () => {
   assert.equal(clinicCalendarYmd("2026-10-05", "Asia/Kolkata"), "2026-10-05");
   assert.equal(
