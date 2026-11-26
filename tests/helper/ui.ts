@@ -660,3 +660,42 @@ export async function clickTabOrMenuItem(
     `Tab "${tabName}" not found as visible tab or in dropdown menu`,
   );
 }
+
+/**
+ * Opens an overlay (sheet, dialog or alert dialog) from a dropdown menu item,
+ * and asserts that the menu closes instead of staying open behind the overlay.
+ *
+ * A menu that stays open behind a modal overlay is hidden from the
+ * accessibility tree, so `getByRole("menu")` does not find it. Count the
+ * `[role="menu"]` elements instead.
+ *
+ * @param page - Playwright page instance
+ * @param trigger - The button that opens the dropdown menu
+ * @param itemName - Name of the menu item that opens the overlay
+ * @param overlay - Locator for the overlay that the menu item opens
+ */
+export async function openOverlayFromMenu(
+  page: Page,
+  trigger: Locator,
+  itemName: string | RegExp,
+  overlay: Locator,
+) {
+  await trigger.click();
+  await page.getByRole("menuitem", { name: itemName, exact: true }).click();
+  await expect(overlay).toBeVisible();
+  await expect(page.locator('[role="menu"]')).toHaveCount(0);
+}
+
+/**
+ * Closes an overlay with Escape and asserts that focus returns to the control
+ * that opened it. For an overlay opened from a menu, that is the menu trigger.
+ */
+export async function expectEscapeRestoresFocus(
+  page: Page,
+  overlay: Locator,
+  trigger: Locator,
+) {
+  await page.keyboard.press("Escape");
+  await expect(overlay).toBeHidden();
+  await expect(trigger).toBeFocused();
+}

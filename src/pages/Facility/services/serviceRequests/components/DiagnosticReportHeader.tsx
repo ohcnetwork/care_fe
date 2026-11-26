@@ -4,6 +4,7 @@ import {
   type LucideIcon,
   MoreVertical,
 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +47,7 @@ export function DiagnosticReportHeader({
   hasObservationHistory = false,
 }: DiagnosticReportHeaderProps) {
   const { t } = useTranslation();
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   return (
     <CardHeader className="p-2">
@@ -106,28 +108,31 @@ export function DiagnosticReportHeader({
           </div>
         </CollapsibleTrigger>
         {hasObservationHistory && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t("view_observation_history")}
-                className="shrink-0"
-              >
-                <MoreVertical className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <ObservationHistorySheet
-                patientId={patientId}
-                diagnosticReportId={report.id}
-              >
-                <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t("view_observation_history")}
+                  className="shrink-0"
+                >
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => setHistoryOpen(true)}>
                   {t("view_observation_history")}
                 </DropdownMenuItem>
-              </ObservationHistorySheet>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <ObservationHistorySheet
+              open={historyOpen}
+              onOpenChange={setHistoryOpen}
+              patientId={patientId}
+              diagnosticReportId={report.id}
+            />
+          </>
         )}
       </div>
     </CardHeader>

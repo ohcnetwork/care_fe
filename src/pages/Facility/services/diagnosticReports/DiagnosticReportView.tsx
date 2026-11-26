@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, MoreVertical, Printer } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ export default function DiagnosticReportView({
   diagnosticReportId: string;
 }) {
   const { t } = useTranslation();
+  const [historyOpen, setHistoryOpen] = useState(false);
   useShortcutSubContext("facility:service");
 
   const { data: report, isLoading } = useQuery({
@@ -143,21 +145,22 @@ export default function DiagnosticReportView({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <ObservationHistorySheet
-                      patientId={report.encounter.patient.id}
-                      diagnosticReportId={diagnosticReportId}
+                    <DropdownMenuItem
+                      onSelect={() => setHistoryOpen(true)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
                     >
-                      <DropdownMenuItem
-                        onSelect={(e) => e.preventDefault()}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                      >
-                        {t("view_observation_history")}
-                      </DropdownMenuItem>
-                    </ObservationHistorySheet>
+                      {t("view_observation_history")}
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                <ObservationHistorySheet
+                  open={historyOpen}
+                  onOpenChange={setHistoryOpen}
+                  patientId={report.encounter.patient.id}
+                  diagnosticReportId={diagnosticReportId}
+                />
               </div>
             </CardHeader>
             <CardContent>

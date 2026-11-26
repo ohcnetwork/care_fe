@@ -10,30 +10,36 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { ObservationStatus } from "@/types/emr/observation/observation";
+import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 
 interface ObservationHistorySheetProps {
-  children: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   patientId: string;
   diagnosticReportId: string;
 }
 
 export function ObservationHistorySheet({
-  children,
+  open,
+  onOpenChange,
   patientId,
   diagnosticReportId,
 }: ObservationHistorySheetProps) {
   const { t } = useTranslation();
 
   // Fetch the full diagnostic report to get all observations
-  const { data: fullReport } = useQuery({
+  const {
+    data: fullReport,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["diagnosticReport", diagnosticReportId],
     queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
       pathParams: {
@@ -41,7 +47,7 @@ export function ObservationHistorySheet({
         external_id: diagnosticReportId,
       },
     }),
-    enabled: !!diagnosticReportId,
+    enabled: open && !!diagnosticReportId,
   });
 
   // Filter deleted observations (entered_in_error)
@@ -51,15 +57,26 @@ export function ObservationHistorySheet({
     ) || [];
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>{children}</SheetTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("observation_history")}</SheetTitle>
         </SheetHeader>
         <SheetBody>
           <div className="space-y-4">
-            {deletedObservations.length === 0 ? (
+            {isLoading ? (
+              <CardListSkeleton count={2} />
+            ) : isError ? (
+              <EmptyState
+                icon={
+                  <CareIcon
+                    icon="l-exclamation-triangle"
+                    className="text-destructive size-6"
+                  />
+                }
+                title={t("error_loading_observation_history")}
+              />
+            ) : deletedObservations.length === 0 ? (
               <EmptyState
                 icon={
                   <CareIcon icon="l-history" className="text-primary size-6" />

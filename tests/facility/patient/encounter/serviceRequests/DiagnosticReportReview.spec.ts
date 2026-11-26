@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { openOverlayFromMenu } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -241,8 +242,72 @@ test.describe("Diagnostic report review", () => {
         await expect(
           historySheet.getByText("101", { exact: true }),
         ).toBeVisible();
+        await expect(page.locator('[role="menu"]')).toHaveCount(0);
+        await page.keyboard.press("Escape");
+        await expect(historySheet).toBeHidden();
+        await expect(history).toBeFocused();
       });
     }
+  });
+
+  test("shows loading and error states in observation history before the report loads", async ({
+    page,
+  }) => {
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({ json: { count: 0, results: [] } }),
+    );
+    const observation = createObservation();
+    observation.status = "entered_in_error";
+    const report = createReport([observation]);
+    report.status = "final";
+    const fixture = await mockReviewPage(page, report);
+    let failReport = () => {};
+    const reportHeld = new Promise<void>((resolve) => {
+      failReport = resolve;
+    });
+    await page.route(fixture.reportUrl, async (route) => {
+      await reportHeld;
+      await route.fulfill({ status: 500, json: { detail: "Server error" } });
+    });
+
+    await page.goto(fixture.url);
+    const history = fixture.review.getByRole("button", {
+      name: "View Observation History",
+      exact: true,
+    });
+    const historySheet = page.getByRole("dialog", {
+      name: "Observation History",
+      exact: true,
+    });
+    const emptyState = historySheet.getByText("No Deleted Observation", {
+      exact: true,
+    });
+
+    await test.step("Show a skeleton while the report loads", async () => {
+      await openOverlayFromMenu(
+        page,
+        history,
+        "View Observation History",
+        historySheet,
+      );
+      await expect(
+        historySheet.locator('[data-slot="skeleton"]').first(),
+      ).toBeVisible();
+      await expect(emptyState).toHaveCount(0);
+    });
+
+    await test.step("Show an error instead of the empty state", async () => {
+      failReport();
+      await expect(
+        historySheet.getByText("Unable to load observation history.", {
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(emptyState).toHaveCount(0);
+      await expect(historySheet.locator('[data-slot="skeleton"]')).toHaveCount(
+        0,
+      );
+    });
   });
 
   test("saves fetched report metadata when the service request snapshot is stale", async ({
