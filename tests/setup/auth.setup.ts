@@ -9,9 +9,7 @@ setup("authenticate", async ({ page }) => {
   // Fill in credentials
   // These should match the credentials from your local backend setup
   await page.getByRole("textbox", { name: /username/i }).fill("admin");
-  await page
-    .getByLabel(/^password$/i)
-    .fill(process.env.PLAYWRIGHT_ADMIN_PASSWORD || "admin");
+  await page.getByLabel(/^password$/i).fill("admin");
 
   // Click login button
   await page.getByRole("button", { name: /^sign in$/i }).click();
