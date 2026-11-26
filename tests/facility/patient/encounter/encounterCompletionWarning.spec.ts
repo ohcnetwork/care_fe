@@ -134,6 +134,12 @@ test.describe("Encounter completion warning", () => {
         { exact: true },
       ),
     ).toHaveCount(0);
+
+    await expect(
+      dialog.getByText("This action will close the Token and Encounter", {
+        exact: true,
+      }),
+    ).toHaveCount(0);
   });
 
   test("shows the appointment warning when an active appointment is linked", async ({
@@ -206,6 +212,12 @@ test.describe("Encounter completion warning", () => {
         "This action will close the Appointment, Token and Encounter",
         { exact: true },
       ),
+    ).toHaveCount(0);
+
+    await expect(
+      dialog.getByText("This action will close the Token and Encounter", {
+        exact: true,
+      }),
     ).toHaveCount(0);
   });
 });
