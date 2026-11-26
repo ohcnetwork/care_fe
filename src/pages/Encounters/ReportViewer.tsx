@@ -347,16 +347,34 @@ export default function ReportViewer({
 
     try {
       const response = await fetch(pdfUrl);
-      const blob = await response.blob();
+      const bytes = await response.arrayBuffer();
+      // Never trust the storage Content-Type. Like pdf.js, accept the PDF
+      // header in the first 1024 bytes; anything else (HTML-format reports)
+      // is printed in a sandbox without allow-scripts, so it stays inert.
+      const isPdf = new TextDecoder("latin1")
+        .decode(bytes.slice(0, 1024))
+        .includes("%PDF-");
+      const blob = new Blob([bytes], {
+        type: isPdf ? "application/pdf" : "text/html;charset=utf-8",
+      });
       const blobUrl = window.URL.createObjectURL(blob);
       const iframe = document.createElement("iframe");
+      if (!isPdf) {
+        // allow-same-origin only lets this page call print() on the frame.
+        iframe.setAttribute("sandbox", "allow-same-origin allow-modals");
+      }
       iframe.src = blobUrl;
 
       iframe.onload = () => {
         try {
           iframe.contentWindow?.print();
         } catch {
-          window.open(blobUrl, "_blank");
+          // Only an inert application/pdf blob may leave the sandbox.
+          if (isPdf) {
+            window.open(blobUrl, "_blank");
+          } else {
+            toast.error(t("PRINTABLE_QR_CODE__print_error"));
+          }
         }
         setTimeout(() => {
           document.body.removeChild(iframe);
