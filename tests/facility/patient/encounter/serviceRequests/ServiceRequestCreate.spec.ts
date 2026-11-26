@@ -143,29 +143,22 @@ test.describe("Patient Service Request Tab", () => {
       .getByRole("button", { name: "See Details" })
       .click();
     await page.waitForLoadState("networkidle");
-    await page.getByRole("button", { name: "Collect Specimen" }).click();
-    await expect(
-      page.getByText("QR code generated successfully"),
-    ).toBeVisible();
-    await page.waitForLoadState("networkidle");
-    await expect(page.getByText("Sample Identification")).toBeVisible();
-    await page.getByPlaceholder("Value", { exact: true }).fill("2");
-    await expect(page.getByPlaceholder("Value", { exact: true })).toHaveValue(
-      "2",
-    );
-    await page
-      .getByRole("textbox", { name: "Type your Notes" })
-      .fill("Test Notes");
-    const collectButton = page.getByRole("button", {
-      name: "Mark as collected",
+    const specimens = page.locator("section").filter({ hasText: "To collect" });
+    const quantity = specimens.getByRole("spinbutton", { name: "Quantity" });
+    await quantity.fill("2");
+    await expect(quantity).toHaveValue("2");
+    await specimens.getByRole("button", { name: "More details" }).click();
+    await specimens.getByRole("textbox", { name: "Notes" }).fill("Test Notes");
+    const collectButton = specimens.getByRole("button", {
+      name: "Collect",
       exact: true,
     });
     await expect(collectButton).toBeEnabled();
     const specimenResponse = page.waitForResponse(
       (resp) =>
-        resp.url().includes("/specimen/") &&
-        resp.request().method() === "PUT" &&
-        resp.status() === 200,
+        resp.url().includes("/create_specimen_from_definition/") &&
+        resp.request().method() === "POST" &&
+        resp.ok(),
     );
     const specimenCollectedToast = expectToast(page, /specimen collected/i);
     await Promise.all([
@@ -215,16 +208,12 @@ test("should fill result value, capture a photo and save results", async ({
   await page.waitForLoadState("networkidle");
 
   // Collect the specimen so a diagnostic report can be created
-  await page.getByRole("button", { name: "Collect Specimen" }).click();
-  await expect(page.getByText("QR code generated successfully")).toBeVisible();
-  await page.waitForLoadState("networkidle");
-  await expect(page.getByText("Sample Identification")).toBeVisible();
-  await page.getByPlaceholder("Value", { exact: true }).fill("2");
-  await page
-    .getByRole("textbox", { name: "Type your Notes" })
-    .fill("Test Notes");
-  const collectButton = page.getByRole("button", {
-    name: "Mark as collected",
+  const specimens = page.locator("section").filter({ hasText: "To collect" });
+  await specimens.getByRole("spinbutton", { name: "Quantity" }).fill("2");
+  await specimens.getByRole("button", { name: "More details" }).click();
+  await specimens.getByRole("textbox", { name: "Notes" }).fill("Test Notes");
+  const collectButton = specimens.getByRole("button", {
+    name: "Collect",
     exact: true,
   });
   await expect(collectButton).toBeEnabled();

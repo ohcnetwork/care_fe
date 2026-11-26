@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { RichTextEditor } from "@/components/Common/RichTextEditor";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -14,7 +13,6 @@ import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticR
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import query from "@/Utils/request/query";
 
-import { DottedDivider } from "@/components/ui/dotted-divider";
 import { DiagnosticReportTimestamps } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportTimestamps";
 import { DiagnosticReportAttachments } from "./DiagnosticReportAttachments";
 import { DiagnosticReportItemProps } from "./diagnosticReportFormTypes";
@@ -60,12 +58,7 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
     fullReport?.status === DiagnosticReportStatus.preliminary;
 
   return (
-    <Card
-      className={cn(
-        "shadow-none border-border rounded-lg bg-background",
-        isExpanded && "bg-muted",
-      )}
-    >
+    <div className={cn(isExpanded && "bg-muted")}>
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <DiagnosticReportHeader
           report={report}
@@ -84,7 +77,7 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
           }
         />
         <CollapsibleContent>
-          <CardContent className="px-2 pb-0">
+          <div className="px-4 pb-4 sm:px-5">
             <PLUGIN_Component
               __name="ServiceRequestAction"
               serviceRequestId={serviceRequestId}
@@ -109,54 +102,43 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
                     draft={draft}
                     isReadOnly={isReadOnly}
                   />
+                  <div className="space-y-1.5 rounded-lg border border-border bg-background px-3 py-2.5">
+                    <h6 className="text-sm font-medium text-foreground">
+                      {t("conclusion")}
+                    </h6>
+                    <RichTextEditor
+                      label={t("conclusion")}
+                      placeholder={t("enter_conclusion_of_diagnostic_report")}
+                      value={draft.conclusion}
+                      onChange={draft.setConclusion}
+                      disabled={isReadOnly}
+                    />
+                  </div>
                 </>
               )}
-              <div className="space-y-4">
-                {showEditor && (
-                  <Card className="mb-4 shadow-none rounded-lg border-border bg-background">
-                    <CardContent className="p-2 space-y-2">
-                      <h6 className="font-medium text-foreground">
-                        {t("conclusion")}
-                      </h6>
-                      <RichTextEditor
-                        label={t("conclusion")}
-                        placeholder={t("enter_conclusion_of_diagnostic_report")}
-                        value={draft.conclusion}
-                        onChange={draft.setConclusion}
-                        disabled={isReadOnly}
-                      />
-                    </CardContent>
-                  </Card>
-                )}
-                <div className="flex sm:flex-row flex-col-reverse justify-between gap-3">
-                  <div className="flex justify-start items-end">
-                    <DiagnosticReportTimestamps report={fullReport ?? report} />
+              <div className="flex flex-col-reverse justify-between gap-2 sm:flex-row sm:items-center">
+                <DiagnosticReportTimestamps report={fullReport ?? report} />
+                {isPreliminary && (
+                  <div className="flex items-center justify-end">
+                    <Button
+                      variant="primary"
+                      onClick={handleSubmit}
+                      disabled={isReadOnly}
+                    >
+                      <Check className="size-4" />
+                      {t("save_results")}
+                    </Button>
                   </div>
-                  {isPreliminary && (
-                    <div className="flex justify-end items-center">
-                      <Button
-                        variant="primary"
-                        onClick={handleSubmit}
-                        disabled={isReadOnly}
-                      >
-                        <Check className="size-4" />
-                        {t("save_results")}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-4 pb-2">
-                  <DottedDivider className="text-muted-foreground" />
-                  <DiagnosticReportAttachments
-                    reportId={report.id}
-                    attachments={attachments}
-                    isPreliminary={isPreliminary}
-                    isReadOnly={isReadOnly}
-                  />
-                </div>
+                )}
               </div>
+              <DiagnosticReportAttachments
+                reportId={report.id}
+                attachments={attachments}
+                isPreliminary={isPreliminary}
+                isReadOnly={isReadOnly}
+              />
             </div>
-          </CardContent>
+          </div>
         </CollapsibleContent>
       </Collapsible>
       {attachments.fileUpload.Dialogues}
@@ -170,6 +152,6 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
         type="diagnostic_report"
         instanceId={report.id}
       />
-    </Card>
+    </div>
   );
 }

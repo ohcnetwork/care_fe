@@ -4,8 +4,6 @@ import { useTranslation } from "react-i18next";
 import { FileListTable } from "@/components/Files/FileListTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DottedDivider } from "@/components/ui/dotted-divider";
-import { cn } from "@/lib/utils";
 import { BACKEND_ALLOWED_EXTENSIONS } from "@/types/files/file";
 
 import { DiagnosticReportAttachmentState } from "./useDiagnosticReportAttachments";
@@ -33,15 +31,11 @@ export function DiagnosticReportAttachments({
   }
 
   return (
-    <div
-      className={cn(
-        hasFiles && "space-y-4 rounded-lg border border-border bg-muted/30 p-2",
-      )}
-    >
+    <div className="space-y-2 border-t border-border pt-2">
       {hasFiles && (
-        <div className="space-y-2">
+        <div className="space-y-2 rounded-lg border border-border bg-background px-3 py-2.5">
           <div className="flex items-center gap-2">
-            <h5 className="text-foreground font-semibold">
+            <h5 className="text-sm font-medium text-foreground">
               {t("uploaded_files")}
             </h5>
             <Badge variant="secondary">{fileResults.length}</Badge>
@@ -55,49 +49,21 @@ export function DiagnosticReportAttachments({
         </div>
       )}
 
-      {hasFiles && isPreliminary && (
-        <DottedDivider className="text-muted-foreground" />
-      )}
-
       {isPreliminary && (
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-background/50 p-3 border border-border rounded-md">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-semibold text-foreground">
-                {t("result_document")}
-              </h3>
-              {isReadOnly && <Badge variant="outline">{t("view_only")}</Badge>}
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {t("add_supporting_photos_or_documents", {
-                formats:
-                  BACKEND_ALLOWED_EXTENSIONS.slice(0, 5)
-                    .join(", ")
-                    .toUpperCase() + `, ${t("etc")}`,
-              })}
-            </p>
-
-            {fileUpload.files.length > 0 && (
-              <div className="mt-3 max-w-md space-y-2">
-                <div
-                  className="truncate text-sm text-muted-foreground"
-                  title={fileUpload.files.map((file) => file.name).join(", ")}
-                >
-                  {fileUpload.files.map((file) => file.name).join(", ")}
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full border-border bg-background"
-                  disabled={isReadOnly}
-                  onClick={() => fileUpload.clearFiles()}
-                >
-                  {t("clear")}
-                </Button>
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <h3 className="text-sm font-medium text-foreground">
+            {t("result_document")}
+          </h3>
+          {isReadOnly && <Badge variant="outline">{t("view_only")}</Badge>}
+          <p className="hidden min-w-0 flex-1 truncate text-sm text-muted-foreground md:block">
+            {t("add_supporting_photos_or_documents", {
+              formats:
+                BACKEND_ALLOWED_EXTENSIONS.slice(0, 5)
+                  .join(", ")
+                  .toUpperCase() + `, ${t("etc")}`,
+            })}
+          </p>
+          <div className="ml-auto flex gap-2">
             <Button
               variant="outline"
               disabled={isReadOnly}
@@ -117,6 +83,24 @@ export function DiagnosticReportAttachments({
             </Button>
             <fileUpload.Input className="hidden" disabled={isReadOnly} />
           </div>
+          {fileUpload.files.length > 0 && (
+            <div className="flex w-full min-w-0 items-center gap-2 text-sm text-muted-foreground">
+              <span
+                className="min-w-0 truncate"
+                title={fileUpload.files.map((file) => file.name).join(", ")}
+              >
+                {fileUpload.files.map((file) => file.name).join(", ")}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={isReadOnly}
+                onClick={() => fileUpload.clearFiles()}
+              >
+                {t("clear")}
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

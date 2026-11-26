@@ -1,14 +1,8 @@
-import {
-  ChevronsDownUp,
-  ChevronsUpDown,
-  type LucideIcon,
-  MoreVertical,
-} from "lucide-react";
+import { ChevronDown, type LucideIcon, MoreVertical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CardHeader, CardTitle } from "@/components/ui/card";
 import { CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DropdownMenu,
@@ -46,90 +40,81 @@ export function DiagnosticReportHeader({
   hasObservationHistory = false,
 }: DiagnosticReportHeaderProps) {
   const { t } = useTranslation();
+  const statusBadge = (className: string) => (
+    <Badge
+      variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}
+      className={className}
+    >
+      {t(report.status)}
+    </Badge>
+  );
 
   return (
-    <CardHeader className="p-2">
-      <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-2 rounded-md">
-        <CollapsibleTrigger
-          aria-label={`${t(isExpanded ? "collapse" : "expand")} ${title ?? t("diagnostic_report")}`}
-          className="flex flex-1 items-center justify-between gap-2 min-w-0 text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-        >
-          <div className="flex flex-1 items-center gap-2 min-w-0">
-            <CardTitle className="min-w-0 w-full">
-              <div className="flex items-start sm:items-center gap-2 min-w-0 w-full text-left">
-                <span
-                  className={cn(
-                    "flex items-center justify-center bg-muted p-2.5 rounded-lg",
-                    isExpanded && "bg-accent",
-                  )}
-                >
-                  <ReportIcon className="size-6 text-muted-foreground stroke-[1.5px]" />
-                </span>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-base text-foreground font-semibold wrap-break-word">
-                    {title}
-                  </span>
-
-                  {updatedBy && (
-                    <span className="text-sm text-muted-foreground font-normal truncate">
-                      {formatName(updatedBy)}
-                    </span>
-                  )}
-
-                  {!isExpanded && (
-                    <DiagnosticReportTimestamps report={report} compact />
-                  )}
-
-                  <div className="mt-1.5 sm:hidden">
-                    <Badge
-                      variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}
-                    >
-                      {t(report.status)}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </CardTitle>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center gap-1 shrink-0">
-            <Badge
-              variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}
-              className="hidden sm:inline-flex"
-            >
-              {t(report.status)}
-            </Badge>
-            {isExpanded ? (
-              <ChevronsDownUp className="size-4 mx-2" />
-            ) : (
-              <ChevronsUpDown className="size-4 mx-2" />
+    <div className="flex items-center gap-1 px-4 py-2.5 sm:px-5">
+      <CollapsibleTrigger
+        aria-label={`${t(isExpanded ? "collapse" : "expand")} ${title ?? t("diagnostic_report")}`}
+        className="flex min-w-0 flex-1 cursor-pointer items-start gap-2.5 rounded-md text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      >
+        <ReportIcon
+          aria-hidden="true"
+          className="mt-0.5 size-4 shrink-0 text-soft-foreground"
+        />
+        <span className="block min-w-0 flex-1">
+          <span className="block text-sm font-semibold wrap-break-word text-foreground">
+            {title}
+          </span>
+          <span className="flex min-w-0 flex-col text-sm text-soft-foreground sm:flex-row sm:flex-wrap sm:gap-x-1.5">
+            {updatedBy && (
+              <span className="truncate">{formatName(updatedBy)}</span>
             )}
-          </div>
-        </CollapsibleTrigger>
-        {hasObservationHistory && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t("view_observation_history")}
-                className="shrink-0"
-              >
-                <MoreVertical className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <ObservationHistorySheet
-                patientId={patientId}
-                diagnosticReportId={report.id}
-              >
-                <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
-                  {t("view_observation_history")}
-                </DropdownMenuItem>
-              </ObservationHistorySheet>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </div>
-    </CardHeader>
+            {updatedBy && !isExpanded && (
+              <span aria-hidden="true" className="hidden sm:inline">
+                ·
+              </span>
+            )}
+            {!isExpanded && (
+              <DiagnosticReportTimestamps
+                report={report}
+                compact
+                className=""
+              />
+            )}
+          </span>
+          {statusBadge("mt-1.5 sm:hidden")}
+        </span>
+        {statusBadge("hidden shrink-0 self-center sm:inline-flex")}
+        <ChevronDown
+          aria-hidden="true"
+          className={cn(
+            "mx-1.5 size-4 shrink-0 self-center text-soft-foreground transition-transform",
+            isExpanded && "rotate-180",
+          )}
+        />
+      </CollapsibleTrigger>
+      {hasObservationHistory && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t("view_observation_history")}
+              className="shrink-0 text-soft-foreground"
+            >
+              <MoreVertical />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <ObservationHistorySheet
+              patientId={patientId}
+              diagnosticReportId={report.id}
+            >
+              <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+                {t("view_observation_history")}
+              </DropdownMenuItem>
+            </ObservationHistorySheet>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </div>
   );
 }

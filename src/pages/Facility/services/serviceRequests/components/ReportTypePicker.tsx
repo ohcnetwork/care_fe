@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { Code } from "@/types/base/code/code";
 
 import { reportCodeKey } from "./diagnosticReportCreation";
@@ -21,12 +22,14 @@ export function ReportTypePicker({
   disableEdit,
   onCreateReport,
   onDismiss,
+  className,
 }: {
   availableReportCodes: Code[];
   hasCollectedSpecimens: boolean;
   disableEdit: boolean;
   onCreateReport: (code: Code) => void;
   onDismiss?: () => void;
+  className?: string;
 }) {
   const { t } = useTranslation();
   const triggerId = useId();
@@ -35,58 +38,47 @@ export function ReportTypePicker({
     availableReportCodes.length === 1 ? availableReportCodes[0] : selectedCode;
 
   return (
-    <div className="flex flex-col items-stretch gap-2 rounded-lg border border-border bg-muted p-4">
-      {onDismiss && (
-        <Button
-          aria-label={t("close")}
-          onClick={() => {
-            onDismiss();
-            setSelectedCode(null);
-          }}
-          variant="ghost"
-          size="icon"
-          className="self-end"
-        >
-          <X className="size-4" />
-        </Button>
+    <div
+      className={cn(
+        "flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted p-2",
+        className,
       )}
-      <div className="w-full flex-1 space-y-2">
-        <Label
-          htmlFor={triggerId}
-          className="text-sm font-medium text-foreground"
+    >
+      <Label htmlFor={triggerId} className="sr-only">
+        {t("select_diagnostic_report_type")}
+      </Label>
+      <Select
+        value={
+          effectiveSelectedCode ? reportCodeKey(effectiveSelectedCode) : ""
+        }
+        onValueChange={(value) => {
+          const code = availableReportCodes.find(
+            (c) => reportCodeKey(c) === value,
+          );
+          setSelectedCode(code ?? null);
+        }}
+        disabled={!hasCollectedSpecimens || disableEdit}
+      >
+        <SelectTrigger
+          id={triggerId}
+          className="min-w-0 flex-1 basis-56 bg-background"
         >
-          {t("select_diagnostic_report_type")}
-        </Label>
-        <Select
-          value={
-            effectiveSelectedCode ? reportCodeKey(effectiveSelectedCode) : ""
-          }
-          onValueChange={(value) => {
-            const code = availableReportCodes.find(
-              (c) => reportCodeKey(c) === value,
-            );
-            setSelectedCode(code ?? null);
-          }}
-          disabled={!hasCollectedSpecimens || disableEdit}
-        >
-          <SelectTrigger id={triggerId} className="w-full">
-            <SelectValue placeholder={t("select_diagnostic_report_type")} />
-          </SelectTrigger>
-          <SelectContent>
-            {availableReportCodes.map((code) => (
-              <SelectItem key={reportCodeKey(code)} value={reportCodeKey(code)}>
-                <span className="truncate">
-                  {code.display} ({code.code})
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex ml-auto items-center gap-2">
+          <SelectValue placeholder={t("select_diagnostic_report_type")} />
+        </SelectTrigger>
+        <SelectContent>
+          {availableReportCodes.map((code) => (
+            <SelectItem key={reportCodeKey(code)} value={reportCodeKey(code)}>
+              <span className="truncate">
+                {code.display} ({code.code})
+              </span>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <div className="ml-auto flex items-center gap-2">
         {availableReportCodes.length !== 1 && (
           <Button
-            variant="link"
+            variant="ghost"
             onClick={() => setSelectedCode(null)}
             disabled={!effectiveSelectedCode}
           >
@@ -102,11 +94,23 @@ export function ReportTypePicker({
           disabled={
             disableEdit || !hasCollectedSpecimens || !effectiveSelectedCode
           }
-          className="w-full sm:w-auto"
         >
-          <Plus className="size-4 mr-2" />
+          <Plus className="size-4" />
           {t("create_report")}
         </Button>
+        {onDismiss && (
+          <Button
+            aria-label={t("close")}
+            onClick={() => {
+              onDismiss();
+              setSelectedCode(null);
+            }}
+            variant="ghost"
+            size="icon"
+          >
+            <X className="size-4" />
+          </Button>
+        )}
       </div>
     </div>
   );

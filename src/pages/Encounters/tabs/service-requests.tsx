@@ -27,6 +27,8 @@ import { encounterServiceRequestListSearch } from "@/lib/router/search/encounter
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { ServiceRequestSelectionBar } from "@/pages/Facility/services/serviceRequests/components/ServiceRequestSelectionBar";
+import { useServiceRequestSelection } from "@/pages/Facility/services/serviceRequests/components/useServiceRequestSelection";
 import { Priority, Status } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 
@@ -63,6 +65,13 @@ export const EncounterServiceRequestTab = () => {
       },
     }),
     enabled: !!facilityId,
+  });
+
+  const selection = useServiceRequestSelection(data?.results ?? [], {
+    enabled:
+      canWriteClinicalData &&
+      (!qParams.status || qParams.status === Status.active),
+    resetKey: JSON.stringify(qParams),
   });
 
   const handleClearStatus = () => {
@@ -150,6 +159,19 @@ export const EncounterServiceRequestTab = () => {
           )}
         </FrameHeader>
 
+        {!isLoading &&
+          facilityId &&
+          selection.enabled &&
+          !!data?.results?.length && (
+            <FramePanel className="p-0">
+              <ServiceRequestSelectionBar
+                facilityId={facilityId}
+                selection={selection}
+                className="rounded-none border-0 bg-transparent px-3 py-2.5"
+              />
+            </FramePanel>
+          )}
+
         <FramePanel className="min-w-0 overflow-hidden p-0 **:data-[slot=table-container]:rounded-none **:data-[slot=table-container]:border-0">
           {isLoading ? (
             <div className="p-3">
@@ -161,6 +183,7 @@ export const EncounterServiceRequestTab = () => {
               facilityId={facilityId || ""}
               showPatientInfo={false}
               readOnly={!canWriteClinicalData}
+              selection={selection}
             />
           ) : (
             <EmptyState

@@ -142,7 +142,7 @@ async function mockReportWorkflow(
     activity,
     report,
     reportCollectionUrl,
-    createDraftUrl: `**/service_request/${serviceRequestId}/create_specimen_from_definition/`,
+    batchUrl: "**/api/v1/batch_requests/",
     updateSpecimenUrl: `**/specimen/${draft.id}/`,
   };
 }
@@ -154,17 +154,18 @@ test.describe("Service request report workflow", () => {
     const fixture = await mockReportWorkflow(page, {
       specimenScenario: "fractional-template",
     });
-    await page.route(fixture.createDraftUrl, (route) =>
-      route.fulfill({ status: 201, json: {} }),
+    await page.route(fixture.batchUrl, (route) =>
+      route.fulfill({ json: { results: [] } }),
     );
     await page.goto(fixture.url);
-    const created = page.waitForRequest(fixture.createDraftUrl);
-    await page.getByRole("button", { name: "Collect Specimen" }).click();
-    const { specimen } = (await created).postDataJSON();
-    expect(specimen.collection.quantity).toBeNull();
-    await expect(page.getByPlaceholder("Value", { exact: true })).toHaveValue(
-      "0.5",
-    );
+    // The tube row keeps the template's quantity editable.
+    await expect(
+      page.getByRole("spinbutton", { name: "Quantity" }),
+    ).toHaveValue("0.5");
+    const created = page.waitForRequest(fixture.batchUrl);
+    await page.getByRole("button", { name: "Print All QR Codes" }).click();
+    const [{ body }] = (await created).postDataJSON().requests;
+    expect(body.specimen.collection.quantity).toBeNull();
   });
 
   test("sends null when a collector clears the optional quantity", async ({
@@ -177,14 +178,13 @@ test.describe("Service request report workflow", () => {
       route.fulfill({ json: {} }),
     );
     await page.goto(fixture.url);
-    await page.getByRole("button", { name: "Collect Specimen" }).click();
-    const value = page.getByPlaceholder("Value", { exact: true });
+    const value = page.getByRole("spinbutton", { name: "Quantity" });
     // Reopening the draft must not reapply the definition's quantity.
     await expect(value).toHaveValue("");
     await value.fill("2");
     await value.fill("");
     const updated = page.waitForRequest(fixture.updateSpecimenUrl);
-    await page.getByRole("button", { name: "Mark as collected" }).click();
+    await page.getByRole("button", { name: "Collect", exact: true }).click();
     expect((await updated).postDataJSON().collection.quantity).toBeNull();
   });
 

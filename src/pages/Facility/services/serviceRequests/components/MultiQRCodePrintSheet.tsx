@@ -31,10 +31,12 @@ import { PrintableQRCodeArea } from "./PrintableQRCodeArea";
 
 interface MultiQRCodePrintSheetProps {
   specimens: SpecimenRead[];
-  children: React.ReactNode;
+  /** Opens the sheet; leave out when `open` is controlled. */
+  children?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   isLoading?: boolean;
+  getLabelText?: (specimen: SpecimenRead) => string;
 }
 
 export function MultiQRCodePrintSheet({
@@ -43,6 +45,7 @@ export function MultiQRCodePrintSheet({
   open,
   onOpenChange,
   isLoading = false,
+  getLabelText,
 }: MultiQRCodePrintSheetProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -121,7 +124,7 @@ export function MultiQRCodePrintSheet({
   return (
     <>
       <Sheet open={isOpen} onOpenChange={handleOpenChange}>
-        <SheetTrigger asChild>{children}</SheetTrigger>
+        {children && <SheetTrigger asChild>{children}</SheetTrigger>}
         <SheetContent size="md" className="overflow-hidden">
           <SheetHeader>
             <SheetTitle>{t("print_qr_codes")}</SheetTitle>
@@ -245,6 +248,11 @@ export function MultiQRCodePrintSheet({
                             <div className="font-semibold uppercase text-sm text-gray-700">
                               {specimen.accession_identifier || specimen.id}
                             </div>
+                            {getLabelText && (
+                              <div className="text-sm font-medium">
+                                {getLabelText(specimen)}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -264,6 +272,7 @@ export function MultiQRCodePrintSheet({
             logoSize={logoSize}
             printSize={printSize}
             showDetails={showDetails}
+            getLabelText={getLabelText}
           />
         </div>
       )}

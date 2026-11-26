@@ -94,8 +94,11 @@ export function DiagnosticReportForm({
   return (
     <>
       {activeDiagnosticReports.length > 0 && (
-        <div className="relative">
-          <div className="relative z-10 space-y-3">
+        <section className="overflow-hidden rounded-lg border border-border bg-white shadow-xs">
+          <h5 className="px-4 py-3 font-semibold text-foreground sm:px-5">
+            {t("test_result_entries")}
+          </h5>
+          <div className="divide-y divide-soft-border border-t border-border">
             {activeDiagnosticReports.map((report) => (
               <DiagnosticReportItem
                 key={report.id}
@@ -111,7 +114,7 @@ export function DiagnosticReportForm({
             ))}
           </div>
           {isMultipleDiagnosticReport && availableReportCodes.length > 0 && (
-            <div className="-mt-3 rounded-b-lg bg-muted px-2 pb-2 pt-4">
+            <div className="border-t border-border px-4 py-2 sm:px-5">
               {showReportTypeSelect ? (
                 <ReportTypePicker
                   availableReportCodes={availableReportCodes}
@@ -122,11 +125,12 @@ export function DiagnosticReportForm({
                     setShowReportTypeSelect(false);
                   }}
                   onDismiss={() => setShowReportTypeSelect(false)}
+                  className="border-0 bg-transparent p-0"
                 />
               ) : (
                 <Button
                   variant="link"
-                  className="px-2"
+                  className="px-0"
                   onClick={() => {
                     setShowReportTypeSelect(true);
                   }}
@@ -140,7 +144,7 @@ export function DiagnosticReportForm({
               )}
             </div>
           )}
-        </div>
+        </section>
       )}
       {showCreateReportForm && (
         <CreateDiagnosticReportForm

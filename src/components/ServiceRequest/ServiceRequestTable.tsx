@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -19,6 +20,7 @@ import { TagBadges } from "@/components/Tags/TagBadges";
 import { LocationNode } from "@/components/Location/LocationTree";
 import { navigate } from "@/lib/router/navigate";
 import { cn } from "@/lib/utils";
+import { type ServiceRequestSelection } from "@/pages/Facility/services/serviceRequests/components/useServiceRequestSelection";
 import {
   SERVICE_REQUEST_PRIORITY_COLORS,
   SERVICE_REQUEST_STATUS_COLORS,
@@ -32,6 +34,7 @@ interface ServiceRequestTableProps {
   showPatientInfo?: boolean;
   readOnly?: boolean;
   onPatientClick?: (request: ServiceRequestReadSpec) => void;
+  selection?: ServiceRequestSelection;
 }
 
 export default function ServiceRequestTable({
@@ -41,9 +44,11 @@ export default function ServiceRequestTable({
   showPatientInfo = true,
   readOnly = false,
   onPatientClick,
+  selection,
 }: ServiceRequestTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const showSelection = !readOnly && !!selection?.enabled;
 
   const handleViewDetails = (request: ServiceRequestReadSpec) => {
     if (locationId) {
@@ -64,6 +69,7 @@ export default function ServiceRequestTable({
       <Table>
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-gray-200">
+            {showSelection && <TableHead className="min-w-8" />}
             {showPatientInfo && <TableHead>{t("patient_name")}</TableHead>}
             <TableHead>{t("service_type")}</TableHead>
             <TableHead>
@@ -84,6 +90,19 @@ export default function ServiceRequestTable({
               key={request.id}
               className="divide-x divide-gray-200 group"
             >
+              {showSelection && (
+                <TableCell>
+                  {selection.canSelect(request) && (
+                    <Checkbox
+                      checked={selection.isSelected(request)}
+                      onCheckedChange={(checked) =>
+                        selection.setSelected(request, checked)
+                      }
+                      aria-label={request.title}
+                    />
+                  )}
+                </TableCell>
+              )}
               {showPatientInfo && (
                 <TableCell
                   className={cn(

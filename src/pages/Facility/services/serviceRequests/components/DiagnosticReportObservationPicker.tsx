@@ -75,7 +75,6 @@ export function DiagnosticReportObservationPicker({
         <Button
           type="button"
           variant="outline"
-          size="sm"
           disabled={disabled}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
@@ -111,7 +110,7 @@ export function DiagnosticReportObservationPicker({
             ) : isError ? (
               <div role="alert" className="space-y-2 p-4 text-sm">
                 <p>{t("error_loading_definitions")}</p>
-                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                <Button variant="outline" onClick={() => refetch()}>
                   {t("try_again")}
                 </Button>
               </div>
@@ -133,7 +132,7 @@ export function DiagnosticReportObservationPicker({
                     >
                       <div className="min-w-0">
                         <p className="font-medium">{definition.title}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           {definition.code.display || definition.code.code}
                         </p>
                       </div>

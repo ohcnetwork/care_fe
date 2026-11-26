@@ -35,7 +35,7 @@ export function ChargeItemCard({ chargeItem, sourceUrl }: ChargeItemCardProps) {
     : null;
 
   return (
-    <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+    <div className="flex flex-col gap-2 px-4 py-3 @sm:flex-row @sm:items-center @sm:justify-between @sm:gap-3">
       <div className="flex min-w-0 flex-row items-center gap-2 text-sm text-muted-foreground">
         <span className="text-sm text-foreground font-medium text-wrap">
           {chargeItem.title}
@@ -46,7 +46,7 @@ export function ChargeItemCard({ chargeItem, sourceUrl }: ChargeItemCardProps) {
           </span>
         )}
       </div>
-      <div className="flex flex-row items-center gap-2 sm:shrink-0">
+      <div className="flex flex-row items-center gap-2 @sm:shrink-0">
         <div className="font-semibold text-sm flex items-center">
           <span className="items-center">
             <MonetaryDisplay amount={chargeItem.total_price} />
@@ -70,7 +70,6 @@ export function ChargeItemCard({ chargeItem, sourceUrl }: ChargeItemCardProps) {
         {invoiceUrl ? (
           <Button
             variant="outline"
-            size="xs"
             onClick={() => navigate({ href: invoiceUrl })}
           >
             {t("invoice")}
