@@ -1,4 +1,4 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   BedDouble,
   ChevronRight,
@@ -46,9 +46,9 @@ interface BedBoardProps {
 }
 
 /**
- * Every bed of one location: its own beds, then the beds of each room
- * directly inside it. Render it with `key={locationId}` so the search and
- * the filter start empty for each location.
+ * The beds directly in one location. The areas below it, with beds somewhere
+ * in them, are links. Render it with `key={locationId}` so the search and the
+ * filter start empty for each location.
  */
 export function BedBoard({
   facilityId,
@@ -81,19 +81,10 @@ export function BedBoard({
     ...locationChildrenQuery(facilityId, locationId, "instance"),
     enabled: !!location?.has_beds,
   });
-  const rooms = subLocations?.results.filter((room) => room.has_beds) ?? [];
-  // Sub-locations without beds of their own are offered only when a bed sits
-  // somewhere below them, so no link leads to an empty branch.
+  // Sub-locations are offered only when a bed sits in them or somewhere below,
+  // so no link leads to an empty branch.
   const { locations: deeperAreas, isLoading: isCheckingDeeperAreas } =
-    useLocationsWithBeds(
-      facilityId,
-      subLocations?.results.filter((area) => !area.has_beds),
-    );
-  const roomBedLists = useQueries({
-    queries: rooms.map((room) =>
-      locationChildrenQuery(facilityId, room.id, "instance"),
-    ),
-  });
+    useLocationsWithBeds(facilityId, subLocations?.results);
 
   // Shared with the loaded board, so nothing moves when the location arrives.
   const sectionClass = cn(
@@ -148,30 +139,13 @@ export function BedBoard({
   // A link can point at a bed itself: show that one bed.
   const ownBeds =
     location.mode === "instance" ? [location] : (ownBedList?.results ?? []);
-  const sections = rooms.map((room, index) => ({
-    room,
-    beds: roomBedLists[index]?.data?.results ?? [],
-    isLoading: roomBedLists[index]?.isLoading ?? false,
-  }));
-  const allBeds = [...ownBeds, ...sections.flatMap((section) => section.beds)];
   const isLoadingBeds =
-    isLoadingSubLocations ||
-    isLoadingOwnBeds ||
-    isCheckingDeeperAreas ||
-    sections.some((section) => section.isLoading);
+    isLoadingSubLocations || isLoadingOwnBeds || isCheckingDeeperAreas;
 
   const isVisible = (bed: LocationRead) =>
     matchesBedSearch(bed, search) &&
     (filter === "all" || getBedState(bed) === filter);
-  const visibleOwnBeds = ownBeds.filter(isVisible);
-  const visibleSections = sections
-    .map((section) => ({
-      ...section,
-      visibleBeds: section.beds.filter(isVisible),
-    }))
-    .filter((section) => section.visibleBeds.length > 0);
-  const hasVisibleBeds =
-    visibleOwnBeds.length > 0 || visibleSections.length > 0;
+  const visibleBeds = ownBeds.filter(isVisible);
 
   const ancestors = buildLocationPath(location).slice(0, -1);
 
@@ -214,7 +188,7 @@ export function BedBoard({
           </div>
         </div>
 
-        {allBeds.length > 0 && (
+        {ownBeds.length > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
             <div className="relative min-w-0 flex-1 basis-56 sm:max-w-sm">
               <Search
@@ -233,35 +207,25 @@ export function BedBoard({
             <BedStateFilter
               value={filter}
               onChange={setFilter}
-              counts={countBeds(allBeds)}
+              counts={countBeds(ownBeds)}
             />
           </div>
         )}
 
-        {visibleOwnBeds.length > 0 && (
+        {visibleBeds.length > 0 && (
           <BedSection
             facilityId={facilityId}
-            beds={visibleOwnBeds}
+            beds={visibleBeds}
             counts={countBeds(ownBeds)}
           />
         )}
-        {visibleSections.map((section) => (
-          <BedSection
-            key={section.room.id}
-            facilityId={facilityId}
-            room={section.room}
-            onOpenRoom={onOpenLocation}
-            beds={section.visibleBeds}
-            counts={countBeds(section.beds)}
-          />
-        ))}
 
         {isLoadingBeds ? (
           <div role="status">
             <span className="sr-only">{t("loading")}</span>
             <BedGridSkeleton />
           </div>
-        ) : allBeds.length === 0 ? (
+        ) : ownBeds.length === 0 ? (
           <EmptyState
             icon={<BedDouble className="size-8 text-placeholder-foreground" />}
             title={t(
@@ -277,7 +241,7 @@ export function BedBoard({
             className="py-8"
           />
         ) : (
-          !hasVisibleBeds && (
+          !visibleBeds.length && (
             <EmptyState
               icon={<SearchX className="size-8 text-placeholder-foreground" />}
               title={t("no_beds_found")}
