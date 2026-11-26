@@ -426,6 +426,8 @@ test("Custom date range opens on the start date with a small back button", async
     await page.getByRole("menuitem", { name: /custom date range/i }).click();
     await expect(from(page)).toBeFocused();
     const back = page.getByRole("button", { name: "Back", exact: true });
+    await expect(back).toBeVisible();
+    await expect(back.locator("svg.lucide-chevron-left")).toBeVisible();
     await expect(back).toHaveAttribute("data-size", "icon-sm");
     await expect(back).toHaveCSS("width", "36px");
     await expect(back).toHaveCSS("height", "36px");
