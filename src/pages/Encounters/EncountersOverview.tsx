@@ -31,15 +31,19 @@ export default function EncountersOverview({
         }}
       >
         <TabsContent value="patients">
-          <EncounterList
-            key={`${facilityId}:${encounterClass ?? "all"}`}
-            facilityId={facilityId}
-            encounterClass={encounterClass}
-          />
+          {tab === "patients" && (
+            <EncounterList
+              key={`${facilityId}:${encounterClass ?? "all"}`}
+              facilityId={facilityId}
+              encounterClass={encounterClass}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="locations">
-          <BedBoardPage facilityId={facilityId} locationId={locationId} />
+          {tab === "locations" && (
+            <BedBoardPage facilityId={facilityId} locationId={locationId} />
+          )}
         </TabsContent>
       </Tabs>
     </div>
