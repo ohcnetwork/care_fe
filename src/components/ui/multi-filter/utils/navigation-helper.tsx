@@ -12,15 +12,19 @@ import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-export default function NavigationHelper({
-  isActiveFilter,
-  enterToSelect,
-  canGoBack,
-}: {
+export interface NavigationHelperProps {
   isActiveFilter?: boolean;
+  hideRightArrow?: boolean;
   enterToSelect?: boolean;
   canGoBack?: boolean;
-}) {
+}
+
+export default function NavigationHelper({
+  isActiveFilter,
+  hideRightArrow,
+  enterToSelect,
+  canGoBack,
+}: NavigationHelperProps) {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ sm: false, default: true });
 
@@ -43,7 +47,7 @@ export default function NavigationHelper({
             <Kbd>
               <ArrowUp aria-hidden="true" />
             </Kbd>
-            {!isActiveFilter && (
+            {!isActiveFilter && !hideRightArrow && (
               <Kbd>
                 <ArrowRight aria-hidden="true" />
               </Kbd>

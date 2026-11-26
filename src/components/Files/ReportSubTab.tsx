@@ -6,10 +6,10 @@ import {
   FileHeart,
   FileText,
   LucideIcon,
-  Plus,
   RefreshCw,
   SearchIcon,
 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -53,7 +53,10 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import Pagination from "@/components/Common/Pagination";
 import { ArchivedBadge } from "@/components/Files/ArchivedBadge";
+import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 import { ArchiveStatusFilter } from "@/components/Files/FileFilters";
+import { GenerateReportDropdown } from "@/components/Files/GenerateReportDropdown";
+import { getReportBasePath } from "@/components/Files/reportTemplateOptions";
 
 import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
@@ -61,7 +64,6 @@ import { fileListSearch } from "@/lib/router/search/patient";
 
 import { formatDateTime } from "@/Utils/utils";
 import { navigate } from "@/lib/router/navigate";
-import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateReportSheet";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { ReportReadList, ReportType } from "@/types/emr/report/report";
 
@@ -70,7 +72,6 @@ interface ReportTabProps {
   reportType?: ReportType;
   facilityId?: string;
   patientId?: string;
-  encounterId?: string;
 }
 
 const REPORT_TYPE_ICONS: Partial<Record<string, LucideIcon>> = {
@@ -84,7 +85,6 @@ export function ReportSubTab({
   reportType,
   facilityId,
   patientId,
-  encounterId,
 }: ReportTabProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
@@ -117,14 +117,26 @@ export function ReportSubTab({
   });
 
   const isFiltered = !!qParams.name || qParams.is_archived !== undefined;
-  const canNavigateToPreview = !!(facilityId && patientId && encounterId);
+
+  const [archivedReport, setArchivedReport] = useState<ReportReadList | null>(
+    null,
+  );
 
   const handleView = (report: ReportReadList) => {
-    if (canNavigateToPreview) {
-      navigate({
-        to: "/facility/$facilityId/patient/$patientId/encounter/$encounterId/report/$reportId",
-        params: { facilityId, patientId, encounterId, reportId: report.id },
-      });
+    // The viewer only lists active reports and would generate a new one.
+    if (report.is_archived) {
+      setArchivedReport(report);
+      return;
+    }
+
+    const basePath = getReportBasePath(
+      reportType,
+      associatingId,
+      facilityId ?? facility?.id,
+      patientId,
+    );
+    if (basePath) {
+      navigate({ href: `${basePath}/report/${report.id}` });
     } else {
       viewFile(report);
     }
@@ -133,6 +145,12 @@ export function ReportSubTab({
   return (
     <>
       {Dialogs}
+      <ArchivedFileDialog
+        open={!!archivedReport}
+        onOpenChange={(open) => !open && setArchivedReport(null)}
+        file={archivedReport}
+        title={t("archived_report")}
+      />
 
       <Frame spacing="sm" className="min-w-0">
         <FrameHeader className="flex-row flex-wrap items-center gap-2">
@@ -166,18 +184,11 @@ export function ReportSubTab({
           </TooltipComponent>
           {facility && (
             <div className="ml-auto">
-              <TemplateReportSheet
-                facilityId={facility.id}
+              <GenerateReportDropdown
+                facilityId={facilityId ?? facility.id}
+                patientId={patientId}
                 associatingId={associatingId}
-                permissions={facility.permissions ?? []}
                 reportType={reportType}
-                trigger={
-                  <Button variant="outline">
-                    <Plus />
-                    {t("generate_report")}
-                  </Button>
-                }
-                onSuccess={() => refetch()}
               />
             </div>
           )}

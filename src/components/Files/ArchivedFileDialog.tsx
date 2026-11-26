@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -6,30 +5,40 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { TooltipComponent } from "@/components/ui/tooltip";
 
-import { formatName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { FileReadMinimal } from "@/types/files/file";
+
+export type ArchivedFileDialogFile = Pick<
+  FileReadMinimal,
+  "name" | "archive_reason" | "archived_datetime"
+> & {
+  extension?: string;
+  archived_by?: Parameters<typeof formatName>[0];
+};
 
 export default function ArchivedFileDialog({
   open,
   onOpenChange,
   file,
+  title,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  file: FileReadMinimal | null;
+  file: ArchivedFileDialogFile | null;
+  title?: string;
 }) {
   const { t } = useTranslation();
 
   if (!file) {
     return <></>;
   }
-  const fileName = file?.name ? file.name + file.extension : "";
+  const fileName = file?.name ? file.name + (file.extension ?? "") : "";
   return (
     <Dialog
       open={open}
@@ -41,14 +50,10 @@ export default function ArchivedFileDialog({
         aria-describedby="file-archive"
       >
         <DialogHeader>
-          <DialogTitle className="break-words">
-            {t("archived_file")}:{" "}
-            <TooltipComponent content={fileName}>
-              <span className="sm:max-w-sm inline-block align-bottom">
-                {fileName}
-              </span>
-            </TooltipComponent>
-          </DialogTitle>
+          <DialogTitle>{title ?? t("archived_file")}</DialogTitle>
+          <DialogDescription className="break-all">
+            {fileName}
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
           <div className="flex flex-col gap-1 bg-gray-100 p-4 rounded-md">
@@ -58,12 +63,14 @@ export default function ArchivedFileDialog({
             <span className="break-words">{file?.archive_reason}</span>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 justify-between text-sm bg-blue-100 text-blue-900 p-2 rounded-md">
-            <span className="break-words">
-              {t("archived_by")}: {formatName(file.archived_by)}
-            </span>
+            {file.archived_by && (
+              <span className="break-words">
+                {t("archived_by")}: {formatName(file.archived_by)}
+              </span>
+            )}
             <span className="whitespace-nowrap">
               {t("archived_at")}:{" "}
-              {dayjs(file.archived_datetime).format("DD MMM YYYY, hh:mm A")}
+              {formatDateTime(file.archived_datetime, "DD MMM YYYY, hh:mm A")}
             </span>
           </div>
         </div>

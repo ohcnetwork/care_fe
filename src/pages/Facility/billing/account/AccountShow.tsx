@@ -25,6 +25,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
@@ -67,7 +69,9 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { isPositive, isZero, roundWhole } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
+import { ReportTemplateSearchList } from "@/components/Files/GenerateReportDropdown";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
+import { useReportTemplateOptions } from "@/components/Files/reportTemplateOptions";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { navigate } from "@/lib/router/navigate";
@@ -141,6 +145,7 @@ function AccountShow({
     });
   };
   const [transferPaymentOpen, setTransferPaymentOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const queryClient = useQueryClient();
   const [closeAccountStatus, setCloseAccountStatus] = useState<{
     sheetOpen: boolean;
@@ -154,6 +159,7 @@ function AccountShow({
     canUpdateAccount,
     canCreateChargeItem,
     canWritePaymentReconciliation,
+    canListTemplate: canListTemplates,
   } = getPermissions(hasPermission, facility?.permissions || []);
 
   useShortcutSubContext("facility:account:show&facility:billing");
@@ -179,6 +185,18 @@ function AccountShow({
   });
 
   const hasBillableItems = (billableChargeItems?.count ?? 0) > 0;
+
+  const {
+    templates: accountTemplates,
+    isLoading: isLoadingTemplates,
+    search: accountTemplateSearch,
+    setSearch: setAccountTemplateSearch,
+  } = useReportTemplateOptions({
+    facilityId,
+    associatingId: accountId,
+    reportType: ReportType.ACCOUNT_REPORT,
+    enabled: dropdownOpen && canListTemplates,
+  });
 
   const showMoreAfterIndex = useBreakpoints({
     default: 1,
@@ -349,6 +367,7 @@ function AccountShow({
         <ReportSubTab
           associatingId={accountId}
           reportType={ReportType.ACCOUNT_REPORT}
+          facilityId={facilityId}
         />
       ),
       shortcutId: "switch-to-reports-tab",
@@ -435,7 +454,13 @@ function AccountShow({
             </div>
           )}
           {account.status == AccountStatus.active && (
-            <DropdownMenu>
+            <DropdownMenu
+              open={dropdownOpen}
+              onOpenChange={(open) => {
+                setDropdownOpen(open);
+                if (!open) setAccountTemplateSearch("");
+              }}
+            >
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
@@ -445,7 +470,10 @@ function AccountShow({
                   <MoreVertical className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent
+                align="end"
+                className="w-full max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
+              >
                 {!isAccountBillingClosed(account) && (
                   <>
                     <DropdownMenuItem
@@ -467,6 +495,18 @@ function AccountShow({
                   <CareIcon icon="l-exchange" className="mr-2 size-4" />
                   {t("transfer_payment")}
                 </DropdownMenuItem>
+                {canListTemplates && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>{t("reports")}</DropdownMenuLabel>
+                    <ReportTemplateSearchList
+                      templates={accountTemplates}
+                      isLoading={isLoadingTemplates}
+                      search={accountTemplateSearch}
+                      onSearchChange={setAccountTemplateSearch}
+                    />
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}

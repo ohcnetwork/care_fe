@@ -111,7 +111,6 @@ export const FilesTab = ({
             }
             facilityId={encounter?.facility?.id}
             patientId={patient?.id}
-            encounterId={encounter?.id}
           />
         </TabsContent>
 
