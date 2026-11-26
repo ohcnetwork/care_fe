@@ -6,6 +6,8 @@ import {
   type PrintPatientHeader,
   buildPatientHeader,
 } from "@/print/patientDetails";
+import { labelledRichText } from "@/print/richText";
+import type { PrintLabelledRichText } from "@/print/types";
 import {
   type Condition,
   ConditionOperation,
@@ -43,7 +45,7 @@ export interface DiagnosticReportPrintContent {
       }[];
     } | null;
     note: { label: string; text: string } | null;
-    conclusion: { label: string; text: string } | null;
+    conclusion: PrintLabelledRichText | null;
     /** Paths of the attachment page images, one page each. */
     attachments: string[];
   }[];
@@ -257,9 +259,7 @@ export function buildDiagnosticReportPrintContent({
         ? buildResults(report.observations, t)
         : null,
       note: report.note ? { label: t("notes"), text: report.note } : null,
-      conclusion: report.conclusion
-        ? { label: t("conclusion"), text: report.conclusion }
-        : null,
+      conclusion: labelledRichText(t("conclusion"), report.conclusion),
       attachments: attachmentPaths[report.id] ?? [],
     })),
     footer: {

@@ -35,22 +35,29 @@
   cells
 }
 
+#let detail-columns(left, right) = layout(size => {
+  let rows(r) = detail-rows(r, label-width: px(112))
+  let side-by-side = grid(
+    columns: (3fr, 2fr),
+    column-gutter: px(16),
+    rows(left), rows(right),
+  )
+  // 14rem + gap-4 + 12rem, the HTML print's flex-basis widths and gap.
+  let min-width = px(224) + px(16) + px(192)
+  if size.width >= min-width { side-by-side } else { rows(left + right) }
+})
+
 #grid(
   columns: (1fr, auto),
   column-gutter: px(16),
   stack(
     spacing: px(12),
-    grid(
-      columns: (3fr, 2fr),
-      column-gutter: px(16),
-      detail-rows(c.details.left, label-width: px(112)),
-      detail-rows(c.details.right, label-width: px(112)),
-    ),
+    detail-columns(c.details.left, c.details.right),
     if c.details.location != none {
       detail-rows((c.details.location,), label-width: px(112))
     },
   ),
-  if c.qr_code != none { image(c.qr_code, width: px(85)) },
+  if c.qr_code != none { qr-code(c.qr_code) },
 )
 
 #v(px(8))
@@ -72,7 +79,7 @@
     v(px(24))
   }
 
-  block(below: px(6), grid(
+  block(below: px(6), sticky: true, grid(
     columns: (1fr, auto),
     align: horizon,
     {
@@ -88,17 +95,16 @@
   ))
 
   block(width: 100%, stroke: border, radius: px(6), clip: true, {
-    pad(x: px(16), y: px(12), {
+    block(sticky: true, pad(x: px(16), y: px(12), {
       text(weight: "medium", fill: gray(700), l.prescribed_by + ": ")
       text(weight: "semibold", fill: gray(950), rx.prescribed_by)
       if rx.note != none {
-        linebreak()
-        text(size: text-size.xs, fill: gray(700), l.note + ": " + rx.note)
+        text(size: text-size.xs, fill: gray(700), rich-text(rx.note, lead: l.note + ":"))
       }
-    })
+    }))
     if rx.medications.len() > 0 {
       data-table(
-        columns: (auto, auto, auto, auto, auto, 1fr),
+        columns: (auto, 3fr, 2fr, 2fr, 1.5fr, 3fr),
         align: (center, left, left, left, left, left),
         header-align: (center, left, left, left, left, left),
         header: c.table_header,

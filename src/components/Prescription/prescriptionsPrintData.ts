@@ -16,6 +16,8 @@ import {
   buildPatientDetailRows,
   buildPatientHeader,
 } from "@/print/patientDetails";
+import { richTextOrNull } from "@/print/richText";
+import type { PrintRichBlock } from "@/print/types";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
 import type { PatientRead } from "@/types/emr/patient/patient";
 import type { PrescriptionRead } from "@/types/emr/prescription/prescription";
@@ -39,8 +41,7 @@ export interface PrescriptionsPrintContent {
     progress: string | null;
     date: string;
     prescribed_by: string;
-    /** Markdown is not rendered; the text is shown as written. */
-    note: string | null;
+    note: PrintRichBlock[] | null;
     medications: {
       index: string;
       name: string;
@@ -137,7 +138,7 @@ export function buildPrescriptionsPrintContent({
         "DD MMM YYYY, ddd, hh:mm A",
       ),
       prescribed_by: formatName(prescription.prescribed_by),
-      note: prescription.note || null,
+      note: richTextOrNull(prescription.note),
       medications: (prescription.medications ?? []).map(
         (medication, medIndex) => {
           const instructions = medication.dosage_instruction;
@@ -149,7 +150,7 @@ export function buildPrescriptionsPrintContent({
             index: String(medIndex + 1),
             name: displayMedicationName(medication),
             instructions: instructions.map((di) => ({
-              dosage: formatDosage(di) || "",
+              dosage: formatDosage(di, { print: true }) || "",
               frequency: formatFrequency(di) || "",
               duration: formatDuration(di) || "",
               text: [

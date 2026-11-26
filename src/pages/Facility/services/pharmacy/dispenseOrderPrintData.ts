@@ -59,13 +59,14 @@ export function buildDispenseOrderPrintContent({
         t("expiry_date"),
         t("prepared_date"),
       ],
+      widths: [3, null, 2, null, 1.5, null, null],
       rows: dispenses.map((dispense) => {
         const instructions = dispense.dosage_instruction ?? [];
         return [
           dispense.item.product.product_knowledge.name,
           joinInstructionTexts(
             instructions,
-            formatDosage,
+            (di) => formatDosage(di, { print: true }),
             INSTRUCTION_SEPARATOR,
           ),
           joinInstructionTexts(

@@ -57,7 +57,7 @@
       ..days.map(_ => slots).flatten().map(slot => table.cell(align: center + horizon, text(size: px(9), slot))),
     ),
     ..week.rows.map(row => (
-      table.cell(inset: px(6), align: left + top, {
+      table.cell(inset: px(6), align: left + top, fit-words({
         text(size: text-size.xs, weight: "bold", row.name)
         for summary in row.summaries {
           linebreak()
@@ -67,7 +67,7 @@
           linebreak()
           text(size: px(8), fill: gray(400), row.orders)
         }
-      }),
+      })),
       ..row.counts.map(count-cell),
     )).flatten(),
   )
@@ -95,7 +95,7 @@
   for (r, week) in section.ranges.enumerate() {
     if r > 0 { pagebreak(weak: true) }
     if r == 0 {
-      block(width: 100%, below: px(8), breakable: false, fill: if section.prn { palette("pink", 700) } else { gray(800) }, inset: (x: px(8), y: px(4)), text(
+      block(width: 100%, below: px(8), breakable: false, sticky: true, fill: if section.prn { palette("pink", 700) } else { gray(800) }, inset: (x: px(8), y: px(4)), text(
         size: text-size.sm,
         weight: "bold",
         fill: white,

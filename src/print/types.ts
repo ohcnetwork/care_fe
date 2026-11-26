@@ -53,6 +53,35 @@ export interface PrintLayout {
   };
 }
 
+export type PrintTextMark =
+  "bold" | "italic" | "underline" | "strike" | "highlight" | "code";
+
+export type PrintTextRun =
+  | { kind: "text"; text: string; marks: PrintTextMark[]; link: string | null }
+  | { kind: "break" };
+
+export interface PrintRichListItem {
+  checked: boolean | null;
+  blocks: PrintRichBlock[];
+}
+
+export type PrintRichBlock =
+  | { kind: "paragraph"; runs: PrintTextRun[] }
+  | { kind: "heading"; level: number; runs: PrintTextRun[] }
+  | {
+      kind: "list";
+      ordered: boolean;
+      start: number;
+      items: PrintRichListItem[];
+    }
+  | { kind: "quote"; blocks: PrintRichBlock[] }
+  | { kind: "rule" };
+
+export interface PrintLabelledRichText {
+  label: string;
+  blocks: PrintRichBlock[];
+}
+
 /** What a template receives as `json("/data.json")`. */
 export interface PrintDocument<TContent> {
   layout: PrintLayout;

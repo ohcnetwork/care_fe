@@ -14,18 +14,23 @@
 #patient-details(c.details.left, c.details.right)
 
 #if c.title != none or c.note != none {
-  block(below: px(8), {
+  block(below: px(8), fit-words({
     if c.title != none { text(size: text-size.lg, weight: "semibold", fill: gray(700), c.title) }
     if c.title != none and c.note != none { parbreak() }
     if c.note != none { text(fill: gray(600), c.note) }
-  })
+  }))
 }
 
 #if c.table_title != none {
-  block(below: px(8), text(size: text-size.base, weight: "semibold", c.table_title))
+  block(below: px(8), sticky: true, text(size: text-size.base, weight: "semibold", c.table_title))
 }
+#let widths = c.table.widths
+#assert(
+  widths.len() == c.table.header.len(),
+  message: "details-table: table.widths needs one entry per header column",
+)
 #data-table(
-  columns: (1fr,) + (auto,) * (c.table.header.len() - 1),
+  columns: widths.map(w => if w == none { auto } else { w * 1fr }),
   align: (left,) + (center,) * (c.table.header.len() - 1),
   header-align: (left,) + (center,) * (c.table.header.len() - 1),
   header: c.table.header,

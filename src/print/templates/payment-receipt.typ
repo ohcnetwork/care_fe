@@ -55,7 +55,7 @@
     stroke: (top: px(1) + border-color),
     [
       #text(weight: "medium", fill: gray(950), c.labels.notes)
-      #block(above: px(4), text(fill: gray(600), c.note))
+      #block(above: px(4), fit-words(text(fill: gray(600), c.note)))
     ],
   )
 }

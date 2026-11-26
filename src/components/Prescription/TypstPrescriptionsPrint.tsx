@@ -23,7 +23,7 @@ export function TypstPrescriptionsPrint({
   facility,
 }: Props) {
   const { t } = useTranslation();
-  const qrCode = useQrCode(patient.id, QR_CODE_PATH, 85);
+  const qrCode = useQrCode(patient.id, QR_CODE_PATH);
 
   return (
     <>

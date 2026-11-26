@@ -12,6 +12,11 @@ export interface DetailsTablePrintContent {
   title: string | null;
   note: string | null;
   table_title: string | null;
-  table: { header: string[]; rows: string[][] };
+  table: {
+    header: string[];
+    rows: string[][];
+    /** Per column: a share of the free width, or `null` to fit short content. */
+    widths: (number | null)[];
+  };
   footer: { left: string; right: string };
 }

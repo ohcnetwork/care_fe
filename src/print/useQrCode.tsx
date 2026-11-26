@@ -29,7 +29,7 @@ function roundFinders(svg: SVGSVGElement) {
 }
 
 /** Typst can't draw QR codes: render `element` and pass `files` to the preview. */
-export function useQrCode(value: string, path: string, size: number) {
+export function useQrCode(value: string, path: string) {
   const ref = useRef<SVGSVGElement>(null);
   const [bytes, setBytes] = useState<Uint8Array>();
 
@@ -43,7 +43,7 @@ export function useQrCode(value: string, path: string, size: number) {
   return {
     element: (
       <div hidden>
-        <QRCodeSVG ref={ref} value={value} size={size} marginSize={0} />
+        <QRCodeSVG ref={ref} value={value} marginSize={0} />
       </div>
     ),
     files: bytes ? { [path]: bytes } : undefined,

@@ -19,13 +19,13 @@
     below: px(16),
     inset: (bottom: px(8)),
     stroke: (bottom: px(1) + border-color),
-    {
+    fit-words({
       text(size: text-size.lg, weight: "semibold", c.title)
       if c.description != none and c.description != "" {
         linebreak()
         text(fill: gray(500), c.description)
       }
-    },
+    }),
   )
 }
 
@@ -38,18 +38,18 @@
   })
   pad(left: px(16), for block-item in response.blocks {
     if block-item.type == "heading" {
-      block(above: px(14), below: px(6), width: 100%, breakable: false, {
+      block(above: px(14), below: px(6), width: 100%, breakable: false, sticky: true, {
         text(size: text-size.lg, weight: "semibold", fill: black, block-item.text)
         if block-item.rule { v(px(4)); line(length: 100%, stroke: px(1) + gray(200)) }
       })
     } else {
-      block(above: px(8), width: 100%, {
+      block(above: px(8), width: 100%, fit-words({
         text(size: text-size.base, weight: "medium", block-item.text)
         for answer in block-item.answers {
           linebreak()
           text(fill: gray(700), answer)
         }
-      })
+      }))
     }
   })
 }

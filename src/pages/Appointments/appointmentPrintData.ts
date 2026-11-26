@@ -5,6 +5,8 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
 import { formatAmount } from "@/print/formatAmount";
 import type { PrintDetailRow } from "@/print/patientDetails";
+import { labelledRichText } from "@/print/richText";
+import type { PrintLabelledRichText } from "@/print/types";
 import {
   ChargeItemStatus,
   EXCLUDED_CHARGE_ITEM_STATUSES,
@@ -57,7 +59,7 @@ export interface AppointmentPrintContent {
     }[];
     total: { label: string; value: string };
   } | null;
-  note: { label: string; text: string } | null;
+  note: PrintLabelledRichText | null;
   footer: { left: string; right: string };
 }
 
@@ -178,9 +180,7 @@ export function buildAppointmentPrintContent({
           },
         }
       : null,
-    note: appointment.note
-      ? { label: t("note"), text: appointment.note }
-      : null,
+    note: labelledRichText(t("note"), appointment.note),
     footer: {
       left: `${t("created_by")}: ${formatName(appointment.created_by)} | ${t("last_updated_by")}: ${formatName(appointment.updated_by)}`,
       right: format(new Date(), "PP 'at' p"),

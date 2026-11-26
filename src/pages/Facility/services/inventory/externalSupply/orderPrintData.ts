@@ -20,6 +20,7 @@ function buildOrderContent({
   heading,
   tableTitle,
   header,
+  widths,
   rows,
   extensionRows = [],
   t,
@@ -28,6 +29,7 @@ function buildOrderContent({
   heading: string;
   tableTitle: string;
   header: string[];
+  widths: DetailsTablePrintContent["table"]["widths"];
   rows: string[][];
   extensionRows?: PrintDetailRow[];
   t: TFunction;
@@ -56,7 +58,7 @@ function buildOrderContent({
     title: order.name ?? null,
     note: order.note || null,
     table_title: tableTitle,
-    table: { header, rows },
+    table: { header, rows, widths },
     footer: buildGeneratedFooter(t),
   };
 }
@@ -75,6 +77,7 @@ export function buildRequestOrderPrintContent({
     heading: t("request_order"),
     tableTitle: t("requested_items"),
     header: [t("product"), t("quantity"), t("status")],
+    widths: [1, null, null],
     rows: supplyRequests.map((request) => [
       request.item.name || "-",
       String(round(request.quantity)),
@@ -109,6 +112,7 @@ export function buildDeliveryOrderPrintContent({
       t("condition"),
       ...(internal ? [t("lot_batch_number"), t("expiry_date")] : []),
     ],
+    widths: [3, null, null, null, ...(internal ? [1.5, null] : [])],
     rows: supplyDeliveries.map((delivery) => {
       const inventoryProduct = delivery.supplied_inventory_item?.product;
       const productName = internal

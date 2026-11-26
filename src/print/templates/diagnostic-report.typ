@@ -19,8 +19,9 @@
 
 #let results-table(results) = {
   let n = results.header.len()
-  table(
-    columns: (1fr,) * n,
+  let columns = (1fr,) * n
+  fit-cells(columns, table(
+    columns: columns,
     inset: px(6),
     stroke: border,
     align: left + top,
@@ -38,13 +39,18 @@
         cell,
       ),
     ))).flatten(),
-  )
+  ))
 }
 
-#let labelled-text(item) = block(above: px(12), width: 100%, {
+#let labelled-text(item) = block(above: px(12), width: 100%, fit-words({
   text(weight: "medium", fill: gray(700), item.label)
   linebreak()
   item.text
+}))
+
+#let labelled-rich-text(item) = block(above: px(12), width: 100%, {
+  text(weight: "medium", fill: gray(700), item.label)
+  rich-text(item.blocks)
 })
 
 #for report in c.reports {
@@ -54,18 +60,21 @@
     width: 100%,
     inset: (top: px(16)),
     stroke: (top: px(1) + border-color),
+    sticky: true,
     text(size: text-size.lg, weight: "semibold", report.title),
   )
-  grid(
+  block(sticky: true, grid(
     columns: (1fr, 1fr),
     column-gutter: px(24),
     row-gutter: px(6),
     ..report.rows.map(row => detail-rows((row,))),
-  )
+  ))
+  // `v`, not `below:`: `below` merges with the next block's spacing (the larger
+  // wins), which would narrow this gap.
   v(px(16))
   if report.results != none { results-table(report.results) }
   if report.note != none { labelled-text(report.note) }
-  if report.conclusion != none { labelled-text(report.conclusion) }
+  if report.conclusion != none { labelled-rich-text(report.conclusion) }
 }
 
 #print-meta(left: c.footer.left, right: c.footer.right)

@@ -27,6 +27,7 @@
   "red-600": "#dc2626",
   "red-50": "#fef2f2",
   "red-700": "#b91c1c",
+  "yellow-200": "#fef08a",
   "yellow-600": "#ca8a04",
   "pink-50": "#fdf2f8",
   "pink-700": "#be185d",
@@ -63,6 +64,9 @@
 #let fonts = ("Figtree",)
 #let mono-fonts = ("Geist Mono",) + fonts
 
+// Between A5 portrait (128mm between 10mm margins) and A4 (190mm).
+#let _is-narrow(width) = width < 450pt
+
 /// An image at most `max-width` wide and `max-height` tall, keeping its aspect
 /// ratio; one limited by height is centred.
 #let bounded-image(path, max-width: none, max-height: none) = layout(size => {
@@ -76,6 +80,9 @@
     img
   }
 })
+
+/// A patient UUID (29 squares a side) scans easily at this size on any paper.
+#let qr-code(path) = image(path, width: px(80))
 
 #let labelled(label, value) = [#text(weight: "semibold", label + ":") #value]
 
@@ -119,9 +126,139 @@
   }),
 )))
 
+#let _break-after = regex("[^-,;/)\\]@]*[-,;/)\\]@]?")
+
+// A no-break space joins its words: it keeps a dose's number with its unit.
+#let _word-or-space = regex("[\\S\\x{A0}]+|[\\s--\\x{A0}]+")
+
+#let _break-word(word, width) = {
+  let lines = ()
+  let line = ""
+  for piece in word.matches(_break-after).map(m => m.text).filter(p => p != "") {
+    let units = if measure(text(piece)).width > width { piece.clusters() } else { (piece,) }
+    for unit in units {
+      if line != "" and measure(text(line + unit)).width > width {
+        lines.push(line)
+        line = unit
+      } else {
+        line += unit
+      }
+    }
+  }
+  lines.push(line)
+  lines.join(linebreak())
+}
+
+/// Breaks words wider than their cell, like CSS `overflow-wrap: anywhere`
+/// (Typst can't: typst/typst#674). Uses line breaks, not zero-width spaces,
+/// which PDF viewers drop characters next to when copying. Matches up to 100
+/// words at a time: past ~500 show-rule matches in one paragraph, Typst fails
+/// with "maximum grouping depth exceeded".
+#let fit-words(body) = layout(size => {
+  show regex("\\S+(?:\\s+\\S+){0,99}"): words => context {
+    words.text.matches(_word-or-space).map(m => {
+      let t = m.text
+      if t.trim() == "" or measure(text(t)).width <= size.width { t } else {
+        t.split("\u{a0}").map(w => {
+          if measure(text(w)).width <= size.width { w } else { _break-word(w, size.width) }
+        }).join(" ")
+      }
+    }).join()
+  }
+  body
+})
+
+// A task list's checkbox, drawn: Figtree has no ☐ or ☑.
+#let _checkbox(checked) = box(
+  width: 0.75em,
+  height: 0.75em,
+  baseline: 0.1em,
+  stroke: 0.06em + gray(700),
+  radius: 0.12em,
+  if checked {
+    let tick = 0.1em + gray(900)
+    place(line(start: (18%, 52%), end: (42%, 76%), stroke: tick))
+    place(line(start: (42%, 76%), end: (82%, 26%), stroke: tick))
+  },
+)
+
+#let _rich-run(run) = {
+  if run.kind == "break" { return linebreak() }
+  let body = if "code" in run.marks { text(font: mono-fonts, run.text) } else { text(run.text) }
+  if "bold" in run.marks { body = strong(body) }
+  if "italic" in run.marks { body = emph(body) }
+  if "underline" in run.marks { body = underline(body) }
+  if "strike" in run.marks { body = strike(body) }
+  if "highlight" in run.marks { body = highlight(fill: palette("yellow", 200), body) }
+  if run.link != none and run.link != "" {
+    body = link(run.link, if "underline" in run.marks { body } else { underline(body) })
+  }
+  body
+}
+
+#let _rich-blocks(nodes, lead: none) = {
+  let parts = ()
+  let lead-left = lead != none
+  for node in nodes {
+    let body = if node.kind == "paragraph" {
+      node.runs.map(_rich-run).join()
+    } else if node.kind == "heading" {
+      let size = (1.4em, 1.25em, 1.1em).at(node.level - 1, default: 1em)
+      text(size: size, weight: "semibold", node.runs.map(_rich-run).join())
+    } else if node.kind == "list" {
+      let item-body(item) = {
+        let body = _rich-blocks(item.blocks)
+        if item.checked == none { body } else {
+          grid(columns: (auto, 1fr), column-gutter: 0.4em, _checkbox(item.checked), body)
+        }
+      }
+      if node.items.all(item => item.checked != none) {
+        stack(spacing: px(4), ..node.items.map(item-body))
+      } else if node.ordered {
+        enum(start: node.start, ..node.items.map(item-body))
+      } else {
+        // Typst's default second-level marker (‣) isn't in Figtree.
+        list(marker: ([•], [–]), ..node.items.map(item-body))
+      }
+    } else if node.kind == "quote" {
+      block(
+        inset: (left: px(8)),
+        stroke: (left: px(2) + gray(300)),
+        text(fill: gray(600), _rich-blocks(node.blocks)),
+      )
+    } else if node.kind == "rule" {
+      line(length: 100%, stroke: px(1) + border-color)
+    }
+    if lead-left {
+      lead-left = false
+      if node.kind == "paragraph" { body = [#lead #body] } else { parts.push(lead) }
+    }
+    parts.push(body)
+  }
+  if lead-left { parts.push(lead) }
+  stack(spacing: px(6), ..parts)
+}
+
+/// `lead` (e.g. "Note:") goes before the first paragraph.
+#let rich-text(blocks, lead: none) = fit-words(_rich-blocks(blocks, lead: lead))
+
+/// Skips `auto` columns, where `fit-words` would split amounts like "6.00%".
+#let fit-cells(columns, body) = {
+  show table.cell: cell => {
+    let spanned = range(cell.x, cell.x + cell.colspan)
+    if spanned.all(x => columns.at(x) == auto) { return cell }
+    let inset = if type(cell.inset) == dictionary { cell.inset } else { (rest: cell.inset) }
+    pad(..inset, align(cell.align, fit-words(cell.body)))
+  }
+  body
+}
+
 /// A bordered table in the style of CAREUI's `Table`. `header` repeats on
 /// every page; `header-align` defaults to centre; `empty` is shown without rows;
-/// `outer` sets the outer border's sides and corner radius.
+/// `outer` sets the outer border's sides and corner radius. Put free text in
+/// `fr` columns: if the `auto` ones would take over 60% of the width, their
+/// headers wrap, then their values, down to the longest word. Rows continue on
+/// the next page: a row kept whole loses what runs past the page.
 #let data-table(
   columns: (),
   align: (),
@@ -130,12 +267,42 @@
   rows: (),
   empty: none,
   outer: (stroke: (:), radius: px(6)),
-) = {
+) = layout(size => {
   let n = columns.len()
   let header-align = if header-align == none {
     range(n).map(_ => center)
   } else { header-align }
   let line = px(1) + border-color
+  let narrow = _is-narrow(size.width)
+  let inset = if narrow { (x: px(4), y: px(6)) } else { (x: px(8), y: px(8)) }
+  let font-size = if narrow { text-size.xs } else { text.size }
+
+  let sizes = columns
+  if rows.len() > 0 and rows.all(r => r.len() == n) and columns.any(c => type(c) == fraction) {
+    let content-of(c) = if type(c) == content and c.func() == table.cell { c.body } else { c }
+    let width(c) = measure(text(size: font-size, weight: "medium", content-of(c))).width
+    let longest-word(h) = if type(h) == str { calc.max(..h.split(" ").map(width)) } else { width(h) }
+    let fit = range(n).map(i => if columns.at(i) != auto { none } else {
+      calc.max(longest-word(header.at(i)), ..rows.map(r => width(r.at(i)))) + 2 * inset.x
+    })
+    let natural = range(n).map(i => if fit.at(i) == none { 0pt } else {
+      calc.max(fit.at(i), width(header.at(i)) + 2 * inset.x)
+    })
+    let budget = 0.6 * size.width
+    if natural.sum() > budget {
+      let least = range(n).map(i => if fit.at(i) == none { none } else {
+        calc.max(longest-word(header.at(i)), ..rows.map(r => longest-word(r.at(i)))) + 2 * inset.x
+      })
+      let cols = range(n).filter(i => fit.at(i) != none)
+      let over = cols.map(i => fit.at(i)).sum() - budget
+      let slack = cols.map(i => fit.at(i) - least.at(i)).sum()
+      // Every column gives up the same share of what it can spare.
+      let cut = if over <= 0pt or slack == 0pt { 0 } else { calc.min(1, over / slack) }
+      sizes = range(n).map(i => if fit.at(i) == none { columns.at(i) } else {
+        fit.at(i) - cut * (fit.at(i) - least.at(i))
+      })
+    }
+  }
 
   let body = if rows.len() == 0 and empty != none {
     (table.cell(colspan: n, align: center, text(fill: gray(500), empty)),)
@@ -150,11 +317,10 @@
     clip: true,
     {
     set text(weight: "medium", fill: gray(950))
-    // Never split a row across pages.
-    set table.cell(breakable: false)
-    table(
-      columns: columns,
-      inset: (x: px(8), y: px(8)),
+    set text(size: font-size) if narrow
+    fit-cells(columns, table(
+      columns: sizes,
+      inset: inset,
       align: (x, y) => if y == 0 { header-align.at(x) + horizon } else {
         align.at(x) + horizon
       },
@@ -165,10 +331,10 @@
       ),
       table.header(..header),
       ..body,
-    )
+    ))
     },
   )
-}
+})
 
 /// Small print at the end of a document ("Created by", "Location", ...).
 #let print-meta(left: none, right: none) = block(above: px(8), {
@@ -199,12 +365,9 @@
     columns: (label-width, auto, 1fr),
     text(fill: gray(600), row.label),
     text(fill: gray(600), ":"),
-    pad(left: px(4), text(weight: "semibold", if (
+    pad(left: px(4), fit-words(text(weight: "semibold", if (
       row.value == none or row.value == ""
-    ) { "-" } else {
-      // A zero-width space lets long ids wrap; Typst won't break a hyphen before a digit.
-      row.value.replace("-", "-\u{200B}")
-    })),
+    ) { "-" } else { row.value }))),
   )),
 )
 
@@ -222,8 +385,9 @@
   ),
 )
 
-#let _facility-info(facility) = {
-  text(size: text-size.xxl, weight: "semibold", facility.name)
+#let _facility-info(facility, narrow) = {
+  let name-size = if narrow { text-size.xl } else { text-size.xxl }
+  text(size: name-size, weight: "semibold", facility.name)
   set text(size: text-size.xs, fill: gray(500))
   if facility.address != none { linebreak(); facility.address }
   if facility.phone != none { linebreak(); facility.phone }
@@ -250,7 +414,6 @@
   }
 
   let logo = if header.logo != none { _logo(header.logo) }
-  let info = box(_facility-info(header.facility))
   let alignment = if header.logo == none { "right" } else {
     header.logo.alignment
   }
@@ -260,21 +423,26 @@
     inset: (bottom: px(8)),
     stroke: (bottom: px(1) + border-color),
     below: px(12),
-    if alignment == "center" {
-      stack(spacing: px(8), align(center, logo), info)
-    } else if alignment == "left" {
-      grid(
-        columns: (auto, 1fr),
-        column-gutter: px(12),
-        logo, align(right, info),
-      )
-    } else {
-      grid(
-        columns: (1fr, auto),
-        column-gutter: px(12),
-        info, logo,
-      )
-    },
+    // Measured across the page: next to a wide logo, the name's own cell is
+    // narrow even on A4.
+    layout(size => {
+      let info = box(_facility-info(header.facility, _is-narrow(size.width)))
+      if alignment == "center" {
+        stack(spacing: px(8), align(center, logo), info)
+      } else if alignment == "left" {
+        grid(
+          columns: (auto, 1fr),
+          column-gutter: px(12),
+          logo, align(right, info),
+        )
+      } else {
+        grid(
+          columns: (1fr, auto),
+          column-gutter: px(12),
+          info, logo,
+        )
+      }
+    }),
   )
 }
 
