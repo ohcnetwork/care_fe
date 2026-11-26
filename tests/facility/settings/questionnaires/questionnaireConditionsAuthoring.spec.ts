@@ -92,7 +92,7 @@ test.describe("Questionnaire v2 visibility condition authoring", () => {
       await page.getByRole("button", { name: "Preview" }).click();
       await expect(
         nav.getByRole("button", { name: dependentTitle }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       await page.getByRole("spinbutton").fill("6");
       await expect(
         nav.getByRole("button", { name: dependentTitle }),
@@ -100,7 +100,7 @@ test.describe("Questionnaire v2 visibility condition authoring", () => {
       await page.getByRole("spinbutton").fill("5");
       await expect(
         nav.getByRole("button", { name: dependentTitle }),
-      ).not.toBeVisible();
+      ).toBeHidden();
     });
   });
 
@@ -168,7 +168,7 @@ test.describe("Questionnaire v2 visibility condition authoring", () => {
       await page.getByRole("button", { name: "Preview" }).click();
       await expect(
         nav.getByRole("button", { name: dependentTitle }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       // Meet only the boolean leg of the OR.
       await page.getByRole("radio", { name: "Yes", exact: true }).click();
       await expect(
@@ -199,7 +199,7 @@ test.describe("Questionnaire v2 visibility condition authoring", () => {
     await expect(page.getByText("Condition 1")).toBeVisible();
 
     await page.getByRole("button", { name: "Delete", exact: true }).click();
-    await expect(page.getByText("Condition 1")).not.toBeVisible();
+    await expect(page.getByText("Condition 1")).toBeHidden();
     await expect(
       page.getByRole("button", { name: "Add a condition" }),
     ).toBeVisible();
@@ -272,12 +272,8 @@ test.describe("Questionnaire v2 visibility condition authoring", () => {
     // ...but the renderer never records responses for group/display
     // questions — a condition targeting one can never match, so the picker
     // must not offer them.
-    await expect(
-      page.getByRole("option", { name: groupTitle }),
-    ).not.toBeVisible();
-    await expect(
-      page.getByRole("option", { name: displayTitle }),
-    ).not.toBeVisible();
+    await expect(page.getByRole("option", { name: groupTitle })).toBeHidden();
+    await expect(page.getByRole("option", { name: displayTitle })).toBeHidden();
   });
 
   test("a saved condition targeting a group is flagged and blocks the save", async ({

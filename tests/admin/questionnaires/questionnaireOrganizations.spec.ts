@@ -82,7 +82,7 @@ test.describe("Questionnaire v2 organizations field", () => {
         .click();
       await expectToast(page, "Questionnaire updated successfully");
       await page.goto(detailUrl);
-      await expect(chip).not.toBeVisible();
+      await expect(chip).toBeHidden();
       await expect(
         page.getByRole("button", { name: "Search Organizations" }),
       ).toBeVisible();
@@ -158,6 +158,7 @@ test.describe("Questionnaire v2 organizations field", () => {
       await selectDepartment(page, page, name, { multiple: true });
       await expect(cardFor(name)).toBeVisible();
     };
+
     await test.step("Persist the first selection", async () => {
       await selectOrganization(names[0]);
       await page
@@ -166,6 +167,7 @@ test.describe("Questionnaire v2 organizations field", () => {
       await expectToast(page, "Questionnaire updated successfully");
       await page.goto(detailUrl);
     });
+
     await test.step("Keep both pending selections when one was already saved", async () => {
       await selectOrganization(names[1]);
       await expect(cardFor(names[0])).toBeVisible();
@@ -173,10 +175,11 @@ test.describe("Questionnaire v2 organizations field", () => {
       await cardFor(names[0])
         .getByRole("button", { name: `Remove ${names[0]}`, exact: true })
         .click();
-      await expect(cardFor(names[0])).not.toBeVisible();
+      await expect(cardFor(names[0])).toBeHidden();
       await selectOrganization(names[0]);
       await expect(cardFor(names[1])).toBeVisible();
     });
+
     await test.step("Save the complete selection once and reload", async () => {
       let releaseSave = () => {};
       const saveGate = new Promise<void>((resolve) => {

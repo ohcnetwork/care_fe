@@ -21,6 +21,11 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
   async function openDepartment(page: Page, departmentName: string) {
     await searchDepartment(page, departmentName);
     await page.getByRole("row").filter({ hasText: departmentName }).click();
+    // The department list and the opened department both render an
+    // "Add Department/Team" button; only the opened one carries the parent.
+    await expect(
+      page.getByRole("heading", { name: departmentName, exact: true }),
+    ).toBeVisible();
   }
 
   test("Backend should reject creating sub-department under Administration department", async ({
@@ -28,7 +33,6 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
   }) => {
     // Navigate to Administration department
     await openDepartment(page, "Administration");
-    await page.waitForLoadState("networkidle");
 
     // Click Add Department/Team button
     await page.getByRole("button", { name: "Add Department/Team" }).click();
@@ -55,7 +59,6 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
   }) => {
     // Navigate to Administration department
     await openDepartment(page, "Administration");
-    await page.waitForLoadState("networkidle");
 
     // Click Add Department/Team button
     await page.getByRole("button", { name: "Add Department/Team" }).click();

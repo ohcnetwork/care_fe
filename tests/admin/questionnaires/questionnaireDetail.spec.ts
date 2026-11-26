@@ -98,6 +98,7 @@ test.describe("Questionnaire v2 detail", () => {
         });
       } else await route.continue();
     });
+
     await test.step("The failed metadata save keeps the draft", async () => {
       await page
         .getByRole("button", { name: /Save (Questionnaire|Form)/ })
@@ -107,6 +108,7 @@ test.describe("Questionnaire v2 detail", () => {
         page.getByRole("button", { name: /Save (Questionnaire|Form)/ }),
       ).toBeEnabled();
     });
+
     await test.step("Reordering does not mark that metadata as saved", async () => {
       await page.getByRole("button", { name: "More options" }).first().click();
       await page.getByRole("menuitem", { name: "Move Down" }).click();

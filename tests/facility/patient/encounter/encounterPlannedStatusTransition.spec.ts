@@ -248,7 +248,7 @@ test.describe("Planned Encounter Status Transition", () => {
         await page
           .getByRole("button", { name: "Discard", exact: true })
           .click();
-        await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+        await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
         await expect(encounterStatusCombobox(page)).toContainText("Planned");
         await cancelEncounterFromCurrentForm(page);
       });

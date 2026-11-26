@@ -482,7 +482,7 @@ Name files as: `featureName.spec.ts` or `featureAction.spec.ts` (e.g., `location
 4. **Not awaiting helpers** — All helper functions are async, must use `await`
 5. **Forgetting `test.use({ storageState })`** — Tests will fail with auth errors
 6. **Not using `test.step()`** — Makes test reports hard to read
-7. **Using custom timeouts** — Avoid hardcoded `{ timeout: 15000 }`. Instead use `page.waitForLoadState("networkidle")` or visibility checks (`expect(locator).toBeVisible()`) to wait for page readiness. Rely on global timeouts from `playwright.config.ts`.
+7. **Using custom timeouts or blanket waits** — Avoid hardcoded `{ timeout: 15000 }`, `page.waitForTimeout()` and `page.waitForLoadState("networkidle")`; the last two fail lint. Wait for what the next step needs instead: the element (`await expect(locator).toBeVisible()`) or the API response (register `page.waitForResponse(...)` before the action, await it after). Rely on global timeouts from `playwright.config.ts`.
 8. **Non-camelCase directory names** — Use camelCase for test directories (e.g., `enableWhen/`, `patientDetails/`), not kebab-case or snake_case.
 
 ## Available Constants

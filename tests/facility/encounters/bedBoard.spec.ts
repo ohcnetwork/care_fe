@@ -550,7 +550,7 @@ test.describe("Bed board", () => {
       board(page).getByText("No beds match your search or filter."),
     ).toBeVisible();
     // Filtering works on what is loaded: no new requests.
-    expect(childRequests.length).toBe(requestsBefore);
+    expect(childRequests).toHaveLength(requestsBefore);
   });
 
   test("lists rooms with beds as sections and deeper areas as links", async ({

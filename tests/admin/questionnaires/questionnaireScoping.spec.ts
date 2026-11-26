@@ -68,7 +68,7 @@ test.describe("Questionnaire v2 per-mount scoping", () => {
       await expect(group.getByRole("radio")).toHaveCount(5);
       await expect(
         group.getByRole("radio", { name: "Patient", exact: true }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       for (const label of [
         "Encounter",
         "Referral",

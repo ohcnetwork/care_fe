@@ -391,7 +391,7 @@ test.describe("Fill page multi-questionnaire sessions", () => {
 
     // Discard means "drop that old draft", not "wipe what I just typed".
     await page.getByRole("button", { name: "Discard", exact: true }).click();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
     await expect(addedAnswer).toHaveValue(noteB);
     // The drafted (primary) form IS reset — that is what Discard promises.
     await expect(

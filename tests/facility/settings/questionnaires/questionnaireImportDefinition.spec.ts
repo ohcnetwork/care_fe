@@ -50,6 +50,7 @@ test("full questionnaire import lets authors choose a new slug before creating a
       }),
     ),
   });
+
   await test.step("Review and correct the slug without submitting", async () => {
     await expect(dialog.getByRole("textbox", { name: "Slug" })).toHaveValue(
       "original-export-slug",
@@ -67,6 +68,7 @@ test("full questionnaire import lets authors choose a new slug before creating a
     expect(posts).toHaveLength(0);
     await dialog.getByRole("textbox", { name: "Slug" }).fill(slug);
   });
+
   await test.step("Create the imported draft with the chosen identity and current scope", async () => {
     await dialog.getByRole("button", { name: "Import", exact: true }).click();
     await expectToast(page, "Questionnaire Imported Successfully");

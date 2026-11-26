@@ -27,7 +27,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       .uncheck();
     await requestPicker.getByRole("checkbox", { name: /Paracetamol/ }).check();
     await requestPicker.getByRole("button", { name: /^Done\b/ }).click();
-    await expect(requestPicker).not.toBeVisible();
+    await expect(requestPicker).toBeHidden();
     const form = page.getByRole("form", {
       name: "Pending changes",
       exact: true,
@@ -44,7 +44,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       .check();
     await page.keyboard.press("Escape");
     await form.getByRole("button", { name: /^Save Changes\b/ }).click();
-    await expect(form).not.toBeVisible();
+    await expect(form).toBeHidden();
   }
 
   async function createStockRequest(page: Page, orderNameParam?: string) {

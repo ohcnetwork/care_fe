@@ -83,10 +83,10 @@ function Fixture() {
       ) : (
         panel
       )}
-      <button type="button" className="fixed end-2 top-2" data-testid="outside">
+      <button type="button" className="fixed end-2 top-2">
         Outside
       </button>
-      <output data-testid="applied">
+      <output aria-label="Applied range">
         {JSON.stringify({
           from: range.from && format(range.from, "yyyy-MM-dd"),
           to: range.to && format(range.to, "yyyy-MM-dd"),

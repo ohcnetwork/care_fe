@@ -158,7 +158,7 @@ test.describe("Payment change account", () => {
     await expect(selectAll).toHaveAttribute("aria-checked", "mixed");
 
     await page.getByRole("button", { name: "Clear Selection" }).click();
-    await expect(page.getByText(/items selected/)).not.toBeVisible();
+    await expect(page.getByText(/items selected/)).toBeHidden();
   });
 
   test("moves a selected payment to another active account", async ({
@@ -207,7 +207,7 @@ test.describe("Payment change account", () => {
     await submit.click();
     expect((await changeAccount).status()).toBe(201);
     await expectToast(page, "Payments moved to new account successfully");
-    await expect(sheet).not.toBeVisible();
+    await expect(sheet).toBeHidden();
 
     await test.step("Payment leaves the source account", async () => {
       await expect(paymentRow(page, AMOUNTS.active)).toHaveCount(0);

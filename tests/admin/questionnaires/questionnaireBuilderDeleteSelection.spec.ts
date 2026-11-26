@@ -50,9 +50,7 @@ test.describe("Questionnaire v2 builder — selection after delete", () => {
     await test.step("Deleting it selects the 9th question, not the first", async () => {
       await page.getByRole("button", { name: "More options" }).click();
       await page.getByRole("menuitem", { name: "Delete question" }).click();
-      await expect(
-        nav.getByRole("button", { name: titles[9] }),
-      ).not.toBeVisible();
+      await expect(nav.getByRole("button", { name: titles[9] })).toBeHidden();
 
       // Regression: the reducer's removeQuestions fell back to
       // `questions[0]` on any deletion of the selected question, jumping

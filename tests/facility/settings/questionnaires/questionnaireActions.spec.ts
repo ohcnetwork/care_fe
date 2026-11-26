@@ -43,7 +43,9 @@ async function dismissToasts(page: Page): Promise<void> {
     const count = await closeButtons.count();
     if (count === 0) return;
     await closeButtons.first().click();
-    await page.waitForTimeout(300);
+    // Sonner keeps a dismissed toast mounted through its exit animation;
+    // wait until it unmounts so the next pass does not click it again.
+    await expect.poll(() => closeButtons.count()).toBeLessThan(count);
   }
 }
 

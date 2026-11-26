@@ -174,7 +174,7 @@ test.describe("Charge item change account", () => {
 
     await test.step("Clear selection hides the bulk bar", async () => {
       await page.getByRole("button", { name: "Clear Selection" }).click();
-      await expect(page.getByText(/items selected/)).not.toBeVisible();
+      await expect(page.getByText(/items selected/)).toBeHidden();
       await expect(selectAll).not.toBeChecked();
     });
   });
@@ -226,7 +226,7 @@ test.describe("Charge item change account", () => {
     await submit.click();
     expect((await changeAccount).status()).toBe(201);
     await expectToast(page, "Charge items moved to new account successfully");
-    await expect(sheet).not.toBeVisible();
+    await expect(sheet).toBeHidden();
 
     await test.step("Item leaves the source account", async () => {
       await expect(chargeItemRow(page, seed.billable[0])).toHaveCount(0);
