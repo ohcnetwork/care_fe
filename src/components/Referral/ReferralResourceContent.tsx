@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { formatDateTime } from "@/Utils/utils";
 import { DiagnosisCard } from "@/components/Patient/diagnosis/DiagnosisTable";
 import { Badge } from "@/components/ui/badge";
+import { formatSchedulingDateTime } from "@/pages/Appointments/schedulingTimeZone";
 import { DiagnosticReportSummary } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportSummary";
 import { SpecimenDetails } from "@/pages/Facility/services/serviceRequests/components/SpecimenDetails";
 import { Code } from "@/types/base/code/code";
@@ -83,6 +84,8 @@ export function ReferralResourceContent({
   const status = (value?: string | null) =>
     value ? t(value, { defaultValue: value.replaceAll("_", " ") }) : "";
   const date = (value?: string | null) => (value ? formatDateTime(value) : "");
+  const slotTime = (value: string) =>
+    formatSchedulingDateTime(value, "hh:mm a; dd/MM/yyyy");
   let extra: ReactNode;
   switch (data.resource_type) {
     case "file_upload":
@@ -111,9 +114,12 @@ export function ReferralResourceContent({
       add("status", status(booking.status));
       add(
         "referral_appointment_start",
-        date(booking.token_slot.start_datetime),
+        slotTime(booking.token_slot.start_datetime),
       );
-      add("referral_appointment_end", date(booking.token_slot.end_datetime));
+      add(
+        "referral_appointment_end",
+        slotTime(booking.token_slot.end_datetime),
+      );
       add("note", booking.note);
       break;
     }

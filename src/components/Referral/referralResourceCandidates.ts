@@ -3,6 +3,7 @@ import { t } from "i18next";
 import { callApi } from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime } from "@/Utils/utils";
+import { formatSchedulingDateTime } from "@/pages/Appointments/schedulingTimeZone";
 import consentApi from "@/types/consent/consentApi";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
@@ -221,7 +222,7 @@ export async function loadReferralCandidates({
           title:
             item.token_slot.availability.schedule.name ||
             item.token_slot.availability.name,
-          detail: `${formatDateTime(item.token_slot.start_datetime)} · ${t(item.status)}`,
+          detail: `${formatSchedulingDateTime(item.token_slot.start_datetime, "hh:mm a; dd/MM/yyyy")} · ${t(item.status)}`,
           metadata: {
             facility_id: item.facility.id,
             facility_name: item.facility.name,
