@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
+import {
+  addTopLevelQuestion,
+  createQuestionnaireAndOpenBuilder,
+} from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -127,5 +130,62 @@ test.describe("Questionnaire v2 save race with concurrent edits", () => {
       await page.reload();
       await expect(titleInput).toHaveValue(midFlightTitle);
     });
+  });
+});
+
+test.describe("Questionnaire v2 validation errors name the right question", () => {
+  test("a choice question without options is blocked before it reaches the server", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+
+    await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title: `QV2 Choice Guard ${Date.now()}`,
+    });
+    await addTopLevelQuestion(page, faker.lorem.words(3));
+    await page.getByRole("combobox").first().click();
+    await page.getByRole("option", { name: "Choice" }).click();
+
+    await page.getByRole("button", { name: "Save Changes" }).click();
+    await expectToast(
+      page,
+      "Choice questions need answer options — add options or pick a value set",
+    );
+  });
+
+  test("a server validation error names the question as the author counts it", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+
+    await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title: `QV2 Save 400 ${Date.now()}`,
+    });
+    await addTopLevelQuestion(page, faker.lorem.words(3));
+
+    await page.route("**/api/v1/questionnaire/*/", (route) => {
+      if (route.request().method() === "PUT") {
+        return route.fulfill({
+          status: 400,
+          contentType: "application/json",
+          body: JSON.stringify({
+            errors: [
+              {
+                type: "value_error",
+                loc: ["questions", 0],
+                msg: "Value error, rejected by the server",
+              },
+            ],
+          }),
+        });
+      }
+      return route.fallback();
+    });
+    await page.getByRole("button", { name: "Save Changes" }).click();
+
+    await expectToast(page, "Value error, rejected by the server");
+    await expectToast(page, "Value Error: 'questions.1'");
   });
 });

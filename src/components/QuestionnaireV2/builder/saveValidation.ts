@@ -63,6 +63,13 @@ const SAVE_CHECKS: SaveCheck[] = [
     messageKey: "quantity_needs_valueset",
   },
   {
+    predicate: (question) =>
+      question.type === "choice" &&
+      !question.answer_value_set &&
+      (question.answer_option?.length ?? 0) === 0,
+    messageKey: "choice_needs_options",
+  },
+  {
     // Core resource editors use structured questions; plugins use groups.
     predicate: (question) =>
       question.type === "structured" &&
