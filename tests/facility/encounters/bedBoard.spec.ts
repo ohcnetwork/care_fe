@@ -643,6 +643,31 @@ test.describe("Bed board", () => {
     ).toBeVisible();
   });
 
+  test("the sidebar leaves the location search for the encounter list and back", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto(basePath);
+    await expect(page).toHaveURL(`${basePath}/${ward.id}`);
+    const navigation = page.locator('[data-sidebar="sidebar"]');
+
+    await navigation
+      .getByRole("link", { name: "All Encounters", exact: true })
+      .click();
+    // The board must not send the user back to the location it just left.
+    await expect(page).toHaveURL(
+      new RegExp(`/facility/${facilityId}/encounters/patients/all(\\?|$)`),
+    );
+    await expect(board(page)).toHaveCount(0);
+
+    await navigation
+      .getByRole("link", { name: "Search by Location", exact: true })
+      .click();
+    // No filter of the encounter list is left on the location URL.
+    await expect(page).toHaveURL(`${basePath}/${ward.id}`);
+    await expect(board(page)).toBeVisible();
+  });
+
   test("long names do not overflow a narrow screen", async ({ page }) => {
     const longName = faker.string.alpha(90);
     children.get(ward.id)!.push(
