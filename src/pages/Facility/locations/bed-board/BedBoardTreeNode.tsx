@@ -1,23 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
-import { Bed, ChevronDown, ChevronRight } from "lucide-react";
+import { Bed, ChevronDown } from "lucide-react";
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 
 import { locationChildrenQuery } from "./locationQueries";
-import { useLocationsWithBeds } from "./useLocationsWithBeds";
 
 interface BedBoardTreeNodeProps {
   facilityId: string;
   location: LocationRead;
-  level: number;
   selectedLocationId?: string;
+  /** Keeps the sub-locations that lead to a bed. */
+  filterWithBeds: (locations: LocationRead[] | undefined) => LocationRead[];
+  hasBedsBelow: (location: LocationRead) => boolean;
   isExpanded: (locationId: string) => boolean;
   onToggle: (locationId: string, expanded: boolean) => void;
   onSelect: (location: LocationRead) => void;
@@ -26,69 +28,47 @@ interface BedBoardTreeNodeProps {
 export function BedBoardTreeNode({
   facilityId,
   location,
-  level,
   selectedLocationId,
+  filterWithBeds,
+  hasBedsBelow,
   isExpanded,
   onToggle,
   onSelect,
 }: BedBoardTreeNodeProps) {
   const { t } = useTranslation();
+  const childrenId = useId();
   const Icon = LocationTypeIcons[location.form];
   const isSelected = location.id === selectedLocationId;
-  // The flag says whether there is anything to expand, so a leaf has no arrow.
-  const expanded = location.has_sub_locations && isExpanded(location.id);
 
-  const { data: subLocations, isLoading: isLoadingSubLocations } = useQuery({
+  // A location with no bed anywhere below it has no arrow, so the arrow never
+  // opens onto nothing.
+  const canExpand = location.has_sub_locations && hasBedsBelow(location);
+  const expanded = canExpand && isExpanded(location.id);
+
+  const { data: subLocations, isLoading: isLoadingChildren } = useQuery({
     ...locationChildrenQuery(facilityId, location.id, "kind"),
     enabled: expanded,
   });
   // Only sub-locations that lead to beds belong on a bed board.
-  const { locations: children, isLoading: isCheckingBeds } =
-    useLocationsWithBeds(facilityId, subLocations?.results);
-  const isLoading = isLoadingSubLocations || isCheckingBeds;
-  // Once they are known, a location whose sub-locations hold no beds has
-  // nothing to expand either.
-  const canExpand =
-    location.has_sub_locations &&
-    !(subLocations && !isCheckingBeds && children.length === 0);
+  const children = filterWithBeds(subLocations?.results);
+
+  const showChildren = expanded && children.length > 0;
 
   return (
     <li>
       <div
         className={cn(
-          "flex items-center rounded-md",
+          "flex min-h-11 min-w-0 items-center gap-2 rounded-md px-2 text-sm",
           isSelected
             ? "bg-primary/10 font-medium text-primary"
             : "hover:bg-muted",
         )}
-        style={{ paddingLeft: `${level * 1.25}rem` }}
       >
-        {canExpand ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7 shrink-0"
-            aria-expanded={expanded}
-            aria-label={`${t(expanded ? "collapse" : "expand")} ${location.name}`}
-            onClick={() => onToggle(location.id, !expanded)}
-          >
-            {expanded ? (
-              <ChevronDown aria-hidden="true" />
-            ) : (
-              <ChevronRight aria-hidden="true" />
-            )}
-          </Button>
-        ) : (
-          <span className="size-7 shrink-0" />
-        )}
         <button
           type="button"
           aria-current={isSelected ? "true" : undefined}
-          className="flex min-h-9 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md py-1.5 pr-2 text-left text-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-          onClick={() => {
-            onSelect(location);
-            if (canExpand) onToggle(location.id, true);
-          }}
+          className="flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md py-2 text-left outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          onClick={() => onSelect(location)}
         >
           <Icon
             className={cn(
@@ -97,49 +77,77 @@ export function BedBoardTreeNode({
             )}
             aria-hidden="true"
           />
-          <span className="truncate">{location.name}</span>
+          <span className="min-w-0 leading-tight wrap-anywhere">
+            {location.name}
+          </span>
           {location.status !== "active" && (
             <Badge variant="secondary" size="xs">
               {t("inactive")}
             </Badge>
           )}
-          {location.has_beds && (
+          {canExpand && location.has_beds && (
             <Bed
-              className="ml-auto size-3.5 shrink-0 text-muted-foreground"
+              className="ml-auto size-3.5 shrink-0 text-blue-600"
               role="img"
               aria-label={t("has_beds")}
             />
           )}
         </button>
-      </div>
-      {expanded &&
-        canExpand &&
-        (isLoading ? (
-          <div
-            role="status"
-            className="space-y-1 py-1"
-            style={{ paddingLeft: `${(level + 1) * 1.25 + 1.75}rem` }}
+        {canExpand ? (
+          <Button
+            type="button"
+            variant="tertiary"
+            size="icon"
+            className="size-9 shrink-0"
+            aria-expanded={expanded}
+            aria-busy={(expanded && isLoadingChildren) || undefined}
+            aria-controls={showChildren ? childrenId : undefined}
+            aria-label={`${t(expanded ? "collapse" : "expand")} ${location.name}`}
+            onClick={() => onToggle(location.id, !expanded)}
           >
-            <span className="sr-only">{t("loading")}</span>
-            <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-6 w-24" />
-          </div>
-        ) : (
-          <ul>
-            {children.map((child) => (
-              <BedBoardTreeNode
-                key={child.id}
-                facilityId={facilityId}
-                location={child}
-                level={level + 1}
-                selectedLocationId={selectedLocationId}
-                isExpanded={isExpanded}
-                onToggle={onToggle}
-                onSelect={onSelect}
+            {expanded && isLoadingChildren ? (
+              <Spinner />
+            ) : (
+              <ChevronDown
+                aria-hidden="true"
+                className={cn(
+                  "transition-transform motion-reduce:transition-none",
+                  expanded && "rotate-180",
+                )}
               />
-            ))}
-          </ul>
-        ))}
+            )}
+          </Button>
+        ) : (
+          // Takes the place of the expand button, so the bed icon lines up
+          // with the arrows of the rows above and below.
+          <span className="flex size-9 shrink-0 items-center justify-center">
+            {location.has_beds && (
+              <Bed
+                className="size-3.5 text-blue-600"
+                role="img"
+                aria-label={t("has_beds")}
+              />
+            )}
+          </span>
+        )}
+      </div>
+      {showChildren && (
+        <ul id={childrenId} className="ms-2.5 min-w-0">
+          {children.map((child) => (
+            <BedBoardTreeNode
+              key={child.id}
+              facilityId={facilityId}
+              location={child}
+              selectedLocationId={selectedLocationId}
+              filterWithBeds={filterWithBeds}
+              hasBedsBelow={hasBedsBelow}
+              isExpanded={isExpanded}
+              onToggle={onToggle}
+              onSelect={onSelect}
+            />
+          ))}
+        </ul>
+      )}
     </li>
   );
 }

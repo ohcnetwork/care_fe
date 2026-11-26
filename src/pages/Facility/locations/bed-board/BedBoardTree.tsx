@@ -5,6 +5,8 @@ import { LocationRead } from "@/types/location/location";
 import { buildLocationPath } from "@/types/location/utils";
 
 import { BedBoardTreeNode } from "./BedBoardTreeNode";
+import { BedBoardTreeSkeleton } from "./BedBoardTreeSkeleton";
+import { useBedLocations } from "./useLocationsWithBeds";
 
 interface BedBoardTreeProps {
   facilityId: string;
@@ -23,25 +25,42 @@ export function BedBoardTree({
   onSelect,
 }: BedBoardTreeProps) {
   const { t } = useTranslation();
-  // The path to the open location is expanded by default. `toggled` holds
-  // only what the user expanded or collapsed by hand.
-  const [toggled, setToggled] = useState<ReadonlyMap<string, boolean>>(
+  // `expanded` holds what is open. Opening a location adds the path to it and
+  // never closes anything: the rest of the tree stays as the user left it.
+  const [expanded, setExpanded] = useState<ReadonlyMap<string, boolean>>(
     new Map(),
   );
-  const pathIds = selectedLocation
-    ? buildLocationPath(selectedLocation).map((location) => location.id)
-    : [];
+  // Read once here: each node asks it what to show below itself.
+  const { filterWithBeds, hasBedsBelow, isLoading } =
+    useBedLocations(facilityId);
+  const [shownLocationId, setShownLocationId] = useState<string>();
 
-  // When another location opens, show the path to it again even if a part of
-  // it was collapsed by hand.
-  const [shownLocationId, setShownLocationId] = useState(selectedLocation?.id);
-  if (shownLocationId !== selectedLocation?.id) {
-    setShownLocationId(selectedLocation?.id);
-    setToggled(
-      (previous) =>
-        new Map([...previous].filter(([id]) => !pathIds.includes(id))),
-    );
+  // Opens the parents of the location, not the location itself: only its
+  // arrow expands it.
+  const expandPath = (location: LocationRead) =>
+    setExpanded((previous) => {
+      const next = new Map(previous);
+      buildLocationPath(location)
+        .slice(0, -1)
+        .forEach((step) => next.set(step.id, true));
+      return next;
+    });
+
+  // The location can also open from the board (a room, a breadcrumb link), or
+  // from a link to it.
+  if (selectedLocation && shownLocationId !== selectedLocation.id) {
+    setShownLocationId(selectedLocation.id);
+    expandPath(selectedLocation);
   }
+
+  const select = (location: LocationRead) => {
+    setShownLocationId(location.id);
+    expandPath(location);
+    onSelect(location);
+  };
+
+  // Until the list is read no row knows whether it has an arrow.
+  if (isLoading) return <BedBoardTreeSkeleton />;
 
   return (
     <nav aria-label={t("locations")}>
@@ -51,13 +70,14 @@ export function BedBoardTree({
             key={root.id}
             facilityId={facilityId}
             location={root}
-            level={0}
             selectedLocationId={selectedLocationId}
-            isExpanded={(id) => toggled.get(id) ?? pathIds.includes(id)}
-            onToggle={(id, expanded) =>
-              setToggled((previous) => new Map(previous).set(id, expanded))
+            filterWithBeds={filterWithBeds}
+            hasBedsBelow={hasBedsBelow}
+            isExpanded={(id) => expanded.get(id) ?? false}
+            onToggle={(id, isOpen) =>
+              setExpanded((previous) => new Map(previous).set(id, isOpen))
             }
-            onSelect={onSelect}
+            onSelect={select}
           />
         ))}
       </ul>
