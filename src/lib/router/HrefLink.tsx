@@ -14,6 +14,8 @@ export interface HrefLinkProps extends ComponentPropsWithoutRef<"a"> {
    * in a new tab, still open `href`.
    */
   back?: boolean | (() => void);
+  /** Set `false` to keep the scroll position, such as for tab links. */
+  resetScroll?: boolean;
 }
 
 function isPlainLeftClick(
@@ -40,7 +42,10 @@ function isPlainLeftClick(
  * active state.
  */
 export const HrefLink = forwardRef<HTMLAnchorElement, HrefLinkProps>(
-  function HrefLink({ href, replace, back, onClick, ...props }, ref) {
+  function HrefLink(
+    { href, replace, back, resetScroll, onClick, ...props },
+    ref,
+  ) {
     return (
       <a
         {...props}
@@ -57,7 +62,12 @@ export const HrefLink = forwardRef<HTMLAnchorElement, HrefLinkProps>(
             event.preventDefault();
             if (typeof back === "function") back();
             else if (back) goBack(event.currentTarget.href);
-            else navigate({ href: event.currentTarget.href, replace });
+            else
+              navigate({
+                href: event.currentTarget.href,
+                replace,
+                resetScroll,
+              });
           }
         }}
       />

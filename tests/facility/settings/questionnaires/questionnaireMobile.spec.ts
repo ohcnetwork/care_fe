@@ -23,7 +23,7 @@ test.describe("Questionnaire v2 mobile layout", () => {
       name: "E2E Kitchen Sink (Facility)",
     });
     await expect(card).toBeVisible();
-    await expect(page.locator("table")).not.toBeVisible();
+    await expect(page.locator("table")).toBeHidden();
 
     await card.click();
     await page.waitForURL(/\/settings\/questionnaires\/[0-9a-f-]+$/);
@@ -42,7 +42,7 @@ test.describe("Questionnaire v2 mobile layout", () => {
     );
 
     await test.step("The desktop tree nav is hidden, the Select shows", async () => {
-      await expect(page.getByRole("navigation")).not.toBeVisible();
+      await expect(page.getByRole("navigation")).toBeHidden();
       await expect(
         page.getByRole("combobox").filter({ hasText: "Primary symptom" }),
       ).toBeVisible();

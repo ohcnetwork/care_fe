@@ -181,7 +181,7 @@ test.describe("Department/Team Creation", () => {
 
     await expect(
       page.getByRole("row").filter({ hasText: departmentName }),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   test("Verify cancel button discards department creation", async ({
@@ -202,6 +202,6 @@ test.describe("Department/Team Creation", () => {
 
     await expect(
       page.getByRole("row").filter({ hasText: departmentName }),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 });

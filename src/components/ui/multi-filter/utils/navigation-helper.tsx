@@ -15,11 +15,15 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 export interface NavigationHelperProps {
   isActiveFilter?: boolean;
   hideRightArrow?: boolean;
+  enterToSelect?: boolean;
+  canGoBack?: boolean;
 }
 
 export default function NavigationHelper({
   isActiveFilter,
   hideRightArrow,
+  enterToSelect,
+  canGoBack,
 }: NavigationHelperProps) {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ sm: false, default: true });
@@ -32,7 +36,7 @@ export default function NavigationHelper({
       <div className="flex items-center justify-between gap-2 p-2 text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <KbdGroup>
-            {isActiveFilter && (
+            {isActiveFilter && (!enterToSelect || canGoBack) && (
               <Kbd>
                 <ArrowLeft aria-hidden="true" />
               </Kbd>
@@ -53,7 +57,7 @@ export default function NavigationHelper({
         </div>
         <div className="flex items-center gap-1.5">
           <Kbd>
-            {isActiveFilter ? (
+            {isActiveFilter && !enterToSelect ? (
               <Space aria-hidden="true" />
             ) : (
               <CornerDownLeft aria-hidden="true" />

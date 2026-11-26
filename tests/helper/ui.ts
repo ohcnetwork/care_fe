@@ -64,8 +64,11 @@ export async function selectComboboxOption(
 ): Promise<void> {
   await trigger.click();
   await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  await expect(
+    trigger,
+    "combobox trigger has no aria-controls",
+  ).toHaveAttribute("aria-controls", /.+/);
   const popupId = await trigger.getAttribute("aria-controls");
-  expect(popupId, "combobox trigger has no aria-controls").toBeTruthy();
   const popup = trigger.page().locator(`[id="${popupId}"]`);
   const options =
     name === undefined
@@ -91,6 +94,20 @@ export async function closeAnyOpenPopovers(page: Page) {
       .waitFor({ state: "hidden" })
       .catch(() => {});
   }
+}
+
+/**
+ * Waits for the request a debounced picker search sends, matched by the
+ * search term in its query string. Pickers name that parameter differently
+ * (`title`, `name`, `search_text`), so any parameter may carry it. Start it
+ * before typing; the debounce delays the request, so nothing is missed.
+ */
+function waitForSearchResponse(page: Page, search: string) {
+  return page.waitForResponse(
+    (response) =>
+      response.request().method() === "GET" &&
+      [...new URL(response.url()).searchParams.values()].includes(search),
+  );
 }
 
 interface SelectFromRequirementsOptions {
@@ -138,8 +155,9 @@ export async function selectFromRequirements(
     const input = scope.locator('[data-slot="command-input"]').first();
     if (await input.isVisible().catch(() => false)) {
       await input.fill("");
+      const searchResponse = waitForSearchResponse(page, search);
       await input.fill(search);
-      await page.waitForTimeout(500); // Wait for debounced search
+      await searchResponse;
     }
   }
 
@@ -156,18 +174,44 @@ export async function selectFromRequirements(
   const targetOption = options.nth(itemIndex);
   const plusButton = targetOption.locator("button:has(svg.lucide-plus)");
 
+  // The picker stays open (multi-select) and lists each pick as a chip
+  // with an X remove button at its top, so one more chip means it landed.
+  const removeChipButtons = scope.locator("button:has(svg.lucide-x)");
+  const chipsBefore = await removeChipButtons.count();
+
   // Wait for the plus button and click it
   await plusButton.waitFor({ state: "visible" });
   await plusButton.click();
-
-  // Wait for selection to register (multi-select, so it stays open)
-  await page.waitForTimeout(300);
+  await expect(removeChipButtons).toHaveCount(chipsBefore + 1);
 }
 
 interface SelectFromValueSetOptions {
   search?: string;
   itemIndex?: number;
   tab?: "search" | "starred";
+}
+
+/**
+ * One column of a ValueSetSearchContent picker: search results or starred.
+ *
+ * Scope option queries to a column. Both columns render role=option, and
+ * the starred column stays mounted while a search is in flight, so an
+ * unscoped query can resolve against a starred entry instead of a search
+ * result. Each column's list is a cmdk group (role=group) and only the
+ * starred one carries the "Starred" label. The search input's wrappers are
+ * role=group too, so only groups inside the listbox count. While a search
+ * is in flight the results column shows a spinner instead of its group, so
+ * the search locator matches nothing until the results arrive.
+ */
+export function valueSetColumn(
+  scope: Locator,
+  column: "search" | "starred",
+): Locator {
+  const starredLabel = scope.page().getByText("Starred", { exact: true });
+  const groups = scope.getByRole("listbox").getByRole("group");
+  return column === "starred"
+    ? groups.filter({ has: starredLabel })
+    : groups.filter({ hasNot: starredLabel });
 }
 
 /**
@@ -211,7 +255,7 @@ export async function selectFromValueSet(
     const starredTab = scope.getByRole("tab", { name: /starred/i });
     if (await starredTab.isVisible().catch(() => false)) {
       await starredTab.click();
-      await page.waitForTimeout(200);
+      await expect(starredTab).toHaveAttribute("aria-selected", "true");
     }
   }
 
@@ -230,13 +274,7 @@ export async function selectFromValueSet(
     }
   }
 
-  // Scope to the requested column. Both columns render role=option, and the
-  // starred column stays mounted while a search is in flight, so an unscoped
-  // query can resolve against a starred entry instead of a search result.
-  const column = scope.getByTestId(
-    tab === "starred" ? "valueset-starred" : "valueset-search-results",
-  );
-  const options = column.getByRole("option");
+  const options = valueSetColumn(scope, tab).getByRole("option");
   await options.first().waitFor({ state: "visible" });
 
   const count = await options.count();
@@ -266,6 +304,8 @@ interface SelectFromCommandOptions {
  * - Uses CommandInput with data-slot="command-input" for search
  * - Options are directly clickable CommandItems
  * - Works with both Popover (desktop) and Drawer (mobile)
+ * - `search` must send a GET request carrying the term (a debounced
+ *   server-side search, as both of the selectors above do)
  *
  * @example
  * await selectFromCommand(page, trigger, {
@@ -302,16 +342,17 @@ export async function selectFromCommand(
 
     if (isInputVisible) {
       await input.fill("");
+      const searchResponse = waitForSearchResponse(page, search);
       await input.fill(search);
-      // Wait for search results to update
-      await page.waitForTimeout(500);
+      await searchResponse;
     } else {
       // Fallback for custom inputs
       const placeholderInput = scope.getByPlaceholder(/search/i).first();
       if (await placeholderInput.isVisible().catch(() => false)) {
         await placeholderInput.fill("");
+        const searchResponse = waitForSearchResponse(page, search);
         await placeholderInput.fill(search);
-        await page.waitForTimeout(500);
+        await searchResponse;
       }
     }
   }
@@ -565,7 +606,17 @@ export async function applyTableFilter(
   await page.locator('[data-slot="table-body"]').waitFor({ state: "visible" });
 
   await selectFromFilterSelect(page, filterLabel, filterValue);
-  await page.waitForLoadState("networkidle");
+  // The trigger reads its value from the page URL, as the list query does,
+  // so the render that shows the picked value also swaps the old rows for
+  // the new filter's query: a loading skeleton (no table body) until its
+  // results arrive. Once the trigger shows it, the table body waited for
+  // below can only hold the filtered rows.
+  const filterTrigger = page
+    .locator('[data-slot="filter-select"]')
+    .getByRole("button")
+    .filter({ hasText: filterLabel })
+    .first();
+  await expect(filterTrigger).toContainText(new RegExp(filterValue, "i"));
 
   const tableBody = page.locator('[data-slot="table-body"]');
   await tableBody.waitFor({ state: "visible" });

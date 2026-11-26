@@ -10,15 +10,31 @@ const FILL_DRAFT_KEY_PREFIX = "care_qn_fill_draft--";
 export const AUTOSAVE_DEBOUNCE_MS = 1500;
 
 /**
- * Waits past a pending autosave debounce.
+ * Waits until any pending autosave debounce has fired in the page.
  *
  * Required before any NEGATIVE storage assertion: `expect.poll` resolves
  * the moment its assertion first passes, so polling for "still nothing in
  * storage" on an already-empty origin returns instantly and can never
  * observe a debounced write that was on its way.
+ *
+ * A debounce that is meant to write nothing leaves nothing to poll for, so
+ * this waits on the page's own timer queue rather than the test runner's
+ * clock: `subscribeToFillEdits.ts` arms `setTimeout(flush,
+ * AUTOSAVE_DEBOUNCE_MS)`, and the HTML timer steps never run a timeout
+ * before an earlier-armed one with an equal or shorter delay. Once this
+ * longer page timer fires, that flush (and the synchronous localStorage
+ * write it would make) has already run, even if the page's timers are
+ * throttled. The doubled delay also covers a debounce armed just after
+ * this call, such as a prefetch landing late.
  */
 export async function settleAutosaveDebounce(page: Page): Promise<void> {
-  await page.waitForTimeout(AUTOSAVE_DEBOUNCE_MS * 2);
+  await page.evaluate(
+    (delayMs) =>
+      new Promise<void>((resolve) => {
+        setTimeout(resolve, delayMs);
+      }),
+    AUTOSAVE_DEBOUNCE_MS * 2,
+  );
 }
 
 /** How many fill-session drafts this origin currently holds. */

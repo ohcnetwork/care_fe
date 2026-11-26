@@ -60,8 +60,7 @@ test.describe("All Encounters encounter class filter", () => {
       });
       await openMultiFilter(page, /^Encounter Class$/);
       await page
-        .getByRole("menu")
-        .getByText("Ambulatory", { exact: true })
+        .getByRole("menuitemradio", { name: "Ambulatory", exact: true })
         .click();
       await page.keyboard.press("Escape");
       await filteredRequest;
@@ -73,6 +72,7 @@ test.describe("All Encounters encounter class filter", () => {
 
     await test.step("The filter survives a reload", async () => {
       await page.reload();
+      await page.getByRole("button", { name: /^filters\b/i }).click();
       await expect(
         selectedMultiFilterBar(page, /^Encounter Class$/),
       ).toContainText("Ambulatory");
@@ -85,6 +85,7 @@ test.describe("All Encounters encounter class filter", () => {
       await expect(page).toHaveURL(
         (url) => url.searchParams.get("encounter_class") === "amb",
       );
+      await page.getByRole("button", { name: /^filters\b/i }).click();
       await expect(
         selectedMultiFilterBar(page, /^Encounter Class$/),
       ).toContainText("Ambulatory");
@@ -115,7 +116,7 @@ test.describe("All Encounters encounter class filter", () => {
     page,
   }) => {
     await page.goto(`/facility/${facilityId}/encounters/patients/imp`);
-    await page.getByRole("button", { name: /^filter$/i }).click();
+    await page.getByRole("button", { name: /^add filter$/i }).click();
     await expect(
       page.getByRole("option", { name: /^Status/ }).first(),
     ).toBeVisible();

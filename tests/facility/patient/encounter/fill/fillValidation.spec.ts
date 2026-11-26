@@ -89,7 +89,7 @@ test.describe("Fill page validation", () => {
       .click();
     await expect(
       firstRequired.getByText("This field is required"),
-    ).not.toBeVisible();
+    ).toBeHidden();
     await expect(firstRequiredGroup).toHaveAccessibleDescription("");
     await expect(firstRequiredGroup).not.toHaveAttribute(
       "aria-invalid",
@@ -128,7 +128,7 @@ test.describe("Fill page validation", () => {
     await forms.getByPlaceholder("Search Forms").press("Shift+Enter");
     await expect(forms).toBeVisible();
     await forms.getByPlaceholder("Search Forms").press("Escape");
-    await expect(forms).not.toBeVisible();
+    await expect(forms).toBeHidden();
     expect(submissions).toHaveLength(0);
 
     await noteInput.press("Shift+Enter");

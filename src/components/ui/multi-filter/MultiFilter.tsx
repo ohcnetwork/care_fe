@@ -9,6 +9,7 @@ import {
   type FilterFieldConfig,
 } from "@/components/ui/filters";
 import { cn } from "@/lib/utils";
+import { formatName } from "@/Utils/utils";
 
 import {
   toCareValues,
@@ -16,6 +17,7 @@ import {
   type CareFilterValue,
 } from "./careuiAdapter";
 import { DomainFilterValue } from "./domainFilterValue";
+import { FilterOptionIndicator } from "./filterOptionIndicator";
 import { useFilterI18n } from "./useFilterI18n";
 import { FilterState, FilterValues } from "./utils/Utils";
 
@@ -34,6 +36,28 @@ interface MultiFilterProps {
   facilityId?: string;
   disabled?: boolean;
   align?: "start" | "end";
+  compact?: boolean;
+}
+
+function summarizeValues(
+  filter: Filter<CareFilterValue>,
+  field: FilterFieldConfig<CareFilterValue>,
+) {
+  return filter.values
+    .map((value) => {
+      if (typeof value === "string") {
+        return (
+          field.options?.find((option) => option.value === value)?.label ??
+          value
+        );
+      }
+      if ("username" in value) return formatName(value);
+      if ("display" in value) return value.display;
+      if ("name" in value) return value.name;
+      if ("title" in value) return value.title;
+      return field.label;
+    })
+    .join(", ");
 }
 
 /** Adapts CARE query filters and clinical pickers to the CareUI filter framework. */
@@ -52,6 +76,7 @@ export default function MultiFilter({
   facilityId,
   disabled = false,
   align = "start",
+  compact = false,
 }: MultiFilterProps) {
   const { t } = useTranslation();
   const i18n = useFilterI18n();
@@ -94,6 +119,7 @@ export default function MultiFilter({
       key,
       label: t(filter.label),
       icon: filter.icon,
+      optionSize: filter.optionSize,
       type:
         filter.type === "command"
           ? filter.mode === "single"
@@ -118,13 +144,7 @@ export default function MultiFilter({
         label: t(option.label),
         icon:
           filter.showColorIndicators === false ? undefined : (
-            <span
-              aria-hidden="true"
-              className={cn(
-                "size-3 shrink-0 rounded-full border",
-                option.color,
-              )}
-            />
+            <FilterOptionIndicator color={option.color} />
           ),
       })),
       disableClear: filter.disableClear,
@@ -144,8 +164,18 @@ export default function MultiFilter({
           : t("select"),
     };
 
-    if (filter.type !== "command") {
-      field.customRenderer = ({ values, onChange, open, onOpenChange }) => (
+    // The compact toolbar opens every field in place, in the same picker menu.
+    if (filter.type !== "command" || compact) {
+      field.customRenderer = ({
+        values,
+        onChange,
+        open,
+        onOpenChange,
+        trigger,
+        finalFocus,
+        onBack,
+        onClose,
+      }) => (
         <DomainFilterValue
           state={state}
           values={values}
@@ -155,6 +185,10 @@ export default function MultiFilter({
           onOpenChange={onOpenChange}
           facilityId={facilityId}
           className={field.valueClassName}
+          trigger={trigger}
+          finalFocus={finalFocus}
+          onBack={onBack}
+          onClose={onClose}
         />
       );
     }
@@ -196,6 +230,7 @@ export default function MultiFilter({
       <Filters
         filters={filters}
         fields={fields}
+        toolbarSummary={compact ? summarizeValues : undefined}
         onChange={handleChange}
         onClearAll={() => {
           setDraftFilters([]);

@@ -41,7 +41,7 @@ async function createReport(page: Page, reportType: string) {
 
 async function saveResults(page: Page, entry: Locator) {
   await entry.getByRole("button", { name: "Save Results" }).click();
-  await expect(entry.getByPlaceholder("Result value")).not.toBeVisible();
+  await expect(entry.getByPlaceholder("Result value")).toBeHidden();
   await expect(
     page.getByText("Test results saved successfully", { exact: true }).last(),
   ).toBeVisible();
@@ -208,9 +208,7 @@ test.describe("Multiple diagnostic reports", () => {
       await saveResults(page, firstEntry);
       await expect(reportCards.nth(0)).toContainText(firstReportType);
       await expect(reportCards.nth(1)).toContainText(secondReportType);
-      await expect(
-        firstEntry.getByPlaceholder("Result value"),
-      ).not.toBeVisible();
+      await expect(firstEntry.getByPlaceholder("Result value")).toBeHidden();
       await expect(
         firstReview.getByRole("button", { name: "Approve Results" }),
       ).toBeVisible();
@@ -308,7 +306,7 @@ test.describe("Multiple diagnostic reports", () => {
       await firstReview.locator('[data-slot="collapsible-trigger"]').click();
       await expect(
         firstReview.getByRole("textbox", { name: "Conclusion", exact: true }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       await saveResults(page, firstEntry);
 
       await expect(

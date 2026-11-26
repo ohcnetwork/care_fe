@@ -340,7 +340,7 @@ test.describe("Facility value-set slug safeguards (mocked, no writes)", () => {
 
     failCatalogue = false;
     await page.getByRole("button", { name: "Try Again", exact: true }).click();
-    await expect(failure).not.toBeVisible();
+    await expect(failure).toBeHidden();
     await expect(save).toBeEnabled();
     await expect(page.getByRole("textbox", { name: "Slug *" })).toHaveValue(
       "local-options",

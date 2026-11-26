@@ -163,7 +163,7 @@ test("configures an organization destination and receives its referral in the or
       internal_organization: null,
     });
     availabilityId = availability.id;
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await page.reload();
     await expect(
       page.getByRole("listitem").filter({

@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import { valueSetColumn } from "tests/helper/ui";
 import { firstValueSetDisplay } from "tests/helper/valueSet";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -29,10 +30,10 @@ test.describe("Allergy in Encounter", () => {
 
     await page.locator("[cmdk-input]").waitFor({ state: "visible" });
     await page.locator("[cmdk-input]").fill(allergyName);
-
-    const option = page
-      .getByTestId("valueset-search-results")
-      .getByRole("option", { name: allergyName, exact: true });
+    const option = valueSetColumn(page.locator("body"), "search").getByRole(
+      "option",
+      { name: allergyName, exact: true },
+    );
     await option.scrollIntoViewIfNeeded();
     await option.click();
 

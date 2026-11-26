@@ -21,6 +21,9 @@ export const router = createRouter({
   defaultPreload: "intent",
   defaultPreloadStaleTime: 0,
   scrollRestoration: true,
+  // Staff pages scroll inside the persistent shell, rather than the window.
+  // Reset it for new entries while the router restores cached Back/Forward.
+  scrollToTopSelectors: ['[data-scroll-restoration-id="app-content"]'],
   parseSearch,
   stringifySearch,
   // Some params hold comma-separated ids (`$prescriptionIds`, `$invoiceIds`).

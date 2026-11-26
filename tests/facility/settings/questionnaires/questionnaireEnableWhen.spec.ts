@@ -71,12 +71,12 @@ test.describe("Questionnaire v2 enable_when visibility", () => {
 
       // The whole form renders on one scroll — a hidden dependent simply
       // isn't on the page (no pagination to walk).
-      await expect(page.getByText(dependentTitle)).not.toBeVisible();
+      await expect(page.getByText(dependentTitle)).toBeHidden();
     });
 
     await test.step("Answering No keeps the dependent question hidden", async () => {
       await page.getByRole("radio", { name: "No", exact: true }).click();
-      await expect(page.getByText(dependentTitle)).not.toBeVisible();
+      await expect(page.getByText(dependentTitle)).toBeHidden();
     });
 
     await test.step("Answering Yes reveals the dependent question", async () => {
