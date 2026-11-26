@@ -91,7 +91,7 @@ test.describe("Questionnaire v2 unit semantics", () => {
       }
       await expect(
         page.getByRole("combobox", { name: "Unit", exact: true }),
-      ).not.toBeVisible();
+      ).toBeHidden();
     });
 
     await test.step("The author's default unit is pre-selected", async () => {

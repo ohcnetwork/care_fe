@@ -66,7 +66,7 @@ test.describe("Payment Reconciliation", () => {
       // For non-cash payments, Amount Received field should not be visible
       await expect(
         page.getByRole("textbox", { name: "Amount Received" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
     }
 
     // Fill Payment Date
@@ -140,9 +140,7 @@ test.describe("Payment Reconciliation", () => {
     await expect(
       page.getByRole("combobox").filter({ hasText: ward.name }),
     ).toHaveAttribute("aria-expanded", "false");
-    await expect(
-      page.getByPlaceholder("Search locations..."),
-    ).not.toBeVisible();
+    await expect(page.getByPlaceholder("Search locations...")).toBeHidden();
   });
 
   test("only enables recording a payment for a positive amount", async ({

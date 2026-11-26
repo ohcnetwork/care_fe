@@ -1,14 +1,9 @@
-import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { User } from "lucide-react";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { Checkbox } from "@/components/ui/checkbox";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
@@ -16,21 +11,28 @@ import useAuthUser from "@/hooks/useAuthUser";
 import facilityApi from "@/types/facility/facilityApi";
 import { UserSpec } from "@/types/user/user";
 
+import { FilterChoiceItem } from "./filterChoiceItem";
 import FilterHeader from "./filterHeader";
+import {
+  FilterMenuList,
+  FilterMenuSearch,
+  useFilterMenuSearch,
+} from "./filterMenuSearch";
+import { FilterMenuLabel, FilterMenuSeparator } from "./filterSurface";
 import { FilterConfig, FilterDateRange } from "./utils/Utils";
 
 function FacilityUserFilterDropdown({
   selectedUsers,
   onUsersChange,
   facilityId,
-  handleBack,
+  onBack,
 }: {
   selectedUsers: UserSpec[];
   onUsersChange: (users: UserSpec[]) => void;
   facilityId: string;
-  handleBack?: () => void;
+  onBack?: () => void;
 }) {
-  const [search, setSearch] = useState("");
+  const { search } = useFilterMenuSearch();
   const { t } = useTranslation();
   const currentUser = useAuthUser();
 
@@ -47,17 +49,6 @@ function FacilityUserFilterDropdown({
     enabled: !!facilityId,
   });
 
-  const handleUserToggle = (user: UserSpec) => {
-    const isSelected = selectedUsers.some((u) => u.id === user.id);
-    if (isSelected) {
-      // Deselect if already selected
-      onUsersChange([]);
-    } else {
-      // Single selection - replace any existing selection
-      onUsersChange([user]);
-    }
-  };
-
   // Filter users: current user first (if not searching), then others
   const allUsers = usersData?.results || [];
 
@@ -66,76 +57,53 @@ function FacilityUserFilterDropdown({
 
   // Separate users: selected first, then current user (if not selected), then others
   const selectedUserIds = new Set(selectedUsers.map((u) => u.id));
-  const nonSelectedUsers = allUsers.filter((u) => !selectedUserIds.has(u.id));
+  const availableUsers = allUsers
+    .filter(
+      (u) => !selectedUserIds.has(u.id) && (search || u.id !== currentUser.id),
+    )
+    .sort((a, b) => {
+      if (a.id === currentUser.id) return -1;
+      if (b.id === currentUser.id) return 1;
+      return formatName(a).localeCompare(formatName(b));
+    });
 
-  // Sort non-selected: current user first, then alphabetically
-  const sortedNonSelectedUsers = nonSelectedUsers.sort((a, b) => {
-    if (a.id === currentUser.id) return -1;
-    if (b.id === currentUser.id) return 1;
-    return formatName(a).localeCompare(formatName(b));
-  });
-
-  useKeyboardShortcut(
-    ["ArrowLeft"],
-    () => {
-      handleBack?.();
-    },
-    {
-      overrideSystem: true,
-    },
+  const renderUser = (user: UserSpec, mine = false) => (
+    <FilterChoiceItem
+      key={user.id}
+      checked={selectedUserIds.has(user.id)}
+      onChoose={() => onUsersChange([user])}
+    >
+      <Avatar
+        imageUrl={user.profile_picture_url}
+        name={formatName(user, true)}
+        className="size-5 rounded-full"
+      />
+      <span className="truncate">
+        {mine ? t("mine") : formatName(user)}
+        {!mine && user.id === currentUser.id && (
+          <span className="ms-1 text-xs text-muted-foreground">
+            ({t("me")})
+          </span>
+        )}
+      </span>
+    </FilterChoiceItem>
   );
 
   return (
     <div>
       <div className="p-3 border-b">
-        <Input
+        <FilterMenuSearch
           placeholder={t("search_users_placeholder")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => e.stopPropagation()}
-          className="h-8 text-base sm:text-sm"
+          onBack={onBack}
         />
       </div>
-      <div className="p-3 max-h-[30vh] overflow-y-auto">
+      <FilterMenuList className="p-3 max-h-[30vh] overflow-y-auto">
         {/* Selected Users */}
         {selectedUsers.length > 0 && (
           <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-              {t("selected")}
-            </div>
-            {selectedUsers.map((user) => (
-              <DropdownMenuItem
-                key={user.id}
-                onSelect={(e) => {
-                  e.preventDefault();
-                  handleUserToggle(user);
-                }}
-                className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-              >
-                <Checkbox
-                  checked={true}
-                  className="data-checked:border-primary-700 text-white"
-                />
-                <div className="flex items-center gap-2 max-w-xs truncate">
-                  <Avatar
-                    imageUrl={user.profile_picture_url}
-                    name={formatName(user, true)}
-                    className="size-5 rounded-full"
-                  />
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-sm truncate">
-                      {formatName(user)}
-                      {user.id === currentUser.id && (
-                        <span className="text-xs text-gray-500 ml-1">
-                          ({t("me")})
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </DropdownMenuItem>
-            ))}
-            <div className="my-2 border-t border-gray-200" />
+            <FilterMenuLabel>{t("selected")}</FilterMenuLabel>
+            {selectedUsers.map((user) => renderUser(user))}
+            <FilterMenuSeparator />
           </>
         )}
 
@@ -144,67 +112,17 @@ function FacilityUserFilterDropdown({
           !selectedUserIds.has(currentUser.id) &&
           currentUserInList && (
             <>
-              <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                {t("quick_select")}
-              </div>
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                  handleUserToggle(currentUserInList);
-                }}
-                className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-              >
-                <Checkbox checked={false} className="h-4 w-4" />
-                <div className="flex items-center gap-2">
-                  <Avatar
-                    imageUrl={currentUserInList.profile_picture_url}
-                    name={formatName(currentUserInList, true)}
-                    className="size-5 rounded-full"
-                  />
-                  <span className="text-sm font-medium">{t("mine")}</span>
-                </div>
-              </DropdownMenuItem>
-              <div className="my-2 border-t border-gray-200" />
+              <FilterMenuLabel>{t("quick_select")}</FilterMenuLabel>
+              {renderUser(currentUserInList, true)}
+              <FilterMenuSeparator />
             </>
           )}
 
         {/* Available Users */}
-        {sortedNonSelectedUsers.length > 0 && (
+        {availableUsers.length > 0 && (
           <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-              {t("available_users")}
-            </div>
-            {sortedNonSelectedUsers
-              .filter((u) => search || u.id !== currentUser.id)
-              .map((user) => (
-                <DropdownMenuItem
-                  key={user.id}
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    handleUserToggle(user);
-                  }}
-                  className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-                >
-                  <Checkbox checked={false} className="h-4 w-4" />
-                  <div className="flex items-center gap-2 max-w-xs truncate">
-                    <Avatar
-                      imageUrl={user.profile_picture_url}
-                      name={formatName(user, true)}
-                      className="size-5 rounded-full"
-                    />
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-sm truncate">
-                        {formatName(user)}
-                        {user.id === currentUser.id && (
-                          <span className="text-xs text-gray-500 ml-1">
-                            ({t("me")})
-                          </span>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </DropdownMenuItem>
-              ))}
+            <FilterMenuLabel>{t("available_users")}</FilterMenuLabel>
+            {availableUsers.map((user) => renderUser(user))}
           </>
         )}
 
@@ -220,7 +138,7 @@ function FacilityUserFilterDropdown({
             {t("no_users_found")}
           </div>
         )}
-      </div>
+      </FilterMenuList>
     </div>
   );
 }
@@ -230,6 +148,7 @@ export default function RenderFacilityUserFilter({
   selectedUsers,
   onFilterChange,
   handleBack,
+  handleClose,
   facilityId,
 }: {
   filter: FilterConfig;
@@ -239,6 +158,7 @@ export default function RenderFacilityUserFilter({
     values: string[] | UserSpec[] | FilterDateRange,
   ) => void;
   handleBack?: () => void;
+  handleClose?: () => void;
   facilityId?: string;
 }) {
   const { t } = useTranslation();
@@ -246,21 +166,30 @@ export default function RenderFacilityUserFilter({
   if (!facilityId) {
     return (
       <div className="p-4 text-sm text-gray-500 text-center">
-        {t("facility_required_for_facility_user_filter")}
+        {filter.type === "care_team"
+          ? t("facility_required_for_care_team_filter")
+          : t("facility_required_for_facility_user_filter")}
       </div>
     );
   }
 
   return (
     <div className="p-0">
-      {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
+      {(handleBack || handleClose) && (
+        <FilterHeader
+          label={t(filter.label)}
+          icon={filter.icon}
+          onBack={handleBack}
+          onClose={handleClose}
+        />
+      )}
       <FacilityUserFilterDropdown
         selectedUsers={selectedUsers}
         onUsersChange={(users) => {
           onFilterChange(filter.key, users);
         }}
         facilityId={facilityId}
-        handleBack={handleBack}
+        onBack={handleBack}
       />
     </div>
   );

@@ -97,7 +97,7 @@ test.describe("Questionnaire v2 import via URL and malformed payloads", () => {
 
       await expect(dialog.getByText("Please enter a valid URL")).toBeVisible();
       // Still on the select step — no confirm summary appeared.
-      await expect(dialog.getByText(/Question count/)).not.toBeVisible();
+      await expect(dialog.getByText(/Question count/)).toBeHidden();
     }
   });
 
@@ -132,7 +132,7 @@ test.describe("Questionnaire v2 import via URL and malformed payloads", () => {
       page,
       "Invalid JSON: please check the format and try again",
     );
-    await expect(dialog.getByText(/Question count/)).not.toBeVisible();
+    await expect(dialog.getByText(/Question count/)).toBeHidden();
   });
 
   test("a malformed JSON file shows the inline dropzone error", async ({
@@ -193,11 +193,11 @@ test.describe("Questionnaire v2 import via URL and malformed payloads", () => {
 
     await test.step("Cancel closes without touching the empty draft", async () => {
       await dialog.getByRole("button", { name: "Cancel" }).click();
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
       await expect(
         page.getByRole("button", { name: "Add First Question" }),
       ).toBeVisible();
-      await expect(page.getByText("Discarded")).not.toBeVisible();
+      await expect(page.getByText("Discarded")).toBeHidden();
     });
   });
 
@@ -223,7 +223,7 @@ test.describe("Questionnaire v2 import via URL and malformed payloads", () => {
       await page.reload();
       await expect(
         page.getByRole("dialog", { name: "Import Questionnaire" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       await expect(
         page.getByRole("button", { name: "Add First Question" }),
       ).toBeVisible();
@@ -280,7 +280,7 @@ test.describe("Questionnaire v2 import replaces an existing draft", () => {
       await expect(
         page.getByRole("textbox", { name: "Question Title" }),
       ).toHaveValue(replacement);
-      await expect(page.getByText(original)).not.toBeVisible();
+      await expect(page.getByText(original)).toBeHidden();
     });
   });
 });

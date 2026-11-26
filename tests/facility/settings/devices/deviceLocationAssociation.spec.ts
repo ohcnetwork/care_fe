@@ -73,7 +73,7 @@ test.describe("Device Location Association", () => {
     ).toBeVisible();
 
     // Location should now be displayed
-    await expect(page.getByText("No location associated")).not.toBeVisible();
+    await expect(page.getByText("No location associated")).toBeHidden();
   });
 
   test("should display current location and allow disassociation", async ({
@@ -116,7 +116,7 @@ test.describe("Device Location Association", () => {
       name: "Associate Location",
     });
     await associateSheet.getByRole("button", { name: "Close" }).click();
-    await expect(associateSheet).not.toBeVisible();
+    await expect(associateSheet).toBeHidden();
 
     // Open the sheet again
     await page

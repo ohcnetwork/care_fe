@@ -28,7 +28,7 @@ test.describe("Back button should not appear when page is opened in a new tab wi
 
     // Verify back button is NOT visible (no history)
     const backButton = newPage.getByRole("button", { name: /back/i });
-    await expect(backButton).not.toBeVisible();
+    await expect(backButton).toBeHidden();
   });
 
   test("Back button in Account Show", async ({ page, context }) => {
@@ -51,6 +51,6 @@ test.describe("Back button should not appear when page is opened in a new tab wi
 
     // Verify back button is NOT visible (no history)
     const backButton = newPage.getByRole("button", { name: /back/i });
-    await expect(backButton).not.toBeVisible();
+    await expect(backButton).toBeHidden();
   });
 });

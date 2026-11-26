@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { Check, Search } from "lucide-react";
+import { Check, LayoutGrid, List as ListIcon, Search } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -20,10 +21,17 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
+  Frame,
+  FrameFooter,
+  FrameHeader,
+  FramePanel,
+} from "@/components/ui/frame";
+import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { DateFilterButton } from "@/components/ui/multi-filter/dateFilter";
 import {
   careTeamFilter,
   dateFilter,
@@ -44,16 +52,31 @@ import {
   PopoverAnchor,
   PopoverContent,
 } from "@/components/ui/popover";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useIsMobile } from "@/hooks/use-mobile";
 import useAuthUser from "@/hooks/useAuthUser";
+import { useIsNarrowerThan } from "@/hooks/useIsNarrowerThan";
 
 import Page from "@/components/Common/Page";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
+import {
+  ENCOUNTER_TABLE_MIN_WIDTH,
+  EncounterTable,
+} from "@/components/Encounter/EncounterTable";
 
 import useFilters from "@/hooks/useFilters";
 import { encounterListSearch } from "@/lib/router/search/encounter";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import { EncounterListEmptyState } from "@/pages/Encounters/encounter-search/EncounterListEmptyState";
+import {
+  EncounterSearch,
+  SelectedPatient,
+  VisitField,
+} from "@/pages/Encounters/encounter-search/EncounterSearch";
+import { EncounterSearchChips } from "@/pages/Encounters/encounter-search/EncounterSearchChips";
+import { EncounterSearchDateNotice } from "@/pages/Encounters/encounter-search/EncounterSearchDateNotice";
 import {
   EncounterClass,
   EncounterListRead,
@@ -133,6 +156,64 @@ const buildQueryParams = (
   return params;
 };
 
+type EncounterListView = "cards" | "list";
+
+// The chosen view is a display preference: it lives in localStorage, not in
+// the URL or the query key, so switching never refetches.
+const VIEW_STORAGE_KEY = "care_encounter_list_view";
+
+function readStoredView(): EncounterListView {
+  try {
+    return localStorage.getItem(VIEW_STORAGE_KEY) === "list" ? "list" : "cards";
+  } catch {
+    return "cards";
+  }
+}
+
+function storeView(view: EncounterListView) {
+  try {
+    localStorage.setItem(VIEW_STORAGE_KEY, view);
+  } catch {
+    // Private mode or a full store: the choice just isn't remembered.
+  }
+}
+
+function EncounterViewTabs({
+  view,
+  onChange,
+  className,
+}: {
+  view: EncounterListView;
+  onChange: (view: EncounterListView) => void;
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  const options: {
+    value: EncounterListView;
+    label: string;
+    icon: typeof LayoutGrid;
+  }[] = [
+    { value: "cards", label: t("encounter_view_cards"), icon: LayoutGrid },
+    { value: "list", label: t("encounter_view_list"), icon: ListIcon },
+  ];
+  return (
+    <Tabs
+      value={view}
+      onValueChange={(next) => onChange(next as EncounterListView)}
+      className={className}
+    >
+      <TabsList aria-label={t("view")}>
+        {options.map(({ value, label, icon: Icon }) => (
+          <TabsTrigger key={value} value={value}>
+            <Icon aria-hidden="true" />
+            {label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
+  );
+}
+
 function EmptyState() {
   const { t } = useTranslation();
   return (
@@ -166,6 +247,7 @@ export function EncounterList({
   });
   const { t } = useTranslation();
   const user = useAuthUser();
+  const isMobile = useIsMobile();
   const filterScope = `${user.id}:${facilityId}`;
   const storageKey = encounterFilterStorageKey("list", filterScope);
   const [, setSavedFilters] = useAtom(encounterListFiltersAtom(filterScope));
@@ -198,6 +280,28 @@ export function EncounterList({
   // filters by, saves and restores an encounter class. A stray
   // ?encounter_class= on a class-specific list is ignored.
   const filtersByEncounterClass = !encounterClass;
+  // Only the All list has the combined search; class lists keep theirs.
+  const isAllList = !encounterClass;
+  const [dateNotice, setDateNotice] = useState<{
+    patientId: string;
+    snapshot: Record<string, string | undefined>;
+  } | null>(null);
+  const [preferredView, setPreferredView] =
+    useState<EncounterListView>(readStoredView);
+  const changeView = (next: EncounterListView) => {
+    setPreferredView(next);
+    storeView(next);
+  };
+  // The frame's width, not the viewport's, decides whether the table fits:
+  // the sidebar changes the room it gets. The panel adds a 1px border on
+  // each side of the table.
+  const [frameRef, frameTooNarrowForTable] = useIsNarrowerThan<HTMLDivElement>(
+    ENCOUNTER_TABLE_MIN_WIDTH + 2,
+  );
+  // Mobile, and a frame too narrow for the table, show only cards, without
+  // the view tabs; the saved choice returns when there is room again.
+  const cardsOnly = isMobile || frameTooNarrowForTable;
+  const view: EncounterListView = cardsOnly ? "cards" : preferredView;
 
   const getDefaultDateRange = () => {
     const today = new Date();
@@ -303,7 +407,8 @@ export function EncounterList({
       return;
     }
 
-    if (event.key === "Escape") {
+    // Dismiss suggestions before the browser moves focus to the next toolbar control.
+    if (event.key === "Tab" || event.key === "Escape") {
       setSearchOptionsOpen(false);
     }
   };
@@ -377,29 +482,39 @@ export function EncounterList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
+  // The list's filters without its search text; the All search previews its
+  // visit counts with the same ones.
+  const listFilterParams = {
+    ...buildQueryParams(
+      facilityId,
+      status,
+      priority,
+      created_date_after,
+      created_date_before,
+      organization,
+      care_team_user,
+    ),
+    encounter_class: filtersByEncounterClass
+      ? qParams.encounter_class
+      : encounterClass,
+    tags: qParams.tags,
+    tags_behavior: qParams.tags_behavior,
+    patient_filter: patient_filter,
+  };
+  // The All list reads only what the URL applies, never the unsubmitted draft.
+  const listSearch = isAllList
+    ? { name: qParams.name, external_identifier: qParams.external_identifier }
+    : searchQueryParams;
+
   const { data: queryEncounters, isFetching } = useQuery({
     queryKey: ["encounters", facilityId, qParams, encounterClass],
     queryFn: query.debounced(encounterApi.list, {
       queryParams: {
-        ...buildQueryParams(
-          facilityId,
-          status,
-          priority,
-          created_date_after,
-          created_date_before,
-          organization,
-          care_team_user,
-        ),
-        encounter_class: filtersByEncounterClass
-          ? qParams.encounter_class
-          : encounterClass,
-        external_identifier: searchQueryParams.external_identifier,
+        ...listFilterParams,
+        external_identifier: listSearch.external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
-        tags: qParams.tags,
-        tags_behavior: qParams.tags_behavior,
-        patient_filter: patient_filter,
-        name: searchQueryParams.name,
+        name: listSearch.name,
       },
     }),
     enabled: !propEncounters && !encounter_id,
@@ -423,9 +538,10 @@ export function EncounterList({
 
   const tagIds = qParams.tags?.split(",") || [];
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
-  const selectedTags = tagQueries
-    .map((query) => query.data)
-    .filter(Boolean) as TagConfig[];
+  // A pending detail lookup is not an empty selection: keep the open tag picker mounted.
+  const selectedTags = tagQueries.some((query) => query.isPending)
+    ? undefined
+    : tagQueries.flatMap((query) => (query.data ? [query.data] : []));
 
   // Fetch organization data if organization ID is in URL params
   const { data: selectedOrg } = useQuery({
@@ -471,6 +587,9 @@ export function EncounterList({
     dateFilter("created_date", t("date"), longDateRangeOptions, true),
   ];
 
+  // Query params to apply with the next filter update, so clearing the
+  // filters and the search together is one navigation.
+  const queuedQuery = useRef<Record<string, string | undefined>>({});
   const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
     // Save to sessionStorage atom
     setSavedFilters((prev) => {
@@ -563,14 +682,15 @@ export function EncounterList({
           break;
       }
     }
-    updateQuery(filterQuery);
+    updateQuery({ ...filterQuery, ...queuedQuery.current });
+    queuedQuery.current = {};
   };
 
   const {
     selectedFilters,
     handleFilterChange,
     handleOperationChange,
-    handleClearAll,
+    handleClearFilters,
     handleClearFilter,
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
@@ -627,18 +747,132 @@ export function EncounterList({
     updateQuery,
   ]);
 
-  const displaySelectedFilters =
-    (patient_filter || encounterClass === "imp") &&
+  const applySearchText = (field: VisitField, term: string) =>
+    updateQuery(
+      field === "name"
+        ? { name: term, external_identifier: "" }
+        : { name: "", external_identifier: term },
+    );
+  const removeSearchText = () =>
+    updateQuery({ name: "", external_identifier: "" });
+
+  // Selecting a patient clears the dates, as before. Undo restores the
+  // previous patient and dates; the history is replaced, so Back can't.
+  const selectPatient = (patient: SelectedPatient) => {
+    const datesCleared = !!(created_date_after || created_date_before);
+    updateQuery({
+      patient_filter: patient.id,
+      patient_name: patient.name,
+      created_date_after: undefined,
+      created_date_before: undefined,
+    });
+    setDateNotice(
+      datesCleared
+        ? {
+            patientId: patient.id,
+            snapshot: {
+              patient_filter,
+              patient_name: qParams.patient_name,
+              created_date_after,
+              created_date_before,
+            },
+          }
+        : null,
+    );
+  };
+  // Removing the patient isn't Undo: the default dates resume.
+  const removePatient = () => {
+    updateQuery({ patient_filter: undefined, patient_name: undefined });
+    setDateNotice(null);
+  };
+  const showDateNotice =
+    !!dateNotice &&
+    dateNotice.patientId === patient_filter &&
     !created_date_after &&
-    !created_date_before
-      ? {
-          ...selectedFilters,
-          created_date: {
-            ...selectedFilters.created_date,
-            selected: [],
-          },
-        }
-      : selectedFilters;
+    !created_date_before;
+  const scannedPatient =
+    qParams.patient_name === t("scanned_patient") ||
+    qParams.patient_name === t("encounter_search_scanned_patient");
+  // Inside the search on desktop; on mobile, a row below the toolbar.
+  const appliedSearch = {
+    name: qParams.name,
+    visitId: qParams.external_identifier,
+    patient: patient_filter
+      ? { name: qParams.patient_name, scanned: scannedPatient }
+      : undefined,
+  };
+
+  const { created_date: dateState, ...toolbarFilters } = selectedFilters;
+  // What the empty state names, from the URL alone: toolbar fields, then
+  // the search text and the patient.
+  const appliedFilterKeys = Object.entries(toolbarFilters)
+    .filter(
+      ([, state]) => Array.isArray(state.selected) && state.selected.length,
+    )
+    .map(([key]) => key);
+  const appliedNames = [
+    ...appliedFilterKeys.map((key) => t(toolbarFilters[key].filter.label)),
+    ...(qParams.name ? [t("encounter_search_field_name")] : []),
+    ...(qParams.external_identifier
+      ? [t("encounter_search_field_visit_id")]
+      : []),
+    ...(patient_filter
+      ? [
+          scannedPatient || !qParams.patient_name
+            ? t("encounter_search_patient_fallback")
+            : qParams.patient_name,
+        ]
+      : []),
+  ];
+  // Clears the toolbar fields, the search text and the patient in one
+  // navigation. Without a patient the default dates return.
+  const clearEmptyStateFilters = () => {
+    queuedQuery.current = {
+      name: "",
+      external_identifier: "",
+      patient_filter: undefined,
+      patient_name: undefined,
+    };
+    if (appliedFilterKeys.length) handleClearFilters(appliedFilterKeys);
+    else onFilterUpdate({});
+    setDateNotice(null);
+  };
+  // The date range can only be lifted for a patient.
+  const showAnyDate =
+    patient_filter && (created_date_after || created_date_before)
+      ? () =>
+          updateQuery({
+            created_date_after: undefined,
+            created_date_before: undefined,
+          })
+      : undefined;
+
+  // The frame footer and header read the page's own data only.
+  const totalCount = propEncounters
+    ? propEncounters.length
+    : queryEncounters?.count;
+  const hasMorePages =
+    !propEncounters &&
+    !!queryEncounters &&
+    queryEncounters.count > resultsPerPage;
+  const rangeFrom = ((qParams.page || 1) - 1) * resultsPerPage + 1;
+  const showingRange =
+    !isFetching && totalCount && encounters.length
+      ? t("encounters_showing_range", {
+          from: propEncounters ? 1 : rangeFrom,
+          to: propEncounters
+            ? encounters.length
+            : rangeFrom + encounters.length - 1,
+          total: totalCount,
+        })
+      : undefined;
+  const dateRange =
+    Array.isArray(dateState.selected) ||
+    ((patient_filter || encounterClass === "imp") &&
+      !created_date_after &&
+      !created_date_before)
+      ? {}
+      : dateState.selected;
 
   return (
     <Page
@@ -658,140 +892,239 @@ export function EncounterList({
         </Badge>
       }
     >
-      <div className="space-y-4 mt-4 flex flex-col">
-        <div className="flex w-full min-w-0 flex-wrap items-center gap-2.5">
-          <div className="relative w-full sm:w-auto sm:min-w-60">
-            <Popover
-              open={searchOptionsOpen && showSearchOptions}
-              onOpenChange={setSearchOptionsOpen}
-            >
-              <PopoverAnchor asChild>
-                <InputGroup>
-                  <InputGroupInput
-                    ref={searchInputRef}
-                    value={searchText}
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setSearchText(value);
-                      setSearchOptionsOpen(value.trim() !== "");
-                      setActiveSearchOptionIndex(0);
-                    }}
-                    onFocus={() => {
-                      if (showSearchOptions) {
-                        setSearchOptionsOpen(true);
-                      }
-                    }}
-                    onKeyDown={handleSearchInputKeyDown}
-                    placeholder={selectedSearchType.placeholder}
-                  />
-                  <InputGroupAddon>
-                    <Search aria-hidden="true" />
-                  </InputGroupAddon>
-                </InputGroup>
-              </PopoverAnchor>
-              <PopoverContent
-                className="w-(--anchor-width) p-0"
-                align="start"
-                onOpenAutoFocus={(event) => {
-                  event.preventDefault();
-                  searchInputRef.current?.focus();
-                }}
-                onCloseAutoFocus={(event) => {
-                  event.preventDefault();
-                }}
-              >
-                <Command>
-                  <CommandList>
-                    <CommandGroup>
-                      {searchWithOptions.map((option, index) => (
-                        <CommandItem
-                          key={option.key}
-                          value={option.key}
-                          onSelect={() => handleSearchWithChange(option.key)}
-                          className={`flex items-center gap-2 ${
-                            activeSearchOptionIndex === index ? "bg-accent" : ""
-                          }`}
-                          onMouseEnter={() => setActiveSearchOptionIndex(index)}
-                        >
-                          <div>
-                            {searchText}{" "}
-                            <span className="text-muted-foreground">
-                              {option.label}
-                            </span>
-                          </div>
-                          <Check
-                            className={`ml-auto size-4 ${
-                              option.key === searchWith
-                                ? "opacity-100"
-                                : "opacity-0"
-                            }`}
+      <Frame ref={frameRef} className="mt-4">
+        {/* The toolbar: search and filters on the left, the view tabs on
+            the right; applied-search chips and the date notice below. */}
+        <FrameHeader className="@container/toolbar gap-2">
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-2 @4xl/toolbar:flex-nowrap">
+            <div className="flex w-full min-w-0 items-center gap-2 @4xl/toolbar:w-auto">
+              {isAllList ? (
+                <EncounterSearch
+                  // Compact; it widens only when two chips share the line.
+                  className="w-full @4xl/toolbar:w-96 @4xl/toolbar:has-[[data-slot=encounter-search-applied]+[data-slot=encounter-search-applied]]:w-128"
+                  previewQueryParams={listFilterParams}
+                  applied={isMobile ? {} : appliedSearch}
+                  onApplyText={applySearchText}
+                  onRemoveText={removeSearchText}
+                  onSelectPatient={selectPatient}
+                  onRemovePatient={removePatient}
+                />
+              ) : (
+                <>
+                  <div className="relative min-w-24 flex-1 @4xl/toolbar:w-60 @4xl/toolbar:flex-none">
+                    <Popover
+                      open={searchOptionsOpen && showSearchOptions}
+                      onOpenChange={setSearchOptionsOpen}
+                    >
+                      <PopoverAnchor asChild>
+                        <InputGroup>
+                          <InputGroupInput
+                            ref={searchInputRef}
+                            value={searchText}
+                            onChange={(event) => {
+                              const value = event.target.value;
+                              setSearchText(value);
+                              setSearchOptionsOpen(value.trim() !== "");
+                              setActiveSearchOptionIndex(0);
+                            }}
+                            onFocus={() => {
+                              if (showSearchOptions) {
+                                setSearchOptionsOpen(true);
+                              }
+                            }}
+                            onKeyDown={handleSearchInputKeyDown}
+                            placeholder={selectedSearchType.placeholder}
                           />
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
-          <PatientIdentifierFilter
-            onSelect={(patientId, patientName) =>
-              updateQuery({
-                patient_filter: patientId,
-                patient_name: patientName,
-                created_date_after: undefined,
-                created_date_before: undefined,
-              })
-            }
-            placeholder={t("filter_by_identifier")}
-            size="default"
-            className="w-full sm:w-auto"
-            patientId={qParams.patient_filter}
-            patientName={qParams.patient_name}
-          />
-          <div className="w-full min-w-0 sm:w-auto">
-            <MultiFilter
-              selectedFilters={displaySelectedFilters}
-              onFilterChange={handleFilterChange}
-              onOperationChange={handleOperationChange}
-              onClearAll={handleClearAll}
-              onClearFilter={handleClearFilter}
-              className="w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
-              triggerButtonClassName="self-start sm:self-center"
-              clearAllButtonClassName="self-center"
-              facilityId={facilityId}
-            />
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-          {isFetching ? (
-            <CardGridSkeleton count={6} />
-          ) : encounters.length === 0 ? (
-            <div className="col-span-full">
-              <EmptyState />
-            </div>
-          ) : (
-            <>
-              {encounters.map(
-                (encounter: EncounterListRead | EncounterRead) => (
-                  <EncounterInfoCard
-                    key={encounter.id}
-                    encounter={encounter}
-                    facilityId={facilityId}
-                  />
-                ),
-              )}
-              {queryEncounters?.count &&
-                queryEncounters.count > resultsPerPage && (
-                  <div className="col-span-full">
-                    <Pagination totalCount={queryEncounters.count} />
+                          <InputGroupAddon>
+                            <Search aria-hidden="true" />
+                          </InputGroupAddon>
+                        </InputGroup>
+                      </PopoverAnchor>
+                      <PopoverContent
+                        className="w-(--anchor-width) p-0"
+                        align="start"
+                        onOpenAutoFocus={(event) => {
+                          event.preventDefault();
+                          searchInputRef.current?.focus();
+                        }}
+                        onCloseAutoFocus={(event) => {
+                          event.preventDefault();
+                        }}
+                      >
+                        <Command>
+                          <CommandList>
+                            <CommandGroup>
+                              {searchWithOptions.map((option, index) => (
+                                <CommandItem
+                                  key={option.key}
+                                  value={option.key}
+                                  onSelect={() =>
+                                    handleSearchWithChange(option.key)
+                                  }
+                                  className={`flex items-center gap-2 ${
+                                    activeSearchOptionIndex === index
+                                      ? "bg-accent"
+                                      : ""
+                                  }`}
+                                  onMouseEnter={() =>
+                                    setActiveSearchOptionIndex(index)
+                                  }
+                                >
+                                  <div>
+                                    {searchText}{" "}
+                                    <span className="text-muted-foreground">
+                                      {option.label}
+                                    </span>
+                                  </div>
+                                  <Check
+                                    className={`ml-auto size-4 ${
+                                      option.key === searchWith
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    }`}
+                                  />
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </div>
-                )}
-            </>
+                  <PatientIdentifierFilter
+                    onSelect={(patientId, patientName) =>
+                      updateQuery({
+                        patient_filter: patientId,
+                        patient_name: patientName,
+                        created_date_after: undefined,
+                        created_date_before: undefined,
+                      })
+                    }
+                    placeholder={t("filter_by_identifier")}
+                    size="default"
+                    className="w-auto min-w-0 flex-1 @4xl/toolbar:flex-none [&>[data-variant]]:shadow-2xs"
+                    scanLabelClassName="hidden @lg/toolbar:block"
+                    patientId={qParams.patient_filter}
+                    patientName={qParams.patient_name}
+                  />
+                </>
+              )}
+            </div>
+            {/* On mobile the filters and Date share their row equally. Both
+              halves are unpadded wrappers, so flex-basis 0 splits it evenly. */}
+            <div className="shrink-0 max-md:min-w-0 max-md:flex-1 max-md:basis-0">
+              <MultiFilter
+                compact
+                className="max-md:w-full"
+                selectedFilters={toolbarFilters}
+                onFilterChange={handleFilterChange}
+                onOperationChange={handleOperationChange}
+                onClearAll={() =>
+                  handleClearFilters(Object.keys(toolbarFilters))
+                }
+                onClearFilter={handleClearFilter}
+                facilityId={facilityId}
+              />
+            </div>
+            <div className="shrink-0 max-md:min-w-0 max-md:flex-1 max-md:basis-0">
+              <DateFilterButton
+                filter={dateState.filter}
+                selected={dateRange}
+                onFilterChange={handleFilterChange}
+                className="max-md:w-full max-md:max-w-none max-md:justify-start"
+              />
+            </div>
+            {!cardsOnly && (
+              <EncounterViewTabs
+                view={view}
+                onChange={changeView}
+                className="ml-auto shrink-0"
+              />
+            )}
+          </div>
+
+          {isAllList && isMobile && (
+            <EncounterSearchChips
+              layout="row"
+              {...appliedSearch}
+              onRemoveText={removeSearchText}
+              onRemovePatient={removePatient}
+            />
           )}
-        </div>
-      </div>
+
+          {isAllList && showDateNotice && (
+            <EncounterSearchDateNotice
+              name={qParams.name}
+              visitId={qParams.external_identifier}
+              onUndo={() => {
+                if (dateNotice) updateQuery(dateNotice.snapshot);
+                setDateNotice(null);
+              }}
+              onDismiss={() => setDateNotice(null)}
+            />
+          )}
+        </FrameHeader>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={view}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            // The card grid counts columns from the frame's width, which the
+            // sidebar changes, not the viewport's.
+            className="@container"
+          >
+            {!isFetching && encounters.length === 0 ? (
+              isAllList ? (
+                <EncounterListEmptyState
+                  applied={appliedNames}
+                  onClearFilters={clearEmptyStateFilters}
+                  onShowAnyDate={showAnyDate}
+                />
+              ) : (
+                <EmptyState />
+              )
+            ) : view === "list" ? (
+              // One panel holds the table; its own container border is
+              // dropped so only the frame and the panel draw borders.
+              <FramePanel className="overflow-hidden p-0 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
+                <EncounterTable
+                  encounters={encounters}
+                  facilityId={facilityId}
+                  loading={isFetching}
+                />
+              </FramePanel>
+            ) : (
+              <div className="grid gap-2 @2xl:grid-cols-2 @5xl:grid-cols-3 @7xl:grid-cols-4">
+                {isFetching ? (
+                  <CardGridSkeleton count={6} />
+                ) : (
+                  encounters.map(
+                    (encounter: EncounterListRead | EncounterRead) => (
+                      <EncounterInfoCard
+                        key={encounter.id}
+                        encounter={encounter}
+                        facilityId={facilityId}
+                      />
+                    ),
+                  )
+                )}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+        {(showingRange || hasMorePages) && (
+          <FrameFooter className="flex-row flex-wrap items-center justify-between gap-2">
+            <span className="text-xs text-muted-foreground">
+              {showingRange}
+            </span>
+            {hasMorePages && queryEncounters && (
+              <Pagination totalCount={queryEncounters.count} noMargin />
+            )}
+          </FrameFooter>
+        )}
+      </Frame>
     </Page>
   );
 }

@@ -58,7 +58,7 @@ test("department filters restore only in the facility where they were selected",
   await openMultiFilter(page, /^Department$/);
   await page.getByPlaceholder("Search departments...").fill(department.name);
   await page
-    .getByRole("menuitem", { name: department.name, exact: true })
+    .getByRole("menuitemradio", { name: department.name, exact: true })
     .click();
   await page.keyboard.press("Escape");
   await expect(page).toHaveURL(new RegExp(`organization=${department.id}`));
@@ -72,7 +72,9 @@ test("department filters restore only in the facility where they were selected",
       requestsInOtherFacility.push(url.searchParams.get("organization") ?? "");
   });
   await page.goto(`/facility/${other.id}/encounters/patients/all`);
-  await expect(page.getByRole("button", { name: /^Filter$/ })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^add filter$/i }),
+  ).toBeVisible();
   await expect.poll(() => requestsInOtherFacility.length).toBeGreaterThan(0);
   expect(requestsInOtherFacility.every((value) => value === "")).toBe(true);
   await expect(page).not.toHaveURL(/organization=/);

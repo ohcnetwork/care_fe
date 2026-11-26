@@ -185,7 +185,7 @@ test.describe("Device forms and responses", () => {
       await expect(picker.getByPlaceholder("Search Forms")).toBeVisible();
       await expect(page).toHaveURL(devicePath);
       await page.keyboard.press("Escape");
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       await expect(submit).toBeFocused();
       await expect(page).toHaveURL(devicePath);
       await submit.click();
@@ -286,7 +286,7 @@ test.describe("Device forms and responses", () => {
       await page.reload();
       await expect(viewer.getByText(answer, { exact: true })).toBeVisible();
       await viewer.getByRole("button", { name: "Close", exact: true }).click();
-      await expect(viewer).not.toBeVisible();
+      await expect(viewer).toBeHidden();
       await page.getByRole("tab", { name: "Overview", exact: true }).click();
       await expect(page).toHaveURL(devicePath);
       await expect(
@@ -451,7 +451,7 @@ test.describe("Device forms and responses", () => {
         .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
         .toBe(390);
       await viewer.getByRole("button", { name: "Close", exact: true }).click();
-      await expect(viewer).not.toBeVisible();
+      await expect(viewer).toBeHidden();
 
       const filteredUrl = page.url();
       await page
@@ -469,7 +469,7 @@ test.describe("Device forms and responses", () => {
       ).toBeVisible();
       expect(page.url()).toBe(filteredUrl);
       await page.keyboard.press("Escape");
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       expect(page.url()).toBe(filteredUrl);
       await expect(rows).toHaveAttribute(
         "data-response-id",
@@ -596,7 +596,7 @@ test.describe("Device forms and responses", () => {
         await editor
           .getByRole("button", { name: "Close", exact: true })
           .click();
-        await expect(editor).not.toBeVisible();
+        await expect(editor).toBeHidden();
         await expect(row).toBeVisible();
         await expect(
           page.getByRole("heading", { name: device.name, exact: true }),

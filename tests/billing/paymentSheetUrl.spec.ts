@@ -53,7 +53,7 @@ test.describe("Payment Sheet URL Persistence", () => {
       // Close via the sheet's close button
       await paymentSheet.getByRole("button", { name: /close/i }).click();
 
-      await expect(paymentSheet).not.toBeVisible();
+      await expect(paymentSheet).toBeHidden();
       await expect(page).not.toHaveURL(/\/payment\//);
     });
 

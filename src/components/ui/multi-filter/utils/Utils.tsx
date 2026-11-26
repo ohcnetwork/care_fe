@@ -9,6 +9,7 @@ import {
   subYears,
 } from "date-fns";
 
+import type { FilterFieldConfig } from "@/components/ui/filters";
 import { ActivityDefinitionFilterValue } from "@/components/ui/multi-filter/activityDefinitionFilter";
 import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter";
 
@@ -91,6 +92,7 @@ export interface BaseFilterConfig {
   ) => React.ReactNode;
   getOperations?: (selected: FilterValues) => Operation[];
   mode?: FilterMode;
+  optionSize?: FilterFieldConfig["optionSize"];
   disableClear?: boolean;
   showColorIndicators?: boolean;
 }
@@ -143,6 +145,28 @@ export type FilterConfig =
   | ActivityDefinitionFilterConfig
   | CareTeamFilterConfig
   | FacilityUserFilterConfig;
+
+/**
+ * Whether a filter's picker takes one value. Picking it applies the value and
+ * closes the picker, as a select does, so the picker has no Done button.
+ * Multi-select pickers stay open until Done. Tags and locations always take
+ * several values. A date takes one range: a preset, or a custom range once
+ * it is applied (opening the calendar is not a pick).
+ */
+export function isSingleSelectFilter(filter: FilterConfig): boolean {
+  switch (filter.type) {
+    case "command":
+    case "activity_definition":
+      return filter.mode !== "multi";
+    case "department":
+    case "care_team":
+    case "facility_user":
+    case "date":
+      return true;
+    default:
+      return false;
+  }
+}
 
 export interface OperationConfig {
   selectedOperation: Operation | null;
@@ -223,6 +247,7 @@ export function createFilterConfig(
     ) => React.ReactNode;
     getOperations?: (selected: FilterValues) => Operation[];
     mode?: FilterMode;
+    optionSize?: BaseFilterConfig["optionSize"];
     icon?: React.ReactNode;
     dateRangeOptions?: DateRangeOption[];
     operationKey?: string;
@@ -236,6 +261,7 @@ export function createFilterConfig(
     renderSelected,
     getOperations,
     mode,
+    optionSize,
     icon,
     dateRangeOptions,
     operationKey,
@@ -250,6 +276,7 @@ export function createFilterConfig(
     renderSelected: renderSelected || defaultRenderSelected,
     getOperations: getOperations || defaultGetOperations,
     mode: mode || "single",
+    optionSize,
     icon,
     operationKey,
     disableClear,

@@ -1,5 +1,5 @@
 import { format, isSameDay, isValid } from "date-fns";
-import { Check, ChevronRight } from "lucide-react";
+import { CalendarDays, Check, ChevronRight } from "lucide-react";
 import {
   type Ref,
   useEffect,
@@ -16,13 +16,16 @@ import {
   DateRangePicker,
   type DateRangePickerHandle,
 } from "@/components/ui/date-range-picker";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
+import FilterFooter from "./filterFooter";
 import FilterHeader from "./filterHeader";
+import { FilterMenuItem, FilterSurfaceContext } from "./filterSurface";
 import NavigationHelper from "./utils/navigation-helper";
 import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
 import {
@@ -38,19 +41,25 @@ import {
 function DateRangeOptions({
   options,
   handleBack,
+  handleClose,
   setView,
   isCustomDateRangeSelected,
   filter,
   handleDateRangeSelect,
   isSameRange,
+  hasSelection,
+  onClear,
 }: {
   options: DateRangeOption[];
   handleBack?: () => void;
+  handleClose?: () => void;
   setView: (view: "options" | "custom") => void;
   isCustomDateRangeSelected: boolean;
   filter: FilterConfig;
   handleDateRangeSelect: (option: DateRangeOption) => void;
   isSameRange: (option: DateRangeOption) => boolean;
+  hasSelection: boolean;
+  onClear?: () => void;
 }) {
   const { t } = useTranslation();
   const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
@@ -65,17 +74,21 @@ function DateRangeOptions({
 
   return (
     <>
-      {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
+      {(handleBack || handleClose) && (
+        <FilterHeader
+          label={t(filter.label)}
+          icon={filter.icon}
+          onBack={handleBack}
+          onClose={handleClose}
+        />
+      )}
       <div className="flex flex-col gap-1 p-2">
         {options.map((option, index) => (
-          <DropdownMenuItem
+          <FilterMenuItem
             key={index}
             ref={index === focusItemIndex ? setFocusItemRef : null}
             onFocus={() => setFocusItemIndex(index)}
-            onSelect={(e) => {
-              e.preventDefault();
-              handleDateRangeSelect(option);
-            }}
+            onSelect={() => handleDateRangeSelect(option)}
             aria-current={isSameRange(option) || undefined}
             className="w-full justify-start px-3 font-medium text-sm text-gray-950"
           >
@@ -85,16 +98,13 @@ function DateRangeOptions({
             {isSameRange(option) && (
               <Check aria-hidden="true" className="ms-auto" />
             )}
-          </DropdownMenuItem>
+          </FilterMenuItem>
         ))}
-        <DropdownMenuItem
+        <FilterMenuItem
           ref={options.length === focusItemIndex ? setFocusItemRef : null}
           aria-current={isCustomDateRangeSelected || undefined}
           className="w-full justify-start px-3 font-medium text-sm text-gray-950"
-          onSelect={(e) => {
-            e.preventDefault();
-            setView("custom");
-          }}
+          onSelect={() => setView("custom")}
           onFocus={() => setFocusItemIndex(options.length)}
         >
           {t("custom_date_range")}
@@ -105,9 +115,18 @@ function DateRangeOptions({
             aria-hidden="true"
             className={cn(!isCustomDateRangeSelected && "ms-auto")}
           />
-        </DropdownMenuItem>
+        </FilterMenuItem>
       </div>
-      <NavigationHelper isActiveFilter={true} />
+      {handleClose ? (
+        // No Done: picking a preset, or applying a custom range, closes.
+        <FilterFooter
+          multiple={false}
+          selectedCount={hasSelection ? 1 : 0}
+          onClear={onClear}
+        />
+      ) : (
+        <NavigationHelper isActiveFilter={true} />
+      )}
     </>
   );
 }
@@ -131,6 +150,7 @@ export default function RenderDateFilter({
   selected,
   onFilterChange,
   handleBack,
+  handleClose,
   defaultView,
   ref,
 }: {
@@ -138,6 +158,7 @@ export default function RenderDateFilter({
   selected: FilterDateRange;
   onFilterChange: (filterKey: string, values: FilterValues) => void;
   handleBack?: () => void;
+  handleClose?: () => void;
   defaultView?: "options" | "custom";
   ref?: Ref<DateFilterHandle>;
 }) {
@@ -180,20 +201,26 @@ export default function RenderDateFilter({
           value={selected}
           minDate={meta?.minDate}
           maxDate={meta?.maxDate}
-          onApply={(range) => {
-            onFilterChange(filter.key, range);
-            setView("options");
-          }}
+          // Applying closes the picker; the calendar stays on screen while
+          // it fades out rather than switching back to the presets.
+          onApply={(range) => onFilterChange(filter.key, range)}
         />
       ) : (
         <DateRangeOptions
           options={options}
           handleBack={handleBack}
+          handleClose={handleClose}
           setView={setView}
           isCustomDateRangeSelected={isCustomDateRangeSelected}
           filter={filter}
           handleDateRangeSelect={handleDateRangeSelect}
           isSameRange={isSameRange}
+          hasSelection={Boolean(selected.from || selected.to)}
+          onClear={
+            filter.disableClear
+              ? undefined
+              : () => onFilterChange(filter.key, [])
+          }
         />
       )}
     </div>
@@ -214,6 +241,102 @@ export const getDateOperations = (selected: FilterDateRange) => {
   }
   return [];
 };
+
+/**
+ * Wraps a date picker's change handler so a picked range (a preset, or an
+ * applied custom range) closes the picker; clearing keeps it open.
+ */
+function closeOnDatePick(
+  onFilterChange: (key: string, values: FilterValues) => void,
+  close: () => void,
+) {
+  return (key: string, values: FilterValues) => {
+    onFilterChange(key, values);
+    if (!Array.isArray(values)) close();
+  };
+}
+
+export function DateFilterButton({
+  filter,
+  selected,
+  onFilterChange,
+  className,
+}: {
+  filter: FilterConfig;
+  selected: FilterDateRange;
+  onFilterChange: (key: string, values: FilterValues) => void;
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  const draftRef = useRef<DateFilterHandle>(null);
+  const isMobile = useIsMobile();
+  // One open state for the menu and the drawer, so a pick can close either.
+  const [open, setOpen] = useState(false);
+  const pick = closeOnDatePick(onFilterChange, () => setOpen(false));
+  const hasDate = Boolean(selected.from || selected.to);
+  const button = (
+    <Button
+      variant="outline"
+      className={cn("ml-auto max-w-48 shrink-0 shadow-2xs", className)}
+    >
+      <CalendarDays />
+      <span className={hasDate ? "sr-only" : undefined}>{t(filter.label)}</span>
+      {hasDate && (
+        <SelectedDateBadge
+          filter={filter}
+          selected={selected}
+          interactive={false}
+        />
+      )}
+    </Button>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(next, details) => {
+          applyDateDraftOnClose(draftRef, next, details);
+          setOpen(next);
+        }}
+      >
+        <DrawerTrigger asChild>{button}</DrawerTrigger>
+        <DrawerContent aria-label={t(filter.label)}>
+          <FilterSurfaceContext.Provider value="drawer">
+            <RenderDateFilter
+              ref={draftRef}
+              filter={filter}
+              selected={selected}
+              onFilterChange={pick}
+              handleClose={() => setOpen(false)}
+            />
+          </FilterSurfaceContext.Provider>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <DropdownMenu
+      open={open}
+      onOpenChange={(next, details) => {
+        applyDateDraftOnClose(draftRef, next, details);
+        setOpen(next);
+      }}
+    >
+      <DropdownMenuTrigger asChild>{button}</DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-80 p-0">
+        <RenderDateFilter
+          ref={draftRef}
+          filter={filter}
+          selected={selected}
+          onFilterChange={pick}
+        />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export const SelectedDateBadge = ({
   selected,
   filter,
@@ -227,6 +350,7 @@ export const SelectedDateBadge = ({
 }) => {
   const { t } = useTranslation();
   const draftRef = useRef<DateFilterHandle>(null);
+  const [open, setOpen] = useState(false);
   const hasValidFrom = !!selected.from && isValid(selected.from);
   const hasValidTo = !!selected.to && isValid(selected.to);
   if (!hasValidFrom && !hasValidTo) return <></>;
@@ -265,9 +389,11 @@ export const SelectedDateBadge = ({
 
   return (
     <DropdownMenu
-      onOpenChange={(open, details) =>
-        applyDateDraftOnClose(draftRef, open, details)
-      }
+      open={open}
+      onOpenChange={(next, details) => {
+        applyDateDraftOnClose(draftRef, next, details);
+        setOpen(next);
+      }}
     >
       <DropdownMenuTrigger asChild>
         <Button
@@ -285,7 +411,7 @@ export const SelectedDateBadge = ({
           ref={draftRef}
           filter={filter}
           selected={selected}
-          onFilterChange={onFilterChange}
+          onFilterChange={closeOnDatePick(onFilterChange, () => setOpen(false))}
           defaultView="custom"
         />
       </DropdownMenuContent>
