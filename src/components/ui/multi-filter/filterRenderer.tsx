@@ -1,4 +1,4 @@
-import { type Ref } from "react";
+import { type ReactNode, type Ref } from "react";
 
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
@@ -9,13 +9,19 @@ import RenderFacilityUserFilter from "@/components/ui/multi-filter/facilityUserF
 import RenderActivityDefinitionFilter, {
   ActivityDefinitionFilterValue,
 } from "./activityDefinitionFilter";
-import RenderCareTeamFilter from "./careTeamFilter";
+import RenderCommandFilter from "./commandFilter";
 import RenderDateFilter, { type DateFilterHandle } from "./dateFilter";
 import RenderDepartmentFilter from "./departmentFilter";
+import FilterFooter from "./filterFooter";
 import RenderLocationFilter from "./locationFilter";
 import RenderTagFilter from "./tagFilter";
 import NavigationHelper from "./utils/navigation-helper";
-import { FilterDateRange, FilterState, FilterValues } from "./utils/Utils";
+import {
+  FilterDateRange,
+  FilterState,
+  FilterValues,
+  isSingleSelectFilter,
+} from "./utils/Utils";
 
 export default function FilterRenderer({
   activeFilter,
@@ -23,6 +29,7 @@ export default function FilterRenderer({
   facilityId,
   onFilterChange,
   handleBack,
+  handleClose,
   dateDraftRef,
 }: {
   activeFilter: string;
@@ -30,6 +37,7 @@ export default function FilterRenderer({
   facilityId?: string;
   onFilterChange: (filterKey: string, values: FilterValues) => void;
   handleBack?: () => void;
+  handleClose?: () => void;
   /** Lets the hosting menu apply an unapplied custom date range on close. */
   dateDraftRef?: Ref<DateFilterHandle>;
 }) {
@@ -42,10 +50,42 @@ export default function FilterRenderer({
     filter,
     facilityId,
     handleBack,
+    handleClose,
     onFilterChange,
   };
+  // Pickers opened from "Add filter" (which can close) get Clear, and Done
+  // when they take several values: a single-select picker closes on a pick.
+  // Inline value pickers keep the keyboard hints.
+  const multiple = !isSingleSelectFilter(filter);
+  const footer = (
+    hints: ReactNode = (
+      <NavigationHelper isActiveFilter enterToSelect canGoBack={!!handleBack} />
+    ),
+  ) =>
+    handleClose ? (
+      <FilterFooter
+        multiple={multiple}
+        selectedCount={Array.isArray(selected) ? selected.length : 0}
+        onClear={
+          filter.disableClear ? undefined : () => onFilterChange(filter.key, [])
+        }
+        onDone={multiple ? handleClose : undefined}
+      />
+    ) : (
+      hints
+    );
 
   switch (filter.type) {
+    case "command":
+      return (
+        <>
+          <RenderCommandFilter
+            {...commonProps}
+            selected={selected as string[]}
+          />
+          {footer()}
+        </>
+      );
     case "date":
       return (
         <RenderDateFilter
@@ -61,7 +101,7 @@ export default function FilterRenderer({
             {...commonProps}
             selectedTags={selected as TagConfig[]}
           />
-          <NavigationHelper isActiveFilter={true} />
+          {footer()}
         </>
       );
     case "department":
@@ -71,7 +111,7 @@ export default function FilterRenderer({
             {...commonProps}
             selectedOrgs={selected as FacilityOrganizationRead[]}
           />
-          <NavigationHelper isActiveFilter={true} />
+          {footer()}
         </>
       );
     case "location":
@@ -82,9 +122,10 @@ export default function FilterRenderer({
             selectedLocations={selected as LocationRead[]}
             onFilterChange={onFilterChange}
             handleBack={handleBack}
+            handleClose={handleClose}
             facilityId={facilityId}
           />
-          <NavigationHelper isActiveFilter={true} />
+          {footer(<NavigationHelper isActiveFilter />)}
         </>
       );
     case "activity_definition":
@@ -95,19 +136,10 @@ export default function FilterRenderer({
             facilityId={facilityId || ""}
             selectedDefinitions={selected as ActivityDefinitionFilterValue[]}
           />
-          <NavigationHelper isActiveFilter={true} />
+          {footer()}
         </>
       );
     case "care_team":
-      return (
-        <>
-          <RenderCareTeamFilter
-            {...commonProps}
-            selectedUsers={selected as UserReadMinimal[]}
-          />
-          <NavigationHelper isActiveFilter={true} />
-        </>
-      );
     case "facility_user":
       return (
         <>
@@ -115,7 +147,7 @@ export default function FilterRenderer({
             {...commonProps}
             selectedUsers={selected as UserReadMinimal[]}
           />
-          <NavigationHelper isActiveFilter={true} />
+          {footer()}
         </>
       );
     default:

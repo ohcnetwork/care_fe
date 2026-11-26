@@ -11,12 +11,14 @@ export default function RenderLocationFilter({
   selectedLocations,
   onFilterChange,
   handleBack,
+  handleClose,
   facilityId,
 }: {
   filter: FilterConfig;
   selectedLocations: LocationRead[];
   onFilterChange: (filterKey: string, values: FilterValues) => void;
   handleBack?: () => void;
+  handleClose?: () => void;
   facilityId?: string;
 }) {
   const { t } = useTranslation();
@@ -31,7 +33,14 @@ export default function RenderLocationFilter({
 
   return (
     <div className="p-0">
-      {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
+      {(handleBack || handleClose) && (
+        <FilterHeader
+          label={t(filter.label)}
+          icon={filter.icon}
+          onBack={handleBack}
+          onClose={handleClose}
+        />
+      )}
       <div className="max-h-[50vh]">
         <LocationMultiSelect
           facilityId={facilityId}
