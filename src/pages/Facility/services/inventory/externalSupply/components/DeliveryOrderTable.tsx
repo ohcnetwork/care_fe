@@ -59,6 +59,10 @@ export default function DeliveryOrderTable({
     );
   }
 
+  // Internal transfers to a supplier location are returns, which name the supplier
+  const showSupplierColumn =
+    internal && deliveries.some((delivery) => delivery.supplier);
+
   return (
     <Table>
       <TableHeader>
@@ -66,6 +70,7 @@ export default function DeliveryOrderTable({
           <TableHead>{t("name")}</TableHead>
           <TableHead>{internal ? t("origin") : t("supplier")}</TableHead>
           <TableHead>{t("deliver_to")}</TableHead>
+          {showSupplierColumn && <TableHead>{t("supplier")}</TableHead>}
           <TableHead>{t("status")}</TableHead>
           <TableHead className="w-45">{t("tags", { count: 2 })}</TableHead>
           <TableHead className="w-48">{t("created_by")}</TableHead>
@@ -77,9 +82,12 @@ export default function DeliveryOrderTable({
           <TableRow key={delivery.id}>
             <TableCell>{delivery.name}</TableCell>
             <TableCell>
-              {delivery.supplier?.name || delivery.origin?.name}
+              {internal ? delivery.origin?.name : delivery.supplier?.name}
             </TableCell>
             <TableCell>{delivery.destination.name}</TableCell>
+            {showSupplierColumn && (
+              <TableCell>{delivery.supplier?.name}</TableCell>
+            )}
             <TableCell>
               <Badge variant={DELIVERY_ORDER_STATUS_COLORS[delivery.status]}>
                 {t(delivery.status)}
