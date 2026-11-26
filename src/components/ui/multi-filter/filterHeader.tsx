@@ -26,7 +26,7 @@ function FilterHeader({
         <Button
           type="button"
           variant="ghost"
-          size="icon"
+          size="icon-sm"
           aria-label={t("back")}
           onClick={onBack}
         >
@@ -41,7 +41,7 @@ function FilterHeader({
         <Button
           type="button"
           variant="ghost"
-          size="icon"
+          size="icon-sm"
           aria-label={t("close")}
           onClick={onClose}
         >
