@@ -5,6 +5,7 @@ import {
   searchInt,
   searchString,
 } from "@/lib/router/search/fields";
+import { scheduleHomeSearch } from "@/lib/router/search/scheduling";
 
 /** The public facility list: `FacilitiesPage`. */
 export const facilitiesPageSearch = z.object({
@@ -30,4 +31,10 @@ export const facilityUserListSearch = z.object({
 /** The departments tab of a user: `UserDepartmentsTab`. */
 export const userDepartmentListSearch = z.object({
   ...paginationSearch,
+  name: searchString(),
 });
+
+/** The tabs of a user in a facility: departments and availability. */
+export const userHomeSearch = userDepartmentListSearch.extend(
+  scheduleHomeSearch.shape,
+);
