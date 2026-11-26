@@ -107,7 +107,7 @@ async function saveResults(page: Page, entry: Locator) {
     .click();
   await expect(
     entry.getByRole("button", { name: "Save Results", exact: true }),
-  ).not.toBeVisible();
+  ).toBeHidden();
   await expect(
     page.getByText("Test results saved successfully", { exact: true }).last(),
   ).toBeVisible();

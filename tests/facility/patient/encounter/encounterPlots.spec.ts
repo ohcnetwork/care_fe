@@ -55,6 +55,7 @@ test.describe("Encounter Plots Tab", () => {
     page,
   }) => {
     let analyseHits = 0;
+
     await test.step("Stub observations with empty results per code", async () => {
       await page.route(/\/observation\/analyse\//, (route) => {
         analyseHits++;
@@ -94,6 +95,7 @@ test.describe("Encounter Plots Tab", () => {
     page,
   }) => {
     let analyseHits = 0;
+
     await test.step("Stub observations with one empty and one filled code", async () => {
       await page.route(/\/observation\/analyse\//, (route) => {
         analyseHits++;

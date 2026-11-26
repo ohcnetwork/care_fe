@@ -257,7 +257,7 @@ test.describe("Patient Registration", () => {
         page
           .locator("li[data-sonner-toast]")
           .getByText(/patient registered successfully/i),
-      ).not.toBeVisible();
+      ).toBeHidden();
     });
   });
 
@@ -358,6 +358,6 @@ test.describe("DOB timezone validation", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText(/patient registered successfully/i),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 });

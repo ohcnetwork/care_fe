@@ -79,6 +79,7 @@ test("read-only structured questions disable every history-import button", async
     })),
   );
   await page.goto(`${fillPath()}/${form.id}`);
+
   await test.step("all history entry points remain disabled in read-only sections", async () => {
     for (const { title, button } of historyTypes) {
       await expect(
@@ -137,6 +138,7 @@ test("initial and additional encounter pickers exclude another facility's forms"
     .click();
   const picker = page.getByRole("dialog", { name: "Forms", exact: true });
   const search = picker.getByPlaceholder("Search Forms");
+
   await test.step("the initial popover offers the current facility and shared forms only", async () => {
     const request = page.waitForRequest((request) => {
       const url = new URL(request.url());
@@ -163,6 +165,7 @@ test("initial and additional encounter pickers exclude another facility's forms"
       .click();
     await expect(questionBlock(page, "Scope note")).toBeVisible();
   });
+
   await test.step("adding another form uses the same facility scope", async () => {
     await page
       .getByRole("button", { name: "Add Questionnaire", exact: true })

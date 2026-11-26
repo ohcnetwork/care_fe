@@ -216,7 +216,7 @@ test.describe("User Profile Avatar Modification", () => {
       await expect(dialog).toBeVisible();
 
       await dialog.getByRole("button", { name: /cancel/i }).click();
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
     });
   });
 
@@ -235,7 +235,7 @@ test.describe("User Profile Avatar Modification", () => {
     });
     await expect(dialog).toBeVisible();
     await page.keyboard.press("Escape");
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await expect(trigger).toBeFocused();
   });
 

@@ -39,7 +39,7 @@ test("location navigation distinguishes sub-locations from beds while preserving
     wardOption.getByRole("button", { name: "Select", exact: true }),
   ).toBeVisible();
   await wardOption.click();
-  await expect(selector).not.toBeVisible();
+  await expect(selector).toBeHidden();
   await expect(page).toHaveURL(new RegExp(`/locations/${ward.id}/beds$`));
   await expect(page.getByText(wardBed.name, { exact: true })).toBeVisible();
 

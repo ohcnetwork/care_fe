@@ -249,7 +249,7 @@ for (const disableComposition of [false, true]) {
           preview.getByText(previewDisplay(disableComposition), {
             exact: true,
           }),
-        ).not.toBeVisible();
+        ).toBeHidden();
       } finally {
         releaseChangedPreview();
       }

@@ -40,7 +40,7 @@ async function selectInventoryUsage(page: Page, usage: string) {
 
 async function saveLocation(page: Page, action: "Create" | "Update") {
   await page.getByRole("button", { name: action, exact: true }).click();
-  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(page.getByRole("dialog")).toBeHidden();
 }
 
 test.describe("Facility Location Inventory Usage", () => {
@@ -103,7 +103,7 @@ test.describe("Facility Location Inventory Usage", () => {
         page.getByRole("combobox", { name: "Inventory Usage", exact: true }),
       ).toContainText("None");
       await page.keyboard.press("Escape");
-      await expect(page.getByRole("dialog")).not.toBeVisible();
+      await expect(page.getByRole("dialog")).toBeHidden();
       await locationRow(page, parentName).click();
     });
 
@@ -128,7 +128,7 @@ test.describe("Facility Location Inventory Usage", () => {
           page.getByRole("combobox", { name: "Inventory Usage", exact: true }),
         ).toContainText("Consumption");
         await page.keyboard.press("Escape");
-        await expect(page.getByRole("dialog")).not.toBeVisible();
+        await expect(page.getByRole("dialog")).toBeHidden();
       }
     });
   });

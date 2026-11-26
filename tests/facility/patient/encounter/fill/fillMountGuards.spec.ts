@@ -171,8 +171,12 @@ test.describe("Fill mount guards", () => {
     const buttonCount = await buttons.count();
     if (buttonCount > 0) {
       await buttons.first().click();
+      // Back leaves the guard. Once the fill page that owns the submit path
+      // has unmounted, nothing it rendered can still send a batch request.
+      await expect(
+        page.getByRole("alert").getByText(SUBJECT_TYPE_MISMATCH_MESSAGE),
+      ).toBeHidden();
     }
-    await page.waitForLoadState("networkidle");
     expect(
       posts,
       "a subject-family mismatch must never reach batch_requests, even after an interaction",
