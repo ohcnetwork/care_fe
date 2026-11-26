@@ -144,6 +144,9 @@
     { "key": "shift+e", "action": "open-command-dialog", "description": "Open Command Dialog" },
     { "key": "m c", "action": "mark-as-completed", "description": "Mark as Completed" },
     { "key": "shift+d", "action": "dispense", "description": "Dispense Medication" },
+    { "key": "shift+l", "action": "view-location-history", "description": "View Location History" },
+    { "key": "t", "action": "manage-care-team", "description": "Manage Care Team" },
+    { "key": "shift+t", "action": "manage-departments", "description": "Update Department" },
     { "key": "g g", "action": "encounter-overview", "description": "Go to Updates Tab" },
     { "key": "g p", "action": "plots", "description": "Go to Plots Tab" },
     { "key": "g o", "action": "observations", "description": "Go to Observations Tab" },
@@ -155,6 +158,7 @@
     { "key": "g f", "action": "files", "description": "Go to Files Tab" },
     { "key": "g n", "action": "notes", "description": "Go to Notes Tab" },
     { "key": "g v", "action": "devices", "description": "Go to Devices Tab" },
-    { "key": "g c", "action": "consents", "description": "Go to Consents Tab" }
+    { "key": "g c", "action": "consents", "description": "Go to Consents Tab" },
+    { "key": "g e", "action": "referrals", "description": "Go to Referrals Tab" }
   ]
 }

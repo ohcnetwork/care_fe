@@ -88,7 +88,13 @@ export const EncounterShow = (props: Props) => {
     canReadClinicalData,
     canReadSelectedEncounter,
     selectedEncounterPermissions,
-    actions: { markAsCompleted, dispense },
+    actions: {
+      markAsCompleted,
+      dispense,
+      viewLocationHistory,
+      manageCareTeam,
+      manageDepartments,
+    },
   } = useEncounter();
 
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -193,6 +199,7 @@ export const EncounterShow = (props: Props) => {
         selectedEncounterPermissions.canReadReferral ||
         selectedEncounterPermissions.canCreateReferral,
       component: <EncounterReferralsTab />,
+      shortcutId: "referrals",
     },
     service_requests: {
       icon: ListChecks,
@@ -272,8 +279,20 @@ export const EncounterShow = (props: Props) => {
             {t("dispense")}
             <ShortcutBadge actionId="dispense" />
           </Button>
+          <Button className="sr-only" tabIndex={-1} onClick={manageCareTeam}>
+            {t("manage_care_team")}
+            <ShortcutBadge actionId="manage-care-team" />
+          </Button>
+          <Button className="sr-only" tabIndex={-1} onClick={manageDepartments}>
+            {t("update_department")}
+            <ShortcutBadge actionId="manage-departments" />
+          </Button>
         </>
       )}
+      <Button className="sr-only" tabIndex={-1} onClick={viewLocationHistory}>
+        {t("location_history")}
+        <ShortcutBadge actionId="view-location-history" />
+      </Button>
       <div className="@container/encounter-header flex flex-col gap-2">
         <div className="flex min-w-0 items-center justify-between gap-2">
           {backButton}

@@ -401,20 +401,8 @@ export function EncounterCommandDialog({
       items: actionItems,
     });
 
-    if (
-      canNavigateToReferrals &&
-      (selectedEncounterPermissions.canReadReferral ||
-        selectedEncounterPermissions.canCreateReferral)
-    ) {
-      actionItems.push({
-        id: "referrals",
-        label: t("referrals"),
-        icon: <ArrowBigRight />,
-      });
-    }
-
     // Go to navigation - limited to pages visible in the active workspace
-    const goToItems: (ActionItem & { pageKey: string })[] = [
+    const goToItems: (ActionItem & { pageKey: string; visible?: boolean })[] = [
       {
         id: "encounter-overview",
         pageKey: "updates",
@@ -431,6 +419,15 @@ export function EncounterCommandDialog({
         id: "immunizations",
         pageKey: "immunizations",
         label: t("immunizations"),
+      },
+      {
+        id: "referrals",
+        pageKey: "referrals",
+        label: t("referrals"),
+        visible:
+          canNavigateToReferrals &&
+          (selectedEncounterPermissions.canReadReferral ||
+            selectedEncounterPermissions.canCreateReferral),
       },
       { id: "responses", pageKey: "responses", label: t("responses") },
       { id: "files", pageKey: "files", label: t("files") },
@@ -452,8 +449,10 @@ export function EncounterCommandDialog({
     groups.push({
       group: t("go_to"),
       items: goToItems
-        .filter(({ pageKey }) => isPageVisible(pageKey))
-        .map(({ pageKey: _pageKey, ...item }) => ({
+        .filter(
+          ({ pageKey, visible }) => (visible ?? true) && isPageVisible(pageKey),
+        )
+        .map(({ pageKey: _pageKey, visible: _visible, ...item }) => ({
           ...item,
           shortcut: getShortcutDisplay(item.id),
           icon: <ArrowBigRight />,
