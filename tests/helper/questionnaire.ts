@@ -2,7 +2,6 @@ import { type Page, expect } from "@playwright/test";
 import { createTestEncounter } from "tests/helper/encounter";
 import { createTestPatient } from "tests/helper/patient";
 import { questionBlock } from "tests/helper/questionnaireV2";
-import { expectToast } from "tests/helper/ui";
 
 /**
  * Fill-flow interaction helpers, targeting the v2 fill page (the one-scroll
@@ -100,11 +99,28 @@ export async function expectFieldError(page: Page, labelText: string) {
 }
 
 /**
- * Submits the form and waits for the success toast.
+ * Submits the form and waits for the success toast of this submit.
+ *
+ * A spec that submits twice (create, then edit) can still have the first
+ * success toast on screen, so a plain text match finds two toasts and fails
+ * strict mode, or passes on the stale one. Toasts already shown are marked
+ * before the click, and only an unmarked toast counts.
  */
 export async function submitAndExpectSuccess(page: Page) {
+  const toasts = page.locator(".toaster.group [data-sonner-toast]");
+  await toasts.evaluateAll((elements) =>
+    elements.forEach((element) =>
+      element.setAttribute("data-e2e-earlier-toast", ""),
+    ),
+  );
   await submitForm(page);
-  await expectToast(page, /questionnaire submitted successfully/i);
+  await expect(
+    page
+      .locator(
+        ".toaster.group [data-sonner-toast]:not([data-e2e-earlier-toast])",
+      )
+      .filter({ hasText: /questionnaire submitted successfully/i }),
+  ).toBeVisible();
 }
 
 /**
