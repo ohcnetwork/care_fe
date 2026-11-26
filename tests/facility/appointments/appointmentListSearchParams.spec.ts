@@ -1,3 +1,4 @@
+import { tz } from "@date-fns/tz";
 import {
   expect,
   test,
@@ -10,6 +11,15 @@ import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+// The page opens on the clinic's day, not the runner's (see
+// `appointments.schedulingTimeZone` in care.config.ts).
+const clinicToday = () =>
+  format(new Date(), "yyyy-MM-dd", {
+    in: tz(
+      process.env.REACT_APPOINTMENTS_SCHEDULING_TIMEZONE || "Asia/Kolkata",
+    ),
+  });
 
 // The appointments page reads its query string with a typed search schema
 // (`appointmentListSearch` in `src/lib/router/search/appointments.ts`) under
@@ -70,11 +80,11 @@ test.describe("Appointment list search params", () => {
     const userId = await currentUserId(request);
     // With the default configuration, the list opens on today. The day can
     // change while the page loads, so the day after navigation also counts.
-    const dayBefore = format(new Date(), "yyyy-MM-dd");
+    const dayBefore = clinicToday();
     await page.goto(listUrl());
 
     await expect(page).toHaveURL((url) => {
-      const today = [dayBefore, format(new Date(), "yyyy-MM-dd")];
+      const today = [dayBefore, clinicToday()];
       const dateFrom = url.searchParams.get("date_from") ?? "";
       return (
         url.searchParams.get("practitioners") === userId &&
