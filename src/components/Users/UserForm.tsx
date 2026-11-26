@@ -47,7 +47,10 @@ import {
 } from "@/components/Users/UserFormValidations";
 import { UserPasswordMethodCard } from "@/components/Users/UserPasswordMethodCard";
 import { UserQualificationFields } from "@/components/Users/UserQualificationFields";
-import { RoleOrgAccessEditor } from "@/components/Users/UserRoleOrganizationAccess";
+import {
+  RoleOrgAccessEditor,
+  getMissingRoleOrgField,
+} from "@/components/Users/UserRoleOrganizationAccess";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -105,9 +108,26 @@ export default function UserForm({
   const isNameRowInline = useBreakpoints({ default: false, sm: true });
   const mobile = !isNameRowInline && !isEditMode && !isServiceAccount;
   const roleOrgSchema = z.object({
-    organization: z.string().min(1, t("select_role_organization")),
-    role: z.string().min(1, t("please_select_role")),
+    organization: z.string(),
+    role: z.string(),
   });
+  const roleOrgListSchema = z
+    .array(roleOrgSchema)
+    .superRefine((entries, ctx) => {
+      const incomplete = entries.flatMap((entry, index) => {
+        const field = getMissingRoleOrgField(entry);
+        return field ? [{ index, field }] : [];
+      });
+      if (!incomplete.length) return;
+      const message = t("role_organization_designation_required");
+      // Add the list issue first: it is the message shown under the list, and
+      // react-hook-form then nests the row issues inside it.
+      ctx.addIssue({ code: "custom", message });
+      incomplete.forEach(({ index, field }) =>
+        ctx.addIssue({ code: "custom", message, path: [index, field] }),
+      );
+    })
+    .transform((entries) => entries.filter((entry) => entry.organization));
 
   const userFormSchema = z
     .object({
@@ -165,7 +185,7 @@ export default function UserForm({
       // role_orgs only used in create mode
       role_orgs: isEditMode
         ? z.array(roleOrgSchema).optional()
-        : z.array(roleOrgSchema).default([]),
+        : roleOrgListSchema.default([]),
     })
     .refine(
       (data) => {
@@ -1056,14 +1076,21 @@ export default function UserForm({
                     control={form.control}
                     name="role_orgs"
                     render={({ field }) => (
-                      <UserFormItem>
+                      // react-hook-form focuses this wrapper when role_orgs is the
+                      // invalid field, which scrolls the list and its error into view.
+                      <UserFormItem
+                        ref={field.ref}
+                        tabIndex={-1}
+                        className="outline-none"
+                      >
                         <FormControl>
                           <RoleOrgAccessEditor
                             value={field.value || []}
+                            rowErrors={form.formState.errors.role_orgs}
                             onChange={(value) =>
                               form.setValue("role_orgs", value, {
                                 shouldDirty: true,
-                                shouldValidate: true,
+                                shouldValidate: form.formState.isSubmitted,
                               })
                             }
                             disabled={isLoadingUser || isSubmitting}

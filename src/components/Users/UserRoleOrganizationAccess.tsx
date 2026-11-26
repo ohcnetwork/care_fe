@@ -41,6 +41,19 @@ export interface RoleOrgFormValue {
   role: string;
 }
 
+/**
+ * A row needs both a responsibility and a designation, or neither. Returns the
+ * missing half when only one of them is picked.
+ */
+export function getMissingRoleOrgField({
+  organization,
+  role,
+}: RoleOrgFormValue): keyof RoleOrgFormValue | undefined {
+  if (organization && !role) return "role";
+  if (role && !organization) return "organization";
+  return undefined;
+}
+
 interface RoleOrgMembership {
   id: string;
   organization: Organization;
@@ -51,6 +64,11 @@ interface RoleOrgAccessEditorProps {
   value: RoleOrgFormValue[];
   onChange: (value: RoleOrgFormValue[]) => void;
   disabled?: boolean;
+  /** Validation errors by row index. The invalid fields of a row are highlighted. */
+  rowErrors?: Record<
+    number,
+    Partial<Record<keyof RoleOrgFormValue, unknown>> | undefined
+  >;
 }
 
 const EMPTY_ROLE_ORG: RoleOrgFormValue = {
@@ -62,6 +80,7 @@ export function RoleOrgAccessEditor({
   value,
   onChange,
   disabled = false,
+  rowErrors,
 }: RoleOrgAccessEditorProps) {
   const { t } = useTranslation();
   const mobile = useMobileAddUser();
@@ -82,7 +101,6 @@ export function RoleOrgAccessEditor({
   };
 
   const removeEntry = (index: number) => {
-    if (entries.length <= 1) return;
     onChange(entries.filter((_, currentIndex) => currentIndex !== index));
   };
 
@@ -115,7 +133,9 @@ export function RoleOrgAccessEditor({
                 ? t("profile_remove_responsibility", { number: index + 1 })
                 : t("remove")
             }
-            onlyEntry={entries.length <= 1}
+            onlyEntry={
+              entries.length === 1 && !entry.organization && !entry.role
+            }
             removeDisabled={disabled}
             onRemove={() => removeAt(index)}
           >
@@ -133,6 +153,7 @@ export function RoleOrgAccessEditor({
                 placeholder={t("select_role_organization")}
                 inputPlaceholder={t("search_organization")}
                 disabled={disabled}
+                aria-invalid={!!rowErrors?.[index]?.organization}
               />
             </EntryField>
             <EntryField
@@ -158,8 +179,9 @@ export function RoleOrgAccessEditor({
                   })
                 }
                 context={RoleContext.ROLE_ORG}
-                disabled={disabled}
+                disabled={disabled || !entry.organization}
                 placeholder={t("select_designation")}
+                aria-invalid={!!rowErrors?.[index]?.role}
               />
             </EntryField>
           </UserFormListRow>
@@ -301,6 +323,7 @@ export function RoleOrgAccessSummary({
                       value={newRole}
                       onChange={setNewRole}
                       context={RoleContext.ROLE_ORG}
+                      disabled={!newOrg}
                       placeholder={t("select_designation")}
                     />
                     <Button

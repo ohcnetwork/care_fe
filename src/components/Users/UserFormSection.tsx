@@ -28,10 +28,14 @@ export function UserFormGroups({
 export function UserFormItem({
   children,
   className,
+  ...props
 }: React.ComponentProps<typeof FormItem>) {
   const mobile = useMobileAddUser();
   return (
-    <FormItem className={cn("min-w-0", !mobile && "gap-1.5", className)}>
+    <FormItem
+      className={cn("min-w-0", !mobile && "gap-1.5", className)}
+      {...props}
+    >
       {mobile ? <Field>{children}</Field> : children}
     </FormItem>
   );

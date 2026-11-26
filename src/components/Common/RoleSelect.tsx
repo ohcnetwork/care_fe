@@ -48,6 +48,7 @@ interface RoleSelectProps {
   placeholder?: string;
   /** "field" renders the trigger like the other form field comboboxes. */
   appearance?: "button" | "field";
+  "aria-invalid"?: boolean;
 }
 
 interface RoleCommandContentProps {
@@ -127,6 +128,7 @@ export function RoleSelect({
   className,
   placeholder,
   appearance = "button",
+  "aria-invalid": ariaInvalid,
 }: RoleSelectProps) {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
@@ -167,6 +169,7 @@ export function RoleSelect({
         type="button"
         role="combobox"
         aria-expanded={open}
+        aria-invalid={ariaInvalid}
         disabled={disabled}
         className={cn(
           fieldTriggerLayout,
@@ -192,6 +195,7 @@ export function RoleSelect({
         variant="outline"
         role="combobox"
         aria-expanded={open}
+        aria-invalid={ariaInvalid}
         className={cn("w-full justify-between", className)}
         disabled={disabled}
       >
