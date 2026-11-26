@@ -4,7 +4,10 @@
     "baseUrl": "../",
     "types": [],
     "paths": {
-      "tests/*": ["./tests/*"]
+      "@/*": ["src/*"],
+      "@core/*": ["src/*"],
+      "@careConfig": ["care.config.ts"],
+      "tests/*": ["tests/*"]
     }
   },
   "include": [
