@@ -44,6 +44,7 @@ import { EncounterObservationsTab } from "@/pages/Encounters/tabs/observations";
 import { EncounterOverviewTab } from "@/pages/Encounters/tabs/overview";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/plots";
 import { EncounterResponsesTab } from "@/pages/Encounters/tabs/responses";
+import { isEncounterAccessDenied } from "@/pages/Encounters/utils/encounterAccess";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { EncounterWorkspaceContent } from "@/pages/Encounters/workspace/EncounterWorkspaceContent";
 import { EncounterWorkspaceSwitcher } from "@/pages/Encounters/workspace/EncounterWorkspaceSwitcher";
@@ -79,6 +80,7 @@ export const EncounterShow = (props: Props) => {
     selectedEncounterId,
     setSelectedEncounter,
     isPrimaryEncounterLoading,
+    primaryEncounterError,
     patientId,
     patient,
     isPatientLoading,
@@ -98,13 +100,19 @@ export const EncounterShow = (props: Props) => {
   const pluginTabs = useCareAppTabs<PluginEncounterTabProps>("encounterTabs");
 
   const canAccess = canReadClinicalData || canReadSelectedEncounter;
+  const accessDenied = isEncounterAccessDenied({
+    isPrimaryEncounterLoading,
+    isPatientLoading,
+    canReadClinicalData,
+    canReadSelectedEncounter,
+    primaryEncounterError,
+  });
   useEffect(() => {
-    if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
+    if (accessDenied) {
       toast.error(t("permission_denied_encounter"));
       goBack("/");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPrimaryEncounterLoading, isPatientLoading]);
+  }, [accessDenied, t]);
 
   // Rendered while loading too: with no app sidebar or header on this route,
   // it is the only way out if the encounter fails to load.

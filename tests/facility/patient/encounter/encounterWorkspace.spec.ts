@@ -218,6 +218,7 @@ async function mockEncounterWorkspaceApi(
     defaultSaveValue?: string;
     symptoms: boolean;
     serviceOnHold: boolean;
+    encounterReadStatus?: number;
   } = {
     defaultLoad: false,
     defaultSave: 0,
@@ -866,6 +867,15 @@ async function mockEncounterWorkspaceApi(
         (item) => path === `/api/v1/encounter/${item.id}/`,
       );
       if (encounter) {
+        if (failures.encounterReadStatus) {
+          await route.fulfill({
+            status: failures.encounterReadStatus,
+            json: {
+              detail: "You do not have permission to perform this action.",
+            },
+          });
+          return;
+        }
         await route.fulfill({ json: encounter });
         return;
       }
@@ -3784,6 +3794,23 @@ test.describe("Encounter workspace rendering", () => {
     ).toHaveCount(0);
     expect(fixture.clinicalReads).toEqual([]);
     expect(widgetRecordReads()).toEqual([]);
+  });
+
+  test("turns away with permission denied when patient clinical data is readable but encounter retrieve returns 403", async ({
+    page,
+  }) => {
+    const fixture = await mockEncounterWorkspaceApi(page);
+    fixture.facility.permissions = [];
+    fixture.failures.encounterReadStatus = 403;
+    await page.goto(`${fixture.basePath}/rounds`);
+    await expect(
+      page.getByText("You do not have permission to view this encounter", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(page).not.toHaveURL((url) =>
+      url.pathname.includes(`/encounter/${fixture.currentEncounter.id}`),
+    );
   });
 
   test("retries workspace and clinical reads without losing the requested page", async ({
