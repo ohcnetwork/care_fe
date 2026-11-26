@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,6 +51,15 @@ export function TextInput({
     const text = isSingleLine ? content.replace(/[\r\n]+/g, " ") : content;
     const separator = isSingleLine ? " " : "\n";
     const next = value ? `${value}${separator}${text}` : text;
+    if (
+      question.max_length !== undefined &&
+      next.length > question.max_length
+    ) {
+      toast.error(
+        t("maximum_characters_allowed", { count: question.max_length }),
+      );
+      return;
+    }
     handleChange(next);
     if (!keepOpen) setTemplatesOpen(false);
   };

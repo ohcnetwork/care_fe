@@ -86,6 +86,8 @@ export function TemplatePicker({
     <Command
       onKeyDown={(event) => {
         if (event.key !== "Enter" || !event.shiftKey) return;
+        // Enter that confirms an IME composition must not insert.
+        if (event.nativeEvent.isComposing) return;
         // cmdk keeps focus in the search input, so read the highlighted item.
         const highlighted = event.currentTarget
           .querySelector("[cmdk-item][aria-selected=true]")
@@ -108,7 +110,7 @@ export function TemplatePicker({
         <CommandGroup>
           {templates.map((template, index) => (
             <CommandItem
-              key={index}
+              key={`${index}-${template.name}`}
               value={`${index}-${template.name}`}
               keywords={[template.name]}
               onSelect={() => insert(template.content, false)}
@@ -144,6 +146,7 @@ export function TemplatePicker({
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent
         align="start"
+        aria-label={t("insert_template")}
         className="w-80 gap-0 overflow-hidden p-0"
         onCloseAutoFocus={handleCloseAutoFocus}
       >
