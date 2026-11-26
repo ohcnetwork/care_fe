@@ -136,6 +136,7 @@ export default function PatientSelect({
       navigate({
         to: "/facility/$facilityId/appointments/$staffId/book-appointment",
         params: { facilityId, staffId },
+        replace: true,
       });
     }
   }, [facilityId, staffId, tokenData, slotId, t]);
