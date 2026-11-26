@@ -17,12 +17,29 @@ export interface SeededResource {
   id: string;
 }
 
+/**
+ * The backend takes billing row locks with `select_for_update(nowait=True)`
+ * (care/emr/locks/billing.py), so a write that meets another worker's write
+ * on the same row (for example the facility's invoice number) fails at once
+ * with 423 Locked. The request is rolled back and created nothing, so a
+ * seeding call can safely send it again once the other write has committed.
+ */
+const LOCKED_RETRY_DELAYS_MS = [100, 250, 500, 1000, 2000];
+
 async function post<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${getApiUrl()}${path}`, {
-    method: "POST",
-    headers: getApiHeaders(),
-    body: JSON.stringify(body),
-  });
+  const send = () =>
+    fetch(`${getApiUrl()}${path}`, {
+      method: "POST",
+      headers: getApiHeaders(),
+      body: JSON.stringify(body),
+    });
+  let res = await send();
+  for (const delay of LOCKED_RETRY_DELAYS_MS) {
+    if (res.status !== 423) break;
+    await res.body?.cancel();
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    res = await send();
+  }
   if (!res.ok) {
     throw new Error(`POST ${path} failed: ${res.status} — ${await res.text()}`);
   }
