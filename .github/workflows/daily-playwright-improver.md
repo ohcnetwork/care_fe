@@ -209,7 +209,7 @@ triggered or merged changes (e.g., "The team used automation to ...").
 ## agent: `coverage-scout`
 ---
 description: Surveys the tests/src trees against the in-flight snapshot and returns a ranked list of unclaimed coverage gaps.
-model: claude-haiku-4.5
+model: claude-sonnet-5.5
 ---
 
 You survey and report. You do not write tests, open PRs, comment on anything, or edit files.
@@ -248,7 +248,7 @@ through the UI from the fixtures in `tests/support/`; and its size (small / medi
 ## agent: `source-surveyor`
 ---
 description: Reads the route, zod schema, and API types for one target screen and reports its fields, validation rules, error strings, states, and role gates verbatim.
-model: claude-haiku-4.5
+model: claude-sonnet-5.5
 ---
 
 You extract facts from source and report them. You do not write tests, judge coverage, decide
