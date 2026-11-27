@@ -111,6 +111,25 @@ jobs:
             echo "Transient failure — worth retrying:"
             grep -oE "$TRANSIENT" failed.log | sort | uniq -c | sed 's/^/  /'
             echo "retry=true" >> "$GITHUB_OUTPUT"
+          # gh-aw logs the executable check before launching Copilot. A runner timeout
+          # after the startup line, with no later harness message, can strand the review
+          # before the harness can retry. Keep ordinary review timeouts out of this path.
+          elif [ "$WORKFLOW_NAME" = "CARE PR Reviewer" ] &&
+            awk -F '\t' '
+              $1 == "agent" && $2 == "Execute GitHub Copilot CLI" {
+                if ($3 ~ /\[copilot-harness\] starting: command=/ && !starting) {
+                  starting = 1
+                } else if (starting && $3 ~ /\[copilot-harness\]/) {
+                  progressed = 1
+                }
+                if (starting && $3 ~ /##\[error\]The action \047Execute GitHub Copilot CLI\047 has timed out after [0-9]+ minutes\./) {
+                  timed_out = 1
+                }
+              }
+              END { exit !(starting && timed_out && !progressed) }
+            ' failed.log; then
+            echo "Copilot timed out before reporting its executable check. Retrying."
+            echo "retry=true" >> "$GITHUB_OUTPUT"
           else
             # The agent ran and failed for some other reason. That is a real failure and should
             # stay visible rather than be papered over by a retry.
@@ -118,7 +137,7 @@ jobs:
             echo "retry=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Wait out the rate-limit window
+      - name: Wait before retrying
         if: steps.classify.outputs.retry == 'true'
         run: |
           set -euo pipefail
