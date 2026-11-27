@@ -3,7 +3,7 @@ import { Select as SelectPrimitive } from "@base-ui/react/select";
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { ArrowLeft, ChevronDown, QrCode, Search, X } from "lucide-react";
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import {
   Country,
@@ -189,6 +189,9 @@ export function EncounterSearch({
     : field === "auto" && configs.some(isPhoneConfig) && isNumericText(term);
   const shownCountry =
     (term.startsWith("+") && parsePhoneNumber(term)?.country) || country;
+  // The list filters by one patient at a time: with one applied, the search
+  // stays off until its chip is removed.
+  const patientLocked = !!applied.patient;
   const popupOpen = open && (!!term || !!lookup);
   // A number too long for its country can't become valid by typing more.
   const phoneTooLong =
@@ -283,7 +286,7 @@ export function EncounterSearch({
   // A scanner used with nothing focused keeps today's behaviour.
   useBarcodeScanner({
     onScan: (scanned) => applyScan(scannedPatientId(scanned) ?? scanned),
-    enabled: !popupOpen && !scanOpen,
+    enabled: !patientLocked && !popupOpen && !scanOpen,
     preventDefault: false,
     maxLength: 500,
     timeout: 500,
@@ -403,9 +406,19 @@ export function EncounterSearch({
     onRemoveText();
     inputRef.current?.focus();
   };
+  // The input is disabled while a patient is applied: it takes focus once the
+  // removal has unlocked it.
+  const refocusOnUnlock = useRef(false);
+  useEffect(() => {
+    if (patientLocked || !refocusOnUnlock.current) return;
+    refocusOnUnlock.current = false;
+    // The combobox enables its input a render later.
+    const frame = requestAnimationFrame(() => inputRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [patientLocked]);
   const removePatient = () => {
+    refocusOnUnlock.current = true;
     onRemovePatient();
-    inputRef.current?.focus();
   };
 
   const describe = (row: Row) => {
@@ -485,7 +498,8 @@ export function EncounterSearch({
         items={groups}
         value={null}
         inputValue={draft}
-        open={popupOpen}
+        open={popupOpen && !patientLocked}
+        disabled={patientLocked}
         filter={null}
         autoHighlight
         itemToStringLabel={describe}
@@ -527,6 +541,7 @@ export function EncounterSearch({
           <InputGroupAddon align="inline-start" className="min-w-0 shrink">
             <Select<SearchField>
               value={field}
+              disabled={patientLocked}
               onValueChange={(next) => {
                 fieldPicked.current = true;
                 setField(next);
@@ -606,6 +621,7 @@ export function EncounterSearch({
                 code: getCountryCallingCode(shownCountry),
               })}
               pickedFocus={inputRef}
+              disabled={patientLocked}
               onChange={(next) => {
                 setCountry(next);
                 setPending(null);
@@ -666,13 +682,15 @@ export function EncounterSearch({
                   fieldConfig && isPhoneConfig(fieldConfig) ? "tel" : undefined
                 }
                 placeholder={
-                  field !== "auto"
-                    ? t("encounter_search_placeholder_field", {
-                        field: fieldLabel,
-                      })
-                    : hasApplied
-                      ? t("search")
-                      : t("encounter_search_placeholder")
+                  patientLocked
+                    ? t("encounter_search_placeholder_locked")
+                    : field !== "auto"
+                      ? t("encounter_search_placeholder_field", {
+                          field: fieldLabel,
+                        })
+                      : hasApplied
+                        ? t("search")
+                        : t("encounter_search_placeholder")
                 }
                 onKeyDown={(event) => {
                   scanner.track(event);
@@ -694,9 +712,6 @@ export function EncounterSearch({
                     if (field !== "auto") {
                       event.preventDefault();
                       setField("auto");
-                    } else if (!event.repeat && applied.patient) {
-                      event.preventDefault();
-                      onRemovePatient();
                     } else if (
                       !event.repeat &&
                       (applied.name || applied.visitId)
@@ -733,6 +748,7 @@ export function EncounterSearch({
             <InputGroupButton
               size="xs"
               aria-label={t("scan_patient_qr")}
+              disabled={patientLocked}
               onClick={() => setScanOpen(true)}
             >
               <QrCode />

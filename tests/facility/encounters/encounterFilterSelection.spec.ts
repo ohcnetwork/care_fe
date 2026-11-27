@@ -1463,6 +1463,32 @@ test.describe("All encounters search", () => {
     );
   });
 
+  test("the search stays off while a patient is applied, until the chip is removed", async ({
+    page,
+  }) => {
+    await page.goto(listUrl(`?patient_filter=${fullPatient.id}`));
+    await expect(chip(page)).toHaveText(/^patient$/i);
+
+    // One patient at a time: nothing to type into, pick or scan.
+    await expect(searchBox(page)).toBeDisabled();
+    await expect(searchBox(page)).toHaveAttribute(
+      "placeholder",
+      "Remove the patient to search again",
+    );
+    await expect(
+      page.getByRole("combobox", { name: /^search field$/i }),
+    ).toBeDisabled();
+    await expect(page.getByRole("button", { name: /scan/i })).toBeDisabled();
+
+    await chip(page).getByRole("button", { name: "Remove patient" }).click();
+    await expect(searchBox(page)).toBeEnabled();
+    await expect(searchBox(page)).toBeFocused();
+    await expect(searchBox(page)).toHaveAttribute(
+      "placeholder",
+      "Search visits or patients",
+    );
+  });
+
   test("a scanner's Enter applies the patient; a typed Enter filters visits", async ({
     page,
   }) => {
