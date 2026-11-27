@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_app/facility/$facilityId/encounters/")({
   beforeLoad: ({ params, location }) => {
     throw redirectKeepingQuery(
       `/facility/${params.facilityId}/encounters/patients/${
-        careConfig.defaultEncounterType || "all"
+        careConfig.clinicalDefaults.encounter.class || "all"
       }`,
       location,
     );

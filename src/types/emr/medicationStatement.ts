@@ -57,13 +57,14 @@ export type MedicationStatement = {
 
 export type MedicationStatementRequest = {
   id?: string;
-  status: MedicationStatementStatus;
+  // null until the clinician picks one, when the deployment default is none.
+  status: MedicationStatementStatus | null;
   reason?: string;
   medication: Code;
   encounter?: string; // UUID
   dosage_text: string;
   effective_period?: Period;
-  information_source: MedicationStatementInformationSourceType;
+  information_source: MedicationStatementInformationSourceType | null;
   note?: string;
   created_by?: UserReadMinimal;
 };

@@ -221,8 +221,10 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   );
   const [startTimeError, setStartTimeError] = useState("");
   const [endTimeError, setEndTimeError] = useState("");
+  // Open when the status starts empty (deployment default of none), so the
+  // clinician sees the field they must pick.
   const [showAdvanced, setShowAdvanced] = useState(
-    !!administrationRequest.id || isPastTime,
+    !!administrationRequest.id || isPastTime || !administrationRequest.status,
   );
 
   const validateDateTime = (date: Date, isStartTime: boolean): string => {
@@ -243,7 +245,10 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
   // Validate and notify parent whenever times change
   useEffect(() => {
-    if (!administrationRequest.occurrence_period_start) {
+    if (
+      !administrationRequest.status ||
+      !administrationRequest.occurrence_period_start
+    ) {
       isValid?.(false);
       return;
     }
@@ -428,7 +433,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                   : "secondary"
             }
           >
-            {t(administrationRequest.status)}
+            {t(administrationRequest.status ?? "not_specified")}
           </Badge>
         </div>
 

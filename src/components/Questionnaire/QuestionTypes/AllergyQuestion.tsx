@@ -58,6 +58,7 @@ import { dateQueryString } from "@/Utils/utils";
 import type { Code } from "@/types/base/code/code";
 import {
   ALLERGY_VERIFICATION_STATUS,
+  type AllergyCriticality,
   type AllergyIntolerance,
   type AllergyIntoleranceRequest,
   type AllergyVerificationStatus,
@@ -68,6 +69,8 @@ import type {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
+import { validateChosenFields } from "@/types/questionnaire/validation";
+import careConfig from "@careConfig";
 
 interface AllergyQuestionProps {
   patientId: string;
@@ -84,11 +87,21 @@ interface AllergyQuestionProps {
 
 const ALLERGY_INITIAL_VALUE: Partial<AllergyIntoleranceRequest> = {
   code: { code: "", display: "", system: "" },
-  clinical_status: "active",
-  verification_status: "confirmed",
-  category: "medication",
-  criticality: "low",
+  ...careConfig.clinicalDefaults.allergy,
 };
+
+export function validateAllergyQuestion(
+  allergies: AllergyIntoleranceRequest[],
+  questionId: string,
+) {
+  return validateChosenFields(
+    allergies,
+    questionId,
+    ["clinical_status", "verification_status", "category", "criticality"],
+    (allergy) => allergy.code.display,
+    (allergy) => allergy.verification_status === "entered_in_error",
+  );
+}
 
 type AllergyCategory = "food" | "medication" | "environment" | "biologic";
 
@@ -105,7 +118,7 @@ function CategorySelect({
   disabled,
   hasId,
 }: {
-  category: AllergyCategory;
+  category: AllergyCategory | null;
   onValueChange: (value: AllergyCategory) => void;
   disabled?: boolean;
   hasId: boolean;
@@ -156,8 +169,8 @@ function CriticalitySelect({
   onValueChange,
   disabled,
 }: {
-  criticality: string;
-  onValueChange: (value: string) => void;
+  criticality: AllergyCriticality | null;
+  onValueChange: (value: AllergyCriticality) => void;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -187,7 +200,7 @@ function StatusSelect({
   disabled,
   isExistingRecord,
 }: {
-  verificationStatus: string;
+  verificationStatus: string | null;
   onValueChange: (value: string) => void;
   disabled?: boolean;
   isExistingRecord?: boolean;
@@ -241,7 +254,7 @@ function StatusButtons({
   onUpdate,
   disabled,
 }: {
-  clinicalStatus: string;
+  clinicalStatus: string | null;
   onUpdate: (updates: Partial<AllergyIntoleranceRequest>) => void;
   disabled?: boolean;
 }) {
@@ -814,11 +827,11 @@ export function AllergyQuestion({
                                 allergy.clinical_status === "resolved",
                             })}
                           >
-                            {t(allergy.category)}
+                            {t(allergy.category ?? "not_specified")}
                             {" · "}
-                            {t(allergy.criticality)}
+                            {t(allergy.criticality ?? "not_specified")}
                             {" · "}
-                            {t(allergy.verification_status)}
+                            {t(allergy.verification_status ?? "not_specified")}
                             {allergy.last_occurrence && (
                               <>
                                 {" · "}

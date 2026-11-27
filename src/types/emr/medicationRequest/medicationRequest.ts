@@ -9,6 +9,8 @@ import { UserReadMinimal } from "@/types/user/user";
 import { add, divide, isZero, multiply } from "@/Utils/decimal";
 import Decimal from "decimal.js";
 
+import careConfig from "@careConfig";
+
 export const MEDICATION_REQUEST_STATUS_COLORS = {
   active: "primary",
   completed: "blue",
@@ -974,6 +976,8 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
  *
  * You can extend the dictionaries & regex to cover more cases (IV, subcutaneous, brand names, etc.).
  */
+const MEDICATION_DEFAULTS = careConfig.clinicalDefaults.medicationRequest;
+
 export function parseMedicationStringToRequest(
   requester: UserReadMinimal,
   medication?: Code,
@@ -1004,9 +1008,9 @@ export function parseMedicationStringToRequest(
         }
       : {}),
     status: "active",
-    intent: "order",
-    priority: "routine",
-    category: MedicationCategory.inpatient,
+    intent: MEDICATION_DEFAULTS.intent ?? undefined,
+    priority: MEDICATION_DEFAULTS.priority,
+    category: MEDICATION_DEFAULTS.category as MedicationCategory,
     authored_on: new Date().toISOString(),
     requester: requester,
   };

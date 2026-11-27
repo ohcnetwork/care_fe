@@ -69,8 +69,10 @@ import { Question } from "@/types/questionnaire/question";
 import {
   FieldDefinitions,
   useFieldError,
+  validateChosenFields,
   validateFields,
 } from "@/types/questionnaire/validation";
+import careConfig from "@careConfig";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 import { FieldError } from "./FieldError";
@@ -91,7 +93,7 @@ interface MedicationStatementQuestionProps {
 }
 
 const MEDICATION_STATEMENT_INITIAL_VALUE: MedicationStatementRequest = {
-  status: "active",
+  status: careConfig.clinicalDefaults.medicationStatement.status,
   reason: undefined,
   medication: {
     code: "",
@@ -100,7 +102,8 @@ const MEDICATION_STATEMENT_INITIAL_VALUE: MedicationStatementRequest = {
   },
   dosage_text: "",
   effective_period: undefined,
-  information_source: MedicationStatementInformationSourceType.PATIENT,
+  information_source:
+    careConfig.clinicalDefaults.medicationStatement.information_source,
   note: undefined,
 };
 
@@ -135,6 +138,13 @@ export function validateMedicationStatementQuestion(
   values: MedicationStatementRequest[],
   questionId: string,
 ): QuestionValidationError[] {
+  const choiceErrors = validateChosenFields(
+    values,
+    questionId,
+    ["status", "information_source"],
+    (value) => value.medication.display,
+    (value) => value.status === "entered_in_error",
+  );
   return values.reduce((errors: QuestionValidationError[], value, index) => {
     // Skip validation for medications marked as entered_in_error
     if (value.status === "entered_in_error") return errors;
@@ -142,7 +152,7 @@ export function validateMedicationStatementQuestion(
       ...errors,
       ...validateFields(value, questionId, MEDICATION_STATEMENT_FIELDS, index),
     ];
-  }, []);
+  }, choiceErrors);
 }
 
 export function MedicationStatementQuestion({
@@ -808,7 +818,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           disabled={disabled || isReadOnly}
         >
           <SelectTrigger className="h-9 text-sm capitalize">
-            <SelectValue />
+            <SelectValue placeholder={t("select")} />
           </SelectTrigger>
           <SelectContent>
             {(
@@ -855,7 +865,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           disabled={disabled}
         >
           <SelectTrigger className="h-9 text-sm capitalize">
-            <SelectValue />
+            <SelectValue placeholder={t("select")} />
           </SelectTrigger>
           <SelectContent>
             {MEDICATION_STATEMENT_STATUS.map(

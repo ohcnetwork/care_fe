@@ -1,9 +1,6 @@
 import { PaymentReconciliationPaymentMethod } from "../src/types/billing/paymentReconciliation/paymentReconciliation";
-import {
-  ENCOUNTER_CLASS,
-  ENCOUNTER_DISCHARGE_DISPOSITION,
-  EncounterDischargeDisposition,
-} from "../src/types/emr/encounter/encounter";
+import { clinicalDefaultsSchema } from "../src/types/emr/clinicalDefaults";
+import { ENCOUNTER_CLASS } from "../src/types/emr/encounter/encounter";
 import { parseCareApp } from "../src/Utils/careApps";
 
 import { z } from "zod";
@@ -207,6 +204,11 @@ export const envSchema = z
       .optional(),
     REACT_ALLOWED_LOCALES: z.string().optional(),
     REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED: numberAsString.optional(),
+    REACT_CLINICAL_DEFAULTS: jsonAsStringSchema
+      .transform((val) => JSON.parse(val))
+      .pipe(clinicalDefaultsSchema)
+      .optional(),
+    // Removed; kept here only to report them (see superRefine).
     REACT_DEFAULT_ENCOUNTER_TYPE: z.string().optional(),
     REACT_DEFAULT_DISCHARGE_DISPOSITION: z.string().optional(),
     REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.uuid().optional(),
@@ -242,27 +244,26 @@ export const envSchema = z
     const allowedClasses =
       data.REACT_ALLOWED_ENCOUNTER_CLASSES || ENCOUNTER_CLASS;
 
-    if (
-      data.REACT_DEFAULT_ENCOUNTER_TYPE &&
-      !allowedClasses.includes(data.REACT_DEFAULT_ENCOUNTER_TYPE as any)
-    ) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Encounter class not in allowed encounter classes",
-        path: ["REACT_DEFAULT_ENCOUNTER_TYPE"],
-      });
+    // Removed settings fail loudly, so a deployment doesn't lose its default unnoticed.
+    for (const [removed, key] of [
+      ["REACT_DEFAULT_ENCOUNTER_TYPE", "class"],
+      ["REACT_DEFAULT_DISCHARGE_DISPOSITION", "discharge_disposition"],
+    ] as const) {
+      if (data[removed]) {
+        ctx.addIssue({
+          code: "custom",
+          message: `${removed} was removed. Set encounter.${key} in REACT_CLINICAL_DEFAULTS instead.`,
+          path: [removed],
+        });
+      }
     }
 
-    if (
-      data.REACT_DEFAULT_DISCHARGE_DISPOSITION &&
-      !ENCOUNTER_DISCHARGE_DISPOSITION.includes(
-        data.REACT_DEFAULT_DISCHARGE_DISPOSITION as EncounterDischargeDisposition,
-      )
-    ) {
+    const defaultClass = data.REACT_CLINICAL_DEFAULTS?.encounter.class;
+    if (defaultClass && !allowedClasses.includes(defaultClass)) {
       ctx.addIssue({
         code: "custom",
-        message: "Invalid discharge disposition",
-        path: ["REACT_DEFAULT_DISCHARGE_DISPOSITION"],
+        message: "encounter.class is not in REACT_ALLOWED_ENCOUNTER_CLASSES",
+        path: ["REACT_CLINICAL_DEFAULTS"],
       });
     }
 

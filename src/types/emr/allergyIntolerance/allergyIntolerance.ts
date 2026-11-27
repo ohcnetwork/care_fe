@@ -40,10 +40,11 @@ export interface AllergyIntolerance {
 // Added optional id here as this type is used only in one place
 export interface AllergyIntoleranceRequest {
   id?: string;
-  clinical_status: AllergyClinicalStatus;
-  verification_status: AllergyVerificationStatus;
-  category: AllergyCategory;
-  criticality: string;
+  // null until the clinician picks one, when the deployment default is none.
+  clinical_status: AllergyClinicalStatus | null;
+  verification_status: AllergyVerificationStatus | null;
+  category: AllergyCategory | null;
+  criticality: AllergyCriticality | null;
   code: Code;
   last_occurrence?: string;
   note?: string;

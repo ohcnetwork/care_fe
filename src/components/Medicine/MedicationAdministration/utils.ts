@@ -1,5 +1,7 @@
 import { format } from "date-fns";
 
+import careConfig from "@careConfig";
+
 import {
   MedicationAdministrationRead,
   MedicationAdministrationRequest,
@@ -71,7 +73,7 @@ export function createMedicationAdministrationRequest(
     occurrence_period_start: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     occurrence_period_end: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     note: "",
-    status: "completed",
+    status: careConfig.clinicalDefaults.medicationAdministration.status,
     // Default administration dosage from the first instruction
     dosage: (() => {
       const primaryInstruction = medication.dosage_instruction[0];

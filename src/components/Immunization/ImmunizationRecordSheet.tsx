@@ -50,6 +50,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import mutate from "@/Utils/request/mutate";
 import { Code } from "@/types/base/code/code";
 import {
+  IMMUNIZATION_CREATE_STATUS,
   IMMUNIZATION_NOT_DONE_REASONS,
   IMMUNIZATION_STATUS,
   ImmunizationRead,
@@ -62,10 +63,13 @@ import immunizationRecommendationApi from "@/types/emr/immunizationRecommendatio
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import { LocationRead } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
+import careConfig from "@careConfig";
 
 import { codingsLabel, doseLabel } from "./immunizationUtils";
 
 const NO_RECOMMENDATION = "none";
+const DEFAULTS = careConfig.clinicalDefaults.immunization;
+
 const DEFAULT_DOSE_UNIT = DOSAGE_UNITS_CODES.find(
   (unit) => unit.code === "mL",
 )!;
@@ -79,9 +83,6 @@ function toCode(coding?: ImmunizationPolicyCoding | null): Code | null {
   };
 }
 
-/** Statuses offered when recording; corrections are made by editing. */
-const CREATE_STATUSES = ["completed", "not_done"] as const;
-
 function recordSchema(t: TFunction) {
   const code = z.object({
     system: z.string(),
@@ -91,7 +92,7 @@ function recordSchema(t: TFunction) {
   return z
     .object({
       code: code.nullable(),
-      status: z.enum(IMMUNIZATION_STATUS),
+      status: z.enum(IMMUNIZATION_STATUS, { error: t("field_required") }),
       reason: z.enum(IMMUNIZATION_NOT_DONE_REASONS).optional(),
       occurrence: z.string().optional(),
       historical: z.boolean(),
@@ -223,11 +224,13 @@ function ImmunizationRecordForm({
     resolver: zodResolver(schema),
     defaultValues: {
       code: record?.code ?? toCode(recommendation?.codes?.[0]),
-      status: record?.status ?? "completed",
+      status: record?.status ?? DEFAULTS.status ?? undefined,
       reason: record?.reason ?? undefined,
       occurrence: record
         ? (record.occurrence ?? undefined)
-        : new Date().toISOString(),
+        : DEFAULTS.occurrence === "now"
+          ? new Date().toISOString()
+          : undefined,
       historical: record ? !record.primary_source : false,
       recommendation: recommendation?.id ?? NO_RECOMMENDATION,
       complete_recommendation: true,
@@ -450,17 +453,18 @@ function ImmunizationRecordForm({
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue />
+                          <SelectValue placeholder={t("select_status")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {(isEdit ? IMMUNIZATION_STATUS : CREATE_STATUSES).map(
-                          (option) => (
-                            <SelectItem key={option} value={option}>
-                              {t(`immunization_status__${option}`)}
-                            </SelectItem>
-                          ),
-                        )}
+                        {(isEdit
+                          ? IMMUNIZATION_STATUS
+                          : IMMUNIZATION_CREATE_STATUS
+                        ).map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {t(`immunization_status__${option}`)}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

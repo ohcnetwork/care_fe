@@ -2,6 +2,7 @@ import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/stru
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
 import { sanitizeNote } from "./adapt";
 
+import { validateDiagnosisQuestion } from "@/components/Questionnaire/QuestionTypes/DiagnosisQuestion";
 import { DiagnosisInput } from "@/components/QuestionnaireV2/structured/inputs/DiagnosisInput";
 
 export const diagnosisDefinition: StructuredTypeDefinition<"diagnosis"> = {
@@ -10,6 +11,8 @@ export const diagnosisDefinition: StructuredTypeDefinition<"diagnosis"> = {
   requires: ["patientId", "encounterId"],
   subjects: ["encounter"],
   draftPolicy: "serialize",
+  validate: (diagnoses, questionId) =>
+    validateDiagnosisQuestion(diagnoses, questionId),
   buildRequests: async (
     diagnoses,
     { patientId, encounterId, questionId, path },

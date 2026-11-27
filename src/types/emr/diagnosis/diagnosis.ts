@@ -68,8 +68,9 @@ export type DiagnosisCategory = (typeof DIAGNOSIS_CATEGORY)[number];
 
 export interface DiagnosisRequest {
   id?: string;
-  clinical_status: DiagnosisClinicalStatus;
-  verification_status: DiagnosisVerificationStatus;
+  // null until the clinician picks one, when the deployment default is none.
+  clinical_status: DiagnosisClinicalStatus | null;
+  verification_status: DiagnosisVerificationStatus | null;
   code: Code;
   severity: DiagnosisSeverity | null;
   onset?: Onset;

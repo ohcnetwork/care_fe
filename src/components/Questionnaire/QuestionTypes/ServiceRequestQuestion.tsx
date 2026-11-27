@@ -59,6 +59,7 @@ import {
 } from "@/types/questionnaire/questionnaireResponseTemplate";
 import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
+import careConfig from "@careConfig";
 import { Decimal } from "decimal.js";
 
 import { AddToTemplateDialog } from "@/components/Questionnaire/AddToTemplateDialog";
@@ -113,6 +114,8 @@ interface ServiceRequestQuestionProps {
   questionnaireSlug?: string;
   question: Question;
 }
+
+const SR_DEFAULTS = careConfig.clinicalDefaults.serviceRequest;
 
 const SERVICE_REQUEST_FIELDS = {
   TITLE: {
@@ -646,9 +649,9 @@ export function ServiceRequestQuestion({
       const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec = {
         service_request: {
           title: selectedActivityDefinitionData.title,
-          status: Status.active,
-          intent: Intent.order,
-          priority: Priority.routine,
+          status: SR_DEFAULTS.status as Status,
+          intent: SR_DEFAULTS.intent as Intent,
+          priority: SR_DEFAULTS.priority as Priority,
           category: selectedActivityDefinitionData.classification,
           do_not_perform: false,
           note: null,
@@ -762,9 +765,15 @@ export function ServiceRequestQuestion({
         service_request: {
           title:
             templateSR.service_request?.title || activityDefinitionData.title,
-          status: templateSR.service_request?.status || Status.active,
-          intent: templateSR.service_request?.intent || Intent.order,
-          priority: templateSR.service_request?.priority || Priority.routine,
+          status:
+            templateSR.service_request?.status ||
+            (SR_DEFAULTS.status as Status),
+          intent:
+            templateSR.service_request?.intent ||
+            (SR_DEFAULTS.intent as Intent),
+          priority:
+            templateSR.service_request?.priority ||
+            (SR_DEFAULTS.priority as Priority),
           category:
             templateSR.service_request?.category ||
             activityDefinitionData.classification,
@@ -835,10 +844,15 @@ export function ServiceRequestQuestion({
                   title:
                     templateSR.service_request?.title ||
                     activityDefinitionData.title,
-                  status: templateSR.service_request?.status || Status.active,
-                  intent: templateSR.service_request?.intent || Intent.order,
+                  status:
+                    templateSR.service_request?.status ||
+                    (SR_DEFAULTS.status as Status),
+                  intent:
+                    templateSR.service_request?.intent ||
+                    (SR_DEFAULTS.intent as Intent),
                   priority:
-                    templateSR.service_request?.priority || Priority.routine,
+                    templateSR.service_request?.priority ||
+                    (SR_DEFAULTS.priority as Priority),
                   category:
                     templateSR.service_request?.category ||
                     activityDefinitionData.classification,
