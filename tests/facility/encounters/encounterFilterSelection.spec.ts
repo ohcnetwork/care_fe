@@ -1163,9 +1163,10 @@ test.describe("All encounters search", () => {
     expect(lookups).toHaveLength(0);
   });
 
-  test("in Auto, a full phone number offers only the phone lookup", async ({
+  test("in Auto, a full phone number lists its patients directly", async ({
     page,
   }) => {
+    const lookups = trackPatientLookups(page);
     // Like a facility with many configs: some without a format rule, and the
     // phone config listed last.
     const hospitalId = identifierConfig("Hospital ID", "example.org/hospital");
@@ -1183,15 +1184,20 @@ test.describe("All encounters search", () => {
     );
     await page.goto(listUrl());
 
+    // The phone config is the only one that recognises the number, so no
+    // row to confirm: the patients under it are listed, with Back to the rows.
     await searchBox(page).pressSequentially("+919846404232", { delay: 20 });
+    await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
+    await expect(
+      page.getByRole("option", { name: fullPatient.name }),
+    ).toBeVisible();
+    expect(lookups).toEqual([
+      { config: phoneConfig.id, value: "+919846404232", page_size: 20 },
+    ]);
+
     const patientRows = page
       .getByRole("group", { name: /look up a patient/i })
       .getByRole("option");
-    await expect(patientRows).toHaveCount(1);
-    await expect(patientRows).toContainText(/phone number \+91 98464 04232/i);
-    await expect(page.getByRole("option").first()).toContainText(
-      /phone number/i,
-    );
 
     // Without a format match, a partly typed phone number leads with its
     // hint; then configs without a rule, usable ones before disabled ones.
@@ -1225,9 +1231,8 @@ test.describe("All encounters search", () => {
     await expect(india).toBeVisible();
     await searchBox(page).pressSequentially("4 7400 123456", { delay: 50 });
     await expect(country("Phone country: United Kingdom (+44)")).toBeVisible();
-    await expect(page.getByRole("option").first()).toContainText(
-      /phone number \+44 7400 123456/i,
-    );
+    // The complete number goes straight to its patients.
+    await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
   });
 
   test("looks up a phone number in the picked country", async ({ page }) => {
@@ -1332,13 +1337,8 @@ test.describe("All encounters search", () => {
     const before = new URL(page.url()).searchParams;
 
     await searchBox(page).pressSequentially("9876543210", { delay: 150 });
-    // Detection puts the lookup first; typing alone never searches. Auto
-    // reads the number in the default country and shows its code.
-    await expect(page.getByRole("option").first()).toContainText(
-      /phone number \+91 98765 43210/i,
-    );
-    expect(lookups).toHaveLength(0);
-    await searchBox(page).press("Enter");
+    // Auto reads the number in the default country; only the phone config
+    // recognises it, so its patients are listed without another step.
     await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
     expect(lookups).toEqual([
       { config: phoneConfig.id, value: "+919876543210", page_size: 20 },
@@ -1372,7 +1372,6 @@ test.describe("All encounters search", () => {
 
     // Removing the patient is not Undo: the default dates resume.
     await searchBox(page).pressSequentially("9876543210", { delay: 150 });
-    await searchBox(page).press("Enter");
     await page.getByRole("option", { name: fullPatient.name }).click();
     await expect(dateNotice(page)).toBeVisible();
     await chip(page)
@@ -1399,7 +1398,6 @@ test.describe("All encounters search", () => {
     });
     await page.goto(listUrl());
     await searchBox(page).pressSequentially("9876500000", { delay: 150 });
-    await searchBox(page).press("Enter");
     await page.getByRole("option", { name: /meera s/i }).click();
 
     const year = page.getByRole("textbox", { name: /year of birth/i });

@@ -246,21 +246,29 @@ export function EncounterSearch({
     scanner.reset();
   };
 
-  // In a picked identifier field, a value that is plainly complete (a valid
-  // phone number in the country shown, or a regex match) is looked up at once:
-  // choosing the field already said what the text is, so there is no row to
-  // confirm. Auto still waits for a choice, as its text could be a name or a
-  // visit ID.
+  // A value that is plainly a complete identifier (a valid phone number in the
+  // country shown, or a regex match) is looked up at once, with the patients
+  // under it listed directly: no row to confirm. A picked field already says
+  // what the text is. Auto does the same when exactly one identifier
+  // recognises it; if several do, it is ambiguous and the rows stay. Back
+  // returns to the rows (name, visit) when the guess was wrong.
   const lookupIfReady = (
     nextField: SearchField,
     text: string,
     nextCountry: Country,
   ) => {
     const value = text.trim();
-    const config = configOfField(nextField, configs);
-    if (!value || !config) return false;
-    const check = checkIdentifier(config, value, nextCountry);
-    if (check.status !== "complete" || !check.detected) return false;
+    if (!value) return false;
+    const picked = configOfField(nextField, configs);
+    const candidates = picked ? [picked] : nextField === "auto" ? configs : [];
+    const ready = candidates
+      .map((config) => ({
+        config,
+        check: checkIdentifier(config, value, nextCountry),
+      }))
+      .filter(({ check }) => check.detected && check.status === "complete");
+    if (ready.length !== 1) return false;
+    const [{ config, check }] = ready;
     setPending(null);
     setLookup({ config, value: check.value, display: check.display });
     return true;
