@@ -50,7 +50,7 @@ export interface FileUpdate {
 
 export interface FileReadMinimal extends FileBase {
   id: string;
-  archived_by: UserReadMinimal;
+  archived_by: UserReadMinimal | null;
   archived_datetime: string;
   upload_completed: boolean;
   is_archived?: boolean;
