@@ -10,6 +10,12 @@ export const IMMUNIZATION_STATUS = [
 
 export type ImmunizationStatus = (typeof IMMUNIZATION_STATUS)[number];
 
+/** Statuses offered when recording; corrections are made by editing. */
+export const IMMUNIZATION_CREATE_STATUS = [
+  "completed",
+  "not_done",
+] as const satisfies readonly ImmunizationStatus[];
+
 export const IMMUNIZATION_STATUS_COLORS = {
   completed: "green",
   not_done: "yellow",

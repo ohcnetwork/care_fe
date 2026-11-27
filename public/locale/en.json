@@ -2031,6 +2031,7 @@
   "female": "Female",
   "field": "Field",
   "field_required": "This field is required",
+  "field_required_for_entry": "{{field}} is required for {{entry}}",
   "fields": "Fields",
   "file_archived_successfully": "File archived successfully",
   "file_conversion_in_progress": "File conversion in progress",

@@ -1,6 +1,6 @@
 interface ClinicalCodeRecord {
   code: { code: string };
-  verification_status: string;
+  verification_status: string | null;
 }
 
 /** Records entered in error do not count as duplicates. */

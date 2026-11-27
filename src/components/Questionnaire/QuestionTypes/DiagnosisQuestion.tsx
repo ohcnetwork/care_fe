@@ -75,6 +75,8 @@ import {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
+import { validateChosenFields } from "@/types/questionnaire/validation";
+import careConfig from "@careConfig";
 
 interface DiagnosisQuestionProps {
   patientId: string;
@@ -90,13 +92,37 @@ interface DiagnosisQuestionProps {
   question: Question;
 }
 
+const DEFAULTS = careConfig.clinicalDefaults.diagnosis;
+
+/** Today, unless the deployment leaves the onset date for the clinician. */
+function defaultOnset() {
+  return DEFAULTS.onset === "now"
+    ? { onset_datetime: dateQueryString(new Date()) }
+    : undefined;
+}
+
+export function validateDiagnosisQuestion(
+  diagnoses: DiagnosisRequest[],
+  questionId: string,
+) {
+  return validateChosenFields(
+    diagnoses,
+    questionId,
+    ["clinical_status", "verification_status", "severity"],
+    (diagnosis) => diagnosis.code.display,
+    // Only entries changed in this form are saved.
+    (diagnosis) =>
+      !diagnosis.dirty || diagnosis.verification_status === "entered_in_error",
+  );
+}
+
 const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   code: { code: "", display: "", system: "" },
-  clinical_status: "active",
-  verification_status: "confirmed",
-  severity: "moderate",
-  category: "encounter_diagnosis",
-  onset: { onset_datetime: dateQueryString(new Date()) },
+  clinical_status: DEFAULTS.clinical_status,
+  verification_status: DEFAULTS.verification_status,
+  severity: DEFAULTS.severity,
+  category: DEFAULTS.category,
+  onset: defaultOnset(),
   dirty: true,
 };
 
@@ -135,7 +161,7 @@ function ClinicalStatusSelect({
   onValueChange,
   disabled,
 }: {
-  status: DiagnosisClinicalStatus;
+  status: DiagnosisClinicalStatus | null;
   onValueChange: (value: DiagnosisClinicalStatus) => void;
   disabled?: boolean;
 }) {
@@ -168,7 +194,7 @@ function VerificationStatusSelect({
   isExistingRecord,
   disabled,
 }: {
-  status: string;
+  status: string | null;
   onValueChange: (value: string) => void;
   isExistingRecord?: boolean;
   disabled?: boolean;
@@ -254,7 +280,7 @@ function DiagnosisDetailsForm({
       <div className="space-y-2">
         <Label className="text-sm">{t("status")}</Label>
         <ClinicalStatusSelect
-          status={diagnosis.clinical_status || "active"}
+          status={diagnosis.clinical_status ?? null}
           onValueChange={(value) =>
             onUpdate({
               clinical_status: value as DiagnosisRequest["clinical_status"],
@@ -266,7 +292,7 @@ function DiagnosisDetailsForm({
       <div className="space-y-2">
         <Label className="text-sm">{t("verification")}</Label>
         <VerificationStatusSelect
-          status={diagnosis.verification_status || ""}
+          status={diagnosis.verification_status ?? null}
           onValueChange={(value) =>
             onUpdate({
               verification_status:
@@ -350,11 +376,11 @@ export function DiagnosisQuestion({
 
   const isPreview = patientId === "preview";
   const [selectedCategory] = useState<DiagnosisRequest["category"]>(
-    "encounter_diagnosis",
+    DEFAULTS.category,
   );
   const [newDiagnosis, setNewDiagnosis] = useState<Partial<DiagnosisRequest>>({
     ...DIAGNOSIS_INITIAL_VALUE,
-    onset: { onset_datetime: dateQueryString(new Date()) },
+    onset: defaultOnset(),
   });
   const [showDiagnosisSelection, setShowDiagnosisSelection] = useState(false);
   const isMobile = useBreakpoints({ default: true, md: false });
@@ -449,7 +475,7 @@ export function DiagnosisQuestion({
     setShowDiagnosisSelection(false);
     setNewDiagnosis({
       ...DIAGNOSIS_INITIAL_VALUE,
-      onset: { onset_datetime: dateQueryString(new Date()) },
+      onset: defaultOnset(),
     });
   };
 
@@ -533,7 +559,7 @@ export function DiagnosisQuestion({
       ...sortedDiagnoses,
       ...nonDuplicateDiagnoses.map(({ id: _id, ...diagnosis }) => ({
         ...diagnosis,
-        severity: diagnosis.severity ?? "moderate",
+        severity: diagnosis.severity ?? DEFAULTS.severity,
         dirty: true,
       })),
     ];
@@ -561,7 +587,7 @@ export function DiagnosisQuestion({
                 {
                   key: "clinical_status",
                   label: t("status"),
-                  render: (status: string) => (
+                  render: (status: string | null) => (
                     <Badge
                       variant={
                         DIAGNOSIS_CLINICAL_STATUS_COLORS[
@@ -569,14 +595,14 @@ export function DiagnosisQuestion({
                         ]
                       }
                     >
-                      {t(status)}
+                      {t(status ?? "not_specified")}
                     </Badge>
                   ),
                 },
                 {
                   key: "verification_status",
                   label: t("verification"),
-                  render: (verification_status: string) => (
+                  render: (verification_status: string | null) => (
                     <Badge
                       variant={
                         DIAGNOSIS_VERIFICATION_STATUS_COLORS[
@@ -584,7 +610,7 @@ export function DiagnosisQuestion({
                         ]
                       }
                     >
-                      {t(verification_status)}
+                      {t(verification_status ?? "not_specified")}
                     </Badge>
                   ),
                 },
@@ -811,7 +837,7 @@ const DiagnosisTableRow = ({
         </TableCell>
         <TableCell className="py-1">
           <ClinicalStatusSelect
-            status={diagnosis.clinical_status}
+            status={diagnosis.clinical_status ?? null}
             onValueChange={(value) =>
               onUpdate?.({
                 clinical_status: value as DiagnosisRequest["clinical_status"],
@@ -829,7 +855,7 @@ const DiagnosisTableRow = ({
         </TableCell>
         <TableCell className="py-1">
           <VerificationStatusSelect
-            status={diagnosis.verification_status}
+            status={diagnosis.verification_status ?? null}
             onValueChange={(value) =>
               onUpdate?.({
                 verification_status:
@@ -984,9 +1010,13 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                         : ""}
                     </span>
                     <span className="text-gray-300">|</span>
-                    <span>{t(diagnosis.clinical_status)}</span>
+                    <span>
+                      {t(diagnosis.clinical_status ?? "not_specified")}
+                    </span>
                     <span className="text-gray-300">|</span>
-                    <span>{t(diagnosis.verification_status)}</span>
+                    <span>
+                      {t(diagnosis.verification_status ?? "not_specified")}
+                    </span>
                     {diagnosis.severity && (
                       <>
                         <span className="text-gray-300">|</span>

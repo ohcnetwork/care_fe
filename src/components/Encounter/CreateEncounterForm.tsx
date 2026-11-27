@@ -114,7 +114,7 @@ export default function CreateEncounterForm({
     scheduleEncounterType &&
     careConfig.encounterClasses.includes(scheduleEncounterType)
       ? scheduleEncounterType
-      : careConfig.defaultEncounterType;
+      : (careConfig.clinicalDefaults.encounter.class ?? undefined);
 
   const encounterFormSchema = z
     .object({
@@ -124,7 +124,8 @@ export default function CreateEncounterForm({
         EncounterStatus.ON_HOLD,
       ] as const),
       encounter_class: z.enum(careConfig.encounterClasses),
-      priority: z.enum(ENCOUNTER_PRIORITY),
+      // Empty when the deployment defaults priority to none.
+      priority: z.enum(ENCOUNTER_PRIORITY, { error: t("field_required") }),
       organizations: z.array(z.string()).min(1, {
         message: t("at_least_one_department_is_required"),
       }),
@@ -152,7 +153,7 @@ export default function CreateEncounterForm({
     defaultValues: {
       status: defaultStatus,
       encounter_class: defaultEncounterClass,
-      priority: "routine",
+      priority: careConfig.clinicalDefaults.encounter.priority ?? undefined,
       organizations: defaultOrganizations.map(({ id }) => id),
       start_date: new Date().toISOString(),
       tags: [],

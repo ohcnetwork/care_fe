@@ -54,10 +54,11 @@ export interface Symptom {
 
 export interface SymptomRequest {
   id?: string;
-  clinical_status: SymptomClinicalStatus;
-  verification_status: SymptomVerificationStatus;
+  // null until the clinician picks one, when the deployment default is none.
+  clinical_status: SymptomClinicalStatus | null;
+  verification_status: SymptomVerificationStatus | null;
   code: Code;
-  severity: SymptomSeverity;
+  severity: SymptomSeverity | null;
   onset?: Onset;
   recorded_date?: string;
   note?: string;

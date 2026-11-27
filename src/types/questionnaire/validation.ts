@@ -113,3 +113,34 @@ export function validateFields(
     [],
   );
 }
+
+/**
+ * Errors for choice fields still empty in each entry. A deployment can default
+ * these fields to none (`REACT_CLINICAL_DEFAULTS`) so the clinician must pick
+ * them; this stops the form from saving until they do. `keys` are also the
+ * i18n keys of the field labels.
+ */
+export function validateChosenFields<T extends object>(
+  entries: T[],
+  questionId: string,
+  keys: (keyof T & string)[],
+  entryName: (entry: T) => string,
+  skip?: (entry: T) => boolean,
+): QuestionValidationError[] {
+  return entries.flatMap((entry, index) =>
+    skip?.(entry)
+      ? []
+      : keys
+          .filter((key) => entry[key] == null || entry[key] === "")
+          .map((key) => ({
+            question_id: questionId,
+            error: t("field_required_for_entry", {
+              field: t(key as string),
+              entry: entryName(entry),
+            }),
+            type: "validation_error",
+            field_key: key,
+            index,
+          })),
+  );
+}

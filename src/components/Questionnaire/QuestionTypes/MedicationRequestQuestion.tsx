@@ -107,6 +107,7 @@ import { QuestionnaireResponseTemplateReadSpec } from "@/types/questionnaire/que
 import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
 import {
   useFieldError,
+  validateChosenFields,
   validateFields,
 } from "@/types/questionnaire/validation";
 import { UserReadMinimal } from "@/types/user/user";
@@ -283,6 +284,13 @@ export function validateMedicationRequestQuestion(
   values: MedicationRequestCreate[],
   questionId: string,
 ): QuestionValidationError[] {
+  const intentErrors = validateChosenFields(
+    values,
+    questionId,
+    ["intent"],
+    displayMedicationName,
+    (value) => value.status === "entered_in_error",
+  );
   return values.reduce((errors: QuestionValidationError[], value, index) => {
     // Skip validation for medications marked as entered_in_error
     if (value.status === "entered_in_error") return errors;
@@ -340,7 +348,7 @@ export function validateMedicationRequestQuestion(
     );
 
     return [...errors, ...dosageErrors];
-  }, []);
+  }, intentErrors);
 }
 
 export function MedicationRequestQuestion({

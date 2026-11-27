@@ -21,7 +21,7 @@ export function useDefaultEncounterClass() {
   )?.default_class;
   const defaultClass: EncounterListClass =
     ENCOUNTER_LIST_CLASSES.find((encounterClass) => encounterClass === saved) ||
-    careConfig.defaultEncounterType ||
+    careConfig.clinicalDefaults.encounter.class ||
     "all";
 
   const setDefaultClass = (encounterClass: EncounterListClass) =>

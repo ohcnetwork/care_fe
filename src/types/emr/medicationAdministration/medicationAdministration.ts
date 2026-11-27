@@ -60,7 +60,8 @@ export interface MedicationAdministrationRequest {
   id?: string;
   encounter: string;
   request: string;
-  status: MedicationAdministrationStatus;
+  // null until the clinician picks one, when the deployment default is none.
+  status: MedicationAdministrationStatus | null;
   status_reason?: Code;
   medication?: Code;
   administered_product?: string;

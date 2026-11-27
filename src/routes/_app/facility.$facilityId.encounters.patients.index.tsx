@@ -10,7 +10,7 @@ export const Route = createFileRoute(
   beforeLoad: ({ params, location }) => {
     throw redirectKeepingQuery(
       `/facility/${params.facilityId}/encounters/patients/${
-        careConfig.defaultEncounterType || "all"
+        careConfig.clinicalDefaults.encounter.class || "all"
       }`,
       location,
     );

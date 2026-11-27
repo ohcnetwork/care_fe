@@ -2,6 +2,7 @@ import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/stru
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
 import { sanitizeNote } from "./adapt";
 
+import { validateAllergyQuestion } from "@/components/Questionnaire/QuestionTypes/AllergyQuestion";
 import { AllergyIntoleranceInput } from "@/components/QuestionnaireV2/structured/inputs/AllergyIntoleranceInput";
 
 export const allergyIntoleranceDefinition: StructuredTypeDefinition<"allergy_intolerance"> =
@@ -11,6 +12,8 @@ export const allergyIntoleranceDefinition: StructuredTypeDefinition<"allergy_int
     requires: ["patientId", "encounterId"],
     subjects: ["encounter"],
     draftPolicy: "serialize",
+    validate: (allergies, questionId) =>
+      validateAllergyQuestion(allergies, questionId),
     buildRequests: async (
       allergies,
       { patientId, encounterId, questionId, path },

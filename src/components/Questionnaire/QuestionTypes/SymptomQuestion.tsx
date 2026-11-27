@@ -73,6 +73,8 @@ import {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
+import { validateChosenFields } from "@/types/questionnaire/validation";
+import careConfig from "@careConfig";
 
 interface SymptomQuestionProps {
   patientId: string;
@@ -88,21 +90,43 @@ interface SymptomQuestionProps {
   question: Question;
 }
 
+const DEFAULTS = careConfig.clinicalDefaults.symptom;
+
 const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
   code: { code: "", display: "", system: "" },
-  clinical_status: "active",
-  verification_status: "confirmed",
-  severity: "moderate",
+  clinical_status: DEFAULTS.clinical_status,
+  verification_status: DEFAULTS.verification_status,
+  severity: DEFAULTS.severity,
   category: "problem_list_item",
-  onset: { onset_datetime: dateQueryString(new Date()) },
+  onset: defaultOnset(),
 };
+
+/** Today, unless the deployment leaves the onset date for the clinician. */
+function defaultOnset() {
+  return DEFAULTS.onset === "now"
+    ? { onset_datetime: dateQueryString(new Date()) }
+    : undefined;
+}
+
+export function validateSymptomQuestion(
+  symptoms: SymptomRequest[],
+  questionId: string,
+) {
+  return validateChosenFields(
+    symptoms,
+    questionId,
+    ["clinical_status", "verification_status", "severity"],
+    (symptom) => symptom.code.display,
+    (symptom) => symptom.verification_status === "entered_in_error",
+  );
+}
 
 function StatusSelect({
   status,
   onValueChange,
   disabled,
 }: {
-  status: string;
+  status: string | null;
   onValueChange: (value: string) => void;
   disabled?: boolean;
 }) {
@@ -110,7 +134,7 @@ function StatusSelect({
   return (
     <Select value={status} onValueChange={onValueChange} disabled={disabled}>
       <SelectTrigger className="h-8 md:h-9">
-        <SelectValue />
+        <SelectValue placeholder={t("select")} />
       </SelectTrigger>
       <SelectContent>
         {SYMPTOM_CLINICAL_STATUS.map((status) => (
@@ -128,7 +152,7 @@ function SeveritySelect({
   onValueChange,
   disabled,
 }: {
-  severity: string;
+  severity: string | null;
   onValueChange: (value: string) => void;
   disabled?: boolean;
 }) {
@@ -136,7 +160,7 @@ function SeveritySelect({
   return (
     <Select value={severity} onValueChange={onValueChange} disabled={disabled}>
       <SelectTrigger className="h-8 md:h-9">
-        <SelectValue />
+        <SelectValue placeholder={t("select")} />
       </SelectTrigger>
       <SelectContent>
         {SYMPTOM_SEVERITY.map((severity) => (
@@ -155,7 +179,7 @@ function VerificationStatusSelect({
   isExistingRecord,
   disabled,
 }: {
-  status: string;
+  status: string | null;
   onValueChange: (value: string) => void;
   isExistingRecord?: boolean;
   disabled?: boolean;
@@ -164,7 +188,7 @@ function VerificationStatusSelect({
   return (
     <Select value={status} onValueChange={onValueChange} disabled={disabled}>
       <SelectTrigger className="h-8 md:h-9">
-        <SelectValue />
+        <SelectValue placeholder={t("select")} />
       </SelectTrigger>
       <SelectContent>
         {SYMPTOM_VERIFICATION_STATUS.map(
@@ -243,7 +267,7 @@ function SymptomActionsMenu({
   symptom,
 }: {
   showNotes: boolean;
-  verificationStatus: string;
+  verificationStatus: string | null;
   disabled?: boolean;
   onToggleNotes: () => void;
   onRemove: () => void;
@@ -482,9 +506,9 @@ const SymptomRow = React.memo(function SymptomRow({
                           )
                         : ""}
                       {" · "}
-                      {t(symptom.clinical_status)}
+                      {t(symptom.clinical_status ?? "not_specified")}
                       {" · "}
-                      {t(symptom.severity)} {t("severity")}
+                      {t(symptom.severity ?? "not_specified")} {t("severity")}
                     </div>
                   )}
                 </div>
@@ -659,7 +683,7 @@ export function SymptomQuestion({
   const [showSymptomSelection, setShowSymptomSelection] = useState(false);
   const [newSymptom, setNewSymptom] = useState<Partial<SymptomRequest>>({
     ...SYMPTOM_INITIAL_VALUE,
-    onset: { onset_datetime: dateQueryString(new Date()) },
+    onset: defaultOnset(),
   });
   const isMobile = useBreakpoints({ default: true, md: false });
 
@@ -706,7 +730,7 @@ export function SymptomQuestion({
 
     setNewSymptom({
       ...SYMPTOM_INITIAL_VALUE,
-      onset: { onset_datetime: dateQueryString(new Date()) },
+      onset: defaultOnset(),
       code,
     });
 
@@ -731,7 +755,7 @@ export function SymptomQuestion({
     setShowSymptomSelection(false);
     setNewSymptom({
       ...SYMPTOM_INITIAL_VALUE,
-      onset: { onset_datetime: dateQueryString(new Date()) },
+      onset: defaultOnset(),
     });
   };
 
@@ -819,7 +843,7 @@ export function SymptomQuestion({
                 {
                   key: "clinical_status",
                   label: t("status"),
-                  render: (status: string) => (
+                  render: (status: string | null) => (
                     <Badge
                       variant={
                         SYMPTOM_CLINICAL_STATUS_COLORS[
@@ -827,14 +851,14 @@ export function SymptomQuestion({
                         ]
                       }
                     >
-                      {t(status)}
+                      {t(status ?? "not_specified")}
                     </Badge>
                   ),
                 },
                 {
                   key: "verification_status",
                   label: t("verification"),
-                  render: (verification_status: string) => (
+                  render: (verification_status: string | null) => (
                     <Badge
                       variant={
                         SYMPTOM_VERIFICATION_STATUS_COLORS[
@@ -842,14 +866,14 @@ export function SymptomQuestion({
                         ]
                       }
                     >
-                      {t(verification_status)}
+                      {t(verification_status ?? "not_specified")}
                     </Badge>
                   ),
                 },
                 {
                   key: "severity",
                   label: t("severity"),
-                  render: (severity: string) => (
+                  render: (severity: string | null) => (
                     <Badge
                       variant={
                         SYMPTOM_SEVERITY_COLORS[
@@ -857,7 +881,7 @@ export function SymptomQuestion({
                         ]
                       }
                     >
-                      {t(severity)}
+                      {t(severity ?? "not_specified")}
                     </Badge>
                   ),
                 },

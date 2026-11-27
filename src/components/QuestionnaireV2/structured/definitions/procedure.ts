@@ -2,6 +2,7 @@ import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/stru
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
 import { sanitizeNote } from "./adapt";
 
+import { validateProcedureQuestion } from "@/components/Questionnaire/QuestionTypes/ProcedureQuestion";
 import { ProcedureInput } from "@/components/QuestionnaireV2/structured/inputs/ProcedureInput";
 
 import type { ProcedureOccurrence } from "@/types/emr/procedure/procedure";
@@ -25,6 +26,8 @@ export const procedureDefinition: StructuredTypeDefinition<"procedure"> = {
   requires: ["patientId", "encounterId"],
   subjects: ["encounter"],
   draftPolicy: "serialize",
+  validate: (procedures, questionId) =>
+    validateProcedureQuestion(procedures, questionId),
   buildRequests: async (
     procedures,
     { patientId, encounterId, questionId, path },

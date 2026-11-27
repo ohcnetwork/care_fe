@@ -48,6 +48,9 @@ import {
 } from "@/types/questionnaire/validation";
 import careConfig from "@careConfig";
 
+const DEFAULT_DISCHARGE_DISPOSITION =
+  careConfig.clinicalDefaults.encounter.discharge_disposition ?? undefined;
+
 interface EncounterQuestionProps {
   question: Question;
   encounterId: string;
@@ -145,7 +148,7 @@ export function EncounterQuestion({
     hospitalization: {
       re_admission: false,
       admit_source: "other",
-      discharge_disposition: careConfig.defaultDischargeDisposition,
+      discharge_disposition: DEFAULT_DISCHARGE_DISPOSITION,
       diet_preference: "none",
     },
     discharge_summary_advice: null,
@@ -178,7 +181,7 @@ export function EncounterQuestion({
         ...initialEncounter.hospitalization,
         discharge_disposition:
           initialEncounter.hospitalization?.discharge_disposition ??
-          careConfig.defaultDischargeDisposition,
+          DEFAULT_DISCHARGE_DISPOSITION,
       };
     }
     if (
@@ -265,7 +268,7 @@ export function EncounterQuestion({
         ...newEncounter.hospitalization,
         discharge_disposition:
           newEncounter.hospitalization?.discharge_disposition ??
-          careConfig.defaultDischargeDisposition,
+          DEFAULT_DISCHARGE_DISPOSITION,
       };
     } else if ("hospitalization" in newEncounter) {
       newEncounter.hospitalization = {
@@ -493,7 +496,7 @@ export function EncounterQuestion({
                   <Select
                     value={
                       encounter.hospitalization?.discharge_disposition ??
-                      careConfig.defaultDischargeDisposition
+                      DEFAULT_DISCHARGE_DISPOSITION
                     }
                     onValueChange={(value: EncounterDischargeDisposition) => {
                       if (!encounter.hospitalization) return;

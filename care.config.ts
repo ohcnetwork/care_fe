@@ -1,9 +1,9 @@
 import { booleanFromString } from "@/common/utils";
 import { PaymentReconciliationPaymentMethod } from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import { clinicalDefaultsSchema } from "@/types/emr/clinicalDefaults";
 import {
   ENCOUNTER_CLASS,
   EncounterClass,
-  EncounterDischargeDisposition,
 } from "@/types/emr/encounter/encounter";
 
 import { parseCareApp } from "@/Utils/careApps";
@@ -70,6 +70,14 @@ const resolveApiUrl = (): string => {
   return env.REACT_CARE_API_URL ?? "";
 };
 
+const encounterClasses = (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",") ??
+  ENCOUNTER_CLASS) as NonEmptyArray<EncounterClass>;
+
+// An invalid value falls back to the built-in defaults; src/index.tsx reports it.
+const clinicalDefaults =
+  clinicalDefaultsSchema.safeParse(parseJson(env.REACT_CLINICAL_DEFAULTS))
+    .data ?? clinicalDefaultsSchema.parse(undefined);
+
 const careConfig = {
   apiUrl: resolveApiUrl(),
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
@@ -87,17 +95,21 @@ const careConfig = {
   availableLocales: (env.REACT_ALLOWED_LOCALES || "")
     .split(",")
     .map((l) => l.trim()),
-  encounterClasses: (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",") ??
-    ENCOUNTER_CLASS) as NonEmptyArray<EncounterClass>,
+  encounterClasses,
 
-  defaultEncounterType:
-    (env.REACT_DEFAULT_ENCOUNTER_TYPE as EncounterClass) ||
-    (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",").length === 1
-      ? (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",")[0] as EncounterClass)
-      : undefined),
-
-  defaultDischargeDisposition: env.REACT_DEFAULT_DISCHARGE_DISPOSITION as
-    EncounterDischargeDisposition | undefined,
+  /**
+   * Defaults for new clinical entries in an encounter (REACT_CLINICAL_DEFAULTS).
+   * A null field is "none": the clinician must pick it before saving.
+   */
+  clinicalDefaults: {
+    ...clinicalDefaults,
+    encounter: {
+      ...clinicalDefaults.encounter,
+      class:
+        clinicalDefaults.encounter.class ??
+        (encounterClasses.length === 1 ? encounterClasses[0] : null),
+    },
+  },
 
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||

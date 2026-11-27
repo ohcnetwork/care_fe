@@ -69,6 +69,7 @@ import {
   ProcedureOccurrence,
   ProcedureOutcome,
   ProcedureRequest,
+  ProcedureStatus,
 } from "@/types/emr/procedure/procedure";
 import procedureApi from "@/types/emr/procedure/procedureApi";
 import {
@@ -76,6 +77,8 @@ import {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
+import { validateChosenFields } from "@/types/questionnaire/validation";
+import careConfig from "@careConfig";
 
 interface ProcedureQuestionProps {
   patientId: string;
@@ -94,7 +97,7 @@ interface ProcedureQuestionProps {
 // No default date: most procedures are recorded long after they happened.
 const PROCEDURE_INITIAL_VALUE: Omit<ProcedureRequest, "encounter"> = {
   code: { code: "", display: "", system: "" },
-  status: "completed",
+  status: careConfig.clinicalDefaults.procedure.status,
   category: [],
   body_site: [],
   reason: [],
@@ -103,6 +106,20 @@ const PROCEDURE_INITIAL_VALUE: Omit<ProcedureRequest, "encounter"> = {
 };
 
 const NO_OUTCOME = "none";
+
+export function validateProcedureQuestion(
+  procedures: ProcedureRequest[],
+  questionId: string,
+) {
+  return validateChosenFields(
+    procedures,
+    questionId,
+    ["status"],
+    (procedure) => procedure.code.display,
+    // Only rows added or edited in this form are saved.
+    (procedure) => !procedure.dirty || procedure.status === "entered_in_error",
+  );
+}
 
 const noop = () => {};
 
@@ -129,7 +146,7 @@ function StatusSelect({
   isExistingRecord,
   disabled,
 }: {
-  status: string;
+  status: string | null;
   onValueChange: (value: string) => void;
   isExistingRecord?: boolean;
   disabled?: boolean;
@@ -138,7 +155,7 @@ function StatusSelect({
   return (
     <Select value={status} onValueChange={onValueChange} disabled={disabled}>
       <SelectTrigger className="h-8 md:h-9" aria-label={t("status")}>
-        <SelectValue />
+        <SelectValue placeholder={t("select_status")} />
       </SelectTrigger>
       <SelectContent>
         {PROCEDURE_STATUS.map(
@@ -305,18 +322,19 @@ function ProcedureDetailsFields({
           disabled={disabled}
         />
       </div>
-      {PROCEDURE_STATUS_WITH_REASON.includes(procedure.status) && (
-        <div>
-          <FieldLabel>{t("status_reason")}</FieldLabel>
-          <ValueSetSelect
-            system="system-procedure-status-reason"
-            value={procedure.status_reason}
-            placeholder={t("select_status_reason")}
-            onSelect={(code) => onUpdate({ status_reason: code })}
-            disabled={disabled}
-          />
-        </div>
-      )}
+      {procedure.status &&
+        PROCEDURE_STATUS_WITH_REASON.includes(procedure.status) && (
+          <div>
+            <FieldLabel>{t("status_reason")}</FieldLabel>
+            <ValueSetSelect
+              system="system-procedure-status-reason"
+              value={procedure.status_reason}
+              placeholder={t("select_status_reason")}
+              onSelect={(code) => onUpdate({ status_reason: code })}
+              disabled={disabled}
+            />
+          </div>
+        )}
       <div>
         <FieldLabel>{t("body_site")}</FieldLabel>
         <CodeListInput
@@ -397,7 +415,7 @@ function ProcedureActionsMenu({
   onRemove,
 }: {
   showDetails: boolean;
-  status: string;
+  status: string | null;
   disabled?: boolean;
   onToggleDetails: () => void;
   onRemove: () => void;
@@ -465,7 +483,7 @@ const ProcedureRow = React.memo(function ProcedureRow({
 
   const handleStatusChange = useCallback(
     (value: string) => {
-      const status = value as ProcedureRequest["status"];
+      const status = value as ProcedureStatus;
       onUpdate(index, {
         status,
         // A reason only qualifies statuses that take one.
@@ -600,7 +618,7 @@ const ProcedureRow = React.memo(function ProcedureRow({
                     <div className="text-sm mt-1 text-gray-600">
                       {[
                         occurrenceLabel,
-                        t(procedure.status),
+                        t(procedure.status ?? "not_specified"),
                         procedure.outcome &&
                           t(`procedure_outcome__${procedure.outcome}`),
                       ]

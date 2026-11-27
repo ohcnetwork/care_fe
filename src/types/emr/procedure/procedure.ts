@@ -55,7 +55,8 @@ export interface Procedure {
 
 export interface ProcedureRequest {
   id?: string;
-  status: ProcedureStatus;
+  // null until the clinician picks one, when the deployment default is none.
+  status: ProcedureStatus | null;
   status_reason?: Code | null;
   category: Code[];
   code: Code;
