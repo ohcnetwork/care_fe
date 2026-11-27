@@ -46,7 +46,7 @@ const tabsListVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-muted ring ring-border",
+        default: "bg-strong-background/60 ring ring-border",
         line: "h-[calc(var(--tabs-list-height)+1px)] data-vertical:h-fit w-max min-w-full data-vertical:w-fit data-vertical:min-w-0 rounded-none gap-1 border-border bg-transparent p-0 justify-start data-[orientation=horizontal]:border-b data-[orientation=vertical]:border-r",
         browser:
           "rounded-none p-0 border-b border-border gap-1 items-end bg-transparent w-full justify-start h-auto",

@@ -60,6 +60,12 @@ const from = (page: Page) =>
 const to = (page: Page) => page.getByRole("textbox", { name: /^end date$/i });
 const apply = (page: Page) =>
   page.getByRole("button", { name: "Apply", exact: true });
+// The fixture's <output> (implicit role "status") records every applied range.
+const applied = (page: Page) =>
+  page.getByRole("status", { name: "Applied range", exact: true });
+// A fixture button outside the picker, used to dismiss the popover.
+const outside = (page: Page) =>
+  page.getByRole("button", { name: "Outside", exact: true });
 
 test("first click registers, active end can be corrected, and range count is inclusive", async ({
   page,
@@ -79,7 +85,7 @@ test("first click registers, active end can be corrected, and range count is inc
   await expect(from(page)).toHaveValue("01/11/2026");
   await expect(to(page)).toHaveValue("16/11/2026");
   await apply(page).click();
-  await expect(page.getByTestId("applied")).toContainText('"count":1');
+  await expect(applied(page)).toContainText('"count":1');
 });
 
 test("shortcuts and Enter move focus and apply exactly once inside a menu", async ({
@@ -94,8 +100,8 @@ test("shortcuts and Enter move focus and apply exactly once inside a menu", asyn
   await expect(to(page)).toHaveValue("20/11/2026");
   await expect(apply(page)).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(page.getByTestId("applied")).toContainText('"count":1');
-  await expect(page.getByTestId("applied")).toContainText('"to":"2026-11-20"');
+  await expect(applied(page)).toContainText('"count":1');
+  await expect(applied(page)).toContainText('"to":"2026-11-20"');
 });
 
 test("invalid dates never commit, bounds show inline errors, and a typed reversed range swaps", async ({
@@ -109,7 +115,7 @@ test("invalid dates never commit, bounds show inline errors, and a typed reverse
     page.getByText("Enter a valid date as DD/MM/YYYY"),
   ).toBeVisible();
   await expect(apply(page)).toBeDisabled();
-  await expect(page.getByTestId("applied")).toContainText('"count":0');
+  await expect(applied(page)).toContainText('"count":0');
   await from(page).fill("01/01/2026");
   await expect(from(page)).toHaveAttribute("aria-invalid", "true");
   await from(page).fill("16/11/2026");
@@ -197,14 +203,12 @@ test("year pages and month selection navigate without editing the draft", async 
   await expect(day(page, "2032-12-15")).toBeVisible();
   await expect(from(page)).toHaveValue("09/11/2026");
   await expect(to(page)).toHaveValue("19/11/2026");
-  await expect(page.getByTestId("applied")).toContainText('"count":0');
+  await expect(applied(page)).toContainText('"count":0');
   await day(page, "2032-12-15").click();
   await day(page, "2032-12-20").click();
   await apply(page).click();
-  await expect(page.getByTestId("applied")).toContainText(
-    '"from":"2032-12-15"',
-  );
-  await expect(page.getByTestId("applied")).toContainText('"to":"2032-12-20"');
+  await expect(applied(page)).toContainText('"from":"2032-12-15"');
+  await expect(applied(page)).toContainText('"to":"2032-12-20"');
 });
 
 test("popover: Escape discards drafts, dismissing keeps applicable drafts", async ({
@@ -225,19 +229,19 @@ test("popover: Escape discards drafts, dismissing keeps applicable drafts", asyn
 
   // A draft Apply would reject (missing End) is discarded silently.
   await day(page, "2026-11-03").click();
-  await page.getByTestId("outside").click();
+  await outside(page).click();
   await expect(from(page)).toBeHidden();
   await trigger.click();
   await expect(from(page)).toHaveValue("");
-  await expect(page.getByTestId("applied")).toContainText('"count":0');
+  await expect(applied(page)).toContainText('"count":0');
 
   await day(page, "2026-11-16").click();
   await day(page, "2026-11-03").click();
   // Apply is enabled by this click, so focus moves after it renders.
   await expect(apply(page)).toBeFocused();
-  await page.getByTestId("outside").click();
+  await outside(page).click();
   await expect(from(page)).toBeHidden();
-  await expect(page.getByTestId("applied")).toContainText(
+  await expect(applied(page)).toContainText(
     '{"from":"2026-11-03","to":"2026-11-16","count":1}',
   );
 
@@ -250,13 +254,13 @@ test("popover: Escape discards drafts, dismissing keeps applicable drafts", asyn
   await expect(from(page)).toHaveValue("03/11/2026");
   await filled.click();
   await expect(from(page)).toBeHidden();
-  await expect(page.getByTestId("applied")).toContainText('"count":1');
+  await expect(applied(page)).toContainText('"count":1');
 
   await filled.click();
   await to(page).fill("20/11/2026");
   await apply(page).click();
   await expect(page.locator('[data-slot="date-range-picker"]')).toHaveCount(0);
-  await expect(page.getByTestId("applied")).toContainText(
+  await expect(applied(page)).toContainText(
     '{"from":"2026-11-03","to":"2026-11-20","count":2}',
   );
 });
@@ -272,15 +276,15 @@ test("closing an open-ended picker applies only complete ranges", async ({
   await trigger.click();
   await day(page, "2026-11-03").click();
   await expect(apply(page)).toBeEnabled();
-  await page.getByTestId("outside").click();
+  await outside(page).click();
   await expect(from(page)).toBeHidden();
-  await expect(page.getByTestId("applied")).toContainText('"count":0');
+  await expect(applied(page)).toContainText('"count":0');
 
   await trigger.click();
   await day(page, "2026-11-03").click();
   await day(page, "2026-11-16").click();
-  await page.getByTestId("outside").click();
-  await expect(page.getByTestId("applied")).toContainText(
+  await outside(page).click();
+  await expect(applied(page)).toContainText(
     '{"from":"2026-11-03","to":"2026-11-16","count":1}',
   );
 });
@@ -362,10 +366,8 @@ test("date presets fit without scrolling on a desktop and still apply", async ({
     ),
   ).toBe(true);
   await page.getByRole("menuitem", { name: "Today", exact: true }).click();
-  await expect(page.getByTestId("applied")).toContainText(
-    '"from":"2026-11-20"',
-  );
-  await expect(page.getByTestId("applied")).toContainText('"count":1');
+  await expect(applied(page)).toContainText('"from":"2026-11-20"');
+  await expect(applied(page)).toContainText('"count":1');
 });
 
 test("the applied preset is marked with a check and footer hints use Kbd", async ({
@@ -460,10 +462,8 @@ test("clearing End on a reopened range keeps the calendar in sync and picks a ne
   await expect(selected("2026-11-07")).toHaveCount(0);
   await expect(selected("2026-11-11")).toHaveCount(1);
   await apply(page).click();
-  await expect(page.getByTestId("applied")).toContainText(
-    '"from":"2026-11-10"',
-  );
-  await expect(page.getByTestId("applied")).toContainText('"to":"2026-11-12"');
+  await expect(applied(page)).toContainText('"from":"2026-11-10"');
+  await expect(applied(page)).toContainText('"to":"2026-11-12"');
 });
 
 test("re-picking a range in another month keeps that month in view", async ({
@@ -499,7 +499,7 @@ test("the real multi-filter passes bounds through and returns to presets after A
   await expect(
     page.getByRole("menuitem", { name: /custom date range/i }),
   ).toBeVisible();
-  await expect(page.getByTestId("applied")).toContainText('"count":1');
+  await expect(applied(page)).toContainText('"count":1');
   await page.getByRole("menuitem", { name: /custom date range/i }).click();
   await expect(from(page)).toHaveValue("03/11/2026");
   await expect(to(page)).toHaveValue("16/11/2026");
@@ -559,7 +559,7 @@ test("a constrained popover keeps Apply visible without a nested panel scroller"
   await from(page).fill("03/11/2026");
   await apply(page).click();
   await expect(panel).toHaveCount(0);
-  await expect(page.getByTestId("applied")).toContainText('"count":1');
+  await expect(applied(page)).toContainText('"count":1');
 });
 
 test("blank input cannot apply and clearing one edge preserves the other field's error", async ({
@@ -869,10 +869,10 @@ test("populated date fields fit, with side-by-side desktop fields and only clear
     await expect(
       page.getByRole("button", { name: /^clear end date$/i }),
     ).toBeVisible();
-    await page.getByTestId("outside").evaluate((element) => {
+    await outside(page).evaluate((element) => {
       element.style.display = "none";
     });
-    await page.getByTestId("applied").evaluate((element) => {
+    await applied(page).evaluate((element) => {
       element.style.display = "none";
     });
     await expect(apply(page)).toBeInViewport({ ratio: 1 });

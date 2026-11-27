@@ -217,9 +217,7 @@ test.describe("Questionnaire v2 studio chrome", () => {
       await page
         .getByRole("textbox", { name: "Question Title" })
         .pressSequentially(`Fixed ${stamp}`);
-      await expect(
-        page.getByRole("button", { name: "to fix" }),
-      ).not.toBeVisible();
+      await expect(page.getByRole("button", { name: "to fix" })).toBeHidden();
       await expect(page.getByText("Ready to save")).toBeVisible();
     });
   });
@@ -282,7 +280,7 @@ test.describe("Questionnaire v2 studio chrome", () => {
       ).toBeVisible();
       await expect(
         nav.getByRole("button", { name: `Alpha ${stamp}` }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       // Insert separators are positional in the filtered list — they hide
       // while a filter is active so an insert can't land at the wrong
       // index; the footer add stays reachable.

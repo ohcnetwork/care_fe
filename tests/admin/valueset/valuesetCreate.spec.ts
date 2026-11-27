@@ -132,9 +132,8 @@ test.describe("ValueSet Create", () => {
     await page.getByRole("textbox", { name: "Name *" }).fill(name);
 
     const slugField = page.getByRole("textbox", { name: "Slug *" });
+    await expect(slugField).toHaveValue(/.+/);
     const slugValue = await slugField.inputValue();
-    expect(slugValue).toBeTruthy();
-    expect(slugValue.length).toBeGreaterThan(0);
 
     const expectedSlugValue = expectedSlug(name);
 

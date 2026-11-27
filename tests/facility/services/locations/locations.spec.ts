@@ -53,7 +53,7 @@ test.describe("Locations", () => {
     ).toContainText("Pharmacy");
     await dialog.getByPlaceholder("Search").fill("Bio-Chemistry Lab");
     await dialog.getByRole("option", { name: "Bio-Chemistry Lab" }).click();
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await expect(
       page
         .getByRole("button", { name: "Bio-Chemistry Lab" })
@@ -90,7 +90,7 @@ test.describe("Locations", () => {
     ).toContainText("Pharmacy");
     await dialog.getByPlaceholder("Search").fill("Bio-Chemistry Lab");
     await dialog.getByRole("option", { name: "Bio-Chemistry Lab" }).click();
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await toggle.hover();
     await expect(
       page

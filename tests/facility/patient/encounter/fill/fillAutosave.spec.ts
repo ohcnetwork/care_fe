@@ -49,7 +49,7 @@ test.describe("Fill page local autosave", () => {
     await page.getByRole("button", { name: "Add questionnaire" }).click();
     const forms = page.getByRole("dialog", { name: "Forms", exact: true });
     await forms.getByPlaceholder("Search Forms").press("Escape");
-    await expect(forms).not.toBeVisible();
+    await expect(forms).toBeHidden();
     await expect(page).toHaveURL(fillUrl);
     await expect(input).toHaveValue("Final edit before leaving");
 
@@ -65,7 +65,7 @@ test.describe("Fill page local autosave", () => {
       .press("Enter");
     const confirmation = page.getByRole("alertdialog");
     await confirmation.getByRole("button", { name: "Cancel" }).press("Enter");
-    await expect(confirmation).not.toBeVisible();
+    await expect(confirmation).toBeHidden();
     await expect(input).toHaveValue("Final edit before Escape");
 
     // Close while another autosave is pending; unmount must not restore it.
@@ -82,7 +82,7 @@ test.describe("Fill page local autosave", () => {
 
     await page.goto(fillUrl);
     await expect(input).toHaveValue("");
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
     await expect(
       page.getByRole("button", { name: "Resume", exact: true }),
     ).toHaveCount(0);
@@ -112,7 +112,7 @@ test.describe("Fill page local autosave", () => {
       .getByRole("button", { name: "Close", exact: true })
       .last()
       .click();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
     await expect
       .poll(() => draftFormNoteText(page, questionnaireId))
       .toBe("New work while the prompt is visible");
@@ -165,7 +165,7 @@ test.describe("Fill page local autosave", () => {
 
     // Resume applies the draft into the live store.
     await page.getByRole("button", { name: /resume/i }).click();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
     await expect(textInput).toHaveValue(note);
     await expect(
       questionBlock(page, "Is bilateral air entry present?").getByRole(
@@ -193,7 +193,7 @@ test.describe("Fill page local autosave", () => {
     await expect(
       questionBlock(page, "Is bilateral air entry present?"),
     ).toBeVisible();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
   });
 
   test("Discard deletes the draft, a later reload shows no prompt", async ({
@@ -225,7 +225,7 @@ test.describe("Fill page local autosave", () => {
 
     // Discard: prompt gone, form stays pristine, chip gone.
     await page.getByRole("button", { name: "Discard", exact: true }).click();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
     await expect(textInput).toHaveValue("");
     await expect(
       page.getByRole("tab", { name: /Questionnaire/ }),
@@ -235,7 +235,7 @@ test.describe("Fill page local autosave", () => {
     // nothing left to prompt about.
     await page.reload();
     await expect(airEntry).toBeVisible();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
     await expect(textInput).toHaveValue("");
   });
 
@@ -271,7 +271,7 @@ test.describe("Fill page local autosave", () => {
     await textInput.fill(freshNote);
 
     await page.getByRole("button", { name: "Discard", exact: true }).click();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
     // The fresh work is still on screen…
     await expect(textInput).toHaveValue(freshNote);
 
@@ -319,7 +319,7 @@ test.describe("Fill page local autosave", () => {
     await expect(
       page.getByRole("button", { name: "Save Changes" }),
     ).toBeVisible();
-    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeHidden();
     await settleAutosaveDebounce(page);
     expect(await fillDraftCount(page)).toBe(0);
   });

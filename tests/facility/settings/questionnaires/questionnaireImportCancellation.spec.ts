@@ -91,14 +91,14 @@ test("cancelled URL imports cannot restore confirmation after reopening", async 
 }) => {
   const dialog = await startDelayedImport(page);
   await dialog.getByRole("button", { name: "Cancel" }).click();
-  await expect(dialog).not.toBeVisible();
+  await expect(dialog).toBeHidden();
   await page.getByRole("button", { name: "Import Questions" }).click();
   await finishCancelledImport(page);
 
   await expect(dialog.getByRole("combobox")).toHaveText(
     "Import from a JSON file",
   );
-  await expect(dialog.getByText(/Question count/)).not.toBeVisible();
+  await expect(dialog.getByText(/Question count/)).toBeHidden();
   await expect(
     dialog.getByRole("button", { name: "Import", exact: true }),
   ).toBeDisabled();
@@ -134,7 +134,7 @@ test("a delayed URL response cannot overwrite a newer file import", async ({
   await expect(
     page.getByRole("textbox", { name: "Question Title" }),
   ).toHaveValue(questionTitle);
-  await expect(page.getByText("Stale URL question")).not.toBeVisible();
+  await expect(page.getByText("Stale URL question")).toBeHidden();
 });
 
 test("editing a URL invalidates the response for the previous address", async ({
@@ -152,7 +152,7 @@ test("editing a URL invalidates the response for the previous address", async ({
   await expect(urlInput).toHaveValue(
     "https://questionnaire-fixtures.example/replacement.json",
   );
-  await expect(dialog.getByText(/Question count/)).not.toBeVisible();
+  await expect(dialog.getByText(/Question count/)).toBeHidden();
   await expect(
     dialog.getByRole("button", { name: "Import", exact: true }),
   ).toBeEnabled();

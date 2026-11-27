@@ -132,8 +132,8 @@ for (const action of ["Clear Cache", "Update Now"]) {
     await page.waitForURL(/\/updates$/);
     const localRow = page.locator('[data-draft-source="local"]');
     await expect(localRow).toHaveCount(1);
+    await expect(localRow).toHaveAttribute("data-draft-id", /.+/);
     const draftKey = await localRow.getAttribute("data-draft-id");
-    expect(draftKey).toBeTruthy();
     const beforeDraft = await page.evaluate(
       (key) => localStorage.getItem(key),
       draftKey!,

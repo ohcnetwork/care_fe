@@ -566,11 +566,9 @@ test.describe("Encounter immunizations", () => {
     await expect(sheet.getByText("Select the vaccine.")).toBeVisible();
 
     await sheet.getByRole("combobox", { name: "Vaccine", exact: true }).click();
-    await page
-      .getByTestId("valueset-search-results")
-      .getByRole("option")
-      .filter({ hasText: vaccine.display })
-      .click();
+    // routeTerminology serves no starred or recent codes, so the picker's
+    // only options are its search results.
+    await page.getByRole("option").filter({ hasText: vaccine.display }).click();
     await sheet.getByRole("combobox", { name: "Status" }).click();
     await page.getByRole("option", { name: "Not given" }).click();
     await expect(

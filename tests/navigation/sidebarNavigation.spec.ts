@@ -33,6 +33,19 @@ function mainLeft(page: Page) {
     .evaluate((element) => element.getBoundingClientRect().left);
 }
 
+// Shortcuts ignore a repeat within 300ms of the last handled press, measured
+// with the browser's Date.now(). Call this once the previous press has visibly
+// taken effect: it waits until the browser clock is past that window, so the
+// next press is handled instead of being dropped.
+async function waitForShortcutDebounce(page: Page) {
+  const handledBy = await page.evaluate(() => Date.now());
+  await expect
+    .poll(() => page.evaluate(() => Date.now()), {
+      message: "the 300ms shortcut debounce should elapse",
+    })
+    .toBeGreaterThan(handledBy + 300);
+}
+
 test.describe("Shared workspace navigation", () => {
   let facilityPath: string;
 
@@ -131,7 +144,7 @@ test.describe("Shared workspace navigation", () => {
         ).toHaveAttribute("href", `/facility/${facility.id}/overview`);
       }
       await page.keyboard.press("Escape");
-      await expect(menu).not.toBeVisible();
+      await expect(menu).toBeHidden();
       await expect(selector).toBeFocused();
     });
 
@@ -331,7 +344,7 @@ test.describe("Shared workspace navigation", () => {
       await page.mouse.move(900, 700);
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
-      await expect(navigation).not.toBeVisible();
+      await expect(navigation).toBeHidden();
       await expect(navigation).not.toBeInViewport();
       const closedLeft = await mainLeft(page);
       await toggle.hover();
@@ -358,12 +371,12 @@ test.describe("Shared workspace navigation", () => {
       });
 
       await page.mouse.move(900, 700);
-      await expect(navigation).not.toBeVisible();
+      await expect(navigation).toBeHidden();
       await toggle.hover();
       await expect(navigation).toBeInViewport({ ratio: 1 });
       await page.keyboard.press("Escape");
       await expect(state).toHaveAttribute("data-app-sidebar-preview", "false");
-      await expect(navigation).not.toBeVisible();
+      await expect(navigation).toBeHidden();
     });
 
     await test.step("clicking the preview toggle pins the sidebar and keyboard shortcuts toggle it", async () => {
@@ -379,9 +392,9 @@ test.describe("Shared workspace navigation", () => {
       await expect.poll(() => mainLeft(page)).toBeGreaterThan(closedLeft + 100);
       await page.keyboard.press("Control+b");
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
-      await expect(navigation).not.toBeVisible();
+      await expect(navigation).toBeHidden();
       // Shortcuts debounce for 300ms, so an immediate second press is ignored
-      await page.waitForTimeout(350);
+      await waitForShortcutDebounce(page);
       await page.keyboard.press("Control+b");
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "true");
       await expect(navigation).toBeInViewport({ ratio: 1 });
@@ -414,7 +427,7 @@ test.describe("Shared workspace navigation", () => {
       await toggle.click();
       await page.mouse.move(900, 700);
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
-      await expect(navigation).not.toBeVisible();
+      await expect(navigation).toBeHidden();
       const closedLeft = await mainLeft(page);
       const closedHeadingLeft = await heading.evaluate(
         (element) => element.getBoundingClientRect().left,
@@ -475,7 +488,7 @@ test.describe("Shared workspace navigation", () => {
       await expect(toggle).toHaveAttribute("aria-expanded", "true");
       await toggle.click();
       await page.mouse.move(900, 700);
-      await expect(navigation).not.toBeVisible();
+      await expect(navigation).toBeHidden();
       await toggle.hover();
       await expect(state).toHaveAttribute("data-app-sidebar-preview", "true");
       await expect(navigation).toBeInViewport({ ratio: 1 });
@@ -509,12 +522,12 @@ test.describe("Shared workspace navigation", () => {
       ).toBeVisible();
       await page.keyboard.press("Meta+b");
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
-      await expect(navigation).not.toBeVisible();
+      await expect(navigation).toBeHidden();
       await expect(page.locator('[data-slot="tooltip-content"]')).toHaveCount(
         0,
       );
       // Shortcuts debounce for 300ms, so an immediate second press is ignored
-      await page.waitForTimeout(350);
+      await waitForShortcutDebounce(page);
       await page.keyboard.press("Meta+b");
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "true");
       await expect(navigation).toBeInViewport({ ratio: 1 });
@@ -530,7 +543,7 @@ test.describe("Shared workspace navigation", () => {
     const toggle = sidebarToggle(page);
     await toggle.click();
     await page.mouse.move(900, 700);
-    await expect(navigation).not.toBeVisible();
+    await expect(navigation).toBeHidden();
     const closedLeft = await mainLeft(page);
     await toggle.hover();
     await expect(navigation).toBeInViewport({ ratio: 1 });
@@ -543,8 +556,29 @@ test.describe("Shared workspace navigation", () => {
       menu.getByRole("menuitem", { name: "Profile", exact: true }),
     ).toBeVisible();
     await menu.hover();
-    // Keep the portal open beyond the preview's pointer-leave grace period.
-    await page.waitForTimeout(500);
+    // Leaving the preview closes it after a 300ms grace period unless one of
+    // its menus is open. Keep sampling while the pointer rests on the
+    // portalled menu until well past that period; any closed sample fails.
+    const restingSince = Date.now();
+    await expect
+      .poll(
+        async () => {
+          const preview = await sidebarState(page).getAttribute(
+            "data-app-sidebar-preview",
+          );
+          if (preview !== "true") {
+            throw new Error(
+              "The sidebar preview closed while its menu was open",
+            );
+          }
+          return Date.now() - restingSince;
+        },
+        {
+          message: "the preview should stay open past its close grace period",
+          intervals: [100],
+        },
+      )
+      .toBeGreaterThan(500);
     await expect(navigation).toBeInViewport({ ratio: 1 });
     await expect(sidebarState(page)).toHaveAttribute(
       "data-app-sidebar-preview",
@@ -554,10 +588,10 @@ test.describe("Shared workspace navigation", () => {
       .poll(async () => Math.abs((await mainLeft(page)) - closedLeft))
       .toBeLessThan(1);
     await page.keyboard.press("Escape");
-    await expect(menu).not.toBeVisible();
+    await expect(menu).toBeHidden();
     await page.mouse.move(900, 700);
     await page.keyboard.press("Escape");
-    await expect(navigation).not.toBeVisible();
+    await expect(navigation).toBeHidden();
     await expect(sidebarState(page)).toHaveAttribute(
       "data-app-sidebar-pinned",
       "false",
@@ -615,7 +649,7 @@ test.describe("Shared workspace navigation", () => {
         await expect(picker).toBeVisible();
         await toggle.click();
         await page.mouse.move(900, 700);
-        await expect(navigation).not.toBeVisible();
+        await expect(navigation).toBeHidden();
         await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
         const closedLeft = await mainLeft(page);
         await toggle.hover();
@@ -675,7 +709,7 @@ test.describe("Shared workspace navigation", () => {
         await dialog
           .getByRole("button", { name: "Close", exact: true })
           .click();
-        await expect(dialog).not.toBeVisible();
+        await expect(dialog).toBeHidden();
         // Closing a dialog leaves the pointer outside the preview; reopen it
         // through the normal hover target before continuing navigation.
         await toggle.hover();
@@ -690,7 +724,7 @@ test.describe("Shared workspace navigation", () => {
         await home.click();
         await expect(page).toHaveURL(`${facilityPath}/overview`);
         await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
-        await expect(navigation).not.toBeVisible();
+        await expect(navigation).toBeHidden();
       });
     });
   }
@@ -737,7 +771,7 @@ test.describe("Shared workspace navigation", () => {
       const toggle = sidebarToggle(page);
       await toggle.click();
       await page.mouse.move(900, 700);
-      await expect(navigation).not.toBeVisible();
+      await expect(navigation).toBeHidden();
       await toggle.hover();
       await expect(navigation).toBeInViewport({ ratio: 1 });
       const organizations = navigation.getByRole("button", {
@@ -755,7 +789,7 @@ test.describe("Shared workspace navigation", () => {
         ).toHaveAttribute("href", `/admin/organizations/${path}`);
       }
       await page.keyboard.press("Escape");
-      await expect(navigation).not.toBeVisible();
+      await expect(navigation).toBeHidden();
     });
   });
 
@@ -774,7 +808,7 @@ test.describe("Shared workspace navigation", () => {
     const toggle = sidebarToggle(page);
 
     await test.step("the drawer expands groups inline and closes on navigation", async () => {
-      await expect(drawer).not.toBeVisible();
+      await expect(drawer).toBeHidden();
       await toggle.click();
       await expect(drawer).toBeVisible();
       await expect(drawer).toBeInViewport({ ratio: 1 });
@@ -791,19 +825,19 @@ test.describe("Shared workspace navigation", () => {
         .click();
       await drawer.getByRole("link", { name: "Invoices", exact: true }).click();
       await expect(page).toHaveURL(`${facilityPath}/billing/invoices`);
-      await expect(drawer).not.toBeVisible();
+      await expect(drawer).toBeHidden();
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
     });
 
     await test.step("selecting the current destination dismisses the drawer too", async () => {
       await toggle.click();
-      const currentPage = drawer.getByRole("link", {
+      const currentLink = drawer.getByRole("link", {
         name: "Invoices",
         exact: true,
       });
-      await expect(currentPage).toHaveAttribute("aria-current", "page");
-      await currentPage.click();
-      await expect(drawer).not.toBeVisible();
+      await expect(currentLink).toHaveAttribute("aria-current", "page");
+      await currentLink.click();
+      await expect(drawer).toBeHidden();
       await expect(page).toHaveURL(`${facilityPath}/billing/invoices`);
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
     });
@@ -849,7 +883,7 @@ test.describe("Shared workspace navigation", () => {
           const toggle = sidebarToggle(page);
           await toggle.click();
           await page.mouse.move(900, 700);
-          await expect(navigation).not.toBeVisible();
+          await expect(navigation).toBeHidden();
           await toggle.hover();
           await expect(navigation).toBeInViewport({ ratio: 1 });
         }

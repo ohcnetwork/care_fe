@@ -41,6 +41,23 @@ async function stubEncounterCreate(page: Page) {
   return createRequests;
 }
 
+// shortcutActionHandler drops a repeat of the same shortcut within 300ms of
+// the last one, and a press that an overlay blocked still counts as the last.
+const SHORTCUT_DEBOUNCE_MS = 300;
+
+function getPageTime(page: Page) {
+  return page.evaluate(() => Date.now());
+}
+
+// The debounce lives in a module-level map with nothing in the DOM to assert
+// on, so wait it out on the page's own clock. Otherwise the next press would be
+// swallowed by the debounce instead of judged on what covers the sheet.
+async function waitOutShortcutDebounce(page: Page, lastPressAt: number) {
+  await expect
+    .poll(() => getPageTime(page), { intervals: [50] })
+    .toBeGreaterThanOrEqual(lastPressAt + SHORTCUT_DEBOUNCE_MS);
+}
+
 test.describe("Shortcuts and overlays", () => {
   test.describe("Page actions palette on a page", () => {
     let encounterUrl: string;
@@ -85,11 +102,13 @@ test.describe("Shortcuts and overlays", () => {
       await expect(
         dialog.getByRole("button", { name: /^Create Encounter/ }),
       ).toBeEnabled();
+      let lastShiftEnterAt = 0;
 
       await test.step("does not submit through the open calendar", async () => {
         const nextMonthButton = await openCalendarAndGetNextMonthButton(page);
         await nextMonthButton.focus();
         await page.keyboard.press("Shift+Enter");
+        lastShiftEnterAt = await getPageTime(page);
 
         await page.keyboard.press("Escape");
         await expect(nextMonthButton).toBeHidden();
@@ -103,16 +122,17 @@ test.describe("Shortcuts and overlays", () => {
         // Off the options, focus sits on the popup and the key reaches the page
         await page.mouse.move(0, 0);
 
-        // Shortcuts debounce for 300ms, and the blocked press above counts
-        await page.waitForTimeout(350);
+        // The blocked press above still started the debounce window
+        await waitOutShortcutDebounce(page, lastShiftEnterAt);
         await page.keyboard.press("Shift+Enter");
+        lastShiftEnterAt = await getPageTime(page);
 
         await page.keyboard.press("Escape");
         await expect(statusOption).toBeHidden();
       });
 
       await test.step("submits once nothing covers it", async () => {
-        await page.waitForTimeout(350);
+        await waitOutShortcutDebounce(page, lastShiftEnterAt);
         expect(createRequests).toHaveLength(0);
 
         await page.keyboard.press("Shift+Enter");
