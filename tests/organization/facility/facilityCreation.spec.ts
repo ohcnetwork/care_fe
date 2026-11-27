@@ -287,9 +287,7 @@ test.describe("Facility Creation", () => {
     ).toBeVisible();
 
     // Verify "Show on Map" is NOT visible since we didn't provide location
-    await expect(
-      page.getByRole("link", { name: "Show on Map" }),
-    ).not.toBeVisible();
+    await expect(page.getByRole("link", { name: "Show on Map" })).toBeHidden();
 
     // Without a description the details card has no description section.
     await expect(page.locator('[data-cy="facility-description"]')).toHaveCount(
@@ -375,12 +373,12 @@ test.describe("Facility Creation", () => {
       dialog.locator('p[data-slot="form-message"]', {
         hasText: /description/i,
       }),
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     await expect(dialog.getByText("Features").first()).toBeVisible();
     await expect(
       dialog.locator('p[data-slot="form-message"]', { hasText: /feature/i }),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   test("Edit a facility and verify changes", async ({ page }) => {
@@ -420,7 +418,7 @@ test.describe("Facility Creation", () => {
     await expectToast(page, /Facility updated successfully/i);
 
     // Wait for dialog to close
-    await expect(editDialog).not.toBeVisible();
+    await expect(editDialog).toBeHidden();
 
     // Verify changes on the facility details page
     await expect(page.getByText(description)).toBeVisible();
@@ -503,7 +501,7 @@ test.describe("Facility Creation", () => {
     await expectToast(page, /Facility updated successfully/i);
 
     // Wait for dialog to close
-    await expect(editDialog).not.toBeVisible();
+    await expect(editDialog).toBeHidden();
 
     // Verify "Show on Map" link is now visible
     const mapLink = page.getByRole("link", { name: "Show on Map" });
@@ -545,6 +543,6 @@ test.describe("Facility Creation", () => {
     // Verify the facility is no longer visible in the list
     await expect(
       page.getByRole("link", { name: "View Facility" }),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 });

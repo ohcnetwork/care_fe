@@ -5,9 +5,19 @@ import { expectAndDismissToast, expectToast } from "tests/helper/ui";
 test.use({ storageState: "tests/.auth/user.json" });
 
 async function gotoResponsibilities(page: Page) {
-  await page.goto("/admin/organizations/role", { waitUntil: "networkidle" });
+  await page.goto("/admin/organizations/role");
   await expect(
     page.getByRole("textbox", { name: /search responsibilities/i }),
+  ).toBeVisible();
+  // On wide screens the page opens the first responsibility once the list
+  // loads, moving to its detail route and remounting the directory. Wait for
+  // that selection so later searches and sheets are not reset by it, or for
+  // the empty state when there is nothing to select.
+  await expect(
+    page
+      .locator('[data-slot="responsibility-list"]')
+      .getByRole("button", { pressed: true })
+      .or(page.getByText(/no organizations found/i)),
   ).toBeVisible();
 }
 
@@ -49,7 +59,7 @@ async function createResponsibility(
   // Tests create more than one responsibility in a row; close this toast so
   // the next create does not match it as well (two toasts, same text).
   await expectAndDismissToast(page, /organization created successfully/i);
-  await expect(dialog).not.toBeVisible();
+  await expect(dialog).toBeHidden();
 }
 
 /** Searches for, then selects, a responsibility from the directory list. */
@@ -236,7 +246,7 @@ test.describe("Admin Responsibilities Page", () => {
     await dialog.getByRole("button", { name: /^update$/i }).click();
 
     await expectToast(page, /organizations updated successfully/i);
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
 
     await expect(
       page.getByRole("heading", { name: updatedName, exact: true }),
@@ -294,6 +304,6 @@ test.describe("Admin Responsibilities Page", () => {
     await expect(confirmationDialog).toBeVisible();
     await confirmationDialog.getByRole("button", { name: /remove/i }).click();
     await expectToast(page, /managed responsibility removed successfully/i);
-    await expect(manageSection.getByText(managedName)).not.toBeVisible();
+    await expect(manageSection.getByText(managedName)).toBeHidden();
   });
 });

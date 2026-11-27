@@ -73,6 +73,8 @@ interface Props {
   patientName?: string;
   align?: "start" | "center" | "end";
   hideScanButton?: boolean;
+  /** Classes for the Scan button label; hidden below `md` by default. */
+  scanLabelClassName?: string;
   open?: boolean;
 }
 
@@ -285,6 +287,7 @@ export default function PatientIdentifierFilter({
   patientName,
   align = "start",
   hideScanButton = false,
+  scanLabelClassName = "hidden md:block",
   size = "sm",
   open: externalOpen = false,
 }: Props) {
@@ -479,7 +482,7 @@ export default function PatientIdentifierFilter({
       size={size}
       role="combobox"
       aria-expanded={open}
-      className="min-w-0 flex-1 justify-between font-normal"
+      className="min-w-24 flex-1 justify-between font-normal"
     >
       {selectedPatient && !verificationOpen ? (
         <span className="truncate text-primary-500 text-sm">
@@ -510,7 +513,7 @@ export default function PatientIdentifierFilter({
             data-shortcut-id="scan-patient"
           >
             <QrCode className="size-4" />
-            <span className="hidden md:block">{t("scan")}</span>
+            <span className={scanLabelClassName}>{t("scan")}</span>
           </Button>
         )}
         {isMobile ? (

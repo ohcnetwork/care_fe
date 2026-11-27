@@ -69,15 +69,28 @@ test.describe("Department Selector Infinite Scroll", () => {
         page.getByRole("button", { name: "See Details" }).first(),
       ).toBeVisible();
       await page.getByRole("button", { name: "See Details" }).first().click();
-      await page.waitForLoadState("networkidle");
       await page.getByText("Departments", { exact: true }).click();
-      await page.waitForLoadState("networkidle");
     });
 
     await test.step("Open Link Department sheet", async () => {
+      // The picker in the sheet loads the first page of top-level departments
+      // (offset=0) and "My departments" as it mounts. Both must settle before
+      // the scroll step, whose listener matches any request with an offset.
+      const firstPageLoaded = page.waitForResponse((resp) => {
+        const url = new URL(resp.url());
+        return (
+          url.pathname.endsWith(`/facility/${facilityId}/organizations/`) &&
+          url.searchParams.get("parent") === "" &&
+          url.searchParams.get("offset") === "0" &&
+          resp.status() === 200
+        );
+      });
+      const myDepartmentsLoaded = page.waitForResponse((resp) =>
+        resp.url().includes(`/facility/${facilityId}/organizations/mine/`),
+      );
       await page.getByRole("button", { name: "Link Department" }).click();
       await expect(page.getByText("Link User to Department")).toBeVisible();
-      await page.waitForLoadState("networkidle");
+      await Promise.all([firstPageLoaded, myDepartmentsLoaded]);
     });
 
     await test.step("Open department dropdown", async () => {

@@ -195,23 +195,22 @@ export default function useMultiFilterState(
     }
   };
 
-  const handleClearAll = () => {
+  const handleClearFilters = (keys: string[]) => {
     const newState = { ...selectedFilters };
-    Object.keys(newState).forEach((key) => {
-      newState[key].selected = [];
-      newState[key].operation.selectedOperation = null;
-      newState[key].operation.availableOperations = [];
-    });
-    setSelectedFilters(newState);
     const clearData: Record<string, unknown> = {};
-    Object.keys(newState).forEach((key) => {
+    keys.forEach((key) => {
+      newState[key] = {
+        ...newState[key],
+        selected: [],
+        operation: { selectedOperation: null, availableOperations: [] },
+      };
       clearData[key] = undefined;
       // Clear operation if operationKey is specified
       if (newState[key].filter.operationKey) {
         clearData[newState[key].filter.operationKey] = undefined;
       }
     });
-
+    setSelectedFilters(newState);
     onFilterUpdate?.(clearData);
   };
 
@@ -238,7 +237,8 @@ export default function useMultiFilterState(
     selectedFilters,
     handleFilterChange,
     handleOperationChange,
-    handleClearAll,
+    handleClearAll: () => handleClearFilters(Object.keys(selectedFilters)),
+    handleClearFilters,
     handleClearFilter,
   };
 }

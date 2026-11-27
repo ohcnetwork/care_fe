@@ -57,10 +57,10 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       // the valueset is the unit-choice source.
       await expect(
         page.getByRole("radio", { name: "Custom Options" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       await expect(
         page.getByRole("button", { name: "Add Option" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       await pickValuesetFromAutocomplete(page, {
         search: "UCUM",
         optionName: "UCUM Units",
@@ -141,7 +141,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
 
     await test.step("Remove unbinds and restores the search box", async () => {
       await page.getByRole("button", { name: "Remove" }).click();
-      await expect(page.getByText("Code Verified")).not.toBeVisible();
+      await expect(page.getByText("Code Verified")).toBeHidden();
       await expect(searchTrigger).toBeVisible();
     });
 
@@ -196,7 +196,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       await rows.nth(1).getByRole("button", { name: "Delete" }).click();
       await expect(rows.nth(1).getByRole("textbox")).toHaveValue(optionC);
       await expect(rows.nth(2).getByRole("textbox")).toHaveValue(optionB);
-      await expect(rows.nth(3)).not.toBeVisible();
+      await expect(rows.nth(3)).toBeHidden();
     });
 
     await test.step("Clear default resets every option", async () => {
@@ -231,7 +231,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       ).toBeVisible();
       await expect(
         page.getByRole("button", { name: "Add Option" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
     });
 
     await test.step("Pick an existing valueset", async () => {
@@ -283,9 +283,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
     await expect(block).toHaveCount(1);
     await expect(block.getByText(displayText, { exact: true })).toBeVisible();
     await expect(block.getByRole("textbox")).toHaveCount(0);
-    await expect(
-      page.getByRole("button", { name: "Add note" }),
-    ).not.toBeVisible();
+    await expect(page.getByRole("button", { name: "Add note" })).toBeHidden();
   });
 
   test("required flag renders an asterisk; repeats hides for boolean and clears on type change", async ({
@@ -314,7 +312,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
 
     await test.step("Boolean never offers Repeats — and clears the flag", async () => {
       await pickType(page, "boolean");
-      await expect(repeatable).not.toBeVisible();
+      await expect(repeatable).toBeHidden();
       await expect(
         page.getByRole("checkbox", { name: "Required" }),
       ).toHaveAttribute("aria-checked", "true");

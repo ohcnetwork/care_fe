@@ -367,7 +367,7 @@ test.describe("Fill page server draft", () => {
     await page.getByRole("button", { name: "Close", exact: true }).click();
     const confirmation = page.getByRole("alertdialog");
     await confirmation.getByRole("button", { name: "Cancel" }).click();
-    await expect(confirmation).not.toBeVisible();
+    await expect(confirmation).toBeHidden();
     await expect(noteBox()).toHaveValue(editedNote);
 
     await page.getByRole("button", { name: "Minimize", exact: true }).click();

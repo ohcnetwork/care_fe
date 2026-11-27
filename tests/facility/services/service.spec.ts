@@ -49,7 +49,7 @@ test.describe("Services", () => {
     ).toBeVisible();
     await dialog.getByPlaceholder("Search").fill("Pathology Lab");
     await dialog.getByRole("option", { name: "Pathology Lab" }).click();
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await expect(
       page.getByRole("heading", {
         level: 1,
@@ -87,7 +87,7 @@ test.describe("Services", () => {
     ).toBeVisible();
     await dialog.getByPlaceholder("Search").fill("Pathology Lab");
     await dialog.getByRole("option", { name: "Pathology Lab" }).click();
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await expect(
       page.getByRole("heading", {
         level: 1,

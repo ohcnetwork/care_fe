@@ -6,6 +6,9 @@ export function selectedMultiFilterBar(page: Page, label: RegExp) {
 
 export async function clearSelectedMultiFilter(page: Page, label: RegExp) {
   await page.keyboard.press("Escape");
+  // Compact toolbars list the selected filters in the Filters button's popover.
+  const summary = page.getByRole("button", { name: /^filters\b/i });
+  if (await summary.isVisible()) await summary.click();
   await selectedMultiFilterBar(page, label)
     .getByRole("button", { name: "Remove filter", exact: true })
     .click();
@@ -21,7 +24,7 @@ export async function openMultiFilter(
   filterName: RegExp,
   scope: Page | Locator = page,
 ) {
-  await scope.getByRole("button", { name: /^filter$/i }).click();
+  await scope.getByRole("button", { name: /^(?:add )?filter$/i }).click();
   await page.getByRole("option", { name: filterName }).click();
 }
 
@@ -32,7 +35,12 @@ export async function applyOptionFilter(
   optionName: RegExp,
 ) {
   await openMultiFilter(page, filterName);
-  await page.getByRole("option", { name: optionName }).click();
+  // Compact toolbars use the picker menu's choice rows; others use options.
+  await page
+    .getByRole("option", { name: optionName })
+    .or(page.getByRole("menuitemradio", { name: optionName }))
+    .or(page.getByRole("menuitemcheckbox", { name: optionName }))
+    .click();
   await page.keyboard.press("Escape");
 }
 
@@ -68,7 +76,7 @@ export async function applyFacilityUserMineFilter(
   filterName: RegExp,
 ) {
   await openMultiFilter(page, filterName);
-  await page.getByRole("menuitem", { name: /mine/i }).click();
+  await page.getByRole("menuitemradio", { name: /mine/i }).click();
   await page.keyboard.press("Escape");
   await expect(selectedMultiFilterBar(page, filterName)).toBeVisible();
 }

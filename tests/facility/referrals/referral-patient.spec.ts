@@ -260,7 +260,7 @@ test("creates a patient referral using a referral form without attaching an enco
       questionnaire: patientFormId,
     });
     referralId = (await response.json()).id;
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await expect(
       page.getByRole("row").filter({ hasText: title }),
     ).toBeVisible();

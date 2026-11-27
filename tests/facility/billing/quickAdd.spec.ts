@@ -79,23 +79,6 @@ test.beforeAll(async ({ request }) => {
   );
 });
 
-test.afterAll(async ({ request }) => {
-  for (const id of [packageId, groupId]) {
-    if (!id) continue;
-    const tag = await read<Record<string, unknown>>(
-      await request.get(`${getApiUrl()}/api/v1/tag_config/${id}/`, {
-        headers: getApiHeaders(),
-      }),
-    );
-    await read(
-      await request.put(`${getApiUrl()}/api/v1/tag_config/${id}/`, {
-        headers: getApiHeaders(),
-        data: { ...tag, status: "archived" },
-      }),
-    );
-  }
-});
-
 test.beforeEach(async ({ request }) => {
   patientId = await createTestPatient("Quick Add keyboard");
   const account = await read<{ id: string }>(
@@ -114,6 +97,23 @@ test.beforeEach(async ({ request }) => {
     ),
   );
   accountId = account.id;
+});
+
+test.afterAll(async ({ request }) => {
+  for (const id of [packageId, groupId]) {
+    if (!id) continue;
+    const tag = await read<Record<string, unknown>>(
+      await request.get(`${getApiUrl()}/api/v1/tag_config/${id}/`, {
+        headers: getApiHeaders(),
+      }),
+    );
+    await read(
+      await request.put(`${getApiUrl()}/api/v1/tag_config/${id}/`, {
+        headers: getApiHeaders(),
+        data: { ...tag, status: "archived" },
+      }),
+    );
+  }
 });
 
 async function openQuickAdd(page: Page, entry = "charge_items") {
@@ -220,8 +220,10 @@ test("Quick Add blocks a fractional quantity, then accepts a valid quantity", as
   const sheet = await openQuickAdd(page);
   const quantity = sheet.getByRole("spinbutton");
   await quantity.fill("1.5");
+  // The whole-number quantity input fails constraint validation, so the form
+  // never submits. The final count of one POST, read after the valid submit
+  // closes the sheet, also proves this attempt posted nothing.
   await sheet.getByRole("button", { name: /^Add Items/ }).click();
-  await page.waitForLoadState("networkidle");
   expect(posts).toBe(0);
   await expect(sheet).toBeVisible();
   await quantity.fill("2");

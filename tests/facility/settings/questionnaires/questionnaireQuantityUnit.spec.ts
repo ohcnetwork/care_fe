@@ -62,10 +62,10 @@ test.describe("Questionnaire v2 quantity default unit round-trip", () => {
       await expect(page.getByText("Unit Options").first()).toBeVisible();
       await expect(
         page.getByRole("radio", { name: "Custom Options" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       await expect(
         page.getByRole("button", { name: "Add Option" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
     });
 
     await test.step("Pick the unit value set and a default unit", async () => {

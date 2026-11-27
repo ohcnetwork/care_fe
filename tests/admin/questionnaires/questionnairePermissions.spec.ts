@@ -46,7 +46,7 @@ test.describe("Questionnaire v2 permissions (nurse)", () => {
     await expect(page.getByText("e2e-pagination-001")).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "Create Questionnaire" }),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   test("admin list is empty with no create button", async ({ page }) => {
@@ -62,7 +62,7 @@ test.describe("Questionnaire v2 permissions (nurse)", () => {
     await expect(page.getByText("No questionnaires found")).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Create Questionnaire" }),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   test("detail page renders read-only for a readable questionnaire", async ({
@@ -75,13 +75,13 @@ test.describe("Questionnaire v2 permissions (nurse)", () => {
       await expect(page.getByRole("textbox", { name: "Title" })).toBeDisabled();
       await expect(
         page.getByRole("button", { name: "Save Questionnaire" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       await expect(
         page.getByRole("button", { name: "Edit Questions" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       await expect(
         page.getByRole("button", { name: "Clone Questionnaire" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       const statusGroup = page.getByRole("radiogroup", { name: "Status" });
       await expect(
         statusGroup.getByRole("radio", { name: "Draft" }),
@@ -112,10 +112,10 @@ test.describe("Questionnaire v2 permissions (nurse)", () => {
     await expect(page.getByText("Kitchen Sink").first()).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Save Changes" }),
-    ).not.toBeVisible();
+    ).toBeHidden();
     await expect(
       page.getByRole("textbox", { name: "Question Title" }),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   test("create page deep-link shows the permission-denied state", async ({
@@ -126,8 +126,6 @@ test.describe("Questionnaire v2 permissions (nurse)", () => {
     await expect(
       page.getByText("You do not have permission to perform this action"),
     ).toBeVisible();
-    await expect(
-      page.getByRole("textbox", { name: "Title" }),
-    ).not.toBeVisible();
+    await expect(page.getByRole("textbox", { name: "Title" })).toBeHidden();
   });
 });
