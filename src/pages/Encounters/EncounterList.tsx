@@ -1097,7 +1097,7 @@ export function EncounterList({
                 />
               </FramePanel>
             ) : (
-              <div className="grid gap-2 @2xl:grid-cols-2 @5xl:grid-cols-3 @7xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-2 @2xl:grid-cols-2 @5xl:grid-cols-3 @7xl:grid-cols-4">
                 {isFetching ? (
                   <CardGridSkeleton count={6} />
                 ) : (
