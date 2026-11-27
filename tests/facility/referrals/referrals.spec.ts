@@ -20,8 +20,9 @@ async function selectDepartment(page: Page, name: string) {
   await page
     .getByPlaceholder("Search departments...", { exact: true })
     .fill(name);
-  await page.getByRole("menuitem", { name, exact: true }).click();
-  await page.keyboard.press("Escape");
+  // Department is single-select: picking a row applies it and closes the picker.
+  await page.getByRole("menuitemradio", { name, exact: true }).click();
+  await expect(page.getByRole("menu")).toBeHidden();
   await expect(selectedMultiFilterBar(page, /Department/)).toContainText(name);
 }
 
