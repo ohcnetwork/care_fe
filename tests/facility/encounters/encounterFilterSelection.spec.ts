@@ -1058,8 +1058,6 @@ test.describe("All encounters search", () => {
     page.getByRole("combobox", { name: /^search visits$/i });
   const chip = (page: Page) =>
     page.locator('[data-slot="encounter-search-applied"]');
-  const dateNotice = (page: Page) =>
-    page.getByRole("status").filter({ hasText: /date range cleared/i });
 
   /** Splits encounter list requests into list pages and limit=1 previews. */
   function trackEncounterRequests(page: Page) {
@@ -1327,7 +1325,7 @@ test.describe("All encounters search", () => {
     ).toBeVisible();
   });
 
-  test("looks up a complete phone on Enter, and Undo restores the dates", async ({
+  test("lists the patients of a complete phone and clears the dates for the chosen one", async ({
     page,
   }) => {
     const lookups = trackPatientLookups(page);
@@ -1335,7 +1333,6 @@ test.describe("All encounters search", () => {
     await expect(page).toHaveURL((url) =>
       url.searchParams.has("created_date_after"),
     );
-    const before = new URL(page.url()).searchParams;
 
     await searchBox(page).pressSequentially("9876543210", { delay: 150 });
     // Auto reads the number in the default country; only the phone config
@@ -1353,28 +1350,11 @@ test.describe("All encounters search", () => {
         !url.searchParams.has("created_date_after") &&
         !url.searchParams.has("created_date_before"),
     );
-    await expect(dateNotice(page)).toContainText(
-      "The name filter still applies.",
-    );
     await expect(
       chip(page).filter({ hasText: fullPatient.name }),
     ).toBeVisible();
 
-    await dateNotice(page).getByRole("button", { name: "Undo" }).click();
-    await expect(page).toHaveURL(
-      (url) =>
-        !url.searchParams.has("patient_filter") &&
-        url.searchParams.get("created_date_after") ===
-          before.get("created_date_after") &&
-        url.searchParams.get("created_date_before") ===
-          before.get("created_date_before"),
-    );
-    await expect(dateNotice(page)).toHaveCount(0);
-
-    // Removing the patient is not Undo: the default dates resume.
-    await searchBox(page).pressSequentially("9876543210", { delay: 150 });
-    await page.getByRole("option", { name: fullPatient.name }).click();
-    await expect(dateNotice(page)).toBeVisible();
+    // Removing the patient: the default dates resume.
     await chip(page)
       .filter({ hasText: fullPatient.name })
       .getByRole("button", { name: "Remove patient" })
@@ -1384,7 +1364,6 @@ test.describe("All encounters search", () => {
         !url.searchParams.has("patient_filter") &&
         url.searchParams.has("created_date_after"),
     );
-    await expect(dateNotice(page)).toHaveCount(0);
   });
 
   test("verifies a partial record and filters by its full record's id", async ({

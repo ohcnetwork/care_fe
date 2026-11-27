@@ -76,7 +76,6 @@ import {
   VisitField,
 } from "@/pages/Encounters/encounter-search/EncounterSearch";
 import { EncounterSearchChips } from "@/pages/Encounters/encounter-search/EncounterSearchChips";
-import { EncounterSearchDateNotice } from "@/pages/Encounters/encounter-search/EncounterSearchDateNotice";
 import {
   EncounterClass,
   EncounterListRead,
@@ -282,10 +281,6 @@ export function EncounterList({
   const filtersByEncounterClass = !encounterClass;
   // Only the All list has the combined search; class lists keep theirs.
   const isAllList = !encounterClass;
-  const [dateNotice, setDateNotice] = useState<{
-    patientId: string;
-    snapshot: Record<string, string | undefined>;
-  } | null>(null);
   const [preferredView, setPreferredView] =
     useState<EncounterListView>(readStoredView);
   const changeView = (next: EncounterListView) => {
@@ -757,40 +752,17 @@ export function EncounterList({
   const removeSearchText = () =>
     updateQuery({ name: "", external_identifier: "" });
 
-  // Selecting a patient clears the dates, as before. Undo restores the
-  // previous patient and dates; the history is replaced, so Back can't.
-  const selectPatient = (patient: SelectedPatient) => {
-    const datesCleared = !!(created_date_after || created_date_before);
+  // Selecting a patient clears the dates, as before.
+  const selectPatient = (patient: SelectedPatient) =>
     updateQuery({
       patient_filter: patient.id,
       patient_name: patient.name,
       created_date_after: undefined,
       created_date_before: undefined,
     });
-    setDateNotice(
-      datesCleared
-        ? {
-            patientId: patient.id,
-            snapshot: {
-              patient_filter,
-              patient_name: qParams.patient_name,
-              created_date_after,
-              created_date_before,
-            },
-          }
-        : null,
-    );
-  };
-  // Removing the patient isn't Undo: the default dates resume.
-  const removePatient = () => {
+  // Removing the patient: the default dates resume.
+  const removePatient = () =>
     updateQuery({ patient_filter: undefined, patient_name: undefined });
-    setDateNotice(null);
-  };
-  const showDateNotice =
-    !!dateNotice &&
-    dateNotice.patientId === patient_filter &&
-    !created_date_after &&
-    !created_date_before;
   const scannedPatient =
     qParams.patient_name === t("scanned_patient") ||
     qParams.patient_name === t("encounter_search_scanned_patient");
@@ -836,7 +808,6 @@ export function EncounterList({
     };
     if (appliedFilterKeys.length) handleClearFilters(appliedFilterKeys);
     else onFilterUpdate({});
-    setDateNotice(null);
   };
   // The date range can only be lifted for a patient.
   const showAnyDate =
@@ -1050,18 +1021,6 @@ export function EncounterList({
               {...appliedSearch}
               onRemoveText={removeSearchText}
               onRemovePatient={removePatient}
-            />
-          )}
-
-          {isAllList && showDateNotice && (
-            <EncounterSearchDateNotice
-              name={qParams.name}
-              visitId={qParams.external_identifier}
-              onUndo={() => {
-                if (dateNotice) updateQuery(dateNotice.snapshot);
-                setDateNotice(null);
-              }}
-              onDismiss={() => setDateNotice(null)}
             />
           )}
         </FrameHeader>
