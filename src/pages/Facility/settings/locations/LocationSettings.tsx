@@ -91,7 +91,7 @@ export default function LocationSettings({
         <CareUIPageTitle>{t("locations")}</CareUIPageTitle>
 
         <LocationTreeLayout
-          className="overflow-clip rounded-lg border border-border bg-card shadow-xs md:h-[calc(100svh-10rem)]"
+          className="overflow-clip rounded-lg border border-border bg-card shadow-xs md:h-[calc(100svh-9rem)]"
           tree={
             <LocationTreeSearch facilityId={facilityId} onSelect={openLocation}>
               <nav aria-label={t("locations")}>
