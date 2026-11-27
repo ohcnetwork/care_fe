@@ -65,12 +65,27 @@ for (const target of [
       );
     }
 
+    const endpoint = {
+      questionnaire: `/api/v1/questionnaire/${questionnaireId}/`,
+      encounter: `/api/v1/encounter/${encounterId}/`,
+      patient: `/api/v1/patient/${patientId}/`,
+      "server draft": draftEndpoint,
+    }[target];
+    const matchesEndpoint = (url: URL) => url.pathname === endpoint;
+    // The failing route installed below must only catch the reconnect
+    // refetch, so the page's initial load of this endpoint finishes first.
+    const initialLoad = page.waitForResponse(
+      (response) =>
+        matchesEndpoint(new URL(response.url())) &&
+        response.request().method() === "GET",
+    );
+
     await page.goto(fillUrl);
     const note = questionBlock(page, "Note on Bilateral Air Entry").getByRole(
       "textbox",
     );
     await expect(note).toBeVisible();
-    await page.waitForLoadState("networkidle");
+    await initialLoad;
     await note.fill("Edited before the refresh");
     const originalInput = await note.elementHandle();
     expect(originalInput).not.toBeNull();
@@ -89,13 +104,6 @@ for (const target of [
       );
     }
 
-    const endpoint = {
-      questionnaire: `/api/v1/questionnaire/${questionnaireId}/`,
-      encounter: `/api/v1/encounter/${encounterId}/`,
-      patient: `/api/v1/patient/${patientId}/`,
-      "server draft": draftEndpoint,
-    }[target];
-    const matchesEndpoint = (url: URL) => url.pathname === endpoint;
     const refreshStarted = deferred();
     const releaseFailure = deferred();
     const retryStarted = deferred();

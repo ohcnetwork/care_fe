@@ -420,7 +420,7 @@ test.describe("External delivery cancellation", () => {
           expect(
             (await responseData<{ status: string }>(await completion)).status,
           ).toBe("completed");
-          await expect(complete).not.toBeVisible();
+          await expect(complete).toBeHidden();
         }
       }
 
@@ -585,7 +585,7 @@ test.describe("External delivery draft items", () => {
     await selectAll.check();
     await done.click();
 
-    await expect(requestPicker).not.toBeVisible();
+    await expect(requestPicker).toBeHidden();
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(form).toBeVisible();
     await expect(form.locator("tbody tr")).toHaveCount(requests.length);
@@ -626,7 +626,7 @@ test.describe("External delivery draft items", () => {
         previous.startTime + previous.responseStart,
       );
     }
-    await expect(form).not.toBeVisible();
+    await expect(form).toBeHidden();
 
     const persisted = await responseData<{ results: DeliveryItem[] }>(
       await page.request.get(
@@ -934,7 +934,7 @@ test.describe("External delivery draft items", () => {
       await editForm
         .getByRole("button", { name: "Discard Changes", exact: true })
         .click();
-      await expect(editForm).not.toBeVisible();
+      await expect(editForm).toBeHidden();
     });
 
     await test.step("Prefill an edit and allow it to be discarded without cancelling the saved item", async () => {
@@ -956,7 +956,7 @@ test.describe("External delivery draft items", () => {
       await expect(
         editForm.getByRole("spinbutton", { name: "Pack Qty", exact: true }),
       ).toHaveValue("2");
-      await expect(editForm.getByRole("radiogroup")).not.toBeVisible();
+      await expect(editForm.getByRole("radiogroup")).toBeHidden();
       await expect(page.getByText("Editing", { exact: true })).toBeVisible();
       await expect(approveButton).toBeDisabled();
 
@@ -1078,7 +1078,7 @@ test.describe("External delivery draft items", () => {
       await editForm
         .getByRole("button", { name: "Discard edit", exact: true })
         .click();
-      await expect(editForm).not.toBeVisible();
+      await expect(editForm).toBeHidden();
       await expect(approveButton).toBeEnabled();
       await expect(
         savedRows.getByRole("button", { name: "Actions", exact: true }),
@@ -1152,11 +1152,9 @@ test.describe("External delivery draft items", () => {
     await test.step("Retry the replacement and retain the original in history", async () => {
       const updatedNote = `Summary after replacement ${faker.string.alphanumeric(10)}`;
       await updateOrderNote(updatedNote);
-      await expect(
-        page.getByText(updatedNote, { exact: true }),
-      ).not.toBeVisible();
+      await expect(page.getByText(updatedNote, { exact: true })).toBeHidden();
       await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
-      await expect(editForm).not.toBeVisible();
+      await expect(editForm).toBeHidden();
       await expect(page.getByText(updatedNote, { exact: true })).toBeVisible();
       await page.reload();
       await expect(page.locator("table tbody tr")).toHaveCount(1);
@@ -1211,9 +1209,7 @@ test.describe("External delivery draft items", () => {
         .fill("3");
       const updatedNote = `Summary after item save ${faker.string.alphanumeric(10)}`;
       await updateOrderNote(updatedNote);
-      await expect(
-        page.getByText(updatedNote, { exact: true }),
-      ).not.toBeVisible();
+      await expect(page.getByText(updatedNote, { exact: true })).toBeHidden();
 
       const waitForCreatedItem = (packQuantity: number) =>
         page.waitForResponse(
@@ -1227,7 +1223,7 @@ test.describe("External delivery draft items", () => {
       const successfulItem = waitForCreatedItem(3);
       await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
       expect((await successfulItem).ok()).toBe(true);
-      await expect(editForm).not.toBeVisible();
+      await expect(editForm).toBeHidden();
       await expect(page.getByRole("dialog")).toHaveCount(0);
       await expect(page.getByText(updatedNote, { exact: true })).toBeVisible();
 
@@ -1284,7 +1280,7 @@ test.describe("External delivery draft items", () => {
       const retriedItem = waitForCreatedItem(4);
       await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
       expect((await retriedItem).ok()).toBe(true);
-      await expect(editForm).not.toBeVisible();
+      await expect(editForm).toBeHidden();
       const saved = await responseData<{ results: DeliveryItem[] }>(
         await page.request.get(
           `${apiUrl}/api/v1/supply_delivery/?order=${order.id}&facility=${facilityId}`,
@@ -1372,7 +1368,7 @@ test.describe("External delivery draft items", () => {
       );
       expect(beforeSave.status).toBe("in_progress");
       await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
-      await expect(editForm).not.toBeVisible();
+      await expect(editForm).toBeHidden();
       await page.reload();
       await expect(unpricedRow).toHaveCount(1);
       await expect(unpricedRow).toContainText("31/01/2031");
@@ -1385,6 +1381,7 @@ test.describe("External delivery draft items", () => {
       expect(replacedOriginal.status).toBe("abandoned");
     });
   });
+
   test("clears and refills a saved item's pack quantity without losing the edit", async ({
     page,
   }) => {
@@ -1430,7 +1427,7 @@ test.describe("External delivery draft items", () => {
       form.getByRole("spinbutton", { name: "Qty", exact: true }),
     ).toHaveValue(/^15(?:\.0+)?$/);
     await form.getByRole("button", { name: /^Save Changes\b/ }).click();
-    await expect(form).not.toBeVisible();
+    await expect(form).toBeHidden();
     const saved = await responseData<{ results: DeliveryItem[] }>(
       await page.request.get(
         `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,
@@ -1494,7 +1491,7 @@ test.describe("External delivery draft items", () => {
         .inputValue();
       expect(Number(displayedTotal)).toBe(withoutPricingMetadata ? 30 : 12.5);
       await form.getByRole("button", { name: /^Save Changes\b/ }).click();
-      await expect(form).not.toBeVisible();
+      await expect(form).toBeHidden();
       const saved = await responseData<{
         results: (DeliveryItem & {
           total_purchase_price: number;
@@ -1592,7 +1589,7 @@ test.describe("External delivery draft items", () => {
         .check();
       await form.locator('input[type="date"]').fill("2031-02-28");
       await form.getByRole("button", { name: /^Save Changes\b/ }).click();
-      await expect(form).not.toBeVisible();
+      await expect(form).toBeHidden();
       const saved = await responseData<{ results: DeliveryItem[] }>(
         await page.request.get(
           `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,
@@ -1702,7 +1699,7 @@ test.describe("External delivery draft items", () => {
         .getByRole("spinbutton", { name: "Item Price", exact: true })
         .fill("11.12");
       await form.getByRole("button", { name: /^Save Changes\b/ }).click();
-      await expect(form).not.toBeVisible();
+      await expect(form).toBeHidden();
       const pricedLines = await responseData<{ results: DeliveryItem[] }>(
         await page.request.get(
           `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,

@@ -15,8 +15,15 @@ import {
   SelectedDateBadge,
   applyDateDraftOnClose,
 } from "./dateFilter";
+import { CloseOnRepickContext } from "./filterChoiceItem";
+import { FilterMenuSearchProvider } from "./filterMenuSearch";
 import FilterRenderer from "./filterRenderer";
-import { FilterDateRange, FilterState } from "./utils/Utils";
+import { useFilterSurface } from "./filterSurface";
+import {
+  FilterDateRange,
+  FilterState,
+  isSingleSelectFilter,
+} from "./utils/Utils";
 
 interface DomainFilterValueProps {
   state: FilterState;
@@ -27,6 +34,12 @@ interface DomainFilterValueProps {
   onOpenChange?: (open: boolean) => void;
   facilityId?: string;
   className?: string;
+  trigger?: React.ReactElement;
+  finalFocus?: boolean;
+  /** Shows the picker header with a back button (e.g. to the field list). */
+  onBack?: () => void;
+  /** Shows the picker header with a close button. */
+  onClose?: () => void;
 }
 
 export function DomainFilterValue({
@@ -38,13 +51,50 @@ export function DomainFilterValue({
   onOpenChange,
   facilityId,
   className,
+  trigger,
+  finalFocus,
+  onBack,
+  onClose,
 }: DomainFilterValueProps) {
   const { t } = useTranslation();
   const selected = toDomainValues(state, values);
   const { filter } = state;
   const dateDraftRef = useRef<DateFilterHandle>(null);
+  // The compact toolbar's popover or drawer hosts the picker itself.
+  const inline = useFilterSurface() !== "menu";
 
-  return (
+  // A single-select picker applies its pick and closes, as Done does in the
+  // toolbar and as the built-in option lists do; picking the current choice
+  // again closes it too. Clearing keeps it open.
+  const closeOnPick = isSingleSelectFilter(filter);
+  const closePicker = onClose ?? (() => onOpenChange?.(false));
+
+  const picker = (
+    <CloseOnRepickContext.Provider
+      value={closeOnPick ? closePicker : undefined}
+    >
+      <FilterRenderer
+        activeFilter={filter.key}
+        dateDraftRef={dateDraftRef}
+        selectedFilters={{
+          ...selectedFilters,
+          [filter.key]: { ...state, selected },
+        }}
+        facilityId={facilityId}
+        handleBack={onBack}
+        handleClose={onClose}
+        onFilterChange={(_, next) => {
+          const nextValues = Array.isArray(next) ? next : [next];
+          onChange(nextValues);
+          if (closeOnPick && nextValues.length > 0) closePicker();
+        }}
+      />
+    </CloseOnRepickContext.Provider>
+  );
+
+  const menu = inline ? (
+    picker
+  ) : (
     <DropdownMenu
       open={open}
       onOpenChange={(next, details) => {
@@ -53,45 +103,51 @@ export function DomainFilterValue({
       }}
     >
       <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          data-slot="filter-value"
-          aria-label={t("filter_value", { field: t(filter.label) })}
-          className={cn(
-            "min-w-0 flex-1 justify-start font-normal shadow-sm md:flex-none",
-            className,
-          )}
-        >
-          <span className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
-            {values.length === 0 ? (
-              t("select")
-            ) : filter.type === "date" ? (
-              <SelectedDateBadge
-                selected={selected as FilterDateRange}
-                filter={filter}
-                interactive={false}
-              />
-            ) : (
-              filter.renderSelected?.(selected, filter)
+        {trigger ?? (
+          <Button
+            type="button"
+            variant="outline"
+            data-slot="filter-value"
+            aria-label={t("filter_value", { field: t(filter.label) })}
+            className={cn(
+              "min-w-0 flex-1 justify-start font-normal shadow-sm md:flex-none",
+              className,
             )}
-          </span>
-        </Button>
+          >
+            <span className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
+              {values.length === 0 ? (
+                t("select")
+              ) : filter.type === "date" ? (
+                <SelectedDateBadge
+                  selected={selected as FilterDateRange}
+                  filter={filter}
+                  interactive={false}
+                />
+              ) : (
+                filter.renderSelected?.(selected, filter)
+              )}
+            </span>
+          </Button>
+        )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-80 p-0" align="start">
-        <FilterRenderer
-          activeFilter={filter.key}
-          dateDraftRef={dateDraftRef}
-          selectedFilters={{
-            ...selectedFilters,
-            [filter.key]: { ...state, selected },
-          }}
-          facilityId={facilityId}
-          onFilterChange={(_, next) =>
-            onChange(Array.isArray(next) ? next : [next])
-          }
-        />
+      <DropdownMenuContent
+        className="w-80 p-0"
+        align="start"
+        finalFocus={finalFocus}
+        aria-label={t(filter.label)}
+      >
+        {picker}
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+  return filter.type === "command" ||
+    filter.type === "tag" ||
+    filter.type === "department" ||
+    filter.type === "care_team" ||
+    filter.type === "facility_user" ||
+    filter.type === "activity_definition" ? (
+    <FilterMenuSearchProvider>{menu}</FilterMenuSearchProvider>
+  ) : (
+    menu
   );
 }

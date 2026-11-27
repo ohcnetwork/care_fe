@@ -77,7 +77,7 @@ test.describe("Encounter navigation", () => {
             await sectionPicker
               .getByRole("button", { name, exact: true })
               .click();
-            await expect(sectionPicker).not.toBeVisible();
+            await expect(sectionPicker).toBeHidden();
             await expect(sectionTrigger).toHaveAccessibleName(
               `Encounter section: ${name}`,
             );
@@ -144,13 +144,13 @@ test.describe("Encounter navigation", () => {
         await expect(
           page.getByRole("group", { name: "Appointment", exact: true }),
         ).toHaveCount(0);
-        await expect(historicalContext).not.toBeVisible();
-        await expect(returnToCurrent).not.toBeVisible();
+        await expect(historicalContext).toBeHidden();
+        await expect(returnToCurrent).toBeHidden();
         await expect(updateEncounter).toBeVisible();
         expect(currentFacilityName).not.toBe("");
         await expect(
           encounterContext.getByText(currentFacilityName, { exact: true }),
-        ).not.toBeVisible();
+        ).toBeHidden();
         await expect(
           encounterContext.getByRole("button", { name: /^Encounter dates:/ }),
         ).toHaveText(/\d{1,2} [A-Za-z]{3}.*Ongoing/);
@@ -242,7 +242,7 @@ test.describe("Encounter navigation", () => {
                 ).toBeGreaterThanOrEqual(48);
               }
               await page.keyboard.press("Escape");
-              await expect(sectionPicker).not.toBeVisible();
+              await expect(sectionPicker).toBeHidden();
               await expect(sectionTrigger).toBeFocused();
             }
           });
@@ -261,7 +261,7 @@ test.describe("Encounter navigation", () => {
             details.getByText("In Progress", { exact: true }),
           ).toBeVisible();
           await page.keyboard.press("Escape");
-          await expect(details).not.toBeVisible();
+          await expect(details).toBeHidden();
 
           await encounterContext
             .getByRole("button", { name: /^Encounter dates:/ })
@@ -284,7 +284,7 @@ test.describe("Encounter navigation", () => {
             details.getByText("Ongoing", { exact: true }),
           ).toBeVisible();
           await page.keyboard.press("Escape");
-          await expect(details).not.toBeVisible();
+          await expect(details).toBeHidden();
         });
 
         await test.step("Choose the historical encounter", async () => {
@@ -293,14 +293,14 @@ test.describe("Encounter navigation", () => {
             .click();
           const history = page.getByRole("dialog");
           await history.locator('button[aria-pressed="false"]:visible').click();
-          await expect(history).not.toBeVisible();
+          await expect(history).toBeHidden();
           await expect(page).toHaveURL(
             (url) =>
               url.searchParams.get("selectedEncounter") === pastEncounterId,
           );
           await expect(historicalContext).toBeVisible();
           await expect(returnToCurrent).toBeVisible();
-          await expect(updateEncounter).not.toBeVisible();
+          await expect(updateEncounter).toBeHidden();
           await expect(
             encounterContext.getByText(currentFacilityName, { exact: true }),
           ).toBeVisible();
@@ -314,9 +314,9 @@ test.describe("Encounter navigation", () => {
           await expect(details.getByText(/\d{1,2}:\d{2}/)).toHaveCount(2);
           await expect(
             details.getByText("Created Date", { exact: true }),
-          ).not.toBeVisible();
+          ).toBeHidden();
           await page.keyboard.press("Escape");
-          await expect(details).not.toBeVisible();
+          await expect(details).toBeHidden();
         });
 
         await test.step("Open Notes and retain the historical encounter", async () => {
@@ -339,7 +339,7 @@ test.describe("Encounter navigation", () => {
               }),
             ).not.toHaveAttribute("aria-current", "page");
             await page.keyboard.press("Escape");
-            await expect(sectionPicker).not.toBeVisible();
+            await expect(sectionPicker).toBeHidden();
           }
           await expect(
             page.getByRole(layout === "mobile" ? "button" : "heading", {
@@ -391,8 +391,8 @@ test.describe("Encounter navigation", () => {
               !url.searchParams.has("selectedEncounter"),
           );
           await expectSelectedSection("Notes");
-          await expect(historicalContext).not.toBeVisible();
-          await expect(returnToCurrent).not.toBeVisible();
+          await expect(historicalContext).toBeHidden();
+          await expect(returnToCurrent).toBeHidden();
           await expect(updateEncounter).toBeVisible();
         });
 
@@ -568,6 +568,7 @@ test.describe("Encounter navigation", () => {
                 .toBeLessThanOrEqual(4);
             }
           });
+
           await bar
             .getByRole("button", { name: "More Actions", exact: true })
             .click();
@@ -603,7 +604,7 @@ test.describe("Encounter navigation", () => {
 
         if (layout === "mobile") {
           await page.keyboard.press("Escape");
-          await expect(actionSurface).not.toBeVisible();
+          await expect(actionSurface).toBeHidden();
         }
 
         await test.step("Activate the Scan control with Enter", async () => {
@@ -616,7 +617,7 @@ test.describe("Encounter navigation", () => {
           ).toBeVisible();
           expect(writes).toHaveLength(0);
           await page.keyboard.press("Escape");
-          await expect(page.getByRole("dialog")).not.toBeVisible();
+          await expect(page.getByRole("dialog")).toBeHidden();
         });
 
         await test.step("Send the appointment bar action to the intended request boundary", async () => {
@@ -651,7 +652,7 @@ test.describe("Encounter navigation", () => {
             await page.keyboard.press("Enter");
             await expect.poll(() => writes.length).toBe(1);
             if (layout === "mobile") {
-              await expect(actionSurface).not.toBeVisible();
+              await expect(actionSurface).toBeHidden();
               await bar
                 .getByRole("button", { name: "More Actions", exact: true })
                 .focus();
@@ -659,7 +660,7 @@ test.describe("Encounter navigation", () => {
               await expect(actionSurface).toBeVisible();
               await expect(action).toBeDisabled();
               await page.keyboard.press("Escape");
-              await expect(actionSurface).not.toBeVisible();
+              await expect(actionSurface).toBeHidden();
               await bar
                 .getByRole("button", { name: "More Actions", exact: true })
                 .focus();

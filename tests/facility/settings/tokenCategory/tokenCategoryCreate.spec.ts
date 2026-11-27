@@ -80,7 +80,7 @@ test.describe("Token Category Create - Permission Tests", () => {
       );
       await sheet.getByRole("button", { name: "Create" }).click();
 
-      await expect(sheet).not.toBeVisible();
+      await expect(sheet).toBeHidden();
       await expect(page).toHaveURL(
         /\/facility\/[^/]+\/settings\/token_category$/,
       );

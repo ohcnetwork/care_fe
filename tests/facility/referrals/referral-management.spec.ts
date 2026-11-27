@@ -42,7 +42,7 @@ test("coordinates a referral with persisted status, team, response, and conversa
     await editDialog
       .getByRole("button", { name: "Save Changes", exact: true })
       .click();
-    await expect(editDialog).not.toBeVisible();
+    await expect(editDialog).toBeHidden();
     await page
       .getByRole("button", { name: "Manage assignees", exact: true })
       .click();
@@ -78,7 +78,7 @@ test("coordinates a referral with persisted status, team, response, and conversa
     await dialog
       .getByRole("button", { name: "Save Changes", exact: true })
       .click();
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await page
       .getByRole("button", { name: "Start referral", exact: true })
       .click();
@@ -153,7 +153,7 @@ test("coordinates a referral with persisted status, team, response, and conversa
     await reopen
       .getByRole("button", { name: "Reopen referral", exact: true })
       .click();
-    await expect(reopen).not.toBeVisible();
+    await expect(reopen).toBeHidden();
     await page.reload();
     await expect(
       page
@@ -223,7 +223,7 @@ test("coordinates a referral with persisted status, team, response, and conversa
       .getByRole("button", { name: "Retry", exact: true })
       .click();
     await retriedForms;
-    await expect(refreshWarning).not.toBeVisible();
+    await expect(refreshWarning).toBeHidden();
     await expect(
       questionBlock(page, fixture.responseLabel).getByRole("textbox"),
     ).toHaveValue(recommendation);
@@ -250,7 +250,7 @@ test("coordinates a referral with persisted status, team, response, and conversa
     await discard
       .getByRole("button", { name: "Keep editing", exact: true })
       .click();
-    await expect(discard).not.toBeVisible();
+    await expect(discard).toBeHidden();
     await expect(page).toHaveURL(responsePageUrl.href);
     await expect(
       questionBlock(page, fixture.responseLabel).getByRole("textbox"),
@@ -397,7 +397,7 @@ test("coordinates a referral with persisted status, team, response, and conversa
     await confirmation
       .getByRole("button", { name: "Mark entered in error", exact: true })
       .click();
-    await expect(confirmation).not.toBeVisible();
+    await expect(confirmation).toBeHidden();
     await page.reload();
     await expect(response).toContainText("Entered in Error");
     await response.locator("details").locator("summary").click();
@@ -445,7 +445,7 @@ test("coordinates a referral with persisted status, team, response, and conversa
       .click();
     await expect(
       conversation.getByRole("textbox", { name: "Edit message", exact: true }),
-    ).not.toBeVisible();
+    ).toBeHidden();
     await expect(messages.getByText(edited, { exact: true })).toBeVisible();
     await page.reload();
     const updated = messages.getByRole("listitem").filter({ hasText: edited });

@@ -13,8 +13,6 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useShortcutSubContext } from "@/context/ShortcutContext";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -154,8 +152,6 @@ function ChargeItemsTable({
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [isChangeAccountOpen, setIsChangeAccountOpen] = useState(false);
 
-  // Register shortcuts for this table
-  useShortcutSubContext("facility:billing");
   const { qParams, updateQuery } = useFilters({
     schema: chargeItemListSearch,
     limit: 15,

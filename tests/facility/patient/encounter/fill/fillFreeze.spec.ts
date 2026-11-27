@@ -157,10 +157,11 @@ test.describe("P1-4: submit freeze", () => {
     await expect(removeButton).toBeDisabled();
     await expect(addPickerButton).toBeDisabled();
     await expect(noteButton).toBeDisabled();
-    // The disabled trigger means the note popover — and its textarea —
-    // is unreachable at all: force a click past Playwright's actionability
-    // guard and confirm the textarea never appears.
-    await noteButton.click({ force: true });
+    // The note popover — and its textarea — is unreachable at all: the
+    // trigger carries the native `disabled` attribute (not just
+    // aria-disabled), so the browser never delivers a click to it, and the
+    // textarea is not on the page.
+    await expect(noteButton).toHaveAttribute("disabled");
     await expect(page.getByPlaceholder("Add note")).toHaveCount(0);
     // The freeze means there is no way to type over it — confirmed by the
     // disabled assertions above — but the value itself must also still

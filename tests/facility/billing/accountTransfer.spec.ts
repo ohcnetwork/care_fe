@@ -258,7 +258,7 @@ test.describe("Account Transfer Payment", () => {
     for (const account of nonActiveAccounts) {
       await page.goto(`/facility/${facilityId}/billing/account/${account.id}`);
       await expect(page.getByText(account.name)).toBeVisible();
-      await expect(page.locator(moreOptionsSelector)).not.toBeVisible();
+      await expect(page.locator(moreOptionsSelector)).toBeHidden();
     }
   });
 
