@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 import { cn } from "@/lib/utils";
 
@@ -153,6 +154,7 @@ export function EncounterSearch({
   const inputRef = useRef<HTMLInputElement>(null);
   const descriptionId = useId();
   const scanner = useScannerBurst();
+  const isMobile = useIsMobile();
 
   const configs = useMemo(
     () => [
@@ -347,6 +349,28 @@ export function EncounterSearch({
   };
 
   const hasApplied = !!(applied.name || applied.visitId || applied.patient);
+  // The picked field already shows in the selector, so phones get a short
+  // prompt that fits the input's minimum width instead of repeating it.
+  let placeholder: string;
+  if (field === "auto") {
+    placeholder = hasApplied
+      ? t("search")
+      : isMobile
+        ? t("encounter_search_placeholder_mobile_auto")
+        : t("encounter_search_placeholder");
+  } else if (!isMobile) {
+    placeholder = t("encounter_search_placeholder_field", {
+      field: fieldLabel,
+    });
+  } else if (field === "name") {
+    placeholder = t("encounter_search_placeholder_mobile_name");
+  } else if (field === "visit") {
+    placeholder = t("encounter_search_placeholder_mobile_visit_id");
+  } else if (fieldConfig && isPhoneConfig(fieldConfig)) {
+    placeholder = t("encounter_search_placeholder_mobile_phone");
+  } else {
+    placeholder = t("encounter_search_placeholder_mobile_identifier");
+  }
   // A removed chip's button unmounts; typing continues in the input.
   const removeText = () => {
     onRemoveText();
@@ -493,7 +517,8 @@ export function EncounterSearch({
                 render={
                   <InputGroupButton
                     size="xs"
-                    className="max-w-56 min-w-0 gap-1 font-medium text-foreground"
+                    // Buttons don't shrink by default; this one truncates.
+                    className="max-w-56 min-w-0 shrink gap-1 font-medium text-foreground"
                   />
                 }
               >
@@ -563,7 +588,7 @@ export function EncounterSearch({
               the input wraps to a second line inside the field. */}
           <div
             data-slot="encounter-search-entry"
-            className="flex min-w-0 flex-1 flex-wrap items-center gap-1 py-0.5"
+            className="flex min-w-28 flex-1 flex-wrap items-center gap-1 py-0.5"
             onClick={(event) => {
               if (event.target === event.currentTarget) {
                 inputRef.current?.focus();
@@ -601,20 +626,12 @@ export function EncounterSearch({
                 render={
                   <InputGroupInput
                     ref={inputRef}
-                    className="h-8 ps-1.5 pe-1.5"
+                    className="h-8 ps-1.5 pe-1.5 text-ellipsis"
                   />
                 }
                 aria-label={t("encounter_search_label")}
                 aria-describedby={descriptionId}
-                placeholder={
-                  field !== "auto"
-                    ? t("encounter_search_placeholder_field", {
-                        field: fieldLabel,
-                      })
-                    : hasApplied
-                      ? t("search")
-                      : t("encounter_search_placeholder")
-                }
+                placeholder={placeholder}
                 onKeyDown={(event) => {
                   scanner.track(event);
                   if (
@@ -656,7 +673,7 @@ export function EncounterSearch({
               : t("encounter_search_description_field", { field: fieldLabel })}
           </span>
           {draft && (
-            <InputGroupAddon align="inline-end">
+            <InputGroupAddon align="inline-end" className="shrink-0">
               <InputGroupButton
                 size="icon-xs"
                 aria-label={t("encounter_search_clear")}
@@ -670,7 +687,7 @@ export function EncounterSearch({
             </InputGroupAddon>
           )}
           <Separator orientation="vertical" className="order-last bg-input" />
-          <InputGroupAddon align="inline-end">
+          <InputGroupAddon align="inline-end" className="shrink-0">
             <InputGroupButton
               size="xs"
               aria-label={t("scan_patient_qr")}
