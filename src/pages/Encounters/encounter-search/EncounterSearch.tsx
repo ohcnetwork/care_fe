@@ -499,7 +499,6 @@ export function EncounterSearch({
         value={null}
         inputValue={draft}
         open={popupOpen && !patientLocked}
-        disabled={patientLocked}
         filter={null}
         autoHighlight
         itemToStringLabel={describe}
@@ -536,99 +535,106 @@ export function EncounterSearch({
             className,
           )}
         >
-          {/* Before the input, so Shift+Tab from the input reaches it. It
+          {/* With a patient applied only its chip shows: a search box that
+              can't be typed in would read as editable. */}
+          {!patientLocked && (
+            <>
+              {/* Before the input, so Shift+Tab from the input reaches it. It
               shrinks before the input does. */}
-          <InputGroupAddon align="inline-start" className="min-w-0 shrink">
-            <Select<SearchField>
-              value={field}
-              disabled={patientLocked}
-              onValueChange={(next) => {
-                fieldPicked.current = true;
-                setField(next);
-                setPending(null);
-                if (!lookupIfReady(next, term, country)) setLookup(null);
-                setOpen(term !== "");
-              }}
-              // Select returns focus to its trigger; after a pick, typing
-              // continues in the input.
-              onOpenChangeComplete={(isOpen: boolean) => {
-                if (isOpen || !fieldPicked.current) return;
-                fieldPicked.current = false;
-                inputRef.current?.focus();
-              }}
-            >
-              {/* A dropdown in an input group is an InputGroupButton. */}
-              <SelectPrimitive.Trigger
-                aria-label={t("encounter_search_field_label")}
-                render={
-                  <InputGroupButton
-                    size="xs"
-                    className="max-w-56 min-w-0 gap-1 font-medium text-foreground"
-                  />
-                }
-              >
-                <SelectValue className="block min-w-0 truncate" />
-                <ChevronDown
-                  aria-hidden="true"
-                  className="size-3.5 text-muted-foreground"
-                />
-              </SelectPrimitive.Trigger>
-              <SelectContent position="popper" align="start">
-                {/* Groups give the items their inset from the popup's edge. */}
-                <SelectGroup>
-                  <SelectItem value="auto">
-                    {t("encounter_search_field_auto")}
-                  </SelectItem>
-                </SelectGroup>
-                <SelectGroup>
-                  <SelectLabel>
-                    {t("encounter_search_filter_visits_by")}
-                  </SelectLabel>
-                  <SelectItem value="name">
-                    {t("encounter_search_field_name")}
-                  </SelectItem>
-                  <SelectItem value="visit">
-                    {t("encounter_search_field_visit_id")}
-                  </SelectItem>
-                </SelectGroup>
-                {configs.length > 0 && (
-                  <SelectGroup>
-                    <SelectLabel>
-                      {t("encounter_search_look_up_patient_by")}
-                    </SelectLabel>
-                    {configs.map((config) => (
-                      <SelectItem
-                        key={config.id}
-                        value={identifierField(config)}
-                      >
-                        {config.config.display}
+              <InputGroupAddon align="inline-start" className="min-w-0 shrink">
+                <Select<SearchField>
+                  value={field}
+                  onValueChange={(next) => {
+                    fieldPicked.current = true;
+                    setField(next);
+                    setPending(null);
+                    if (!lookupIfReady(next, term, country)) setLookup(null);
+                    setOpen(term !== "");
+                  }}
+                  // Select returns focus to its trigger; after a pick, typing
+                  // continues in the input.
+                  onOpenChangeComplete={(isOpen: boolean) => {
+                    if (isOpen || !fieldPicked.current) return;
+                    fieldPicked.current = false;
+                    inputRef.current?.focus();
+                  }}
+                >
+                  {/* A dropdown in an input group is an InputGroupButton. */}
+                  <SelectPrimitive.Trigger
+                    aria-label={t("encounter_search_field_label")}
+                    render={
+                      <InputGroupButton
+                        size="xs"
+                        className="max-w-56 min-w-0 gap-1 font-medium text-foreground"
+                      />
+                    }
+                  >
+                    <SelectValue className="block min-w-0 truncate" />
+                    <ChevronDown
+                      aria-hidden="true"
+                      className="size-3.5 text-muted-foreground"
+                    />
+                  </SelectPrimitive.Trigger>
+                  <SelectContent position="popper" align="start">
+                    {/* Groups give the items their inset from the popup's edge. */}
+                    <SelectGroup>
+                      <SelectItem value="auto">
+                        {t("encounter_search_field_auto")}
                       </SelectItem>
-                    ))}
-                  </SelectGroup>
-                )}
-              </SelectContent>
-            </Select>
-          </InputGroupAddon>
-          {/* Full-height dividers read as part of the field's border. */}
-          <Separator orientation="vertical" className="order-first bg-input" />
-          {showCountry && (
-            // As in the shared PhoneInput: the country, then the number.
-            <CountrySelect
-              value={shownCountry}
-              options={countryOptions}
-              aria-label={t("encounter_search_phone_country", {
-                country: countryLabels[shownCountry],
-                code: getCountryCallingCode(shownCountry),
-              })}
-              pickedFocus={inputRef}
-              disabled={patientLocked}
-              onChange={(next) => {
-                setCountry(next);
-                setPending(null);
-                if (!lookupIfReady(field, term, next)) setLookup(null);
-                setOpen(term !== "");
-              }}
-            />
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>
+                        {t("encounter_search_filter_visits_by")}
+                      </SelectLabel>
+                      <SelectItem value="name">
+                        {t("encounter_search_field_name")}
+                      </SelectItem>
+                      <SelectItem value="visit">
+                        {t("encounter_search_field_visit_id")}
+                      </SelectItem>
+                    </SelectGroup>
+                    {configs.length > 0 && (
+                      <SelectGroup>
+                        <SelectLabel>
+                          {t("encounter_search_look_up_patient_by")}
+                        </SelectLabel>
+                        {configs.map((config) => (
+                          <SelectItem
+                            key={config.id}
+                            value={identifierField(config)}
+                          >
+                            {config.config.display}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )}
+                  </SelectContent>
+                </Select>
+              </InputGroupAddon>
+              {/* Full-height dividers read as part of the field's border. */}
+              <Separator
+                orientation="vertical"
+                className="order-first bg-input"
+              />
+              {showCountry && (
+                // As in the shared PhoneInput: the country, then the number.
+                <CountrySelect
+                  value={shownCountry}
+                  options={countryOptions}
+                  aria-label={t("encounter_search_phone_country", {
+                    country: countryLabels[shownCountry],
+                    code: getCountryCallingCode(shownCountry),
+                  })}
+                  pickedFocus={inputRef}
+                  onChange={(next) => {
+                    setCountry(next);
+                    setPending(null);
+                    if (!lookupIfReady(field, term, next)) setLookup(null);
+                    setOpen(term !== "");
+                  }}
+                />
+              )}
+            </>
           )}
           {/* The chips, then the input. When the chips don't fit beside it,
               the input wraps to a second line inside the field. */}
@@ -648,81 +654,83 @@ export function EncounterSearch({
             />
             {/* The search icon leads the input, after any chips, so it marks
                 where the search continues; the two wrap together. */}
-            <div
-              className={cn(
-                "flex items-center",
-                hasApplied ? "min-w-20 grow basis-20" : "min-w-28 flex-1",
-              )}
-              onClick={(event) => {
-                if (event.target !== inputRef.current) {
-                  inputRef.current?.focus();
-                }
-              }}
-            >
-              {!showCountry && (
-                <Search
-                  aria-hidden="true"
-                  className={cn(
-                    "size-4 shrink-0 text-muted-foreground",
-                    hasApplied ? "ms-1" : "ms-2",
-                  )}
-                />
-              )}
-              <ComboboxPrimitive.Input
-                render={
-                  <InputGroupInput
-                    ref={inputRef}
-                    className="h-8 ps-1.5 pe-1.5"
+            {!patientLocked && (
+              <div
+                className={cn(
+                  "flex items-center",
+                  hasApplied ? "min-w-20 grow basis-20" : "min-w-28 flex-1",
+                )}
+                onClick={(event) => {
+                  if (event.target !== inputRef.current) {
+                    inputRef.current?.focus();
+                  }
+                }}
+              >
+                {!showCountry && (
+                  <Search
+                    aria-hidden="true"
+                    className={cn(
+                      "size-4 shrink-0 text-muted-foreground",
+                      hasApplied ? "ms-1" : "ms-2",
+                    )}
                   />
-                }
-                aria-label={t("encounter_search_label")}
-                aria-describedby={descriptionId}
-                aria-invalid={phoneTooLong || undefined}
-                inputMode={
-                  fieldConfig && isPhoneConfig(fieldConfig) ? "tel" : undefined
-                }
-                placeholder={
-                  patientLocked
-                    ? t("encounter_search_placeholder_locked")
-                    : field !== "auto"
+                )}
+                <ComboboxPrimitive.Input
+                  render={
+                    <InputGroupInput
+                      ref={inputRef}
+                      className="h-8 ps-1.5 pe-1.5"
+                    />
+                  }
+                  aria-label={t("encounter_search_label")}
+                  aria-describedby={descriptionId}
+                  aria-invalid={phoneTooLong || undefined}
+                  inputMode={
+                    fieldConfig && isPhoneConfig(fieldConfig)
+                      ? "tel"
+                      : undefined
+                  }
+                  placeholder={
+                    field !== "auto"
                       ? t("encounter_search_placeholder_field", {
                           field: fieldLabel,
                         })
                       : hasApplied
                         ? t("search")
                         : t("encounter_search_placeholder")
-                }
-                onKeyDown={(event) => {
-                  scanner.track(event);
-                  if (
-                    event.key === "Enter" &&
-                    scanner.isScannerEnter(draft, event)
-                  ) {
-                    const patientId = scannedPatientId(draft);
-                    if (patientId) {
-                      event.preventDefault();
-                      event.preventBaseUIHandler();
-                      applyScan(patientId);
-                      return;
-                    }
                   }
-                  if (event.key === "Backspace" && !draft) {
-                    // First back to Auto, then the last chip; a held key stops
-                    // at the empty input.
-                    if (field !== "auto") {
-                      event.preventDefault();
-                      setField("auto");
-                    } else if (
-                      !event.repeat &&
-                      (applied.name || applied.visitId)
+                  onKeyDown={(event) => {
+                    scanner.track(event);
+                    if (
+                      event.key === "Enter" &&
+                      scanner.isScannerEnter(draft, event)
                     ) {
-                      event.preventDefault();
-                      onRemoveText();
+                      const patientId = scannedPatientId(draft);
+                      if (patientId) {
+                        event.preventDefault();
+                        event.preventBaseUIHandler();
+                        applyScan(patientId);
+                        return;
+                      }
                     }
-                  }
-                }}
-              />
-            </div>
+                    if (event.key === "Backspace" && !draft) {
+                      // First back to Auto, then the last chip; a held key stops
+                      // at the empty input.
+                      if (field !== "auto") {
+                        event.preventDefault();
+                        setField("auto");
+                      } else if (
+                        !event.repeat &&
+                        (applied.name || applied.visitId)
+                      ) {
+                        event.preventDefault();
+                        onRemoveText();
+                      }
+                    }
+                  }}
+                />
+              </div>
+            )}
           </div>
           <span id={descriptionId} className="sr-only">
             {field === "auto"
@@ -743,18 +751,24 @@ export function EncounterSearch({
               </InputGroupButton>
             </InputGroupAddon>
           )}
-          <Separator orientation="vertical" className="order-last bg-input" />
-          <InputGroupAddon align="inline-end">
-            <InputGroupButton
-              size="xs"
-              aria-label={t("scan_patient_qr")}
-              disabled={patientLocked}
-              onClick={() => setScanOpen(true)}
-            >
-              <QrCode />
-              <span className="hidden @lg/toolbar:inline">{t("scan")}</span>
-            </InputGroupButton>
-          </InputGroupAddon>
+          {!patientLocked && (
+            <>
+              <Separator
+                orientation="vertical"
+                className="order-last bg-input"
+              />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton
+                  size="xs"
+                  aria-label={t("scan_patient_qr")}
+                  onClick={() => setScanOpen(true)}
+                >
+                  <QrCode />
+                  <span className="hidden @lg/toolbar:inline">{t("scan")}</span>
+                </InputGroupButton>
+              </InputGroupAddon>
+            </>
+          )}
         </InputGroup>
         <ComboboxContent
           anchor={anchorRef}

@@ -1315,12 +1315,13 @@ test.describe("All encounters search", () => {
       page.getByRole("combobox", { name: /^search field$/i }),
     ).toContainText(/phone/i);
 
-    // Applying a patient keeps them too.
+    // Applying a patient keeps them too: they are back with the chip gone.
     await searchBox(page).pressSequentially("07400123456", { delay: 50 });
     await page.getByRole("option", { name: fullPatient.name }).click();
     await expect(page).toHaveURL(
       (url) => url.searchParams.get("patient_filter") === fullPatient.id,
     );
+    await chip(page).getByRole("button", { name: "Remove patient" }).click();
     await expect(
       page.getByRole("button", { name: "Phone country: United Kingdom (+44)" }),
     ).toBeVisible();
@@ -1469,19 +1470,16 @@ test.describe("All encounters search", () => {
     await page.goto(listUrl(`?patient_filter=${fullPatient.id}`));
     await expect(chip(page)).toHaveText(/^patient$/i);
 
-    // One patient at a time: nothing to type into, pick or scan.
-    await expect(searchBox(page)).toBeDisabled();
-    await expect(searchBox(page)).toHaveAttribute(
-      "placeholder",
-      "Remove the patient to search again",
-    );
+    // One patient at a time: only the chip shows, with nothing that looks
+    // like it can be typed into, picked or scanned.
+    await expect(searchBox(page)).toHaveCount(0);
     await expect(
       page.getByRole("combobox", { name: /^search field$/i }),
-    ).toBeDisabled();
-    await expect(page.getByRole("button", { name: /scan/i })).toBeDisabled();
+    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /scan/i })).toHaveCount(0);
 
     await chip(page).getByRole("button", { name: "Remove patient" }).click();
-    await expect(searchBox(page)).toBeEnabled();
+    await expect(searchBox(page)).toBeVisible();
     await expect(searchBox(page)).toBeFocused();
     await expect(searchBox(page)).toHaveAttribute(
       "placeholder",

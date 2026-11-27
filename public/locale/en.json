@@ -1738,7 +1738,6 @@
   "encounter_search_phone_country": "Phone country: {{country}} (+{{code}})",
   "encounter_search_placeholder": "Search visits or patients",
   "encounter_search_placeholder_field": "Search by {{field}}",
-  "encounter_search_placeholder_locked": "Remove the patient to search again",
   "encounter_search_remove_name_filter": "Remove name filter",
   "encounter_search_remove_patient": "Remove patient",
   "encounter_search_remove_visit_id_filter": "Remove visit ID filter",
