@@ -105,7 +105,7 @@ test.describe("Questionnaire v2 builder navigation", () => {
       await page.getByRole("button", { name: "Delete question" }).click();
       await expect(
         nav.getByRole("button", { name: `${titles[1]} (Copy)` }),
-      ).not.toBeVisible();
+      ).toBeHidden();
     });
   });
 
@@ -167,9 +167,7 @@ test.describe("Questionnaire v2 builder navigation", () => {
       await nav.getByRole("button", { name: titles[1] }).click();
       await page.getByRole("button", { name: "More options" }).click();
       await page.getByRole("menuitem", { name: "Delete question" }).click();
-      await expect(
-        nav.getByRole("button", { name: titles[1] }),
-      ).not.toBeVisible();
+      await expect(nav.getByRole("button", { name: titles[1] })).toBeHidden();
     });
 
     await test.step("The survivor remains and the delete persists on save", async () => {
@@ -182,9 +180,7 @@ test.describe("Questionnaire v2 builder navigation", () => {
       await expect(
         page.getByRole("textbox", { name: "Question Title" }),
       ).toHaveValue(titles[0]);
-      await expect(
-        nav.getByRole("button", { name: titles[1] }),
-      ).not.toBeVisible();
+      await expect(nav.getByRole("button", { name: titles[1] })).toBeHidden();
     });
   });
 });

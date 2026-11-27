@@ -312,22 +312,22 @@ const config = [
       "playwright/valid-expect-in-promise": "error",
       "playwright/valid-test-tags": "error",
       "playwright/valid-title": "error",
-      // Existing violations: warnings until the tests are migrated, then
-      // promote each rule to "error".
-      "playwright/consistent-spacing-between-blocks": "warn",
-      "playwright/no-force-option": "warn",
-      "playwright/no-networkidle": "warn",
-      "playwright/no-unused-locators": "warn",
-      "playwright/no-useless-await": "warn",
-      "playwright/no-useless-not": "warn",
-      "playwright/no-wait-for-timeout": "warn",
-      "playwright/prefer-hooks-in-order": "warn",
-      "playwright/prefer-locator": "warn",
-      "playwright/prefer-to-have-count": "warn",
-      "playwright/prefer-to-have-length": "warn",
-      "playwright/prefer-web-first-assertions": "warn",
+      // Rules the tests were migrated to; errors too, so CI and the
+      // pre-commit hook reject new violations.
+      "playwright/consistent-spacing-between-blocks": "error",
+      "playwright/no-force-option": "error",
+      "playwright/no-networkidle": "error",
+      "playwright/no-unused-locators": "error",
+      "playwright/no-useless-await": "error",
+      "playwright/no-useless-not": "error",
+      "playwright/no-wait-for-timeout": "error",
+      "playwright/prefer-hooks-in-order": "error",
+      "playwright/prefer-locator": "error",
+      "playwright/prefer-to-have-count": "error",
+      "playwright/prefer-to-have-length": "error",
+      "playwright/prefer-web-first-assertions": "error",
       "playwright/no-restricted-locators": [
-        "warn",
+        "error",
         [
           {
             type: "getByTestId",
@@ -336,6 +336,8 @@ const config = [
           },
         ],
       ],
+      // `any` is only a warning in src/; the tests have none, so keep it out.
+      "@typescript-eslint/no-explicit-any": "error",
     },
   },
 

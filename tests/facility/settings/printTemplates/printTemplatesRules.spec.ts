@@ -346,6 +346,7 @@ test.describe("Print templates (isolated API)", () => {
     await expect(invoice).toContainText(
       "Starts with a copy of the default template. Changes apply only to Invoice prints.",
     );
+
     await test.step("Prefill the default template's settings", async () => {
       await expect(invoice.getByLabel("Page Size")).toHaveText("A5");
       const logo = invoice.getByRole("group", { name: "Logo" });

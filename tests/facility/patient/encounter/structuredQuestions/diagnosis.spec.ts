@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { type Page, expect, test } from "@playwright/test";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import { valueSetColumn } from "tests/helper/ui";
 import { firstValueSetDisplay } from "tests/helper/valueSet";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -37,8 +38,7 @@ async function addDiagnosis(page: Page, severity?: string) {
     .filter({ hasText: /Add (another )?Diagnosis/i })
     .click();
   await page.getByPlaceholder(/Add (another )?Diagnosis/i).fill(diagnosisName);
-  await page
-    .getByTestId("valueset-search-results")
+  await valueSetColumn(page.locator("body"), "search")
     .getByRole("option", { name: diagnosisName, exact: true })
     .click();
 
@@ -66,14 +66,22 @@ test.describe("Diagnosis", () => {
     severity = faker.helpers.arrayElement(DIAGNOSIS_SEVERITY);
 
     questionnaireUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`;
+    // The form seeds its rows from this encounter's saved diagnoses; wait for
+    // that list so every test edits a fully loaded form.
+    const savedDiagnoses = page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        url.pathname === `/api/v1/patient/${patientId}/diagnosis/` &&
+        url.searchParams.get("encounter") === encounterId
+      );
+    });
     await page.goto(questionnaireUrl);
+    await savedDiagnoses;
   });
 
   test("should add diagnosis with all fields and verify it appears in diagnosis history", async ({
     page,
   }) => {
-    await page.waitForLoadState("networkidle");
-
     await addDiagnosis(page);
 
     const diagnosisRow = page.getByRole("row", { name: diagnosisName });
@@ -119,8 +127,6 @@ test.describe("Diagnosis", () => {
   });
 
   test("verify duplicate diagnosis cannot be added", async ({ page }) => {
-    await page.waitForLoadState("networkidle");
-
     await addDiagnosis(page);
     await page.getByRole("button", { name: "Save Changes" }).click();
 
@@ -129,7 +135,9 @@ test.describe("Diagnosis", () => {
     ).toBeVisible();
 
     await page.goto(questionnaireUrl);
-    await page.waitForLoadState("networkidle");
+    // The saved diagnosis is back in the form, so the duplicate check has
+    // the existing row to compare against.
+    await expect(page.getByRole("row", { name: diagnosisName })).toBeVisible();
 
     await addDiagnosis(page);
 

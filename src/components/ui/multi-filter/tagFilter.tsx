@@ -1,22 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Component } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { cn } from "@/lib/utils";
 
 import TagColorDot from "@/components/Tags/TagColorDot";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
-  DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -33,20 +30,67 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
+import { FilterChoiceItem } from "./filterChoiceItem";
 import FilterHeader from "./filterHeader";
+import {
+  FilterMenuList,
+  FilterMenuSearch,
+  useFilterMenuSearch,
+} from "./filterMenuSearch";
+import {
+  FilterMenuItem,
+  FilterMenuLabel,
+  FilterMenuSeparator,
+  useFilterSurface,
+} from "./filterSurface";
 import {
   COLOR_PALETTE,
   FilterConfig,
   FilterDateRange,
   TagFilterMeta,
+  getColorForOption,
 } from "./utils/Utils";
+
+interface TagFilterItemProps {
+  tag: TagConfig;
+  checked: boolean;
+  onToggle: (tag: TagConfig) => void;
+  colorIndex?: number;
+  showParent?: boolean;
+}
+
+function TagFilterItem({
+  tag,
+  checked,
+  onToggle,
+  colorIndex = 0,
+  showParent,
+}: TagFilterItemProps) {
+  return (
+    <FilterChoiceItem multiple checked={checked} onChoose={() => onToggle(tag)}>
+      {showParent && tag.parent && (
+        <>
+          <Component />
+          <span className="truncate text-muted-foreground">
+            {tag.parent.display}
+          </span>
+          <ChevronRight />
+        </>
+      )}
+      <TagColorDot
+        tag={tag}
+        fallbackColorClass={getColorForOption(colorIndex)}
+      />
+      <span className="truncate">{tag.display}</span>
+    </FilterChoiceItem>
+  );
+}
 
 function TreeViewItem({
   tag,
   selectedTags,
   onTagToggle,
   resource,
-  getColorForTag,
   level = 0,
   facilityId,
 }: {
@@ -54,15 +98,13 @@ function TreeViewItem({
   selectedTags: TagConfig[];
   onTagToggle: (tag: TagConfig) => void;
   resource: TagResource;
-  getColorForTag: (tagId: string, index: number) => string;
   level?: number;
   facilityId?: string;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  const isRootLevel = tag.has_children;
   const { data: children, isLoading: loadingChildren } = useQuery({
-    queryKey: ["tags", resource, "parent", tag.id],
+    queryKey: ["tags", resource, "parent", tag.id, facilityId],
     queryFn: query(tagConfigApi.list, {
       queryParams: {
         resource,
@@ -74,60 +116,47 @@ function TreeViewItem({
     enabled: tag.has_children && (level === 0 || expanded),
   });
 
-  const isSelected = selectedTags.some((t) => t.id === tag.id);
+  if (!tag.has_children) {
+    return (
+      <TagFilterItem
+        tag={tag}
+        checked={selectedTags.some((t) => t.id === tag.id)}
+        onToggle={onTagToggle}
+      />
+    );
+  }
+
   const hasActiveChildren = (children?.results?.length ?? 0) > 0;
   const allChildrenSelected =
     children?.results?.every((childTag: TagConfig) =>
       selectedTags.some((t) => t.id === childTag.id),
     ) ?? false;
 
-  if (isRootLevel && !loadingChildren && !hasActiveChildren) {
+  if ((level === 0 || expanded) && !loadingChildren && !hasActiveChildren) {
     return null;
   }
 
   return (
     <div>
-      <DropdownMenuItem
-        disabled={isRootLevel && allChildrenSelected}
-        onSelect={(e) => {
-          e.preventDefault();
-          if (isRootLevel) {
-            setExpanded(!expanded);
-          } else {
-            onTagToggle(tag);
-          }
-        }}
-        className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-        style={{ paddingLeft: `${level * 16 + 8}px` }}
+      <FilterMenuItem
+        disabled={allChildrenSelected}
+        aria-expanded={expanded}
+        onSelect={() => setExpanded(!expanded)}
       >
-        <div className="flex items-center gap-2 flex-1">
-          {isRootLevel ? (
-            <Component className="h-4 w-4 text-black/80" strokeWidth={1.25} />
-          ) : (
-            <Checkbox checked={isSelected} className="h-4 w-4" />
-          )}
-          <TagColorDot
-            tag={tag}
-            fallbackColorClass={getColorForTag(tag.id, 0)}
+        <Component />
+        <TagColorDot tag={tag} fallbackColorClass={getColorForOption(0)} />
+        <span className="flex-1 truncate">{tag.display}</span>
+        <Badge variant="secondary" size="sm">
+          {t("group")}
+        </Badge>
+        {!allChildrenSelected && (
+          <ChevronRight
+            className={cn("transition-transform", expanded && "rotate-90")}
           />
-          <span className="text-sm truncate flex-1">{tag.display}</span>
-          {tag.has_children && (
-            <Badge variant="secondary" className="text-xs p-0.5 ml-auto">
-              {t("group")}
-            </Badge>
-          )}
-          {isRootLevel && !allChildrenSelected && (
-            <ChevronRight
-              className={cn(
-                "h-3 w-3 transition-transform",
-                expanded && "rotate-90",
-              )}
-            />
-          )}
-        </div>
-      </DropdownMenuItem>
-      {expanded && isRootLevel && (
-        <div>
+        )}
+      </FilterMenuItem>
+      {expanded && (
+        <div className="ps-4">
           {children?.results?.map((childTag: TagConfig) => {
             const childSelected = selectedTags.some(
               (t) => t.id === childTag.id,
@@ -140,7 +169,6 @@ function TreeViewItem({
                   selectedTags={selectedTags}
                   onTagToggle={onTagToggle}
                   resource={resource}
-                  getColorForTag={getColorForTag}
                   level={level + 1}
                   facilityId={facilityId}
                 />
@@ -157,23 +185,23 @@ function TagFilterDropdown({
   selectedTags,
   onTagsChange,
   resource,
-  placeholder: _placeholder,
   facilityId,
-  handleBack,
+  onBack,
 }: {
   selectedTags: TagConfig[];
   onTagsChange: (tags: TagConfig[]) => void;
   resource: TagResource;
-  placeholder?: string;
-  handleBack?: () => void;
   facilityId?: string;
+  onBack?: () => void;
 }) {
-  const [search, setSearch] = useState("");
+  const { search } = useFilterMenuSearch();
   const { t } = useTranslation();
   const isMobile = useBreakpoints({
     default: true,
     md: false,
   });
+  // Submenus need a menu popup; elsewhere groups are expandable rows.
+  const inline = useFilterSurface() !== "menu";
 
   // Fetch root-level tags
   const { data: rootTags, isLoading } = useQuery({
@@ -190,10 +218,6 @@ function TagFilterDropdown({
     enabled: true,
   });
 
-  const getColorForTag = (tagId: string, index: number) => {
-    return COLOR_PALETTE[index % COLOR_PALETTE.length];
-  };
-
   const handleTagToggle = (tag: TagConfig) => {
     const isSelected = selectedTags.some((t) => t.id === tag.id);
     if (isSelected) {
@@ -205,6 +229,12 @@ function TagFilterDropdown({
 
   const filteredTags = rootTags?.results || [];
   const isSearching = !!search;
+  const filteredSelectedTags = selectedTags.filter(
+    (tag) =>
+      !isSearching ||
+      tag.display.toLowerCase().includes(search.toLowerCase()) ||
+      tag.parent?.display.toLowerCase().includes(search.toLowerCase()),
+  );
 
   // Separate tags into groups
   const rootLevelGroupTags = filteredTags.filter((tag) => tag.has_children);
@@ -212,97 +242,35 @@ function TagFilterDropdown({
     (tag) => !selectedTags.some((t) => t.id === tag.id) && !tag.has_children,
   );
 
-  const [hasOpenSubmenu, setHasOpenSubmenu] = useState(false);
-
-  useKeyboardShortcut(
-    ["ArrowLeft"],
-    () => {
-      if (!hasOpenSubmenu) {
-        handleBack?.();
-      }
-    },
-    {
-      overrideSystem: true,
-    },
-  );
-
   return (
     <div>
       <div className="p-3 border-b">
-        <Input
-          placeholder={t("search_tags")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => e.stopPropagation()}
-          className="h-8 text-base sm:text-sm"
-        />
+        <FilterMenuSearch placeholder={t("search_tags")} onBack={onBack} />
       </div>
-      <div className="p-3 max-h-[30vh] overflow-y-auto">
+      <FilterMenuList className="p-3 max-h-[30vh] overflow-y-auto">
         {/* Selected Tags */}
-        {(() => {
-          const filteredSelectedTags = selectedTags.filter(
-            (tag) =>
-              !isSearching ||
-              tag.display.toLowerCase().includes(search.toLowerCase()) ||
-              tag.parent?.display.toLowerCase().includes(search.toLowerCase()),
-          );
-          return (
-            filteredSelectedTags.length > 0 && (
-              <>
-                <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                  {t("selected_tags")}
-                </div>
-                {filteredSelectedTags.map((tag, index) => (
-                  <DropdownMenuItem
-                    key={tag.id}
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      handleTagToggle(tag);
-                    }}
-                    className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-                  >
-                    <Checkbox
-                      checked={true}
-                      className="data-checked:border-primary-700 text-white"
-                    />
-                    <div className="flex items-center gap-2 max-w-xs truncate">
-                      {tag.parent && (
-                        <Component
-                          className="h-3 w-3 text-black/80"
-                          strokeWidth={1.25}
-                        />
-                      )}
-                      <span className="text-sm flex flex-row items-center gap-1 min-w-0">
-                        {tag.parent && (
-                          <span className="flex gap-1 items-center shrink-0">
-                            <span className="text-gray-700 truncate">
-                              {tag.parent.display}
-                            </span>
-                            <ChevronRight className="h-3 w-3 shrink-0" />
-                          </span>
-                        )}
-                        <TagColorDot
-                          tag={tag}
-                          fallbackColorClass={getColorForTag(tag.id, index)}
-                        />
-                        <span className="truncate">{tag.display}</span>
-                      </span>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-              </>
-            )
-          );
-        })()}
+        {filteredSelectedTags.length > 0 && (
+          <>
+            <FilterMenuLabel>{t("selected_tags")}</FilterMenuLabel>
+            {filteredSelectedTags.map((tag, index) => (
+              <TagFilterItem
+                key={tag.id}
+                tag={tag}
+                checked
+                onToggle={handleTagToggle}
+                colorIndex={index}
+                showParent
+              />
+            ))}
+            <FilterMenuSeparator />
+          </>
+        )}
 
         {/* Groups */}
         {rootLevelGroupTags.length > 0 && !isSearching && (
           <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-              {t("tag_groups")}
-            </div>
-            {isMobile
+            <FilterMenuLabel>{t("tag_groups")}</FilterMenuLabel>
+            {isMobile || inline
               ? // Mobile tree view
                 rootLevelGroupTags.map((group) => (
                   <TreeViewItem
@@ -311,7 +279,6 @@ function TagFilterDropdown({
                     selectedTags={selectedTags}
                     onTagToggle={handleTagToggle}
                     resource={resource}
-                    getColorForTag={getColorForTag}
                     facilityId={facilityId}
                   />
                 ))
@@ -323,67 +290,42 @@ function TagFilterDropdown({
                     selectedTags={selectedTags}
                     onTagToggle={handleTagToggle}
                     resource={resource}
-                    getColorForTag={getColorForTag}
                     facilityId={facilityId}
-                    onSubMenuOpen={(open) => {
-                      setHasOpenSubmenu(open);
-                    }}
                   />
                 ))}
-            <DropdownMenuSeparator />
+            <FilterMenuSeparator />
           </>
         )}
 
         {/* Other Tags */}
         {nonSelectedRootLevelTags.length > 0 && (
           <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-              {t("other_tags")}
-            </div>
+            <FilterMenuLabel>{t("other_tags")}</FilterMenuLabel>
             {nonSelectedRootLevelTags.map((tag, index) => (
-              <DropdownMenuItem
+              <TagFilterItem
                 key={tag.id}
-                onSelect={(e) => {
-                  e.preventDefault();
-                  handleTagToggle(tag);
-                }}
-                className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-              >
-                <Checkbox checked={false} className="h-4 w-4" />
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <TagColorDot
-                    tag={tag}
-                    fallbackColorClass={getColorForTag(tag.id, index)}
-                  />
-                  <span className="text-sm flex flex-row items-center gap-1 min-w-0 truncate">
-                    {tag.parent && (
-                      <>
-                        <span className="text-gray-400 shrink-0">
-                          {tag.parent.display}
-                        </span>
-                        <ChevronRight className="size-4 shrink-0" />
-                      </>
-                    )}
-                    <span className="truncate">{tag.display}</span>
-                  </span>
-                </div>
-              </DropdownMenuItem>
+                tag={tag}
+                checked={false}
+                onToggle={handleTagToggle}
+                colorIndex={index}
+                showParent
+              />
             ))}
           </>
         )}
 
         {isLoading && (
-          <div className="px-2 py-4 text-sm text-gray-500 text-center">
+          <div className="px-2 py-4 text-center text-sm text-muted-foreground">
             {t("loading")}
           </div>
         )}
 
         {!isLoading && filteredTags.length === 0 && (
-          <div className="px-2 py-4 text-sm text-gray-500 text-center">
+          <div className="px-2 py-4 text-center text-sm text-muted-foreground">
             {t("no_tags_group")}
           </div>
         )}
-      </div>
+      </FilterMenuList>
     </div>
   );
 }
@@ -393,20 +335,15 @@ function GroupSubmenu({
   selectedTags,
   onTagToggle,
   resource,
-  getColorForTag,
   facilityId,
-  onSubMenuOpen,
 }: {
   group: TagConfig;
   selectedTags: TagConfig[];
   onTagToggle: (tag: TagConfig) => void;
   resource: TagResource;
-  getColorForTag: (tagId: string, index: number) => string;
   facilityId?: string;
-  onSubMenuOpen: (isOpen: boolean) => void;
 }) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
   const { data: children, isLoading: loadingChildren } = useQuery({
     queryKey: ["tags", resource, "parent", group.id, facilityId],
     queryFn: query(tagConfigApi.list, {
@@ -420,16 +357,6 @@ function GroupSubmenu({
     enabled: true,
   });
 
-  useEffect(() => {
-    if (!open) {
-      setTimeout(() => {
-        onSubMenuOpen(false);
-      }, 100);
-    } else {
-      onSubMenuOpen(true);
-    }
-  }, [open, onSubMenuOpen]);
-
   const hasActiveChildren = (children?.results?.length ?? 0) > 0;
   const allChildrenSelected =
     children?.results?.every((childTag: TagConfig) =>
@@ -441,62 +368,38 @@ function GroupSubmenu({
   }
 
   return (
-    <DropdownMenuSub
-      open={open}
-      onOpenChange={(open) => {
-        setOpen(open);
-      }}
-    >
+    <DropdownMenuSub>
       <DropdownMenuSubTrigger
-        className={cn(
-          "flex items-center gap-2 px-2 py-1",
-          allChildrenSelected && "opacity-50 [&>svg:last-child]:hidden",
-        )}
+        className="data-disabled:opacity-50 data-disabled:[&>svg:last-child]:hidden"
         disabled={allChildrenSelected}
       >
-        <div className="flex items-center gap-2 flex-1 justify-between">
-          <div className="flex items-center gap-1">
-            <Component className="h-4 w-4 text-black/80" strokeWidth={1.25} />
-            <span className="text-sm">{group.display}</span>
-          </div>
-          <Badge variant="secondary" className="text-xs p-0.5">
-            {t("group")}
-          </Badge>
-        </div>
+        <Component />
+        <span className="flex-1 truncate">{group.display}</span>
+        <Badge variant="secondary" size="sm">
+          {t("group")}
+        </Badge>
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
-        <div className="p-2 border-b border-gray-200">
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            {group.display}
-          </div>
-        </div>
+        <DropdownMenuLabel>{group.display}</DropdownMenuLabel>
+        <DropdownMenuSeparator />
         {loadingChildren ? (
-          <div className="p-2 text-sm text-gray-500">{t("loading")}</div>
+          <div className="p-2 text-sm text-muted-foreground">
+            {t("loading")}
+          </div>
         ) : children?.results?.length ? (
-          children.results.map((childTag: TagConfig, index: number) => {
-            const isSelected = selectedTags.some((t) => t.id === childTag.id);
-            return (
-              <DropdownMenuItem
-                key={childTag.id}
-                onSelect={(e) => {
-                  e.preventDefault();
-                  onTagToggle(childTag);
-                }}
-                className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-              >
-                <Checkbox checked={isSelected} className="h-4 w-4" />
-                <div className="flex items-center gap-2 flex-1">
-                  <TagColorDot
-                    tag={childTag}
-                    fallbackColorClass={getColorForTag(childTag.id, index)}
-                  />
-                  <span className="text-sm">{childTag.display}</span>
-                </div>
-              </DropdownMenuItem>
-            );
-          })
+          children.results.map((childTag, index) => (
+            <TagFilterItem
+              key={childTag.id}
+              tag={childTag}
+              checked={selectedTags.some((t) => t.id === childTag.id)}
+              onToggle={onTagToggle}
+              colorIndex={index}
+            />
+          ))
         ) : (
-          <div className="p-2 text-sm text-gray-500">{t("no_tags")}</div>
+          <div className="p-2 text-sm text-muted-foreground">
+            {t("no_tags")}
+          </div>
         )}
       </DropdownMenuSubContent>
     </DropdownMenuSub>
@@ -508,6 +411,7 @@ export default function RenderTagFilter({
   selectedTags,
   onFilterChange,
   handleBack,
+  handleClose,
   facilityId,
 }: {
   filter: FilterConfig;
@@ -517,20 +421,28 @@ export default function RenderTagFilter({
     values: string[] | TagConfig[] | FilterDateRange,
   ) => void;
   handleBack?: () => void;
+  handleClose?: () => void;
   facilityId?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="p-0">
-      {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
+      {(handleBack || handleClose) && (
+        <FilterHeader
+          label={t(filter.label)}
+          icon={filter.icon}
+          onBack={handleBack}
+          onClose={handleClose}
+        />
+      )}
       <TagFilterDropdown
         selectedTags={selectedTags}
         onTagsChange={(tags) => {
           onFilterChange(filter.key, tags);
         }}
         resource={(filter.meta as TagFilterMeta).resource}
-        placeholder={filter.placeholder}
-        handleBack={handleBack}
         facilityId={facilityId}
+        onBack={handleBack}
       />
     </div>
   );

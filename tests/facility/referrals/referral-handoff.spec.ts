@@ -345,6 +345,7 @@ async function completeReferralHandoff(
       },
       senderSession.headers,
     );
+
     const fixture =
       await test.step("The sender sends a referral and shares source evidence through the clinical UI", async () => {
         let creationPosts = 0;
@@ -441,7 +442,7 @@ async function completeReferralHandoff(
           created_by: { id: sender.id },
         });
         expect(creationPosts).toBe(1);
-        await expect(creation).not.toBeVisible();
+        await expect(creation).toBeHidden();
         await senderPage
           .getByRole("row")
           .filter({ hasText: configuration.title })
@@ -472,7 +473,7 @@ async function completeReferralHandoff(
         await picker
           .getByRole("button", { name: "Add record", exact: true })
           .click();
-        await expect(picker).not.toBeVisible();
+        await expect(picker).toBeHidden();
         await expect(
           sourceRecords.getByText(clinicalFinding, { exact: true }),
         ).toBeVisible();
@@ -495,6 +496,7 @@ async function completeReferralHandoff(
           path: `/referrals/${referral.id}`,
         };
       });
+
     await test.step("The sender finds the referral in the encounter and the recipient in the receiving department", async () => {
       const deniedOrigin = await request.get(
         `${apiBaseUrl()}/api/v1/encounter/${encounterId}/`,
@@ -542,7 +544,7 @@ async function completeReferralHandoff(
       });
       await expect(profile).toHaveAttribute("href", `/patient/${patientId}`);
       await senderPage.keyboard.press("Escape");
-      await expect(profile).not.toBeVisible();
+      await expect(profile).toBeHidden();
       const sourceEncounter = senderPage.getByRole("region", {
         name: "Originating encounter",
         exact: true,
@@ -1057,7 +1059,7 @@ async function completeReferralHandoff(
       await visitWarning
         .getByRole("button", { name: "Retry", exact: true })
         .click();
-      await expect(visitWarning).not.toBeVisible();
+      await expect(visitWarning).toBeHidden();
       await expect(saveResponse).toBeEnabled();
       await expect(
         questionBlock(recipientPage, fixture.responseLabel).getByRole(
@@ -1090,7 +1092,7 @@ async function completeReferralHandoff(
       await picker
         .getByRole("button", { name: "Add record", exact: true })
         .click();
-      await expect(picker).not.toBeVisible();
+      await expect(picker).toBeHidden();
       await expect(
         records.getByText(localFinding, { exact: true }),
       ).toBeVisible();
@@ -1192,7 +1194,7 @@ async function completeReferralHandoff(
           name: "Referral request",
           exact: true,
         }),
-      ).not.toBeVisible();
+      ).toBeHidden();
       await expect(
         responses.getByText(recommendation, { exact: true }),
       ).toBeVisible();

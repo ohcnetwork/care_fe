@@ -129,6 +129,7 @@ function AccountShow({
       to: "/facility/$facilityId/billing/account/$accountId/$tab/payment/$paymentType",
       params: { facilityId, accountId, tab, paymentType: type },
       replace: true,
+      resetScroll: false,
     });
   };
   const closePaymentSheet = () => {
@@ -136,6 +137,7 @@ function AccountShow({
       to: "/facility/$facilityId/billing/account/$accountId/$tab",
       params: { facilityId, accountId, tab },
       replace: true,
+      resetScroll: false,
     });
   };
   const [transferPaymentOpen, setTransferPaymentOpen] = useState(false);
@@ -154,7 +156,7 @@ function AccountShow({
     canWritePaymentReconciliation,
   } = getPermissions(hasPermission, facility?.permissions || []);
 
-  useShortcutSubContext("facility:account:show");
+  useShortcutSubContext("facility:account:show&facility:billing");
 
   const { data: account, isLoading } = useQuery({
     queryKey: ["account", accountId],
@@ -731,6 +733,7 @@ function AccountShow({
           navigate({
             to: "/facility/$facilityId/billing/account/$accountId/$tab",
             params: { facilityId, accountId, tab: value },
+            resetScroll: false,
           })
         }
         setPageTitle={false}

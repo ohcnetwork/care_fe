@@ -51,7 +51,7 @@ test("registered groups save one slot and finding per repeated row", async ({
       .check();
     await expect(
       page.getByRole("button", { name: "Add Sub-Question" }),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   await test.step("Save and reload the two-child repeating schema", async () => {

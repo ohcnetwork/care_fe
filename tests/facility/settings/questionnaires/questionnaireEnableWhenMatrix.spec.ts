@@ -43,8 +43,8 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
     await openKitchenSinkPreview(page);
 
     await test.step("Both numeric dependents start hidden", async () => {
-      await expect(navRow(page, "Severe pain follow-up")).not.toBeVisible();
-      await expect(navRow(page, "Low pain follow-up")).not.toBeVisible();
+      await expect(navRow(page, "Severe pain follow-up")).toBeHidden();
+      await expect(navRow(page, "Low pain follow-up")).toBeHidden();
     });
 
     await test.step("Pain score 8 reveals only the greater-than dependent", async () => {
@@ -53,7 +53,7 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
         .getByRole("spinbutton")
         .fill("8");
       await expect(navRow(page, "Severe pain follow-up")).toBeVisible();
-      await expect(navRow(page, "Low pain follow-up")).not.toBeVisible();
+      await expect(navRow(page, "Low pain follow-up")).toBeHidden();
     });
 
     await test.step("Pain score 2 swaps to the less-than dependent", async () => {
@@ -61,22 +61,22 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
         .getByRole("spinbutton")
         .fill("2");
       await expect(navRow(page, "Low pain follow-up")).toBeVisible();
-      await expect(navRow(page, "Severe pain follow-up")).not.toBeVisible();
+      await expect(navRow(page, "Severe pain follow-up")).toBeHidden();
     });
 
     await test.step("Clearing the score hides both again", async () => {
       await questionBlock(page, "Pain score (0-10)")
         .getByRole("spinbutton")
         .fill("");
-      await expect(navRow(page, "Severe pain follow-up")).not.toBeVisible();
-      await expect(navRow(page, "Low pain follow-up")).not.toBeVisible();
+      await expect(navRow(page, "Severe pain follow-up")).toBeHidden();
+      await expect(navRow(page, "Low pain follow-up")).toBeHidden();
     });
   });
 
   test("string equals condition follows the typed answer", async ({ page }) => {
     await openKitchenSinkPreview(page);
 
-    await expect(navRow(page, "Fever details")).not.toBeVisible();
+    await expect(navRow(page, "Fever details")).toBeHidden();
 
     await test.step("Typing the matching answer reveals the dependent", async () => {
       await questionBlock(page, "Primary symptom")
@@ -89,7 +89,7 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
       await questionBlock(page, "Primary symptom")
         .getByPlaceholder("Enter details")
         .fill("cough");
-      await expect(navRow(page, "Fever details")).not.toBeVisible();
+      await expect(navRow(page, "Fever details")).toBeHidden();
     });
   });
 
@@ -99,7 +99,7 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
     await openKitchenSinkPreview(page);
 
     // Conditions: boolean == Yes OR pain score > 5, enable_behavior "any".
-    await expect(navRow(page, "Any-behavior follow-up")).not.toBeVisible();
+    await expect(navRow(page, "Any-behavior follow-up")).toBeHidden();
 
     await test.step("Only the numeric condition matching is enough", async () => {
       await jumpTo(page, "Pain score (0-10)");
@@ -113,7 +113,7 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
       await questionBlock(page, "Pain score (0-10)")
         .getByRole("spinbutton")
         .fill("");
-      await expect(navRow(page, "Any-behavior follow-up")).not.toBeVisible();
+      await expect(navRow(page, "Any-behavior follow-up")).toBeHidden();
     });
 
     await test.step("Only the boolean condition matching is also enough", async () => {
@@ -126,20 +126,20 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
   test("boolean Yes/No conditions swap their dependents", async ({ page }) => {
     await openKitchenSinkPreview(page);
 
-    await expect(navRow(page, "Stability notes")).not.toBeVisible();
-    await expect(navRow(page, "Escalation plan")).not.toBeVisible();
+    await expect(navRow(page, "Stability notes")).toBeHidden();
+    await expect(navRow(page, "Escalation plan")).toBeHidden();
 
     await test.step("Yes reveals the Yes-dependent only", async () => {
       await jumpTo(page, "Is the patient stable?");
       await page.getByRole("radio", { name: "Yes", exact: true }).click();
       await expect(navRow(page, "Stability notes")).toBeVisible();
-      await expect(navRow(page, "Escalation plan")).not.toBeVisible();
+      await expect(navRow(page, "Escalation plan")).toBeHidden();
     });
 
     await test.step("No swaps to the No-dependent", async () => {
       await page.getByRole("radio", { name: "No", exact: true }).click();
       await expect(navRow(page, "Escalation plan")).toBeVisible();
-      await expect(navRow(page, "Stability notes")).not.toBeVisible();
+      await expect(navRow(page, "Stability notes")).toBeHidden();
     });
   });
 

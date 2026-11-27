@@ -197,6 +197,9 @@ type CountrySelectProps = {
   value: RPNInput.Country;
   options: CountryEntry[];
   onChange: (country: RPNInput.Country) => void;
+  "aria-label"?: string;
+  /** Where focus goes after a pick, when used outside PhoneInput. */
+  pickedFocus?: React.RefObject<HTMLElement | null>;
 };
 
 const CountrySelect = ({
@@ -204,13 +207,17 @@ const CountrySelect = ({
   value: selectedCountry,
   options: countryList,
   onChange,
+  "aria-label": ariaLabel,
+  pickedFocus,
 }: CountrySelectProps) => {
   const { t } = useTranslation();
   const listRef = React.useRef<HTMLDivElement>(null);
   const [searchValue, setSearchValue] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const [picked, setPicked] = React.useState(false);
   const handleCountrySelect = (country: RPNInput.Country) => {
     onChange(country);
+    setPicked(true);
     setOpen(false);
   };
   return (
@@ -219,7 +226,10 @@ const CountrySelect = ({
       modal
       onOpenChange={(open) => {
         setOpen(open);
-        open && setSearchValue("");
+        if (open) {
+          setSearchValue("");
+          setPicked(false);
+        }
       }}
     >
       <PopoverTrigger asChild>
@@ -228,6 +238,7 @@ const CountrySelect = ({
           variant="ghost"
           className="border-input flex shrink-0 gap-1.5 rounded-none! border-0 border-r px-2 text-sm no-underline shadow-none not-in-data-[slot=button-group]:rounded-none! focus-visible:outline-0 focus-visible:bg-muted h-full"
           disabled={disabled}
+          aria-label={ariaLabel}
         >
           <FlagComponent
             country={selectedCountry}
@@ -245,6 +256,7 @@ const CountrySelect = ({
         className="p-2 sm:p-0 w-[var(--anchor-width)] min-w-64 overflow-clip"
         align="start"
         sideOffset={5}
+        finalFocus={(picked && pickedFocus) || true}
       >
         <Command>
           <CommandInput
@@ -313,4 +325,4 @@ const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
   );
 };
 
-export { PhoneInput };
+export { CountrySelect, PhoneInput };

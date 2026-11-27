@@ -137,9 +137,7 @@ test.describe("Questionnaire v2 builder groups", () => {
 
     await test.step("Clear Selection dismisses the bar without deleting", async () => {
       await page.getByRole("button", { name: "Clear Selection" }).click();
-      await expect(
-        page.getByText("2 sub-questions selected"),
-      ).not.toBeVisible();
+      await expect(page.getByText("2 sub-questions selected")).toBeHidden();
       await expect(editorCard(page).getByText(c1)).toBeVisible();
     });
 
@@ -147,8 +145,8 @@ test.describe("Questionnaire v2 builder groups", () => {
       await page.getByRole("checkbox", { name: c1 }).click();
       await page.getByRole("checkbox", { name: c2 }).click();
       await page.getByRole("button", { name: "Delete", exact: true }).click();
-      await expect(editorCard(page).getByText(c1)).not.toBeVisible();
-      await expect(editorCard(page).getByText(c2)).not.toBeVisible();
+      await expect(editorCard(page).getByText(c1)).toBeHidden();
+      await expect(editorCard(page).getByText(c2)).toBeHidden();
       await expect(editorCard(page).getByText(c3)).toBeVisible();
     });
   });
@@ -197,7 +195,7 @@ test.describe("Questionnaire v2 builder groups", () => {
       await page.getByRole("option", { name: groupB }).click();
       await dialog.getByRole("spinbutton").fill("0");
       await dialog.getByRole("button", { name: "Move", exact: true }).click();
-      await expect(dialog).not.toBeVisible();
+      await expect(dialog).toBeHidden();
     });
 
     await test.step("Group Beta now lists A1 first, then B1", async () => {
@@ -319,7 +317,7 @@ test.describe("Questionnaire v2 builder groups", () => {
         .last()
         .click();
       await page.getByRole("menuitem", { name: "Delete", exact: true }).click();
-      await expect(editorCard(page).getByText(childTitle)).not.toBeVisible();
+      await expect(editorCard(page).getByText(childTitle)).toBeHidden();
 
       await typePicker.click();
       await page

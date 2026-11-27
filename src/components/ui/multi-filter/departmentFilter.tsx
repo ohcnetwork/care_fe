@@ -1,25 +1,29 @@
-import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { cn } from "@/lib/utils";
 
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
 import query from "@/Utils/request/query";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
-import { Button } from "@/components/ui/button";
+import { FilterChoiceItem } from "./filterChoiceItem";
 import FilterHeader from "./filterHeader";
+import {
+  FilterMenuList,
+  FilterMenuSearch,
+  useFilterMenuSearch,
+} from "./filterMenuSearch";
+import { FilterOptionIndicator } from "./filterOptionIndicator";
+import {
+  FilterMenuItem,
+  FilterMenuLabel,
+  FilterMenuSeparator,
+} from "./filterSurface";
 import { COLOR_PALETTE, FilterConfig, FilterDateRange } from "./utils/Utils";
 
 const getColorForOrg = (id: string) => {
@@ -43,6 +47,7 @@ function TreeViewItem({
   level?: number;
   facilityId: string;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const { data: children, isLoading: loadingChildren } = useQuery({
     queryKey: ["facilityOrganizations", facilityId, "parent", org.id],
@@ -59,58 +64,55 @@ function TreeViewItem({
   const hasChildren = org.has_children;
   const hasActiveChildren = (children?.results?.length ?? 0) > 0;
 
-  if (level === 0 && hasChildren && !loadingChildren && !hasActiveChildren) {
+  if (
+    !isSelected &&
+    level === 0 &&
+    hasChildren &&
+    !loadingChildren &&
+    !hasActiveChildren
+  ) {
     return null;
   }
 
   return (
     <div>
-      <DropdownMenuItem
-        onSelect={(e) => {
-          e.preventDefault();
-          onOrgToggle(org);
-        }}
-        className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-        style={{ paddingLeft: `${level * 16 + 8}px` }}
-      >
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <Checkbox
-            checked={isSelected}
-            className="data-checked:border-primary-700 text-white shrink-0"
-          />
-          <div
-            className={cn("size-3 rounded-full border", getColorForOrg(org.id))}
-          />
-          <span className="text-sm truncate flex-1">{org.name}</span>
-          {hasChildren && (
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                setExpanded(!expanded);
-              }}
-              className="w-12 justify-center -mr-2"
-            >
-              <ChevronRight
-                className={cn("transition-transform", expanded && "rotate-90")}
-              />
-            </Button>
-          )}
-        </div>
-      </DropdownMenuItem>
-      {expanded && hasChildren && (
-        <div>
-          {children?.results?.map((childOrg: FacilityOrganizationRead) => (
-            <TreeViewItem
-              key={childOrg.id}
-              org={childOrg}
-              selectedOrgs={selectedOrgs}
-              onOrgToggle={onOrgToggle}
-              level={level + 1}
-              facilityId={facilityId}
+      <div className="flex items-center">
+        <FilterChoiceItem
+          checked={isSelected}
+          onChoose={() => onOrgToggle(org)}
+          className="min-w-0 flex-1"
+        >
+          <FilterOptionIndicator color={getColorForOrg(org.id)} />
+          <span className="truncate">{org.name}</span>
+        </FilterChoiceItem>
+        {hasChildren && (
+          <FilterMenuItem
+            aria-label={`${t(expanded ? "collapse" : "expand")} ${org.name}`}
+            aria-expanded={expanded}
+            onSelect={() => setExpanded(!expanded)}
+          >
+            <ChevronRight
+              className={cn("transition-transform", expanded && "rotate-90")}
             />
-          ))}
+          </FilterMenuItem>
+        )}
+      </div>
+      {expanded && hasChildren && (
+        <div className="ps-4">
+          {children?.results
+            ?.filter(
+              (child) => !selectedOrgs.some((org) => org.id === child.id),
+            )
+            .map((child) => (
+              <TreeViewItem
+                key={child.id}
+                org={child}
+                selectedOrgs={selectedOrgs}
+                onOrgToggle={onOrgToggle}
+                level={level + 1}
+                facilityId={facilityId}
+              />
+            ))}
         </div>
       )}
     </div>
@@ -121,14 +123,14 @@ function DepartmentFilterDropdown({
   selectedOrgs,
   onOrgsChange,
   facilityId,
-  handleBack,
+  onBack,
 }: {
   selectedOrgs: FacilityOrganizationRead[];
   onOrgsChange: (orgs: FacilityOrganizationRead[]) => void;
   facilityId: string;
-  handleBack?: () => void;
+  onBack?: () => void;
 }) {
-  const [search, setSearch] = useState("");
+  const { search } = useFilterMenuSearch();
   const { t } = useTranslation();
 
   // Fetch root-level organizations (or search all when searching)
@@ -144,14 +146,8 @@ function DepartmentFilterDropdown({
     enabled: !!facilityId,
   });
 
-  const handleOrgToggle = (org: FacilityOrganizationRead) => {
-    const isSelected = selectedOrgs.some((o) => o.id === org.id);
-    if (isSelected) {
-      onOrgsChange([]);
-    } else {
-      onOrgsChange([org]);
-    }
-  };
+  const handleOrgSelect = (org: FacilityOrganizationRead) =>
+    onOrgsChange([org]);
 
   const filteredOrgs = rootOrgs?.results || [];
   const isSearching = !!search;
@@ -161,132 +157,66 @@ function DepartmentFilterDropdown({
     (org) => !selectedOrgs.some((o) => o.id === org.id),
   );
 
-  useKeyboardShortcut(
-    ["ArrowLeft"],
-    () => {
-      handleBack?.();
-    },
-    {
-      overrideSystem: true,
-    },
+  const filteredSelectedOrgs = selectedOrgs.filter(
+    (org) =>
+      !isSearching ||
+      org.name.toLowerCase().includes(search.toLowerCase()) ||
+      org.parent?.name.toLowerCase().includes(search.toLowerCase()),
   );
+  const renderOrg = (org: FacilityOrganizationRead, checked: boolean) =>
+    org.has_children && !isSearching ? (
+      <TreeViewItem
+        key={org.id}
+        org={org}
+        selectedOrgs={selectedOrgs}
+        onOrgToggle={handleOrgSelect}
+        facilityId={facilityId}
+      />
+    ) : (
+      <FilterChoiceItem
+        key={org.id}
+        checked={checked}
+        onChoose={() => handleOrgSelect(org)}
+      >
+        <FilterOptionIndicator color={getColorForOrg(org.id)} />
+        <span className="min-w-0">
+          <span className="block truncate">{org.name}</span>
+          {org.parent?.name &&
+            (checked ||
+              isSearching ||
+              (org.parent.org_type !== "root" &&
+                org.parent.level_cache > 0)) && (
+              <span className="block truncate text-xs text-muted-foreground">
+                {org.parent.name}
+              </span>
+            )}
+        </span>
+      </FilterChoiceItem>
+    );
 
   return (
     <div>
       <div className="p-3 border-b">
-        <Input
+        <FilterMenuSearch
           placeholder={t("search_departments_placeholder")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => e.stopPropagation()}
-          className="h-8 text-base sm:text-sm"
+          onBack={onBack}
         />
       </div>
-      <div className="p-3 max-h-[30vh] overflow-y-auto">
+      <FilterMenuList className="p-3 max-h-[30vh] overflow-y-auto">
         {/* Selected Departments */}
-        {(() => {
-          const filteredSelectedOrgs = selectedOrgs.filter(
-            (org) =>
-              !isSearching ||
-              org.name.toLowerCase().includes(search.toLowerCase()) ||
-              org.parent?.name.toLowerCase().includes(search.toLowerCase()),
-          );
-          return (
-            filteredSelectedOrgs.length > 0 && (
-              <>
-                <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                  {t("selected_departments")}
-                </div>
-                {filteredSelectedOrgs.map((org) => (
-                  <DropdownMenuItem
-                    key={org.id}
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      handleOrgToggle(org);
-                    }}
-                    className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-                  >
-                    <Checkbox
-                      checked={true}
-                      className="data-checked:border-primary-700 text-white shrink-0"
-                    />
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <div
-                        className={cn(
-                          "size-3 rounded-full shrink-0 border",
-                          getColorForOrg(org.id),
-                        )}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <span className="text-sm truncate block">
-                          {org.name}
-                        </span>
-                        {org.parent && org.parent.name && (
-                          <span className="text-xs text-gray-400 truncate block">
-                            {org.parent.name}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-              </>
-            )
-          );
-        })()}
+        {filteredSelectedOrgs.length > 0 && (
+          <>
+            <FilterMenuLabel>{t("selected_departments")}</FilterMenuLabel>
+            {filteredSelectedOrgs.map((org) => renderOrg(org, true))}
+            <FilterMenuSeparator />
+          </>
+        )}
 
         {/* Available Departments */}
         {nonSelectedOrgs.length > 0 && (
           <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-              {t("available_departments")}
-            </div>
-            {nonSelectedOrgs.map((org) =>
-              org.has_children && !isSearching ? (
-                <TreeViewItem
-                  key={org.id}
-                  org={org}
-                  selectedOrgs={selectedOrgs}
-                  onOrgToggle={handleOrgToggle}
-                  facilityId={facilityId}
-                />
-              ) : (
-                <DropdownMenuItem
-                  key={org.id}
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    handleOrgToggle(org);
-                  }}
-                  className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-                >
-                  <Checkbox
-                    checked={selectedOrgs.some((o) => o.id === org.id)}
-                    className="data-checked:border-primary-700 text-white shrink-0"
-                  />
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <div
-                      className={cn(
-                        "size-3 rounded-full shrink-0 border",
-                        getColorForOrg(org.id),
-                      )}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <span className="text-sm truncate block">{org.name}</span>
-                      {org.parent &&
-                        org.parent.name &&
-                        (isSearching ||
-                          (org.parent.org_type !== "root" &&
-                            org.parent.level_cache > 0)) && (
-                          <span className="text-xs text-gray-400 truncate block">
-                            {org.parent.name}
-                          </span>
-                        )}
-                    </div>
-                  </div>
-                </DropdownMenuItem>
-              ),
-            )}
+            <FilterMenuLabel>{t("available_departments")}</FilterMenuLabel>
+            {nonSelectedOrgs.map((org) => renderOrg(org, false))}
           </>
         )}
 
@@ -302,7 +232,7 @@ function DepartmentFilterDropdown({
             {t("no_departments_found")}
           </div>
         )}
-      </div>
+      </FilterMenuList>
     </div>
   );
 }
@@ -312,6 +242,7 @@ export default function RenderDepartmentFilter({
   selectedOrgs,
   onFilterChange,
   handleBack,
+  handleClose,
   facilityId,
 }: {
   filter: FilterConfig;
@@ -321,6 +252,7 @@ export default function RenderDepartmentFilter({
     values: string[] | FacilityOrganizationRead[] | FilterDateRange,
   ) => void;
   handleBack?: () => void;
+  handleClose?: () => void;
   facilityId?: string;
 }) {
   const { t } = useTranslation();
@@ -335,14 +267,21 @@ export default function RenderDepartmentFilter({
 
   return (
     <div className="p-0">
-      {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
+      {(handleBack || handleClose) && (
+        <FilterHeader
+          label={t(filter.label)}
+          icon={filter.icon}
+          onBack={handleBack}
+          onClose={handleClose}
+        />
+      )}
       <DepartmentFilterDropdown
         selectedOrgs={selectedOrgs}
         onOrgsChange={(orgs) => {
           onFilterChange(filter.key, orgs);
         }}
         facilityId={facilityId}
-        handleBack={handleBack}
+        onBack={handleBack}
       />
     </div>
   );

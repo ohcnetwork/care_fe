@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
+import { valueSetColumn } from "tests/helper/ui";
 import { firstValueSetDisplay } from "tests/helper/valueSet";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -31,8 +32,7 @@ async function selectSymptom(page: Page, name: string) {
     .filter({ hasText: /Add (another )?Symptom/i })
     .click();
   await page.getByPlaceholder(/Add (another )?Symptom/i).fill(name);
-  await page
-    .getByTestId("valueset-search-results")
+  await valueSetColumn(page.locator("body"), "search")
     .getByRole("option", { name, exact: true })
     .click();
 }
@@ -56,12 +56,20 @@ test.describe("Symptom Questionnaire", () => {
 
     questionnaireUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/symptom`;
 
+    // The form seeds its rows from this encounter's saved symptoms; wait for
+    // that list so every test edits a fully loaded form.
+    const savedSymptoms = page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        url.pathname === `/api/v1/patient/${patientId}/symptom/` &&
+        url.searchParams.get("encounter") === encounterId
+      );
+    });
     await page.goto(questionnaireUrl);
+    await savedSymptoms;
   });
 
   test("should add symptom with all fields", async ({ page }) => {
-    await page.waitForLoadState("networkidle");
-
     await selectSymptom(page, symptomName);
     const symptomRow = page.getByRole("row", { name: symptomName });
 
@@ -113,7 +121,9 @@ test.describe("Symptom Questionnaire", () => {
     ).toBeVisible();
 
     await page.goto(questionnaireUrl);
-    await page.waitForLoadState("networkidle");
+    // The saved symptom is back in the form, so the duplicate check has the
+    // existing row to compare against.
+    await expect(page.getByRole("row", { name: symptomName })).toBeVisible();
 
     await selectSymptom(page, symptomName);
 

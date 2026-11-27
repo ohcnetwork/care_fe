@@ -77,11 +77,11 @@ test.describe("Account Management Permissions", () => {
       const accountEditButton = page
         .getByRole("button", { name: /edit/i })
         .nth(0);
-      await expect(accountEditButton).not.toBeVisible();
+      await expect(accountEditButton).toBeHidden();
 
       // Verify Rebalance button is not visible
       const rebalanceButton = page.getByRole("button", { name: /rebalance/i });
-      await expect(rebalanceButton).not.toBeVisible();
+      await expect(rebalanceButton).toBeHidden();
     });
   });
 });
