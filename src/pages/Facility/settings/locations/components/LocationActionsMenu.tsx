@@ -1,4 +1,11 @@
-import { ArrowDown, ArrowUp, MoreVertical, Trash } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowDownRight,
+  ArrowUp,
+  ArrowUpLeft,
+  MoreVertical,
+  Trash,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -13,10 +20,12 @@ import {
 
 interface LocationActionsMenuProps {
   locationName: string;
-  /** Leave a handler out to leave its action out. */
+  /** Leave a handler out to leave its action out. Up is earlier in the list. */
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   onDelete?: () => void;
+  /** A grid wraps from row to row, so its moves read earlier and later. */
+  orientation?: "vertical" | "grid";
   className?: string;
 }
 
@@ -26,10 +35,14 @@ export function LocationActionsMenu({
   onMoveUp,
   onMoveDown,
   onDelete,
+  orientation = "vertical",
   className,
 }: LocationActionsMenuProps) {
   const { t } = useTranslation();
   if (!onMoveUp && !onMoveDown && !onDelete) return null;
+  const isGrid = orientation === "grid";
+  const BackIcon = isGrid ? ArrowUpLeft : ArrowUp;
+  const ForwardIcon = isGrid ? ArrowDownRight : ArrowDown;
 
   return (
     <DropdownMenu>
@@ -46,14 +59,14 @@ export function LocationActionsMenu({
       <DropdownMenuContent align="end">
         {onMoveUp && (
           <DropdownMenuItem onClick={onMoveUp}>
-            <ArrowUp aria-hidden="true" />
-            {t("move_up")}
+            <BackIcon aria-hidden="true" />
+            {t(isGrid ? "move_earlier" : "move_up")}
           </DropdownMenuItem>
         )}
         {onMoveDown && (
           <DropdownMenuItem onClick={onMoveDown}>
-            <ArrowDown aria-hidden="true" />
-            {t("move_down")}
+            <ForwardIcon aria-hidden="true" />
+            {t(isGrid ? "move_later" : "move_down")}
           </DropdownMenuItem>
         )}
         {onDelete && (

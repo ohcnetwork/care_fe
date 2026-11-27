@@ -301,13 +301,13 @@ test.describe("Bed board", () => {
     await expect(
       board(page).getByRole("heading", { name: "General Ward" }),
     ).toBeVisible();
-    // Seven beds of its own and two in Room 1.
-    await expect(chip(page, "All 9")).toHaveAttribute("aria-pressed", "true");
-    await expect(chip(page, "Occupied 3")).toBeVisible();
+    // Seven beds of its own; the beds of Room 1 are on its own board.
+    await expect(chip(page, "All 7")).toHaveAttribute("aria-pressed", "true");
+    await expect(chip(page, "Occupied 2")).toBeVisible();
     await expect(chip(page, "Reserved 1")).toBeVisible();
-    await expect(chip(page, "Free 2")).toBeVisible();
+    await expect(chip(page, "Free 1")).toBeVisible();
     await expect(chip(page, "Unavailable 3")).toBeVisible();
-    await expect(board(page).locator('[data-cy="bed-tile"]')).toHaveCount(9);
+    await expect(board(page).locator('[data-cy="bed-tile"]')).toHaveCount(7);
     await expect(
       tree(page).getByRole("button", { name: /^General Ward/ }),
     ).toHaveAttribute("aria-current", "true");
@@ -317,19 +317,18 @@ test.describe("Bed board", () => {
 
   test("requests only what the location flags say exists", async ({ page }) => {
     await page.goto(`${basePath}/${ward.id}`);
-    await expect(tile(page, "R1-2")).toBeVisible();
+    await expect(tile(page, "A-2")).toBeVisible();
     const asked = (parent: LocationRead, mode: string) =>
       childRequests.some(
         (request) => request.parent === parent.id && request.mode === mode,
       );
     expect(asked(ward, "kind")).toBe(true);
     expect(asked(ward, "instance")).toBe(true);
-    expect(asked(room, "instance")).toBe(true);
-    // Room 1 has no sub-locations; Annexe and Store have no beds.
-    expect(asked(room, "kind")).toBe(false);
-    expect(asked(annexe, "instance")).toBe(false);
-    expect(asked(store, "instance")).toBe(false);
-    expect(asked(store, "kind")).toBe(false);
+    // The areas below are links: nothing in them is asked for.
+    for (const below of [room, annexe, store]) {
+      expect(asked(below, "instance")).toBe(false);
+      expect(asked(below, "kind")).toBe(false);
+    }
 
     // Which branches lead to a bed comes from one list of the locations that
     // hold beds, not from a walk down each branch.
@@ -389,7 +388,7 @@ test.describe("Bed board", () => {
       board(page)
         .getByRole("navigation", { name: "More areas" })
         .getByRole("button"),
-    ).toHaveText(["Annexe"]);
+    ).toHaveText(["Room 1", "Annexe"]);
   });
 
   test("an occupied bed shows the patient, the encounter and where to go", async ({
@@ -502,19 +501,18 @@ test.describe("Bed board", () => {
   }) => {
     await page.goto(`${basePath}/${ward.id}`);
     const tiles = board(page).locator('[data-cy="bed-tile"]');
-    await expect(tiles).toHaveCount(9);
+    await expect(tiles).toHaveCount(7);
     const requestsBefore = childRequests.length;
 
-    await chip(page, "Free 2").click();
-    await expect(chip(page, "Free 2")).toHaveAttribute("aria-pressed", "true");
-    await expect(tiles).toHaveCount(2);
+    await chip(page, "Free 1").click();
+    await expect(chip(page, "Free 1")).toHaveAttribute("aria-pressed", "true");
+    await expect(tiles).toHaveCount(1);
     await expect(tile(page, "A-2")).toBeVisible();
-    await expect(tile(page, "R1-2")).toBeVisible();
     // The chips keep counting every bed, not only the filtered ones.
-    await expect(chip(page, "All 9")).toBeVisible();
+    await expect(chip(page, "All 7")).toBeVisible();
 
-    await chip(page, "Occupied 3").click();
-    await expect(tiles).toHaveCount(3);
+    await chip(page, "Occupied 2").click();
+    await expect(tiles).toHaveCount(2);
     await chip(page, "Reserved 1").click();
     await expect(tiles).toHaveCount(1);
     await expect(tile(page, "A-6")).toBeVisible();
@@ -523,22 +521,15 @@ test.describe("Bed board", () => {
     // Pressing the active chip again keeps it on.
     await chip(page, "Unavailable 3").click();
     await expect(tiles).toHaveCount(3);
-    await chip(page, "All 9").click();
-    await expect(tiles).toHaveCount(9);
+    await chip(page, "All 7").click();
+    await expect(tiles).toHaveCount(7);
 
     const search = board(page).getByRole("searchbox", {
       name: "Search beds or patients",
     });
-    await search.fill("  bALa ");
+    await search.fill("  asHA ");
     await expect(tiles).toHaveCount(1);
-    await expect(tile(page, "R1-1")).toBeVisible();
-    // Only Room 1 has a match, so the ward's own section is gone.
-    await expect(board(page).getByRole("region", { name: "Beds" })).toHaveCount(
-      0,
-    );
-    await expect(
-      board(page).getByRole("region", { name: "Room 1" }),
-    ).toBeVisible();
+    await expect(tile(page, "A-1")).toBeVisible();
 
     await search.fill("a-3");
     await expect(tiles).toHaveCount(1);
@@ -553,32 +544,35 @@ test.describe("Bed board", () => {
     expect(childRequests).toHaveLength(requestsBefore);
   });
 
-  test("lists rooms with beds as sections and deeper areas as links", async ({
+  test("lists the areas below as links, each with its own board", async ({
     page,
   }) => {
     await page.goto(`${basePath}/${ward.id}`);
-    const roomSection = board(page).getByRole("region", { name: "Room 1" });
-    await expect(roomSection.getByText("2 beds · 1 free")).toBeVisible();
-    await expect(roomSection.locator('[data-cy="bed-tile"]')).toHaveCount(2);
-
     const moreAreas = board(page).getByRole("navigation", {
       name: "More areas",
     });
-    await expect(moreAreas.getByRole("button")).toHaveText(["Annexe"]);
-    // Annexe has no beds of its own but leads to some, so it is offered.
-    // Store leads to none, so it is not.
+    await expect(moreAreas.getByRole("button")).toHaveText([
+      "Room 1",
+      "Annexe",
+    ]);
+    // Store leads to no bed, so it is not offered.
     await expect(board(page).getByText("Store")).toHaveCount(0);
+    await expect(tile(page, "R1-1")).toHaveCount(0);
 
+    await moreAreas.getByRole("button", { name: "Room 1" }).click();
+    await expect(page).toHaveURL(`${basePath}/${room.id}`);
+    await expect(chip(page, "All 2")).toBeVisible();
+    await expect(tile(page, "R1-1")).toBeVisible();
+
+    await page.goto(`${basePath}/${ward.id}`);
     await moreAreas.getByRole("button", { name: "Annexe" }).click();
     await expect(page).toHaveURL(`${basePath}/${annexe.id}`);
-    await expect(chip(page, "All 1")).toBeVisible();
+    // Annexe has no beds of its own but leads to some, so it is offered.
     await expect(
-      board(page)
-        .getByRole("region", { name: "Annexe Room" })
-        .getByText("1 bed · 1 free"),
+      board(page).getByText("No beds directly in this location"),
     ).toBeVisible();
 
-    await board(page).getByRole("button", { name: "Annexe Room" }).click();
+    await moreAreas.getByRole("button", { name: "Annexe Room" }).click();
     await expect(page).toHaveURL(`${basePath}/${annexeRoom.id}`);
     await expect(tile(page, "AX-1")).toBeVisible();
   });
@@ -713,8 +707,8 @@ test.describe("Bed board", () => {
     page,
   }) => {
     await page.goto(`/facility/${facilityId}/locations/${ward.id}/beds`);
-    await expect(chip(page, "All 9")).toBeVisible();
-    await expect(tile(page, "R1-1")).toBeVisible();
+    await expect(chip(page, "All 7")).toBeVisible();
+    await expect(tile(page, "A-1")).toBeVisible();
     await expect(tree(page)).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "Change location" }),

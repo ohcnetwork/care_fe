@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { UserRoundX } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Sheet,
   SheetBody,
@@ -64,9 +66,14 @@ export function BedBookingSheet({
           ) : encounter ? (
             <EncounterInfoCard encounter={encounter} facilityId={facilityId} />
           ) : (
-            <p className="py-12 text-center text-sm text-muted-foreground">
-              {t("no_encounter_associated")}
-            </p>
+            <EmptyState
+              icon={
+                <UserRoundX className="size-8 text-placeholder-foreground" />
+              }
+              title={t("no_encounter_associated")}
+              description={t("no_encounter_linked_to_bed")}
+              className="py-12"
+            />
           )}
         </SheetBody>
       </SheetContent>
