@@ -77,6 +77,22 @@ test.describe("Questionnaire v2 text answer templates", () => {
       );
     });
 
+    await test.step("Clicking the search box keeps typing in the search, not the answer", async () => {
+      const answer = page.getByPlaceholder(TEMPLATE_PLACEHOLDER);
+      await answer.fill("");
+      await page.getByRole("button", { name: "Insert template" }).click();
+
+      const search = page.getByRole("combobox", { name: "Search template" });
+      await search.click();
+      await page.keyboard.type("Beta");
+      await expect(search).toHaveValue("Beta");
+      await expect(answer).toHaveValue("");
+      await expect(page.getByRole("option")).toHaveCount(1);
+
+      await page.getByRole("option", { name: templates[1].name }).click();
+      await expect(search).toBeHidden();
+    });
+
     await test.step("Shift+Enter inserts the highlighted template and keeps the list open", async () => {
       const answer = page.getByPlaceholder(TEMPLATE_PLACEHOLDER);
       await answer.fill("");
@@ -103,6 +119,98 @@ test.describe("Questionnaire v2 text answer templates", () => {
       await expect(answer).toHaveValue(
         `${templates[0].content} ${templates[1].content} ${templates[1].content}`,
       );
+    });
+  });
+
+  test("text answers open the template list on a fresh line and insert there", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    const stamp = Date.now();
+    const templates = [
+      { name: `Alpha ${stamp}`, content: "alpha content" },
+      { name: `Beta ${stamp}`, content: "beta content" },
+      { name: `Gamma ${stamp}`, content: "gamma content" },
+    ];
+
+    await test.step("Create a questionnaire with a text question and three templates", async () => {
+      await createQuestionnaireAndOpenBuilder(page, {
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+        title: `QV2 Line Templates ${stamp}`,
+      });
+      await addTopLevelQuestion(page, `Notes ${stamp}`);
+      await page.getByRole("combobox", { name: "Question Type" }).click();
+      await page.getByRole("option", { name: /^Text/ }).click();
+
+      for (const [index, template] of templates.entries()) {
+        await page.getByRole("button", { name: "Add template" }).click();
+        await page
+          .getByRole("textbox", { name: "Template name" })
+          .nth(index)
+          .fill(template.name);
+        await page
+          .getByRole("textbox", { name: "Content" })
+          .nth(index)
+          .fill(template.content);
+      }
+
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      await expectToast(page, "Questionnaire updated successfully");
+      await page.getByRole("button", { name: "Preview" }).click();
+    });
+
+    const answer = page.getByPlaceholder(TEMPLATE_PLACEHOLDER);
+    const search = page.getByRole("combobox", { name: "Search template" });
+    const [alpha, beta, gamma] = templates;
+
+    await test.step("A slash inside the text stays in the text", async () => {
+      await answer.click();
+      await answer.pressSequentially("and/or 12/05");
+      await expect(answer).toHaveValue("and/or 12/05");
+      await expect(search).toBeHidden();
+
+      await answer.fill("first\nlast");
+      await answer.focus();
+      await answer.evaluate((element) => {
+        (element as HTMLTextAreaElement).setSelectionRange(6, 6);
+      });
+      await answer.press("/");
+      await expect(answer).toHaveValue("first\n/last");
+      await expect(search).toBeHidden();
+    });
+
+    await test.step("Typing / on a fresh line opens the list and fills that line", async () => {
+      await answer.fill("");
+      await answer.press("/");
+      await expect(search).toBeVisible();
+      await page.getByRole("option", { name: alpha.name }).click();
+      await expect(answer).toHaveValue(alpha.content);
+
+      await answer.press("Enter");
+      await answer.press("/");
+      await expect(search).toBeVisible();
+      await expect(answer).toHaveValue(`${alpha.content}\n`);
+      await page.getByRole("option", { name: beta.name }).click();
+      await expect(answer).toHaveValue(`${alpha.content}\n${beta.content}`);
+
+      await answer.press("Enter");
+      await answer.press("/");
+      await search.fill(gamma.name);
+      await search.press("Shift+Enter");
+      await expect(search).toBeVisible();
+      await search.fill(alpha.name);
+      await search.press("Enter");
+      await expect(search).toBeHidden();
+      await expect(answer).toHaveValue(
+        `${alpha.content}\n${beta.content}\n${gamma.content}\n${alpha.content}`,
+      );
+    });
+
+    await test.step("The Insert template button adds a line without leaving a blank one", async () => {
+      await answer.fill("note\n");
+      await page.getByRole("button", { name: "Insert template" }).click();
+      await page.getByRole("option", { name: alpha.name }).click();
+      await expect(answer).toHaveValue(`note\n${alpha.content}`);
     });
   });
 

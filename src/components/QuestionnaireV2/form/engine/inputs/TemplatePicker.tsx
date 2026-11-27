@@ -9,7 +9,6 @@ import {
 import { RefObject, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -24,6 +23,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { InputGroupButton } from "@/components/ui/input-group";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import {
   Popover,
@@ -71,16 +71,14 @@ export function TemplatePicker({
   };
 
   const trigger = (
-    <Button
-      type="button"
-      variant="ghost"
+    <InputGroupButton
       size="sm"
       disabled={disabled}
       className="w-full justify-start rounded-t-none! rounded-b-[calc(var(--radius-md)-1px)]! text-sm font-medium text-foreground shadow-none! inset-shadow-none! not-in-data-[slot=button-group]:rounded-t-none! not-in-data-[slot=button-group]:rounded-b-[calc(var(--radius-md)-1px)]! focus-visible:-outline-offset-2"
     >
       <ListPlus className="size-4" strokeWidth={1.5} />
       <span className="underline">{t("insert_template")}</span>
-    </Button>
+    </InputGroupButton>
   );
 
   const content = (
@@ -96,7 +94,7 @@ export function TemplatePicker({
         // cmdk keeps focus in the search input, so read the highlighted item.
         const highlighted = event.currentTarget
           .querySelector("[cmdk-item][aria-selected=true]")
-          ?.getAttribute("data-value");
+          ?.getAttribute("data-template-index");
         const template = templates[Number.parseInt(highlighted ?? "", 10)];
         if (!template) return;
         // cmdk would otherwise run the plain select (insert and close).
@@ -118,6 +116,7 @@ export function TemplatePicker({
               key={`${index}-${template.name}`}
               value={`${index}-${template.name}`}
               keywords={[template.name]}
+              data-template-index={index}
               onSelect={() => insert(template.content, false)}
             >
               {template.name}

@@ -38,7 +38,7 @@ export function TextInput({
   // empty instead of leaking a wrong-typed value into the input.
   const entry = response?.values[valueIndex ?? 0];
   const value = (entry?.type === "string" ? entry.value : undefined) ?? "";
-  const templates = getInsertableTemplates(question, valueIndex);
+  const templates = getInsertableTemplates(question);
 
   const handleChange = (next: string) => {
     updateResponse({
@@ -56,7 +56,10 @@ export function TextInput({
     const isSingleLine = question.type === "string";
     const text = isSingleLine ? content.replace(/[\r\n]+/g, " ") : content;
     const separator = isSingleLine ? " " : "\n";
-    const next = value ? `${value}${separator}${text}` : text;
+    const next =
+      !value || value.endsWith("\n")
+        ? `${value}${text}`
+        : `${value}${separator}${text}`;
     if (
       question.max_length !== undefined &&
       next.length > question.max_length
@@ -88,10 +91,21 @@ export function TextInput({
     onKeyDown: (
       e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => {
-      if (e.key === "/" && !value && templates.length > 0) {
-        e.preventDefault();
-        setTemplatesOpen(true);
+      if (e.key !== "/" || templates.length === 0) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || e.nativeEvent.isComposing) {
+        return;
       }
+      // A slash stays literal in text; it opens the list only on an empty
+      // answer or on the fresh line after a line break.
+      const { selectionStart, selectionEnd } = e.currentTarget;
+      const onFreshLine =
+        question.type === "text" &&
+        value.endsWith("\n") &&
+        selectionStart === value.length &&
+        selectionEnd === value.length;
+      if (value && !onFreshLine) return;
+      e.preventDefault();
+      setTemplatesOpen(true);
     },
   };
 
@@ -110,12 +124,20 @@ export function TextInput({
   return (
     <InputGroup>
       {question.type === "text" ? (
-        <InputGroupTextarea rows={3} ref={setInputRef} {...props} />
+        <InputGroupTextarea
+          rows={3}
+          ref={setInputRef}
+          className="resize-y flex-none"
+          {...props}
+        />
       ) : (
         <InputGroupInput type="text" ref={setInputRef} {...props} />
       )}
       <InputGroupAddon
         align="block-end"
+        // The addon's default click-to-focus would also catch clicks that
+        // bubble up from the portalled list (e.g. its search box).
+        onClick={undefined}
         className="rounded-b-[calc(var(--radius-md)-1px)] border-t border-input p-0 [.border-t]:pt-0 group-has-[>input]/input-group:pb-0"
       >
         <TemplatePicker
