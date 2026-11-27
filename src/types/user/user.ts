@@ -30,6 +30,8 @@ export interface UserQualificationDegree {
   display?: string | null;
 }
 
+// The backend sends a smaller organization here, and the full Organization
+// type makes form types too deep for TypeScript.
 export interface UserRoleOrg {
   id: string;
   organization: OrganizationParent;
@@ -51,7 +53,6 @@ export interface UserReadMinimal extends UserBase {
   gender: (typeof GENDER_TYPES)[number]["id"];
   username: string;
   mfa_enabled: boolean;
-  phone_number: string;
   deleted: boolean;
   role_orgs?: UserRoleOrg[];
   communication: UserCommunication[];
@@ -78,18 +79,14 @@ export interface CurrentUserRead extends UserRead, Permissions {
   preferences: Record<string, unknown>;
 }
 
-export interface PublicUserRead extends UserBase {
-  id: string;
-  last_login: string;
-  profile_picture_url: string;
-  gender: (typeof GENDER_TYPES)[number]["id"];
-  username: string;
-  role_orgs?: UserRoleOrg[];
-}
+// Returned by the public schedulable users APIs.
+export type PublicUserRead = Omit<
+  UserReadMinimal,
+  "mfa_enabled" | "deleted" | "communication" | "qualification"
+>;
 
 export interface UserUpdate extends UserBase {
   gender: (typeof GENDER_TYPES)[number]["id"];
-  phone_number: string;
   geo_organization?: string;
   communication?: UserCommunication[];
   qualification?: UserQualification[];

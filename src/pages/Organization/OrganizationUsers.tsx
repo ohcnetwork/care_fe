@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Bot, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -50,13 +50,7 @@ interface Props {
   routeContext?: RouteContext;
 }
 
-function UserStatusBadge({
-  user,
-  isServiceAccount,
-}: {
-  user: UserReadMinimal;
-  isServiceAccount: boolean;
-}) {
+function UserStatusBadge({ user }: { user: UserReadMinimal }) {
   const { t } = useTranslation();
 
   if (user.deleted) {
@@ -64,15 +58,6 @@ function UserStatusBadge({
       <Badge variant="neutral" size="sm">
         <span className="size-1.5 shrink-0 rounded-full bg-current" />
         {t("archived")}
-      </Badge>
-    );
-  }
-
-  if (isServiceAccount) {
-    return (
-      <Badge variant="secondary" size="sm">
-        <Bot />
-        {t("service_account")}
       </Badge>
     );
   }
@@ -371,10 +356,7 @@ export default function OrganizationUsers({
                                 </TableCell>
                               )}
                               <TableCell className="px-4 py-3">
-                                <UserStatusBadge
-                                  user={user}
-                                  isServiceAccount={isServiceAccount}
-                                />
+                                <UserStatusBadge user={user} />
                               </TableCell>
                               <TableCell className="px-4 py-3">
                                 <div className="flex items-center justify-end gap-2">
