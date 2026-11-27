@@ -416,11 +416,13 @@ test("short screens use one menu scroller and keyboard navigation reaches custom
   await expect(from(page)).toBeFocused();
 });
 
-test("Custom date range opens on the start date with a small back button", async ({
+test("Custom date range opens on the start date with a standard back button", async ({
   page,
 }) => {
-  // The filter header uses the designed icon-sm size: 36px at every width.
-  for (const width of [320, 1280]) {
+  for (const [width, size] of [
+    [320, 48],
+    [1280, 40],
+  ]) {
     await page.setViewportSize({ width, height: 900 });
     await open(page, "menu&integration&value");
     await page.getByRole("menuitem", { name: /custom date range/i }).click();
@@ -428,9 +430,9 @@ test("Custom date range opens on the start date with a small back button", async
     const back = page.getByRole("button", { name: "Back", exact: true });
     await expect(back).toBeVisible();
     await expect(back.locator("svg.lucide-chevron-left")).toBeVisible();
-    await expect(back).toHaveAttribute("data-size", "icon-sm");
-    await expect(back).toHaveCSS("width", "36px");
-    await expect(back).toHaveCSS("height", "36px");
+    await expect(back).toHaveAttribute("data-size", "icon");
+    await expect(back).toHaveCSS("width", `${size}px`);
+    await expect(back).toHaveCSS("height", `${size}px`);
     await back.click();
     await expect(
       page.getByRole("menuitem", { name: /custom date range/i }),
