@@ -1,3 +1,4 @@
+import { defaultFilter } from "cmdk";
 import {
   ArrowBigUp,
   ArrowDown,
@@ -84,6 +85,10 @@ export function TemplatePicker({
 
   const content = (
     <Command
+      // `value` carries the index, so search the name (keywords) instead.
+      filter={(_value, search, keywords) =>
+        defaultFilter(keywords?.join(" ") ?? "", search)
+      }
       onKeyDown={(event) => {
         if (event.key !== "Enter" || !event.shiftKey) return;
         // Enter that confirms an IME composition must not insert.

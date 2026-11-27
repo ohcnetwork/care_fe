@@ -3,6 +3,12 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupTextarea,
+} from "@/components/ui/input-group";
 import { Textarea } from "@/components/ui/textarea";
 
 import { TemplatePicker } from "@/components/QuestionnaireV2/form/engine/inputs/TemplatePicker";
@@ -89,35 +95,29 @@ export function TextInput({
     },
   };
 
-  // With templates the input drops its own border: the box below owns it.
-  const boxedClassName =
-    templates.length > 0
-      ? "rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 aria-invalid:ring-0"
-      : undefined;
-
-  const input =
-    question.type === "text" ? (
-      <Textarea
-        rows={3}
-        ref={setInputRef}
-        className={boxedClassName}
-        {...props}
-      />
+  if (templates.length === 0) {
+    return question.type === "text" ? (
+      <Textarea rows={3} ref={setInputRef} {...props} />
     ) : (
       <Input
         type={question.type === "url" ? "url" : "text"}
         ref={setInputRef}
-        className={boxedClassName}
         {...props}
       />
     );
-
-  if (templates.length === 0) return input;
+  }
 
   return (
-    <div className="overflow-hidden rounded-md border border-input shadow-2xs has-[input:focus-visible]:border-ring has-[input:focus-visible]:ring-3 has-[input:focus-visible]:ring-ring/50 has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:ring-3 has-[textarea:focus-visible]:ring-ring/50 has-[[aria-invalid=true]]:border-destructive has-[[aria-invalid=true]]:ring-3 has-[[aria-invalid=true]]:ring-destructive/20">
-      {input}
-      <div className="rounded-b-[calc(var(--radius-md)-1px)] border-t border-input bg-soft-background">
+    <InputGroup>
+      {question.type === "text" ? (
+        <InputGroupTextarea rows={3} ref={setInputRef} {...props} />
+      ) : (
+        <InputGroupInput type="text" ref={setInputRef} {...props} />
+      )}
+      <InputGroupAddon
+        align="block-end"
+        className="rounded-b-[calc(var(--radius-md)-1px)] border-t border-input p-0 [.border-t]:pt-0 group-has-[>input]/input-group:pb-0"
+      >
         <TemplatePicker
           templates={templates}
           disabled={disabled}
@@ -126,7 +126,7 @@ export function TextInput({
           onInsert={handleInsertTemplate}
           returnFocusTo={inputRef}
         />
-      </div>
-    </div>
+      </InputGroupAddon>
+    </InputGroup>
   );
 }
