@@ -169,7 +169,11 @@ export type UserProfileSectionsComponentType = React.FC<{
   className?: string;
 }>;
 
+/** Mounted once on every page, inside the router. For app-wide listeners or UI. */
+export type GlobalMountComponentType = React.FC;
+
 export type SupportedPluginComponents = {
+  GlobalMount: GlobalMountComponentType;
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
   PatientHomeActions: PatientHomeActionsComponentType;

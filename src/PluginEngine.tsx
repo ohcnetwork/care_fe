@@ -235,3 +235,31 @@ export function PLUGIN_Component(props: PluginComponentProps) {
     </>
   );
 }
+
+/**
+ * Mounts the `GlobalMount` component of every plugin. Render it once, inside
+ * the router, so a plugin has an always-mounted place on every page,
+ * including full-screen ones. A plugin can use it for app-wide listeners
+ * (for example push notification clicks) or for UI that is not part of a page.
+ */
+export function PluginGlobalMount() {
+  const careApps = useCareApps();
+
+  return (
+    <>
+      {careApps.map((plugin) => {
+        const Component = !plugin.isLoading
+          ? plugin.components?.GlobalMount
+          : undefined;
+        if (!Component) return null;
+        return (
+          <PluginErrorBoundary key={plugin.slug} pluginName={plugin.slug}>
+            <React.Suspense fallback={null}>
+              <Component />
+            </React.Suspense>
+          </PluginErrorBoundary>
+        );
+      })}
+    </>
+  );
+}

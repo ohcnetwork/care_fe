@@ -9,7 +9,9 @@
  *
  * Either way, the page dispatches `NOTIFICATION_CLICK_EVENT` on `window` and
  * keeps the data in `window.__CARE_PENDING_NOTIFICATION_CLICK__`. A plugin that
- * loads later reads and clears that property, then listens for the event.
+ * loads later (plugins load after sign-in) reads and clears that property, then
+ * listens for the event. A click that nobody takes is dropped by core, see
+ * `NOTIFICATION_CLICK_PENDING_MS`.
  */
 
 export const NOTIFICATION_CLICK_CACHE = "care-notification-click-v1";
@@ -20,61 +22,19 @@ export const NOTIFICATION_CLICK_CREATED_HEADER = "x-created-at";
 /** A stored payload that no window consumed within this time is abandoned. */
 export const NOTIFICATION_CLICK_TTL_MS = 10 * 60 * 1000;
 
+/**
+ * Once a user is signed in, a click that no plugin listener takes in this
+ * time is dropped, so a later page that mounts a listener does not jump to an
+ * old target.
+ */
+export const NOTIFICATION_CLICK_PENDING_MS = 30 * 1000;
+
+/**
+ * Plugins load only after sign-in, so a click made while signed out waits for
+ * the sign-in, so the user lands on its page. It is dropped after this time,
+ * so a different user who signs in later does not inherit it.
+ */
+export const NOTIFICATION_CLICK_SIGNED_OUT_MAX_MS = 5 * 60 * 1000;
+
 export const notificationClickCacheKey = (id: string) =>
   `/__notification_click__/${id}`;
-
-declare global {
-  interface Window {
-    __CARE_PENDING_NOTIFICATION_CLICK__?: Record<string, unknown> | null;
-  }
-}
-
-function publishNotificationClick(data: Record<string, unknown>) {
-  window.__CARE_PENDING_NOTIFICATION_CLICK__ = data;
-  window.dispatchEvent(
-    new CustomEvent(NOTIFICATION_CLICK_EVENT, { detail: data }),
-  );
-}
-
-async function consumeCachedNotificationClick(id: string) {
-  const cache = await caches.open(NOTIFICATION_CLICK_CACHE);
-  const key = notificationClickCacheKey(id);
-  const response = await cache.match(key);
-  if (!response) return null;
-  await cache.delete(key);
-  return (await response.json()) as Record<string, unknown>;
-}
-
-async function handleNotificationClickHash() {
-  const params = new URLSearchParams(window.location.hash.slice(1));
-  const id = params.get(NOTIFICATION_CLICK_HASH_KEY);
-  if (!id) return;
-
-  // Clear the hash right away so a refresh does not replay the click.
-  params.delete(NOTIFICATION_CLICK_HASH_KEY);
-  const remainingHash = params.toString();
-  window.history.replaceState(
-    window.history.state,
-    "",
-    window.location.pathname +
-      window.location.search +
-      (remainingHash ? `#${remainingHash}` : ""),
-  );
-
-  try {
-    const data = await consumeCachedNotificationClick(id);
-    if (data) publishNotificationClick(data);
-  } catch (err) {
-    console.warn("Failed to read notification click data", err);
-  }
-}
-
-export function initNotificationClickHandoff() {
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.addEventListener("message", (event) => {
-      if (event.data?.type !== NOTIFICATION_CLICK_MESSAGE) return;
-      publishNotificationClick(event.data.data ?? {});
-    });
-  }
-  void handleNotificationClickHash();
-}

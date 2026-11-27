@@ -31,6 +31,14 @@ self.addEventListener("message", (event) => {
   }
 });
 
+// Different events for one resource (low stock, near expiry) must not replace
+// each other, while a repeated event still collapses into one notification.
+function notificationTag(data: Record<string, unknown>) {
+  if (data.external_id) return data.external_id as string;
+  if (!data.resource_id) return undefined;
+  return [data.event_type, data.resource_id].filter(Boolean).join(":");
+}
+
 // Any other custom service worker logic can go here.
 self.addEventListener("push", (event) => {
   if (!event.data) return;
@@ -66,7 +74,7 @@ self.addEventListener("push", (event) => {
         body,
         icon: "/images/icons/pwa-192x192.png",
         badge: "/images/icons/pwa-192x192.png",
-        tag: (data.external_id as string) || (data.resource_id as string),
+        tag: notificationTag(data),
         data,
       }),
     );
@@ -103,19 +111,20 @@ self.addEventListener("notificationclick", (e) => {
         // Message instead of navigating, so the open page keeps its state
         // (for example an unsaved form). The app decides where to go.
         if (existingClient) {
+          let delivered = false;
           try {
             existingClient.postMessage({
               type: NOTIFICATION_CLICK_MESSAGE,
               data,
             });
+            delivered = true;
             await existingClient.focus();
-            return;
           } catch (err) {
-            console.warn(
-              "Failed to reach existing client, opening a new window instead",
-              err,
-            );
+            // After delivery the tab already handles the click, so a second
+            // window would duplicate it.
+            console.warn("Failed to message or focus existing client", err);
           }
+          if (delivered) return;
         }
 
         // A new window cannot receive messages before it loads, so keep the

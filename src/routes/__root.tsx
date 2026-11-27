@@ -10,6 +10,7 @@ import Loading from "@/components/Common/Loading";
 
 import { PluginRouteAttacher } from "@/lib/router/pluginRoutes";
 import { isShowingPreviousPage } from "@/lib/router/previousPage";
+import { PluginGlobalMount } from "@/PluginEngine";
 import type { RouterContext } from "@/router";
 import { AreaChrome, useResolvedArea } from "@/Routers/AreaChrome";
 
@@ -66,6 +67,7 @@ function RootComponent() {
         <Loading />
       )}
       <PluginRouteAttacher />
+      <PluginGlobalMount />
       <Suspense>
         <RouterDevtools position="bottom-right" />
       </Suspense>

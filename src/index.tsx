@@ -9,7 +9,7 @@ import React, { Context } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import { z } from "zod";
-import { initNotificationClickHandoff } from "./lib/notificationClick";
+import { initNotificationClickHandoff } from "./lib/notificationClickHandoff";
 import { initZod } from "./lib/zod";
 
 // Extend Window interface to include CARE_API_URL
