@@ -34,7 +34,6 @@ test.beforeEach(async ({ page }) => {
             username: "composition-admin",
             first_name: "Composition",
             last_name: "Admin",
-            user_type: "administrator",
             is_superuser: true,
             permissions: [],
             facilities: [],

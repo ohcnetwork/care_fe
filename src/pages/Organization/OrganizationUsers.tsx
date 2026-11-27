@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Bot, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -58,15 +58,6 @@ function UserStatusBadge({ user }: { user: UserReadMinimal }) {
       <Badge variant="neutral" size="sm">
         <span className="size-1.5 shrink-0 rounded-full bg-current" />
         {t("archived")}
-      </Badge>
-    );
-  }
-
-  if (user.is_service_account) {
-    return (
-      <Badge variant="secondary" size="sm">
-        <Bot />
-        {t("service_account")}
       </Badge>
     );
   }
@@ -261,11 +252,15 @@ export default function OrganizationUsers({
                             : t("role")}
                         </TableHead>
                         {!isServiceAccount && (
-                          <TableHead className="px-4">
-                            {t("last_login")}
-                          </TableHead>
+                          <>
+                            <TableHead className="px-4">
+                              {t("last_login")}
+                            </TableHead>
+                            <TableHead className="px-4">
+                              {t("status")}
+                            </TableHead>
+                          </>
                         )}
-                        <TableHead className="px-4">{t("status")}</TableHead>
                         <TableHead className="px-4">
                           <span className="sr-only">{t("actions")}</span>
                         </TableHead>
@@ -288,13 +283,15 @@ export default function OrganizationUsers({
                               <Skeleton className="h-4 w-24" />
                             </TableCell>
                             {!isServiceAccount && (
-                              <TableCell className="px-4 py-3">
-                                <Skeleton className="h-4 w-20" />
-                              </TableCell>
+                              <>
+                                <TableCell className="px-4 py-3">
+                                  <Skeleton className="h-4 w-20" />
+                                </TableCell>
+                                <TableCell className="px-4 py-3">
+                                  <Skeleton className="h-5 w-16 rounded-full" />
+                                </TableCell>
+                              </>
                             )}
-                            <TableCell className="px-4 py-3">
-                              <Skeleton className="h-5 w-16 rounded-full" />
-                            </TableCell>
                             <TableCell className="px-4 py-3">
                               <Skeleton className="ml-auto h-12 w-44 md:h-10" />
                             </TableCell>
@@ -303,7 +300,7 @@ export default function OrganizationUsers({
                       ) : !users?.results?.length ? (
                         <TableRow>
                           <TableCell
-                            colSpan={isServiceAccount ? 4 : 5}
+                            colSpan={isServiceAccount ? 3 : 5}
                             className="p-6 text-center text-sm text-muted-foreground"
                           >
                             {t("no_users_found")}
@@ -354,19 +351,21 @@ export default function OrganizationUsers({
                                 {userRole.role.name}
                               </TableCell>
                               {!isServiceAccount && (
-                                <TableCell className="px-4 py-3 text-muted-foreground">
-                                  {user.last_login ? (
-                                    <RelativeDateTooltip
-                                      date={user.last_login}
-                                    />
-                                  ) : (
-                                    t("never")
-                                  )}
-                                </TableCell>
+                                <>
+                                  <TableCell className="px-4 py-3 text-muted-foreground">
+                                    {user.last_login ? (
+                                      <RelativeDateTooltip
+                                        date={user.last_login}
+                                      />
+                                    ) : (
+                                      t("never")
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="px-4 py-3">
+                                    <UserStatusBadge user={user} />
+                                  </TableCell>
+                                </>
                               )}
-                              <TableCell className="px-4 py-3">
-                                <UserStatusBadge user={user} />
-                              </TableCell>
                               <TableCell className="px-4 py-3">
                                 <div className="flex items-center justify-end gap-2">
                                   {canManageOrganizationUsers && (

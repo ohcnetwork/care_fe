@@ -100,7 +100,6 @@ test.describe("Print templates (isolated API)", () => {
       first_name: "Print",
       last_name: "Admin",
       phone_number: "",
-      user_type: "administrator",
       gender: "male",
       last_login: "",
       profile_picture_url: "",

@@ -58,7 +58,6 @@ test.describe("Facility general settings layout", () => {
       first_name: "Layout",
       last_name: "Test",
       phone_number: "",
-      user_type: "administrator",
       gender: "male",
       last_login: "",
       profile_picture_url: "",

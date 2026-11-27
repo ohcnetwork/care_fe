@@ -106,12 +106,10 @@ export interface PatientAdmissionForm {
 ```typescript
 // User permissions for healthcare roles
 export interface CurrentUserRead extends UserRead, Permissions {
-  user_type: UserType;
+  is_superuser: boolean;
   facilities: FacilityBareMinimum[];
-  home_facility: FacilityBareMinimum;
+  organizations: Organization[];
 }
-
-export type UserType = 'doctor' | 'nurse' | 'staff' | 'volunteer' | 'administrator';
 ```
 
 ## Medical Measurement Types

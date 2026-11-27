@@ -179,7 +179,6 @@ test.describe("Organization directory compatibility", () => {
               username: "test",
               first_name: "Test",
               last_name: "User",
-              user_type: "administrator",
               is_superuser: true,
               permissions: [],
               facilities: [],

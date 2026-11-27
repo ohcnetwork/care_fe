@@ -64,13 +64,13 @@ function workspaceUser(id = faker.string.uuid()): UserReadMinimal {
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),
     phone_number: "+919999999999",
-    user_type: "administrator",
     gender: "non_binary",
     last_login: "2026-01-01T00:00:00Z",
     profile_picture_url: "",
     mfa_enabled: false,
     deleted: false,
-    is_service_account: false,
+    communication: [],
+    qualification: [],
   };
 }
 
