@@ -1140,6 +1140,76 @@ async function mockEncounterWorkspaceApi(
   };
 }
 
+test("reselecting a dispensing location keeps the initial location filter", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeOverview: true,
+  });
+  const pharmacy = {
+    id: faker.string.uuid(),
+    name: `Pharmacy ${faker.string.alphanumeric(6)}`,
+    has_sub_locations: false,
+  };
+  const otherAssociatedLocation = {
+    id: faker.string.uuid(),
+    name: `Store ${faker.string.alphanumeric(6)}`,
+    has_sub_locations: false,
+  };
+  const unrelatedLocation = {
+    id: faker.string.uuid(),
+    name: `Other ${faker.string.alphanumeric(6)}`,
+    has_sub_locations: false,
+  };
+  const locationPath = `/api/v1/facility/${fixture.facility.id}/location/`;
+
+  await page.route(
+    (url) => url.pathname === locationPath,
+    async (route) => {
+      const url = new URL(route.request().url());
+      const results = [pharmacy, otherAssociatedLocation];
+      if (!url.searchParams.has("mine")) results.push(unrelatedLocation);
+      await route.fulfill({ json: { count: results.length, results } });
+    },
+  );
+
+  const locationResponse = () =>
+    page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === locationPath &&
+        new URL(response.url()).searchParams.get("mode") === "kind",
+    );
+
+  await page.goto(`${fixture.basePath}/updates`);
+  await page.getByRole("tab", { name: "Overview" }).click();
+  await page.getByRole("tab", { name: "Actions", exact: true }).click();
+  const initialResponse = locationResponse();
+  await page
+    .getByRole("region", { name: "Actions", exact: true })
+    .getByRole("button", { name: /^Dispense/ })
+    .click();
+  expect(new URL((await initialResponse).url()).searchParams.get("mine")).toBe(
+    "true",
+  );
+  const picker = page.getByRole("dialog", { name: "Select Location" });
+  await expect(picker.getByText(pharmacy.name)).toBeVisible();
+  await expect(picker.getByText(otherAssociatedLocation.name)).toBeVisible();
+  await expect(picker.getByText(unrelatedLocation.name)).toHaveCount(0);
+  await picker.getByText(pharmacy.name).click();
+
+  const drawer = page.getByRole("dialog", { name: "Dispense" });
+  await expect(drawer.getByText(pharmacy.name)).toBeVisible();
+  const reselectResponse = locationResponse();
+  await drawer.getByRole("button", { name: /selected location/i }).click();
+  expect(new URL((await reselectResponse).url()).searchParams.get("mine")).toBe(
+    "true",
+  );
+  await expect(picker.getByText(otherAssociatedLocation.name)).toBeVisible();
+  await expect(picker.getByText(unrelatedLocation.name)).toHaveCount(0);
+  await picker.getByText(otherAssociatedLocation.name).click();
+  await expect(drawer.getByText(otherAssociatedLocation.name)).toBeVisible();
+});
+
 test("submitted boolean values stay paired with their exact question labels", async ({
   page,
 }) => {
