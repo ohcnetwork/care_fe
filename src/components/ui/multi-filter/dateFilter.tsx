@@ -25,7 +25,11 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import FilterFooter from "./filterFooter";
 import FilterHeader from "./filterHeader";
-import { FilterMenuItem, FilterSurfaceContext } from "./filterSurface";
+import {
+  FilterMenuItem,
+  FilterSurfaceContext,
+  useFilterSurface,
+} from "./filterSurface";
 import NavigationHelper from "./utils/navigation-helper";
 import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
 import {
@@ -167,6 +171,7 @@ export default function RenderDateFilter({
     defaultView || "options",
   );
   const pickerRef = useRef<DateRangePickerHandle>(null);
+  const surface = useFilterSurface();
   useImperativeHandle(ref, () => ({
     applyDraft: () => {
       const range = pickerRef.current?.dismissRange;
@@ -190,7 +195,12 @@ export default function RenderDateFilter({
       : false;
 
   return (
-    <div className="pt-0">
+    <div
+      className={cn(
+        surface === "drawer" &&
+          "min-h-0 flex-1 overflow-y-auto overscroll-contain",
+      )}
+    >
       {view == "custom" ? (
         <DateRangePicker
           ref={pickerRef}

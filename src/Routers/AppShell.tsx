@@ -53,7 +53,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <SidebarInset
           id="pages"
           className={cn(
-            "h-svh min-w-0 max-w-full focus:outline-hidden",
+            "min-h-svh min-w-0 max-w-full focus:outline-hidden max-md:overflow-visible md:h-svh md:min-h-0",
             !isInnerWorkspace && "md:h-[calc(100svh-1rem)]",
           )}
         >
@@ -74,7 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ) : null}
           <div
             className={
-              "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 md:px-6 pb-4"
+              "flex flex-1 flex-col gap-4 px-4 md:px-6 pb-4 md:min-h-0 md:overflow-y-auto"
             }
             data-cui-page
             data-scroll-restoration-id="app-content"

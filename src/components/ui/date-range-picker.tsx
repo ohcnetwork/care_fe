@@ -485,7 +485,7 @@ function RangePanel({
     <div
       data-slot="date-range-picker"
       className={cn(
-        "flex w-80 max-w-full flex-col bg-background text-foreground",
+        "flex md:w-80 max-w-full flex-col bg-background text-foreground",
         className,
       )}
       onKeyDown={(event) => {
