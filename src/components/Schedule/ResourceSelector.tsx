@@ -7,11 +7,11 @@ import {
 } from "@/types/healthcareService/healthcareService";
 import { LocationRead } from "@/types/location/location";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export type ScheduleResourceFormState =
   | {
-      resource: UserSpec | null;
+      resource: UserReadMinimal | null;
       resource_type: SchedulableResourceType.Practitioner;
     }
   | {

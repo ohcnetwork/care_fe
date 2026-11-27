@@ -5,7 +5,7 @@ import {
   QuestionnaireResponseStatus,
   QuestionnaireResponseUpdate,
 } from "@/types/questionnaire/questionnaireResponse";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export interface ResourceQuestionnaireAnswerValue {
   // The resource response API omits fields equal to their default values.
@@ -27,7 +27,7 @@ export interface ResourceQuestionnaireResponse {
   questionnaire: QuestionnaireRead;
   status: QuestionnaireResponseStatus;
   responses: ResourceQuestionnaireAnswer[];
-  created_by: UserSpec | null;
+  created_by: UserReadMinimal | null;
   created_date: string | null;
 }
 

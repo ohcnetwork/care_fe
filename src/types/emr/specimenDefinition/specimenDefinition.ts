@@ -1,6 +1,6 @@
 import { Code } from "@/types/base/code/code";
 import { SlugConfig } from "@/types/base/slug/slugConfig";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum SpecimenDefinitionStatus {
   draft = "draft",
@@ -131,8 +131,8 @@ export interface SpecimenDefinitionCreate extends Omit<
 }
 
 export interface SpecimenDefinitionRead extends SpecimenDefinition {
-  created_by: UserSpec;
-  updated_by: UserSpec;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   created_at: string;
   updated_at: string;
   type_tested?: TypeTestedSpec;

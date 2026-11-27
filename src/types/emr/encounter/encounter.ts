@@ -27,7 +27,7 @@ import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityO
 import { LocationAssociationRead } from "@/types/location/association";
 import { LocationMinSpec, LocationRead } from "@/types/location/location";
 import { AppointmentRead } from "@/types/scheduling/schedule";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const ENCOUNTER_ADMIT_SOURCE = [
   "hosp_trans",
@@ -235,8 +235,8 @@ export interface EncounterRead
   location_history: LocationAssociationRead[];
   care_team: CareTeamResponse[];
   tags: TagConfig[];
-  created_by: UserSpec;
-  updated_by: UserSpec;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }
 export interface EncounterCreate extends Omit<
   EncounterBase,

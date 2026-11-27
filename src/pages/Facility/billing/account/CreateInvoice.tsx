@@ -66,7 +66,7 @@ import {
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, goBack } from "@/Utils/utils";
@@ -192,7 +192,7 @@ export function CreateInvoicePage({
   const [pendingItem, setPendingItem] = useState<{
     definition: ChargeItemDefinitionRead;
     quantity: string;
-    performer?: UserSpec;
+    performer?: UserReadMinimal;
   } | null>(null);
 
   const { mutate: applyInlineChargeItem, isPending: isApplyingInline } =

@@ -1,12 +1,12 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import {
-  CurrentUserRetrieveSpec,
+  CurrentUserRead,
   GenerateServiceAccountTokenResponse,
-  UserCreateSpec,
+  UserCreate,
   UserQualificationDegree,
-  UserRetrieveSpec,
-  UserSpec,
-  UserUpdateSpec,
+  UserRead,
+  UserReadMinimal,
+  UserUpdate,
 } from "@/types/user/user";
 import { UserPreferenceRequest } from "@/types/user/userPreferences";
 
@@ -19,24 +19,24 @@ export default {
   list: {
     path: "/api/v1/users/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<UserSpec>>(),
+    TRes: Type<PaginatedResponse<UserReadMinimal>>(),
   },
   create: {
     path: "/api/v1/users/",
     method: HttpMethod.POST,
-    TRes: Type<UserSpec>(),
-    TBody: Type<UserCreateSpec>(),
+    TRes: Type<UserReadMinimal>(),
+    TBody: Type<UserCreate>(),
   },
   get: {
     path: "/api/v1/users/{username}/",
     method: HttpMethod.GET,
-    TRes: Type<UserRetrieveSpec>(),
+    TRes: Type<UserRead>(),
   },
   update: {
     path: "/api/v1/users/{username}/",
     method: HttpMethod.PUT,
-    TRes: Type<UserSpec>(),
-    TBody: Type<UserUpdateSpec>(),
+    TRes: Type<UserReadMinimal>(),
+    TBody: Type<UserUpdate>(),
   },
   delete: {
     path: "/api/v1/users/{username}/",
@@ -52,7 +52,7 @@ export default {
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
     method: HttpMethod.GET,
-    TRes: Type<CurrentUserRetrieveSpec>(),
+    TRes: Type<CurrentUserRead>(),
   },
   uploadProfilePicture: {
     path: "/api/v1/users/{username}/profile_picture/",
@@ -79,7 +79,7 @@ export default {
   setPreferences: {
     path: "/api/v1/users/set_preferences/",
     method: HttpMethod.POST,
-    TRes: Type<CurrentUserRetrieveSpec>(),
+    TRes: Type<CurrentUserRead>(),
     TBody: Type<UserPreferenceRequest>(),
   },
 } as const;

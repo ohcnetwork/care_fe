@@ -31,7 +31,7 @@ import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizati
 import { Code } from "@/types/base/code/code";
 import careTeamApi from "@/types/careTeam/careTeamApi";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 type CareTeamSheetProps = {
   encounter: EncounterRead;
@@ -62,10 +62,14 @@ export function CareTeamSheet({
   const { t } = useTranslation();
   const [open, _setOpen] = useState(false);
   const queryClient = useQueryClient();
-  const [selectedUser, setSelectedUser] = useState<UserSpec | undefined>();
+  const [selectedUser, setSelectedUser] = useState<
+    UserReadMinimal | undefined
+  >();
   const [selectedOrganization, setSelectedOrganization] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<Code | null>(null);
-  const [memberToRemove, setMemberToRemove] = useState<UserSpec | undefined>();
+  const [memberToRemove, setMemberToRemove] = useState<
+    UserReadMinimal | undefined
+  >();
 
   useEffect(() => {
     if (props.open != null) {
@@ -140,7 +144,7 @@ export function CareTeamSheet({
     setSelectedUser(undefined);
   };
 
-  const confirmRemoveMember = (member: UserSpec) => {
+  const confirmRemoveMember = (member: UserReadMinimal) => {
     setMemberToRemove(member);
   };
 

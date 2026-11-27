@@ -49,7 +49,7 @@ import {
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
 import { NonEmptyArray } from "@/Utils/types";
 import { formatName } from "@/Utils/utils";
@@ -63,8 +63,8 @@ const getColorForTag = (uuid: string) => {
 };
 
 interface Props {
-  selected: UserSpec[];
-  onSelect: (users: UserSpec[]) => void;
+  selected: UserReadMinimal[];
+  onSelect: (users: UserReadMinimal[]) => void;
   facilityId: string;
   multiple?: boolean;
 }
@@ -160,7 +160,7 @@ export const PractitionerSelector = ({
             }),
       },
     }),
-    select: (data: { users: UserSpec[] }) =>
+    select: (data: { users: UserReadMinimal[] }) =>
       data.users.filter((user) =>
         formatName(user).toLowerCase().includes(searchQuery.toLowerCase()),
       ),
@@ -180,7 +180,7 @@ export const PractitionerSelector = ({
     enabled: !!currentOrganizationId,
   });
 
-  const getItemValue = (user: UserSpec) => {
+  const getItemValue = (user: UserReadMinimal) => {
     return `${formatName(user)} ${user.username}`;
   };
 
@@ -195,7 +195,7 @@ export const PractitionerSelector = ({
     }
   };
 
-  const handleSelectAll = (users: UserSpec[]) => {
+  const handleSelectAll = (users: UserReadMinimal[]) => {
     onSelect([...selected, ...users]);
   };
 
@@ -203,14 +203,16 @@ export const PractitionerSelector = ({
     onSelect([]);
   };
 
-  const clearOrganizationUsers = (organizationUsers: { users: UserSpec[] }) => {
+  const clearOrganizationUsers = (organizationUsers: {
+    users: UserReadMinimal[];
+  }) => {
     const remainingSelected = selected.filter(
       (s) => !organizationUsers.users.some((u) => u.id === s.id),
     );
     onSelect(remainingSelected);
   };
 
-  const handleUserSelect = (user: UserSpec) => {
+  const handleUserSelect = (user: UserReadMinimal) => {
     if (selected && multiple) {
       onSelect([...selected, user]);
     } else {
@@ -585,7 +587,7 @@ export const PractitionerSelector = ({
                           size="xs"
                           onClick={() => {
                             handleSelectAll(
-                              organizationUsers.users as NonEmptyArray<UserSpec>,
+                              organizationUsers.users as NonEmptyArray<UserReadMinimal>,
                             );
                           }}
                         >

@@ -78,7 +78,7 @@ test.describe("Fill draft lifecycle at the login form", () => {
     page,
   }) => {
     // Discover the real authenticated user id.
-    // `clearOtherUsersFillDrafts` is keyed off `CurrentUserRetrieveSpec.id` (the
+    // `clearOtherUsersFillDrafts` is keyed off `CurrentUserRead.id` (the
     // same value `QuestionnaireFillPage` uses as `FillDraftScope.userId`),
     // not the JWT's own `user_id` claim — the two are not guaranteed to be
     // the same value, so this test reads it straight from the app's own

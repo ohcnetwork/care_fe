@@ -4,10 +4,10 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import { cn } from "@/lib/utils";
 import { renderGeoOrganizations } from "@/types/organization/organization";
-import { UserRetrieveSpec } from "@/types/user/user";
+import { UserRead } from "@/types/user/user";
 
 interface UserViewDetailsProps {
-  user: UserRetrieveSpec;
+  user: UserRead;
 }
 
 const LabelValue = ({

@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { TagConfig, TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 import { LocationDetail } from "@/types/location/location";
 import { Organization } from "@/types/organization/organization";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum RequestOrderStatus {
   draft = "draft",
@@ -85,7 +85,7 @@ export interface RequestOrderUpdate extends RequestOrder {
 export interface RequestOrderRetrieve extends RequestOrder {
   id: string;
   created_date: string;
-  created_by: UserSpec;
+  created_by: UserReadMinimal;
   modified_date: string;
   origin?: LocationDetail;
   destination: LocationDetail;

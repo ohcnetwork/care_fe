@@ -10,14 +10,17 @@ import {
 
 import UserForm, { UserProfileEditSection } from "@/components/Users/UserForm";
 
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface EditUserSheetProps {
   existingUsername: string;
   open: boolean;
   setOpen: (open: boolean) => void;
   initialSection?: UserProfileEditSection;
-  onUserUpdated?: (user: UserSpec, meta?: { roleOrgIds: string[] }) => void;
+  onUserUpdated?: (
+    user: UserReadMinimal,
+    meta?: { roleOrgIds: string[] },
+  ) => void;
 }
 
 export default function EditUserSheet({

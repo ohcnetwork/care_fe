@@ -61,7 +61,7 @@ import { ImmunizationRecommendationRead } from "@/types/emr/immunizationRecommen
 import immunizationRecommendationApi from "@/types/emr/immunizationRecommendation/immunizationRecommendationApi";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import { LocationRead } from "@/types/location/location";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { codingsLabel, doseLabel } from "./immunizationUtils";
 
@@ -102,7 +102,7 @@ function recordSchema(t: TFunction) {
       route: code.nullable(),
       site: code.nullable(),
       location: z.custom<LocationRead>().nullable(),
-      administered_by: z.custom<UserSpec>().nullable(),
+      administered_by: z.custom<UserReadMinimal>().nullable(),
       is_subpotent: z.boolean(),
       subpotent_reason: z.string(),
       note: z.string(),

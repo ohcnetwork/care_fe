@@ -7,7 +7,7 @@ import {
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationRead } from "@/types/location/location";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import {
   Beaker,
   Building,
@@ -633,7 +633,9 @@ export const careTeamFilter = (
 ) =>
   createFilterConfig(key, label ? t(label) : t("care_team"), "care_team", [], {
     renderSelected: (selected: FilterValues) => {
-      return <SelectedFacilityUserBadge selected={selected as UserSpec[]} />;
+      return (
+        <SelectedFacilityUserBadge selected={selected as UserReadMinimal[]} />
+      );
     },
     getOperations: () => [{ label: "is" }],
     mode,
@@ -652,7 +654,9 @@ export const createdByFilter = (
     [],
     {
       renderSelected: (selected: FilterValues) => {
-        return <SelectedFacilityUserBadge selected={selected as UserSpec[]} />;
+        return (
+          <SelectedFacilityUserBadge selected={selected as UserReadMinimal[]} />
+        );
       },
       getOperations: () => [{ label: "is" }],
       mode,

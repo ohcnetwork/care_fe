@@ -1,5 +1,5 @@
 import { Organization } from "@/types/organization/organization";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const WORKSPACE_AUTH_CONTEXTS = [
   "instance",
@@ -70,8 +70,8 @@ export interface WorkspaceMinimalRead extends WorkspaceBase {
 }
 
 export interface WorkspaceRead extends WorkspaceMinimalRead {
-  created_by: UserSpec | null;
-  updated_by: UserSpec | null;
+  created_by: UserReadMinimal | null;
+  updated_by: UserReadMinimal | null;
 }
 
 export interface WorkspaceCreate extends WorkspaceBase {

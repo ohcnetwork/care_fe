@@ -1,7 +1,7 @@
 import { Code } from "@/types/base/code/code";
 import { CareTeamMember, CareTeamResponse } from "@/types/careTeam/careTeam";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const REFERRAL_STATUSES = [
   "pending",
@@ -38,8 +38,8 @@ export interface ReferralAvailabilityRead {
   care_team: CareTeamResponse[];
   created_date: string;
   modified_date: string;
-  created_by: UserSpec | null;
-  updated_by: UserSpec | null;
+  created_by: UserReadMinimal | null;
+  updated_by: UserReadMinimal | null;
 }
 
 export interface ReferralAvailabilityRetrieve extends ReferralAvailabilityRead {
@@ -108,8 +108,8 @@ export interface ReferralQuestionnaireResponse {
   questionnaire_snapshot: QuestionnaireRead;
   created_date: string;
   modified_date: string;
-  created_by: UserSpec | null;
-  updated_by: UserSpec | null;
+  created_by: UserReadMinimal | null;
+  updated_by: UserReadMinimal | null;
 }
 
 export interface ReferralRead {
@@ -130,8 +130,8 @@ export interface ReferralRetrieve extends ReferralRead {
   encounter: string | null;
   thread: string | null;
   questionnaire_responses: ReferralQuestionnaireResponse[];
-  created_by: UserSpec | null;
-  updated_by: UserSpec | null;
+  created_by: UserReadMinimal | null;
+  updated_by: UserReadMinimal | null;
 }
 
 export interface ReferralUpdate {

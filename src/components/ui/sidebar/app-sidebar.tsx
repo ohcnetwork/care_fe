@@ -38,14 +38,14 @@ import { ServiceSwitcher } from "./facility/service/service-switcher";
 
 import PinPageDialog from "@/components/Common/PinPageDialog";
 import { FacilityBareMinimum } from "@/types/facility/facility";
-import { CurrentUserRetrieveSpec } from "@/types/user/user";
+import { CurrentUserRead } from "@/types/user/user";
 
 // The sidebar always carries the Care wordmark, whatever REACT_MAIN_LOGO is.
 const logoOnLight = "/images/care_logo_on_light.svg";
 const logoOnDark = "/images/care_logo_on_dark.svg";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  user?: CurrentUserRetrieveSpec;
+  user?: CurrentUserRead;
   facilitySidebar?: boolean;
   sidebarFor?: SidebarFor;
 }

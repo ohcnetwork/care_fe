@@ -44,7 +44,7 @@ import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 
@@ -64,7 +64,7 @@ interface AddMultipleChargeItemsSheetProps {
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
   charge_item_definition_object: ChargeItemDefinitionRead;
-  performer_actor_object?: UserSpec;
+  performer_actor_object?: UserReadMinimal;
 }
 
 export default function AddMultipleChargeItemsSheet({
@@ -148,7 +148,10 @@ export default function AddMultipleChargeItemsSheet({
     );
   };
 
-  const handleUpdatePerformer = (index: number, user: UserSpec | undefined) => {
+  const handleUpdatePerformer = (
+    index: number,
+    user: UserReadMinimal | undefined,
+  ) => {
     setSelectedItems(
       selectedItems.map((item, i) =>
         i === index

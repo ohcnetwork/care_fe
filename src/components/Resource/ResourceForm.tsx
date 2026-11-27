@@ -58,7 +58,7 @@ import {
   ResourceRequestStatus,
 } from "@/types/resourceRequest/resourceRequest";
 import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface ResourceProps {
   facilityId: string;
@@ -69,7 +69,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const [facilitySearch, setFacilitySearch] = useState("");
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams(resourceFormSearch);
-  const [assignedToUser, setAssignedToUser] = useState<UserSpec>();
+  const [assignedToUser, setAssignedToUser] = useState<UserReadMinimal>();
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
@@ -220,7 +220,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     value: facility.id,
   }));
 
-  const handleUserChange = (user: UserSpec) => {
+  const handleUserChange = (user: UserReadMinimal) => {
     form.setValue("assigned_to", user.id, { shouldDirty: true });
     setAssignedToUser(user);
   };

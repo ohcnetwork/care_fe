@@ -109,7 +109,7 @@ import {
   useFieldError,
   validateFields,
 } from "@/types/questionnaire/validation";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import { isPositive, round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -160,7 +160,7 @@ export function buildMedicationForTemplate(
  */
 async function fetchProductAndBuildMedication(
   med: MedicationRequestTemplateSpec,
-  currentUser: UserSpec,
+  currentUser: UserReadMinimal,
 ): Promise<MedicationRequestCreate> {
   let productKnowledge: ProductKnowledgeBase | undefined;
 
@@ -357,7 +357,7 @@ export function MedicationRequestQuestion({
   const authUser = useAuthUser();
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
-  const currentUser = useAuthUser() as UserSpec;
+  const currentUser = useAuthUser() as UserReadMinimal;
   const isPreview = patientId === "preview";
   const [{ prescription: prescriptionId }] = useQueryParams(
     questionnaireFillSearch,
@@ -788,7 +788,7 @@ export function MedicationRequestQuestion({
     );
   };
 
-  const handleApplyRequesterToAll = (user: UserSpec | undefined) => {
+  const handleApplyRequesterToAll = (user: UserReadMinimal | undefined) => {
     const newMedications = medications.map((medication) => ({
       ...medication,
       requester: user || currentUser,
@@ -1508,7 +1508,7 @@ interface MedicationRequestGridRowProps {
   onUpdate?: (medication: Partial<MedicationRequestCreate>) => void;
   onRemove?: () => void;
   onAddToTemplate?: (medication: MedicationRequestCreate) => void;
-  onCopyRequesterToAll?: (requester: UserSpec) => void;
+  onCopyRequesterToAll?: (requester: UserReadMinimal) => void;
   index: number;
   questionId: string;
   errors?: QuestionValidationError[];

@@ -1,5 +1,5 @@
 import { QuestionnaireAction } from "@/types/questionnaire/actions";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 /**
  * Action configurations — the backend's `Action` model
@@ -63,8 +63,8 @@ export interface ActionConfigurationRead extends ActionConfigurationBase {
 export interface ActionConfigurationRetrieve extends ActionConfigurationRead {
   created_date: string;
   modified_date: string;
-  created_by: UserSpec | null;
-  updated_by: UserSpec | null;
+  created_by: UserReadMinimal | null;
+  updated_by: UserReadMinimal | null;
 }
 
 /** `ActionConfigurationWriteSpec` — context and `performable` are set at

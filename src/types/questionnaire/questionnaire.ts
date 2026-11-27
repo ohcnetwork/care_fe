@@ -1,5 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { QuestionnaireAction } from "./actions";
 import { Question } from "./question";
@@ -138,8 +138,8 @@ export interface QuestionnaireRead extends Omit<QuestionnaireBase, "version"> {
   /** Not yet returned by QuestionnaireReadSpec — optional, forward-compat. */
   auth_context?: QuestionnaireAuthContext;
   internal_revision?: number;
-  created_by?: UserSpec;
-  updated_by?: UserSpec;
+  created_by?: UserReadMinimal;
+  updated_by?: UserReadMinimal;
   modified_date?: string;
 }
 

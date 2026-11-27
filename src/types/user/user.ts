@@ -33,14 +33,14 @@ export interface UserQualificationDegree {
 // Mirrors the backend's OrganizationUserExtendedReadSpec. The organization is
 // serialized with OrganizationReadSpec (no permissions/managing orgs), so the
 // lighter OrganizationParent shape is used. Keeping this shallow also matters
-// because UserSpec is embedded in many read types that end up in form values.
+// because UserReadMinimal is embedded in many read types that end up in form values.
 export interface UserRoleOrg {
   id: string;
   organization: OrganizationParent;
   role: Pick<RoleBase, "id" | "name" | "description" | "is_system">;
 }
 
-export interface UserBaseSpec {
+export interface UserBase {
   first_name: string;
   last_name: string;
   phone_number: string;
@@ -48,7 +48,7 @@ export interface UserBaseSpec {
   suffix?: string | null;
 }
 
-export interface UserSpec extends UserBaseSpec {
+export interface UserReadMinimal extends UserBase {
   id: string;
   last_login: string;
   profile_picture_url: string;
@@ -62,15 +62,15 @@ export interface UserSpec extends UserBaseSpec {
   qualification: UserQualification[];
 }
 
-export interface UserRetrieveSpec extends UserSpec {
+export interface UserRead extends UserReadMinimal {
   geo_organization?: Organization;
-  created_by?: UserSpec;
+  created_by?: UserReadMinimal;
   email: string;
   flags: string[];
   is_service_account: boolean;
 }
 
-export interface CurrentUserRetrieveSpec extends UserRetrieveSpec, Permissions {
+export interface CurrentUserRead extends UserRead, Permissions {
   alt_phone_number?: string;
   date_of_birth?: string;
   is_superuser: boolean;
@@ -82,7 +82,7 @@ export interface CurrentUserRetrieveSpec extends UserRetrieveSpec, Permissions {
   preferences: Record<string, unknown>;
 }
 
-export interface PublicUserReadSpec extends UserBaseSpec {
+export interface PublicUserRead extends UserBase {
   id: string;
   last_login: string;
   profile_picture_url: string;
@@ -91,7 +91,7 @@ export interface PublicUserReadSpec extends UserBaseSpec {
   role_orgs?: UserRoleOrg[];
 }
 
-export interface UserUpdateSpec extends UserBaseSpec {
+export interface UserUpdate extends UserBase {
   gender: (typeof GENDER_TYPES)[number]["id"];
   phone_number: string;
   geo_organization?: string;
@@ -99,7 +99,7 @@ export interface UserUpdateSpec extends UserBaseSpec {
   qualification?: UserQualification[];
 }
 
-export interface UserCreateSpec extends UserUpdateSpec {
+export interface UserCreate extends UserUpdate {
   username: string;
   password?: string;
   email: string;

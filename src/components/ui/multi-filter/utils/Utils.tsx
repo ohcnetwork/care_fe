@@ -16,7 +16,7 @@ import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationRead } from "@/types/location/location";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 // Generic color palette for cycling through options
 export const COLOR_PALETTE = [
@@ -51,7 +51,7 @@ export type FilterValues =
   | FacilityOrganizationRead[]
   | LocationRead[]
   | ActivityDefinitionFilterValue[]
-  | UserSpec[];
+  | UserReadMinimal[];
 
 export type FilterMode = "single" | "multi";
 

@@ -31,7 +31,7 @@ import {
   getRoleContextForOrganizationType,
 } from "@/types/emr/role/role";
 import organizationApi from "@/types/organization/organizationApi";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
 interface Props {
@@ -51,7 +51,7 @@ export default function LinkUserSheet({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [selectedUser, setSelectedUser] = useState<UserSpec>();
+  const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
   const [selectedRole, setSelectedRole] = useState<RoleBase>();
 
   const { data: preSelectedUser } = useQuery({
@@ -105,7 +105,7 @@ export default function LinkUserSheet({
     });
   };
 
-  const handleUserChange = (value: UserSpec) => {
+  const handleUserChange = (value: UserReadMinimal) => {
     setSelectedUser(value);
     setSelectedRole(undefined);
   };

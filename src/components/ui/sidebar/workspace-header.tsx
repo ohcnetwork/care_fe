@@ -15,12 +15,12 @@ import { AppSidebarToggle } from "@/components/ui/sidebar/sidebar-toggle";
 
 import { useRouteParams } from "@/hooks/useRouteParams";
 
-import { CurrentUserRetrieveSpec } from "@/types/user/user";
+import { CurrentUserRead } from "@/types/user/user";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface WorkspaceHeaderProps {
-  user?: CurrentUserRetrieveSpec;
+  user?: CurrentUserRead;
   patient?: boolean;
   onSearch?: () => void;
 }

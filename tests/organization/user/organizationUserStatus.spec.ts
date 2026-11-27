@@ -6,8 +6,8 @@ import type {
   OrganizationUserRole,
 } from "../../../src/types/organization/organization";
 import type {
-  CurrentUserRetrieveSpec,
-  UserSpec,
+  CurrentUserRead,
+  UserReadMinimal,
 } from "../../../src/types/user/user";
 
 // Isolated API fixtures, not a live backend. Organization user lists are
@@ -15,7 +15,7 @@ import type {
 // not include `is_service_account`, so the status badge must not depend on it.
 test.use({ storageState: { cookies: [], origins: [] } });
 
-function listUser(overrides: Partial<UserSpec> = {}): UserSpec {
+function listUser(overrides: Partial<UserReadMinimal> = {}): UserReadMinimal {
   return {
     id: faker.string.uuid(),
     username: `user-${faker.string.alphanumeric(8).toLowerCase()}`,
@@ -34,7 +34,7 @@ function listUser(overrides: Partial<UserSpec> = {}): UserSpec {
   };
 }
 
-function userRole(user: UserSpec): OrganizationUserRole {
+function userRole(user: UserReadMinimal): OrganizationUserRole {
   return {
     id: faker.string.uuid(),
     user,
@@ -49,7 +49,7 @@ function userRole(user: UserSpec): OrganizationUserRole {
   };
 }
 
-const userRow = (page: Page, user: UserSpec) =>
+const userRow = (page: Page, user: UserReadMinimal) =>
   page.getByRole("row").filter({ hasText: `@${user.username}` });
 
 test.describe("Organization user status badge", () => {
@@ -70,7 +70,7 @@ test.describe("Organization user status badge", () => {
   const activeUser = listUser({ last_login: new Date().toISOString() });
 
   test.beforeEach(async ({ page }) => {
-    const currentUser: CurrentUserRetrieveSpec = {
+    const currentUser: CurrentUserRead = {
       ...listUser({ username: "org-status-admin" }),
       email: "",
       flags: [],

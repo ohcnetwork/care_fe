@@ -13,12 +13,15 @@ import {
 
 import UserForm from "@/components/Users/UserForm";
 
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface AddUserSheetProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  onUserCreated?: (user: UserSpec, meta?: { roleOrgIds: string[] }) => void;
+  onUserCreated?: (
+    user: UserReadMinimal,
+    meta?: { roleOrgIds: string[] },
+  ) => void;
   organizationId?: string;
   isServiceAccount?: boolean;
 }

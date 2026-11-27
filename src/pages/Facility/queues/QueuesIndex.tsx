@@ -49,7 +49,7 @@ import {
   TokenSubQueueStatus,
 } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import mutate from "@/Utils/request/mutate";
@@ -281,7 +281,7 @@ export default function QueuesIndex({
   };
 
   // Handle resource selection
-  const handleResourceChange = (users: UserSpec[]) => {
+  const handleResourceChange = (users: UserReadMinimal[]) => {
     const userId = users[0]?.id;
     updateQuery({ resource_id: userId });
     if (resourceType === SchedulableResourceType.Practitioner && userId) {

@@ -3,7 +3,7 @@ import { type ReactNode, type Ref } from "react";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationRead } from "@/types/location/location";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import RenderFacilityUserFilter from "@/components/ui/multi-filter/facilityUserFilter";
 import RenderActivityDefinitionFilter, {
@@ -145,7 +145,7 @@ export default function FilterRenderer({
         <>
           <RenderFacilityUserFilter
             {...commonProps}
-            selectedUsers={selected as UserSpec[]}
+            selectedUsers={selected as UserReadMinimal[]}
           />
           {footer()}
         </>

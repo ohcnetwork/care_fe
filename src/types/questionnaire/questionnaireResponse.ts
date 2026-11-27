@@ -1,4 +1,4 @@
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { QuestionnaireResponse as Response } from "./form";
 import { QuestionnaireRead } from "./questionnaire";
@@ -27,8 +27,8 @@ export interface QuestionnaireResponse {
     StructuredQuestionType,
     StructuredResponseValue
   >;
-  created_by: UserSpec;
-  updated_by: UserSpec;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }
 
 export interface QuestionnaireResponseUpdate {

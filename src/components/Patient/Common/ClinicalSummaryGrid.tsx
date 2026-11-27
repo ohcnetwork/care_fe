@@ -16,7 +16,7 @@ import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import { BadgeButtonDropdownTrigger } from "@/components/Patient/Common/ClinicalInformationRow";
 
 import { formatName } from "@/Utils/utils";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export interface ClinicalSummaryItem {
   id: string;
@@ -26,7 +26,7 @@ export interface ClinicalSummaryItem {
   /** Resolved or inactive entries recede so active problems lead. */
   dimmed?: boolean;
   note?: string;
-  createdBy: UserSpec;
+  createdBy: UserReadMinimal;
   onViewEncounter?: () => void;
 }
 

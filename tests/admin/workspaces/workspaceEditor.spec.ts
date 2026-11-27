@@ -5,7 +5,7 @@ import {
   selectDepartment,
 } from "tests/helper/departmentSelect";
 
-import type { UserSpec } from "../../../src/types/user/user";
+import type { UserReadMinimal } from "../../../src/types/user/user";
 import type {
   WorkspaceAuthContext,
   WorkspaceCreate,
@@ -57,7 +57,7 @@ function workspace(
   };
 }
 
-function workspaceUser(id = faker.string.uuid()): UserSpec {
+function workspaceUser(id = faker.string.uuid()): UserReadMinimal {
   return {
     id,
     username: `workspace-user-${faker.string.alphanumeric(6)}`,

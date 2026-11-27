@@ -1,7 +1,7 @@
-import { UserRetrieveSpec } from "@/types/user/user";
+import { UserRead } from "@/types/user/user";
 
 export type userChildProps = {
-  userData: UserRetrieveSpec;
+  userData: UserRead;
   username: string;
   permissions?: string[];
 };

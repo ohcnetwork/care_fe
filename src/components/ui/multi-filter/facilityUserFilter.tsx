@@ -9,7 +9,7 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import useAuthUser from "@/hooks/useAuthUser";
 import facilityApi from "@/types/facility/facilityApi";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { FilterChoiceItem } from "./filterChoiceItem";
 import FilterHeader from "./filterHeader";
@@ -27,8 +27,8 @@ function FacilityUserFilterDropdown({
   facilityId,
   onBack,
 }: {
-  selectedUsers: UserSpec[];
-  onUsersChange: (users: UserSpec[]) => void;
+  selectedUsers: UserReadMinimal[];
+  onUsersChange: (users: UserReadMinimal[]) => void;
   facilityId: string;
   onBack?: () => void;
 }) {
@@ -67,7 +67,7 @@ function FacilityUserFilterDropdown({
       return formatName(a).localeCompare(formatName(b));
     });
 
-  const renderUser = (user: UserSpec, mine = false) => (
+  const renderUser = (user: UserReadMinimal, mine = false) => (
     <FilterChoiceItem
       key={user.id}
       checked={selectedUserIds.has(user.id)}
@@ -152,10 +152,10 @@ export default function RenderFacilityUserFilter({
   facilityId,
 }: {
   filter: FilterConfig;
-  selectedUsers: UserSpec[];
+  selectedUsers: UserReadMinimal[];
   onFilterChange: (
     filterKey: string,
-    values: string[] | UserSpec[] | FilterDateRange,
+    values: string[] | UserReadMinimal[] | FilterDateRange,
   ) => void;
   handleBack?: () => void;
   handleClose?: () => void;
@@ -198,7 +198,7 @@ export default function RenderFacilityUserFilter({
 export const SelectedFacilityUserBadge = ({
   selected,
 }: {
-  selected: UserSpec[];
+  selected: UserReadMinimal[];
 }) => {
   if (selected.length === 0) return null;
 

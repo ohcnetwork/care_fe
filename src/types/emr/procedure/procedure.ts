@@ -1,5 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 /** Historical statuses only — the backend rejects workflow statuses. */
 export const PROCEDURE_STATUS = [
@@ -47,8 +47,8 @@ export interface Procedure {
   outcome?: ProcedureOutcome | null;
   note?: string | null;
   encounter: string;
-  created_by?: UserSpec | null;
-  updated_by?: UserSpec | null;
+  created_by?: UserReadMinimal | null;
+  updated_by?: UserReadMinimal | null;
   created_date: string;
   modified_date: string;
 }
@@ -66,7 +66,7 @@ export interface ProcedureRequest {
   note?: string | null;
   encounter: string;
   created_date?: string;
-  created_by?: UserSpec | null;
+  created_by?: UserReadMinimal | null;
   /** Set on rows added or edited in this session; only these are saved. */
   dirty?: boolean;
 }

@@ -13,7 +13,7 @@ applyTo: "src/Providers/**/*.{ts,tsx}"
 ```typescript
 // Healthcare role-based provider example
 export const AuthUserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<CurrentUserRetrieveSpec | null>(null);
+  const [user, setUser] = useState<UserRead | null>(null);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   
   return (

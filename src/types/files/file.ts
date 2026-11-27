@@ -1,4 +1,4 @@
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum FileCategory {
   UNSPECIFIED = "unspecified",
@@ -50,13 +50,13 @@ export interface FileUpdate {
 
 export interface FileReadMinimal extends FileBase {
   id: string;
-  archived_by: UserSpec;
+  archived_by: UserReadMinimal;
   archived_datetime: string;
   upload_completed: boolean;
   is_archived?: boolean;
   archive_reason?: string;
   created_date: string;
-  uploaded_by: UserSpec;
+  uploaded_by: UserReadMinimal;
   extension: string;
 }
 

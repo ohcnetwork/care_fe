@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import type { PlugConfig } from "../../../../src/types/plugConfig";
 import type { Question } from "../../../../src/types/questionnaire/question";
-import type { UserSpec } from "../../../../src/types/user/user";
+import type { UserReadMinimal } from "../../../../src/types/user/user";
 import type {
   WorkspaceRead,
   WorkspaceTemplate,
@@ -66,7 +66,7 @@ function roundsTemplate(
   };
 }
 
-function user(): UserSpec {
+function user(): UserReadMinimal {
   return {
     id: faker.string.uuid(),
     username: faker.internet.username(),

@@ -32,7 +32,7 @@ import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { PatientProps } from ".";
 
@@ -44,7 +44,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserSpec>();
+  const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
   const [selectedRole, setSelectedRole] = useState<RoleBase>();
 
   const { mutate: assignUser } = useMutation({
@@ -76,7 +76,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
     });
   };
 
-  const handleUserChange = (user: UserSpec) => {
+  const handleUserChange = (user: UserReadMinimal) => {
     setSelectedUser(user);
     setSelectedRole(undefined);
   };
@@ -178,7 +178,9 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
 export const PatientUsers = ({ patientData }: PatientProps) => {
   const patientId = patientData.id;
-  const [userToRemove, setUserToRemove] = useState<UserSpec | null>(null);
+  const [userToRemove, setUserToRemove] = useState<UserReadMinimal | null>(
+    null,
+  );
 
   const { t } = useTranslation();
   const queryClient = useQueryClient();

@@ -1,6 +1,6 @@
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import { valuesOf } from "@/Utils/utils";
 
 export enum ResourceRequestStatus {
@@ -79,9 +79,9 @@ export interface ResourceRequestListRead extends ResourceRequestBase {
 export interface ResourceRequestRead extends ResourceRequestListRead {
   approving_facility: FacilityRead | null;
   related_patient: PatientRead | null;
-  assigned_to: UserSpec | null;
-  created_by: UserSpec | null;
-  updated_by: UserSpec | null;
+  assigned_to: UserReadMinimal | null;
+  created_by: UserReadMinimal | null;
+  updated_by: UserReadMinimal | null;
 }
 
 export interface ResourceRequestCreate extends ResourceRequestBase {
@@ -98,7 +98,7 @@ export interface CommentCreate {
 
 export interface CommentRead {
   id: string;
-  created_by: UserSpec;
+  created_by: UserReadMinimal;
   created_date: string;
   comment: string;
 }

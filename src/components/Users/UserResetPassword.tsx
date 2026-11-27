@@ -24,12 +24,12 @@ import { UpdatePasswordForm } from "@/components/Users/models";
 
 import mutate from "@/Utils/request/mutate";
 import authApi from "@/types/auth/authApi";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export default function UserResetPassword({
   userData,
 }: {
-  userData: UserSpec;
+  userData: UserReadMinimal;
 }) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);

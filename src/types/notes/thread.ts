@@ -1,4 +1,4 @@
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export interface ThreadBase {
   title: string;
@@ -12,8 +12,8 @@ export interface ThreadRead extends ThreadBase {
   id: string;
   created_date: string;
   modified_date: string;
-  created_by: UserSpec;
-  updated_by: UserSpec;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }
 
 export const threadTemplates = [

@@ -87,7 +87,7 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
 import {
   dateQueryString,
@@ -566,7 +566,7 @@ export function EncounterList({
       {
         path: "/api/v1/users/{username}/",
         method: "GET",
-        TRes: {} as UserSpec,
+        TRes: {} as UserReadMinimal,
       },
       {
         pathParams: { username: care_team_user },
@@ -618,7 +618,8 @@ export function EncounterList({
               (value as FacilityOrganizationRead) || undefined;
             break;
           case "care_team":
-            updates.selectedCareTeamMember = (value as UserSpec) || undefined;
+            updates.selectedCareTeamMember =
+              (value as UserReadMinimal) || undefined;
             break;
           case "created_date":
             if (
@@ -662,7 +663,7 @@ export function EncounterList({
           break;
         case "care_team":
           filterQuery.care_team_user =
-            (value as UserSpec)?.username || undefined;
+            (value as UserReadMinimal)?.username || undefined;
           filterQuery.care_team = undefined;
           break;
         case "created_date":

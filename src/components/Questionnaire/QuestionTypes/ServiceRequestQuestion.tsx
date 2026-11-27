@@ -58,7 +58,7 @@ import {
   QuestionnaireResponseTemplateReadSpec,
 } from "@/types/questionnaire/questionnaireResponseTemplate";
 import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
-import { CurrentUserRetrieveSpec, UserSpec } from "@/types/user/user";
+import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 import { Decimal } from "decimal.js";
 
 import { AddToTemplateDialog } from "@/components/Questionnaire/AddToTemplateDialog";
@@ -86,7 +86,7 @@ export function buildServiceRequestForTemplate(
   };
 }
 
-// Extend the base type to use UserSpec for requester
+// Extend the base type to use UserReadMinimal for requester
 interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
   BaseServiceRequestApplyActivityDefinitionSpec,
   "service_request"
@@ -95,7 +95,7 @@ interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
     BaseServiceRequestApplyActivityDefinitionSpec["service_request"],
     "requester"
   > & {
-    requester: UserSpec;
+    requester: UserReadMinimal;
   };
 }
 
@@ -178,8 +178,8 @@ interface ServiceRequestFormProps {
   index?: number;
   activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
-  requester?: UserSpec;
-  onRequesterChange?: (user: UserSpec | undefined) => void;
+  requester?: UserReadMinimal;
+  onRequesterChange?: (user: UserReadMinimal | undefined) => void;
 }
 
 function ServiceRequestForm({
@@ -429,7 +429,7 @@ export function ServiceRequestQuestion({
   questionnaireSlug,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
-  const currentUser = useAuthUser() as CurrentUserRetrieveSpec;
+  const currentUser = useAuthUser() as CurrentUserRead;
   const [selectedActivityDefinition, setSelectedActivityDefinition] = useState<
     string | null
   >(null);
@@ -589,11 +589,14 @@ export function ServiceRequestQuestion({
     });
   };
 
-  const handleRequesterChange = (index: number, user: UserSpec | undefined) => {
+  const handleRequesterChange = (
+    index: number,
+    user: UserReadMinimal | undefined,
+  ) => {
     handleUpdateServiceRequest(index, { requester: user || currentUser });
   };
 
-  const handleApplyRequesterToAll = (user: UserSpec | undefined) => {
+  const handleApplyRequesterToAll = (user: UserReadMinimal | undefined) => {
     const newServiceRequests = serviceRequests.map((sr) => ({
       ...sr,
       service_request: {

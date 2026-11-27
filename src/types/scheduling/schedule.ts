@@ -22,7 +22,7 @@ import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareS
 import { LocationRead } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
 import { TokenRead } from "@/types/tokens/token/token";
-import { PublicUserReadSpec, UserSpec } from "@/types/user/user";
+import { PublicUserRead, UserReadMinimal } from "@/types/user/user";
 
 export enum AvailabilitySlotType {
   Appointment = "appointment",
@@ -67,8 +67,8 @@ export interface ScheduleTemplate extends ScheduleEncounterDefaults {
   valid_from: string;
   valid_to: string;
   availabilities: ScheduleAvailability[];
-  created_by: UserSpec;
-  updated_by: UserSpec;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   charge_item_definition: ChargeItemDefinitionRead;
   revisit_charge_item_definition: ChargeItemDefinitionRead;
   revisit_allowed_days: number;
@@ -236,7 +236,7 @@ type LocationResource = {
 };
 
 type UserResource = {
-  resource: UserSpec;
+  resource: UserReadMinimal;
   resource_type: SchedulableResourceType.Practitioner;
 };
 
@@ -256,7 +256,7 @@ export type AppointmentBase = {
   note: string;
   facility: FacilityBareMinimum;
   token: TokenRead | null;
-  booked_by: UserSpec | null; // This is null if the appointment was booked by the patient itself.
+  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
 } & ScheduleResource;
 
 export type Appointment = AppointmentBase & {
@@ -270,8 +270,8 @@ export type PublicAppointment = AppointmentBase & {
 export type AppointmentRead = Appointment & {
   patient: PatientRead;
   tags: TagConfig[];
-  updated_by: UserSpec | null;
-  created_by: UserSpec;
+  updated_by: UserReadMinimal | null;
+  created_by: UserReadMinimal;
   modified_date: string;
   associated_encounter?: EncounterListRead;
 };
@@ -310,11 +310,11 @@ export interface AppointmentRescheduleRequest {
   tags: TagSetRequest[];
 }
 
-export const getUserFromLocalStorage = (): PublicUserReadSpec => {
+export const getUserFromLocalStorage = (): PublicUserRead => {
   return JSON.parse(localStorage.getItem("user") ?? "{}");
 };
 
-export const storeUserInLocalStorage = (user: PublicUserReadSpec) => {
+export const storeUserInLocalStorage = (user: PublicUserRead) => {
   localStorage.setItem("user", JSON.stringify(user));
 };
 

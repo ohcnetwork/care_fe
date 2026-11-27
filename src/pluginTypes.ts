@@ -15,7 +15,7 @@ import {
 } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { PlugConfigMeta } from "@/types/plugConfig";
-import { UserRetrieveSpec, UserSpec } from "@/types/user/user";
+import { UserRead, UserReadMinimal } from "@/types/user/user";
 import type { JSONSchema2020 } from "@/Utils/schema/types";
 import { ComponentType, LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
@@ -41,7 +41,7 @@ export type AppRoutes = {
 };
 
 export type DoctorConnectButtonComponentType = React.FC<{
-  user: UserSpec;
+  user: UserReadMinimal;
 }>;
 
 /**
@@ -164,7 +164,7 @@ export type SupplyDeliveryFormActionsComponentType = React.FC<{
 }>;
 
 export type UserProfileSectionsComponentType = React.FC<{
-  user: UserRetrieveSpec;
+  user: UserRead;
   isOwnProfile: boolean;
   className?: string;
 }>;

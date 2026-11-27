@@ -34,7 +34,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { navigate } from "@/lib/router/navigate";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 import AddUserSheet from "./components/AddUserSheet";
 import EditUserRoleSheet from "./components/EditUserRoleSheet";
@@ -54,7 +54,7 @@ function UserStatusBadge({
   user,
   isServiceAccount,
 }: {
-  user: UserSpec;
+  user: UserReadMinimal;
   isServiceAccount: boolean;
 }) {
   const { t } = useTranslation();

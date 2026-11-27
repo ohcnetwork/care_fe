@@ -9,7 +9,7 @@ import {
 import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
 import { TokenQueueRead } from "@/types/tokens/tokenQueue/tokenQueue";
 import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum TokenStatus {
   UNFULFILLED = "UNFULFILLED",
@@ -103,8 +103,8 @@ export interface TokenRead extends Token {
 }
 
 export type TokenRetrieve = TokenRead & {
-  created_by: UserSpec;
-  updated_by: UserSpec;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   booking?: Appointment;
   encounter?: EncounterListRead;
 } & ScheduleResource;

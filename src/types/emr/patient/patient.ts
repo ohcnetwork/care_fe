@@ -5,7 +5,7 @@ import {
   PatientIdentifier,
   PatientIdentifierUse,
 } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum BloodGroupChoices {
   A_negative = "A_negative",
@@ -50,8 +50,8 @@ export interface PatientListRead extends PatientBase {
 
 export interface PatientRead extends PatientListRead, Permissions {
   geo_organization?: Organization;
-  created_by?: UserSpec;
-  updated_by?: UserSpec;
+  created_by?: UserReadMinimal;
+  updated_by?: UserReadMinimal;
   instance_identifiers: PatientIdentifier[];
   facility_identifiers: PatientIdentifier[];
   extensions?: Record<string, Record<string, unknown>>;

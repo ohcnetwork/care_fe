@@ -3,14 +3,14 @@ import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export interface EncounterHistoryFilters {
   status?: string;
   selectedTags: TagConfig[];
   tagsBehavior: string;
   selectedOrg?: FacilityOrganizationRead;
-  selectedCareTeamMember?: UserSpec;
+  selectedCareTeamMember?: UserReadMinimal;
   dateFrom?: string; // ISO string for serialization
   dateTo?: string; // ISO string for serialization
 }
@@ -45,7 +45,7 @@ export interface EncounterListFilters {
   selectedTags: TagConfig[];
   tagsBehavior: string;
   selectedOrg?: FacilityOrganizationRead;
-  selectedCareTeamMember?: UserSpec;
+  selectedCareTeamMember?: UserReadMinimal;
   dateFrom?: string; // ISO string for serialization
   dateTo?: string; // ISO string for serialization
 }

@@ -52,7 +52,7 @@ import {
   DispenseOrderStatus,
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export default function MedicationDispenseHistory({
   facilityId,
@@ -85,7 +85,7 @@ export default function MedicationDispenseHistory({
       switch (key) {
         case "created_by":
           {
-            const userValue = value as UserSpec | UserSpec[];
+            const userValue = value as UserReadMinimal | UserReadMinimal[];
             const user = Array.isArray(userValue) ? userValue[0] : userValue;
             query = {
               ...query,

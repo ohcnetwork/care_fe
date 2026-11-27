@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { BatchSuccessResponse } from "@/types/base/batch/batch";
 import { PatientListRead, PatientRead } from "@/types/emr/patient/patient";
 import { LocationRead } from "@/types/location/location";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export interface DispenseOrderBatchResponse {
   results: BatchSuccessResponse<{ order: DispenseOrderRead }>[];
@@ -34,8 +34,8 @@ export interface DispenseOrderBase {
 export interface DispenseOrderRead extends DispenseOrderBase {
   patient: PatientRead;
   location: LocationRead;
-  created_by: UserSpec | null;
-  updated_by: UserSpec | null;
+  created_by: UserReadMinimal | null;
+  updated_by: UserReadMinimal | null;
   created_date: string;
   modified_date: string;
 }

@@ -56,7 +56,7 @@ import {
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
@@ -173,7 +173,8 @@ function ChargeItemsTable({
           query.service_resource = (value as string[])?.join(",");
           break;
         case "created_by": {
-          const createdByValue = value as UserSpec | UserSpec[] | undefined;
+          const createdByValue = value as
+            UserReadMinimal | UserReadMinimal[] | undefined;
           const user = Array.isArray(createdByValue)
             ? createdByValue[0]
             : createdByValue;

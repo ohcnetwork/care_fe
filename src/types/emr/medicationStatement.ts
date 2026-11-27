@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { Code } from "@/types/base/code/code";
 import { Period } from "@/types/questionnaire/base";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum MedicationStatementInformationSourceType {
   PATIENT = "patient",
@@ -65,7 +65,7 @@ export type MedicationStatementRequest = {
   effective_period?: Period;
   information_source: MedicationStatementInformationSourceType;
   note?: string;
-  created_by?: UserSpec;
+  created_by?: UserReadMinimal;
 };
 
 export type MedicationStatementRead = {
@@ -80,6 +80,6 @@ export type MedicationStatementRead = {
   note?: string;
   created_date: string;
   modified_date: string;
-  created_by: UserSpec;
-  updated_by: UserSpec;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 };

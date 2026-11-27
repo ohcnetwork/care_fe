@@ -1,5 +1,5 @@
 import { FileRead } from "@/types/files/file";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const CONSENT_CATEGORIES = [
   "research",
@@ -37,7 +37,7 @@ export interface ConsentPeriod {
 
 export interface ConsentVerification {
   verified: boolean;
-  verified_by: UserSpec;
+  verified_by: UserReadMinimal;
   verification_date: string;
   verification_type: VerificationType;
 }

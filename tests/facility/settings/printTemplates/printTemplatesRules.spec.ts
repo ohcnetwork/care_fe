@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import type { FacilityRead } from "@/types/facility/facility";
 import type { PrintTemplate } from "@/types/facility/printTemplate";
-import type { CurrentUserRetrieveSpec } from "@/types/user/user";
+import type { CurrentUserRead } from "@/types/user/user";
 
 // These tests use isolated API fixtures, so they can start from any saved
 // print templates (including legacy data the page can no longer create) and
@@ -45,7 +45,7 @@ async function choose(page: Page, select: Locator, option: string) {
 
 test.describe("Print templates (isolated API)", () => {
   let facility: FacilityRead;
-  let user: CurrentUserRetrieveSpec;
+  let user: CurrentUserRead;
   let saved: PrintTemplate[][];
   let holdUpdate: Promise<void>;
   let failUpdate: string | undefined;

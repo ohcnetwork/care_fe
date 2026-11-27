@@ -2,7 +2,7 @@ import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryCompon
 import { AccountRead } from "@/types/billing/account/Account";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { PaymentReconciliationRead } from "@/types/billing/paymentReconciliation/paymentReconciliation";
-import { UserSpec } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum InvoiceStatus {
   draft = "draft",
@@ -53,8 +53,8 @@ export interface InvoiceRead extends InvoiceList {
   charge_items: ChargeItemRead[];
   total_price_components: MonetaryComponent[];
   payment_reconciliations?: PaymentReconciliationRead[];
-  created_by: UserSpec;
-  updated_by: UserSpec;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   payments: PaymentReconciliationRead[];
   total_payments: string;
   credit_notes: PaymentReconciliationRead[];
