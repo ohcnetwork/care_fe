@@ -721,6 +721,9 @@ function RangePanel({
                 !!preview && day >= preview.from && day <= preview.to,
             }}
             modifiersClassNames={{ preview: "bg-primary/10" }}
+            // Outlined, as the month view marks the current month; the
+            // calendar's muted fill alone reads like hover.
+            todayClassName="[&>button]:font-semibold [&>button]:ring-1 [&>button]:ring-primary [&>button]:ring-inset [&:not([data-selected])>button]:bg-transparent [&:not([data-selected])>button]:text-primary"
           />
         )}
       </div>
