@@ -1,3 +1,4 @@
+import { validatePhoneNumberLength } from "libphonenumber-js";
 import {
   Country,
   isValidPhoneNumber,
@@ -64,6 +65,21 @@ export function parseFieldPrefix(
 /** Digits, with the spaces, dashes and leading `+` of a typed number. */
 export const isNumericText = (text: string) =>
   /^\+?[\d\s()-]+$/.test(text) && /\d/.test(text);
+
+/** Drops what a phone number never holds, keeping digits, `+`, spaces, `()-`. */
+export const sanitizePhoneInput = (text: string) =>
+  text.replace(/[^\d\s()+-]/g, "");
+
+/** Whether `text` has more digits than any number of `country` has. */
+export function isPhoneTooLong(text: string, country: Country): boolean {
+  const trimmed = text.trim();
+  if (!isNumericText(trimmed)) return false;
+  try {
+    return validatePhoneNumberLength(trimmed, country) === "TOO_LONG";
+  } catch {
+    return false;
+  }
+}
 
 const fullMatch = (regex: string) => {
   try {

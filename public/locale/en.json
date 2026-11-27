@@ -1724,6 +1724,7 @@
   "encounter_search_group_visits": "Filter visits",
   "encounter_search_hint_identifier": "Enter a complete {{identifier}}",
   "encounter_search_hint_phone": "Enter the full phone number",
+  "encounter_search_hint_phone_too_long": "Too many digits for a {{country}} number",
   "encounter_search_identifier_row": "{{identifier}} <strong>{{term}}</strong>",
   "encounter_search_label": "Search visits",
   "encounter_search_look_up_patient_by": "Look up a patient by",

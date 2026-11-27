@@ -1244,15 +1244,81 @@ test.describe("All encounters search", () => {
     ).toBeVisible();
     await expect(searchBox(page)).toBeFocused();
 
+    // The phone field was picked, so a valid number is looked up as typed.
     await searchBox(page).pressSequentially("07400 123456", { delay: 50 });
-    await expect(page.getByRole("option")).toContainText(
-      /phone number \+44 7400 123456/i,
-    );
-    await searchBox(page).press("Enter");
     await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
     expect(lookups).toEqual([
       { config: phoneConfig.id, value: "+447400123456", page_size: 20 },
     ]);
+  });
+
+  test("a picked phone field looks up a valid number without a confirming click", async ({
+    page,
+  }) => {
+    const lookups = trackPatientLookups(page);
+    await page.goto(listUrl());
+    await searchBox(page).pressSequentially("phone:", { delay: 50 });
+    await searchBox(page).pressSequentially("98765", { delay: 50 });
+    // Still incomplete: a hint, and no search.
+    await expect(page.getByRole("option")).toContainText(
+      "Enter the full phone number",
+    );
+    expect(lookups).toHaveLength(0);
+
+    await searchBox(page).pressSequentially("43210", { delay: 50 });
+    await page.getByRole("option", { name: fullPatient.name }).click();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("patient_filter") === fullPatient.id,
+    );
+    expect(lookups).toEqual([
+      { config: phoneConfig.id, value: "+919876543210", page_size: 20 },
+    ]);
+  });
+
+  test("a phone field keeps only phone characters and flags a too long number", async ({
+    page,
+  }) => {
+    await page.goto(listUrl());
+    await searchBox(page).pressSequentially("phone:", { delay: 50 });
+    await searchBox(page).pressSequentially("98a76b5", { delay: 50 });
+    await expect(searchBox(page)).toHaveValue("98765");
+
+    await searchBox(page).fill("");
+    await searchBox(page).pressSequentially("98765432101234", { delay: 20 });
+    await expect(searchBox(page)).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByRole("option")).toContainText(
+      "Too many digits for a India number",
+    );
+  });
+
+  test("keeps the picked field and country for the next visit", async ({
+    page,
+  }) => {
+    await page.goto(listUrl());
+    await searchBox(page).pressSequentially("phone:", { delay: 50 });
+    await page
+      .getByRole("button", { name: "Phone country: India (+91)" })
+      .click();
+    await page.getByPlaceholder("Search country...").fill("United Kingdom");
+    await page.getByRole("option", { name: /united kingdom \+44/i }).click();
+
+    await page.reload();
+    await expect(
+      page.getByRole("button", { name: "Phone country: United Kingdom (+44)" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("combobox", { name: /^search field$/i }),
+    ).toContainText(/phone/i);
+
+    // Applying a patient keeps them too.
+    await searchBox(page).pressSequentially("07400123456", { delay: 50 });
+    await page.getByRole("option", { name: fullPatient.name }).click();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("patient_filter") === fullPatient.id,
+    );
+    await expect(
+      page.getByRole("button", { name: "Phone country: United Kingdom (+44)" }),
+    ).toBeVisible();
   });
 
   test("looks up a complete phone on Enter, and Undo restores the dates", async ({

@@ -1,6 +1,7 @@
 import { Combobox as ComboboxPrimitive } from "@base-ui/react";
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 import { useQuery } from "@tanstack/react-query";
+import { useAtom } from "jotai";
 import { ArrowLeft, ChevronDown, QrCode, Search, X } from "lucide-react";
 import { useId, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -43,6 +44,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 import { cn } from "@/lib/utils";
 
+import { encounterSearchPreferenceAtom } from "@/atoms/encounterSearchAtom";
 import PatientIDScanDialog from "@/components/Scan/PatientIDScanDialog";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -51,7 +53,6 @@ import { PartialPatientModel, PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
-import careConfig from "@careConfig";
 
 import { AppliedSearch, EncounterSearchChips } from "./EncounterSearchChips";
 import {
@@ -61,7 +62,9 @@ import {
   identifierField,
   isNumericText,
   isPhoneConfig,
+  isPhoneTooLong,
   parseFieldPrefix,
+  sanitizePhoneInput,
   scannedPatientId,
   SearchField,
 } from "./encounterSearchFields";
@@ -137,11 +140,13 @@ export function EncounterSearch({
 }: EncounterSearchProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
-  const [field, setField] = useState<SearchField>("auto");
-  // Phone numbers without a `+` code are read in this country.
-  const [country, setCountry] = useState<Country>(
-    careConfig.defaultCountry.code,
-  );
+  // The field and phone country last picked stay for the next visit.
+  const [preference, setPreference] = useAtom(encounterSearchPreferenceAtom);
+  const { country } = preference;
+  const setField = (next: SearchField) =>
+    setPreference((prev) => ({ ...prev, field: next }));
+  const setCountry = (next: Country) =>
+    setPreference((prev) => ({ ...prev, country: next }));
   const [draft, setDraft] = useState("");
   const [open, setOpen] = useState(false);
   const [lookup, setLookup] = useState<Lookup | null>(null);
@@ -161,6 +166,13 @@ export function EncounterSearch({
     ],
     [facility],
   );
+  // A stored identifier the facility no longer has falls back to Auto, without
+  // forgetting it while the facility's configs are still loading.
+  const field: SearchField =
+    preference.field.startsWith("identifier:") &&
+    !configOfField(preference.field, configs)
+      ? "auto"
+      : preference.field;
   const fieldConfig = configOfField(field, configs);
   const fieldLabel =
     field === "name"
@@ -178,6 +190,11 @@ export function EncounterSearch({
   const shownCountry =
     (term.startsWith("+") && parsePhoneNumber(term)?.country) || country;
   const popupOpen = open && (!!term || !!lookup);
+  // A number too long for its country can't become valid by typing more.
+  const phoneTooLong =
+    !!fieldConfig &&
+    isPhoneConfig(fieldConfig) &&
+    isPhoneTooLong(term, shownCountry);
 
   // Counts preview each visit filter with the applied filters; they have
   // their own keys, so they never change the list.
@@ -220,14 +237,33 @@ export function EncounterSearch({
     enabled: !!lookup,
   });
 
+  // A picked field and country are kept: only the draft is cleared.
   const reset = () => {
     setDraft("");
-    setField("auto");
-    setCountry(careConfig.defaultCountry.code);
     setOpen(false);
     setLookup(null);
     setPending(null);
     scanner.reset();
+  };
+
+  // In a picked identifier field, a value that is plainly complete (a valid
+  // phone number in the country shown, or a regex match) is looked up at once:
+  // choosing the field already said what the text is, so there is no row to
+  // confirm. Auto still waits for a choice, as its text could be a name or a
+  // visit ID.
+  const lookupIfReady = (
+    nextField: SearchField,
+    text: string,
+    nextCountry: Country,
+  ) => {
+    const value = text.trim();
+    const config = configOfField(nextField, configs);
+    if (!value || !config) return false;
+    const check = checkIdentifier(config, value, nextCountry);
+    if (check.status !== "complete" || !check.detected) return false;
+    setPending(null);
+    setLookup({ config, value: check.value, display: check.display });
+    return true;
   };
 
   const applyScan = (patientId: string) => {
@@ -339,10 +375,17 @@ export function EncounterSearch({
   const changeDraft = (value: string) => {
     const prefixed = parseFieldPrefix(value, configs);
     if (prefixed) setField(prefixed.field);
-    const next = prefixed ? prefixed.rest : value;
+    const nextField = prefixed ? prefixed.field : field;
+    const nextConfig = configOfField(nextField, configs);
+    const typed = prefixed ? prefixed.rest : value;
+    // A phone field takes only what a phone number holds.
+    const next =
+      nextConfig && isPhoneConfig(nextConfig)
+        ? sanitizePhoneInput(typed)
+        : typed;
     setDraft(next);
-    setLookup(null);
     setPending(null);
+    if (!lookupIfReady(nextField, next, country)) setLookup(null);
     setOpen(next.trim() !== "");
   };
 
@@ -403,7 +446,11 @@ export function EncounterSearch({
           {row.check.status !== "complete" && (
             <span className="text-xs text-muted-foreground">
               {isPhoneConfig(row.config)
-                ? t("encounter_search_hint_phone")
+                ? phoneTooLong
+                  ? t("encounter_search_hint_phone_too_long", {
+                      country: countryLabels[shownCountry],
+                    })
+                  : t("encounter_search_hint_phone")
                 : t("encounter_search_hint_identifier", {
                     identifier: display,
                   })}
@@ -475,8 +522,8 @@ export function EncounterSearch({
               onValueChange={(next) => {
                 fieldPicked.current = true;
                 setField(next);
-                setLookup(null);
                 setPending(null);
+                if (!lookupIfReady(next, term, country)) setLookup(null);
                 setOpen(term !== "");
               }}
               // Select returns focus to its trigger; after a pick, typing
@@ -553,8 +600,8 @@ export function EncounterSearch({
               pickedFocus={inputRef}
               onChange={(next) => {
                 setCountry(next);
-                setLookup(null);
                 setPending(null);
+                if (!lookupIfReady(field, term, next)) setLookup(null);
                 setOpen(term !== "");
               }}
             />
@@ -606,6 +653,10 @@ export function EncounterSearch({
                 }
                 aria-label={t("encounter_search_label")}
                 aria-describedby={descriptionId}
+                aria-invalid={phoneTooLong || undefined}
+                inputMode={
+                  fieldConfig && isPhoneConfig(fieldConfig) ? "tel" : undefined
+                }
                 placeholder={
                   field !== "auto"
                     ? t("encounter_search_placeholder_field", {
