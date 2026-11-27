@@ -1130,7 +1130,13 @@ test.describe("All encounters search", () => {
         !url.searchParams.get("external_identifier"),
     );
     await expect(searchBox(page)).toHaveValue("");
-    await expect(chip(page)).toHaveText(/name: taylor/i);
+    // The field shows where the selector was; the chip shows the value.
+    await expect(
+      page.locator('[data-slot="encounter-search-found-by"]'),
+    ).toHaveText("Name");
+    await expect(chip(page)).toHaveText(/^taylor$/i);
+    // One search at a time: the input is read-only until the chip goes.
+    await expect(searchBox(page)).not.toBeEditable();
     await expect
       .poll(() =>
         requests.list.some((params) => params.get("name") === "Taylor"),
@@ -1319,6 +1325,10 @@ test.describe("All encounters search", () => {
     await expect(page).toHaveURL(
       (url) => url.searchParams.get("patient_filter") === fullPatient.id,
     );
+    // The field that found the patient shows where the selector was.
+    await expect(
+      page.locator('[data-slot="encounter-search-found-by"]'),
+    ).toContainText(/phone/i);
     await chip(page).getByRole("button", { name: "Remove patient" }).click();
     await expect(
       page.getByRole("button", { name: "Phone country: United Kingdom (+44)" }),
@@ -1329,7 +1339,7 @@ test.describe("All encounters search", () => {
     page,
   }) => {
     const lookups = trackPatientLookups(page);
-    await page.goto(listUrl("?name=Kumar"));
+    await page.goto(listUrl());
     await expect(page).toHaveURL((url) =>
       url.searchParams.has("created_date_after"),
     );
@@ -1443,22 +1453,50 @@ test.describe("All encounters search", () => {
     );
   });
 
-  test("the search stays off while a patient is applied, until the chip is removed", async ({
+  test("the search stays off while a chip is applied; Backspace twice removes it", async ({
     page,
   }) => {
     await page.goto(listUrl(`?patient_filter=${fullPatient.id}`));
     await expect(chip(page)).toHaveText(/^patient$/i);
 
-    // One patient at a time: only the chip shows, with nothing that looks
-    // like it can be typed into, picked or scanned.
-    await expect(searchBox(page)).toHaveCount(0);
+    // One patient at a time: nothing can be typed, picked or scanned. A
+    // deep link doesn't say how the patient was found, so no label shows.
+    await expect(searchBox(page)).not.toBeEditable();
     await expect(
       page.getByRole("combobox", { name: /^search field$/i }),
     ).toHaveCount(0);
     await expect(page.getByRole("button", { name: /scan/i })).toHaveCount(0);
+    await expect(
+      page.locator('[data-slot="encounter-search-found-by"]'),
+    ).toHaveCount(0);
 
-    await chip(page).getByRole("button", { name: "Remove patient" }).click();
-    await expect(searchBox(page)).toBeVisible();
+    // The input still takes focus and says how to remove the chip. The first
+    // Backspace only highlights it; any other key drops the highlight.
+    await searchBox(page).focus();
+    await expect(searchBox(page)).toHaveAttribute(
+      "placeholder",
+      "Press Backspace to remove",
+    );
+    await searchBox(page).press("Backspace");
+    await expect(chip(page)).toHaveCount(1);
+    await expect(searchBox(page)).toHaveAttribute(
+      "placeholder",
+      "Press Backspace again to remove",
+    );
+    await searchBox(page).press("ArrowLeft");
+    await expect(searchBox(page)).toHaveAttribute(
+      "placeholder",
+      "Press Backspace to remove",
+    );
+
+    // Backspace twice removes it.
+    await searchBox(page).press("Backspace");
+    await searchBox(page).press("Backspace");
+    await expect(chip(page)).toHaveCount(0);
+    await expect(page).toHaveURL(
+      (url) => !url.searchParams.has("patient_filter"),
+    );
+    await expect(searchBox(page)).toBeEditable();
     await expect(searchBox(page)).toBeFocused();
     await expect(searchBox(page)).toHaveAttribute(
       "placeholder",
@@ -1517,9 +1555,9 @@ test.describe("All encounters search", () => {
       /searching visit id/i,
     );
 
-    // Backspace in an empty input returns to Auto; prefixes pick a field.
+    // Backspace in an empty input keeps the picked field; prefixes pick one.
     await page.keyboard.press("Backspace");
-    await expect(field).toHaveText(/auto/i);
+    await expect(field).toHaveText(/visit id/i);
     await searchBox(page).pressSequentially("phone:", { delay: 50 });
     await expect(field).toHaveText(/phone number/i);
     // The phone field shows its country, preselected as in PhoneInput.

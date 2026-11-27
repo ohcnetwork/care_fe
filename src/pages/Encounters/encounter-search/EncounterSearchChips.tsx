@@ -27,6 +27,10 @@ interface EncounterSearchChipsProps extends AppliedSearch {
    * larger chips of its own, below the toolbar on mobile.
    */
   layout?: "inline" | "row";
+  /** The search shows the text filter's field beside it: the chip shows only its value. */
+  hideTextPrefix?: boolean;
+  /** The chip the next Backspace removes, outlined. */
+  highlighted?: "patient" | "text" | null;
   onRemoveText: () => void;
   onRemovePatient: () => void;
 }
@@ -44,6 +48,8 @@ export function EncounterSearchChips({
   name,
   visitId,
   patient,
+  hideTextPrefix = false,
+  highlighted,
   onRemoveText,
   onRemovePatient,
 }: EncounterSearchChipsProps) {
@@ -52,15 +58,21 @@ export function EncounterSearchChips({
   // The list sets one text filter at a time.
   const textFilter = name
     ? {
-        label: t("encounter_search_chip_name", { value: name }),
+        label: hideTextPrefix
+          ? name
+          : t("encounter_search_chip_name", { value: name }),
         removeLabel: t("encounter_search_remove_name_filter"),
       }
     : visitId
       ? {
-          label: t("encounter_search_chip_visit_id", { value: visitId }),
+          label: hideTextPrefix
+            ? visitId
+            : t("encounter_search_chip_visit_id", { value: visitId }),
           removeLabel: t("encounter_search_remove_visit_id_filter"),
         }
       : undefined;
+  // Outlines the chip a second Backspace would remove.
+  const highlightClass = "rounded-md ring-2 ring-primary ring-offset-1";
 
   if (!textFilter && !patient) return null;
 
@@ -99,6 +111,7 @@ export function EncounterSearchChips({
             badgeVariants({ variant: "neutral" }),
             "gap-1 py-0 pe-0 text-sm font-normal",
             row ? "h-9 max-w-full ps-3" : "h-7 max-w-48 min-w-16 shrink",
+            highlighted === "text" && highlightClass,
           )}
         >
           {/* Inline, capped, so a long label doesn't make its chip take more
@@ -124,6 +137,7 @@ export function EncounterSearchChips({
             row
               ? "max-w-full min-w-0"
               : ["min-w-16 shrink", unverified ? "max-w-60" : "max-w-48"],
+            highlighted === "patient" && highlightClass,
           )}
         >
           <MemberCard

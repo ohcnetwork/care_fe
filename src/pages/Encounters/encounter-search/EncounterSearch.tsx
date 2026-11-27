@@ -189,9 +189,21 @@ export function EncounterSearch({
     : field === "auto" && configs.some(isPhoneConfig) && isNumericText(term);
   const shownCountry =
     (term.startsWith("+") && parsePhoneNumber(term)?.country) || country;
-  // The list filters by one patient at a time: with one applied, the search
-  // stays off until its chip is removed.
-  const patientLocked = !!applied.patient;
+  // One search applies at a time: with any chip applied, the search stays off
+  // until the chip is removed.
+  const locked = !!(applied.patient || applied.name || applied.visitId);
+  // A chip applied from outside (the URL) while a draft was typed: the draft
+  // and its lookup go, rather than return once the chip is removed.
+  const [wasLocked, setWasLocked] = useState(locked);
+  if (locked !== wasLocked) {
+    setWasLocked(locked);
+    if (locked) {
+      setDraft("");
+      setOpen(false);
+      setLookup(null);
+      setPending(null);
+    }
+  }
   const popupOpen = open && (!!term || !!lookup);
   // A number too long for its country can't become valid by typing more.
   const phoneTooLong =
@@ -277,7 +289,37 @@ export function EncounterSearch({
     return true;
   };
 
+  // How the applied search was made takes the field selector's place: the
+  // text field, or how the patient was found (the identifier, or a scan). The
+  // URL keeps only the patient, so that is known for a pick made here, and
+  // matched to the applied patient by name. With two chips (only from a URL)
+  // the field is ambiguous, so none shows and the chips keep their prefixes.
+  const [foundBy, setFoundBy] = useState<{
+    name?: string;
+    label: string;
+  } | null>(null);
+  const hasText = !!(applied.name || applied.visitId);
+  const foundByLabel =
+    hasText && applied.patient
+      ? undefined
+      : applied.name
+        ? t("encounter_search_field_name")
+        : applied.visitId
+          ? t("encounter_search_field_visit_id")
+          : applied.patient && foundBy && foundBy.name === applied.patient.name
+            ? foundBy.label
+            : undefined;
+  const selectFound = (patient: SelectedPatient) => {
+    setFoundBy(
+      lookup
+        ? { name: patient.name, label: lookup.config.config.display }
+        : null,
+    );
+    onSelectPatient(patient, "lookup");
+  };
+
   const applyScan = (patientId: string) => {
+    setFoundBy({ name: t("scanned_patient"), label: t("scan") });
     onSelectPatient({ id: patientId, name: t("scanned_patient") }, "scan");
     toast.info(t("patient_details_scanned_successfully"));
     reset();
@@ -286,7 +328,7 @@ export function EncounterSearch({
   // A scanner used with nothing focused keeps today's behaviour.
   useBarcodeScanner({
     onScan: (scanned) => applyScan(scannedPatientId(scanned) ?? scanned),
-    enabled: !patientLocked && !popupOpen && !scanOpen,
+    enabled: !locked && !popupOpen && !scanOpen,
     preventDefault: false,
     maxLength: 500,
     timeout: 500,
@@ -378,7 +420,7 @@ export function EncounterSearch({
       keepOpen.current = true;
       setPending(row.patient as PartialPatientModel);
     } else {
-      onSelectPatient({ id: row.patient.id, name: row.patient.name }, "lookup");
+      selectFound({ id: row.patient.id, name: row.patient.name });
       reset();
     }
   };
@@ -400,25 +442,39 @@ export function EncounterSearch({
     setOpen(next.trim() !== "");
   };
 
-  const hasApplied = !!(applied.name || applied.visitId || applied.patient);
-  // A removed chip's button unmounts; typing continues in the input.
-  const removeText = () => {
-    onRemoveText();
-    inputRef.current?.focus();
-  };
-  // The input is disabled while a patient is applied: it takes focus once the
-  // removal has unlocked it.
+  const hasApplied = locked;
+  // The input is read-only while a chip is applied, and the chip's button
+  // unmounts when it is removed: the input takes focus once the removal (a
+  // URL update) has unlocked it.
   const refocusOnUnlock = useRef(false);
   useEffect(() => {
-    if (patientLocked || !refocusOnUnlock.current) return;
+    if (locked || !refocusOnUnlock.current) return;
     refocusOnUnlock.current = false;
-    // The combobox enables its input a render later.
+    // The combobox updates its input a render later.
     const frame = requestAnimationFrame(() => inputRef.current?.focus());
     return () => cancelAnimationFrame(frame);
-  }, [patientLocked]);
+  }, [locked]);
+  // Backspace on the read-only input first highlights the last chip, then
+  // removes it, as in tag and recipient fields: one stray key can't clear
+  // the search, and the highlight shows what the next press removes.
+  const lastChip = applied.patient ? "patient" : hasText ? "text" : null;
+  const [armed, setArmed] = useState<"patient" | "text" | null>(null);
+  const armedChip = armed !== null && armed === lastChip ? armed : null;
+  const removeText = () => {
+    setArmed(null);
+    refocusOnUnlock.current = true;
+    onRemoveText();
+    // With a patient chip left, the input stays locked but keeps focus.
+    inputRef.current?.focus();
+  };
   const removePatient = () => {
+    setArmed(null);
+    // A later apply of the same patient (a link, say) may not be by the
+    // same identifier.
+    setFoundBy(null);
     refocusOnUnlock.current = true;
     onRemovePatient();
+    inputRef.current?.focus();
   };
 
   const describe = (row: Row) => {
@@ -498,7 +554,10 @@ export function EncounterSearch({
         items={groups}
         value={null}
         inputValue={draft}
-        open={popupOpen && !patientLocked}
+        open={popupOpen && !locked}
+        // Read-only, not disabled, so the input still takes focus and
+        // Backspace can remove the patient chip.
+        readOnly={locked}
         filter={null}
         autoHighlight
         itemToStringLabel={describe}
@@ -535,9 +594,26 @@ export function EncounterSearch({
             className,
           )}
         >
-          {/* With a patient applied only its chip shows: a search box that
-              can't be typed in would read as editable. */}
-          {!patientLocked && (
+          {/* With a chip applied, how the search was made takes the field
+              selector's place; nothing can be picked or scanned until the
+              chip is removed. */}
+          {locked ? (
+            foundByLabel && (
+              <>
+                <InputGroupAddon
+                  align="inline-start"
+                  className="min-w-0 shrink pe-2.5"
+                  data-slot="encounter-search-found-by"
+                >
+                  <span className="block min-w-0 truncate">{foundByLabel}</span>
+                </InputGroupAddon>
+                <Separator
+                  orientation="vertical"
+                  className="order-first bg-input"
+                />
+              </>
+            )
+          ) : (
             <>
               {/* Before the input, so Shift+Tab from the input reaches it. It
               shrinks before the input does. */}
@@ -649,93 +725,113 @@ export function EncounterSearch({
           >
             <EncounterSearchChips
               {...applied}
+              hideTextPrefix={!!foundByLabel}
+              highlighted={armedChip}
               onRemoveText={removeText}
               onRemovePatient={removePatient}
             />
             {/* The search icon leads the input, after any chips, so it marks
-                where the search continues; the two wrap together. */}
-            {!patientLocked && (
-              <div
-                className={cn(
-                  "flex items-center",
-                  hasApplied ? "min-w-20 grow basis-20" : "min-w-28 flex-1",
-                )}
-                onClick={(event) => {
-                  if (event.target !== inputRef.current) {
-                    inputRef.current?.focus();
-                  }
-                }}
-              >
-                {!showCountry && (
-                  <Search
-                    aria-hidden="true"
+                where the search continues; the two wrap together. With a
+                chip applied the input stays focusable but read-only, and
+                its hint (shown while focused) says how to remove the chip. */}
+            <div
+              className={cn(
+                "flex items-center",
+                hasApplied ? "min-w-20 grow basis-20" : "min-w-28 flex-1",
+              )}
+              onClick={(event) => {
+                if (event.target !== inputRef.current) {
+                  inputRef.current?.focus();
+                }
+              }}
+            >
+              {!showCountry && !locked && (
+                <Search
+                  aria-hidden="true"
+                  className="ms-2 size-4 shrink-0 text-muted-foreground"
+                />
+              )}
+              <ComboboxPrimitive.Input
+                render={
+                  <InputGroupInput
+                    ref={inputRef}
                     className={cn(
-                      "size-4 shrink-0 text-muted-foreground",
-                      hasApplied ? "ms-1" : "ms-2",
+                      "h-8 ps-1.5 pe-1.5",
+                      locked &&
+                        "caret-transparent placeholder:text-transparent focus:placeholder:text-muted-foreground",
                     )}
                   />
-                )}
-                <ComboboxPrimitive.Input
-                  render={
-                    <InputGroupInput
-                      ref={inputRef}
-                      className="h-8 ps-1.5 pe-1.5"
-                    />
-                  }
-                  aria-label={t("encounter_search_label")}
-                  aria-describedby={descriptionId}
-                  aria-invalid={phoneTooLong || undefined}
-                  inputMode={
-                    fieldConfig && isPhoneConfig(fieldConfig)
-                      ? "tel"
-                      : undefined
-                  }
-                  placeholder={
-                    field !== "auto"
+                }
+                aria-label={t("encounter_search_label")}
+                aria-describedby={descriptionId}
+                aria-invalid={phoneTooLong || undefined}
+                inputMode={
+                  fieldConfig && isPhoneConfig(fieldConfig) ? "tel" : undefined
+                }
+                placeholder={
+                  locked
+                    ? armedChip
+                      ? t("encounter_search_remove_again")
+                      : t("encounter_search_remove_hint")
+                    : field !== "auto"
                       ? t("encounter_search_placeholder_field", {
                           field: fieldLabel,
                         })
-                      : hasApplied
-                        ? t("search")
-                        : t("encounter_search_placeholder")
-                  }
-                  onKeyDown={(event) => {
-                    scanner.track(event);
-                    if (
-                      event.key === "Enter" &&
-                      scanner.isScannerEnter(draft, event)
+                      : t("encounter_search_placeholder")
+                }
+                onBlur={() => setArmed(null)}
+                onKeyDown={(event) => {
+                  if (locked) {
+                    // Read-only. Backspace or Delete highlights the last
+                    // chip, and again removes it; a held key does neither.
+                    // Escape, or any other key, drops the highlight.
+                    if (event.key === "Backspace" || event.key === "Delete") {
+                      event.preventDefault();
+                      if (event.repeat || !lastChip) return;
+                      if (!armedChip) setArmed(lastChip);
+                      else if (lastChip === "patient") removePatient();
+                      else removeText();
+                    } else if (event.key === "Escape" && armedChip) {
+                      event.preventDefault();
+                      setArmed(null);
+                    } else if (
+                      !["Shift", "Control", "Alt", "Meta"].includes(event.key)
                     ) {
-                      const patientId = scannedPatientId(draft);
-                      if (patientId) {
-                        event.preventDefault();
-                        event.preventBaseUIHandler();
-                        applyScan(patientId);
-                        return;
-                      }
+                      setArmed(null);
                     }
-                    if (event.key === "Backspace" && !draft) {
-                      // First back to Auto, then the last chip; a held key stops
-                      // at the empty input.
-                      if (field !== "auto") {
-                        event.preventDefault();
-                        setField("auto");
-                      } else if (
-                        !event.repeat &&
-                        (applied.name || applied.visitId)
-                      ) {
-                        event.preventDefault();
-                        onRemoveText();
-                      }
+                    return;
+                  }
+                  scanner.track(event);
+                  if (
+                    event.key === "Enter" &&
+                    scanner.isScannerEnter(draft, event)
+                  ) {
+                    const patientId = scannedPatientId(draft);
+                    if (patientId) {
+                      event.preventDefault();
+                      event.preventBaseUIHandler();
+                      applyScan(patientId);
+                      return;
                     }
-                  }}
-                />
-              </div>
-            )}
+                  }
+                  // Backspace in the empty input does nothing more: the field
+                  // stays as picked.
+                }}
+              />
+            </div>
           </div>
+          {/* Announces the highlight, which the placeholder shows. */}
+          <span aria-live="polite" className="sr-only">
+            {armedChip ? t("encounter_search_remove_again") : ""}
+          </span>
           <span id={descriptionId} className="sr-only">
-            {field === "auto"
-              ? t("encounter_search_description_auto")
-              : t("encounter_search_description_field", { field: fieldLabel })}
+            {locked
+              ? t("encounter_search_description_locked")
+              : field === "auto"
+                ? t("encounter_search_description_auto")
+                : t("encounter_search_description_field", {
+                    field: fieldLabel,
+                  })}
           </span>
           {draft && (
             <InputGroupAddon align="inline-end">
@@ -751,7 +847,7 @@ export function EncounterSearch({
               </InputGroupButton>
             </InputGroupAddon>
           )}
-          {!patientLocked && (
+          {!locked && (
             <>
               <Separator
                 orientation="vertical"
@@ -845,10 +941,7 @@ export function EncounterSearch({
               patient={pending}
               onVerified={(patient) => {
                 // Filter by the full record's id, never the partial one.
-                onSelectPatient(
-                  { id: patient.id, name: patient.name },
-                  "lookup",
-                );
+                selectFound({ id: patient.id, name: patient.name });
                 reset();
               }}
               onCancel={() => {
