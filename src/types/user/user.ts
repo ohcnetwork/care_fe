@@ -30,10 +30,6 @@ export interface UserQualificationDegree {
   display?: string | null;
 }
 
-// Mirrors the backend's OrganizationUserExtendedReadSpec. The organization is
-// serialized with OrganizationReadSpec (no permissions/managing orgs), so the
-// lighter OrganizationParent shape is used. Keeping this shallow also matters
-// because UserReadMinimal is embedded in many read types that end up in form values.
 export interface UserRoleOrg {
   id: string;
   organization: OrganizationParent;

@@ -132,7 +132,6 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                         {selectedUser.username}
                       </p>
                     </div>
-
                     <div>
                       <span className="text-sm text-gray-500">
                         {t("phone_number")}
