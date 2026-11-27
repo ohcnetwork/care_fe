@@ -49,27 +49,32 @@ test.describe("Questionnaire v2 permissions (nurse)", () => {
     ).toBeHidden();
   });
 
-  test("admin list is empty with no create button", async ({ page }) => {
-    await page.goto("/admin/questionnaires");
-
-    await expect(
-      page.getByRole("heading", { name: "Questionnaires" }),
-    ).toBeVisible();
-    // The nurse's readable set is facility-scoped (org-tagged fixture
-    // questionnaires — see the facility list test); the admin mount lists
-    // none of them and instance questionnaires without a matching org grant
-    // are hidden, not errored.
-    await expect(page.getByText("No questionnaires found")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Create Questionnaire" }),
-    ).toBeHidden();
+  test("admin pages are not found for a non-superuser", async ({ page }) => {
+    const id = await getQuestionnaireIdBySlug("e2e-kitchen-sink-facility");
+    for (const path of [
+      "/admin/questionnaires",
+      `/admin/questionnaires/${id}`,
+      `/admin/questionnaires/${id}/edit`,
+      "/admin/questionnaires/new",
+    ]) {
+      await test.step(path, async () => {
+        await page.goto(path);
+        await expect(
+          page.getByRole("heading", { name: "Page Not Found" }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("heading", { name: "Questionnaires" }),
+        ).toBeHidden();
+      });
+    }
   });
 
   test("detail page renders read-only for a readable questionnaire", async ({
     page,
   }) => {
+    const facilityId = getFacilityId();
     const id = await getQuestionnaireIdBySlug("e2e-kitchen-sink-facility");
-    await page.goto(`/admin/questionnaires/${id}`);
+    await page.goto(`/facility/${facilityId}/settings/questionnaires/${id}`);
 
     await test.step("No write affordances", async () => {
       await expect(page.getByRole("textbox", { name: "Title" })).toBeDisabled();
@@ -101,8 +106,11 @@ test.describe("Questionnaire v2 permissions (nurse)", () => {
   test("builder deep-link offers no save for a read-only user", async ({
     page,
   }) => {
+    const facilityId = getFacilityId();
     const id = await getQuestionnaireIdBySlug("e2e-kitchen-sink-facility");
-    await page.goto(`/admin/questionnaires/${id}/edit`);
+    await page.goto(
+      `/facility/${facilityId}/settings/questionnaires/${id}/edit`,
+    );
 
     // The deep link isn't blocked — the studio renders the questionnaire —
     // but read-only users get the preview, never the edit surface: there is
@@ -121,7 +129,7 @@ test.describe("Questionnaire v2 permissions (nurse)", () => {
   test("create page deep-link shows the permission-denied state", async ({
     page,
   }) => {
-    await page.goto("/admin/questionnaires/new");
+    await page.goto(`/facility/${getFacilityId()}/settings/questionnaires/new`);
 
     await expect(
       page.getByText("You do not have permission to perform this action"),
