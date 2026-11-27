@@ -52,6 +52,7 @@ export function BedGrid({ beds, onManage, onMove, onDelete }: BedGridProps) {
           </div>
           <LocationActionsMenu
             locationName={bed.name}
+            orientation="grid"
             className="relative z-10"
             onMoveUp={onMove && index > 0 ? () => onMove(bed, "up") : undefined}
             onMoveDown={

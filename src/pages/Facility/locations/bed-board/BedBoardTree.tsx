@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { LocationTreeNode } from "@/components/Location/LocationTreeNode";
+import { LocationTreeSkeleton } from "@/components/Location/LocationTreeSkeleton";
+
 import { LocationRead } from "@/types/location/location";
 import { buildLocationPath } from "@/types/location/utils";
 
-import { BedBoardTreeNode } from "./BedBoardTreeNode";
-import { BedBoardTreeSkeleton } from "./BedBoardTreeSkeleton";
 import { useBedLocations } from "./useLocationsWithBeds";
 
 interface BedBoardTreeProps {
@@ -60,19 +61,22 @@ export function BedBoardTree({
   };
 
   // Until the list is read no row knows whether it has an arrow.
-  if (isLoading) return <BedBoardTreeSkeleton />;
+  if (isLoading) return <LocationTreeSkeleton />;
 
   return (
     <nav aria-label={t("locations")}>
       <ul>
         {roots.map((root) => (
-          <BedBoardTreeNode
+          <LocationTreeNode
             key={root.id}
             facilityId={facilityId}
             location={root}
             selectedLocationId={selectedLocationId}
-            filterWithBeds={filterWithBeds}
-            hasBedsBelow={hasBedsBelow}
+            canExpand={(location) =>
+              location.has_sub_locations && hasBedsBelow(location)
+            }
+            filterChildren={filterWithBeds}
+            showBeds
             isExpanded={(id) => expanded.get(id) ?? false}
             onToggle={(id, isOpen) =>
               setExpanded((previous) => new Map(previous).set(id, isOpen))

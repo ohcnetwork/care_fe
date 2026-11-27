@@ -1,36 +1,46 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { atom, useAtom } from "jotai";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { BreadcrumbLink, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { CareUIPageTitle } from "@/components/ui/typography";
 
 import Page from "@/components/Common/Page";
+import { LocationPathBreadcrumb } from "@/components/Location/LocationPathBreadcrumb";
+import { LocationTreeLayout } from "@/components/Location/LocationTreeLayout";
+import { LocationTreeNode } from "@/components/Location/LocationTreeNode";
+import { LocationTreeSearch } from "@/components/Location/LocationTreeSearch";
+import { LocationTreeSkeleton } from "@/components/Location/LocationTreeSkeleton";
 
 import query from "@/Utils/request/query";
 import { navigate } from "@/lib/router/navigate";
 import { locationChildrenQuery } from "@/pages/Facility/locations/bed-board/locationQueries";
+import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import { buildLocationPath } from "@/types/location/utils";
 
 import LocationView from "./LocationView";
 import { LocationChildren } from "./components/LocationChildren";
-import { LocationTreeNode } from "./components/LocationTreeNode";
 
 interface LocationSettingsProps {
   facilityId: string;
   locationId?: string;
 }
 
+// The top of the list and each location are separate routes, so the page
+// remounts between them: the open branches live outside it.
+const expandedLocationsAtom = atom<ReadonlySet<string>>(new Set<string>());
+
 export default function LocationSettings({
   facilityId,
   locationId,
 }: LocationSettingsProps) {
   const { t } = useTranslation();
-  const [expandedLocations, setExpandedLocations] = useState<
-    ReadonlySet<string>
-  >(new Set());
+  const [expandedLocations, setExpandedLocations] = useAtom(
+    expandedLocationsAtom,
+  );
 
   const { data: topLocations } = useQuery(
     locationChildrenQuery(facilityId, "", "kind"),
@@ -43,26 +53,33 @@ export default function LocationSettings({
     enabled: !!locationId,
   });
 
-  // When another location opens, expand the tree down to it, so the tree
-  // shows where the open location sits.
-  const [shownLocationId, setShownLocationId] = useState<string>();
-  if (selectedLocation && shownLocationId !== selectedLocation.id) {
-    setShownLocationId(selectedLocation.id);
-    setExpandedLocations(
-      (previous) =>
-        new Set([
-          ...previous,
-          ...buildLocationPath(selectedLocation).map((location) => location.id),
-        ]),
+  useEffect(() => {
+    if (!selectedLocation) return;
+    const path = buildLocationPath(selectedLocation).map(({ id }) => id);
+    setExpandedLocations((previous) =>
+      path.every((id) => previous.has(id))
+        ? previous
+        : new Set([...previous, ...path]),
     );
-  }
+  }, [selectedLocation, setExpandedLocations]);
 
-  const toggleExpanded = (id: string) =>
+  const setExpanded = (id: string, expanded: boolean) =>
     setExpandedLocations((previous) => {
       const next = new Set(previous);
-      if (!next.delete(id)) next.add(id);
+      if (expanded) next.add(id);
+      else next.delete(id);
       return next;
     });
+
+  const openLocation = (location: LocationRead) =>
+    navigate({
+      to: "/facility/$facilityId/settings/locations/$id",
+      params: { facilityId, id: location.id },
+    });
+
+  const ancestors = selectedLocation
+    ? buildLocationPath(selectedLocation).slice(0, -1)
+    : [];
 
   return (
     <Page
@@ -73,59 +90,81 @@ export default function LocationSettings({
       <div className="container mx-auto space-y-4 pt-4">
         <CareUIPageTitle>{t("locations")}</CareUIPageTitle>
 
-        <div className="flex items-start gap-4">
-          <Card className="hidden max-h-[calc(100svh-10rem)] w-64 shrink-0 overflow-y-auto p-2 md:block">
-            <nav aria-label={t("locations")}>
-              {!topLocations ? (
-                <div role="status" className="space-y-2 p-2">
-                  <span className="sr-only">{t("loading")}</span>
-                  <Skeleton className="h-6 w-40" />
-                  <Skeleton className="h-6 w-32" />
-                  <Skeleton className="h-6 w-36" />
-                </div>
-              ) : topLocations.results.length ? (
-                <ul>
-                  {topLocations.results.map((location) => (
-                    <LocationTreeNode
-                      key={location.id}
-                      location={location}
-                      facilityId={facilityId}
-                      selectedLocationId={locationId}
-                      expandedLocations={expandedLocations}
-                      onToggleExpand={toggleExpanded}
-                      onSelect={(selected) =>
-                        navigate({
-                          to: "/facility/$facilityId/settings/locations/$id",
-                          params: { facilityId, id: selected.id },
-                        })
-                      }
-                    />
-                  ))}
-                </ul>
-              ) : (
-                <p className="p-2 text-sm text-muted-foreground">
-                  {t("no_locations_available")}
-                </p>
-              )}
-            </nav>
-          </Card>
-
-          <div className="min-w-0 flex-1">
-            {locationId ? (
-              <LocationView
-                key={locationId}
-                id={locationId}
-                facilityId={facilityId}
-              />
-            ) : (
-              <Card>
-                <CardContent className="p-4 md:p-6">
+        <LocationTreeLayout
+          className="overflow-clip rounded-lg border border-border bg-card shadow-xs md:h-[calc(100svh-10rem)]"
+          tree={
+            <LocationTreeSearch facilityId={facilityId} onSelect={openLocation}>
+              <nav aria-label={t("locations")}>
+                {!topLocations ? (
+                  <LocationTreeSkeleton />
+                ) : topLocations.results.length ? (
+                  <ul>
+                    {topLocations.results.map((location) => (
+                      <LocationTreeNode
+                        key={location.id}
+                        location={location}
+                        facilityId={facilityId}
+                        selectedLocationId={locationId}
+                        isExpanded={(id) => expandedLocations.has(id)}
+                        onToggle={setExpanded}
+                        onSelect={(selected) => {
+                          openLocation(selected);
+                          if (selected.has_sub_locations)
+                            setExpanded(selected.id, true);
+                        }}
+                      />
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="p-2 text-sm text-muted-foreground">
+                    {t("no_locations_available")}
+                  </p>
+                )}
+              </nav>
+            </LocationTreeSearch>
+          }
+        >
+          {(sidebarToggle) => (
+            <div className="flex min-w-0 flex-1 flex-col">
+              <div className="flex h-11 min-w-0 shrink-0 items-center gap-2 border-b border-border px-4">
+                {sidebarToggle}
+                <LocationPathBreadcrumb
+                  root={
+                    locationId ? (
+                      <BreadcrumbLink asChild>
+                        <Link
+                          to="/facility/$facilityId/settings/locations"
+                          params={{ facilityId }}
+                        >
+                          {t("locations")}
+                        </Link>
+                      </BreadcrumbLink>
+                    ) : (
+                      <BreadcrumbPage>{t("locations")}</BreadcrumbPage>
+                    )
+                  }
+                  ancestors={ancestors}
+                  current={selectedLocation}
+                  getHref={(ancestor) =>
+                    `/facility/${facilityId}/settings/locations/${ancestor.id}`
+                  }
+                  onOpen={openLocation}
+                />
+              </div>
+              <div className="min-h-0 flex-1 p-4 md:overflow-y-auto md:p-6">
+                {locationId ? (
+                  <LocationView
+                    key={locationId}
+                    id={locationId}
+                    facilityId={facilityId}
+                  />
+                ) : (
                   <LocationChildren facilityId={facilityId} />
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
+                )}
+              </div>
+            </div>
+          )}
+        </LocationTreeLayout>
       </div>
     </Page>
   );

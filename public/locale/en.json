@@ -2955,6 +2955,8 @@
   "move_back_to_waiting": "Move back to waiting",
   "move_back_to_waiting_confirmation": "Are you sure you want to move the token {{tokenNumber}} for {{patientName}} back to waiting?",
   "move_down": "Move Down",
+  "move_earlier": "Move Earlier",
+  "move_later": "Move Later",
   "move_n_questions_one": "Move {{count}} question",
   "move_n_questions_other": "Move {{count}} questions",
   "move_question_down": "Move question down",

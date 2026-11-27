@@ -15,13 +15,13 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { LocationPathBreadcrumb } from "@/components/Location/LocationPathBreadcrumb";
 import { TagBadges } from "@/components/Tags/TagBadges";
 import { cn } from "@/lib/utils";
 
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import { buildLocationPath } from "@/types/location/utils";
 
-import { BedBoardBreadcrumb } from "./BedBoardBreadcrumb";
 import { BedGridSkeleton } from "./BedGridSkeleton";
 import { BedSection } from "./BedSection";
 import { type BedFilter, BedStateFilter } from "./BedStateFilter";
@@ -46,9 +46,8 @@ interface BedBoardProps {
 }
 
 /**
- * The beds directly in one location. The areas below it, with beds somewhere
- * in them, are links. Render it with `key={locationId}` so the search and the
- * filter start empty for each location.
+ * The beds directly in one location, with links to the areas below it. Render
+ * it with `key={locationId}` so the search and filter reset for each location.
  */
 export function BedBoard({
   facilityId,
@@ -81,8 +80,6 @@ export function BedBoard({
     ...locationChildrenQuery(facilityId, locationId, "instance"),
     enabled: !!location?.has_beds,
   });
-  // Sub-locations are offered only when a bed sits in them or somewhere below,
-  // so no link leads to an empty branch.
   const { locations: deeperAreas, isLoading: isCheckingDeeperAreas } =
     useLocationsWithBeds(facilityId, subLocations?.results);
 
@@ -161,7 +158,7 @@ export function BedBoard({
         <div className={barClass}>
           {leading}
           {!hideBreadcrumb && (
-            <BedBoardBreadcrumb
+            <LocationPathBreadcrumb
               ancestors={ancestors}
               current={location}
               onOpen={onOpenLocation}
@@ -213,11 +210,7 @@ export function BedBoard({
         )}
 
         {visibleBeds.length > 0 && (
-          <BedSection
-            facilityId={facilityId}
-            beds={visibleBeds}
-            counts={countBeds(ownBeds)}
-          />
+          <BedSection facilityId={facilityId} beds={visibleBeds} />
         )}
 
         {isLoadingBeds ? (

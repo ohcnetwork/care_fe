@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const WIDTHS = ["w-40", "w-32", "w-36"];
 
-export function BedBoardTreeSkeleton() {
+export function LocationTreeSkeleton() {
   const { t } = useTranslation();
   return (
     <div role="status" className="space-y-1">

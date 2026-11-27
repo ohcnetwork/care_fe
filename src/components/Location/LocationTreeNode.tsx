@@ -9,50 +9,51 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
+import { locationChildrenQuery } from "@/pages/Facility/locations/bed-board/locationQueries";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 
-import { locationChildrenQuery } from "./locationQueries";
-
-interface BedBoardTreeNodeProps {
+interface LocationTreeNodeProps {
   facilityId: string;
   location: LocationRead;
   selectedLocationId?: string;
-  /** Keeps the sub-locations that lead to a bed. */
-  filterWithBeds: (locations: LocationRead[] | undefined) => LocationRead[];
-  hasBedsBelow: (location: LocationRead) => boolean;
   isExpanded: (locationId: string) => boolean;
   onToggle: (locationId: string, expanded: boolean) => void;
   onSelect: (location: LocationRead) => void;
+  /** Without it, a row has an arrow when it has sub-locations. */
+  canExpand?: (location: LocationRead) => boolean;
+  filterChildren?: (locations: LocationRead[] | undefined) => LocationRead[];
+  showBeds?: boolean;
 }
 
-export function BedBoardTreeNode({
+export function LocationTreeNode({
   facilityId,
   location,
   selectedLocationId,
-  filterWithBeds,
-  hasBedsBelow,
   isExpanded,
   onToggle,
   onSelect,
-}: BedBoardTreeNodeProps) {
+  canExpand = (row) => row.has_sub_locations,
+  filterChildren = (rows) => rows ?? [],
+  showBeds = false,
+}: LocationTreeNodeProps) {
   const { t } = useTranslation();
   const childrenId = useId();
   const Icon = LocationTypeIcons[location.form];
   const isSelected = location.id === selectedLocationId;
+  const hasArrow = canExpand(location);
+  const expanded = hasArrow && isExpanded(location.id);
 
-  // A location with no bed anywhere below it has no arrow, so the arrow never
-  // opens onto nothing.
-  const canExpand = location.has_sub_locations && hasBedsBelow(location);
-  const expanded = canExpand && isExpanded(location.id);
-
-  const { data: subLocations, isLoading: isLoadingChildren } = useQuery({
+  const { data: subLocations, isLoading } = useQuery({
     ...locationChildrenQuery(facilityId, location.id, "kind"),
     enabled: expanded,
   });
-  // Only sub-locations that lead to beds belong on a bed board.
-  const children = filterWithBeds(subLocations?.results);
-
+  const children = filterChildren(subLocations?.results);
   const showChildren = expanded && children.length > 0;
+  const bedIcon = (className: string) =>
+    showBeds &&
+    location.has_beds && (
+      <Bed className={className} role="img" aria-label={t("has_beds")} />
+    );
 
   return (
     <li>
@@ -85,27 +86,21 @@ export function BedBoardTreeNode({
               {t("inactive")}
             </Badge>
           )}
-          {canExpand && location.has_beds && (
-            <Bed
-              className="ml-auto size-3.5 shrink-0 text-blue-600"
-              role="img"
-              aria-label={t("has_beds")}
-            />
-          )}
+          {hasArrow && bedIcon("ml-auto size-3.5 shrink-0 text-blue-600")}
         </button>
-        {canExpand ? (
+        {hasArrow ? (
           <Button
             type="button"
             variant="tertiary"
             size="icon"
             className="size-9 shrink-0"
             aria-expanded={expanded}
-            aria-busy={(expanded && isLoadingChildren) || undefined}
+            aria-busy={(expanded && isLoading) || undefined}
             aria-controls={showChildren ? childrenId : undefined}
             aria-label={`${t(expanded ? "collapse" : "expand")} ${location.name}`}
             onClick={() => onToggle(location.id, !expanded)}
           >
-            {expanded && isLoadingChildren ? (
+            {expanded && isLoading ? (
               <Spinner />
             ) : (
               <ChevronDown
@@ -118,32 +113,28 @@ export function BedBoardTreeNode({
             )}
           </Button>
         ) : (
-          // Takes the place of the expand button, so the bed icon lines up
-          // with the arrows of the rows above and below.
-          <span className="flex size-9 shrink-0 items-center justify-center">
-            {location.has_beds && (
-              <Bed
-                className="size-3.5 text-blue-600"
-                role="img"
-                aria-label={t("has_beds")}
-              />
-            )}
-          </span>
+          // Keeps the bed icon in line with the arrows above and below.
+          showBeds && (
+            <span className="flex size-9 shrink-0 items-center justify-center">
+              {bedIcon("size-3.5 text-blue-600")}
+            </span>
+          )
         )}
       </div>
       {showChildren && (
         <ul id={childrenId} className="ms-2.5 min-w-0">
           {children.map((child) => (
-            <BedBoardTreeNode
+            <LocationTreeNode
               key={child.id}
               facilityId={facilityId}
               location={child}
               selectedLocationId={selectedLocationId}
-              filterWithBeds={filterWithBeds}
-              hasBedsBelow={hasBedsBelow}
               isExpanded={isExpanded}
               onToggle={onToggle}
               onSelect={onSelect}
+              canExpand={canExpand}
+              filterChildren={filterChildren}
+              showBeds={showBeds}
             />
           ))}
         </ul>
