@@ -26,7 +26,6 @@ function FilterFooter({
     <Button
       type="button"
       variant="primary"
-      size="sm"
       className="order-last"
       onClick={onDone}
     >
@@ -51,7 +50,6 @@ function FilterFooter({
         <Button
           type="button"
           variant="ghost"
-          size="sm"
           // Stays focusable so keyboard focus isn't dropped once the selection is cleared.
           focusableWhenDisabled
           disabled={selectedCount === 0}

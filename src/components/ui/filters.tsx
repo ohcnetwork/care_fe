@@ -2192,8 +2192,7 @@ export function Filters<T = unknown>({
                 {!field.disableClear && (
                   <Button
                     variant="tertiary"
-                    size="icon-xs"
-                    className="text-muted-foreground"
+                    size="icon-sm"
                     aria-label={mergedI18n.removeFilter}
                     onClick={() => {
                       if (applied.length === 1) {
@@ -2214,7 +2213,6 @@ export function Filters<T = unknown>({
         <div className="flex items-center justify-between gap-2 border-t p-1.5">
           <Button
             variant="tertiary"
-            size="sm"
             className="text-muted-foreground"
             onClick={clear}
           >
@@ -2222,7 +2220,6 @@ export function Filters<T = unknown>({
           </Button>
           <Button
             variant="outline"
-            size="sm"
             className="shadow-2xs"
             onClick={openFieldMenu}
           >
