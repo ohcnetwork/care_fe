@@ -53,7 +53,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <SidebarInset
           id="pages"
           className={cn(
-            "min-h-svh min-w-0 max-w-full focus:outline-hidden max-md:overflow-visible md:h-svh md:min-h-0",
+            "min-h-dvh min-w-0 max-w-full focus:outline-hidden max-md:overflow-visible md:h-svh md:min-h-0",
             !isInnerWorkspace && "md:h-[calc(100svh-1rem)]",
           )}
         >

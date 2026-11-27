@@ -30,7 +30,7 @@ export function PatientShell({ children }: { children: React.ReactNode }) {
           <AppSidebar sidebarFor={SidebarFor.PATIENT} />
           <SidebarInset
             id="pages"
-            className="min-h-svh min-w-0 focus:outline-hidden md:min-h-[calc(100svh-1rem)]"
+            className="min-h-dvh min-w-0 overflow-visible focus:outline-hidden md:min-h-[calc(100svh-1rem)]"
           >
             <BrowserWarning />
             <WorkspaceHeader patient />
