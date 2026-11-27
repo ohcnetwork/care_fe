@@ -68,7 +68,7 @@ export default function MedicationReturnList({
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: currentStatus !== "all" ? currentStatus : undefined,
-        patient_isnull: false, // Medication returns always have a patient
+        patient_return: true, // Medication returns always have a patient
         patient: qParams.patient_external_id,
       },
     }),
