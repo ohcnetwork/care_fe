@@ -1287,20 +1287,45 @@ test.describe("All encounters search", () => {
     ]);
   });
 
-  test("a phone field keeps only phone characters and flags a too long number", async ({
+  test("a phone field keeps only phone characters, up to the country's length", async ({
     page,
   }) => {
     await page.goto(listUrl());
     await searchBox(page).pressSequentially("phone:", { delay: 50 });
+    // The country's calling code shows before the number, not editable.
+    const callingCode = page.locator(
+      '[data-slot="encounter-search-calling-code"]',
+    );
+    await expect(callingCode).toHaveText("+91");
     await searchBox(page).pressSequentially("98a76b5", { delay: 50 });
     await expect(searchBox(page)).toHaveValue("98765");
 
+    // No more digits than an India mobile number has; a leading 0 (the
+    // national prefix) doesn't count.
     await searchBox(page).fill("");
     await searchBox(page).pressSequentially("98765432101234", { delay: 20 });
+    await expect(searchBox(page)).toHaveValue("9876543210");
+    await searchBox(page).fill("");
+    await searchBox(page).pressSequentially("098765432101", { delay: 20 });
+    await expect(searchBox(page)).toHaveValue("09876543210");
+
+    // A number already typed is flagged when a shorter country is picked,
+    // and can still be shortened.
+    await searchBox(page).fill("9876543210");
+    // The open list hides the rest of the field from the accessibility tree.
+    await searchBox(page).press("Escape");
+    await page
+      .getByRole("button", { name: "Phone country: India (+91)" })
+      .click();
+    await page.getByPlaceholder("Search country...").fill("Singapore");
+    await page.getByRole("option", { name: /singapore \+65/i }).click();
+    await expect(callingCode).toHaveText("+65");
     await expect(searchBox(page)).toHaveAttribute("aria-invalid", "true");
     await expect(page.getByRole("option")).toContainText(
-      "Too many digits for a India number",
+      "Too many digits for a Singapore number",
     );
+    await searchBox(page).press("Backspace");
+    await expect(searchBox(page)).toHaveValue("987654321");
   });
 
   test("keeps the picked field and country for the next visit", async ({
@@ -1328,11 +1353,15 @@ test.describe("All encounters search", () => {
     await expect(page).toHaveURL(
       (url) => url.searchParams.get("patient_filter") === fullPatient.id,
     );
-    // The selector keeps the field that found the patient.
+    // With a patient applied, the selector's place says Patient.
+    const field = page.getByRole("combobox", { name: /^search field$/i });
     await expect(
-      page.getByRole("combobox", { name: /^search field$/i }),
-    ).toContainText(/phone/i);
+      page.locator('[data-slot="encounter-search-patient-label"]'),
+    ).toHaveText("Patient");
+    await expect(field).toHaveCount(0);
+    // Removed, the field and country that found them are back.
     await chip(page).getByRole("button", { name: "Remove patient" }).click();
+    await expect(field).toContainText(/phone/i);
     await expect(
       page.getByRole("button", { name: "Phone country: United Kingdom (+44)" }),
     ).toBeVisible();
@@ -1462,31 +1491,34 @@ test.describe("All encounters search", () => {
     await page.goto(listUrl(`?patient_filter=${fullPatient.id}`));
     await expect(chip(page)).toHaveText(/^patient$/i);
 
-    // One search at a time: nothing can be typed or scanned, but the search
-    // type can still be changed.
+    // One search at a time: nothing can be typed, and the selector's place
+    // says Patient. Scan stays, to replace the patient in one click.
     await expect(searchBox(page)).not.toBeEditable();
-    await expect(page.getByRole("button", { name: /scan/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /scan/i })).toBeVisible();
+    await expect(
+      page.locator('[data-slot="encounter-search-patient-label"]'),
+    ).toHaveText("Patient");
     await expect(
       page.getByRole("combobox", { name: /^search field$/i }),
-    ).toBeEnabled();
+    ).toHaveCount(0);
 
     // The input still takes focus and says how to remove the chip. The first
     // Backspace only highlights it; any other key drops the highlight.
     await searchBox(page).focus();
     await expect(searchBox(page)).toHaveAttribute(
       "placeholder",
-      "Press Backspace to remove",
+      "Backspace to remove",
     );
     await searchBox(page).press("Backspace");
     await expect(chip(page)).toHaveCount(1);
     await expect(searchBox(page)).toHaveAttribute(
       "placeholder",
-      "Press Backspace again to remove",
+      "Backspace again to remove",
     );
     await searchBox(page).press("ArrowLeft");
     await expect(searchBox(page)).toHaveAttribute(
       "placeholder",
-      "Press Backspace to remove",
+      "Backspace to remove",
     );
 
     // Backspace twice removes it.
@@ -1500,26 +1532,54 @@ test.describe("All encounters search", () => {
     await expect(searchBox(page)).toBeFocused();
     await expect(searchBox(page)).toHaveAttribute(
       "placeholder",
-      "Search visits or patients",
+      "Name, ID, phone",
     );
   });
 
   test("picking another search type clears the applied search", async ({
     page,
   }) => {
-    await page.goto(listUrl(`?patient_filter=${fullPatient.id}`));
-    await expect(chip(page)).toHaveText(/^patient$/i);
+    // A name filter keeps the selector, on Name; a patient replaces it.
+    await page.goto(listUrl("?name=Kumar"));
+    await expect(chip(page)).toHaveText(/^kumar$/i);
 
     const field = page.getByRole("combobox", { name: /^search field$/i });
+    await expect(field).toHaveText(/^name$/i);
     await field.click();
     await page.getByRole("option", { name: "Visit ID" }).click();
     await expect(chip(page)).toHaveCount(0);
-    await expect(page).toHaveURL(
-      (url) => !url.searchParams.has("patient_filter"),
-    );
+    await expect(page).toHaveURL((url) => !url.searchParams.has("name"));
     await expect(field).toHaveText(/visit id/i);
     await expect(searchBox(page)).toBeEditable();
     await expect(searchBox(page)).toBeFocused();
+  });
+
+  test("the clear button removes the applied search; a scan replaces it", async ({
+    page,
+  }) => {
+    await page.goto(listUrl("?name=Kumar"));
+    await expect(chip(page)).toHaveText(/^kumar$/i);
+    await page.getByRole("button", { name: "Clear search" }).click();
+    await expect(chip(page)).toHaveCount(0);
+    await expect(page).toHaveURL((url) => !url.searchParams.get("name"));
+    await expect(searchBox(page)).toBeEditable();
+    await expect(searchBox(page)).toBeFocused();
+
+    // A handheld scan into the locked input replaces the applied filter.
+    await page.goto(listUrl("?name=Kumar"));
+    await expect(chip(page)).toHaveText(/^kumar$/i);
+    const scanned = faker.string.uuid();
+    await searchBox(page).focus();
+    await page.keyboard.type(scanned);
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(
+      (url) =>
+        url.searchParams.get("patient_filter") === scanned &&
+        !url.searchParams.get("name"),
+    );
+    await expect(
+      page.locator('[data-slot="encounter-search-patient-label"]'),
+    ).toHaveText("Patient");
   });
 
   test("a scanner's Enter applies the patient; a typed Enter filters visits", async ({

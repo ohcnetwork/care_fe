@@ -39,9 +39,9 @@ interface EncounterSearchChipsProps extends AppliedSearch {
  * The search filters the URL applies, each removable, in gray. Text filters
  * are neutral badges; the patient is a member card.
  *
- * Inline, they take the line's space before the input; below about 8rem a
- * chip, the input wraps to the next line instead. In a narrow toolbar the
- * chips also wrap, one per line, rather than truncating to their icons.
+ * Inline, they stay on the search's one line and take its space before the
+ * (locked) input, each truncating down to about 4rem; the search reserves
+ * room for them, so its field selector shrinks first.
  */
 export function EncounterSearchChips({
   layout = "inline",
@@ -87,6 +87,10 @@ export function EncounterSearchChips({
     : undefined;
 
   const row = layout === "row";
+  // Inline, one chip takes the room it needs (the search shrinks its field
+  // selector first); two are capped, so a long label doesn't make its chip
+  // take more of the shrink than the other's.
+  const capped = !row && count > 1;
 
   return (
     <ul
@@ -98,7 +102,7 @@ export function EncounterSearchChips({
         row
           ? "flex-wrap gap-2"
           : [
-              "max-w-max min-w-0 grow-100 gap-1 ps-1.5 @max-lg/toolbar:flex-wrap",
+              "max-w-max min-w-0 grow-100 gap-1 ps-1.5",
               count > 1 ? "basis-56" : "basis-32",
             ],
       )}
@@ -110,13 +114,13 @@ export function EncounterSearchChips({
           className={cn(
             badgeVariants({ variant: "neutral" }),
             "gap-1 py-0 pe-0 text-sm font-normal",
-            row ? "h-9 max-w-full ps-3" : "h-7 max-w-48 min-w-16 shrink",
+            row
+              ? "h-9 max-w-full ps-3"
+              : ["h-7 min-w-16 shrink", capped ? "max-w-48" : "max-w-full"],
             highlighted === "text" && highlightClass,
           )}
         >
-          {/* Inline, capped, so a long label doesn't make its chip take more
-              of the shrink than the patient's. */}
-          <span className={cn("truncate", !row && "max-w-36")}>
+          <span className={cn("truncate", capped && "max-w-36")}>
             {textFilter.label}
           </span>
           <button
@@ -136,7 +140,10 @@ export function EncounterSearchChips({
           className={cn(
             row
               ? "max-w-full min-w-0"
-              : ["min-w-16 shrink", unverified ? "max-w-60" : "max-w-48"],
+              : [
+                  "min-w-16 shrink",
+                  !capped ? "max-w-full" : unverified ? "max-w-60" : "max-w-48",
+                ],
             highlighted === "patient" && highlightClass,
           )}
         >
@@ -144,7 +151,11 @@ export function EncounterSearchChips({
             size={row ? "sm" : "xs"}
             className={cn(
               NEUTRAL_CHIP,
-              row ? "max-w-full" : unverified ? "max-w-60" : "max-w-48",
+              row || !capped
+                ? "max-w-full"
+                : unverified
+                  ? "max-w-60"
+                  : "max-w-48",
             )}
             icon={
               patient.scanned ? (

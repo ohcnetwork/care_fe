@@ -5,7 +5,7 @@ import { useRef, type KeyboardEvent } from "react";
  * People don't type a whole patient id this fast; the global wedge hook
  * allows 500 ms.
  */
-const SCAN_KEY_GAP_MS = 100;
+export const SCAN_KEY_GAP_MS = 100;
 
 /**
  * Tells a handheld scanner's Enter from a typed one in a focused input. The

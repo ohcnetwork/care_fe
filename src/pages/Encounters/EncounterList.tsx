@@ -752,17 +752,28 @@ export function EncounterList({
   const removeSearchText = () =>
     updateQuery({ name: "", external_identifier: "" });
 
-  // Selecting a patient clears the dates, as before.
+  // Selecting a patient clears the dates, as before, and any text search:
+  // one search applies at a time (a scan may replace a name filter).
   const selectPatient = (patient: SelectedPatient) =>
     updateQuery({
       patient_filter: patient.id,
       patient_name: patient.name,
+      name: "",
+      external_identifier: "",
       created_date_after: undefined,
       created_date_before: undefined,
     });
   // Removing the patient: the default dates resume.
   const removePatient = () =>
     updateQuery({ patient_filter: undefined, patient_name: undefined });
+  // Everything the search applied, in one update.
+  const clearSearch = () =>
+    updateQuery({
+      name: "",
+      external_identifier: "",
+      patient_filter: undefined,
+      patient_name: undefined,
+    });
   const scannedPatient =
     qParams.patient_name === t("scanned_patient") ||
     qParams.patient_name === t("encounter_search_scanned_patient");
@@ -869,17 +880,27 @@ export function EncounterList({
             the right; applied-search chips and the date notice below. */}
         <FrameHeader className="@container/toolbar gap-2">
           <div className="flex w-full min-w-0 flex-wrap items-center gap-2 @4xl/toolbar:flex-nowrap">
-            <div className="flex w-full min-w-0 items-center gap-2 @4xl/toolbar:w-auto">
+            <div
+              className={
+                isAllList
+                  ? // The search grows into the toolbar's free space, from
+                    // 384px up to 576px: room for the field selector, the
+                    // phone country and a full patient chip. Two chips
+                    // (only from a URL) may take 640px.
+                    "flex w-full min-w-0 items-center gap-2 @4xl/toolbar:w-auto @4xl/toolbar:min-w-96 @4xl/toolbar:max-w-144 @4xl/toolbar:flex-1 @4xl/toolbar:has-[[data-slot=encounter-search-applied]+[data-slot=encounter-search-applied]]:max-w-160"
+                  : "flex w-full min-w-0 items-center gap-2 @4xl/toolbar:w-auto"
+              }
+            >
               {isAllList ? (
                 <EncounterSearch
-                  // Compact; it widens only when two chips share the line.
-                  className="w-full @4xl/toolbar:w-96 @4xl/toolbar:has-[[data-slot=encounter-search-applied]+[data-slot=encounter-search-applied]]:w-128"
+                  className="w-full"
                   previewQueryParams={listFilterParams}
                   applied={isMobile ? {} : appliedSearch}
                   onApplyText={applySearchText}
                   onRemoveText={removeSearchText}
                   onSelectPatient={selectPatient}
                   onRemovePatient={removePatient}
+                  onClearAll={clearSearch}
                 />
               ) : (
                 <>

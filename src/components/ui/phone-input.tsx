@@ -6,7 +6,7 @@ import {
   getExampleNumber,
 } from "libphonenumber-js";
 import examples from "libphonenumber-js/mobile/examples";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import * as RPNInput from "react-phone-number-input";
@@ -22,7 +22,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { InputGroup } from "@/components/ui/input-group";
 import {
@@ -30,6 +37,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+import { useIsMobile } from "@/hooks/use-mobile";
 
 function getMaxDigits(countryCode: CountryCode): number {
   const example = getExampleNumber(countryCode, examples);
@@ -200,6 +209,10 @@ type CountrySelectProps = {
   "aria-label"?: string;
   /** Where focus goes after a pick, when used outside PhoneInput. */
   pickedFocus?: React.RefObject<HTMLElement | null>;
+  /** Classes for the trigger, when used outside PhoneInput. */
+  className?: string;
+  /** Opens as a drawer on mobile instead of a popover. */
+  drawerOnMobile?: boolean;
 };
 
 const CountrySelect = ({
@@ -209,8 +222,12 @@ const CountrySelect = ({
   onChange,
   "aria-label": ariaLabel,
   pickedFocus,
+  className,
+  drawerOnMobile = false,
 }: CountrySelectProps) => {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
+  const asDrawer = drawerOnMobile && isMobile;
   const listRef = React.useRef<HTMLDivElement>(null);
   const [searchValue, setSearchValue] = React.useState("");
   const [open, setOpen] = React.useState(false);
@@ -220,71 +237,134 @@ const CountrySelect = ({
     setPicked(true);
     setOpen(false);
   };
-  return (
-    <Popover
-      open={open}
-      modal
-      onOpenChange={(open) => {
-        setOpen(open);
-        if (open) {
-          setSearchValue("");
-          setPicked(false);
-        }
-      }}
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (next) {
+      setSearchValue("");
+      setPicked(false);
+    }
+  };
+  const finalFocus = () => (picked && pickedFocus?.current) || true;
+  const selectedLabel = countryList.find(
+    (entry) => entry.value === selectedCountry,
+  )?.label;
+  const selectedValue = selectedLabel
+    ? `${selectedLabel} +${RPNInput.getCountryCallingCode(selectedCountry)}`
+    : undefined;
+
+  const trigger = (
+    <Button
+      type="button"
+      variant="ghost"
+      className={cn(
+        "border-input flex shrink-0 gap-1.5 rounded-none! border-0 border-r px-2 text-sm no-underline shadow-none not-in-data-[slot=button-group]:rounded-none! focus-visible:outline-0 focus-visible:bg-muted h-full",
+        className,
+      )}
+      disabled={disabled}
+      aria-label={ariaLabel}
     >
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          className="border-input flex shrink-0 gap-1.5 rounded-none! border-0 border-r px-2 text-sm no-underline shadow-none not-in-data-[slot=button-group]:rounded-none! focus-visible:outline-0 focus-visible:bg-muted h-full"
-          disabled={disabled}
+      <FlagComponent country={selectedCountry} countryName={selectedCountry} />
+      {!disabled && (
+        <ChevronDown
+          aria-hidden="true"
+          data-icon="inline-end"
+          className="size-3.5 text-muted-foreground"
+        />
+      )}
+    </Button>
+  );
+
+  // The standard searchable list: the search takes focus as it opens, and a
+  // country is found by its name or calling code.
+  const list = (
+    <Command
+      className={cn(asDrawer && "min-h-0 flex-1")}
+      // Opens on the current country, which leads the list.
+      defaultValue={selectedValue}
+      // Plain substring matching: fuzzy matching would list +244 and +54 for
+      // "+44".
+      filter={(value, search) =>
+        value.toLowerCase().includes(search.trim().toLowerCase()) ? 1 : 0
+      }
+    >
+      <CommandInput
+        autoFocus
+        aria-label={t("search_countries")}
+        placeholder={t("search_country")}
+        value={searchValue}
+        onValueChange={(value) => {
+          setSearchValue(value);
+          listRef.current?.scrollTo({ top: 0 });
+        }}
+      />
+      <CommandList
+        ref={listRef}
+        className={cn(
+          "overflow-y-auto",
+          asDrawer ? "max-h-none min-h-0 flex-1" : "max-h-80",
+        )}
+      >
+        <CommandEmpty>{t("no_country_found")}</CommandEmpty>
+        {/* The selected country leads, apart from the rest; while searching
+            it stays first when it matches, and the divider hides. */}
+        {selectedLabel && (
+          <>
+            <CommandGroup>
+              <CountrySelectOption
+                country={selectedCountry}
+                countryName={selectedLabel}
+                selectedCountry={selectedCountry}
+                onChange={handleCountrySelect}
+              />
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
+        <CommandGroup>
+          {countryList.map(({ value, label }) =>
+            value && value !== selectedCountry ? (
+              <CountrySelectOption
+                key={value}
+                country={value}
+                countryName={label}
+                selectedCountry={selectedCountry}
+                onChange={handleCountrySelect}
+              />
+            ) : null,
+          )}
+        </CommandGroup>
+      </CommandList>
+    </Command>
+  );
+
+  if (asDrawer) {
+    return (
+      <Drawer open={open} onOpenChange={handleOpenChange}>
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent
+          height="fixed"
           aria-label={ariaLabel}
+          finalFocus={finalFocus}
         >
-          <FlagComponent
-            country={selectedCountry}
-            countryName={selectedCountry}
-          />
-          <ChevronsUpDown
-            className={cn(
-              "size-4 opacity-50",
-              disabled ? "hidden" : "opacity-100",
-            )}
-          />
-        </Button>
-      </PopoverTrigger>
+          <DrawerTitle className="sr-only">{ariaLabel}</DrawerTitle>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-2 pb-0">
+            {list}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Popover open={open} modal onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent
-        className="p-2 sm:p-0 w-[var(--anchor-width)] min-w-64 overflow-clip"
+        className="w-72 max-w-(--available-width) gap-0 overflow-hidden p-0"
         align="start"
         sideOffset={5}
-        finalFocus={(picked && pickedFocus) || true}
+        finalFocus={finalFocus}
       >
-        <Command>
-          <CommandInput
-            value={searchValue}
-            onValueChange={(value) => {
-              setSearchValue(value);
-              listRef.current?.scrollTo({ top: 0 });
-            }}
-            placeholder={t("search_country")}
-            className="border-none shadow-none outline-hidden ring-0"
-          />
-          <CommandList ref={listRef}>
-            <CommandEmpty>{t("no_country_found")}</CommandEmpty>
-            <CommandGroup>
-              {countryList.map(({ value, label }) =>
-                value ? (
-                  <CountrySelectOption
-                    key={value}
-                    country={value}
-                    countryName={label}
-                    selectedCountry={selectedCountry}
-                    onChange={handleCountrySelect}
-                  />
-                ) : null,
-              )}
-            </CommandGroup>
-          </CommandList>
-        </Command>
+        {list}
       </PopoverContent>
     </Popover>
   );
@@ -304,12 +384,14 @@ const CountrySelectOption = ({
   return (
     <CommandItem
       className="gap-2"
+      // Found by name or calling code ("India", "+91", "91").
+      value={`${countryName} +${RPNInput.getCountryCallingCode(country)}`}
       data-checked={country === selectedCountry}
       onSelect={() => onChange(country)}
     >
       <FlagComponent country={country} countryName={countryName} />
-      <span className="flex-1 text-sm">{countryName}</span>
-      <span className="text-sm text-foreground/50">{`+${RPNInput.getCountryCallingCode(country)}`}</span>
+      <span className="min-w-0 flex-1 truncate">{countryName}</span>
+      <span className="text-muted-foreground tabular-nums">{`+${RPNInput.getCountryCallingCode(country)}`}</span>
     </CommandItem>
   );
 };
