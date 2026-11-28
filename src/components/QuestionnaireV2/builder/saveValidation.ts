@@ -63,6 +63,17 @@ const SAVE_CHECKS: SaveCheck[] = [
     messageKey: "quantity_needs_valueset",
   },
   {
+    // A template with no name or no content would render as an empty entry.
+    // Only string and text questions expose a template editor to fix it.
+    predicate: (question) =>
+      (question.type === "string" || question.type === "text") &&
+      (question.templates?.some(
+        (template) => !template.name.trim() || !template.content.trim(),
+      ) ??
+        false),
+    messageKey: "template_name_and_content_required",
+  },
+  {
     predicate: (question) =>
       question.type === "choice" &&
       !question.answer_value_set &&

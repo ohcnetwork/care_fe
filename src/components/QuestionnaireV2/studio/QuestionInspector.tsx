@@ -22,6 +22,7 @@ import { AnswerOptionsEditor } from "@/components/QuestionnaireV2/builder/Answer
 import { BehaviourSettingsCard } from "@/components/QuestionnaireV2/builder/BehaviourSettingsCard";
 import { BuilderAction } from "@/components/QuestionnaireV2/builder/builderReducer";
 import { QuestionCodingCard } from "@/components/QuestionnaireV2/builder/QuestionCodingCard";
+import { QuestionTemplatesEditor } from "@/components/QuestionnaireV2/builder/QuestionTemplatesEditor";
 import { QuestionTypePicker } from "@/components/QuestionnaireV2/builder/QuestionTypePicker";
 import { NON_REPEATABLE_TYPES } from "@/components/QuestionnaireV2/builder/questionTypeRules";
 import { SubQuestionsList } from "@/components/QuestionnaireV2/builder/SubQuestionsList";
@@ -157,6 +158,9 @@ export function QuestionInspector({
         answer_value_set: undefined,
       };
     }
+    if (nextType !== "string" && nextType !== "text") {
+      patch = { ...patch, templates: undefined };
+    }
     if (!UNIT_BEARING_TYPES.includes(nextType)) {
       patch = { ...patch, unit: undefined };
     }
@@ -281,6 +285,13 @@ export function QuestionInspector({
                 question={question}
                 onChange={onChange}
                 valueSetScope={valueSetScope}
+              />
+            )}
+
+            {(question.type === "string" || question.type === "text") && (
+              <QuestionTemplatesEditor
+                question={question}
+                onChange={onChange}
               />
             )}
 
