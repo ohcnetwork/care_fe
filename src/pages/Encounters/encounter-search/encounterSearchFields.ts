@@ -1,4 +1,10 @@
 import {
+  AsYouType,
+  getExampleNumber,
+  validatePhoneNumberLength,
+} from "libphonenumber-js";
+import mobileExamples from "libphonenumber-js/mobile/examples";
+import {
   Country,
   isValidPhoneNumber,
   parsePhoneNumber,
@@ -64,6 +70,34 @@ export function parseFieldPrefix(
 /** Digits, with the spaces, dashes and leading `+` of a typed number. */
 export const isNumericText = (text: string) =>
   /^\+?[\d\s()-]+$/.test(text) && /\d/.test(text);
+
+/** Drops what a phone number never holds, keeping digits, `+`, spaces, `()-`. */
+export const sanitizePhoneInput = (text: string) =>
+  text.replace(/[^\d\s()+-]/g, "");
+
+/**
+ * Whether `text` has more digits than a mobile number of `country` (or of a
+ * `+` number's own country), as patient phone numbers are mobile numbers and
+ * the shared PhoneInput limits them so. A national prefix, such as a leading
+ * 0, doesn't count. A country without a mobile example falls back to the
+ * longest number the country has.
+ */
+export function isPhoneTooLong(text: string, country: Country): boolean {
+  const trimmed = text.trim();
+  if (!isNumericText(trimmed)) return false;
+  const international = trimmed.startsWith("+");
+  const typing = new AsYouType(international ? undefined : country);
+  typing.input(trimmed);
+  const target = typing.getCountry() ?? (international ? undefined : country);
+  const maxDigits =
+    target && getExampleNumber(target, mobileExamples)?.nationalNumber.length;
+  if (maxDigits) return typing.getNationalNumber().length > maxDigits;
+  try {
+    return validatePhoneNumberLength(trimmed, country) === "TOO_LONG";
+  } catch {
+    return false;
+  }
+}
 
 const fullMatch = (regex: string) => {
   try {

@@ -1058,8 +1058,6 @@ test.describe("All encounters search", () => {
     page.getByRole("combobox", { name: /^search visits$/i });
   const chip = (page: Page) =>
     page.locator('[data-slot="encounter-search-applied"]');
-  const dateNotice = (page: Page) =>
-    page.getByRole("status").filter({ hasText: /date range cleared/i });
 
   /** Splits encounter list requests into list pages and limit=1 previews. */
   function trackEncounterRequests(page: Page) {
@@ -1132,7 +1130,13 @@ test.describe("All encounters search", () => {
         !url.searchParams.get("external_identifier"),
     );
     await expect(searchBox(page)).toHaveValue("");
-    await expect(chip(page)).toHaveText(/name: taylor/i);
+    // The selector moves from Auto to the field used; the chip shows the
+    // value.
+    const field = page.getByRole("combobox", { name: /^search field$/i });
+    await expect(field).toHaveText(/^name$/i);
+    await expect(chip(page)).toHaveText(/^taylor$/i);
+    // One search at a time: the input is read-only until the chip goes.
+    await expect(searchBox(page)).not.toBeEditable();
     await expect
       .poll(() =>
         requests.list.some((params) => params.get("name") === "Taylor"),
@@ -1143,6 +1147,9 @@ test.describe("All encounters search", () => {
       .getByRole("button", { name: "Remove name filter" })
       .click();
     await expect(page).toHaveURL((url) => !url.searchParams.has("name"));
+    // The next search is by the same field.
+    await expect(field).toHaveText(/^name$/i);
+    await expect(searchBox(page)).toBeEditable();
   });
 
   test("never looks up an incomplete phone number", async ({ page }) => {
@@ -1163,9 +1170,10 @@ test.describe("All encounters search", () => {
     expect(lookups).toHaveLength(0);
   });
 
-  test("in Auto, a full phone number offers only the phone lookup", async ({
+  test("in Auto, a full phone number lists its patients directly", async ({
     page,
   }) => {
+    const lookups = trackPatientLookups(page);
     // Like a facility with many configs: some without a format rule, and the
     // phone config listed last.
     const hospitalId = identifierConfig("Hospital ID", "example.org/hospital");
@@ -1183,15 +1191,20 @@ test.describe("All encounters search", () => {
     );
     await page.goto(listUrl());
 
+    // The phone config is the only one that recognises the number, so no
+    // row to confirm: the patients under it are listed, with Back to the rows.
     await searchBox(page).pressSequentially("+919846404232", { delay: 20 });
+    await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
+    await expect(
+      page.getByRole("option", { name: fullPatient.name }),
+    ).toBeVisible();
+    expect(lookups).toEqual([
+      { config: phoneConfig.id, value: "+919846404232", page_size: 20 },
+    ]);
+
     const patientRows = page
       .getByRole("group", { name: /look up a patient/i })
       .getByRole("option");
-    await expect(patientRows).toHaveCount(1);
-    await expect(patientRows).toContainText(/phone number \+91 98464 04232/i);
-    await expect(page.getByRole("option").first()).toContainText(
-      /phone number/i,
-    );
 
     // Without a format match, a partly typed phone number leads with its
     // hint; then configs without a rule, usable ones before disabled ones.
@@ -1225,9 +1238,8 @@ test.describe("All encounters search", () => {
     await expect(india).toBeVisible();
     await searchBox(page).pressSequentially("4 7400 123456", { delay: 50 });
     await expect(country("Phone country: United Kingdom (+44)")).toBeVisible();
-    await expect(page.getByRole("option").first()).toContainText(
-      /phone number \+44 7400 123456/i,
-    );
+    // The complete number goes straight to its patients.
+    await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
   });
 
   test("looks up a phone number in the picked country", async ({ page }) => {
@@ -1244,35 +1256,129 @@ test.describe("All encounters search", () => {
     ).toBeVisible();
     await expect(searchBox(page)).toBeFocused();
 
+    // The phone field was picked, so a valid number is looked up as typed.
     await searchBox(page).pressSequentially("07400 123456", { delay: 50 });
-    await expect(page.getByRole("option")).toContainText(
-      /phone number \+44 7400 123456/i,
-    );
-    await searchBox(page).press("Enter");
     await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
     expect(lookups).toEqual([
       { config: phoneConfig.id, value: "+447400123456", page_size: 20 },
     ]);
   });
 
-  test("looks up a complete phone on Enter, and Undo restores the dates", async ({
+  test("a picked phone field looks up a valid number without a confirming click", async ({
     page,
   }) => {
     const lookups = trackPatientLookups(page);
-    await page.goto(listUrl("?name=Kumar"));
+    await page.goto(listUrl());
+    await searchBox(page).pressSequentially("phone:", { delay: 50 });
+    await searchBox(page).pressSequentially("98765", { delay: 50 });
+    // Still incomplete: a hint, and no search.
+    await expect(page.getByRole("option")).toContainText(
+      "Enter the full phone number",
+    );
+    expect(lookups).toHaveLength(0);
+
+    await searchBox(page).pressSequentially("43210", { delay: 50 });
+    await page.getByRole("option", { name: fullPatient.name }).click();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("patient_filter") === fullPatient.id,
+    );
+    expect(lookups).toEqual([
+      { config: phoneConfig.id, value: "+919876543210", page_size: 20 },
+    ]);
+  });
+
+  test("a phone field keeps only phone characters, up to the country's length", async ({
+    page,
+  }) => {
+    await page.goto(listUrl());
+    await searchBox(page).pressSequentially("phone:", { delay: 50 });
+    // The country's calling code shows before the number, not editable.
+    const callingCode = page.locator(
+      '[data-slot="encounter-search-calling-code"]',
+    );
+    await expect(callingCode).toHaveText("+91");
+    await searchBox(page).pressSequentially("98a76b5", { delay: 50 });
+    await expect(searchBox(page)).toHaveValue("98765");
+
+    // No more digits than an India mobile number has; a leading 0 (the
+    // national prefix) doesn't count.
+    await searchBox(page).fill("");
+    await searchBox(page).pressSequentially("98765432101234", { delay: 20 });
+    await expect(searchBox(page)).toHaveValue("9876543210");
+    await searchBox(page).fill("");
+    await searchBox(page).pressSequentially("098765432101", { delay: 20 });
+    await expect(searchBox(page)).toHaveValue("09876543210");
+
+    // A number already typed is flagged when a shorter country is picked,
+    // and can still be shortened.
+    await searchBox(page).fill("9876543210");
+    // The open list hides the rest of the field from the accessibility tree.
+    await searchBox(page).press("Escape");
+    await page
+      .getByRole("button", { name: "Phone country: India (+91)" })
+      .click();
+    await page.getByPlaceholder("Search country...").fill("Singapore");
+    await page.getByRole("option", { name: /singapore \+65/i }).click();
+    await expect(callingCode).toHaveText("+65");
+    await expect(searchBox(page)).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByRole("option")).toContainText(
+      "Too many digits for a Singapore number",
+    );
+    await searchBox(page).press("Backspace");
+    await expect(searchBox(page)).toHaveValue("987654321");
+  });
+
+  test("keeps the picked field and country for the next visit", async ({
+    page,
+  }) => {
+    await page.goto(listUrl());
+    await searchBox(page).pressSequentially("phone:", { delay: 50 });
+    await page
+      .getByRole("button", { name: "Phone country: India (+91)" })
+      .click();
+    await page.getByPlaceholder("Search country...").fill("United Kingdom");
+    await page.getByRole("option", { name: /united kingdom \+44/i }).click();
+
+    await page.reload();
+    await expect(
+      page.getByRole("button", { name: "Phone country: United Kingdom (+44)" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("combobox", { name: /^search field$/i }),
+    ).toContainText(/phone/i);
+
+    // Applying a patient keeps them too: they are back with the chip gone.
+    await searchBox(page).pressSequentially("07400123456", { delay: 50 });
+    await page.getByRole("option", { name: fullPatient.name }).click();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("patient_filter") === fullPatient.id,
+    );
+    // With a patient applied, the selector's place says Patient.
+    const field = page.getByRole("combobox", { name: /^search field$/i });
+    await expect(
+      page.locator('[data-slot="encounter-search-patient-label"]'),
+    ).toHaveText("Patient");
+    await expect(field).toHaveCount(0);
+    // Removed, the field and country that found them are back.
+    await chip(page).getByRole("button", { name: "Remove patient" }).click();
+    await expect(field).toContainText(/phone/i);
+    await expect(
+      page.getByRole("button", { name: "Phone country: United Kingdom (+44)" }),
+    ).toBeVisible();
+  });
+
+  test("lists the patients of a complete phone and clears the dates for the chosen one", async ({
+    page,
+  }) => {
+    const lookups = trackPatientLookups(page);
+    await page.goto(listUrl());
     await expect(page).toHaveURL((url) =>
       url.searchParams.has("created_date_after"),
     );
-    const before = new URL(page.url()).searchParams;
 
     await searchBox(page).pressSequentially("9876543210", { delay: 150 });
-    // Detection puts the lookup first; typing alone never searches. Auto
-    // reads the number in the default country and shows its code.
-    await expect(page.getByRole("option").first()).toContainText(
-      /phone number \+91 98765 43210/i,
-    );
-    expect(lookups).toHaveLength(0);
-    await searchBox(page).press("Enter");
+    // Auto reads the number in the default country; only the phone config
+    // recognises it, so its patients are listed without another step.
     await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
     expect(lookups).toEqual([
       { config: phoneConfig.id, value: "+919876543210", page_size: 20 },
@@ -1286,29 +1392,11 @@ test.describe("All encounters search", () => {
         !url.searchParams.has("created_date_after") &&
         !url.searchParams.has("created_date_before"),
     );
-    await expect(dateNotice(page)).toContainText(
-      "The name filter still applies.",
-    );
     await expect(
       chip(page).filter({ hasText: fullPatient.name }),
     ).toBeVisible();
 
-    await dateNotice(page).getByRole("button", { name: "Undo" }).click();
-    await expect(page).toHaveURL(
-      (url) =>
-        !url.searchParams.has("patient_filter") &&
-        url.searchParams.get("created_date_after") ===
-          before.get("created_date_after") &&
-        url.searchParams.get("created_date_before") ===
-          before.get("created_date_before"),
-    );
-    await expect(dateNotice(page)).toHaveCount(0);
-
-    // Removing the patient is not Undo: the default dates resume.
-    await searchBox(page).pressSequentially("9876543210", { delay: 150 });
-    await searchBox(page).press("Enter");
-    await page.getByRole("option", { name: fullPatient.name }).click();
-    await expect(dateNotice(page)).toBeVisible();
+    // Removing the patient: the default dates resume.
     await chip(page)
       .filter({ hasText: fullPatient.name })
       .getByRole("button", { name: "Remove patient" })
@@ -1318,7 +1406,6 @@ test.describe("All encounters search", () => {
         !url.searchParams.has("patient_filter") &&
         url.searchParams.has("created_date_after"),
     );
-    await expect(dateNotice(page)).toHaveCount(0);
   });
 
   test("verifies a partial record and filters by its full record's id", async ({
@@ -1333,7 +1420,6 @@ test.describe("All encounters search", () => {
     });
     await page.goto(listUrl());
     await searchBox(page).pressSequentially("9876500000", { delay: 150 });
-    await searchBox(page).press("Enter");
     await page.getByRole("option", { name: /meera s/i }).click();
 
     const year = page.getByRole("textbox", { name: /year of birth/i });
@@ -1399,6 +1485,103 @@ test.describe("All encounters search", () => {
     );
   });
 
+  test("the search stays off while a chip is applied; Backspace twice removes it", async ({
+    page,
+  }) => {
+    await page.goto(listUrl(`?patient_filter=${fullPatient.id}`));
+    await expect(chip(page)).toHaveText(/^patient$/i);
+
+    // One search at a time: nothing can be typed, and the selector's place
+    // says Patient. Scan stays, to replace the patient in one click.
+    await expect(searchBox(page)).not.toBeEditable();
+    await expect(page.getByRole("button", { name: /scan/i })).toBeVisible();
+    await expect(
+      page.locator('[data-slot="encounter-search-patient-label"]'),
+    ).toHaveText("Patient");
+    await expect(
+      page.getByRole("combobox", { name: /^search field$/i }),
+    ).toHaveCount(0);
+
+    // The input still takes focus and says how to remove the chip. The first
+    // Backspace only highlights it; any other key drops the highlight.
+    await searchBox(page).focus();
+    await expect(searchBox(page)).toHaveAttribute(
+      "placeholder",
+      "Backspace to remove",
+    );
+    await searchBox(page).press("Backspace");
+    await expect(chip(page)).toHaveCount(1);
+    await expect(searchBox(page)).toHaveAttribute(
+      "placeholder",
+      "Backspace again to remove",
+    );
+    await searchBox(page).press("ArrowLeft");
+    await expect(searchBox(page)).toHaveAttribute(
+      "placeholder",
+      "Backspace to remove",
+    );
+
+    // Backspace twice removes it.
+    await searchBox(page).press("Backspace");
+    await searchBox(page).press("Backspace");
+    await expect(chip(page)).toHaveCount(0);
+    await expect(page).toHaveURL(
+      (url) => !url.searchParams.has("patient_filter"),
+    );
+    await expect(searchBox(page)).toBeEditable();
+    await expect(searchBox(page)).toBeFocused();
+    await expect(searchBox(page)).toHaveAttribute(
+      "placeholder",
+      "Name, ID, phone",
+    );
+  });
+
+  test("picking another search type clears the applied search", async ({
+    page,
+  }) => {
+    // A name filter keeps the selector, on Name; a patient replaces it.
+    await page.goto(listUrl("?name=Kumar"));
+    await expect(chip(page)).toHaveText(/^kumar$/i);
+
+    const field = page.getByRole("combobox", { name: /^search field$/i });
+    await expect(field).toHaveText(/^name$/i);
+    await field.click();
+    await page.getByRole("option", { name: "Visit ID" }).click();
+    await expect(chip(page)).toHaveCount(0);
+    await expect(page).toHaveURL((url) => !url.searchParams.has("name"));
+    await expect(field).toHaveText(/visit id/i);
+    await expect(searchBox(page)).toBeEditable();
+    await expect(searchBox(page)).toBeFocused();
+  });
+
+  test("the clear button removes the applied search; a scan replaces it", async ({
+    page,
+  }) => {
+    await page.goto(listUrl("?name=Kumar"));
+    await expect(chip(page)).toHaveText(/^kumar$/i);
+    await page.getByRole("button", { name: "Clear search" }).click();
+    await expect(chip(page)).toHaveCount(0);
+    await expect(page).toHaveURL((url) => !url.searchParams.get("name"));
+    await expect(searchBox(page)).toBeEditable();
+    await expect(searchBox(page)).toBeFocused();
+
+    // A handheld scan into the locked input replaces the applied filter.
+    await page.goto(listUrl("?name=Kumar"));
+    await expect(chip(page)).toHaveText(/^kumar$/i);
+    const scanned = faker.string.uuid();
+    await searchBox(page).focus();
+    await page.keyboard.type(scanned);
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(
+      (url) =>
+        url.searchParams.get("patient_filter") === scanned &&
+        !url.searchParams.get("name"),
+    );
+    await expect(
+      page.locator('[data-slot="encounter-search-patient-label"]'),
+    ).toHaveText("Patient");
+  });
+
   test("a scanner's Enter applies the patient; a typed Enter filters visits", async ({
     page,
   }) => {
@@ -1450,9 +1633,9 @@ test.describe("All encounters search", () => {
       /searching visit id/i,
     );
 
-    // Backspace in an empty input returns to Auto; prefixes pick a field.
+    // Backspace in an empty input keeps the picked field; prefixes pick one.
     await page.keyboard.press("Backspace");
-    await expect(field).toHaveText(/auto/i);
+    await expect(field).toHaveText(/visit id/i);
     await searchBox(page).pressSequentially("phone:", { delay: 50 });
     await expect(field).toHaveText(/phone number/i);
     // The phone field shows its country, preselected as in PhoneInput.

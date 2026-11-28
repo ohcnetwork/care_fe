@@ -76,7 +76,6 @@ import {
   VisitField,
 } from "@/pages/Encounters/encounter-search/EncounterSearch";
 import { EncounterSearchChips } from "@/pages/Encounters/encounter-search/EncounterSearchChips";
-import { EncounterSearchDateNotice } from "@/pages/Encounters/encounter-search/EncounterSearchDateNotice";
 import {
   EncounterClass,
   EncounterListRead,
@@ -282,10 +281,6 @@ export function EncounterList({
   const filtersByEncounterClass = !encounterClass;
   // Only the All list has the combined search; class lists keep theirs.
   const isAllList = !encounterClass;
-  const [dateNotice, setDateNotice] = useState<{
-    patientId: string;
-    snapshot: Record<string, string | undefined>;
-  } | null>(null);
   const [preferredView, setPreferredView] =
     useState<EncounterListView>(readStoredView);
   const changeView = (next: EncounterListView) => {
@@ -757,40 +752,28 @@ export function EncounterList({
   const removeSearchText = () =>
     updateQuery({ name: "", external_identifier: "" });
 
-  // Selecting a patient clears the dates, as before. Undo restores the
-  // previous patient and dates; the history is replaced, so Back can't.
-  const selectPatient = (patient: SelectedPatient) => {
-    const datesCleared = !!(created_date_after || created_date_before);
+  // Selecting a patient clears the dates, as before, and any text search:
+  // one search applies at a time (a scan may replace a name filter).
+  const selectPatient = (patient: SelectedPatient) =>
     updateQuery({
       patient_filter: patient.id,
       patient_name: patient.name,
+      name: "",
+      external_identifier: "",
       created_date_after: undefined,
       created_date_before: undefined,
     });
-    setDateNotice(
-      datesCleared
-        ? {
-            patientId: patient.id,
-            snapshot: {
-              patient_filter,
-              patient_name: qParams.patient_name,
-              created_date_after,
-              created_date_before,
-            },
-          }
-        : null,
-    );
-  };
-  // Removing the patient isn't Undo: the default dates resume.
-  const removePatient = () => {
+  // Removing the patient: the default dates resume.
+  const removePatient = () =>
     updateQuery({ patient_filter: undefined, patient_name: undefined });
-    setDateNotice(null);
-  };
-  const showDateNotice =
-    !!dateNotice &&
-    dateNotice.patientId === patient_filter &&
-    !created_date_after &&
-    !created_date_before;
+  // Everything the search applied, in one update.
+  const clearSearch = () =>
+    updateQuery({
+      name: "",
+      external_identifier: "",
+      patient_filter: undefined,
+      patient_name: undefined,
+    });
   const scannedPatient =
     qParams.patient_name === t("scanned_patient") ||
     qParams.patient_name === t("encounter_search_scanned_patient");
@@ -836,7 +819,6 @@ export function EncounterList({
     };
     if (appliedFilterKeys.length) handleClearFilters(appliedFilterKeys);
     else onFilterUpdate({});
-    setDateNotice(null);
   };
   // The date range can only be lifted for a patient.
   const showAnyDate =
@@ -898,17 +880,27 @@ export function EncounterList({
             the right; applied-search chips and the date notice below. */}
         <FrameHeader className="@container/toolbar gap-2">
           <div className="flex w-full min-w-0 flex-wrap items-center gap-2 @4xl/toolbar:flex-nowrap">
-            <div className="flex w-full min-w-0 items-center gap-2 @4xl/toolbar:w-auto">
+            <div
+              className={
+                isAllList
+                  ? // The search grows into the toolbar's free space, from
+                    // 384px up to 576px: room for the field selector, the
+                    // phone country and a full patient chip. Two chips
+                    // (only from a URL) may take 640px.
+                    "flex w-full min-w-0 items-center gap-2 @4xl/toolbar:w-auto @4xl/toolbar:min-w-96 @4xl/toolbar:max-w-144 @4xl/toolbar:flex-1 @4xl/toolbar:has-[[data-slot=encounter-search-applied]+[data-slot=encounter-search-applied]]:max-w-160"
+                  : "flex w-full min-w-0 items-center gap-2 @4xl/toolbar:w-auto"
+              }
+            >
               {isAllList ? (
                 <EncounterSearch
-                  // Compact; it widens only when two chips share the line.
-                  className="w-full @4xl/toolbar:w-96 @4xl/toolbar:has-[[data-slot=encounter-search-applied]+[data-slot=encounter-search-applied]]:w-128"
+                  className="w-full"
                   previewQueryParams={listFilterParams}
                   applied={isMobile ? {} : appliedSearch}
                   onApplyText={applySearchText}
                   onRemoveText={removeSearchText}
                   onSelectPatient={selectPatient}
                   onRemovePatient={removePatient}
+                  onClearAll={clearSearch}
                 />
               ) : (
                 <>
@@ -1050,18 +1042,6 @@ export function EncounterList({
               {...appliedSearch}
               onRemoveText={removeSearchText}
               onRemovePatient={removePatient}
-            />
-          )}
-
-          {isAllList && showDateNotice && (
-            <EncounterSearchDateNotice
-              name={qParams.name}
-              visitId={qParams.external_identifier}
-              onUndo={() => {
-                if (dateNotice) updateQuery(dateNotice.snapshot);
-                setDateNotice(null);
-              }}
-              onDismiss={() => setDateNotice(null)}
             />
           )}
         </FrameHeader>
