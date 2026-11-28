@@ -1130,10 +1130,10 @@ test.describe("All encounters search", () => {
         !url.searchParams.get("external_identifier"),
     );
     await expect(searchBox(page)).toHaveValue("");
-    // The field shows where the selector was; the chip shows the value.
-    await expect(
-      page.locator('[data-slot="encounter-search-found-by"]'),
-    ).toHaveText("Name");
+    // The selector moves from Auto to the field used; the chip shows the
+    // value.
+    const field = page.getByRole("combobox", { name: /^search field$/i });
+    await expect(field).toHaveText(/^name$/i);
     await expect(chip(page)).toHaveText(/^taylor$/i);
     // One search at a time: the input is read-only until the chip goes.
     await expect(searchBox(page)).not.toBeEditable();
@@ -1147,6 +1147,9 @@ test.describe("All encounters search", () => {
       .getByRole("button", { name: "Remove name filter" })
       .click();
     await expect(page).toHaveURL((url) => !url.searchParams.has("name"));
+    // The next search is by the same field.
+    await expect(field).toHaveText(/^name$/i);
+    await expect(searchBox(page)).toBeEditable();
   });
 
   test("never looks up an incomplete phone number", async ({ page }) => {
@@ -1325,9 +1328,9 @@ test.describe("All encounters search", () => {
     await expect(page).toHaveURL(
       (url) => url.searchParams.get("patient_filter") === fullPatient.id,
     );
-    // The field that found the patient shows where the selector was.
+    // The selector keeps the field that found the patient.
     await expect(
-      page.locator('[data-slot="encounter-search-found-by"]'),
+      page.getByRole("combobox", { name: /^search field$/i }),
     ).toContainText(/phone/i);
     await chip(page).getByRole("button", { name: "Remove patient" }).click();
     await expect(
@@ -1459,16 +1462,13 @@ test.describe("All encounters search", () => {
     await page.goto(listUrl(`?patient_filter=${fullPatient.id}`));
     await expect(chip(page)).toHaveText(/^patient$/i);
 
-    // One patient at a time: nothing can be typed, picked or scanned. A
-    // deep link doesn't say how the patient was found, so no label shows.
+    // One search at a time: nothing can be typed or scanned, but the search
+    // type can still be changed.
     await expect(searchBox(page)).not.toBeEditable();
-    await expect(
-      page.getByRole("combobox", { name: /^search field$/i }),
-    ).toHaveCount(0);
     await expect(page.getByRole("button", { name: /scan/i })).toHaveCount(0);
     await expect(
-      page.locator('[data-slot="encounter-search-found-by"]'),
-    ).toHaveCount(0);
+      page.getByRole("combobox", { name: /^search field$/i }),
+    ).toBeEnabled();
 
     // The input still takes focus and says how to remove the chip. The first
     // Backspace only highlights it; any other key drops the highlight.
@@ -1502,6 +1502,24 @@ test.describe("All encounters search", () => {
       "placeholder",
       "Search visits or patients",
     );
+  });
+
+  test("picking another search type clears the applied search", async ({
+    page,
+  }) => {
+    await page.goto(listUrl(`?patient_filter=${fullPatient.id}`));
+    await expect(chip(page)).toHaveText(/^patient$/i);
+
+    const field = page.getByRole("combobox", { name: /^search field$/i });
+    await field.click();
+    await page.getByRole("option", { name: "Visit ID" }).click();
+    await expect(chip(page)).toHaveCount(0);
+    await expect(page).toHaveURL(
+      (url) => !url.searchParams.has("patient_filter"),
+    );
+    await expect(field).toHaveText(/visit id/i);
+    await expect(searchBox(page)).toBeEditable();
+    await expect(searchBox(page)).toBeFocused();
   });
 
   test("a scanner's Enter applies the patient; a typed Enter filters visits", async ({

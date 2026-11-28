@@ -1713,7 +1713,7 @@
   "encounter_search_clear": "Clear search",
   "encounter_search_description_auto": "Searching visit names, visit IDs and patient identifiers",
   "encounter_search_description_field": "Searching {{field}}",
-  "encounter_search_description_locked": "One search applies at a time. Press Backspace twice to remove it and search again.",
+  "encounter_search_description_locked": "One search applies at a time. Press Backspace twice to remove it, or pick another search type.",
   "encounter_search_field_auto": "Auto",
   "encounter_search_field_label": "Search field",
   "encounter_search_field_name": "Name",

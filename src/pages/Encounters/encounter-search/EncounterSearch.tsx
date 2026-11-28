@@ -166,13 +166,24 @@ export function EncounterSearch({
     ],
     [facility],
   );
+  // A single text chip says its own field (the URL has `name` or a visit ID),
+  // so the selector shows that while it is applied, even from a link. A
+  // patient's field isn't in the URL: the selector keeps the one last used.
+  const appliedTextField: SearchField | null = applied.patient
+    ? null
+    : applied.name
+      ? "name"
+      : applied.visitId
+        ? "visit"
+        : null;
   // A stored identifier the facility no longer has falls back to Auto, without
   // forgetting it while the facility's configs are still loading.
   const field: SearchField =
-    preference.field.startsWith("identifier:") &&
+    appliedTextField ??
+    (preference.field.startsWith("identifier:") &&
     !configOfField(preference.field, configs)
       ? "auto"
-      : preference.field;
+      : preference.field);
   const fieldConfig = configOfField(field, configs);
   const fieldLabel =
     field === "name"
@@ -289,37 +300,16 @@ export function EncounterSearch({
     return true;
   };
 
-  // How the applied search was made takes the field selector's place: the
-  // text field, or how the patient was found (the identifier, or a scan). The
-  // URL keeps only the patient, so that is known for a pick made here, and
-  // matched to the applied patient by name. With two chips (only from a URL)
-  // the field is ambiguous, so none shows and the chips keep their prefixes.
-  const [foundBy, setFoundBy] = useState<{
-    name?: string;
-    label: string;
-  } | null>(null);
   const hasText = !!(applied.name || applied.visitId);
-  const foundByLabel =
-    hasText && applied.patient
-      ? undefined
-      : applied.name
-        ? t("encounter_search_field_name")
-        : applied.visitId
-          ? t("encounter_search_field_visit_id")
-          : applied.patient && foundBy && foundBy.name === applied.patient.name
-            ? foundBy.label
-            : undefined;
-  const selectFound = (patient: SelectedPatient) => {
-    setFoundBy(
-      lookup
-        ? { name: patient.name, label: lookup.config.config.display }
-        : null,
-    );
+  // A patient found here leaves the selector on the identifier that found
+  // them, even when Auto detected it, so removing the chip searches the
+  // same way again.
+  const selectLookedUp = (patient: SelectedPatient) => {
+    if (lookup) setField(identifierField(lookup.config));
     onSelectPatient(patient, "lookup");
   };
 
   const applyScan = (patientId: string) => {
-    setFoundBy({ name: t("scanned_patient"), label: t("scan") });
     onSelectPatient({ id: patientId, name: t("scanned_patient") }, "scan");
     toast.info(t("patient_details_scanned_successfully"));
     reset();
@@ -405,6 +395,8 @@ export function EncounterSearch({
 
   const choose = (row: Row) => {
     if (row.kind === "name" || row.kind === "visit") {
+      // The selector keeps the field used, as for a patient.
+      setField(row.kind);
       onApplyText(row.kind, row.term);
       reset();
     } else if (row.kind === "identifier") {
@@ -420,7 +412,7 @@ export function EncounterSearch({
       keepOpen.current = true;
       setPending(row.patient as PartialPatientModel);
     } else {
-      selectFound({ id: row.patient.id, name: row.patient.name });
+      selectLookedUp({ id: row.patient.id, name: row.patient.name });
       reset();
     }
   };
@@ -462,6 +454,9 @@ export function EncounterSearch({
   const armedChip = armed !== null && armed === lastChip ? armed : null;
   const removeText = () => {
     setArmed(null);
+    // Keeps the chip's field (Name or Visit ID) for the next search, also
+    // for a chip from a link.
+    if (appliedTextField) setField(appliedTextField);
     refocusOnUnlock.current = true;
     onRemoveText();
     // With a patient chip left, the input stays locked but keeps focus.
@@ -469,12 +464,19 @@ export function EncounterSearch({
   };
   const removePatient = () => {
     setArmed(null);
-    // A later apply of the same patient (a link, say) may not be by the
-    // same identifier.
-    setFoundBy(null);
     refocusOnUnlock.current = true;
     onRemovePatient();
     inputRef.current?.focus();
+  };
+  // Picking another search type (field or phone country) with a chip
+  // applied clears it: one search applies at a time, by the type shown.
+  const clearApplied = () => {
+    if (applied.patient) removePatient();
+    if (hasText) {
+      setArmed(null);
+      refocusOnUnlock.current = true;
+      onRemoveText();
+    }
   };
 
   const describe = (row: Row) => {
@@ -594,123 +596,101 @@ export function EncounterSearch({
             className,
           )}
         >
-          {/* With a chip applied, how the search was made takes the field
-              selector's place; nothing can be picked or scanned until the
-              chip is removed. */}
-          {locked ? (
-            foundByLabel && (
-              <>
-                <InputGroupAddon
-                  align="inline-start"
-                  className="min-w-0 shrink pe-2.5"
-                  data-slot="encounter-search-found-by"
-                >
-                  <span className="block min-w-0 truncate">{foundByLabel}</span>
-                </InputGroupAddon>
-                <Separator
-                  orientation="vertical"
-                  className="order-first bg-input"
-                />
-              </>
-            )
-          ) : (
-            <>
-              {/* Before the input, so Shift+Tab from the input reaches it. It
+          {/* The selector shows the type of the applied search too; picking
+              another type (or phone country) clears it. */}
+          {/* Before the input, so Shift+Tab from the input reaches it. It
               shrinks before the input does. */}
-              <InputGroupAddon align="inline-start" className="min-w-0 shrink">
-                <Select<SearchField>
-                  value={field}
-                  onValueChange={(next) => {
-                    fieldPicked.current = true;
-                    setField(next);
-                    setPending(null);
-                    if (!lookupIfReady(next, term, country)) setLookup(null);
-                    setOpen(term !== "");
-                  }}
-                  // Select returns focus to its trigger; after a pick, typing
-                  // continues in the input.
-                  onOpenChangeComplete={(isOpen: boolean) => {
-                    if (isOpen || !fieldPicked.current) return;
-                    fieldPicked.current = false;
-                    inputRef.current?.focus();
-                  }}
-                >
-                  {/* A dropdown in an input group is an InputGroupButton. */}
-                  <SelectPrimitive.Trigger
-                    aria-label={t("encounter_search_field_label")}
-                    render={
-                      <InputGroupButton
-                        size="xs"
-                        className="max-w-56 min-w-0 gap-1 font-medium text-foreground"
-                      />
-                    }
-                  >
-                    <SelectValue className="block min-w-0 truncate" />
-                    <ChevronDown
-                      aria-hidden="true"
-                      className="size-3.5 text-muted-foreground"
-                    />
-                  </SelectPrimitive.Trigger>
-                  <SelectContent position="popper" align="start">
-                    {/* Groups give the items their inset from the popup's edge. */}
-                    <SelectGroup>
-                      <SelectItem value="auto">
-                        {t("encounter_search_field_auto")}
-                      </SelectItem>
-                    </SelectGroup>
-                    <SelectGroup>
-                      <SelectLabel>
-                        {t("encounter_search_filter_visits_by")}
-                      </SelectLabel>
-                      <SelectItem value="name">
-                        {t("encounter_search_field_name")}
-                      </SelectItem>
-                      <SelectItem value="visit">
-                        {t("encounter_search_field_visit_id")}
-                      </SelectItem>
-                    </SelectGroup>
-                    {configs.length > 0 && (
-                      <SelectGroup>
-                        <SelectLabel>
-                          {t("encounter_search_look_up_patient_by")}
-                        </SelectLabel>
-                        {configs.map((config) => (
-                          <SelectItem
-                            key={config.id}
-                            value={identifierField(config)}
-                          >
-                            {config.config.display}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    )}
-                  </SelectContent>
-                </Select>
-              </InputGroupAddon>
-              {/* Full-height dividers read as part of the field's border. */}
-              <Separator
-                orientation="vertical"
-                className="order-first bg-input"
-              />
-              {showCountry && (
-                // As in the shared PhoneInput: the country, then the number.
-                <CountrySelect
-                  value={shownCountry}
-                  options={countryOptions}
-                  aria-label={t("encounter_search_phone_country", {
-                    country: countryLabels[shownCountry],
-                    code: getCountryCallingCode(shownCountry),
-                  })}
-                  pickedFocus={inputRef}
-                  onChange={(next) => {
-                    setCountry(next);
-                    setPending(null);
-                    if (!lookupIfReady(field, term, next)) setLookup(null);
-                    setOpen(term !== "");
-                  }}
+          <InputGroupAddon align="inline-start" className="min-w-0 shrink">
+            <Select<SearchField>
+              value={field}
+              onValueChange={(next) => {
+                fieldPicked.current = true;
+                if (locked) clearApplied();
+                setField(next);
+                setPending(null);
+                if (!lookupIfReady(next, term, country)) setLookup(null);
+                setOpen(term !== "");
+              }}
+              // Select returns focus to its trigger; after a pick, typing
+              // continues in the input.
+              onOpenChangeComplete={(isOpen: boolean) => {
+                if (isOpen || !fieldPicked.current) return;
+                fieldPicked.current = false;
+                inputRef.current?.focus();
+              }}
+            >
+              {/* A dropdown in an input group is an InputGroupButton. */}
+              <SelectPrimitive.Trigger
+                aria-label={t("encounter_search_field_label")}
+                render={
+                  <InputGroupButton
+                    size="xs"
+                    className="max-w-56 min-w-0 gap-1 font-medium text-foreground"
+                  />
+                }
+              >
+                <SelectValue className="block min-w-0 truncate" />
+                <ChevronDown
+                  aria-hidden="true"
+                  className="size-3.5 text-muted-foreground"
                 />
-              )}
-            </>
+              </SelectPrimitive.Trigger>
+              <SelectContent position="popper" align="start">
+                {/* Groups give the items their inset from the popup's edge. */}
+                <SelectGroup>
+                  <SelectItem value="auto">
+                    {t("encounter_search_field_auto")}
+                  </SelectItem>
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel>
+                    {t("encounter_search_filter_visits_by")}
+                  </SelectLabel>
+                  <SelectItem value="name">
+                    {t("encounter_search_field_name")}
+                  </SelectItem>
+                  <SelectItem value="visit">
+                    {t("encounter_search_field_visit_id")}
+                  </SelectItem>
+                </SelectGroup>
+                {configs.length > 0 && (
+                  <SelectGroup>
+                    <SelectLabel>
+                      {t("encounter_search_look_up_patient_by")}
+                    </SelectLabel>
+                    {configs.map((config) => (
+                      <SelectItem
+                        key={config.id}
+                        value={identifierField(config)}
+                      >
+                        {config.config.display}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
+              </SelectContent>
+            </Select>
+          </InputGroupAddon>
+          {/* Full-height dividers read as part of the field's border. */}
+          <Separator orientation="vertical" className="order-first bg-input" />
+          {showCountry && (
+            // As in the shared PhoneInput: the country, then the number.
+            <CountrySelect
+              value={shownCountry}
+              options={countryOptions}
+              aria-label={t("encounter_search_phone_country", {
+                country: countryLabels[shownCountry],
+                code: getCountryCallingCode(shownCountry),
+              })}
+              pickedFocus={inputRef}
+              onChange={(next) => {
+                if (locked) clearApplied();
+                setCountry(next);
+                setPending(null);
+                if (!lookupIfReady(field, term, next)) setLookup(null);
+                setOpen(term !== "");
+              }}
+            />
           )}
           {/* The chips, then the input. When the chips don't fit beside it,
               the input wraps to a second line inside the field. */}
@@ -725,7 +705,7 @@ export function EncounterSearch({
           >
             <EncounterSearchChips
               {...applied}
-              hideTextPrefix={!!foundByLabel}
+              hideTextPrefix={!!appliedTextField}
               highlighted={armedChip}
               onRemoveText={removeText}
               onRemovePatient={removePatient}
@@ -941,7 +921,7 @@ export function EncounterSearch({
               patient={pending}
               onVerified={(patient) => {
                 // Filter by the full record's id, never the partial one.
-                selectFound({ id: patient.id, name: patient.name });
+                selectLookedUp({ id: patient.id, name: patient.name });
                 reset();
               }}
               onCancel={() => {
