@@ -917,7 +917,6 @@ export function EncounterSearch({
                       code: getCountryCallingCode(shownCountry),
                     })}
                     pickedFocus={inputRef}
-                    drawerOnMobile
                     className="h-10 border-r-0 not-in-data-[slot=button-group]:rounded-md! rounded-md! focus-visible:bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:h-9"
                     onChange={(next) => {
                       if (locked) clearApplied();

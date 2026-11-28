@@ -211,8 +211,6 @@ type CountrySelectProps = {
   pickedFocus?: React.RefObject<HTMLElement | null>;
   /** Classes for the trigger, when used outside PhoneInput. */
   className?: string;
-  /** Opens as a drawer on mobile instead of a popover. */
-  drawerOnMobile?: boolean;
 };
 
 const CountrySelect = ({
@@ -223,11 +221,10 @@ const CountrySelect = ({
   "aria-label": ariaLabel,
   pickedFocus,
   className,
-  drawerOnMobile = false,
 }: CountrySelectProps) => {
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
-  const asDrawer = drawerOnMobile && isMobile;
+  // On mobile the list opens as a drawer, as the other pickers do there.
+  const asDrawer = useIsMobile();
   const listRef = React.useRef<HTMLDivElement>(null);
   const [searchValue, setSearchValue] = React.useState("");
   const [open, setOpen] = React.useState(false);
