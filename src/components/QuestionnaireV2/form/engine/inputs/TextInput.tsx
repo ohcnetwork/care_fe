@@ -122,7 +122,7 @@ export function TextInput({
   }
 
   return (
-    <InputGroup>
+    <InputGroup className="has-[>[data-align=block-end]]:[&>input]:pt-1">
       {question.type === "text" ? (
         <InputGroupTextarea
           rows={3}
@@ -131,7 +131,12 @@ export function TextInput({
           {...props}
         />
       ) : (
-        <InputGroupInput type="text" ref={setInputRef} {...props} />
+        <InputGroupInput
+          type="text"
+          ref={setInputRef}
+          className="flex-none"
+          {...props}
+        />
       )}
       <InputGroupAddon
         align="block-end"
